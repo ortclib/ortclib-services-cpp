@@ -1137,7 +1137,6 @@ namespace openpeer
           mAliveCheckRequester.reset();
 
           mPreviouslyNominated = mNominated;
-          mNominated.reset();
 
           // nomination failed, force scanning to happen now
           mNominated->mReceivedRequest = false;
@@ -1147,6 +1146,8 @@ namespace openpeer
             mNominated->mRequester->cancel();
             mNominated->mRequester.reset();
           }
+
+          mNominated.reset();
 
           (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
           return;
