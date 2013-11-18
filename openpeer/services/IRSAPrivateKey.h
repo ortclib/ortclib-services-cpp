@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include <openpeer/stack/types.h>
+#include <openpeer/services/types.h>
 
 
 #define OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE (2048)

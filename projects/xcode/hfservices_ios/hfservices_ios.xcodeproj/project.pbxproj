@@ -376,10 +376,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../libs/zsLib,
-					../../../libs,
-					../../../libs/curl/include,
-					../../../libs/boost/osx/framework/boost.framework/Headers,
+					../../../..,
+					../../../../zsLib,
+					../../../../curl/include,
+					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
@@ -413,10 +413,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../libs/zsLib,
-					../../../libs,
-					../../../libs/curl/include,
-					../../../libs/boost/osx/framework/boost.framework/Headers,
+					../../../..,
+					../../../../zsLib,
+					../../../../curl/include,
+					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;

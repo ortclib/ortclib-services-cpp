@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include <openpeer/stack/types.h>
+#include <openpeer/services/types.h>
 
 #define OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
 

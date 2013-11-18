@@ -116,10 +116,10 @@
 		0063C47216CAA28600E6DB4D /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
 		0063D2D416CB0A9300E6DB4D /* hfservices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices.xcodeproj; path = ../hfservices/hfservices.xcodeproj; sourceTree = "<group>"; };
 		00ABD44C17A8431D00178078 /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
-		00C82BE31830DA1B005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../libs/boost/osx/framework/boost.framework; sourceTree = "<group>"; };
-		00C90613177BF4F50090BD8B /* zsLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib.xcodeproj; path = ../../../libs/zsLib/projects/xcode/zsLib/zsLib.xcodeproj; sourceTree = "<group>"; };
-		00C9061B177BF5130090BD8B /* udns.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns.xcodeproj; path = ../../../libs/udns/projects/xcode/udns/udns.xcodeproj; sourceTree = "<group>"; };
-		00C90623177BF5380090BD8B /* cryptopp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp.xcodeproj; path = ../../../libs/cryptopp/projects/xcode/cryptopp/cryptopp.xcodeproj; sourceTree = "<group>"; };
+		00C82BE31830DA1B005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../../boost/osx/framework/boost.framework; sourceTree = "<group>"; };
+		00C90613177BF4F50090BD8B /* zsLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib.xcodeproj; path = ../../../../zsLib/projects/xcode/zsLib/zsLib.xcodeproj; sourceTree = "<group>"; };
+		00C9061B177BF5130090BD8B /* udns.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns.xcodeproj; path = ../../../../udns/projects/xcode/udns/udns.xcodeproj; sourceTree = "<group>"; };
+		00C90623177BF5380090BD8B /* cryptopp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp/cryptopp.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -414,7 +414,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = ../../../libs/boost/osx/framework;
+				FRAMEWORK_SEARCH_PATHS = ../../../../boost/osx/framework;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -431,9 +431,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../libs/zsLib,
-					../../../libs,
-					../../../libs/boost/osx/framework/boost.framework/Headers,
+					../../../..,
+					../../../../zsLib,
+					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -456,7 +456,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = ../../../libs/boost/osx/framework;
+				FRAMEWORK_SEARCH_PATHS = ../../../../boost/osx/framework;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
@@ -471,9 +471,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../libs/zsLib,
-					../../../libs,
-					../../../libs/boost/osx/framework/boost.framework/Headers,
+					../../../..,
+					../../../../zsLib,
+					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
