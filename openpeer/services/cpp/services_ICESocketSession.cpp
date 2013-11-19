@@ -1613,7 +1613,7 @@ namespace openpeer
         if (!stepCancelLowerPriority()) goto notify_nominated;
         if (!stepNominate()) goto notify_nominated;
 
-        setState(ICESocketSessionState_Nominated);
+        setState(ICESocketSessionState_Completed);
 
       notify_nominated:
         {
@@ -2017,7 +2017,7 @@ namespace openpeer
       bool ICESocketSession::stepNominate()
       {
         if (mNominateRequester) {
-          ZS_LOG_TRACE(log("already nominating"))
+          ZS_LOG_TRACE(log("already nominating (cannot nominate again until nomination process is completed)"))
           goto set_final_state;
         }
 
@@ -2090,7 +2090,23 @@ namespace openpeer
 
       set_final_state:
         {
-          if (mNominated) return true;
+          if (mNominated) {
+            for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)
+            {
+              CandidatePairPtr &pairing = (*iter);
+
+              if (pairing->mFailed) continue;
+              if (pairing == mNominated) {
+                ZS_LOG_TRACE(log("already nominated and no high prioriy unfailed candidates found (thus must be complete state)"))
+                return true;
+              }
+              // higher priority unfailed candidate found thus norminated but not possibly complete yet
+              break;
+            }
+            ZS_LOG_TRACE(log("candidate is nominated but it's possible that a higher priority candidate will be found"))
+            setState(ICESocketSessionState_Nominated);
+            return false;
+          }
 
           if (mNominateRequester) {
             setState(ICESocketSessionState_Nominating);
@@ -2108,7 +2124,7 @@ namespace openpeer
               setState(ICESocketSessionState_Searching);
               return false;
             }
-            ZS_LOG_DEBUG(log("all known candidates have failed thus search is haulted"))
+            ZS_LOG_TRACE(log("all known candidates have failed thus search is haulted"))
             setState(ICESocketSessionState_Haulted);
           } else {
             setState(ICESocketSessionState_Prepared);
@@ -2236,6 +2252,7 @@ namespace openpeer
         case ICESocketSessionState_Haulted:    return "Haulted";
         case ICESocketSessionState_Nominating: return "Nominating";
         case ICESocketSessionState_Nominated:  return "Nominated";
+        case ICESocketSessionState_Completed:  return "Completed";
         case ICESocketSessionState_Shutdown:   return "Shutdown";
       }
       return "UNDEFINED";

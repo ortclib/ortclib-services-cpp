@@ -65,6 +65,7 @@ namespace openpeer
         ICESocketSessionState_Haulted,
         ICESocketSessionState_Nominating,
         ICESocketSessionState_Nominated,
+        ICESocketSessionState_Completed,
         ICESocketSessionState_Shutdown,
       };
 

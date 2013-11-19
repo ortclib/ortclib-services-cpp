@@ -1467,9 +1467,11 @@ namespace openpeer
             }
           }
 
-          for (TURNInfoMap::iterator infoIter = localSocket->mTURNInfos.begin(); infoIter != localSocket->mTURNInfos.end(); ++infoIter)
+          for (TURNInfoMap::iterator infoIter = localSocket->mTURNInfos.begin(); infoIter != localSocket->mTURNInfos.end(); )
           {
-            TURNInfoPtr &turnInfo = (*infoIter).second;
+            TURNInfoMap::iterator currentInfoIter = infoIter; ++infoIter;
+
+            TURNInfoPtr &turnInfo = (*currentInfoIter).second;
 
             if (shouldSleep) {
               if (!turnInfo->mTURNSocket) {
@@ -1555,13 +1557,17 @@ namespace openpeer
             if (!turnInfo->mTURNSocket) {
 
               // TURN will not start until all STUN discoveries everywhere are complete
-              for (LocalSocketMap::iterator checkIter = mSockets.begin(); checkIter != mSockets.end(); ++checkIter)
+              for (LocalSocketMap::iterator checkIter = mSockets.begin(); checkIter != mSockets.end(); )
               {
-                LocalSocketPtr &checkSocket = (*checkIter).second;
+                LocalSocketMap::iterator currentCheckIter = checkIter; ++checkIter;
 
-                for (STUNInfoDiscoveryMap::iterator stunIter = checkSocket->mSTUNDiscoveries.begin(); stunIter != checkSocket->mSTUNDiscoveries.end(); ++stunIter)
+                LocalSocketPtr &checkSocket = (*currentCheckIter).second;
+
+                for (STUNInfoDiscoveryMap::iterator stunIter = checkSocket->mSTUNDiscoveries.begin(); stunIter != checkSocket->mSTUNDiscoveries.end(); )
                 {
-                  STUNInfoPtr &stunInfo = (*stunIter).second;
+                  STUNInfoDiscoveryMap::iterator currentStunIter = stunIter; ++stunIter;
+
+                  STUNInfoPtr &stunInfo = (*currentStunIter).second;
                   if (stunInfo->mSTUNDiscovery) {
                     if (!stunInfo->mSTUNDiscovery->isComplete()) {
                       ZS_LOG_TRACE(log("cannot create TURN as STUN discovery not complete") + ", stun discovery ID=" + string(stunInfo->mSTUNDiscovery->getID()) + ", candidate: " + stunInfo->mReflexive->toDebugString())
@@ -1584,17 +1590,21 @@ namespace openpeer
               bool foundDuplicate = false;
 
               // check to see if TURN should be created (must not be another socket with TURN with the same reflexive address)
-              for (LocalSocketMap::iterator checkIter = mSockets.begin(); checkIter != mSockets.end(); ++checkIter)
+              for (LocalSocketMap::iterator checkIter = mSockets.begin(); checkIter != mSockets.end(); )
               {
-                LocalSocketPtr &checkSocket = (*checkIter).second;
+                LocalSocketMap::iterator currentCheckIter = checkIter; ++checkIter;
+
+                LocalSocketPtr &checkSocket = (*currentCheckIter).second;
                 if (checkSocket == localSocket) {
                   ZS_LOG_TRACE(log("turn check - no need to compare against same socket"))
                   continue;
                 }
 
-                for (TURNInfoMap::iterator turnCheckIter = checkSocket->mTURNInfos.begin(); turnCheckIter != checkSocket->mTURNInfos.end(); ++turnCheckIter)
+                for (TURNInfoMap::iterator turnCheckIter = checkSocket->mTURNInfos.begin(); turnCheckIter != checkSocket->mTURNInfos.end(); )
                 {
-                  TURNInfoPtr &turnInfo = (*turnCheckIter).second;
+                  TURNInfoMap::iterator currentTurnCheckIter = turnCheckIter; ++turnCheckIter;
+
+                  TURNInfoPtr &turnInfo = (*currentTurnCheckIter).second;
                   if (turnInfo->mTURNSocket) goto found_turn_connection;
                 }
 
@@ -1604,16 +1614,20 @@ namespace openpeer
 
               found_turn_connection:
 
-                for (STUNInfoDiscoveryMap::iterator stunCheckIter = checkSocket->mSTUNDiscoveries.begin(); stunCheckIter != checkSocket->mSTUNDiscoveries.end(); ++stunCheckIter)
+                for (STUNInfoDiscoveryMap::iterator stunCheckIter = checkSocket->mSTUNDiscoveries.begin(); stunCheckIter != checkSocket->mSTUNDiscoveries.end(); )
                 {
-                  STUNInfoPtr &stunCheckInfo = (*stunCheckIter).second;
+                  STUNInfoDiscoveryMap::iterator currentStunCheckIter = stunCheckIter; ++stunCheckIter;
+
+                  STUNInfoPtr &stunCheckInfo = (*currentStunCheckIter).second;
                   if (stunCheckInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                   bool found = false;
 
-                  for (STUNInfoDiscoveryMap::iterator stunLocalIter = localSocket->mSTUNDiscoveries.begin(); stunLocalIter != localSocket->mSTUNDiscoveries.end(); ++stunLocalIter)
+                  for (STUNInfoDiscoveryMap::iterator stunLocalIter = localSocket->mSTUNDiscoveries.begin(); stunLocalIter != localSocket->mSTUNDiscoveries.end(); )
                   {
-                    STUNInfoPtr &stunLocalInfo = (*stunLocalIter).second;
+                    STUNInfoDiscoveryMap::iterator currentStunLocalIter = stunLocalIter; ++stunLocalIter;
+
+                    STUNInfoPtr &stunLocalInfo = (*currentStunLocalIter).second;
                     if (stunLocalInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                     if (stunCheckInfo->mReflexive->mIPAddress != stunLocalInfo->mReflexive->mIPAddress) {
@@ -1629,16 +1643,20 @@ namespace openpeer
                   goto reflexive_mismatch;
                 }
 
-                for (STUNInfoDiscoveryMap::iterator stunLocalIter = localSocket->mSTUNDiscoveries.begin(); stunLocalIter != localSocket->mSTUNDiscoveries.end(); ++stunLocalIter)
+                for (STUNInfoDiscoveryMap::iterator stunLocalIter = localSocket->mSTUNDiscoveries.begin(); stunLocalIter != localSocket->mSTUNDiscoveries.end(); )
                 {
-                  STUNInfoPtr &stunLocalInfo = (*stunLocalIter).second;
+                  STUNInfoDiscoveryMap::iterator currentStunLocalIter = stunLocalIter; ++stunLocalIter;
+
+                  STUNInfoPtr &stunLocalInfo = (*currentStunLocalIter).second;
                   if (stunLocalInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                   bool found = false;
 
-                  for (STUNInfoDiscoveryMap::iterator stunCheckIter = checkSocket->mSTUNDiscoveries.begin(); stunCheckIter != checkSocket->mSTUNDiscoveries.end(); ++stunCheckIter)
+                  for (STUNInfoDiscoveryMap::iterator stunCheckIter = checkSocket->mSTUNDiscoveries.begin(); stunCheckIter != checkSocket->mSTUNDiscoveries.end(); )
                   {
-                    STUNInfoPtr &stunCheckInfo = (*stunCheckIter).second;
+                    STUNInfoDiscoveryMap::iterator currentStunCheckIter = stunCheckIter; ++stunCheckIter;
+
+                    STUNInfoPtr &stunCheckInfo = (*currentStunCheckIter).second;
                     if (stunCheckInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                     if (stunLocalInfo->mReflexive->mIPAddress != stunCheckInfo->mReflexive->mIPAddress) {

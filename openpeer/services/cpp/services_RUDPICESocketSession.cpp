@@ -321,7 +321,8 @@ namespace openpeer
           return;
         }
 
-        if (IICESocketSession::ICESocketSessionState_Nominated == state) {
+        if ((IICESocketSession::ICESocketSessionState_Nominated == state) ||
+            (IICESocketSession::ICESocketSessionState_Completed == state)) {
           ZS_LOG_DEBUG(log("notified that socket session state is nominated") + ", ICE session ID=" + string(session->getID()))
 
           issueChannelConnectIfPossible();
@@ -668,7 +669,8 @@ namespace openpeer
           case IICESocketSession::ICESocketSessionState_Searching:
           case IICESocketSession::ICESocketSessionState_Haulted:
           case IICESocketSession::ICESocketSessionState_Nominating: setState(RUDPICESocketSessionState_Pending); break;
-          case IICESocketSession::ICESocketSessionState_Nominated:  setState(RUDPICESocketSessionState_Ready); break;
+          case IICESocketSession::ICESocketSessionState_Nominated:
+          case IICESocketSession::ICESocketSessionState_Completed:  setState(RUDPICESocketSessionState_Ready); break;
           case IICESocketSession::ICESocketSessionState_Shutdown:   cancel(); break;
         }
       }
