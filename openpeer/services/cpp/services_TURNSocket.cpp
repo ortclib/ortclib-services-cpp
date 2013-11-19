@@ -448,6 +448,14 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      IPAddress TURNSocket::getActiveServerIP()
+      {
+        AutoRecursiveLock lock(mLock);
+        if (!mActiveServer) return IPAddress();
+        return mActiveServer->mServerIP;
+      }
+
+      //-----------------------------------------------------------------------
       IPAddress TURNSocket::getRelayedIP()
       {
         AutoRecursiveLock lock(mLock);

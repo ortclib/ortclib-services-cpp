@@ -1512,12 +1512,14 @@ namespace openpeer
                     turnInfo->mRelay = CandidatePtr(new Candidate(*turnInfo->mRelay));
 
                     turnInfo->mRelay->mIPAddress = turnInfo->mTURNSocket->getRelayedIP();
+                    turnInfo->mServerIP = turnInfo->mTURNSocket->getActiveServerIP();
 
                     String usernameFrag = (mFoundation ? mFoundation->getUsernameFrag() : mUsernameFrag);
                     turnInfo->mRelay->mFoundation = IHelper::convertToHex(*IHelper::hash("foundation:" + usernameFrag + ":" + turnInfo->mRelay->mIPAddress.string(false) + ":" + toString(turnInfo->mRelay->mType), IHelper::HashAlgorthm_MD5));;
 
                     // remember newly discovered relay IP address mapping
                     localSocket->mTURNRelayIPs[turnInfo->mRelay->mIPAddress] = turnInfo;
+                    localSocket->mTURNServerIPs[turnInfo->mServerIP] = turnInfo;
 
                     ZS_LOG_DEBUG(log("TURN relay ready") + ", base IP=" + string(localSocket->mLocal->mIPAddress) + ", discovered=" + string(turnInfo->mRelay->mIPAddress))
                   }
@@ -1949,7 +1951,7 @@ namespace openpeer
         STUNPacketPtr stun = STUNPacket::parseIfSTUN(buffer, bufferLengthInBytes, STUNPacket::RFC_AllowAll, false, "ICESocket", mID);
 
         if (stun) {
-          ZS_LOG_DEBUG(log("received STUN packet") + ", via candidate=" + viaCandidate.toDebugString(false) + ", ip=" + source.string() + ", class=" + stun->classAsString() + ", method=" + stun->methodAsString())
+          ZS_LOG_DEBUG(log("received STUN packet") + ", via candidate=" + viaCandidate.toDebugString(false) + ", source ip=" + source.string() + ", class=" + stun->classAsString() + ", method=" + stun->methodAsString())
           ITURNSocketPtr turn;
           if (IICESocket::Type_Relayed != normalize(viaCandidate.mType)) {
 
@@ -1960,8 +1962,8 @@ namespace openpeer
               if (found != mSocketLocalIPs.end()) {
                 LocalSocketPtr &localSocket = (*found).second;
 
-                TURNInfoRelatedIPMap::iterator foundRelay = localSocket->mTURNRelayIPs.find(viaCandidate.mIPAddress);
-                if (foundRelay != localSocket->mTURNRelayIPs.end()) {
+                TURNInfoRelatedIPMap::iterator foundRelay = localSocket->mTURNServerIPs.find(source);
+                if (foundRelay != localSocket->mTURNServerIPs.end()) {
                   turn = (*foundRelay).second->mTURNSocket;
                 }
               }
@@ -2047,7 +2049,7 @@ namespace openpeer
           return;
         }
 
-        // this isn't a STUN packet but it might be TURN channel data (but not if came from TURN)
+        // this isn't a STUN packet but it might be TURN channel data (but only if came from a TURN server)
         if (IICESocket::Type_Relayed != normalize(viaCandidate.mType)) {
           ITURNSocketPtr turn;
 
@@ -2058,8 +2060,8 @@ namespace openpeer
             if (found != mSocketLocalIPs.end()) {
               LocalSocketPtr &localSocket = (*found).second;
 
-              TURNInfoRelatedIPMap::iterator foundRelay = localSocket->mTURNRelayIPs.find(viaCandidate.mIPAddress);
-              if (foundRelay != localSocket->mTURNRelayIPs.end()) {
+              TURNInfoRelatedIPMap::iterator foundRelay = localSocket->mTURNServerIPs.find(source);
+              if (foundRelay != localSocket->mTURNServerIPs.end()) {
                 turn = (*foundRelay).second->mTURNSocket;
               }
             }
@@ -2242,6 +2244,11 @@ namespace openpeer
         TURNInfoRelatedIPMap::iterator foundRelay = mTURNRelayIPs.find(turnInfo->mRelay->mIPAddress);
         if (foundRelay != mTURNRelayIPs.end()) {
           mTURNRelayIPs.erase(foundRelay);
+        }
+
+        TURNInfoRelatedIPMap::iterator foundServer = mTURNServerIPs.find(turnInfo->mServerIP);
+        if (foundServer != mTURNServerIPs.end()) {
+          mTURNServerIPs.erase(foundServer);
         }
 
         mTURNSockets.erase(found);

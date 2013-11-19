@@ -117,6 +117,7 @@ namespace openpeer
           TURNServerInfoPtr mServerInfo;
 
           ITURNSocketPtr    mTURNSocket;
+          IPAddress         mServerIP;
 
           Time              mTURNRetryAfter;
           Duration          mTURNRetryDuration;
@@ -163,6 +164,7 @@ namespace openpeer
           TURNInfoMap           mTURNInfos;
           TURNInfoSocketMap     mTURNSockets;
           TURNInfoRelatedIPMap  mTURNRelayIPs;
+          TURNInfoRelatedIPMap  mTURNServerIPs;
 
           STUNInfoMap           mSTUNInfos;
           STUNInfoDiscoveryMap  mSTUNDiscoveries;

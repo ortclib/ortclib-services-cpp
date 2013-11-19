@@ -48,8 +48,8 @@
 // #define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
 
 // *** DEBUGGING ONLY - DO _NOT_ ENABLE OTHERWISE ***
-// #define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-// #define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP "23.22.109.183"
+//#define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
+//#define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP "174.129.95.12"
 
 #include <list>
 #include <map>
@@ -186,6 +186,7 @@ namespace openpeer
                                 bool bindChannelIfPossible = false
                                 );
 
+        virtual IPAddress getActiveServerIP();
         virtual IPAddress getRelayedIP();
         virtual IPAddress getReflectedIP();
 

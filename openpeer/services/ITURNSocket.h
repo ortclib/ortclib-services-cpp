@@ -118,6 +118,7 @@ namespace openpeer
                               bool bindChannelIfPossible = false
                               ) = 0;
 
+      virtual IPAddress getActiveServerIP() = 0;
       virtual IPAddress getRelayedIP() = 0;
       virtual IPAddress getReflectedIP() = 0;
 
