@@ -38,4 +38,5 @@ namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_servic
 namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_http) } }
 namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_ice) } }
 namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_rudp) } }
+namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_mls) } }
 

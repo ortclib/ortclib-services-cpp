@@ -1170,6 +1170,7 @@ namespace openpeer
         ULONG charsPerGroup = (bytesPerGroup * 3) + 1;
 
         ULONG groupsPerLine = maxLineLength / charsPerGroup;
+        groupsPerLine = (groupsPerLine < 1 ? 1: groupsPerLine);
 
         while (bufferSizeInBytes > 0) {
 
@@ -1216,8 +1217,11 @@ namespace openpeer
             ++fill;
           }
 
-          *fill = '\n';
-          ++fill;
+          if ((bufferSizeInBytes > 0) ||
+              (!firstLine)) {
+            *fill = '\n';
+            ++fill;
+          }
 
           *fill = 0;
 

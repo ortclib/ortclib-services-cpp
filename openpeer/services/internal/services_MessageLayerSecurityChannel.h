@@ -79,6 +79,8 @@ namespace openpeer
 
         static const char *toString(DecodingTypes decodingType);
 
+        typedef ULONG AlgorithmIndex;
+
         struct KeyInfo
         {
           String mIntegrityPassphrase;
@@ -86,9 +88,13 @@ namespace openpeer
           SecureByteBlockPtr mSendKey;
           SecureByteBlockPtr mNextIV;
           SecureByteBlockPtr mLastIntegrity;
+
+          String getDebugValueString(
+                                     AlgorithmIndex index,
+                                     bool includeCommaPrefix = true
+                                     ) const;
         };
         
-        typedef ULONG AlgorithmIndex;
         typedef std::map<AlgorithmIndex, KeyInfo> KeyMap;
 
       protected:

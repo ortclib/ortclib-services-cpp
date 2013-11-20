@@ -46,7 +46,7 @@
 
 #define OPENPEER_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS (60*3)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_mls) } }
 
 namespace openpeer
 {
@@ -636,6 +636,8 @@ namespace openpeer
           return;
         }
 
+        ZS_LOG_TRACE(log("send keying material signed"))
+
         // by clearing out the receive key needing to be signed (but leaving the paired doc), it signals the "step" that the signing process was complete
         mSendKeyingNeedToSignEl.reset();
 
@@ -730,38 +732,39 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
         bool firstTime = !includeCommaPrefix;
-        return Helper::getDebugValue("mls channel id", string(mID), firstTime) +
-               Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
-               Helper::getDebugValue("state", IMessageLayerSecurityChannel::toString(mCurrentState), firstTime) +
-               Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-               Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
-               Helper::getDebugValue("local context ID", mLocalContextID, firstTime) +
-               Helper::getDebugValue("remote context ID", mRemoteContextID, firstTime) +
-               Helper::getDebugValue("sending remote public key", mSendingEncodingRemotePublicKey ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("sending passphrase", mSendingEncodingPassphrase, firstTime) +
-               Helper::getDebugValue("sending keying needs sign doc", mSendKeyingNeedingToSignDoc ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("sending keying needs sign element", mSendKeyingNeedToSignEl ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive seq number", string(mNextReceiveSequenceNumber), firstTime) +
-               Helper::getDebugValue("decoding type", toString(mReceiveDecodingType), firstTime) +
-               Helper::getDebugValue("decoding public key fingerprint", mReceiveDecodingPublicKeyFingerprint, firstTime) +
-               Helper::getDebugValue("receive decoding private key", mReceiveDecodingPrivateKey ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive decoding public key", mReceiveDecodingPublicKey ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive decoding passphrase", mReceivingDecodingPassphrase, firstTime) +
-               Helper::getDebugValue("receive signing public key", mReceiveSigningPublicKey ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive keying signed doc", mReceiveKeyingSignedDoc ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive keying signed element", mReceiveKeyingSignedEl ? String("true") : String(), firstTime) +
-               ", receive stream encoded: " + ITransportStream::toDebugString(mReceiveStreamEncoded->getStream(), false) +
-               ", receive stream decode: " + ITransportStream::toDebugString(mReceiveStreamDecoded->getStream(), false) +
-               ", send stream decoded: " + ITransportStream::toDebugString(mSendStreamDecoded->getStream(), false) +
-               ", send stream encoded: " + ITransportStream::toDebugString(mSendStreamEncoded->getStream(), false) +
-               Helper::getDebugValue("receive stream encoded subscription", mReceiveStreamEncodedSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive stream decoded subscription", mReceiveStreamDecodedSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("send stream decoded subscription", mSendStreamDecodedSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("send stream encoded subscription", mSendStreamEncodedSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive stream decoded write ready", mReceiveStreamDecodedWriteReady ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("send stream encoded write ready", mSendStreamEncodedWriteReady ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("receive keys", mReceiveKeys.size() > 0 ? string(mReceiveKeys.size()) : String(), firstTime) +
-               Helper::getDebugValue("send keys", mSendKeys.size() > 0 ? string(mSendKeys.size()) : String(), firstTime);
+        return
+        Helper::getDebugValue("mls channel id", string(mID), firstTime) +
+        Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
+        Helper::getDebugValue("state", IMessageLayerSecurityChannel::toString(mCurrentState), firstTime) +
+        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
+        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        Helper::getDebugValue("local context ID", mLocalContextID, firstTime) +
+        Helper::getDebugValue("remote context ID", mRemoteContextID, firstTime) +
+        Helper::getDebugValue("sending remote public key", mSendingEncodingRemotePublicKey ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("sending passphrase", mSendingEncodingPassphrase, firstTime) +
+        Helper::getDebugValue("sending keying needs sign doc", mSendKeyingNeedingToSignDoc ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("sending keying needs sign element", mSendKeyingNeedToSignEl ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive seq number", string(mNextReceiveSequenceNumber), firstTime) +
+        Helper::getDebugValue("decoding type", toString(mReceiveDecodingType), firstTime) +
+        Helper::getDebugValue("decoding public key fingerprint", mReceiveDecodingPublicKeyFingerprint, firstTime) +
+        Helper::getDebugValue("receive decoding private key", mReceiveDecodingPrivateKey ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive decoding public key", mReceiveDecodingPublicKey ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive decoding passphrase", mReceivingDecodingPassphrase, firstTime) +
+        Helper::getDebugValue("receive signing public key", mReceiveSigningPublicKey ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive keying signed doc", mReceiveKeyingSignedDoc ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive keying signed element", mReceiveKeyingSignedEl ? String("true") : String(), firstTime) +
+        ", receive stream encoded: " + ITransportStream::toDebugString(mReceiveStreamEncoded->getStream(), false) +
+        ", receive stream decode: " + ITransportStream::toDebugString(mReceiveStreamDecoded->getStream(), false) +
+        ", send stream decoded: " + ITransportStream::toDebugString(mSendStreamDecoded->getStream(), false) +
+        ", send stream encoded: " + ITransportStream::toDebugString(mSendStreamEncoded->getStream(), false) +
+        Helper::getDebugValue("receive stream encoded subscription", mReceiveStreamEncodedSubscription ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive stream decoded subscription", mReceiveStreamDecodedSubscription ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("send stream decoded subscription", mSendStreamDecodedSubscription ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("send stream encoded subscription", mSendStreamEncodedSubscription ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive stream decoded write ready", mReceiveStreamDecodedWriteReady ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("send stream encoded write ready", mSendStreamEncodedWriteReady ? String("true") : String(), firstTime) +
+        Helper::getDebugValue("receive keys", mReceiveKeys.size() > 0 ? string(mReceiveKeys.size()) : String(), firstTime) +
+        Helper::getDebugValue("send keys", mSendKeys.size() > 0 ? string(mSendKeys.size()) : String(), firstTime);
       }
 
       //-----------------------------------------------------------------------
@@ -849,7 +852,7 @@ namespace openpeer
         }
 
         if (mRemoteContextID.hasData()) {
-          ZS_LOG_DEBUG(log("already decoded at least one packet"))
+          ZS_LOG_DEBUG(log("already decoded at least one packet") + ", remote context ID=" + mRemoteContextID)
           if (mReceiveKeys.size() < 1) {
             bool hasReceiveInformation = true;
 
@@ -872,6 +875,11 @@ namespace openpeer
         while (mReceiveStreamEncoded->getTotalReadBuffersAvailable() > 0) {
           ITransportStream::StreamHeaderPtr streamHeader;
           SecureByteBlockPtr streamBuffer = mReceiveStreamEncoded->read(&streamHeader);
+
+          if (ZS_IS_LOGGING(Insane)) {
+            String str = IHelper::getDebugString(*streamBuffer);
+            ZS_LOG_INSANE(log("stream buffer read") + "\n" + str)
+          }
 
           // has to be greater than the size of a DWORD
           if (streamBuffer->SizeInBytes() <= sizeof(DWORD)) {
@@ -908,6 +916,8 @@ namespace openpeer
             // decode the packet
             KeyInfo &keyInfo = (*found).second;
 
+            ZS_LOG_INSANE(log("decrypting key to use") + keyInfo.getDebugValueString(algorithm))
+
             size_t integritySize = IHelper::getHashDigestSize(IHelper::HashAlgorthm_SHA1);
 
             // must be greater in size than the hash algorithm
@@ -935,6 +945,11 @@ namespace openpeer
               setError(IHTTP::HTTPStatusCode_Unauthorized, "unable to decrypt buffer");
               cancel();
               return false;
+            }
+
+            if (ZS_IS_LOGGING(Insane)) {
+              String str = IHelper::getDebugString(*output);
+              ZS_LOG_INSANE(log("stream buffer decrypted") + "\n" + str)
             }
 
             String hexIV = IHelper::convertToHex(*keyInfo.mNextIV);
@@ -1206,7 +1221,7 @@ namespace openpeer
                   goto next_key;
                 }
 
-                ZS_LOG_DEBUG(log("adding algorithm to available keying information") + ", index=" + string(index))
+                ZS_LOG_DEBUG(log("receive algorithm keying information") + key.getDebugValueString(index))
                 mReceiveKeys[index] = key;
               }
 
@@ -1373,6 +1388,8 @@ namespace openpeer
             inputsEl->adoptAsLastChild(createElementWithText("hmacIntegrityKey", IHelper::convertToBase64(*mSendingEncodingRemotePublicKey->encrypt(*IHelper::convertToBuffer(key.mIntegrityPassphrase)))));
           }
 
+          ZS_LOG_DEBUG(log("send algorithm keying information") + key.getDebugValueString(index))
+
           keyEl->adoptAsLastChild(inputsEl);
 
           keysEl->adoptAsLastChild(keyEl);
@@ -1413,6 +1430,11 @@ namespace openpeer
 
           ZS_THROW_BAD_STATE_IF(!buffer)
 
+          if (ZS_IS_LOGGING(Insane)) {
+            String str = IHelper::getDebugString(*buffer);
+            ZS_LOG_INSANE(log("stream buffer to encode") + "\n" + str)
+          }
+
           // pick an algorithm
           AlgorithmIndex index = IHelper::random(1, mSendKeys.size());
 
@@ -1421,6 +1443,7 @@ namespace openpeer
 
           KeyInfo &keyInfo = (*found).second;
 
+          ZS_LOG_INSANE(log("encrypting key to use") + keyInfo.getDebugValueString(index))
 
           SecureByteBlockPtr encrypted = IHelper::encrypt(*(keyInfo.mSendKey), *(keyInfo.mNextIV), *buffer);
 
@@ -1441,6 +1464,11 @@ namespace openpeer
 
           memcpy(integrityPos, calculatedIntegrity->BytePtr(), calculatedIntegrity->SizeInBytes());
           memcpy(outputPos, encrypted->BytePtr(), encrypted->SizeInBytes());
+
+          if (ZS_IS_LOGGING(Insane)) {
+            String str = IHelper::getDebugString(*output);
+            ZS_LOG_INSANE(log("stream buffer write") + "\n" + str)
+          }
 
           ZS_LOG_DEBUG(log("sending data on wire") + ", buffer size=" + string(output->SizeInBytes()) + ", decrypted size=" + string(buffer->SizeInBytes()) + ", encrypted size=" + string(encrypted->SizeInBytes()) + ", key=" + IHelper::convertToHex(*(keyInfo.mSendKey)) + ", iv=" + hexIV + ", integrity=" + IHelper::convertToHex(*calculatedIntegrity))
           mSendStreamEncoded->write(output, header);
@@ -1468,6 +1496,24 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageLayerSecurityChannel::KeyInfo
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      String MessageLayerSecurityChannel::KeyInfo::getDebugValueString(
+                                                                       AlgorithmIndex index,
+                                                                       bool includeCommaPrefix
+                                                                       ) const
+      {
+        bool firstTime = !includeCommaPrefix;
+        return
+        Helper::getDebugValue("key index", string(index), firstTime) +
+        Helper::getDebugValue("integrity passphrase", mIntegrityPassphrase, firstTime) +
+        Helper::getDebugValue("send key", mSendKey ? IHelper::getDebugString(*mSendKey, mSendKey->SizeInBytes(), mSendKey->SizeInBytes()*2) : String(), firstTime) +
+        Helper::getDebugValue("next iv", mNextIV ? IHelper::getDebugString(*mNextIV, mNextIV->SizeInBytes(), mNextIV->SizeInBytes()*2) : String(), firstTime) +
+        Helper::getDebugValue("last integrity", mLastIntegrity ? IHelper::getDebugString(*mLastIntegrity, mLastIntegrity->SizeInBytes(), mLastIntegrity->SizeInBytes()*2) : String(), firstTime);
+      }
     }
 
     //-----------------------------------------------------------------------
