@@ -1510,9 +1510,9 @@ namespace openpeer
         return
         Helper::getDebugValue("key index", string(index), firstTime) +
         Helper::getDebugValue("integrity passphrase", mIntegrityPassphrase, firstTime) +
-        Helper::getDebugValue("send key", mSendKey ? IHelper::getDebugString(*mSendKey, mSendKey->SizeInBytes(), mSendKey->SizeInBytes()*2) : String(), firstTime) +
-        Helper::getDebugValue("next iv", mNextIV ? IHelper::getDebugString(*mNextIV, mNextIV->SizeInBytes(), mNextIV->SizeInBytes()*2) : String(), firstTime) +
-        Helper::getDebugValue("last integrity", mLastIntegrity ? IHelper::getDebugString(*mLastIntegrity, mLastIntegrity->SizeInBytes(), mLastIntegrity->SizeInBytes()*2) : String(), firstTime);
+        Helper::getDebugValue("send key", mSendKey ? IHelper::convertToHex(*mSendKey) : String(), firstTime) +
+        Helper::getDebugValue("next iv", mNextIV ? IHelper::convertToHex(*mNextIV) : String(), firstTime) +
+        Helper::getDebugValue("last integrity", mLastIntegrity ? IHelper::convertToHex(*mLastIntegrity) : String(), firstTime);
       }
     }
 

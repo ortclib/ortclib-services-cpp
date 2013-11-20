@@ -1149,9 +1149,9 @@ namespace openpeer
                 mBufferedList.pop_front();
                 continue;
               }
-              
+
               size_t length = (data.second - sent);
-              memcpy(data.first.get() + sent, data.first.get(), length);
+              memmove(data.first.get(), data.first.get() + sent, length);
               data.second = length;
               break;
             }
