@@ -2236,11 +2236,6 @@ namespace openpeer
 
         TURNInfoPtr turnInfo = (*found).second;
 
-        TURNInfoMap::iterator foundInfo = mTURNInfos.find(turnInfo);
-        if (foundInfo != mTURNInfos.end()) {
-          mTURNInfos.erase(foundInfo);
-        }
-
         TURNInfoRelatedIPMap::iterator foundRelay = mTURNRelayIPs.find(turnInfo->mRelay->mIPAddress);
         if (foundRelay != mTURNRelayIPs.end()) {
           mTURNRelayIPs.erase(foundRelay);
