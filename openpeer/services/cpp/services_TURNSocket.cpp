@@ -645,7 +645,7 @@ namespace openpeer
           }
 
           if (!server) {
-            ZS_LOG_WARNING(Detail, log("count not find a server to send the request to"))
+            ZS_LOG_WARNING(Detail, log("could not find a server to send the request to"))
             return;
           }
         }

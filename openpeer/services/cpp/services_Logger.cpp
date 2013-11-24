@@ -255,6 +255,55 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark LoggerThread
+      #pragma mark
+
+      class LoggerThread;
+      typedef boost::shared_ptr<LoggerThread> LoggerThreadPtr;
+      typedef boost::weak_ptr<LoggerThread> LoggerThreadWeakPtr;
+
+      //-----------------------------------------------------------------------
+      class LoggerThread
+      {
+      public:
+        //---------------------------------------------------------------------
+        virtual ~LoggerThread()
+        {
+          mThread->waitForShutdown();
+          mThread.reset();
+        }
+
+        //---------------------------------------------------------------------
+        static LoggerThreadPtr create()
+        {
+          LoggerThreadPtr pThis(new LoggerThread);
+          pThis->mThread = MessageQueueThread::createBasic();
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        static LoggerThreadPtr singleton()
+        {
+          AutoRecursiveLock lock(IHelper::getGlobalLock());
+          static LoggerThreadPtr global = LoggerThread::create();
+          return global;
+        }
+
+        //---------------------------------------------------------------------
+        static MessageQueueThreadPtr getThread()
+        {
+          return singleton()->mThread;
+        }
+
+      protected:
+        MessageQueueThreadPtr mThread;
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark LogLevelLogger
       #pragma mark
 
@@ -794,11 +843,10 @@ namespace openpeer
       public:
         //---------------------------------------------------------------------
         TelnetLogger(
-                     MessageQueueThreadPtr thread,
+                     IMessageQueuePtr queue,
                      bool colorizeOutput
                      ) :
-          MessageQueueAssociator(thread),
-          mThread(thread),
+          MessageQueueAssociator(queue),
           mColorizeOutput(colorizeOutput),
           mOutgoingMode(false),
           mConnected(false),
@@ -842,55 +890,43 @@ namespace openpeer
         //---------------------------------------------------------------------
         void close()
         {
-          MessageQueueThreadPtr thread;
+          AutoRecursiveLock lock(mLock);
 
-          {
-            AutoRecursiveLock lock(mLock);
-
-            if (mClosed) {
-              // already closed
-              return;
-            }
-
-            mClosed = true;
-
-            TelnetLoggerPtr pThis = mThisWeak.lock();
-            if (pThis) {
-              LogPtr log = Log::singleton();
-              log->removeListener(mThisWeak.lock());
-              mThisWeak.reset();
-            }
-
-            mBufferedList.clear();
-            mConnected = false;
-
-            if (mOutgoingServerQuery) {
-              mOutgoingServerQuery->cancel();
-              mOutgoingServerQuery.reset();
-            }
-
-            mServers.reset();
-
-            if (mTelnetSocket) {
-              mTelnetSocket->close();
-              mTelnetSocket.reset();
-            }
-            if (mListenSocket) {
-              mListenSocket->close();
-              mListenSocket.reset();
-            }
-            if (mListenTimer) {
-              mListenTimer->cancel();
-              mListenTimer.reset();
-            }
-            if (mThread) {
-              thread = mThread;
-              mThread.reset();
-            }
+          if (mClosed) {
+            // already closed
+            return;
           }
 
-          if (thread) {
-            thread->waitForShutdown();
+          mClosed = true;
+
+          TelnetLoggerPtr pThis = mThisWeak.lock();
+          if (pThis) {
+            LogPtr log = Log::singleton();
+            log->removeListener(mThisWeak.lock());
+            mThisWeak.reset();
+          }
+
+          mBufferedList.clear();
+          mConnected = false;
+
+          if (mOutgoingServerQuery) {
+            mOutgoingServerQuery->cancel();
+            mOutgoingServerQuery.reset();
+          }
+
+          mServers.reset();
+
+          if (mTelnetSocket) {
+            mTelnetSocket->close();
+            mTelnetSocket.reset();
+          }
+          if (mListenSocket) {
+            mListenSocket->close();
+            mListenSocket.reset();
+          }
+          if (mListenTimer) {
+            mListenTimer->cancel();
+            mListenTimer.reset();
           }
         }
 
@@ -920,8 +956,8 @@ namespace openpeer
         //---------------------------------------------------------------------
         static TelnetLoggerPtr create(USHORT listenPort, ULONG maxSecondsWaitForSocketToBeAvailable, bool colorizeOutput)
         {
-          MessageQueueThreadPtr thread = MessageQueueThread::createBasic();
-          TelnetLoggerPtr pThis(new TelnetLogger(thread, colorizeOutput));
+          IMessageQueuePtr queue = LoggerThread::getThread();
+          TelnetLoggerPtr pThis(new TelnetLogger(queue, colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(listenPort, maxSecondsWaitForSocketToBeAvailable);
           return pThis;
@@ -934,8 +970,8 @@ namespace openpeer
                                       const char *sendStringUponConnection
                                       )
         {
-          MessageQueueThreadPtr thread = MessageQueueThread::createBasic();
-          TelnetLoggerPtr pThis(new TelnetLogger(thread, colorizeOutput));
+          MessageQueueThreadPtr queue = LoggerThread::getThread();
+          TelnetLoggerPtr pThis(new TelnetLogger(queue, colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(serverHostWithPort, sendStringUponConnection);
           return pThis;
@@ -1395,8 +1431,6 @@ namespace openpeer
         #pragma mark
 
         mutable RecursiveLock mLock;
-
-        MessageQueueThreadPtr mThread;
 
         TelnetLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;

@@ -684,6 +684,8 @@ namespace openpeer
             return;
           }
 
+          ZS_LOG_WARNING(Detail, log("socket exception occured"))
+
           LocalSocketPtr &localSocket = (*found).second;
 
           for (TURNInfoMap::iterator iter = localSocket->mTURNInfos.begin(); iter != localSocket->mTURNInfos.end(); ++iter) {
@@ -712,6 +714,22 @@ namespace openpeer
 
           localSocket->mSocket->close();
           localSocket->mSocket.reset();
+
+          for (LocalSocketIPAddressMap::iterator ipIter = mSocketLocalIPs.begin(); ipIter != mSocketLocalIPs.end(); )
+          {
+            LocalSocketIPAddressMap::iterator currentIPIter = ipIter; ++ipIter;
+
+            const LocalIP &ip = (*currentIPIter).first;
+            LocalSocketPtr &mappedSocket = (*currentIPIter).second;
+
+            if (mappedSocket != localSocket) {
+              ZS_LOG_TRACE(log("socket exception - socket is not this local IP") + ", ip=" + ip.string())
+              continue;
+            }
+
+            ZS_LOG_WARNING(Detail, log("socket exception - socket was closed for this IP") + ", ip=" + ip.string())
+            mSocketLocalIPs.erase(currentIPIter);
+          }
 
           mSockets.erase(found);
         }
