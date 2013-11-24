@@ -1149,6 +1149,41 @@ namespace openpeer
 
           mNominated.reset();
 
+          for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)
+          {
+            CandidatePairPtr &pairing = (*iter);
+
+            if (pairing->mFailed) {
+              ZS_LOG_TRACE(log("alive connectivity check failed - pairing cannot ever be used as it has already failed") + pairing->toDebugString())
+              continue;
+            }
+            if (pairing->mRequester) {
+              ZS_LOG_TRACE(log("alive connectivity check failed - pairing requestor still active (do nothing)") + pairing->toDebugString())
+              continue;
+            }
+            if (IICESocket::ICEControl_Controlling == mControl) {
+
+              // When in controlling state, will attempt to nominate next
+              // available pairing so eventually all previously successful
+              // candidate pair will timeout.
+              //
+              // But when controlled, it's possible that candidate pairs that
+              // previously passed are no longer exist but we are left waiting
+              // for the controlling party to nominate the pairing which will
+              // never happen so treat the pairing as in need of a rescan even
+              // if it previous succeeded.
+
+              if (pairing->mReceivedRequest) {
+                ZS_LOG_TRACE(log("alive connectivity check failed - pairing already received request (do nothing)") + pairing->toDebugString())
+                continue;
+              }
+            }
+
+            ZS_LOG_DEBUG(log("alive connectivity check failed - pairing being marked to rescan since it was not thoroughly checked") + pairing->toDebugString())
+            pairing->mReceivedRequest = false;
+            pairing->mReceivedResponse = false;
+          }
+
           (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
           return;
         }
@@ -1853,19 +1888,33 @@ namespace openpeer
       {
         bool foundUnsearched = false;
 
+        ZS_LOG_INSANE(log("step activate timer check"))
+
         for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)
         {
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing == mNominated) {
             // stop once we are at the nominated point (the rest are lower priority candidates)
+            ZS_LOG_INSANE(log("activate timer - pairing matches nominated") + pairing->toDebugString())
             break;
           }
 
           // is there any need for an activation timer?
-          if (pairing->mReceivedResponse) continue;
-          if (pairing->mRequester) continue;
-          if (pairing->mFailed) continue;
+          if (pairing->mReceivedResponse) {
+            ZS_LOG_INSANE(log("activate timer - pairing received response") + pairing->toDebugString())
+            continue;
+          }
+          if (pairing->mRequester) {
+            ZS_LOG_INSANE(log("activate timer - pairing received request") + pairing->toDebugString())
+            continue;
+          }
+          if (pairing->mFailed) {
+            ZS_LOG_INSANE(log("activate timer - pairing failed") + pairing->toDebugString())
+            continue;
+          }
+
+          ZS_LOG_INSANE(log("activate timer - found unsearched") + pairing->toDebugString())
 
           foundUnsearched = true;
           break;
@@ -1905,9 +1954,12 @@ namespace openpeer
         {
           CandidatePairPtr &pairing = (*iter);
 
-          if (pairing->mFailed) continue;
+          if (pairing->mFailed) {
+            ZS_LOG_INSANE(log("end search - pair failed") + pairing->toDebugString())
+            continue;
+          }
 
-          ZS_LOG_TRACE(log("found candidate which has not failed thus no reason to end search yet"))
+          ZS_LOG_TRACE(log("found candidate which has not failed thus no reason to end search yet") + pairing->toDebugString())
           return true;
         }
 
@@ -1998,11 +2050,15 @@ namespace openpeer
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing == mNominated) {
+            ZS_LOG_INSANE(log("cancel lower priority - pairing found nominated") + pairing->toDebugString())
             foundNominated = true;
             continue;
           }
 
-          if (!pairing->mRequester) continue;
+          if (!pairing->mRequester) {
+            ZS_LOG_INSANE(log("cancel lower priority - pairing doesn't have requestor (nothing to cancel)") + pairing->toDebugString())
+            continue;
+          }
 
           ZS_LOG_DEBUG(log("cancelling requester for candidate") + pairing->toDebugString())
 
@@ -2038,12 +2094,22 @@ namespace openpeer
 
           if (pairing == mNominated) {
             // stop once we are at the nominated point (the rest are lower priority candidates which should never be nominated)
+            ZS_LOG_INSANE(log("nominate - pairing found nonimated") + pairing->toDebugString())
             break;
           }
 
-          if (pairing->mFailed) continue;
-          if (!pairing->mReceivedRequest) continue;
-          if (!pairing->mReceivedResponse) continue;
+          if (pairing->mFailed) {
+            ZS_LOG_INSANE(log("nominate - pairing is failed") + pairing->toDebugString())
+            continue;
+          }
+          if (!pairing->mReceivedRequest) {
+            ZS_LOG_INSANE(log("nominate - pairing did not receive request") + pairing->toDebugString())
+            continue;
+          }
+          if (!pairing->mReceivedResponse) {
+            ZS_LOG_INSANE(log("nominate - pairing did not receive response") + pairing->toDebugString())
+            continue;
+          }
 
           ZS_LOG_DETAIL(log("nominating candidate") + pairing->toDebugString())
 
@@ -2095,7 +2161,10 @@ namespace openpeer
             {
               CandidatePairPtr &pairing = (*iter);
 
-              if (pairing->mFailed) continue;
+              if (pairing->mFailed) {
+                ZS_LOG_INSANE(log("nominate - candidate already failed (will never nominate)") + pairing->toDebugString())
+                continue;
+              }
               if (pairing == mNominated) {
                 ZS_LOG_TRACE(log("already nominated and no high prioriy unfailed candidates found (thus must be complete state)"))
                 return true;
@@ -2118,7 +2187,10 @@ namespace openpeer
             {
               CandidatePairPtr &pairing = (*iter);
 
-              if (pairing->mFailed) continue;
+              if (pairing->mFailed) {
+                ZS_LOG_INSANE(log("nominate - candidate already failed (will never search)") + pairing->toDebugString())
+                continue;
+              }
 
               ZS_LOG_TRACE(log("found candidate which has not failed thus still searching"))
               setState(ICESocketSessionState_Searching);
