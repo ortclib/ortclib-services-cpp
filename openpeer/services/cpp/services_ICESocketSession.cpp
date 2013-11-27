@@ -719,16 +719,16 @@ namespace openpeer
 
                 mNominated = found;
 
+                ICESocketPtr socket = mICESocketWeak.lock();
+                if (socket) {
+                  socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+                }
+
                 // this should be happening, but just in case, clear out any nomination process in progress
                 mPendingNominatation.reset();
                 if (mNominateRequester) {
                   mNominateRequester->cancel();
                   mNominateRequester.reset();
-                }
-
-                ICESocketPtr socket = mICESocketWeak.lock();
-                if (socket) {
-                  socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
                 }
 
                 get(mInformedWriteReady) = false;
@@ -1069,6 +1069,11 @@ namespace openpeer
           mNominated = usePair;
           mPendingNominatation.reset();
 
+          ICESocketPtr socket = mICESocketWeak.lock();
+          if (socket) {
+            socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+          }
+
           get(mInformedWriteReady) = false;
 
           notifyLocalWriteReady(usePair->mLocal);
@@ -1147,6 +1152,10 @@ namespace openpeer
             mNominated->mRequester.reset();
           }
 
+          ICESocketPtr socket = mICESocketWeak.lock();
+          if (socket) {
+            socket->forICESocketSession().removeRoute(mThisWeak.lock());
+          }
           mNominated.reset();
 
           for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)

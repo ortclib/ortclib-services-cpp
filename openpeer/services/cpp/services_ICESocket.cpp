@@ -542,10 +542,11 @@ namespace openpeer
       void ICESocket::removeRoute(ICESocketSessionPtr inSession)
       {
         for (QuickRouteMap::iterator iter = mRoutes.begin(); iter != mRoutes.end(); ++iter) {
-          ICESocketSessionPtr &session = (*iter).second;
+          QuickRouteMap::iterator current = iter; ++iter;
+
+          ICESocketSessionPtr &session = (*current).second;
           if (session == inSession) {
-            mRoutes.erase(iter);
-            return;
+            mRoutes.erase(current);
           }
         }
       }
