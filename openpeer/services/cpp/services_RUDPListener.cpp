@@ -35,10 +35,12 @@
 #include <openpeer/services/RUDPPacket.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 #include <openpeer/services/IICESocket.h>
+#include <openpeer/services/IHelper.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
 #include <cryptopp/osrng.h>
@@ -217,7 +219,7 @@ namespace openpeer
         CryptoPP::AutoSeededRandomPool rng;
         rng.GenerateBlock(&(mMagic[0]), sizeof(mMagic));
 
-        ZS_LOG_BASIC(log("started") + ", compiled date=" + __DATE__ + ", time=" + __TIME__)
+        ZS_LOG_BASIC(log("started") + ZS_PARAM("compiled date", __DATE__) + ZS_PARAM("time", __TIME__))
       }
 
       //-----------------------------------------------------------------------
@@ -555,9 +557,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPListener::log(const char *message) const
+      Log::Params RUDPListener::log(const char *message) const
       {
-        return String("RUDPListener [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RUDPListener");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -615,7 +619,7 @@ namespace openpeer
       {
         if (mCurrentState == state) return;
 
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
         mCurrentState = state;
 
         if (!mDelegate) return;
@@ -683,10 +687,10 @@ namespace openpeer
         try {
           bool wouldBlock = false;
           size_t bytesSent = mUDPSocket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
-          ZS_LOG_TRACE(log("sendTo called") + ", destination=" + destination.string() + ", buffer=" + (buffer ? "true" : "false") + ", buffer length=" + string(bufferLengthInBytes) + ", bytes sent=" + string(bytesSent) + ", would block=" + (wouldBlock? "true" : "false"))
+          ZS_LOG_TRACE(log("sendTo called") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           return (bytesSent == bufferLengthInBytes);
         } catch(ISocket::Exceptions::Unspecified &) {
-          ZS_LOG_ERROR(Detail, log("sendTo exception") + ", destination=" + destination.string() + ", buffer=" + (buffer ? "true" : "false") + ", buffer length=" + string(bufferLengthInBytes))
+          ZS_LOG_ERROR(Detail, log("sendTo exception") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes))
           return false;
         }
         return false;

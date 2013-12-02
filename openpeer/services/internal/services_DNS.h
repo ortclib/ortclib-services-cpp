@@ -83,6 +83,13 @@ namespace openpeer
                                       WORD defaultWeight,
                                       SRVLookupTypes lookupType
                                       );
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DNS => (internal)
+        #pragma mark
+
+        static Log::Params log(const char *message);
       };
 
       //-----------------------------------------------------------------------

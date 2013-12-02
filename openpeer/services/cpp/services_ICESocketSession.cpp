@@ -188,17 +188,17 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::CandidatePair::toDebugString(bool includeCommaPrefix) const
+      ElementPtr ICESocketSession::CandidatePair::toDebug() const
       {
-        bool firstTime = false;
-        return
-        (includeCommaPrefix ? String(", ") : String()) +
-        "local candidate: [" + mLocal.toDebugString(false) +
-        "], remote candidate: [" + mRemote.toDebugString(false) + "]" +
-        Helper::getDebugValue("received request", mReceivedRequest ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("received response", mReceivedResponse ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("failed", mFailed ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("requester", mRequester ? String("true") : String(), firstTime);
+        ElementPtr resultEl = Element::create("IICESocket::CandidatePair");
+
+        IHelper::debugAppend(resultEl, "local candidate", mLocal.toDebug());
+        IHelper::debugAppend(resultEl, "remote candidate", mRemote.toDebug());
+        IHelper::debugAppend(resultEl, "received request", mReceivedRequest);
+        IHelper::debugAppend(resultEl, "received response", mReceivedResponse);
+        IHelper::debugAppend(resultEl, "failed", mFailed);
+        IHelper::debugAppend(resultEl, "requester", (bool)mRequester);
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -276,14 +276,14 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::toDebugString(IICESocketSessionPtr session, bool includeCommaPrefix)
+      ElementPtr ICESocketSession::toDebug(IICESocketSessionPtr session)
       {
-        if (!session) return String(includeCommaPrefix ? ", ice socket=(null)" : "ice socket=(null)");
+        if (!session) return ElementPtr();
 
         ICESocketSessionPtr pThis = ICESocketSession::convert(session);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
-      
+
       //-----------------------------------------------------------------------
       IICESocketPtr ICESocketSession::getSocket()
       {
@@ -380,7 +380,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocketSession::updateRemoteCandidates(const CandidateList &remoteCandidates)
       {
-        ZS_LOG_DEBUG(log("updating remote candidates") + ", size=" + string(remoteCandidates.size()))
+        ZS_LOG_DEBUG(log("updating remote candidates") + ZS_PARAM("size", remoteCandidates.size()))
         AutoRecursiveLock lock(getLock());
 
         mUpdatedRemoteCandidates = remoteCandidates;
@@ -408,8 +408,8 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         ZS_LOG_DEBUG(log("adjusting keep alive propertiess") +
-                     ", send keep alive (ms)=" + string(sendKeepAliveIndications.total_milliseconds()) +
-                     ", expecting data within (ms)=" + string(expectSTUNOrDataWithinWithinOrSendAliveCheck.total_milliseconds()))
+                     ZS_PARAM("send keep alive (ms)", sendKeepAliveIndications.total_milliseconds()) +
+                     ZS_PARAM("expecting data within (ms)", expectSTUNOrDataWithinWithinOrSendAliveCheck.total_milliseconds()))
 
         if (mKeepAliveTimer) {
           ZS_LOG_DEBUG(log("cancelling current keep alive timer"))
@@ -530,7 +530,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!stun)
 
-        ZS_LOG_DEBUG(log("handle stun packet") + ", candidate: " + viaLocalCandidate.toDebugString(false) + ", source=" + string(source) + ", local username frag=" + localUsernameFrag + ", remote username frag=" + remoteUsernameFrag)
+        ZS_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag))
 
         if (mSubscriptions.size() < 1) {
           ZS_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
@@ -546,12 +546,12 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         if (localUsernameFrag != mLocalUsernameFrag) {
-          ZS_LOG_DEBUG(log("local username frag does not match") + ", expecting=" + mLocalUsernameFrag + ", received=" + localUsernameFrag)
+          ZS_LOG_DEBUG(log("local username frag does not match") + ZS_PARAM("expecting", mLocalUsernameFrag) + ZS_PARAM("received", localUsernameFrag))
           return false;
         }
 
         if (remoteUsernameFrag != mRemoteUsernameFrag) {
-          ZS_LOG_DEBUG(log("remote username frag does not match") + ", expecting=" + mRemoteUsernameFrag + ", received=" + remoteUsernameFrag)
+          ZS_LOG_DEBUG(log("remote username frag does not match") + ZS_PARAM("expecting", mRemoteUsernameFrag) + ZS_PARAM("received", remoteUsernameFrag))
           return false;
         }
 
@@ -575,7 +575,7 @@ namespace openpeer
         }
 
         if (found) {
-          ZS_LOG_DEBUG(log("found pairing") + ", is nominated=" + (mNominated == found ? "true":"false")  + found->toDebugString())
+          ZS_LOG_DEBUG(log("found pairing") + ZS_PARAM("is nominated", (mNominated == found)) + found->toDebug())
         }
 
         if (!found) {
@@ -606,7 +606,7 @@ namespace openpeer
             newPair->mRemote = remote;
             newPair->mReceivedRequest = true;
 
-            ZS_LOG_DEBUG(log("new candidate pair discovered") + newPair->toDebugString())
+            ZS_LOG_DEBUG(log("new candidate pair discovered") + newPair->toDebug())
 
             mCandidatePairs.push_back(newPair);
 
@@ -618,7 +618,7 @@ namespace openpeer
           }
           mUpdatedRemoteCandidates.push_back(remote);
 
-          ZS_LOG_DEBUG(log("performing discovery on peer reflexive discovered IP") + ", remote: " + remote.toDebugString(false))
+          ZS_LOG_DEBUG(log("performing discovery on peer reflexive discovered IP") + ZS_PARAM("remote", remote.toDebug()))
 
           (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
 
@@ -715,7 +715,7 @@ namespace openpeer
 
               if (mNominated != found) {
                 // the remote party is telling this party that this pair is nominated
-                ZS_LOG_DETAIL(log("candidate is nominated by controlling party (i.e. remote party)") + found->toDebugString())
+                ZS_LOG_DETAIL(log("candidate is nominated by controlling party (i.e. remote party)") + found->toDebug())
 
                 mNominated = found;
 
@@ -748,7 +748,7 @@ namespace openpeer
           if (found) {
             if (!found->mRequester) {
               if (!found->mReceivedResponse) {
-                ZS_LOG_DETAIL(log("candidate search started on reaction to a request") + found->toDebugString())
+                ZS_LOG_DETAIL(log("candidate search started on reaction to a request") + found->toDebug())
 
                 STUNPacketPtr request = STUNPacket::createRequest(STUNPacket::Method_Binding);
                 fix(request);
@@ -824,7 +824,7 @@ namespace openpeer
           }
 
           if (!isCandidateMatch(mNominated, viaLocalCandidate, source)) {
-            ZS_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated canddiate thus ignoring") + ", candidate: " + viaLocalCandidate.toDebugString(false) + ", source=" + string(source) + ", local: " + mNominated->mLocal.toDebugString(false) + ", remote: " + mNominated->mRemote.toDebugString(false))
+            ZS_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated canddiate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
             return false;
           }
 
@@ -855,7 +855,7 @@ namespace openpeer
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + ", candidate: " + viaLocalCandidate.toDebugString(false))
+          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
@@ -880,7 +880,7 @@ namespace openpeer
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + ", candidate: " + viaLocalCandidate.toDebugString(false))
+          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
@@ -1018,17 +1018,17 @@ namespace openpeer
                 // this request better be signed properly or we will ignore the conflict...
                 if (!mRemotePassword.isEmpty()) {
                   if (!response->isValidMessageIntegrity(mRemotePassword)) {
-                    ZS_LOG_WARNING(Detail, log("nomination caused role conflict reply did not pass integtiry check") + usePair->toDebugString())
+                    ZS_LOG_WARNING(Detail, log("nomination caused role conflict reply did not pass integtiry check") + usePair->toDebug())
                     return false;
                   }
                 }
 
                 if (requester == mAliveCheckRequester) {
-                  ZS_LOG_WARNING(Detail, log("alive check caused role conflict reply cannot be issued for alive check request (since already nominated)") + usePair->toDebugString())
+                  ZS_LOG_WARNING(Detail, log("alive check caused role conflict reply cannot be issued for alive check request (since already nominated)") + usePair->toDebug())
                   return false;
                 }
 
-                ZS_LOG_WARNING(Detail, log("nomination request caused role conflict") + usePair->toDebugString())
+                ZS_LOG_WARNING(Detail, log("nomination request caused role conflict") + usePair->toDebug())
 
                 // we have a role conflict... switch roles now...
                 STUNPacketPtr originalRequest = requester->getRequest();
@@ -1046,13 +1046,13 @@ namespace openpeer
           // the nomination request succeeded (or so we think - make sure it was signed properly)!
           if (mRemotePassword.hasData()) {
             if (!response->isValidMessageIntegrity(mRemotePassword)) {
-              ZS_LOG_WARNING(Detail, log("response from nomination or alive check failed message integrity") + ", was nominate requester=" + (requester == mNominateRequester  ? "true" : "false"))
+              ZS_LOG_WARNING(Detail, log("response from nomination or alive check failed message integrity") + ZS_PARAM("was nominate requester", (requester == mNominateRequester)))
               return false;
             }
           }
 
           if (requester == mAliveCheckRequester) {
-            ZS_LOG_DEBUG(log("alive check request succeeded") + usePair->toDebugString())
+            ZS_LOG_DEBUG(log("alive check request succeeded") + usePair->toDebug())
             mLastReceivedDataOrSTUN = zsLib::now();
 
             mAliveCheckRequester.reset();
@@ -1061,7 +1061,7 @@ namespace openpeer
 
           // yes, okay, it did in fact succeed - we have nominated our candidate!
           // inform that the session is now connected
-          ZS_LOG_DETAIL(log("nomination request succeeded") + usePair->toDebugString())
+          ZS_LOG_DETAIL(log("nomination request succeeded") + usePair->toDebug())
 
           // we are now established to the remote party
 
@@ -1101,7 +1101,7 @@ namespace openpeer
                   if (!response->isValidMessageIntegrity(mRemotePassword)) return false;
                 }
 
-                ZS_LOG_WARNING(Detail, log("candidate role conflict error received") + pairing->toDebugString())
+                ZS_LOG_WARNING(Detail, log("candidate role conflict error received") + pairing->toDebug())
 
                 // we have a role conflict... switch roles now...
                 STUNPacketPtr originalRequest = requester->getRequest();
@@ -1121,7 +1121,7 @@ namespace openpeer
             // fake that we received a request since we will never receive in this case
             pairing->mReceivedRequest = true;
           }
-          ZS_LOG_DEBUG(log("pairing response received") + pairing->toDebugString())
+          ZS_LOG_DEBUG(log("pairing response received") + pairing->toDebug())
           step();
           return true;
         }
@@ -1137,7 +1137,7 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         if (requester == mAliveCheckRequester) {
-          ZS_LOG_WARNING(Detail, log("alive connectivity check failed (probably a connection timeout)") + mNominated->toDebugString())
+          ZS_LOG_WARNING(Detail, log("alive connectivity check failed (probably a connection timeout)") + mNominated->toDebug())
 
           mAliveCheckRequester.reset();
 
@@ -1163,11 +1163,11 @@ namespace openpeer
             CandidatePairPtr &pairing = (*iter);
 
             if (pairing->mFailed) {
-              ZS_LOG_TRACE(log("alive connectivity check failed - pairing cannot ever be used as it has already failed") + pairing->toDebugString())
+              ZS_LOG_TRACE(log("alive connectivity check failed - pairing cannot ever be used as it has already failed") + pairing->toDebug())
               continue;
             }
             if (pairing->mRequester) {
-              ZS_LOG_TRACE(log("alive connectivity check failed - pairing requestor still active (do nothing)") + pairing->toDebugString())
+              ZS_LOG_TRACE(log("alive connectivity check failed - pairing requestor still active (do nothing)") + pairing->toDebug())
               continue;
             }
             if (IICESocket::ICEControl_Controlling == mControl) {
@@ -1183,12 +1183,12 @@ namespace openpeer
               // if it previous succeeded.
 
               if (pairing->mReceivedRequest) {
-                ZS_LOG_TRACE(log("alive connectivity check failed - pairing already received request (do nothing)") + pairing->toDebugString())
+                ZS_LOG_TRACE(log("alive connectivity check failed - pairing already received request (do nothing)") + pairing->toDebug())
                 continue;
               }
             }
 
-            ZS_LOG_DEBUG(log("alive connectivity check failed - pairing being marked to rescan since it was not thoroughly checked") + pairing->toDebugString())
+            ZS_LOG_DEBUG(log("alive connectivity check failed - pairing being marked to rescan since it was not thoroughly checked") + pairing->toDebug())
             pairing->mReceivedRequest = false;
             pairing->mReceivedResponse = false;
           }
@@ -1205,7 +1205,7 @@ namespace openpeer
           {
             CandidatePairPtr pairing = (*iter);
             if (mPendingNominatation == pairing) {
-              ZS_LOG_ERROR(Detail, log("nomination of candidate failed") + pairing->toDebugString())
+              ZS_LOG_ERROR(Detail, log("nomination of candidate failed") + pairing->toDebug())
 
               // we found the candidate that was going to be nomiated but it can't be since the nomination failed...
               pairing->mFailed = false;
@@ -1233,7 +1233,7 @@ namespace openpeer
             CandidatePairPtr pairing = (*iter);
             if (requester == pairing->mRequester) {
               // mark this pair as failed
-              ZS_LOG_DETAIL(log("candidate timeout") + pairing->toDebugString())
+              ZS_LOG_DETAIL(log("candidate timeout") + pairing->toDebug())
 
               pairing->mRequester.reset();
               pairing->mFailed = true;
@@ -1263,7 +1263,7 @@ namespace openpeer
         if (Duration() != mBackgroundingTimeout) {
           Duration diff = tick - mLastActivity;
           if (diff > mBackgroundingTimeout) {
-            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ", time diff (ms)=" + string(diff.total_milliseconds()))
+            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
             setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
             cancel();
             return;
@@ -1299,17 +1299,17 @@ namespace openpeer
             if (mFoundation) {
               if (!mFoundation->canUnfreeze(pairing)) {
                 if (pairing->mFailed) {
-                  ZS_LOG_TRACE(log("candidate now marked as failed (as foundation candidate pairing failed)") + pairing->toDebugString())
+                  ZS_LOG_TRACE(log("candidate now marked as failed (as foundation candidate pairing failed)") + pairing->toDebug())
                   // need to perform step after failure
                   IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
                   break;
                 }
-                ZS_LOG_TRACE(log("candidate still frozen") + pairing->toDebugString())
+                ZS_LOG_TRACE(log("candidate still frozen") + pairing->toDebug())
                 continue;
               }
             }
 
-            ZS_LOG_DETAIL(log("activating search on candidate") + pairing->toDebugString())
+            ZS_LOG_DETAIL(log("activating search on candidate") + pairing->toDebug())
 
             // activate this pair right now... if there is no remote username then treat this as a regular STUN request/response situation (plus will automatically nominate if successful)
             STUNPacketPtr request = STUNPacket::createRequest(STUNPacket::Method_Binding);
@@ -1350,7 +1350,7 @@ namespace openpeer
             return;  // not enough time has passed since sending data to send more...
           }
 
-          ZS_LOG_DETAIL(log("keep alive") + mNominated->toDebugString())
+          ZS_LOG_DETAIL(log("keep alive") + mNominated->toDebug())
           STUNPacketPtr indication = STUNPacket::createIndication(STUNPacket::Method_Binding);
           fix(indication);
 
@@ -1432,9 +1432,17 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::log(const char *message) const
+      Log::Params ICESocketSession::log(const char *message) const
       {
-        return String("ICESocketSession [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("ICESocketSession");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params ICESocketSession::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
@@ -1445,65 +1453,66 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::getDebugValueString(bool includeCommaPrefix) const
+      ElementPtr ICESocketSession::toDebug() const
       {
         AutoRecursiveLock lock(getLock());
-        bool firstTime = !includeCommaPrefix;
+        ElementPtr resultEl = Element::create("ICESocketSession");
 
-        return
-        Helper::getDebugValue("ice socket session id", string(mID), firstTime) +
+        IHelper::debugAppend(resultEl, "id", mID);
 
-        Helper::getDebugValue("state", IICESocketSession::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        IHelper::debugAppend(resultEl, "state", IICESocketSession::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
-        Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
-        Helper::getDebugValue("default subscription", mDefaultSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("informed write ready", mInformedWriteReady ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+        IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
+        IHelper::debugAppend(resultEl, "informed write ready", mInformedWriteReady);
 
-        Helper::getDebugValue("socket subscription", mSocketSubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "socket subscription", (bool)mSocketSubscription);
 
-        Helper::getDebugValue("foundation", mFoundation ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "foundation", mFoundation ? mFoundation->getID() : 0);
 
-        Helper::getDebugValue("local username frag", mLocalUsernameFrag, firstTime) +
-        Helper::getDebugValue("local password", mLocalPassword, firstTime) +
-        Helper::getDebugValue("remote username frag", mRemoteUsernameFrag, firstTime) +
-        Helper::getDebugValue("remote password", mRemotePassword, firstTime) +
+        IHelper::debugAppend(resultEl, "local username frag", mLocalUsernameFrag);
+        IHelper::debugAppend(resultEl, "local password", mLocalPassword);
+        IHelper::debugAppend(resultEl, "remote username frag", mRemoteUsernameFrag);
+        IHelper::debugAppend(resultEl, "remote password", mRemotePassword);
 
-        Helper::getDebugValue("activate timer", mActivateTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("keep-alive timer", mKeepAliveTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("expecting data timer", mExpectingDataTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("step timer", mStepTimer ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "activate timer", (bool)mActivateTimer);
+        IHelper::debugAppend(resultEl, "keep-alive timer", (bool)mKeepAliveTimer);
+        IHelper::debugAppend(resultEl, "expecting data timer", (bool)mExpectingDataTimer);
+        IHelper::debugAppend(resultEl, "step timer", (bool)mStepTimer);
 
-        Helper::getDebugValue("control", IICESocket::toString(mControl), firstTime) +
-        Helper::getDebugValue("resolver", 0 != mConflictResolver ? string(mConflictResolver) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "control", IICESocket::toString(mControl));
+        IHelper::debugAppend(resultEl, "resolver", mConflictResolver);
 
-        Helper::getDebugValue("nominate request", mNominateRequester ? String("true") : String(), firstTime) +
-        (mPendingNominatation ? (String("pending nomination: ") + mPendingNominatation->toDebugString(false)) : String());
-        (mNominated ? (String("nominated: ") + mNominated->toDebugString(false)) : String());
+        IHelper::debugAppend(resultEl, "nominate request", (bool)mNominateRequester);
+        IHelper::debugAppend(resultEl, "pending nomination", mPendingNominatation->toDebug());
+        IHelper::debugAppend(resultEl, "nominated: ", mNominated->toDebug());
 
-        Helper::getDebugValue("last send data", Time() != mLastSentData ? IHelper::timeToString(mLastSentData) : String(), firstTime) +
-        Helper::getDebugValue("last activity", Time() != mLastActivity ? IHelper::timeToString(mLastActivity) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "last send data", mLastSentData);
+        IHelper::debugAppend(resultEl, "last activity", mLastActivity);
 
-        Helper::getDebugValue("need to notify nominated", mLastNotifiedNominated == mNominated ? String() : String("true"), firstTime) +
+        IHelper::debugAppend(resultEl, "need to notify nominated", mLastNotifiedNominated == mNominated);
 
-        Helper::getDebugValue("alive check requester", mAliveCheckRequester ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("last received data/stun", Time() != mLastReceivedDataOrSTUN ? IHelper::timeToString(mLastReceivedDataOrSTUN) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "alive check requester", (bool)mAliveCheckRequester);
+        IHelper::debugAppend(resultEl, "last received data/stun", mLastReceivedDataOrSTUN);
 
-        Helper::getDebugValue("keep alive (ms)", Duration() != mKeepAliveDuration ? string(mKeepAliveDuration.total_milliseconds()) : String(), firstTime) +
-        Helper::getDebugValue("expecting data/stun (ms)", Duration() != mExpectSTUNOrDataWithinDuration ? string(mExpectSTUNOrDataWithinDuration.total_milliseconds()) : String(), firstTime) +
-        Helper::getDebugValue("keel alive stun timeout (ms)", Duration() != mKeepAliveSTUNRequestTimeout ? string(mKeepAliveSTUNRequestTimeout.total_milliseconds()) : String(), firstTime) +
-        Helper::getDebugValue("backgrounding timeout (ms)", Duration() != mBackgroundingTimeout ? string(mBackgroundingTimeout.total_milliseconds()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "keep alive (ms)", mKeepAliveDuration);
+        IHelper::debugAppend(resultEl, "expecting data/stun (ms)", mExpectSTUNOrDataWithinDuration);
+        IHelper::debugAppend(resultEl, "keel alive stun timeout (ms)", mKeepAliveSTUNRequestTimeout);
+        IHelper::debugAppend(resultEl, "backgrounding timeout (ms)", mBackgroundingTimeout);
 
-        Helper::getDebugValue("candidate pairs", mCandidatePairs.size() > 0 ? string(mCandidatePairs.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "candidate pairs", mCandidatePairs.size());
 
-        Helper::getDebugValue("updated local candidates", mUpdatedLocalCandidates.size() > 0 ? string(mUpdatedLocalCandidates.size()) : String(), firstTime) +
-        Helper::getDebugValue("updated remote candidates", mUpdatedRemoteCandidates.size() > 0 ? string(mUpdatedRemoteCandidates.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "updated local candidates", mUpdatedLocalCandidates.size());
+        IHelper::debugAppend(resultEl, "updated remote candidates", mUpdatedRemoteCandidates.size());
 
-        Helper::getDebugValue("local candidates", mLocalCandidates.size() > 0 ? string(mLocalCandidates.size()) : String(), firstTime) +
-        Helper::getDebugValue("remote candidates", mRemoteCandidates.size() > 0 ? string(mRemoteCandidates.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "local candidates", mLocalCandidates.size());
+        IHelper::debugAppend(resultEl, "remote candidates", mRemoteCandidates.size());
 
-        Helper::getDebugValue("end of remote candidates flagged", mEndOfRemoteCandidatesFlag ? String("true") : String(), firstTime);
+        IHelper::debugAppend(resultEl, "end of remote candidates flagged", mEndOfRemoteCandidatesFlag);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -1605,7 +1614,7 @@ namespace openpeer
       {
         if (mCurrentState == state) return;
 
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 
@@ -1626,16 +1635,16 @@ namespace openpeer
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
-      
+
       //-----------------------------------------------------------------------
       void ICESocketSession::step()
       {
@@ -1645,7 +1654,7 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DEBUG(log("step") + getDebugValueString())
+        ZS_LOG_DEBUG(debug("step"))
 
         if (!stepSocket()) goto notify_nominated;
         if (!stepCandidates()) goto notify_nominated;
@@ -1694,7 +1703,7 @@ namespace openpeer
           case IICESocket::ICESocketState_Shutdown:
           {
             // socket is self-destructing or is destroyed...
-            ZS_LOG_WARNING(Detail, log("ICE socket shutdown") + ", error=" + string(error) + ", reason=" + reason)
+            ZS_LOG_WARNING(Detail, log("ICE socket shutdown") + ZS_PARAM("error", error) + ZS_PARAM("reason", reason))
             if (0 != error) {
               setError(error, reason);
             }
@@ -1860,7 +1869,7 @@ namespace openpeer
               {
                 if ((mNominated == pairing) ||
                     (mPendingNominatation == pairing)) {
-                  ZS_LOG_WARNING(Detail, log("cannot remove candidate pair that is nominating/nominated") + pairing->toDebugString())
+                  ZS_LOG_WARNING(Detail, log("cannot remove candidate pair that is nominating/nominated") + pairing->toDebug())
                   continue;
                 }
 
@@ -1870,7 +1879,7 @@ namespace openpeer
                   pairing->mRequester.reset();
                 }
 
-                ZS_LOG_DEBUG(log("removing candidate pair") + ", reason=" + reason + pairing->toDebugString())
+                ZS_LOG_DEBUG(log("removing candidate pair") + ZS_PARAM("reason", reason) + pairing->toDebug())
 
                 mCandidatePairs.erase(current);
               }
@@ -1879,14 +1888,14 @@ namespace openpeer
         }
 
         if (ZS_IS_LOGGING(Debug)) {
-          ZS_LOG_DEBUG(log("--- ICE SESSION CANDIDATES START ") + (mControl == IICESocket::ICEControl_Controlling ? "(CONTROLLING) ---" : "(CONTROLLED) ---"))
+          ZS_LOG_DEBUG(log("--- ICE SESSION CANDIDATES START") + ZS_PARAM("control", IICESocket::toString(IICESocket::ICEControl_Controlling)))
 
           for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter) {
             CandidatePairPtr &pairing = (*iter);
 
-            ZS_LOG_DEBUG(log("candidate pair") + ", local ip=" + pairing->mLocal.mIPAddress.string() + " remote=" + pairing->mRemote.mIPAddress.string())
+            ZS_LOG_DEBUG(log("candidate pair") + ZS_PARAM("local ip", pairing->mLocal.mIPAddress.string()) + ZS_PARAM("remote", pairing->mRemote.mIPAddress.string()))
           }
-          ZS_LOG_DEBUG(log("--- ICE SESSION CANDIDATES END ---") + ", control=" + (mControl == IICESocket::ICEControl_Controlling ? "CONTROLLING" : "CONTROLLED"))
+          ZS_LOG_DEBUG(log("--- ICE SESSION CANDIDATES END") + ZS_PARAM("control", IICESocket::toString(IICESocket::ICEControl_Controlling)))
         }
 
         return true;
@@ -1905,31 +1914,31 @@ namespace openpeer
 
           if (pairing == mNominated) {
             // stop once we are at the nominated point (the rest are lower priority candidates)
-            ZS_LOG_INSANE(log("activate timer - pairing matches nominated") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("activate timer - pairing matches nominated") + pairing->toDebug())
             break;
           }
 
           // is there any need for an activation timer?
           if (pairing->mReceivedResponse) {
-            ZS_LOG_INSANE(log("activate timer - pairing received response") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("activate timer - pairing received response") + pairing->toDebug())
             continue;
           }
           if (pairing->mRequester) {
-            ZS_LOG_INSANE(log("activate timer - pairing received request") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("activate timer - pairing received request") + pairing->toDebug())
             continue;
           }
           if (pairing->mFailed) {
-            ZS_LOG_INSANE(log("activate timer - pairing failed") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("activate timer - pairing failed") + pairing->toDebug())
             continue;
           }
 
-          ZS_LOG_INSANE(log("activate timer - found unsearched") + pairing->toDebugString())
+          ZS_LOG_INSANE(log("activate timer - found unsearched") + pairing->toDebug())
 
           foundUnsearched = true;
           break;
         }
 
-        ZS_LOG_TRACE(log("step activate timer") + ", needs timer=" + (foundUnsearched ? "true" : "false"))
+        ZS_LOG_TRACE(log("step activate timer") + ZS_PARAM("needs timer", foundUnsearched))
 
         if (foundUnsearched) {
           if (mActivateTimer) return true;
@@ -1964,11 +1973,11 @@ namespace openpeer
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing->mFailed) {
-            ZS_LOG_INSANE(log("end search - pair failed") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("end search - pair failed") + pairing->toDebug())
             continue;
           }
 
-          ZS_LOG_TRACE(log("found candidate which has not failed thus no reason to end search yet") + pairing->toDebugString())
+          ZS_LOG_TRACE(log("found candidate which has not failed thus no reason to end search yet") + pairing->toDebug())
           return true;
         }
 
@@ -1982,7 +1991,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool ICESocketSession::stepTimer()
       {
-        ZS_LOG_TRACE(log("step timer") + ", needs timer=" + (mNominated ? "false" : "true"))
+        ZS_LOG_TRACE(log("step timer") + ZS_PARAM("needs timer", (bool)mNominated))
 
         if (!mNominated) {
           if (mStepTimer) return true;
@@ -2004,7 +2013,7 @@ namespace openpeer
       bool ICESocketSession::stepExpectingDataTimer()
       {
         bool needed =  ((mNominated) && (Duration() != mExpectSTUNOrDataWithinDuration));
-        ZS_LOG_TRACE(log("expecting data timer") + ", needs timer=" + (needed ? "true" : "false"))
+        ZS_LOG_TRACE(log("expecting data timer") + ZS_PARAM("needs timer", needed))
 
         if (needed) {
           if (mExpectingDataTimer) return true;
@@ -2026,7 +2035,7 @@ namespace openpeer
       bool ICESocketSession::stepKeepAliveTimer()
       {
         bool needed =  ((mNominated) && (Duration() != mKeepAliveDuration));
-        ZS_LOG_TRACE(log("keep alive timer") + ", needs timer=" + (needed ? "true" : "false"))
+        ZS_LOG_TRACE(log("keep alive timer") + ZS_PARAM("needs timer", needed))
 
         if (needed) {
           if (mKeepAliveTimer) return true;
@@ -2059,17 +2068,17 @@ namespace openpeer
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing == mNominated) {
-            ZS_LOG_INSANE(log("cancel lower priority - pairing found nominated") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("cancel lower priority - pairing found nominated") + pairing->toDebug())
             foundNominated = true;
             continue;
           }
 
           if (!pairing->mRequester) {
-            ZS_LOG_INSANE(log("cancel lower priority - pairing doesn't have requestor (nothing to cancel)") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("cancel lower priority - pairing doesn't have requestor (nothing to cancel)") + pairing->toDebug())
             continue;
           }
 
-          ZS_LOG_DEBUG(log("cancelling requester for candidate") + pairing->toDebugString())
+          ZS_LOG_DEBUG(log("cancelling requester for candidate") + pairing->toDebug())
 
           pairing->mRequester->cancel();
           pairing->mRequester.reset();
@@ -2103,24 +2112,24 @@ namespace openpeer
 
           if (pairing == mNominated) {
             // stop once we are at the nominated point (the rest are lower priority candidates which should never be nominated)
-            ZS_LOG_INSANE(log("nominate - pairing found nonimated") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("nominate - pairing found nonimated") + pairing->toDebug())
             break;
           }
 
           if (pairing->mFailed) {
-            ZS_LOG_INSANE(log("nominate - pairing is failed") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("nominate - pairing is failed") + pairing->toDebug())
             continue;
           }
           if (!pairing->mReceivedRequest) {
-            ZS_LOG_INSANE(log("nominate - pairing did not receive request") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("nominate - pairing did not receive request") + pairing->toDebug())
             continue;
           }
           if (!pairing->mReceivedResponse) {
-            ZS_LOG_INSANE(log("nominate - pairing did not receive response") + pairing->toDebugString())
+            ZS_LOG_INSANE(log("nominate - pairing did not receive response") + pairing->toDebug())
             continue;
           }
 
-          ZS_LOG_DETAIL(log("nominating candidate") + pairing->toDebugString())
+          ZS_LOG_DETAIL(log("nominating candidate") + pairing->toDebug())
 
           if (mRemotePassword.isEmpty()) {
             ZS_LOG_DEBUG(log("remote password is not set thus this pair can be immediately nominated (i.e. server mode)"))
@@ -2171,7 +2180,7 @@ namespace openpeer
               CandidatePairPtr &pairing = (*iter);
 
               if (pairing->mFailed) {
-                ZS_LOG_INSANE(log("nominate - candidate already failed (will never nominate)") + pairing->toDebugString())
+                ZS_LOG_INSANE(log("nominate - candidate already failed (will never nominate)") + pairing->toDebug())
                 continue;
               }
               if (pairing == mNominated) {
@@ -2197,7 +2206,7 @@ namespace openpeer
               CandidatePairPtr &pairing = (*iter);
 
               if (pairing->mFailed) {
-                ZS_LOG_INSANE(log("nominate - candidate already failed (will never search)") + pairing->toDebugString())
+                ZS_LOG_INSANE(log("nominate - candidate already failed (will never search)") + pairing->toDebug())
                 continue;
               }
 
@@ -2265,16 +2274,16 @@ namespace openpeer
                                     )
       {
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ", candidate: " + viaLocalCandidate.toDebugString(false) + " to ip=" + destination.string() + ", buffer=" + (buffer ? "true" : "false") + ", buffer length=" + string(bufferLengthInBytes) + ", user data=" + (isUserData ? "true" : "false"))
+          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
         ICESocketPtr socket = mICESocketWeak.lock();
         if (!socket) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE socket is closed") + ", candidate: " + viaLocalCandidate.toDebugString(false) + " to ip=" + destination.string() + ", buffer=" + (buffer ? "true" : "false") + ", buffer length=" + string(bufferLengthInBytes) + ", user data=" + (isUserData ? "true" : "false"))
+          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE socket is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
-        ZS_LOG_TRACE(log("sending packet") + ", candidate: " + viaLocalCandidate.toDebugString(false) + " to ip=" + destination.string() + ", buffer=" + (buffer ? "true" : "false") + ", buffer length=" + string(bufferLengthInBytes) + ", user data=" + (isUserData ? "true" : "false"))
+        ZS_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
         return socket->forICESocketSession().sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
       }
 
@@ -2299,12 +2308,12 @@ namespace openpeer
           if (!pairing->mReceivedRequest) return false; // incomplete check, still frozen
           if (!pairing->mReceivedResponse) return false; // incomplete check, still frozen
 
-          ZS_LOG_TRACE(log("foundation is unfozen thus can proceed with activation") + ", foundation: " + pairing->toDebugString(false))
+          ZS_LOG_TRACE(log("foundation is unfozen thus can proceed with activation") + ZS_PARAM("foundation", pairing->toDebug()))
 
           return true;
         }
 
-        ZS_LOG_DEBUG(log("foundation not found thus can proceed with activation") + ", derived: " + derivedPairing->toDebugString(false))
+        ZS_LOG_DEBUG(log("foundation not found thus can proceed with activation") + ZS_PARAM("derived", derivedPairing->toDebug()))
         return true;
       }
     }
@@ -2318,9 +2327,9 @@ namespace openpeer
     #pragma mark
 
     //-------------------------------------------------------------------------
-    String IICESocketSession::toDebugString(IICESocketSessionPtr session, bool includeCommaPrefix)
+    ElementPtr IICESocketSession::toDebug(IICESocketSessionPtr session)
     {
-      return internal::ICESocketSession::toDebugString(session, includeCommaPrefix);
+      return internal::ICESocketSession::toDebug(session);
     }
 
     //-------------------------------------------------------------------------

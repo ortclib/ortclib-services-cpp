@@ -31,12 +31,15 @@
 
 #include <openpeer/services/internal/services_STUNDiscovery.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
+#include <openpeer/services/IHelper.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 
 #include <algorithm>
 
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
 
@@ -269,7 +272,7 @@ namespace openpeer
           return true;
         }
 
-        ZS_LOG_BASIC(log("found mapped address") + ", mapped address=" + response->mMappedAddress.string())
+        ZS_LOG_BASIC(log("found mapped address") + ZS_PARAM("mapped address", response->mMappedAddress.string()))
         mMapppedAddress = response->mMappedAddress;
 
         // we now have a reply, inform the delegate
@@ -307,9 +310,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String STUNDiscovery::log(const char *message) const
+      Log::Params STUNDiscovery::log(const char *message) const
       {
-        return String("STUNDiscovery [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("STUNDiscovery");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------

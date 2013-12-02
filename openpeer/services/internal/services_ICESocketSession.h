@@ -134,7 +134,7 @@ namespace openpeer
         struct CandidatePair
         {
           static CandidatePairPtr create();
-          String toDebugString(bool includeCommaPrefix = true) const;
+          ElementPtr toDebug() const;
 
           Candidate mLocal;
           Candidate mRemote;
@@ -174,7 +174,7 @@ namespace openpeer
         #pragma mark ICESocketSession => IICESocketSession
         #pragma mark
 
-        static String toDebugString(IICESocketSessionPtr socket, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IICESocketSessionPtr socket);
 
         virtual PUID getID() const {return mID;}
 
@@ -309,10 +309,12 @@ namespace openpeer
 
         RecursiveLock &getLock() const;
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+
         void fix(STUNPacketPtr stun) const;
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         bool isShutdown() const {return ICESocketSessionState_Shutdown == mCurrentState;}
 

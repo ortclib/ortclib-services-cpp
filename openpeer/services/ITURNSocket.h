@@ -98,7 +98,7 @@ namespace openpeer
                                    WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
                                    );
 
-      static String toDebugString(ITURNSocketPtr peer, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(ITURNSocketPtr socket);
 
       virtual PUID getID() const = 0;
 

@@ -31,9 +31,13 @@
 
 #include <openpeer/services/internal/services_STUNRequester.h>
 #include <openpeer/services/internal/services_STUNRequesterManager.h>
+
+#include <openpeer/services/IHelper.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
 #define OPENPEER_SERVICES_STUN_REQUESTER_MAX_RETRANSMIT_STUN_ATTEMPTS (6)
@@ -140,7 +144,9 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
 
         if (mDelegate) {
-          mSTUNRequest->log(Log::Trace, log("cancelled"));
+          if (ZS_IS_LOGGING(Trace)) {
+            mSTUNRequest->log(Log::Trace, log("cancelled"));
+          }
         }
 
         internalCancel();
@@ -287,7 +293,7 @@ namespace openpeer
       timed_out:
         {
           AutoRecursiveLock lock(mLock);
-          ZS_LOG_WARNING(Detail, log("request timed out") + ", on try number=" + string(mTryNumber) + ", timeout duration=" + string(totalTime.total_milliseconds()))
+          ZS_LOG_WARNING(Detail, log("request timed out") + ZS_PARAM("on try number", mTryNumber) + ZS_PARAM("timeout duration", totalTime.total_milliseconds()))
           if (mSTUNRequest) {
             mSTUNRequest->log(Log::Trace, log("timed-out"));
           }
@@ -311,9 +317,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String STUNRequester::log(const char *message) const
+      Log::Params STUNRequester::log(const char *message) const
       {
-        return String("STUNRequester [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("STUNRequester");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -358,7 +366,7 @@ namespace openpeer
           // we have a stun request but not a timer, setup the timer now...
           mTimer = Timer::create(mThisWeak.lock(), mCurrentTimeout, false);
 
-          ZS_LOG_TRACE(log("sending packet now") + ", try number=" + string(mTryNumber) + ", timeout duration=" + string(mCurrentTimeout.total_milliseconds()))
+          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration", mCurrentTimeout.total_milliseconds()))
 
           // send off the packet NOW
           boost::shared_array<BYTE> packet;

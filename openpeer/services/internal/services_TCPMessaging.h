@@ -92,7 +92,7 @@ namespace openpeer
         #pragma mark TCPMessaging => ITCPMessaging
         #pragma mark
 
-        static String toDebugString(ITCPMessagingPtr messaging, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(ITCPMessagingPtr messaging);
 
         static TCPMessagingPtr accept(
                                       ITCPMessagingDelegatePtr delegate,
@@ -162,9 +162,10 @@ namespace openpeer
         bool isShutdown() const {return SessionState_Shutdown == mCurrentState;}
 
         RecursiveLock &getLock() const;
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void setState(SessionStates state);
         void setError(WORD errorCode, const char *inReason = NULL);

@@ -39,6 +39,7 @@
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 
 #include <boost/shared_array.hpp>
 
@@ -51,6 +52,7 @@
 
 namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
 
+using zsLib::AutoPUID;
 using zsLib::ULONG;
 using zsLib::string;
 using zsLib::String;
@@ -223,7 +225,7 @@ namespace openpeer
 
           if (!type) return;
 
-          ZS_LOG_DEBUG(String("buffer written") + ", from=" + type + ", size=" + string(send->SizeInBytes()) + ", writer: " + ITransportStream::toDebugString(writer->getStream(), false))
+          ZS_LOG_DEBUG(log("buffer written") + ZS_PARAM("from", type) + ZS_PARAM("size", send->SizeInBytes()) + ZS_PARAM("writer", ITransportStream::toDebug(writer->getStream())))
 
           ITCPMessaging::ChannelHeaderPtr header;
           if (mHasChannelNumbers) {
@@ -276,7 +278,7 @@ namespace openpeer
             BOOST_EQUAL(channelHeader->mChannelID, info.mChannelNumber)
           }
 
-          ZS_LOG_DEBUG(String("buffer read") + ", to=" + type + ", size=" + string(buffer->SizeInBytes()) + ", reader: " + ITransportStream::toDebugString(reader->getStream(), false))
+          ZS_LOG_DEBUG(log("buffer read") + ZS_PARAM("to", type) + ZS_PARAM("size", buffer->SizeInBytes()) + ZS_PARAM("reader", ITransportStream::toDebug(reader->getStream())))
 
           BOOST_CHECK(info.mBuffer)
           BOOST_CHECK(buffer)
@@ -347,10 +349,20 @@ namespace openpeer
           mClientMessaging->shutdown();
         }
 
+      protected:
+        Log::Params log(const char *message) const
+        {
+          ElementPtr objectEl = Element::create("TestTCPMessagingLoopback");
+          IHelper::debugAppend(objectEl, "id", mID);
+          return Log::Params(message, objectEl);
+        }
+
       private:
         //---------------------------------------------------------------------
         mutable zsLib::RecursiveLock mLock;
         TestTCPMessagingLoopbackWeakPtr mThisWeak;
+
+        AutoPUID mID;
 
         bool mHasChannelNumbers;
 

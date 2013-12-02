@@ -35,6 +35,7 @@
 #include <zsLib/Log.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/XML.h>
 
 #include <cryptopp/osrng.h>
 #include <cryptopp/rsa.h>
@@ -120,15 +121,17 @@ namespace openpeer
 
         RSAPrivateKeyPtr pThis(new RSAPrivateKey);
 
+        ZS_LOG_DEBUG(pThis->log("generated private key"))
+
         pThis->mPrivateKey.GenerateRandomWithKeySize(rng, static_cast<unsigned int>(keySizeInBits));
         if (!pThis->mPrivateKey.Validate(rng, 3)) {
-          ZS_LOG_ERROR(Basic, "failed to generate a new private key")
+          ZS_LOG_ERROR(Basic, pThis->log("failed to generate a new private key"))
           return RSAPrivateKeyPtr();
         }
 
         PublicKey rsaPublic(pThis->mPrivateKey);
         if (!rsaPublic.Validate(rng, 3)) {
-          ZS_LOG_ERROR(Basic, "Failed to generate a public key for the new private key")
+          ZS_LOG_ERROR(Basic, pThis->log("Failed to generate a public key for the new private key"))
           return RSAPrivateKeyPtr();
         }
 
@@ -158,11 +161,11 @@ namespace openpeer
         try {
           pThis->mPrivateKey.Load(byteQueue);
           if (!pThis->mPrivateKey.Validate(rng, 3)) {
-            ZS_LOG_ERROR(Basic, "Failed to load an existing private key")
+            ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key"))
             return RSAPrivateKeyPtr();
           }
         } catch (CryptoPP::Exception &e) {
-          ZS_LOG_ERROR(Basic, String("cryptography library threw an exception, reason=") + e.what())
+          ZS_LOG_ERROR(Basic, pThis->log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()))
           return RSAPrivateKeyPtr();
         }
 
@@ -228,9 +231,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RSAPrivateKey::log(const char *message) const
+      Log::Params RSAPrivateKey::log(const char *message) const
       {
-        return String("RSAPrivateKey [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RSAPrivateKey");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------

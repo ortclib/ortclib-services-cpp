@@ -98,11 +98,20 @@ namespace openpeer
   namespace services
   {
     using zsLib::PUID;
+    using zsLib::CHAR;
+    using zsLib::UCHAR;
     using zsLib::BYTE;
     using zsLib::WORD;
+    using zsLib::SHORT;
     using zsLib::USHORT;
+    using zsLib::INT;
     using zsLib::UINT;
+    using zsLib::LONG;
     using zsLib::ULONG;
+    using zsLib::LONGLONG;
+    using zsLib::ULONGLONG;
+    using zsLib::FLOAT;
+    using zsLib::DOUBLE;
     using zsLib::DWORD;
     using zsLib::QWORD;
     using zsLib::String;

@@ -62,7 +62,7 @@ namespace openpeer
 
       static const char *toString(RUDPICESocketSessionStates state);
 
-      static String toDebugString(IRUDPICESocketSessionPtr session, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(IRUDPICESocketSessionPtr session);
 
       static IRUDPICESocketSessionPtr listen(
                                              IMessageQueuePtr queue,

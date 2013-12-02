@@ -80,7 +80,7 @@ namespace openpeer
         DWORD mChannelID;
       };
 
-      static String toDebugString(ITCPMessagingPtr messaging, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(ITCPMessagingPtr messaging);
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an socket listener by accepting

@@ -181,7 +181,7 @@ namespace openpeer
         virtual void onTimer(TimerPtr timer);
 
         // other
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
 
       private:
         PUID mID;

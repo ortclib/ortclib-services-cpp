@@ -93,8 +93,8 @@ namespace openpeer
       static const char *toString(CongestionAlgorithms value);
 
       //-----------------------------------------------------------------------
-      // PURPOSE: returns a debug string containing internal object state
-      static String toDebugString(IRUDPChannelPtr channel, bool includeCommaPrefix = true);
+      // PURPOSE: returns a debug object containing internal object state
+      static ElementPtr toDebug(IRUDPChannelPtr channel);
 
       virtual PUID getID() const = 0;
 

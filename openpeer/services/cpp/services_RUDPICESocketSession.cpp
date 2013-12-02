@@ -39,6 +39,7 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/XML.h>
 
 #include <cryptopp/osrng.h>
 
@@ -112,12 +113,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPICESocketSession::toDebugString(IRUDPICESocketSessionPtr session, bool includeCommaPrefix)
+      ElementPtr RUDPICESocketSession::toDebug(IRUDPICESocketSessionPtr session)
       {
-        if (!session) return String(includeCommaPrefix ? ", ice socket=(null)" : "ice socket=(null)");
+        if (!session) return ElementPtr();
 
         RUDPICESocketSessionPtr pThis = RUDPICESocketSession::convert(session);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
       
       //-----------------------------------------------------------------------
@@ -299,17 +300,17 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("notified of ICE socket session changed while shutdown") + ", ICE session ID=" + string(session->getID()))
+          ZS_LOG_WARNING(Debug, log("notified of ICE socket session changed while shutdown") + ZS_PARAM("ICE session ID", session->getID()))
           return;
         }
 
         if (session != mICESession) {
-          ZS_LOG_WARNING(Debug, log("received notification of ICE socket session state changed from obsolete session") + ", ICE session ID=" + string(session->getID()))
+          ZS_LOG_WARNING(Debug, log("received notification of ICE socket session state changed from obsolete session") + ZS_PARAM("ICE session ID", session->getID()))
           return;
         }
 
         if (IICESocketSession::ICESocketSessionState_Shutdown == state) {
-          ZS_LOG_WARNING(Detail, log("ICE socket session reported itself shutdown so must shutdown RUDP session") + ", ICE session ID=" + string(session->getID()))
+          ZS_LOG_WARNING(Detail, log("ICE socket session reported itself shutdown so must shutdown RUDP session") + ZS_PARAM("ICE session ID", session->getID()))
 
           WORD errorCode = 0;
           String reason;
@@ -323,7 +324,7 @@ namespace openpeer
 
         if ((IICESocketSession::ICESocketSessionState_Nominated == state) ||
             (IICESocketSession::ICESocketSessionState_Completed == state)) {
-          ZS_LOG_DEBUG(log("notified that socket session state is nominated") + ", ICE session ID=" + string(session->getID()))
+          ZS_LOG_DEBUG(log("notified that socket session state is nominated") + ZS_PARAM("ICE session ID", session->getID()))
 
           issueChannelConnectIfPossible();
         }
@@ -345,8 +346,8 @@ namespace openpeer
                                                                       )
       {
         if (ZS_IS_LOGGING(Insane)) {
-          String raw = Helper::getDebugString(buffer, bufferLengthInBytes);
-          ZS_LOG_INSANE(log("RECEIVED PACKET FROM WIRE=") + "\n" + raw)
+          String base64 = Helper::convertToBase64(buffer, bufferLengthInBytes);
+          ZS_LOG_INSANE(log("RECEIVED PACKET FROM WIRE") + ZS_PARAM("wire in", base64))
         }
 
         RUDPPacketPtr rudp = RUDPPacket::parseIfRUDP(buffer, bufferLengthInBytes);
@@ -414,7 +415,7 @@ namespace openpeer
           {
             AutoRecursiveLock lock(getLock());
             if (localUsernameFrag != mICESession->getLocalUsernameFrag()) {
-              ZS_LOG_TRACE(log("the request local username frag does not match, thus ignoring") + ", local username frag=" + localUsernameFrag + ", expected local username frag=" + mICESession->getLocalUsernameFrag())
+              ZS_LOG_TRACE(log("the request local username frag does not match, thus ignoring") + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("expected local username frag", mICESession->getLocalUsernameFrag()))
               return false;
             }
 
@@ -423,7 +424,7 @@ namespace openpeer
               session = (*found).second;
             } else {
               if (remoteUsernameFrag != mICESession->getRemoteUsernameFrag()) {
-                ZS_LOG_TRACE(log("the request remote username frag does not match (thus ignoring - might be for another session)") + ", remote username frag=" + remoteUsernameFrag + ", expected remote username frag=" + mICESession->getRemoteUsernameFrag())
+                ZS_LOG_TRACE(log("the request remote username frag does not match (thus ignoring - might be for another session)") + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("expected remote username frag", mICESession->getRemoteUsernameFrag()))
                 return false;
               }
             }
@@ -505,18 +506,18 @@ namespace openpeer
           case IRUDPChannel::RUDPChannelState_ShuttingDown: break;
           case IRUDPChannel::RUDPChannelState_Shutdown:
           {
-            ZS_LOG_DEBUG(log("channel closed notification") + ", channel ID=" + string(channel->forSession().getID()))
+            ZS_LOG_DEBUG(log("channel closed notification") + ZS_PARAM("channel ID", channel->forSession().getID()))
             for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter)
             {
               if ((*iter).second != channel) continue;
-              ZS_LOG_TRACE(log("clearing out local channel number") + ", local channel number=" + string(channel->forSession().getIncomingChannelNumber()))
+              ZS_LOG_TRACE(log("clearing out local channel number") + ZS_PARAM("local channel number", channel->forSession().getIncomingChannelNumber()))
               mLocalChannelNumberSessions.erase(iter);
               break;
             }
             for (SessionMap::iterator iter = mRemoteChannelNumberSessions.begin(); iter != mRemoteChannelNumberSessions.end(); ++iter)
             {
               if ((*iter).second != channel) continue;
-              ZS_LOG_TRACE(log("clearing out remote channel number") + ", remote channel number=" + string(channel->forSession().getOutgoingChannelNumber()))
+              ZS_LOG_TRACE(log("clearing out remote channel number") + ZS_PARAM("remote channel number", channel->forSession().getOutgoingChannelNumber()))
               mRemoteChannelNumberSessions.erase(iter);
               break;
             }
@@ -547,8 +548,8 @@ namespace openpeer
         }
 
         if (ZS_IS_LOGGING(Insane)) {
-          String raw = Helper::getDebugString(packet, packetLengthInBytes);
-          ZS_LOG_INSANE(log("SEND PACKET ON WIRE=") + "\n" + raw)
+          String base64 = Helper::convertToBase64(packet, packetLengthInBytes);
+          ZS_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("wire out", base64))
         }
 
         return session->sendPacket(packet, packetLengthInBytes);  // no need to call within a lock
@@ -569,9 +570,17 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String RUDPICESocketSession::log(const char *message) const
+      Log::Params RUDPICESocketSession::log(const char *message) const
       {
-        return String("RUDPICESocketSession [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RUDPICESocketSession");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params RUDPICESocketSession::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
@@ -582,30 +591,32 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String RUDPICESocketSession::getDebugValueString(bool includeCommaPrefix) const
+      ElementPtr RUDPICESocketSession::toDebug() const
       {
         AutoRecursiveLock lock(getLock());
-        bool firstTime = !includeCommaPrefix;
 
-        return
-        Helper::getDebugValue("rudp ice socket session id", string(mID), firstTime) +
+        ElementPtr resultEl = Element::create("RUDPICESocketSession");
 
-        Helper::getDebugValue("graceful shutdown", mGracefulShutdownReference ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "id", mID);
 
-        Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
-        Helper::getDebugValue("default subscription", mDefaultSubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "graceful shutdown", (bool)mGracefulShutdownReference);
 
-        Helper::getDebugValue("state", IRUDPICESocketSession::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+        IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
 
-        Helper::getDebugValue("ice session", mICESession ? string(mICESession->getID()) : String(), firstTime) +
-        Helper::getDebugValue("ice subscription", mICESubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "state", IRUDPICESocketSession::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
-        Helper::getDebugValue("local channel number sessions", mLocalChannelNumberSessions.size() > 0 ? string(mLocalChannelNumberSessions.size()) : String(), firstTime) +
-        Helper::getDebugValue("remote channel number sessions", mRemoteChannelNumberSessions.size() > 0 ? string(mRemoteChannelNumberSessions.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "ice session", mICESession ? mICESession->getID() : 0);
+        IHelper::debugAppend(resultEl, "ice subscription", (bool)mICESubscription);
 
-        Helper::getDebugValue("pending sessions", mPendingSessions.size() > 0 ? string(mPendingSessions.size()) : String(), firstTime);
+        IHelper::debugAppend(resultEl, "local channel number sessions", mLocalChannelNumberSessions.size());
+        IHelper::debugAppend(resultEl, "remote channel number sessions", mRemoteChannelNumberSessions.size());
+
+        IHelper::debugAppend(resultEl, "pending sessions", mPendingSessions.size());
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -680,7 +691,7 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 
@@ -700,14 +711,14 @@ namespace openpeer
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
       
       //-----------------------------------------------------------------------
@@ -863,9 +874,9 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String IRUDPICESocketSession::toDebugString(IRUDPICESocketSessionPtr session, bool includeCommaPrefix)
+    ElementPtr IRUDPICESocketSession::toDebug(IRUDPICESocketSessionPtr session)
     {
-      return internal::RUDPICESocketSession::toDebugString(session, includeCommaPrefix);
+      return internal::RUDPICESocketSession::toDebug(session);
     }
 
     //-------------------------------------------------------------------------

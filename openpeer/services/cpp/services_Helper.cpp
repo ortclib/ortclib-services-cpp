@@ -240,41 +240,147 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String Helper::getDebugValue(const char *name, const String &value, bool &firstTime)
+      void Helper::debugAppend(ElementPtr &parentEl, const char *name, const char *value)
       {
-        if (value.isEmpty()) return String();
-        if (firstTime) {
-          firstTime = false;
-          return String(name) + "=" + value;
-        }
-        return String(", ") + name + "=" + value;
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+        ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+        if (!value) return;
+        if ('\0' == *value) return;
+
+        ElementPtr element = Element::create(name);
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValueAndJSONEncode(value);
+        element->adoptAsFirstChild(tmpTxt);
+
+        parentEl->adoptAsLastChild(element);
       }
 
-      //---------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      void Helper::debugAppend(ElementPtr &parentEl, const char *name, const String &value)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+        ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+        if (value.isEmpty()) return;
+
+        ElementPtr element = Element::create(name);
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValueAndJSONEncode(value);
+        element->adoptAsFirstChild(tmpTxt);
+
+        parentEl->adoptAsLastChild(element);
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::debugAppendNumber(ElementPtr &parentEl, const char *name, const String &value)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+        ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+        if (value.isEmpty()) return;
+
+        ElementPtr element = Element::create(name);
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValue(value, Text::Format_JSONNumberEncoded);
+        element->adoptAsFirstChild(tmpTxt);
+
+        parentEl->adoptAsLastChild(element);
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::debugAppend(ElementPtr &parentEl, const char *name, bool value, bool ignoreIfFalse)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+        if (ignoreIfFalse) {
+          if (!value) return;
+        }
+
+        debugAppend(parentEl, ZS_PARAM(name, value));
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::debugAppend(ElementPtr &parentEl, const Log::Param &param)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+
+        if (!param.param()) return;
+
+        parentEl->adoptAsLastChild(param.param());
+      }
+      
+      //-----------------------------------------------------------------------
+      void Helper::debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+        ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+        if (!childEl) return;
+
+        ElementPtr element = Element::create(name);
+        element->adoptAsLastChild(childEl);
+        parentEl->adoptAsLastChild(element);
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::debugAppend(ElementPtr &parentEl, ElementPtr childEl)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!parentEl)
+        if (!childEl) return;
+        parentEl->adoptAsLastChild(childEl);
+      }
+
+      //-----------------------------------------------------------------------
+      String Helper::toString(ElementPtr element)
+      {
+        if (!element) return String();
+
+        GeneratorPtr generator = Generator::createJSONGenerator();
+        boost::shared_array<char> output = generator->write(element);
+
+        return output.get();
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::toJSON(const char *str)
+      {
+        if (!str) return ElementPtr();
+
+        DocumentPtr doc = Document::createFromParsedJSON(str);
+
+        ElementPtr childEl = doc->getFirstChildElement();
+        if (!childEl) return ElementPtr();
+        
+        childEl->orphan();
+        return childEl;
+      }
+
+      //-----------------------------------------------------------------------
       String Helper::timeToString(const Time &value)
       {
-        if (Time() == value) return String();
-
-        time_t epoch = zsLib::toEpoch(value);
-        return string(epoch);
+        return string(value);
       }
 
-      //---------------------------------------------------------------------
+      //-----------------------------------------------------------------------
       Time Helper::stringToTime(const String &str)
       {
         if (str.isEmpty()) return Time();
 
         try {
-          time_t timestamp = Numeric<time_t>(str);
-          return zsLib::toTime(timestamp);
-        } catch (Numeric<time_t>::ValueOutOfRange &) {
-          ZS_LOG_WARNING(Detail, "unable to convert value to time_t, value=" + str)
+          Duration::sec_type timestamp = Numeric<Duration::sec_type>(str);
+          return zsLib::timeSinceEpoch(Seconds(timestamp));
+        } catch (Numeric<Duration::sec_type>::ValueOutOfRange &) {
+          ZS_LOG_WARNING(Detail, log("unable to convert value to Duration::sec_type") + ZS_PARAM("value", str))
           try {
             QWORD timestamp = Numeric<QWORD>(str);
-            ZS_LOG_WARNING(Debug, "date exceeds maximum time_t, value=" + string(timestamp))
+            ZS_LOG_WARNING(Debug, log("date exceeds maximum Duration::sec_type") + ZS_PARAM("value", timestamp))
             return Time(boost::date_time::max_date_time);
           } catch (Numeric<QWORD>::ValueOutOfRange &) {
-            ZS_LOG_WARNING(Detail, "even QWORD failed to convert value to max_date_time, value=" + str)
+            ZS_LOG_WARNING(Detail, log("even QWORD failed to convert value to max_date_time") + ZS_PARAM("value", str))
           }
         }
         return Time();
@@ -778,18 +884,18 @@ namespace openpeer
                                             )
       {
         if ((!part1) || (!part2)) {
-          ZS_LOG_WARNING(Detail, String("value missing") + ", part1=" + (part1 ? "true" : "(null)") + ", part2=" + (part2 ? "true" : "(null)"))
+          ZS_LOG_WARNING(Detail, log("value missing") + ZS_PARAM("part1", (bool)part1) + ZS_PARAM("part2", (bool)part2))
           return SecureByteBlockPtr();
         }
 
         SecureByteBlockPtr extracted = IHelper::hash("empty");
 
         if (part1->SizeInBytes() != part2->SizeInBytes()) {
-          ZS_LOG_WARNING(Detail, String("illegal size") + ", part1 size=" + string(part1->SizeInBytes()) + ", part2 size=" + string(part2->SizeInBytes()))
+          ZS_LOG_WARNING(Detail, log("illegal size") + ZS_PARAM("part1 size", part1->SizeInBytes()) + ZS_PARAM("part2 size", part2->SizeInBytes()))
           return SecureByteBlockPtr();
         }
         if (part1->SizeInBytes() <= extracted->SizeInBytes()) {
-          ZS_LOG_WARNING(Detail, String("illegal hash size") + ", part size=" + string(part1->SizeInBytes()) + ", hash size=" + string(extracted->SizeInBytes()))
+          ZS_LOG_WARNING(Detail, log("illegal hash size") + ZS_PARAM("part size", part1->SizeInBytes()) + ZS_PARAM("hash size", extracted->SizeInBytes()))
           return SecureByteBlockPtr();
         }
 
@@ -816,7 +922,7 @@ namespace openpeer
         SecureByteBlockPtr hash = IHelper::hash(*buffer);
 
         if (0 != IHelper::compare(*extracted, *hash)) {
-          ZS_LOG_WARNING(Detail, String("extracted hash does not match calculated hash") + ", extracted=" + IHelper::convertToBase64(*extracted) + ", calculated=" + IHelper::convertToBase64(*hash))
+          ZS_LOG_WARNING(Detail, log("extracted hash does not match calculated hash") + ZS_PARAM("extracted", IHelper::convertToBase64(*extracted)) + ZS_PARAM("calculated", IHelper::convertToBase64(*hash)))
           return SecureByteBlockPtr();
         }
 
@@ -832,7 +938,7 @@ namespace openpeer
                                           )
       {
         if (!signedEl) {
-          ZS_LOG_WARNING(Detail, "services::Helper [] requested to get signature info on a null element")
+          ZS_LOG_WARNING(Detail, log("requested to get signature info on a null element"))
           return ElementPtr();
         }
 
@@ -848,7 +954,7 @@ namespace openpeer
           }
 
           if (!signedEl) {
-            ZS_LOG_DETAIL("services::Helper [] no signed element was found (is okay if signing element for first time)")
+            ZS_LOG_DETAIL(log("no signed element was found (is okay if signing element for first time)"))
             return ElementPtr();
           }
 
@@ -857,7 +963,7 @@ namespace openpeer
 
         String id = signedEl->getAttributeValue("id");
         if (id.length() < 1) {
-          ZS_LOG_WARNING(Detail, "services::Helper [] ID is missing on signed element")
+          ZS_LOG_WARNING(Detail, log("ID is missing on signed element"))
           return ElementPtr();
         }
 
@@ -868,7 +974,7 @@ namespace openpeer
           if (referenceEl) {
             String referenceID = referenceEl->getTextDecoded();
             if (referenceID == id) {
-              ZS_LOG_TRACE("services::Helper [] found the signature reference, reference id=" + id)
+              ZS_LOG_TRACE(log("found the signature reference") + ZS_PARAM("reference id", id))
               break;
             }
           }
@@ -877,7 +983,7 @@ namespace openpeer
         }
 
         if (!signatureEl) {
-          ZS_LOG_WARNING(Detail, "services::Helper [] could not find signature element")
+          ZS_LOG_WARNING(Detail, log("could not find signature element"))
           return ElementPtr();
         }
 
@@ -1035,13 +1141,13 @@ namespace openpeer
         };
 
         if (ZS_IS_LOGGING(Insane)) {
-          ZS_LOG_BASIC("Helper [] vvvvvvvvvvvv -- PRE-SORT  -- vvvvvvvvvvvv")
+          ZS_LOG_BASIC(log("vvvvvvvvvvvv -- PRE-SORT  -- vvvvvvvvvvvv"))
           {
             GeneratorPtr generator = Generator::createJSONGenerator();
             boost::shared_array<char> output = generator->write(element);
             ZS_LOG_BASIC( ((CSTR)output.get()) )
           }
-          ZS_LOG_BASIC("Helper [] ^^^^^^^^^^^^ -- PRE-SORT  -- ^^^^^^^^^^^^")
+          ZS_LOG_BASIC(log("^^^^^^^^^^^^ -- PRE-SORT  -- ^^^^^^^^^^^^"))
         }
         ElementPtr convertEl = element->clone()->toElement();
 
@@ -1052,13 +1158,13 @@ namespace openpeer
 
         if (ZS_IS_LOGGING(Insane)) {
           // let's output some logging...
-          ZS_LOG_BASIC("Helper [] vvvvvvvvvvvv -- POST-SORT -- vvvvvvvvvvvv")
+          ZS_LOG_BASIC(log("vvvvvvvvvvvv -- POST-SORT -- vvvvvvvvvvvv"))
           {
             GeneratorPtr generator = Generator::createJSONGenerator();
             boost::shared_array<char> output = generator->write(convertEl);
             ZS_LOG_BASIC( ((CSTR)output.get()) )
           }
-          ZS_LOG_BASIC("Helper [] ^^^^^^^^^^^^ -- POST-SORT -- ^^^^^^^^^^^^")
+          ZS_LOG_BASIC(log("^^^^^^^^^^^^ -- POST-SORT -- ^^^^^^^^^^^^"))
         }
 
         return convertEl;
@@ -1070,10 +1176,10 @@ namespace openpeer
         String domain(inDomain ? String(inDomain) : String());
         zsLib::RegEx regex("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
         if (!regex.hasMatch(inDomain)) {
-          ZS_LOG_WARNING(Detail, "Helper [] domain name is not valid, domain=" + domain)
+          ZS_LOG_WARNING(Detail, log("domain name is not valid") + ZS_PARAM("domain", domain))
           return false;
         }
-        ZS_LOG_TRACE("Helper [] valid domain, domain=" + domain)
+        ZS_LOG_TRACE(log("valid domain") + ZS_PARAM("domain", domain))
         return true;
       }
 
@@ -1233,6 +1339,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      Log::Params Helper::log(const char *message)
+      {
+        return Log::Params(message, "services::Helper");
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -1253,15 +1365,179 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    static String timeToString(const Time &value)
-    {
-      return internal::Helper::timeToString(value);
-    }
-
-    //-------------------------------------------------------------------------
     IMessageQueuePtr IHelper::getServiceQueue()
     {
       return internal::Helper::getServiceQueue();
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const char *value)
+    {
+      return internal::Helper::debugAppend(parentEl, name, value);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const String &value)
+    {
+      return internal::Helper::debugAppend(parentEl, name, value);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, bool value, bool ignoreIfFalse)
+    {
+      return internal::Helper::debugAppend(parentEl, name, value, ignoreIfFalse);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, CHAR value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string((INT)value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, UCHAR value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string((UINT)value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, SHORT value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string((INT)value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, USHORT value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string((UINT)value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, INT value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, UINT value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, LONG value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, ULONG value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, LONGLONG value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, ULONGLONG value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, FLOAT value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0.0f == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, DOUBLE value, bool ignoreIfZero)
+    {
+      if (ignoreIfZero) if (0.0 == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Time &value)
+    {
+      if (Time() == value) return;
+      internal::Helper::debugAppendNumber(parentEl, name, zsLib::string(value));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Duration &value)
+    {
+      if (Duration() == value) return;
+
+      ZS_THROW_INVALID_ARGUMENT_IF(!name)
+
+      if (strstr(name, "(ms)")) {
+        IHelper::debugAppend(parentEl, name, value.total_milliseconds());
+        return;
+      }
+
+      if (strstr(name, "(s)")) {
+        IHelper::debugAppend(parentEl, name, value.total_seconds());
+        return;
+      }
+
+      if (strstr(name, "(seconds)")) {
+        IHelper::debugAppend(parentEl, name, value.total_seconds());
+        return;
+      }
+
+      IHelper::debugAppend(parentEl, name, boost::posix_time::to_simple_string(value).c_str());
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const Log::Param &param)
+    {
+      return internal::Helper::debugAppend(parentEl, param);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl)
+    {
+      return internal::Helper::debugAppend(parentEl, name, childEl);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, ElementPtr childEl)
+    {
+      return internal::Helper::debugAppend(parentEl, childEl);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::toString(ElementPtr el)
+    {
+      return internal::Helper::toString(el);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::toJSON(const char *str)
+    {
+      return internal::Helper::toJSON(str);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::timeToString(const Time &value)
+    {
+      return internal::Helper::timeToString(value);
     }
 
     //-------------------------------------------------------------------------
@@ -1270,12 +1546,6 @@ namespace openpeer
       return internal::Helper::stringToTime(str);
     }
 
-    //-------------------------------------------------------------------------
-    String IHelper::timeToString(const Time &value)
-    {
-      return internal::Helper::timeToString(value);
-    }
-    
     //-------------------------------------------------------------------------
     String IHelper::randomString(UINT lengthInChars)
     {

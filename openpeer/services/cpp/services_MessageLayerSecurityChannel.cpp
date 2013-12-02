@@ -121,7 +121,7 @@ namespace openpeer
         IHelper::split(value, values, ':');
 
         if (values.size() < 2) {
-          ZS_LOG_WARNING(Debug, String("failed to split hex salt from encrypted value") + ", value=" + value)
+          ZS_LOG_WARNING(Debug, Log::Params("failed to split hex salt from encrypted value") + ZS_PARAM("value", value))
           return SecureByteBlockPtr();
         }
 
@@ -245,12 +245,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::toDebugString(IMessageLayerSecurityChannelPtr channel, bool includeCommaPrefix)
+      ElementPtr MessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel)
       {
-        if (!channel) return String(includeCommaPrefix ? ", mls channel=(null)" : "mls channel=(null)");
+        if (!channel) return ElementPtr();
 
         MessageLayerSecurityChannelPtr pThis = MessageLayerSecurityChannel::convert(channel);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -445,7 +445,7 @@ namespace openpeer
           ZS_THROW_INVALID_ARGUMENT_IF(contextID != mLocalContextID)
         }
 
-        ZS_LOG_DEBUG(log("setting local context ID") + ", context ID=" + contextID)
+        ZS_LOG_DEBUG(log("setting local context ID") + ZS_PARAM("context ID", contextID))
 
         mLocalContextID = contextID;
 
@@ -470,7 +470,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!decodingPrivateKey)
         ZS_THROW_INVALID_ARGUMENT_IF(!decodingPublicKey)
 
-        ZS_LOG_DEBUG(log("set receive keying decoding private/public key") + ", decoding public key fingerprint=" + decodingPublicKey->getFingerprint())
+        ZS_LOG_DEBUG(log("set receive keying decoding private/public key") + ZS_PARAM("decoding public key fingerprint", decodingPublicKey->getFingerprint()))
 
         AutoRecursiveLock lock(getLock());
 
@@ -501,7 +501,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!passphrase)
 
-        ZS_LOG_DEBUG(log("set receive keying decoding passphrase") + ", passphrase=" + passphrase)
+        ZS_LOG_DEBUG(log("set receive keying decoding passphrase") + ZS_PARAM("passphrase", passphrase))
 
         AutoRecursiveLock lock(getLock());
 
@@ -534,7 +534,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!remotePublicKey)
 
-        ZS_LOG_DEBUG(log("receive key signing public key") + ", public key fingerprint=" + remotePublicKey->getFingerprint())
+        ZS_LOG_DEBUG(log("receive key signing public key") + ZS_PARAM("public key fingerprint", remotePublicKey->getFingerprint()))
 
         AutoRecursiveLock lock(getLock());
 
@@ -559,7 +559,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!remotePublicKey)
 
-        ZS_LOG_DEBUG(log("send encoding public key") + ", public key fingerprint=" + remotePublicKey->getFingerprint())
+        ZS_LOG_DEBUG(log("send encoding public key") + ZS_PARAM("public key fingerprint", remotePublicKey->getFingerprint()))
 
         AutoRecursiveLock lock(getLock());
 
@@ -586,7 +586,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!passphrase)
 
-        ZS_LOG_DEBUG(log("send keying encoding") + ", passphrase=" + passphrase)
+        ZS_LOG_DEBUG(log("send keying encoding") + ZS_PARAM("passphrase", passphrase))
 
         AutoRecursiveLock lock(getLock());
 
@@ -722,49 +722,59 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::log(const char *message) const
+      Log::Params MessageLayerSecurityChannel::log(const char *message) const
       {
-        return String("MessageLayerSecurityChannel [" + string(mID) + "] " + message);
+        ElementPtr objectEl = Element::create("MessageLayerSecurityChannel");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::getDebugValueString(bool includeCommaPrefix) const
+      Log::Params MessageLayerSecurityChannel::debug(const char *message) const
       {
-        AutoRecursiveLock lock(getLock());
-        bool firstTime = !includeCommaPrefix;
-        return
-        Helper::getDebugValue("mls channel id", string(mID), firstTime) +
-        Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
-        Helper::getDebugValue("state", IMessageLayerSecurityChannel::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
-        Helper::getDebugValue("local context ID", mLocalContextID, firstTime) +
-        Helper::getDebugValue("remote context ID", mRemoteContextID, firstTime) +
-        Helper::getDebugValue("sending remote public key", mSendingEncodingRemotePublicKey ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("sending passphrase", mSendingEncodingPassphrase, firstTime) +
-        Helper::getDebugValue("sending keying needs sign doc", mSendKeyingNeedingToSignDoc ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("sending keying needs sign element", mSendKeyingNeedToSignEl ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive seq number", string(mNextReceiveSequenceNumber), firstTime) +
-        Helper::getDebugValue("decoding type", toString(mReceiveDecodingType), firstTime) +
-        Helper::getDebugValue("decoding public key fingerprint", mReceiveDecodingPublicKeyFingerprint, firstTime) +
-        Helper::getDebugValue("receive decoding private key", mReceiveDecodingPrivateKey ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive decoding public key", mReceiveDecodingPublicKey ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive decoding passphrase", mReceivingDecodingPassphrase, firstTime) +
-        Helper::getDebugValue("receive signing public key", mReceiveSigningPublicKey ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive keying signed doc", mReceiveKeyingSignedDoc ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive keying signed element", mReceiveKeyingSignedEl ? String("true") : String(), firstTime) +
-        ", receive stream encoded: " + ITransportStream::toDebugString(mReceiveStreamEncoded->getStream(), false) +
-        ", receive stream decode: " + ITransportStream::toDebugString(mReceiveStreamDecoded->getStream(), false) +
-        ", send stream decoded: " + ITransportStream::toDebugString(mSendStreamDecoded->getStream(), false) +
-        ", send stream encoded: " + ITransportStream::toDebugString(mSendStreamEncoded->getStream(), false) +
-        Helper::getDebugValue("receive stream encoded subscription", mReceiveStreamEncodedSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive stream decoded subscription", mReceiveStreamDecodedSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("send stream decoded subscription", mSendStreamDecodedSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("send stream encoded subscription", mSendStreamEncodedSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive stream decoded write ready", mReceiveStreamDecodedWriteReady ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("send stream encoded write ready", mSendStreamEncodedWriteReady ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("receive keys", mReceiveKeys.size() > 0 ? string(mReceiveKeys.size()) : String(), firstTime) +
-        Helper::getDebugValue("send keys", mSendKeys.size() > 0 ? string(mSendKeys.size()) : String(), firstTime);
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr MessageLayerSecurityChannel::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("MessageLayerSecurityChannel");
+
+        IHelper::debugAppend(resultEl, "id", mID);
+        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+        IHelper::debugAppend(resultEl, "state", IMessageLayerSecurityChannel::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
+        IHelper::debugAppend(resultEl, "local context ID", mLocalContextID);
+        IHelper::debugAppend(resultEl, "remote context ID", mRemoteContextID);
+        IHelper::debugAppend(resultEl, "sending remote public key", (bool)mSendingEncodingRemotePublicKey);
+        IHelper::debugAppend(resultEl, "sending passphrase", mSendingEncodingPassphrase);
+        IHelper::debugAppend(resultEl, "sending keying needs sign doc", (bool)mSendKeyingNeedingToSignDoc);
+        IHelper::debugAppend(resultEl, "sending keying needs sign element", (bool)mSendKeyingNeedToSignEl);
+        IHelper::debugAppend(resultEl, "receive seq number", string(mNextReceiveSequenceNumber));
+        IHelper::debugAppend(resultEl, "decoding type", toString(mReceiveDecodingType));
+        IHelper::debugAppend(resultEl, "decoding public key fingerprint", mReceiveDecodingPublicKeyFingerprint);
+        IHelper::debugAppend(resultEl, "receive decoding private key", (bool)mReceiveDecodingPrivateKey);
+        IHelper::debugAppend(resultEl, "receive decoding public key", (bool)mReceiveDecodingPublicKey);
+        IHelper::debugAppend(resultEl, "receive decoding passphrase", mReceivingDecodingPassphrase);
+        IHelper::debugAppend(resultEl, "receive signing public key", (bool)mReceiveSigningPublicKey);
+        IHelper::debugAppend(resultEl, "receive keying signed doc", (bool)mReceiveKeyingSignedDoc);
+        IHelper::debugAppend(resultEl, "receive keying signed element", (bool)mReceiveKeyingSignedEl);
+
+        IHelper::debugAppend(resultEl, "receive stream encoded", ITransportStream::toDebug(mReceiveStreamEncoded->getStream()));
+        IHelper::debugAppend(resultEl, "receive stream decode", ITransportStream::toDebug(mReceiveStreamDecoded->getStream()));
+        IHelper::debugAppend(resultEl, "send stream decoded", ITransportStream::toDebug(mSendStreamDecoded->getStream()));
+        IHelper::debugAppend(resultEl, "send stream encoded", ITransportStream::toDebug(mSendStreamEncoded->getStream()));
+        IHelper::debugAppend(resultEl, "receive stream encoded subscription", (bool)mReceiveStreamEncodedSubscription);
+        IHelper::debugAppend(resultEl, "receive stream decoded subscription", (bool)mReceiveStreamDecodedSubscription);
+        IHelper::debugAppend(resultEl, "send stream decoded subscription", (bool)mSendStreamDecodedSubscription);
+        IHelper::debugAppend(resultEl, "send stream encoded subscription", (bool)mSendStreamEncodedSubscription);
+        IHelper::debugAppend(resultEl, "receive stream decoded write ready", mReceiveStreamDecodedWriteReady);
+        IHelper::debugAppend(resultEl, "send stream encoded write ready", mSendStreamEncodedWriteReady);
+        IHelper::debugAppend(resultEl, "receive keys", mReceiveKeys.size());
+        IHelper::debugAppend(resultEl, "send keys", mSendKeys.size());
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -772,12 +782,12 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_DEBUG(log("state changed") + ", state=" + IMessageLayerSecurityChannel::toString(state) + ", old state=" + IMessageLayerSecurityChannel::toString(mCurrentState))
+        ZS_LOG_DEBUG(log("state changed") + ZS_PARAM("state", IMessageLayerSecurityChannel::toString(state)) + ZS_PARAM("old state", IMessageLayerSecurityChannel::toString(mCurrentState)))
         mCurrentState = state;
 
         MessageLayerSecurityChannelPtr pThis = mThisWeak.lock();
         if (pThis) {
-          ZS_LOG_DEBUG(log("attempting to report state to delegate") + getDebugValueString())
+          ZS_LOG_DEBUG(debug("attempting to report state to delegate"))
           mSubscriptions.delegate()->onMessageLayerSecurityChannelStateChanged(pThis, mCurrentState);
         }
       }
@@ -791,14 +801,14 @@ namespace openpeer
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         mLastError = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
       
       //-----------------------------------------------------------------------
@@ -810,7 +820,7 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DEBUG(log("step") + getDebugValueString())
+        ZS_LOG_DEBUG(debug("step"))
 
         if (!stepReceive()) return;
         if (!stepSendKeying()) return;
@@ -852,7 +862,7 @@ namespace openpeer
         }
 
         if (mRemoteContextID.hasData()) {
-          ZS_LOG_DEBUG(log("already decoded at least one packet") + ", remote context ID=" + mRemoteContextID)
+          ZS_LOG_DEBUG(log("already decoded at least one packet") + ZS_PARAM("remote context ID", mRemoteContextID))
           if (mReceiveKeys.size() < 1) {
             bool hasReceiveInformation = true;
 
@@ -878,12 +888,12 @@ namespace openpeer
 
           if (ZS_IS_LOGGING(Insane)) {
             String str = IHelper::getDebugString(*streamBuffer);
-            ZS_LOG_INSANE(log("stream buffer read") + "\n" + str)
+            ZS_LOG_INSANE(log("stream buffer read") + ZS_PARAM("raw", "\n" + str))
           }
 
           // has to be greater than the size of a DWORD
           if (streamBuffer->SizeInBytes() <= sizeof(DWORD)) {
-            ZS_LOG_ERROR(Detail, log("algorithm bytes missing in protocol") + ", size=" + string(streamBuffer->SizeInBytes()))
+            ZS_LOG_ERROR(Detail, log("algorithm bytes missing in protocol") + ZS_PARAM("size", streamBuffer->SizeInBytes()))
             setError(IHTTP::HTTPStatusCode_Unauthorized, "buffer is not decodable");
             cancel();
             return false;
@@ -907,7 +917,7 @@ namespace openpeer
 
             KeyMap::iterator found = mReceiveKeys.find(algorithm);
             if (found == mReceiveKeys.end()) {
-              ZS_LOG_ERROR(Detail, log("attempting to decode a packet where keying algorithm does not map to a know key") + ", algorithm=" + string(algorithm))
+              ZS_LOG_ERROR(Detail, log("attempting to decode a packet where keying algorithm does not map to a know key") + ZS_PARAM("algorithm", string(algorithm)))
               setError(IHTTP::HTTPStatusCode_Forbidden, "attempting to decode a packet where keying algorithm does not map to a know key");
               cancel();
               return false;
@@ -916,13 +926,13 @@ namespace openpeer
             // decode the packet
             KeyInfo &keyInfo = (*found).second;
 
-            ZS_LOG_INSANE(log("decrypting key to use") + keyInfo.getDebugValueString(algorithm))
+            ZS_LOG_INSANE(log("decrypting key to use") + keyInfo.toDebug(algorithm))
 
             size_t integritySize = IHelper::getHashDigestSize(IHelper::HashAlgorthm_SHA1);
 
             // must be greater in size than the hash algorithm
             if (remaining <= integritySize) {
-              ZS_LOG_ERROR(Detail, log("algorithm bytes missing in protocol") + ", size=" + string(streamBuffer->SizeInBytes()))
+              ZS_LOG_ERROR(Detail, log("algorithm bytes missing in protocol") + ZS_PARAM("size", streamBuffer->SizeInBytes()))
               setError(IHTTP::HTTPStatusCode_Unauthorized, "buffer is not decodable");
               cancel();
               return false;
@@ -948,15 +958,15 @@ namespace openpeer
             }
 
             if (ZS_IS_LOGGING(Insane)) {
-              String str = IHelper::getDebugString(*output);
-              ZS_LOG_INSANE(log("stream buffer decrypted") + "\n" + str)
+              String str = IHelper::convertToBase64(*output);
+              ZS_LOG_INSANE(log("stream buffer decrypted") + ZS_PARAM("wire in", str))
             }
 
             String hexIV = IHelper::convertToHex(*keyInfo.mNextIV);
 
             SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + IHelper::convertToHex(*IHelper::hash(*output)) + ":" + hexIV).c_str());
 
-            ZS_LOG_DEBUG(log("received data from wire") + ", buffer size=" + string(streamBuffer->SizeInBytes()) + ", encrypted size=" + string(input.SizeInBytes()) + ", decrypted size=" + string(output->SizeInBytes()) + ", key=" + IHelper::convertToHex(*(keyInfo.mSendKey)) + ", iv=" + hexIV + ", calculated integrity=" + IHelper::convertToHex(*calculatedIntegrity) + ", received integrity=" + IHelper::convertToHex(*integrity))
+            ZS_LOG_DEBUG(log("received data from wire") + ZS_PARAM("buffer size", streamBuffer->SizeInBytes()) + ZS_PARAM("encrypted size", input.SizeInBytes()) + ZS_PARAM("decrypted size", output->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("calculated integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("received integrity", IHelper::convertToHex(*integrity)))
 
             if (0 != IHelper::compare(*calculatedIntegrity, *integrity)) {
               ZS_LOG_ERROR(Debug,log("integrity failed on packet"))
@@ -1016,7 +1026,7 @@ namespace openpeer
           ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
           ZS_LOG_DETAIL(log("[ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ ["))
           ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
-          ZS_LOG_DETAIL(log("MLS RECEIVE") + "=" + "\n" + ((CSTR)(jsonBuffer->BytePtr())) + "\n")
+          ZS_LOG_DETAIL(log("MLS RECEIVE") + ZS_PARAM("json in", ((CSTR)(jsonBuffer->BytePtr()))))
           ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
           ZS_LOG_DETAIL(log("[ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ [ ["))
           ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
@@ -1055,7 +1065,7 @@ namespace openpeer
           String sequenceNumber = getElementTextAndDecode(keyingEl->findFirstChildElement("sequence"));
 
           if (sequenceNumber != string(mNextReceiveSequenceNumber)) {
-            ZS_LOG_ERROR(Detail, log("sequence number mismatch") + ", sequence=" + sequenceNumber + ", expecting=" + string(mNextReceiveSequenceNumber))
+            ZS_LOG_ERROR(Detail, log("sequence number mismatch") + ZS_PARAM("sequence", sequenceNumber) + ZS_PARAM("expecting", mNextReceiveSequenceNumber))
             setError(IHTTP::HTTPStatusCode_RequestTimeout, "sequence number mismatch");
             cancel();
             outReturnResult = false;
@@ -1065,7 +1075,7 @@ namespace openpeer
           Time expires = IHelper::stringToTime(getElementTextAndDecode(keyingEl->findFirstChildElement("expires")));
           Time tick = zsLib::now();
           if (tick > expires) {
-            ZS_LOG_ERROR(Detail, log("signed keying bundle has expired") + ", expires=" + IHelper::timeToString(expires) + ", now=" + IHelper::timeToString(tick))
+            ZS_LOG_ERROR(Detail, log("signed keying bundle has expired") + ZS_PARAM("expires", expires) + ZS_PARAM("now", tick))
             setError(IHTTP::HTTPStatusCode_RequestTimeout, "signed keying bundle has expired");
             cancel();
             outReturnResult = false;
@@ -1101,7 +1111,7 @@ namespace openpeer
 
             String expectingFingerprint = mReceiveDecodingPublicKey->getFingerprint();
             if (encodingFingerprint != expectingFingerprint) {
-              ZS_LOG_ERROR(Detail, log("encoding not using local public key") + ", encoding fingerprint=" + encodingFingerprint + ", expecting fingerprint=" + expectingFingerprint)
+              ZS_LOG_ERROR(Detail, log("encoding not using local public key") + ZS_PARAM("encoding fingerprint", encodingFingerprint) + ZS_PARAM("expecting fingerprint", expectingFingerprint))
               setError(IHTTP::HTTPStatusCode_RequestTimeout, "signed keying bundle has expired");
               cancel();
               outReturnResult = false;
@@ -1126,7 +1136,7 @@ namespace openpeer
             {
               String algorithm = getElementTextAndDecode(encodingEl->findFirstChildElementChecked("algorithm"));
               if (OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
-                ZS_LOG_ERROR(Detail, log("keying encoding not using known algorithm") + ", algorithm=" + algorithm + ", expecting=" + OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM)
+                ZS_LOG_ERROR(Detail, log("keying encoding not using known algorithm") + ZS_PARAM("algorithm", algorithm) + ZS_PARAM("expecting", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
                 setError(IHTTP::HTTPStatusCode_ExpectationFailed, "keyhing encoding not using expecting passphrase");
                 cancel();
                 outReturnResult = false;
@@ -1139,7 +1149,7 @@ namespace openpeer
               String calculatedProof = IHelper::convertToHex(*IHelper::hmac(*IHelper::hmacKeyFromPassphrase(mReceivingDecodingPassphrase), "keying:" + nonce));
 
               if (proof != calculatedProof) {
-                ZS_LOG_ERROR(Detail, log("keying encoding not using expecting passphrase") + ", encoding proof=" + proof + ", expecting proof=" + calculatedProof + ", using passphrase=" + mReceivingDecodingPassphrase)
+                ZS_LOG_ERROR(Detail, log("keying encoding not using expecting passphrase") + ZS_PARAM("encoding proof", proof) + ZS_PARAM("expecting proof", calculatedProof) + ZS_PARAM("using passphrase", mReceivingDecodingPassphrase))
                 setError(IHTTP::HTTPStatusCode_ExpectationFailed, "keyhing encoding not using expecting passphrase");
                 cancel();
                 outReturnResult = false;
@@ -1165,7 +1175,7 @@ namespace openpeer
               algorithmEl->findNextSiblingElement("algorithm");
             }
             if (!found) {
-              ZS_LOG_ERROR(Detail, log("did not find mandated MLS algorithm") + ", expecting=" + OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM)
+              ZS_LOG_ERROR(Detail, log("did not find mandated MLS algorithm") + ZS_PARAM("expecting", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
               setError(IHTTP::HTTPStatusCode_ExpectationFailed, "did not find mandated MLS algorithm");
               cancel();
               outReturnResult = false;
@@ -1187,13 +1197,13 @@ namespace openpeer
                 }
 
                 if (0 == index) {
-                  ZS_LOG_WARNING(Detail, log("algorithm index value is not valid") + ", index=" + string(index))
+                  ZS_LOG_WARNING(Detail, log("algorithm index value is not valid") + ZS_PARAM("index", index))
                   goto next_key;
                 }
 
                 String algorithm = getElementTextAndDecode(keyEl->findFirstChildElementChecked("algorithm"));
                 if (OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
-                  ZS_LOG_WARNING(Detail, log("unsupported algorithm (thus skipping)") + ", algorithm=" + algorithm)
+                  ZS_LOG_WARNING(Detail, log("unsupported algorithm (thus skipping)") + ZS_PARAM("algorithm", algorithm))
                   goto next_key;
                 }
 
@@ -1217,11 +1227,11 @@ namespace openpeer
                 if ((!key.mSendKey) ||
                     (!key.mNextIV) ||
                     (key.mIntegrityPassphrase.isEmpty())) {
-                  ZS_LOG_WARNING(Detail, log("algorithm missing vital secret, iv or integrity information") + ", index=" + string(index))
+                  ZS_LOG_WARNING(Detail, log("algorithm missing vital secret, iv or integrity information") + ZS_PARAM("index", index))
                   goto next_key;
                 }
 
-                ZS_LOG_DEBUG(log("receive algorithm keying information") + key.getDebugValueString(index))
+                ZS_LOG_DEBUG(log("receive algorithm keying information") + key.toDebug(index))
                 mReceiveKeys[index] = key;
               }
 
@@ -1309,7 +1319,7 @@ namespace openpeer
             ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
             ZS_LOG_DETAIL(log("] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ]"))
             ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
-            ZS_LOG_DETAIL(log("MLS SENDING") + "=" + "\n" + ((CSTR)(output.get())) + "\n")
+            ZS_LOG_DETAIL(log("MLS SENDING") + ZS_PARAM("json out", (CSTR)(output.get())))
             ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
             ZS_LOG_DETAIL(log("] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ] ]"))
             ZS_LOG_DETAIL(log("-------------------------------------------------------------------------------------------"))
@@ -1388,7 +1398,7 @@ namespace openpeer
             inputsEl->adoptAsLastChild(createElementWithText("hmacIntegrityKey", IHelper::convertToBase64(*mSendingEncodingRemotePublicKey->encrypt(*IHelper::convertToBuffer(key.mIntegrityPassphrase)))));
           }
 
-          ZS_LOG_DEBUG(log("send algorithm keying information") + key.getDebugValueString(index))
+          ZS_LOG_DEBUG(log("send algorithm keying information") + key.toDebug(index))
 
           keyEl->adoptAsLastChild(inputsEl);
 
@@ -1432,7 +1442,7 @@ namespace openpeer
 
           if (ZS_IS_LOGGING(Insane)) {
             String str = IHelper::getDebugString(*buffer);
-            ZS_LOG_INSANE(log("stream buffer to encode") + "\n" + str)
+            ZS_LOG_INSANE(log("stream buffer to encode") + ZS_PARAM("raw", "\n" + str))
           }
 
           // pick an algorithm
@@ -1443,7 +1453,7 @@ namespace openpeer
 
           KeyInfo &keyInfo = (*found).second;
 
-          ZS_LOG_INSANE(log("encrypting key to use") + keyInfo.getDebugValueString(index))
+          ZS_LOG_INSANE(log("encrypting key to use") + keyInfo.toDebug(index))
 
           SecureByteBlockPtr encrypted = IHelper::encrypt(*(keyInfo.mSendKey), *(keyInfo.mNextIV), *buffer);
 
@@ -1466,11 +1476,11 @@ namespace openpeer
           memcpy(outputPos, encrypted->BytePtr(), encrypted->SizeInBytes());
 
           if (ZS_IS_LOGGING(Insane)) {
-            String str = IHelper::getDebugString(*output);
-            ZS_LOG_INSANE(log("stream buffer write") + "\n" + str)
+            String str = IHelper::convertToBase64(*output);
+            ZS_LOG_INSANE(log("stream buffer write") + ZS_PARAM("wire out", str))
           }
 
-          ZS_LOG_DEBUG(log("sending data on wire") + ", buffer size=" + string(output->SizeInBytes()) + ", decrypted size=" + string(buffer->SizeInBytes()) + ", encrypted size=" + string(encrypted->SizeInBytes()) + ", key=" + IHelper::convertToHex(*(keyInfo.mSendKey)) + ", iv=" + hexIV + ", integrity=" + IHelper::convertToHex(*calculatedIntegrity))
+          ZS_LOG_DEBUG(log("sending data on wire") + ZS_PARAM("buffer size", output->SizeInBytes()) + ZS_PARAM("decrypted size", buffer->SizeInBytes()) + ZS_PARAM("encrypted size", encrypted->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("integrity", IHelper::convertToHex(*calculatedIntegrity)))
           mSendStreamEncoded->write(output, header);
         }
 
@@ -1501,18 +1511,16 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::KeyInfo::getDebugValueString(
-                                                                       AlgorithmIndex index,
-                                                                       bool includeCommaPrefix
-                                                                       ) const
+      ElementPtr MessageLayerSecurityChannel::KeyInfo::toDebug(AlgorithmIndex index) const
       {
-        bool firstTime = !includeCommaPrefix;
-        return
-        Helper::getDebugValue("key index", string(index), firstTime) +
-        Helper::getDebugValue("integrity passphrase", mIntegrityPassphrase, firstTime) +
-        Helper::getDebugValue("send key", mSendKey ? IHelper::convertToHex(*mSendKey) : String(), firstTime) +
-        Helper::getDebugValue("next iv", mNextIV ? IHelper::convertToHex(*mNextIV) : String(), firstTime) +
-        Helper::getDebugValue("last integrity", mLastIntegrity ? IHelper::convertToHex(*mLastIntegrity) : String(), firstTime);
+        ElementPtr resultEl = Element::create("MessageLayerSecurityChannel");
+
+        IHelper::debugAppend(resultEl, "key index", index);
+        IHelper::debugAppend(resultEl, "integrity passphrase", mIntegrityPassphrase);
+        IHelper::debugAppend(resultEl, "send key", mSendKey ? IHelper::convertToHex(*mSendKey) : String());
+        IHelper::debugAppend(resultEl, "next iv", mNextIV ? IHelper::convertToHex(*mNextIV) : String());
+        IHelper::debugAppend(resultEl, "last integrity", mLastIntegrity ? IHelper::convertToHex(*mLastIntegrity) : String());
+        return resultEl;
       }
     }
 
@@ -1538,9 +1546,9 @@ namespace openpeer
     }
 
     //-----------------------------------------------------------------------
-    String IMessageLayerSecurityChannel::toDebugString(IMessageLayerSecurityChannelPtr channel, bool includeCommaPrefix)
+    ElementPtr IMessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel)
     {
-      return internal::MessageLayerSecurityChannel::toDebugString(channel, includeCommaPrefix);
+      return internal::MessageLayerSecurityChannel::toDebug(channel);
     }
 
     //-----------------------------------------------------------------------

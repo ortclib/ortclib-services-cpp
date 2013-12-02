@@ -36,8 +36,8 @@
 #include <cryptopp/queue.h>
 
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 #include <zsLib/helpers.h>
-
 #include <zsLib/Stringize.h>
 
 #define OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES (64*1024)
@@ -122,12 +122,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String TCPMessaging::toDebugString(ITCPMessagingPtr channel, bool includeCommaPrefix)
+      ElementPtr TCPMessaging::toDebug(ITCPMessagingPtr channel)
       {
-        if (!channel) return String(includeCommaPrefix ? ", mls channel=(null)" : "mls channel=(null)");
+        if (!channel) return ElementPtr();
 
         TCPMessagingPtr pThis = TCPMessaging::convert(channel);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -151,12 +151,12 @@ namespace openpeer
         int errorCode = 0;
         pThis->mSocket = boost::dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
         if (!pThis->mSocket) {
-          ZS_LOG_ERROR(Detail, pThis->log("failed to accept socket") + ", error code=" + string(errorCode))
+          ZS_LOG_ERROR(Detail, pThis->log("failed to accept socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
         } else {
           pThis->mSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
           pThis->mSocket->setDelegate(pThis);
-          ZS_LOG_DEBUG(pThis->log("accepted") + ", client IP=" + pThis->mRemoteIP.string())
+          ZS_LOG_DEBUG(pThis->log("accepted") + ZS_PARAM("client IP", pThis->mRemoteIP.string()))
         }
         pThis->init();
         pThis->setState(SessionState_Connected);
@@ -190,9 +190,9 @@ namespace openpeer
         pThis->mSocket->setDelegate(pThis);
         pThis->mSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
         pThis->mSocket->connect(remoteIP, &wouldBlock, &errorCode);
-        ZS_LOG_DEBUG(pThis->log("attempting to connect") + ", server IP=" + remoteIP.string())
+        ZS_LOG_DEBUG(pThis->log("attempting to connect") + ZS_PARAM("server IP", remoteIP.string()))
         if (0 != errorCode) {
-          ZS_LOG_ERROR(Detail, pThis->log("failed to connect socket") + ", error code=" + string(errorCode))
+          ZS_LOG_ERROR(Detail, pThis->log("failed to connect socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
         }
         pThis->init();
@@ -239,11 +239,11 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DEBUG(log("setting keep-alive") + ", value=" + string(enable))
+        ZS_LOG_DEBUG(log("setting keep-alive") + ZS_PARAM("value", enable))
         try {
           mSocket->setOptionFlag(ISocket::SetOptionFlag::KeepAlive, enable);
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_WARNING(Detail, log("unable to change keep-alive value") + ", reason=" + error.getMessage())
+          ZS_LOG_WARNING(Detail, log("unable to change keep-alive value") + ZS_PARAM("reason", error.message()))
         }
       }
 
@@ -350,22 +350,22 @@ namespace openpeer
           size_t bytesRead = mSocket->receive(buffer.BytePtr(), OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES, &wouldBlock);
 
           if (0 == bytesRead) {
-            ZS_LOG_WARNING(Detail, log("notified of data to read but no data available to read") + ", would block=" + string(wouldBlock))
+            ZS_LOG_WARNING(Detail, log("notified of data to read but no data available to read") + ZS_PARAM("would block", wouldBlock))
             setError(IHTTP::HTTPStatusCode_NoContent, "server issues shutdown on socket connection");
             cancel();
             return;
           }
 
           if (ZS_IS_LOGGING(Insane)) {
-            String rawReceived = IHelper::getDebugString(buffer.BytePtr(), bytesRead);
-            ZS_LOG_INSANE(log("RECEIVED FROM WIRE=") + "\n" + rawReceived)
+            String base64 = IHelper::convertToBase64(buffer.BytePtr(), bytesRead);
+            ZS_LOG_INSANE(log("RECEIVED FROM WIRE") + ZS_PARAM("wire in", base64))
           }
 
           mReceivingQueue->Put(buffer.BytePtr(), bytesRead);
 
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_ERROR(Detail, log("receive error") + ", error=" + string(error.getErrorCode()))
-          setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.getMessage()).c_str());
+          ZS_LOG_ERROR(Detail, log("receive error") + ZS_PARAM("error", error.errorCode()))
+          setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.message()).c_str());
           cancel();
           return;
         }
@@ -383,7 +383,7 @@ namespace openpeer
           }
 
           if (size < needingSize) {
-            ZS_LOG_TRACE(log("unsufficient receive data to continue processing") + ", available=" + string(size))
+            ZS_LOG_TRACE(log("unsufficient receive data to continue processing") + ZS_PARAM("available", size))
             break;
           }
 
@@ -401,7 +401,7 @@ namespace openpeer
           needingSize += bufferSize;
 
           if (size < needingSize) {
-            ZS_LOG_TRACE(log("unsufficient receive data to continue processing") + ", available=" + string(size) + ", needing=" + string(needingSize))
+            ZS_LOG_TRACE(log("unsufficient receive data to continue processing") + ZS_PARAM("available", size) + ZS_PARAM("needing", needingSize))
             if (mFramesHaveChannelNumber) {
               // put back the buffered channel number
               mReceivingQueue->Unget((const BYTE *)(&bufferedChannel), sizeof(bufferedChannel));
@@ -410,7 +410,7 @@ namespace openpeer
           }
 
           if (bufferSize > mMaxMessageSizeInBytes) {
-            ZS_LOG_ERROR(Detail, log("read message size exceeds maximum buffer size") + ", message size=" + string(bufferSize) + ", max size=" + string(mMaxMessageSizeInBytes))
+            ZS_LOG_ERROR(Detail, log("read message size exceeds maximum buffer size") + ZS_PARAM("message size", bufferSize) + ZS_PARAM("max size", mMaxMessageSizeInBytes))
             setError(IHTTP::HTTPStatusCode_PreconditionFailed, "read message size exceeds maximum buffer size allowed");
             cancel();
             return;
@@ -431,7 +431,7 @@ namespace openpeer
             channelHeader->mChannelID = channel;
           }
 
-          ZS_LOG_DEBUG(log("message read from network") + ", message size=" + string(bufferSize) + ", channel=" + string(channel))
+          ZS_LOG_DEBUG(log("message read from network") + ZS_PARAM("message size", bufferSize) + ZS_PARAM("channel", channel))
           mReceiveStream->write(message, channelHeader);
         } while(true);
       }
@@ -507,31 +507,45 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String TCPMessaging::log(const char *message) const
+      Log::Params TCPMessaging::log(const char *message) const
       {
-        return String("TCPMessaging [" + string(mID) + "] " + message);
+        ElementPtr objectEl = Element::create("TCPMessaging");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      String TCPMessaging::getDebugValueString(bool includeCommaPrefix) const
+      Log::Params TCPMessaging::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr TCPMessaging::toDebug() const
       {
         AutoRecursiveLock lock(getLock());
-        bool firstTime = !includeCommaPrefix;
-        return Helper::getDebugValue("tcp messaging id", string(mID), firstTime) +
-               Helper::getDebugValue("graceful shutdown", mGracefulShutdownReference ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("subscriptions", mSubscriptions.size() > 0 ? string(mSubscriptions.size()) : String(), firstTime) +
-               Helper::getDebugValue("default subscription", mDefaultSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("state", ITCPMessaging::toString(mCurrentState), firstTime) +
-               Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-               Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
-               ", receive stream: " + ITransportStream::toDebugString(mReceiveStream->getStream(), false) +
-               ", send stream: " + ITransportStream::toDebugString(mSendStream->getStream(), false) +
-               Helper::getDebugValue("send stream subscription", mSendStreamSubscription ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("max size", string(mMaxMessageSizeInBytes), firstTime) +
-               Helper::getDebugValue("write ready", mTCPWriteReady ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("remote IP", mRemoteIP.string(), firstTime) +
-               Helper::getDebugValue("socket", mSocket ? String("true") : String(), firstTime) +
-               Helper::getDebugValue("linger timer", mLingerTimer ? String("true") : String(), firstTime);
+
+        ElementPtr resultEl = Element::create("TCPMessaging");
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "tcp messaging id", mID);
+        IHelper::debugAppend(resultEl, "graceful shutdown", (bool)mGracefulShutdownReference);
+        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+        IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
+        IHelper::debugAppend(resultEl, "state", ITCPMessaging::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
+        IHelper::debugAppend(resultEl, "receive stream", ITransportStream::toDebug(mReceiveStream->getStream()));
+        IHelper::debugAppend(resultEl, "send stream", ITransportStream::toDebug(mSendStream->getStream()));
+        IHelper::debugAppend(resultEl, "send stream subscription", (bool)mSendStreamSubscription);
+        IHelper::debugAppend(resultEl, "max size", mMaxMessageSizeInBytes);
+        IHelper::debugAppend(resultEl, "write ready", mTCPWriteReady);
+        IHelper::debugAppend(resultEl, "remote IP", mRemoteIP.string());
+        IHelper::debugAppend(resultEl, "socket", (bool)mSocket);
+        IHelper::debugAppend(resultEl, "linger timer", (bool)mLingerTimer);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -539,12 +553,12 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_DEBUG(log("state changed") + ", state=" + ITCPMessaging::toString(state) + ", old state=" + ITCPMessaging::toString(mCurrentState))
+        ZS_LOG_DEBUG(log("state changed") + ZS_PARAM("state", ITCPMessaging::toString(state)) + ZS_PARAM("old state", ITCPMessaging::toString(mCurrentState)))
         mCurrentState = state;
 
         TCPMessagingPtr pThis = mThisWeak.lock();
         if (pThis) {
-          ZS_LOG_DEBUG(log("attempting to report state to delegate") + getDebugValueString())
+          ZS_LOG_DEBUG(debug("attempting to report state to delegate"))
           mSubscriptions.delegate()->onTCPMessagingStateChanged(pThis, mCurrentState);
         }
 
@@ -562,14 +576,14 @@ namespace openpeer
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
 
       //-----------------------------------------------------------------------
@@ -668,9 +682,9 @@ namespace openpeer
           }
 
           if (channelHeader) {
-            ZS_LOG_TRACE(log("queuing data to send data over TCP") + ", message size=" + string(buffer->SizeInBytes()) + ", channel=" + string(channelHeader->mChannelID))
+            ZS_LOG_TRACE(log("queuing data to send data over TCP") + ZS_PARAM("message size", buffer->SizeInBytes()) + ZS_PARAM("channel", channelHeader->mChannelID))
           } else {
-            ZS_LOG_TRACE(log("queuing data to send data over TCP") + ", message size=" + string(buffer->SizeInBytes()))
+            ZS_LOG_TRACE(log("queuing data to send data over TCP") + ZS_PARAM("message size", buffer->SizeInBytes()))
           }
 
           mSendingQueue->PutWord32(static_cast<CryptoPP::word32>(buffer->SizeInBytes()));
@@ -704,27 +718,27 @@ namespace openpeer
         mSendingQueue->Peek(buffer.BytePtr(), size);
 
         try {
-          ZS_LOG_TRACE(log("attempting to send data over TCP") + ", size=" + string(size))
+          ZS_LOG_TRACE(log("attempting to send data over TCP") + ZS_PARAM("size", size))
           bool wouldBlock = false;
           size_t sent = mSocket->send(buffer.BytePtr(), size, &wouldBlock);
           outSent = sent;
           if (0 != sent) {
             if (ZS_IS_LOGGING(Insane)) {
-              String rawSent = IHelper::getDebugString(buffer.BytePtr(), sent);
-              ZS_LOG_INSANE(log("SENT ON WIRE=") + "\n" + rawSent)
+              String base64 = IHelper::convertToBase64(buffer.BytePtr(), sent);
+              ZS_LOG_INSANE(log("SENT ON WIRE") + ZS_PARAM("wire out", base64))
             }
             mSendingQueue->Skip(sent);
           }
 
-          ZS_LOG_TRACE(log("data sent over TCP") + ", size=" + string(sent))
+          ZS_LOG_TRACE(log("data sent over TCP") + ZS_PARAM("size", sent))
 
           if (mSendingQueue->CurrentSize() > 0) {
             ZS_LOG_DEBUG(log("still more data in the sending queue to be sent, wait for next write ready..."))
             return false;
           }
         } catch (ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_ERROR(Detail, log("send error") + string(error.getErrorCode()))
-          setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.getMessage()).c_str());
+          ZS_LOG_ERROR(Detail, log("send error") + ZS_PARAM("error", error.errorCode()))
+          setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.message()).c_str());
           cancel();
           return false;
         }
@@ -760,11 +774,11 @@ namespace openpeer
     }
     
     //-----------------------------------------------------------------------
-    String ITCPMessaging::toDebugString(ITCPMessagingPtr messaging, bool includeCommaPrefix)
+    ElementPtr ITCPMessaging::toDebug(ITCPMessagingPtr messaging)
     {
-      return internal::TCPMessaging::toDebugString(messaging, includeCommaPrefix);
+      return internal::TCPMessaging::toDebug(messaging);
     }
-    
+
     //-----------------------------------------------------------------------
     ITCPMessagingPtr ITCPMessaging::accept(
                                    ITCPMessagingDelegatePtr delegate,

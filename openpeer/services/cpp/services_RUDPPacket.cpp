@@ -123,6 +123,8 @@ namespace openpeer
     RUDPPacketPtr RUDPPacket::create()
     {
       RUDPPacketPtr pThis(new RUDPPacket);
+      pThis->mLogObject = NULL;
+      pThis->mLogObjectID = 0;
       pThis->mChannelNumber = 0;
       pThis->mSequenceNumber = 0;
       pThis->mFlags = 0;
@@ -140,6 +142,8 @@ namespace openpeer
     RUDPPacketPtr RUDPPacket::clone()
     {
       RUDPPacketPtr pThis(new RUDPPacket);
+      pThis->mLogObject = mLogObject;
+      pThis->mLogObjectID = mLogObjectID;
       pThis->mChannelNumber = mChannelNumber;
       pThis->mSequenceNumber = mSequenceNumber;
       pThis->mFlags = mFlags;
@@ -166,7 +170,7 @@ namespace openpeer
 
       if ((channelNumber < LegalChannelNumber_StartRange) ||
           (channelNumber > LegalChannelNumber_EndRange)) {
-        ZS_LOG_INSANE("RUDPPacket [] not RUDP packet as not within legal channel range, channel=" + string(channelNumber))
+        ZS_LOG_INSANE(Log::Params("not RUDP packet as not within legal channel range", "RUDPPacket") + ZS_PARAM("channel", channelNumber))
         return RUDPPacketPtr();
       }
 
@@ -554,78 +558,91 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void RUDPPacket::log(
                          Log::Level level,
-                         const char *inputMessage
+                         Log::Params inParams
                          ) const
     {
       if (ZS_GET_LOG_LEVEL() < level) return;
 
       // scope: log message
       {
-        String message;
+        Log::Params params(NULL, mLogObject ? mLogObject : "RUDPPacket");
 
-        message = String("RUDPPacket, message=") + (inputMessage ? inputMessage : "")
-                  + ", channel=" + string(mChannelNumber) +
-                  + ", message=" + (inputMessage ? inputMessage : "")
-                  + ", sequence number=" + string(mSequenceNumber) +
-                  + ", flags=" + string(((UINT)mFlags), 16)
-                  + ", GSNR=" + string(mGSNR);
+        params << inParams;
+
+        if (0 != mLogObjectID) {
+          if (inParams.object()) {
+            params << ZS_PARAM("original object", mLogObject);
+            params << ZS_PARAM("original id", mLogObjectID);
+          } else {
+            params << ZS_PARAM("id", mLogObjectID);
+          }
+        }
+
+        params << ZS_PARAM("channel", mChannelNumber)
+               << ZS_PARAM("sequence number", mSequenceNumber)
+               << ZS_PARAM("flags", + string(((UINT)mFlags), 16))
+               << ZS_PARAM("GSNR", mGSNR);
 
         if (!isFlagSet(Flag_EQ_GSNREqualsGSNFR)) {
-          message += String(", GSNFR=") + string(mGSNFR);
+          params << ZS_PARAM("GSNFR", mGSNFR);
         }
-        message += String(", vector flags=") + string(((UINT)mVectorFlags), 16);
+        params << ZS_PARAM("vector flags", string(((UINT)mVectorFlags), 16));
 
         if (0 != mVectorLengthInBytes) {
-          message += ", vector length=" + string(((UINT)mVectorLengthInBytes));
-          message += ", vector=" + internal::convertToHex(&(mVector[0]), mVectorLengthInBytes);
+          params << ZS_PARAM("vector length", mVectorLengthInBytes);
+          params << ZS_PARAM("vector", internal::convertToHex(&(mVector[0]), mVectorLengthInBytes));
         }
 
         if (0 != mDataLengthInBytes) {
-          message += ", data length=" + string(mDataLengthInBytes);
-        }
-        message += ", flag details=";
-        if (isFlagSet(Flag_PS_ParitySending)) {
-          message += "(ps)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_PG_ParityGSNR)) {
-          message += "(pg)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_XP_XORedParityToGSNFR)) {
-          message += "(xp)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_DP_DuplicatePacket)) {
-          message += "(dp)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_EC_ECNPacket)) {
-          message += "(ec)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_EQ_GSNREqualsGSNFR)) {
-          message += "(eq)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_AR_ACKRequired)) {
-          message += "(ar)";
-        } else {
-          message += "(--)";
-        }
-        if (isFlagSet(Flag_VP_VectorParity)) {
-          message += "(vp)";
-        } else {
-          message += "(--)";
+          params << ZS_PARAM("data length", mDataLengthInBytes);
         }
 
-        ZS_LOG(Basic, message)
+        String flagStr;
+
+        if (isFlagSet(Flag_PS_ParitySending)) {
+          flagStr += "(ps)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_PG_ParityGSNR)) {
+          flagStr += "(pg)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_XP_XORedParityToGSNFR)) {
+          flagStr += "(xp)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_DP_DuplicatePacket)) {
+          flagStr += "(dp)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_EC_ECNPacket)) {
+          flagStr += "(ec)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_EQ_GSNREqualsGSNFR)) {
+          flagStr += "(eq)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_AR_ACKRequired)) {
+          flagStr += "(ar)";
+        } else {
+          flagStr += "(--)";
+        }
+        if (isFlagSet(Flag_VP_VectorParity)) {
+          flagStr += "(vp)";
+        } else {
+          flagStr += "(--)";
+        }
+
+        params << ZS_PARAM("flag details", flagStr);
+
+        ZS_LOG(Basic, params)
       }
     }
   }

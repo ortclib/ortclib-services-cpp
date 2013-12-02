@@ -182,10 +182,13 @@ namespace openpeer
 
       void log(
                Log::Level level = Log::Debug,
-               const char *message = NULL
+               Log::Params inParams = Log::Params()
                ) const;
 
     public:
+      const char *mLogObject;            // when output to a log, which object was responsible for this packet (never packetized or parsed)
+      PUID mLogObjectID;                 // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
+
       WORD mChannelNumber;
       DWORD mSequenceNumber;             // only lower 24bits are valid and all upper bits are set to zero
 

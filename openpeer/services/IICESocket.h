@@ -55,6 +55,14 @@ namespace openpeer
 
     interaction IICESocket
     {
+      struct Candidate;
+      struct TURNServerInfo;
+      struct STUNServerInfo;
+
+      typedef boost::shared_ptr<Candidate> CandidatePtr;
+      typedef boost::shared_ptr<TURNServerInfo> TURNServerInfoPtr;
+      typedef boost::shared_ptr<STUNServerInfo> STUNServerInfoPtr;
+
       enum ICESocketStates
       {
         ICESocketState_Pending,
@@ -89,12 +97,11 @@ namespace openpeer
 
         IPAddress mRelatedIP;         // if server reflexive, peer reflexive or relayed, the related base IP
 
+        static CandidatePtr create();
         Candidate(): mType(Type_Unknown), mComponentID(0), mPriority(0), mLocalPreference(0) {}
         bool hasData() const;
-        String toDebugString(bool includeCommaPrefix = true) const;
+        ElementPtr toDebug() const;
       };
-
-      typedef boost::shared_ptr<Candidate> CandidatePtr;
 
       typedef std::list<Candidate> CandidateList;
       static void compare(
@@ -110,12 +117,6 @@ namespace openpeer
         ICEControl_Controlled,
       };
 
-      struct TURNServerInfo;
-      struct STUNServerInfo;
-
-      typedef boost::shared_ptr<TURNServerInfo> TURNServerInfoPtr;
-      typedef boost::shared_ptr<STUNServerInfo> STUNServerInfoPtr;
-
       struct TURNServerInfo
       {
         String mTURNServer;
@@ -126,7 +127,7 @@ namespace openpeer
 
         static TURNServerInfoPtr create();
         bool hasData() const;
-        String toDebugString(bool includeCommaPrefix = true) const;
+        ElementPtr toDebug() const;
       };
 
       struct STUNServerInfo
@@ -136,7 +137,7 @@ namespace openpeer
 
         static STUNServerInfoPtr create();
         bool hasData() const;
-        String toDebugString(bool includeCommaPrefix = true) const;
+        ElementPtr toDebug() const;
       };
 
       typedef std::list<TURNServerInfoPtr> TURNServerInfoList;
@@ -145,8 +146,8 @@ namespace openpeer
       static const char *toString(ICEControls control);
       
       //-----------------------------------------------------------------------
-      // PURPOSE: returns a debug string containing internal object state
-      static String toDebugString(IICESocketPtr socket, bool includeCommaPrefix = true);
+      // PURPOSE: returns a debug element containing internal object state
+      static ElementPtr toDebug(IICESocketPtr socket);
 
       //-----------------------------------------------------------------------
       // PURPOSE: creates/binds an ICE socket

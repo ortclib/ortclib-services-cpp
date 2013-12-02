@@ -88,7 +88,7 @@ namespace openpeer
         #pragma mark RUDPMessaging => IRUDPMessaging
         #pragma mark
 
-        static String toDebugString(IRUDPMessagingPtr messaging, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IRUDPMessagingPtr messaging);
 
         static RUDPMessagingPtr acceptChannel(
                                               IMessageQueuePtr queue,
@@ -168,9 +168,10 @@ namespace openpeer
         bool isShuttingDown() const {return RUDPMessagingState_ShuttingDown == mCurrentState;}
         bool isShutdown() const {return RUDPMessagingState_Shutdown == mCurrentState;}
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void step();
         bool stepSendData();

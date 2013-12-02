@@ -36,12 +36,14 @@
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ITURNSocket.h>
 #include <openpeer/services/ISTUNDiscovery.h>
+
 #include <zsLib/types.h>
 #include <zsLib/IPAddress.h>
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Socket.h>
 #include <zsLib/XML.h>
 #include <zsLib/Timer.h>
+#include <zsLib/Log.h>
 
 #include <list>
 
@@ -212,7 +214,7 @@ namespace openpeer
         #pragma mark ICESocket => IICESocket
         #pragma mark
 
-        static String toDebugString(IICESocketPtr socket, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IICESocketPtr socket);
 
         static ICESocketPtr create(
                                    IMessageQueuePtr queue,
@@ -341,12 +343,13 @@ namespace openpeer
         #pragma mark ICESocket => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
         bool isShuttingDown() const {return ICESocketState_ShuttingDown == mCurrentState;}
         bool isShutdown() const {return ICESocketState_Shutdown == mCurrentState;}
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void cancel();
         

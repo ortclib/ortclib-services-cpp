@@ -94,7 +94,7 @@ namespace openpeer
         #pragma mark RUDPICESocketSession => RUDPICESocketSession
         #pragma mark
 
-        static String toDebugString(IRUDPICESocketSessionPtr session, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IRUDPICESocketSessionPtr session);
 
         static RUDPICESocketSessionPtr listen(
                                               IMessageQueuePtr queue,
@@ -180,14 +180,15 @@ namespace openpeer
 
         RecursiveLock &getLock() const;
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
         void fix(STUNPacketPtr stun) const;
 
         bool isReady() {return RUDPICESocketSessionState_Ready == mCurrentState;}
         bool isShuttingDown() const {return RUDPICESocketSessionState_ShuttingDown == mCurrentState;}
         bool isShutdown() const {return RUDPICESocketSessionState_Shutdown == mCurrentState;}
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void cancel();
         void step();

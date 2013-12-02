@@ -214,12 +214,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPChannel::toDebugString(IRUDPChannelPtr channel, bool includeCommaPrefix)
+      ElementPtr RUDPChannel::toDebug(IRUDPChannelPtr channel)
       {
-        if (!channel) return String(includeCommaPrefix ? ", rudp channel=(null)" : "rudp channel=(null)");
+        if (!channel) return ElementPtr();
 
         RUDPChannelPtr pThis = RUDPChannel::convert(channel);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -246,7 +246,7 @@ namespace openpeer
       void RUDPChannel::shutdownDirection(Shutdown state)
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DETAIL(log("shutdown direction called") + ", state=" + IRUDPChannel::toString(state) + ", current shutdown=" + IRUDPChannel::toString(mShutdownDirection))
+        ZS_LOG_DETAIL(log("shutdown direction called") + ZS_PARAM("state", IRUDPChannel::toString(state)) + ZS_PARAM("current shutdown", IRUDPChannel::toString(mShutdownDirection)))
         mShutdownDirection = static_cast<IRUDPChannelStream::Shutdown>(mShutdownDirection | state);
         if (!mStream) return;
         mStream->shutdownDirection(mShutdownDirection);
@@ -256,7 +256,7 @@ namespace openpeer
       IPAddress RUDPChannel::getConnectedRemoteIP()
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DEBUG(log("get connected remote IP called") + ", ip=" + mRemoteIP.string())
+        ZS_LOG_DEBUG(log("get connected remote IP called") + ZS_PARAM("ip", mRemoteIP.string()))
         return mRemoteIP;
       }
 
@@ -264,7 +264,7 @@ namespace openpeer
       String RUDPChannel::getRemoteConnectionInfo()
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DEBUG(log("get connection info called") + ", info=" + mRemoteChannelInfo)
+        ZS_LOG_DEBUG(log("get connection info called") + ZS_PARAM("info", mRemoteChannelInfo))
         return mRemoteChannelInfo;
       }
 
@@ -345,7 +345,7 @@ namespace openpeer
             pThis->cancel(false);
           }
         }
-        ZS_LOG_DETAIL(pThis->log("created for socket session incoming") + ", localUsernameFrag=" + localUsernameFrag + ", remoteUsernameFrag=" + remoteUsernameFrag + ", local password=" + localPassword + ", remote password=" + remotePassword + ", incoming channel=" + string(incomingChannelNumber))
+        ZS_LOG_DETAIL(pThis->log("created for socket session incoming") + ZS_PARAM("localUsernameFrag", localUsernameFrag) + ZS_PARAM("remoteUsernameFrag", remoteUsernameFrag) + ZS_PARAM("local password", localPassword) + ZS_PARAM("remote password", remotePassword) + ZS_PARAM("incoming channel", incomingChannelNumber))
         return pThis;
       }
 
@@ -392,7 +392,7 @@ namespace openpeer
         pThis->mSendStream = sendStream;
         pThis->init();
         // do not allow sending to the remote party until we receive an ACK or data
-        ZS_LOG_DETAIL(pThis->log("created for socket session outgoing") + ", localUserFrag=" + localUsernameFrag + ", remoteUsernameFrag=" + remoteUsernameFrag + ", local password=" + localPassword + ", remote password=" + remotePassword + ", incoming channel=" + string(incomingChannelNumber))
+        ZS_LOG_DETAIL(pThis->log("created for socket session outgoing") + ZS_PARAM("localUserFrag", localUsernameFrag) + ZS_PARAM("remoteUsernameFrag", remoteUsernameFrag) + ZS_PARAM("local password", localPassword) + ZS_PARAM("remote password", remotePassword) + ZS_PARAM("incoming channel", incomingChannelNumber))
         return pThis;
       }
       
@@ -455,12 +455,12 @@ namespace openpeer
 
         if ((localUsernameFrag != mLocalUsernameFrag) &&
             (remoteUsernameFrag != mRemoteUsernameFrag)) {
-          ZS_LOG_TRACE(log("the request local/remote username frag does not match, thus ignoring") + ", local:remote username frag=" + localUsernameFrag + ":" + remoteUsernameFrag + ", expected local:remote username frag=" + mLocalUsernameFrag + ":" + mRemoteUsernameFrag)
+          ZS_LOG_TRACE(log("the request local/remote username frag does not match, thus ignoring") + ZS_PARAM("local:remote username frag", localUsernameFrag + ":" + remoteUsernameFrag) + ZS_PARAM("expected local:remote username frag", mLocalUsernameFrag + ":" + mRemoteUsernameFrag))
           return false;
         }
 
         if (remoteUsernameFrag.size() < 1) {
-          ZS_LOG_TRACE(log("missing remote username frag, thus ignoring") + ", local:remote username frag=" + localUsernameFrag + ":" + remoteUsernameFrag + ", expected local:remote username frag=" + mLocalUsernameFrag + ":" + mRemoteUsernameFrag)
+          ZS_LOG_TRACE(log("missing remote username frag, thus ignoring") + ZS_PARAM("local:remote username frag", localUsernameFrag + ":" + remoteUsernameFrag) + ZS_PARAM("expected local:remote username frag", mLocalUsernameFrag + ":" + mRemoteUsernameFrag))
           return false;
         }
 
@@ -468,7 +468,7 @@ namespace openpeer
         if ((stun->mRealm != mRealm) ||
             (stun->mNonce != mNonce)) {
 
-          ZS_LOG_ERROR(Detail, log("STUN message credentials mismatch") + ", expecting username=" + (mLocalUsernameFrag + ":" + mRemoteUsernameFrag) + ", received username=" + stun->mUsername + ", expecting realm=" + mRealm + ", received realm=" + stun->mRealm + ", expecting nonce=" + mNonce + ", received nonce=" + stun->mNonce)
+          ZS_LOG_ERROR(Detail, log("STUN message credentials mismatch") + ZS_PARAM("expecting username", (mLocalUsernameFrag + ":" + mRemoteUsernameFrag)) + ZS_PARAM("received username", stun->mUsername) + ZS_PARAM("expecting realm", mRealm) + ZS_PARAM("received realm", stun->mRealm) + ZS_PARAM("expecting nonce", mNonce) + ZS_PARAM("received nonce", stun->mNonce))
           if (STUNPacket::Class_Request == stun->mClass) {
             stun->mErrorCode = STUNPacket::ErrorCode_Unauthorized;  // the username doesn't match
             outResponse = STUNPacket::createErrorResponse(stun);
@@ -490,7 +490,7 @@ namespace openpeer
 
         if (STUNPacket::Method_ReliableChannelOpen == stun->mMethod) {
           if (STUNPacket::Class_Request != stun->mClass) {
-            ZS_LOG_ERROR(Debug, log("received illegal class on STUN request") + ", class=" + string((int)stun->mClass))
+            ZS_LOG_ERROR(Debug, log("received illegal class on STUN request") + ZS_PARAM("class", (int)stun->mClass))
             return false;  // illegal unless it is a request, responses will come through a different method
           }
 
@@ -612,14 +612,14 @@ namespace openpeer
 
         // this has to be a reliable channel ACK or it is not legal
         if (STUNPacket::Method_ReliableChannelACK != stun->mMethod) {
-          ZS_LOG_ERROR(Debug, log("received illegal method on STUN request") + ", method=" + string((int)stun->mMethod))
+          ZS_LOG_ERROR(Debug, log("received illegal method on STUN request") + ZS_PARAM("method", (int)stun->mMethod))
           return false;
         }
 
         // only legal to be a request or an indication
         if ((STUNPacket::Class_Request != stun->mClass) &&
             (STUNPacket::Class_Indication != stun->mClass)) {
-          ZS_LOG_ERROR(Debug, log("was expecting a request or an indication only for the class on the reliable ACK") + ", class=" + string((int)stun->mClass))
+          ZS_LOG_ERROR(Debug, log("was expecting a request or an indication only for the class on the reliable ACK") + ZS_PARAM("class", (int)stun->mClass))
           return false;
         }
 
@@ -640,7 +640,7 @@ namespace openpeer
           return true;
         }
 
-        ZS_LOG_DETAIL(log("received external ACK request or indication") + ", sequence number=" + sequenceToString(stun->mNextSequenceNumber) + ", GSNR=" + sequenceToString(stun->mGSNR) + ", GSNFR=" + sequenceToString(stun->mGSNFR))
+        ZS_LOG_DETAIL(log("received external ACK request or indication") + ZS_PARAM("sequence number", sequenceToString(stun->mNextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(stun->mGSNR)) + ZS_PARAM("GSNFR", sequenceToString(stun->mGSNFR)))
 
         mLastReceivedData = zsLib::now();
         mStream->handleExternalAck(
@@ -686,7 +686,7 @@ namespace openpeer
 
           stream = mStream;
 
-          ZS_LOG_DEBUG(log("received RUDP packet") + ", stream ID=" + string(stream->getID()) + ", length=" + string(bufferLengthInBytes))
+          ZS_LOG_DEBUG(log("received RUDP packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", bufferLengthInBytes))
 
           newBuffer = boost::shared_array<BYTE>(new BYTE[bufferLengthInBytes]);
           memcpy(newBuffer.get(), buffer, bufferLengthInBytes);
@@ -716,7 +716,7 @@ namespace openpeer
 
           stream = mStream;
 
-          ZS_LOG_DEBUG(log("received notify write ready") + ", stream ID=" + string(stream->getID()))
+          ZS_LOG_DEBUG(log("received notify write ready") + ZS_PARAM("stream ID", stream->getID()))
         }
         stream->notifySocketWriteReady();
       }
@@ -880,7 +880,7 @@ namespace openpeer
             pThis->cancel(false);
           }
         }
-        ZS_LOG_BASIC(pThis->log("created for listener") + ", localUserFrag=" + localUsernameFrag + ", remoteUserFrag=" + remoteUsernameFrag + ", incoming channel=" + string(incomingChannelNumber))
+        ZS_LOG_BASIC(pThis->log("created for listener") + ZS_PARAM("localUserFrag", localUsernameFrag) + ZS_PARAM("remoteUserFrag", remoteUsernameFrag) + ZS_PARAM("incoming channel", string(incomingChannelNumber)))
         return pThis;
       }
       
@@ -916,7 +916,7 @@ namespace openpeer
                                                         )
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DETAIL(log("notify channel stream shutdown") + ", stream ID=" + string(stream->getID()))
+        ZS_LOG_DETAIL(log("notify channel stream shutdown") + ZS_PARAM("stream ID", stream->getID()))
 
         if (stream != mStream) return;
 
@@ -941,7 +941,7 @@ namespace openpeer
                                                           size_t packetLengthInBytes
                                                           )
       {
-        ZS_LOG_DEBUG(log("notify channel stream send packet") + ", stream ID=" + string(stream->getID()) + ", length=" + string(packetLengthInBytes))
+        ZS_LOG_DEBUG(log("notify channel stream send packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", packetLengthInBytes))
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         IPAddress remoteIP;
 
@@ -970,7 +970,7 @@ namespace openpeer
                                                               PUID guarenteeDeliveryRequestID
                                                               )
       {
-        ZS_LOG_DETAIL(log("notify channel stream send external ACK now") + ", stream ID=" + string(stream->getID()) + ", gaurantee=" + (guarenteeDelivery ? "true" : "false"))
+        ZS_LOG_DETAIL(log("notify channel stream send external ACK now") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("gaurantee", guarenteeDelivery))
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         STUNPacketPtr stun;
 
@@ -991,7 +991,7 @@ namespace openpeer
           fillACK(stun);
 
           if (guarenteeDelivery) {
-            ZS_LOG_DETAIL(log("STUN ACK sent via STUN requester") + ", method=request")
+            ZS_LOG_DETAIL(log("STUN ACK sent via STUN requester") + ZS_PARAM("method", "request"))
             ISTUNRequesterPtr request = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mRemoteIP, stun, STUNPacket::RFC_draft_RUDP);
             if (0 == guarenteeDeliveryRequestID) {
               guarenteeDeliveryRequestID = zsLib::createPUID();
@@ -1002,7 +1002,7 @@ namespace openpeer
           }
 
           stun->packetize(packet, packetLengthInBytes, STUNPacket::RFC_draft_RUDP);
-          ZS_LOG_DETAIL(log("STUN ACK sent") + ", method=indication, stun packet size=" + string(packetLengthInBytes))
+          ZS_LOG_DETAIL(log("STUN ACK sent") + ZS_PARAM("method", "indication") + ZS_PARAM("stun packet size", packetLengthInBytes))
           mLastSentData = zsLib::now();
         }
 
@@ -1032,7 +1032,7 @@ namespace openpeer
                                                   size_t packetLengthInBytes
                                                   )
       {
-        ZS_LOG_DEBUG(log("notify requester send packet") + ", ip=" + destination.string() + ", length=" + string(packetLengthInBytes))
+        ZS_LOG_DEBUG(log("notify requester send packet") + ZS_PARAM("ip", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
 
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         bool isShuttdingDown = false;
@@ -1084,7 +1084,8 @@ namespace openpeer
                                                     STUNPacketPtr response
                                                     )
       {
-        ZS_LOG_DEBUG(log("notify requester received reply") + ", ip=" + fromIPAddress.string())
+        ZS_LOG_DEBUG(log("notify requester received reply") + ZS_PARAM("ip", fromIPAddress.string()))
+
         AutoRecursiveLock lock(mLock);
         if (!mMasterDelegate) return false;
 
@@ -1117,7 +1118,7 @@ namespace openpeer
               // this request is unauthorized but perhaps because we have to reissue the request now that server has given us a nonce?
               STUNPacketPtr originalRequest = requester->getRequest();
               if (originalRequest->mUsername.isEmpty()) {
-                ZS_LOG_DETAIL(log("open unauthorized-challenge") + ", realm=" + response->mRealm + ", nonce=" + response->mNonce)
+                ZS_LOG_DETAIL(log("open unauthorized-challenge") + ZS_PARAM("realm", response->mRealm) + ZS_PARAM("nonce", response->mNonce))
 
                 // correct, we have to re-issue the request now
                 STUNPacketPtr newRequest = originalRequest->clone(true);
@@ -1145,13 +1146,13 @@ namespace openpeer
           // these attributes must be present in the response of it is illegal
           if ((!response->hasAttribute(STUNPacket::Attribute_ChannelNumber)) ||
               (!response->hasAttribute(STUNPacket::Attribute_NextSequenceNumber))) {
-            ZS_LOG_ERROR(Detail, log("open missing attributes") + ", channel=" + string(response->mChannelNumber) + ", sequence number=" + sequenceToString(response->mNextSequenceNumber) + ", congestion local=" + string(response->mLocalCongestionControl.size()) + ", congestion remote=" + string(response->mRemoteCongestionControl.size()))
+            ZS_LOG_ERROR(Detail, log("open missing attributes") + ZS_PARAM("channel", response->mChannelNumber) + ZS_PARAM("sequence number", sequenceToString(response->mNextSequenceNumber)) + ZS_PARAM("congestion local", response->mLocalCongestionControl.size()) + ZS_PARAM("congestion remote", response->mRemoteCongestionControl.size()))
             return false;
           }
 
           if (response->hasAttribute(STUNPacket::Attribute_MinimumRTT)) {
             if (response->mMinimumRTT < mMinimumRTT) {
-              ZS_LOG_ERROR(Detail, log("remote party attempting lower min RTT") + ", min=" + string(mMinimumRTT) + ", reply min=" + string(response->mMinimumRTT))
+              ZS_LOG_ERROR(Detail, log("remote party attempting lower min RTT") + ZS_PARAM("min", mMinimumRTT) + ZS_PARAM("reply min", response->mMinimumRTT))
               return false;  // not legal to negotiate a lower minimum RRT
             }
             mMinimumRTT = response->mMinimumRTT;
@@ -1159,7 +1160,7 @@ namespace openpeer
 
           if (response->hasAttribute(STUNPacket::Attribute_Lifetime)) {
             if (response->mLifetime > mLifetime) {
-              ZS_LOG_ERROR(Detail, log("remote party attempting raise lifetime") + ", lifetime=" + string(mLifetime) + ", reply min=" + string(response->mLifetime))
+              ZS_LOG_ERROR(Detail, log("remote party attempting raise lifetime") + ZS_PARAM("lifetime", mLifetime) + ZS_PARAM("reply min", response->mLifetime))
               return false;  // not legal to negotiate a longer lifetime
             }
             mLifetime = response->mLifetime;
@@ -1189,7 +1190,7 @@ namespace openpeer
           mRemoteSequenceNumber = response->mNextSequenceNumber;
           mOutgoingChannelNumber = response->mChannelNumber;
 
-          ZS_LOG_DETAIL(log("open") + ", local sequence number=" + sequenceToString(mLocalSequenceNumber) + ", local sequence number=" + sequenceToString(mRemoteSequenceNumber) + ", outgoing channel number=" + string(mOutgoingChannelNumber) + ", incoming channel number=" + string(mIncomingChannelNumber))
+          ZS_LOG_DETAIL(log("open") + ZS_PARAM("local sequence number", sequenceToString(mLocalSequenceNumber)) + ZS_PARAM("local sequence number", sequenceToString(mRemoteSequenceNumber)) + ZS_PARAM("outgoing channel number", mOutgoingChannelNumber) + ZS_PARAM("incoming channel number", mIncomingChannelNumber))
 
           // we should have enough to open our stream now!
           mStream = IRUDPChannelStream::create(
@@ -1219,7 +1220,7 @@ namespace openpeer
             if (handleStaleNonce((*iter).second, response)) return true;
 
             if (STUNPacket::Class_ErrorResponse == response->mClass) {
-              ZS_LOG_ERROR(Detail, log("shutting down channel as ACK failed") + ", error code=" + string(response->mErrorCode) + " (" + STUNPacket::toString((STUNPacket::ErrorCodes)response->mErrorCode) + ")")
+              ZS_LOG_ERROR(Detail, log("shutting down channel as ACK failed") + ZS_PARAM("error code", response->mErrorCode) + ZS_PARAM("reason", STUNPacket::toString((STUNPacket::ErrorCodes)response->mErrorCode)))
               mOutstandingACKs.erase(iter);
               if (mStream) {
                 mStream->shutdown(false);
@@ -1233,7 +1234,7 @@ namespace openpeer
                 (!response->hasAttribute(STUNPacket::Attribute_GSNR)) ||
                 (!response->hasAttribute(STUNPacket::Attribute_GSNFR)) ||
                 (!response->hasAttribute(STUNPacket::Attribute_RUDPFlags))) {
-              ZS_LOG_ERROR(Detail, log("ACK reply missing attributes (thus being ignored)") + ", sequence number=" + sequenceToString(response->mNextSequenceNumber) + ", GSNR=" + sequenceToString(response->mGSNR) + ", GSNFR=" + sequenceToString(response->mGSNFR) + ", flags=" + string(((WORD)response->mReliabilityFlags)))
+              ZS_LOG_ERROR(Detail, log("ACK reply missing attributes (thus being ignored)") + ZS_PARAM("sequence number", sequenceToString(response->mNextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(response->mGSNR)) + ZS_PARAM("GSNFR", sequenceToString(response->mGSNFR)) + ZS_PARAM("flags", ((WORD)response->mReliabilityFlags)))
               // all of these attributes are manditory or it is not legal - so ignore the response
               return false;
             }
@@ -1321,9 +1322,17 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPChannel::log(const char *message) const
+      Log::Params RUDPChannel::log(const char *message) const
       {
-        return String("RUDPChannel [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RUDPChannel");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params RUDPChannel::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
@@ -1334,59 +1343,60 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String RUDPChannel::getDebugValueString(bool includeCommaPrefix) const
+      ElementPtr RUDPChannel::toDebug() const
       {
         AutoRecursiveLock lock(mLock);
-        bool firstTime = !includeCommaPrefix;
-        return
+        ElementPtr resultEl = Element::create("RUDPChannel");
 
-        Helper::getDebugValue("rudp channel ID", string(mID), firstTime) +
-        Helper::getDebugValue("graceful shutdown", mGracefulShutdownReference ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "id", mID);
+        IHelper::debugAppend(resultEl, "graceful shutdown", (bool)mGracefulShutdownReference);
 
-        Helper::getDebugValue("incoming", mIncoming ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "incoming", mIncoming);
 
-        Helper::getDebugValue("state", IRUDPChannel::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        IHelper::debugAppend(resultEl, "state", IRUDPChannel::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
-        Helper::getDebugValue("delegate", mDelegate ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("master delegate", mMasterDelegate ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
+        IHelper::debugAppend(resultEl, "master delegate", (bool)mMasterDelegate);
 
-        Helper::getDebugValue("stream", mStream ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("open request", mOpenRequest ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("shutdown request", mShutdownRequest ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("stun request previously timed out", mSTUNRequestPreviouslyTimedOut ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "stream", (bool)mStream);
+        IHelper::debugAppend(resultEl, "open request", (bool)mOpenRequest);
+        IHelper::debugAppend(resultEl, "shutdown request", (bool)mShutdownRequest);
+        IHelper::debugAppend(resultEl, "stun request previously timed out", mSTUNRequestPreviouslyTimedOut);
 
-        Helper::getDebugValue("timer", mTimer ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "timer", (bool)mTimer);
 
-        Helper::getDebugValue("shutdown direction", IRUDPChannel::toString(mShutdownDirection), firstTime) +
+        IHelper::debugAppend(resultEl, "shutdown direction", IRUDPChannel::toString(mShutdownDirection));
 
-        Helper::getDebugValue("remote ip", !mRemoteIP.isEmpty() ? string(mRemoteIP) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "remote ip", !mRemoteIP.isEmpty() ? mRemoteIP.string() : String());
 
-        Helper::getDebugValue("local username frag", mLocalUsernameFrag, firstTime) +
-        Helper::getDebugValue("local password", mLocalPassword, firstTime) +
-        Helper::getDebugValue("remote username frag", mRemoteUsernameFrag, firstTime) +
-        Helper::getDebugValue("remote password", mRemotePassword, firstTime) +
+        IHelper::debugAppend(resultEl, "local username frag", mLocalUsernameFrag);
+        IHelper::debugAppend(resultEl, "local password", mLocalPassword);
+        IHelper::debugAppend(resultEl, "remote username frag", mRemoteUsernameFrag);
+        IHelper::debugAppend(resultEl, "remote password", mRemotePassword);
 
-        Helper::getDebugValue("realm", mRealm, firstTime) +
-        Helper::getDebugValue("nonce", mNonce, firstTime) +
+        IHelper::debugAppend(resultEl, "realm", mRealm);
+        IHelper::debugAppend(resultEl, "nonce", mNonce);
 
-        Helper::getDebugValue("incoming channel number", 0 != mIncomingChannelNumber ? string(mIncomingChannelNumber) : String(), firstTime) +
-        Helper::getDebugValue("outgoing channel number", 0 != mOutgoingChannelNumber ? string(mOutgoingChannelNumber) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "incoming channel number", mIncomingChannelNumber);
+        IHelper::debugAppend(resultEl, "outgoing channel number", mOutgoingChannelNumber);
 
-        Helper::getDebugValue("local sequence number", 0 != mLocalSequenceNumber ? string(mLocalSequenceNumber) : String(), firstTime) +
-        Helper::getDebugValue("remote sequence number", 0 != mRemoteSequenceNumber ? string(mLocalSequenceNumber) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "local sequence number", mLocalSequenceNumber);
+        IHelper::debugAppend(resultEl, "remote sequence number", mRemoteSequenceNumber);
 
-        Helper::getDebugValue("minimum RTT", 0 != mMinimumRTT ? string(mMinimumRTT) : String(), firstTime) +
-        Helper::getDebugValue("lifetime", 0 != mLifetime ? string(mLifetime) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "minimum RTT", mMinimumRTT);
+        IHelper::debugAppend(resultEl, "lifetime", mLifetime);
 
-        Helper::getDebugValue("local channel info", mLocalChannelInfo, firstTime) +
-        Helper::getDebugValue("remote channel info", mRemoteChannelInfo, firstTime) +
+        IHelper::debugAppend(resultEl, "local channel info", mLocalChannelInfo);
+        IHelper::debugAppend(resultEl, "remote channel info", mRemoteChannelInfo);
 
-        Helper::getDebugValue("last sent data", Time() != mLastSentData ? IHelper::timeToString(mLastSentData) : String(), firstTime) +
-        Helper::getDebugValue("last received data", Time() != mLastReceivedData ? IHelper::timeToString(mLastReceivedData) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "last sent data", mLastSentData);
+        IHelper::debugAppend(resultEl, "last received data", mLastReceivedData);
 
-        Helper::getDebugValue("outstanding acks", mOutstandingACKs.size() > 0 ? string(mOutstandingACKs.size()) : String(), firstTime);
+        IHelper::debugAppend(resultEl, "outstanding acks", mOutstandingACKs.size());
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -1502,7 +1512,7 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DEBUG(log("step") + getDebugValueString())
+        ZS_LOG_DEBUG(debug("step"))
 
         if (mStream) {
           // we need to create a timer now we have a stream
@@ -1519,7 +1529,7 @@ namespace openpeer
       void RUDPChannel::setState(RUDPChannelStates state)
       {
         if (mCurrentState == state) return;
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 
@@ -1552,19 +1562,19 @@ namespace openpeer
 
         if ((isShuttingDown()) ||
             (isShutdown())) {
-          ZS_LOG_WARNING(Detail, log("already shutting down thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("already shutting down thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
 
       //-----------------------------------------------------------------------
@@ -1764,9 +1774,9 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String IRUDPChannel::toDebugString(IRUDPChannelPtr channel, bool includeCommaPrefix)
+    ElementPtr IRUDPChannel::toDebug(IRUDPChannelPtr channel)
     {
-      return internal::RUDPChannel::toDebugString(channel, includeCommaPrefix);
+      return internal::RUDPChannel::toDebug(channel);
     }
 
   }

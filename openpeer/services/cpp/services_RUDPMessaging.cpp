@@ -41,6 +41,7 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/XML.h>
 
 #define OPENPEER_SERVICES_RUDPMESSAGING_RECYCLE_BUFFER_SIZE ((1 << (sizeof(WORD)*8)) + sizeof(DWORD))
 #define OPENPEER_SERVICES_RUDPMESSAGING_MAX_RECYLCE_BUFFERS (100)
@@ -116,12 +117,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPMessaging::toDebugString(IRUDPMessagingPtr messaging, bool includeCommaPrefix)
+      ElementPtr RUDPMessaging::toDebug(IRUDPMessagingPtr messaging)
       {
-        if (!messaging) return String(includeCommaPrefix ? ", rudp channel stream=(null)" : "rudp channel stream=(null)");
+        if (!messaging) return ElementPtr();
 
         RUDPMessagingPtr pThis = RUDPMessaging::convert(messaging);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -277,10 +278,10 @@ namespace openpeer
                                                     )
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DEBUG(log("notified of channel state change") + ", channel ID=" + string(channel->getID()) + ", state=" + IRUDPChannel::toString(state))
+        ZS_LOG_DEBUG(log("notified of channel state change") + ZS_PARAM("channel ID", channel->getID()) + ZS_PARAM("state", IRUDPChannel::toString(state)))
 
         if (channel != mChannel) {
-          ZS_LOG_WARNING(Debug, log("notified of channel state change for obsolete channel (thus ignoring)") + ", expecting channel=" + (mChannel ? string(mChannel->getID()) : String("(null)")))
+          ZS_LOG_WARNING(Debug, log("notified of channel state change for obsolete channel (thus ignoring)") + ZS_PARAM("expecting channel", mChannel ? mChannel->getID() : 0))
           return;
         }
 
@@ -363,48 +364,58 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPMessaging::log(const char *message) const
+      Log::Params RUDPMessaging::log(const char *message) const
       {
-        return String("RUDPMessaging [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RUDPMessaging");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      String RUDPMessaging::getDebugValueString(bool includeCommaPrefix) const
+      Log::Params RUDPMessaging::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr RUDPMessaging::toDebug() const
       {
         AutoRecursiveLock lock(mLock);
-        bool firstTime = !includeCommaPrefix;
-        return
 
-        Helper::getDebugValue("rudp messaging ID", string(mID), firstTime) +
+        ElementPtr resultEl = Element::create("RUDPMessaging");
 
-        Helper::getDebugValue("state", IRUDPMessaging::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        IHelper::debugAppend(resultEl, "id", mID);
 
-        Helper::getDebugValue("delegate", mDelegate ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "state", IRUDPMessaging::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
-        Helper::getDebugValue("outer receive stream", mOuterReceiveStream ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("outer send stream", mOuterSendStream ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
 
-        Helper::getDebugValue("wire receive stream", mWireReceiveStream ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("wire send stream", mWireSendStream ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "outer receive stream", (bool)mOuterReceiveStream);
+        IHelper::debugAppend(resultEl, "outer send stream", (bool)mOuterSendStream);
 
-        Helper::getDebugValue("outer receive stream subscription", mOuterReceiveStreamSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("outer send stream subscription", mOuterSendStreamSubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "wire receive stream", (bool)mWireReceiveStream);
+        IHelper::debugAppend(resultEl, "wire send stream", (bool)mWireSendStream);
 
-        Helper::getDebugValue("wire receive stream subscription", mWireReceiveStreamSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("wire send stream subscription", mWireSendStreamSubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "outer receive stream subscription", (bool)mOuterReceiveStreamSubscription);
+        IHelper::debugAppend(resultEl, "outer send stream subscription", (bool)mOuterSendStreamSubscription);
 
-        Helper::getDebugValue("informed outer receive ready", mInformedOuterReceiveReady ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("informed wire send ready", mInformedWireSendReady ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "wire receive stream subscription", (bool)mWireReceiveStreamSubscription);
+        IHelper::debugAppend(resultEl, "wire send stream subscription", (bool)mWireSendStreamSubscription);
 
-        Helper::getDebugValue("graceful shutdown reference", mGracefulShutdownReference ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "informed outer receive ready", mInformedOuterReceiveReady);
+        IHelper::debugAppend(resultEl, "informed wire send ready", mInformedWireSendReady);
 
-        Helper::getDebugValue("channel", mChannel ? string(mChannel->getID()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "graceful shutdown reference", (bool)mGracefulShutdownReference);
 
-        Helper::getDebugValue("next message size (bytes)", 0 != mNextMessageSizeInBytes ? string(mNextMessageSizeInBytes) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "channel", mChannel ? mChannel->getID() : 0);
 
-        Helper::getDebugValue("max message size (bytes)", 0 != mMaxMessageSizeInBytes ? string(mNextMessageSizeInBytes) : String(), firstTime);
+        IHelper::debugAppend(resultEl, "next message size (bytes)", mNextMessageSizeInBytes);
+
+        IHelper::debugAppend(resultEl, "max message size (bytes)", mMaxMessageSizeInBytes);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -415,7 +426,7 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DEBUG(log("step") + getDebugValueString())
+        ZS_LOG_DEBUG(debug("step"))
 
         if (!stepSendData()) return;
         if (!stepReceiveData()) return;
@@ -441,7 +452,7 @@ namespace openpeer
           ((DWORD *)dest)[0] = htonl(message->SizeInBytes());
           memcpy(&(dest[sizeof(DWORD)]), message->BytePtr(), message->SizeInBytes());
 
-          ZS_LOG_TRACE(log("sending buffer") + ", message size=" + string(message->SizeInBytes()))
+          ZS_LOG_TRACE(log("sending buffer") + ZS_PARAM("message size", message->SizeInBytes()))
           mWireSendStream->write(buffer);
         }
 
@@ -471,7 +482,7 @@ namespace openpeer
           size_t available = mWireReceiveStream->getTotalReadSizeAvailableInBytes();
 
           if (available < sizeof(DWORD) + bufferSize) {
-            ZS_LOG_TRACE(log("not enough data available to read") + ", available=" + string(available) + ", buffer size=" + string(bufferSize))
+            ZS_LOG_TRACE(log("not enough data available to read") + ZS_PARAM("available", available) + ZS_PARAM("buffer size", bufferSize))
             break;
           }
 
@@ -483,7 +494,7 @@ namespace openpeer
             mWireReceiveStream->read(message->BytePtr(), bufferSize);
           }
 
-          ZS_LOG_TRACE(log("message is read") + ", size=" + string(bufferSize))
+          ZS_LOG_TRACE(log("message is read") + ZS_PARAM("size", bufferSize))
 
           if (bufferSize > 0) {
             mOuterReceiveStream->write(message);
@@ -534,7 +545,7 @@ namespace openpeer
       void RUDPMessaging::setState(RUDPMessagingStates state)
       {
         if (state == mCurrentState) return;
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 
@@ -560,19 +571,19 @@ namespace openpeer
 
         if ((isShuttingDown()) ||
             (isShutdown())) {
-          ZS_LOG_WARNING(Detail, log("already shutting down thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("already shutting down thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
 
       //-----------------------------------------------------------------------
@@ -611,9 +622,9 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String IRUDPMessaging::toDebugString(IRUDPMessagingPtr messaging, bool includeCommaPrefix)
+    ElementPtr IRUDPMessaging::toDebug(IRUDPMessagingPtr messaging)
     {
-      return internal::RUDPMessaging::toDebugString(messaging, includeCommaPrefix);
+      return internal::RUDPMessaging::toDebug(messaging);
     }
 
     //-------------------------------------------------------------------------

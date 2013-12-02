@@ -117,7 +117,7 @@ namespace openpeer
         static HTTPPtr singleton();
         static HTTPPtr create();
 
-        String log(const char *message);
+        Log::Params log(const char *message) const;
 
         void cancel();
 
@@ -224,7 +224,7 @@ namespace openpeer
           #pragma mark HTTP::HTTPQuery => (internal)
           #pragma mark
 
-          String log(const char *message) const;
+          Log::Params log(const char *message) const;
           RecursiveLock &getLock() const;
 
           static size_t writeHeader(

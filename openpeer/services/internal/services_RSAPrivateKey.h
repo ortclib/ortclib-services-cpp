@@ -112,7 +112,7 @@ namespace openpeer
         #pragma mark RSAPrivateKey => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
 
         virtual SecureByteBlockPtr sign(
                                         const BYTE *inBuffer,

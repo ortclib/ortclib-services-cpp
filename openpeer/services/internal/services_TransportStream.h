@@ -101,7 +101,7 @@ namespace openpeer
         #pragma mark TransportStream => ITransportStream
         #pragma mark
 
-        static String toDebugString(ITransportStreamPtr stream, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(ITransportStreamPtr stream);
 
         static TransportStreamPtr create(
                                          ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
@@ -228,9 +228,10 @@ namespace openpeer
         #pragma mark
 
         RecursiveLock &getLock() const;
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         bool isShutdown() const {return mShutdown;}
 

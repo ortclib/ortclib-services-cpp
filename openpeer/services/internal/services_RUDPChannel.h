@@ -226,7 +226,7 @@ namespace openpeer
         #pragma mark RUDPChannel => IRUDPChannel
         #pragma mark
 
-        static String toDebugString(IRUDPChannelPtr channel, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IRUDPChannelPtr channel);
 
         virtual PUID getID() const {return mID;}
 
@@ -406,13 +406,15 @@ namespace openpeer
         #pragma mark RUDPChannel => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+
         void fix(STUNPacketPtr stun) const;
 
         bool isShuttingDown() {return RUDPChannelState_ShuttingDown == mCurrentState;}
         bool isShutdown() {return RUDPChannelState_Shutdown == mCurrentState;}
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void cancel(bool waitForAllDataToSend);
         void step();

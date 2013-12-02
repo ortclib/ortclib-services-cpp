@@ -37,6 +37,7 @@
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
 #include <zsLib/Event.h>
+#include <zsLib/XML.h>
 
 #include <boost/thread.hpp>
 
@@ -201,9 +202,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String HTTP::log(const char *message)
+      Log::Params HTTP::log(const char *message) const
       {
-        return String("HTTP [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("HTTP");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -255,7 +258,7 @@ namespace openpeer
         }
 
         if (0 != errorCode) {
-          ZS_LOG_ERROR(Basic, log("SocketMonitor: Could not wake up socket monitor. This will cause a delay in the socket monitor response time") + ", error=" + (string(errorCode)))
+          ZS_LOG_ERROR(Basic, log("Could not wake up socket monitor. This will cause a delay in the socket monitor response time") + ZS_PARAM("error", errorCode))
         }
       }
 
@@ -306,7 +309,7 @@ namespace openpeer
           if (tries > 10)
             useIPv6 = (tries%2 == 0);   // after 10 tries, start trying to bind using IPv4
 
-          ZS_THROW_BAD_STATE_MSG_IF(tries > 500, log("Unable to allocate any loopback ports for a wake-up socket"))
+          ZS_THROW_BAD_STATE_MSG_IF(tries > 500, log("unable to allocate any loopback ports for a wake-up socket"))
         }
       }
 
@@ -326,7 +329,7 @@ namespace openpeer
 
           HTTPQueryMap::iterator found = mPendingAddQueries.find(query->getID());
           if (found != mPendingAddQueries.end()) {
-            ZS_LOG_TRACE(log("removing query") + ", query=" + string(query->getID()))
+            ZS_LOG_TRACE(log("removing query") + ZS_PARAM("query", query->getID()))
             mPendingAddQueries.erase(found);
           }
 
@@ -334,7 +337,7 @@ namespace openpeer
           if (found != mQueries.end()) {
             CURL *curl = query->getCURL();
             if (NULL != curl) {
-              ZS_LOG_TRACE(log("removing multi query handle") + ", query=" + string(query->getID()))
+              ZS_LOG_TRACE(log("removing multi query handle") + ZS_PARAM("query", query->getID()))
               curl_multi_remove_handle(mMultiCurl, curl);
             }
             query->cleanupCurl();
@@ -342,7 +345,7 @@ namespace openpeer
             if (NULL != curl) {
               HTTPCurlMap::iterator foundCurl = mCurlMap.find(curl);
               if (foundCurl != mCurlMap.end()) {
-                ZS_LOG_TRACE(log("removing from curl handle map") + ", query=" + string(query->getID()))
+                ZS_LOG_TRACE(log("removing from curl handle map") + ZS_PARAM("query", query->getID()))
                 mCurlMap.erase(curl);
               }
             }
@@ -356,14 +359,14 @@ namespace openpeer
           {
             HTTPQueryPtr &query = (*iter).second;
 
-            ZS_LOG_TRACE(log("pending query preparing") + ", query=" + string(query->getID()))
+            ZS_LOG_TRACE(log("pending query preparing") + ZS_PARAM("query", query->getID()))
 
             query->prepareCurl();
             CURL *curl = query->getCURL();
 
             if (curl) {
               if (CURLM_OK != curl_multi_add_handle(mMultiCurl, curl)) {
-                ZS_LOG_ERROR(Detail, log("failed to add query handle to multi curl") + ", query=" + string(query->getID()))
+                ZS_LOG_ERROR(Detail, log("failed to add query handle to multi curl") + ZS_PARAM("query", query->getID()))
                 curl_multi_remove_handle(mMultiCurl, curl);
                 query->cleanupCurl();
                 curl = NULL;
@@ -371,7 +374,7 @@ namespace openpeer
             }
 
             if (curl) {
-              ZS_LOG_TRACE(log("pending query remembering curl mapping") + ", query=" + string(query->getID()))
+              ZS_LOG_TRACE(log("pending query remembering curl mapping") + ZS_PARAM("query", query->getID()))
               mQueries[query->getID()] = query;
               mCurlMap[curl] = query;
             }
@@ -383,7 +386,7 @@ namespace openpeer
           for (HTTPQueryMap::iterator iter = mPendingAddQueries.begin(); iter != mPendingAddQueries.end(); ++iter)
           {
             HTTPQueryPtr &query = (*iter).second;
-            ZS_LOG_WARNING(Debug, log("pending query being shutdown (because of shutdown)") + ", query=" + string(query->getID()))
+            ZS_LOG_WARNING(Debug, log("pending query being shutdown (because of shutdown)") + ZS_PARAM("query", query->getID()))
             query->cleanupCurl();
           }
 
@@ -394,7 +397,7 @@ namespace openpeer
             HTTPQueryPtr &query = (*iter).second;
             CURL *curl = query->getCURL();
             if (curl) {
-              ZS_LOG_WARNING(Debug, log("pending query being removed from multi curl (because of shutdown)") + ", query=" + string(query->getID()))
+              ZS_LOG_WARNING(Debug, log("pending query being removed from multi curl (because of shutdown)") + ZS_PARAM("query", query->getID()))
               curl_multi_remove_handle(mMultiCurl, curl);
             }
             query->cleanupCurl();
@@ -434,7 +437,7 @@ namespace openpeer
         if (event)
           event->wait();
 
-        ZS_LOG_TRACE(log("monitor begin for query") + ", query=" + string(query->getID()))
+        ZS_LOG_TRACE(log("monitor begin for query") + ZS_PARAM("query", query->getID()))
       }
 
       //-----------------------------------------------------------------------
@@ -454,7 +457,7 @@ namespace openpeer
         if (event)
           event->wait();
 
-        ZS_LOG_TRACE(log("monitor end for query") + ", query=" + string(query->getID()))
+        ZS_LOG_TRACE(log("monitor end for query") + ZS_PARAM("query", query->getID()))
       }
 
       //-----------------------------------------------------------------------
@@ -503,7 +506,7 @@ namespace openpeer
             int maxfd = -1;
             CURLMcode result = curl_multi_fdset(mMultiCurl, &fdread, &fdwrite, &fdexcep, &maxfd);
             if (result != CURLM_OK) {
-              ZS_LOG_ERROR(Basic, log("failed multi-select") + ", result=" + string(result) + ", error=" + curl_multi_strerror(result))
+              ZS_LOG_ERROR(Basic, log("failed multi-select") + ZS_PARAM("result", result) + ZS_PARAM("error", curl_multi_strerror(result)))
               mShouldShutdown = true;
             }
 
@@ -537,7 +540,7 @@ namespace openpeer
 
           int result = select(zsLib::INVALID_SOCKET == highestSocket ? 0 : (highestSocket+1), &fdread, &fdwrite, &fdexcep, &timeout);
 
-          ZS_LOG_INSANE(log("curl multi select") + ", result=" + string(result))
+          ZS_LOG_INSANE(log("curl multi select") + ZS_PARAM("result", result))
 
           // select completed, do notifications from select
           {
@@ -592,7 +595,7 @@ namespace openpeer
 
                     if (found != mCurlMap.end()) {
                       HTTPQueryPtr &query = (*found).second;
-                      ZS_LOG_TRACE(log("curl multi select done") + ", query=" + string(query->getID()))
+                      ZS_LOG_TRACE(log("curl multi select done") + ZS_PARAM("query", query->getID()))
 
                       query->notifyComplete(msg->data.result);
 
@@ -950,21 +953,22 @@ namespace openpeer
 
         if (ZS_IS_LOGGING(Debug)) {
           ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))
-          ZS_LOG_BASIC(log("INFO") + ", URL=" + mURL)
-          ZS_LOG_BASIC(log("INFO") + ", method=" + (mIsPost ? "POST" : "GET"))
-          ZS_LOG_BASIC(log("INFO") + ", user agent=" + mUserAgent)
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("URL", mURL))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("method", (mIsPost ? "POST" : "GET")))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("user agent", mUserAgent))
           if ((mIsPost) &&
               (mPostData.size() > 0)) {
-            ZS_LOG_BASIC(log("INFO") + ", content type=" + mMimeType)
-            ZS_LOG_BASIC(log("INFO") + ", posted length=" + string(mPostData.size()))
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("content type", mMimeType))
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("posted length", mPostData.size()))
           }
           if (Duration() != mTimeout) {
-            ZS_LOG_BASIC(log("INFO") + ", timeout (ms)=" + string(mTimeout.total_milliseconds()))
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout.total_milliseconds()))
           }
           ZS_LOG_BASIC("------------------------------------HTTP INFO----------------------------------")
           if (mIsPost) {
             if (mPostData.size() > 0) {
-              ZS_LOG_BASIC(log("POST DATA=") + "\n" + ((const char *)(mPostData.BytePtr())))  // safe to cast BYTE * as const char * because buffer is NUL terminated
+              String base64 = IHelper::convertToBase64(mPostData);
+              ZS_LOG_BASIC(log("POST DATA") + ZS_PARAM("wire out", base64)) // safe to cast BYTE * as const char * because buffer is NUL terminated
             }
             ZS_LOG_BASIC("------------------------------------HTTP INFO----------------------------------")
           }
@@ -1007,7 +1011,7 @@ namespace openpeer
             } else {
               mResponseCode = HTTPStatusCode_ClientClosedRequest;
             }
-            ZS_LOG_DEBUG(log("manually result error") + ", error=" + toString(toStatusCode(mResponseCode)))
+            ZS_LOG_DEBUG(log("manually result error") + ZS_PARAM("error", toString(toStatusCode(mResponseCode))))
           }
         }
 
@@ -1015,10 +1019,10 @@ namespace openpeer
           ZS_LOG_BASIC(log("----------------------------------HTTP COMPLETE--------------------------------"))
           bool successful = (((mResponseCode >= 200) && (mResponseCode < 400)) &&
                              (CURLE_OK == mResultCode));
-          ZS_LOG_BASIC(log("INFO") + ", success=" + (successful ? "TRUE" : "FALSE"))
-          ZS_LOG_BASIC(log("INFO") + ", HTTP response code=" + string(mResponseCode))
-          ZS_LOG_BASIC(log("INFO") + ", CURL result code=" + string(mResultCode))
-          ZS_LOG_BASIC(log("INFO") + ", CURL error message=" + (CSTR)(mErrorBuffer.BytePtr()))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("success", successful))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("HTTP response code", mResponseCode))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("CURL result code", mResultCode))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("CURL error message", (CSTR)(mErrorBuffer.BytePtr())))
           ZS_LOG_BASIC(log("----------------------------------HTTP COMPLETE--------------------------------"))
         }
         cleanupCurl();
@@ -1033,9 +1037,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String HTTP::HTTPQuery::log(const char *message) const
+      Log::Params HTTP::HTTPQuery::log(const char *message) const
       {
-        return String("HTTPQuery [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("HTTPQuery");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -1078,7 +1084,7 @@ namespace openpeer
           String value = ((CSTR)(buffer.BytePtr()));
           value.trim();
 
-          ZS_LOG_BASIC(pThis->log("HEADER=") + value)
+          ZS_LOG_BASIC(pThis->log("HEADER") + ZS_PARAM("value", value))
 
           if (buffer.size() > 0) {
             char letter = (char)(*(buffer.BytePtr()));
@@ -1130,7 +1136,9 @@ namespace openpeer
           buffer.CleanNew(size * nmemb + sizeof(char));
           memcpy(buffer.BytePtr(), ptr, size * nmemb);
 
-          ZS_LOG_BASIC(pThis->log("BODY=") + "\n" + ((const char *)(buffer.BytePtr())))
+          String base64 = IHelper::convertToBase64(buffer);
+
+          ZS_LOG_BASIC(pThis->log("BODY") + ZS_PARAM("wire in", base64))
           ZS_LOG_BASIC(pThis->log("-----------------------------HTTP BODY DATA RECEIVED---------------------------"))
         }
 
@@ -1148,6 +1156,14 @@ namespace openpeer
         }
 
         return size*nmemb;
+      }
+
+      //-----------------------------------------------------------------------
+      static Log::Params slogQuery(const char *message, PUID id)
+      {
+        ElementPtr objectEl = Element::create("HTTPQuery");
+        IHelper::debugAppend(objectEl, "id", id);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -1176,7 +1192,7 @@ namespace openpeer
 
         PUID id = (PUID)((PTRNUMBER)userdata);
 
-        ZS_LOG_INSANE("HTTPQuery [" + string(id) + "] CURL debug, type=" + typeStr + ", data=" + (CSTR)raw.BytePtr())
+        ZS_LOG_INSANE(slogQuery("CURL debug", id) + ZS_PARAM("type", typeStr) + ZS_PARAM("data", (CSTR)raw.BytePtr()))
 
         return 0;
       }

@@ -85,7 +85,7 @@ namespace openpeer
 
       static const char *toString(ICESocketSessionShutdownReasons reason);
 
-      static String toDebugString(IICESocketSessionPtr session, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(IICESocketSessionPtr session);
 
       virtual PUID getID() const = 0;
 

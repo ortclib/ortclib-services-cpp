@@ -139,7 +139,7 @@ namespace openpeer
         #pragma mark STUNDiscovery => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
 
         void step();
         bool hasContactedServerBefore(const IPAddress &server);

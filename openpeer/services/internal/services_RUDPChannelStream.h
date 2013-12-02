@@ -123,7 +123,7 @@ namespace openpeer
         #pragma mark RUDPChannelStream => IRUDPChannelStream
         #pragma mark
 
-        static String toDebugString(IRUDPChannelStreamPtr stream, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IRUDPChannelStreamPtr stream);
 
         static RUDPChannelStreamPtr create(
                                            IMessageQueuePtr queue,
@@ -219,11 +219,13 @@ namespace openpeer
         #pragma mark RUDPChannelStream => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+
         bool isShuttingDown() {return RUDPChannelStreamState_ShuttingDown == mCurrentState;}
         bool isShutdown() {return RUDPChannelStreamState_Shutdown == mCurrentState;}
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void cancel();
         void setState(RUDPChannelStreamStates state);

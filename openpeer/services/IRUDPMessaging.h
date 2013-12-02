@@ -79,8 +79,8 @@ namespace openpeer
       static const char *toString(RUDPMessagingShutdownReasons reason);
 
       //-----------------------------------------------------------------------
-      // PURPOSE: returns a debug string containing internal object state
-      static String toDebugString(IRUDPMessagingPtr messaging, bool includeCommaPrefix = true);
+      // PURPOSE: returns a debug object containing internal object state
+      static ElementPtr toDebug(IRUDPMessagingPtr messaging);
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an RUDP listener by accepting

@@ -62,7 +62,7 @@ namespace openpeer
 
       static const char *toString(Endians endian);
 
-      static String toDebugString(ITransportStreamPtr stream, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(ITransportStreamPtr stream);
 
       static ITransportStreamPtr create(
                                         ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),

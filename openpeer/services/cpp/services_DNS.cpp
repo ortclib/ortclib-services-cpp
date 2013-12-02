@@ -33,10 +33,11 @@
 #include <openpeer/services/internal/services_DNS.h>
 #include <openpeer/services/internal/services_DNSMonitor.h>
 #include <openpeer/services/internal/services_Helper.h>
-#include <zsLib/helpers.h>
 
 #include <cryptopp/osrng.h>
 
+#include <zsLib/helpers.h>
+#include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
 
@@ -484,12 +485,12 @@ namespace openpeer
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark DNSQuery => (internal)
+        #pragma mark DNSQuery => (internal/derived)
         #pragma mark
 
         //---------------------------------------------------------------------
         DNSQuery(IDNSDelegatePtr delegate) :
-          mID(zsLib::createPUID())
+          mObjectName("DNSQuery")
         {
           ZS_THROW_INVALID_USAGE_IF(!delegate)
           IMessageQueuePtr queue = Helper::getServiceQueue();
@@ -506,6 +507,14 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         ~DNSQuery() { mThisWeak.reset(); cancel(); }
+
+        //---------------------------------------------------------------------
+        Log::Params log(const char *message) const
+        {
+          ElementPtr objectEl = Element::create(mObjectName);
+          IHelper::debugAppend(objectEl, "id", mID);
+          return Log::Params(message, objectEl);
+        }
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -567,8 +576,9 @@ namespace openpeer
         #pragma mark
 
         DNSMonitorPtr mMonitor;
-        PUID mID;
+        AutoPUID mID;
         DNSQueryWeakPtr mThisWeak;
+        const char *mObjectName;
 
         IDNSDelegatePtr mDelegate;
 
@@ -590,7 +600,12 @@ namespace openpeer
       class DNSAQuery : public DNSQuery
       {
       protected:
-        DNSAQuery(IDNSDelegatePtr delegate, const char *name) : DNSQuery(delegate), mName(name) {}
+        DNSAQuery(IDNSDelegatePtr delegate, const char *name) :
+          DNSQuery(delegate),
+          mName(name)
+        {
+          mObjectName = "DNSAQuery";
+        }
 
       public:
         //---------------------------------------------------------------------
@@ -616,7 +631,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(getLock());
           if (!mQuery) {
-            ZS_LOG_WARNING(Detail, String("DNSAQuery [") + string(mID) + "] A record lookup was cancelled before result arrived" + ", name=" + mName)
+            ZS_LOG_WARNING(Detail, log("A record lookup was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
           }
           done();
@@ -627,10 +642,10 @@ namespace openpeer
             for (IDNS::AResult::IPAddressList::iterator iter = mA->mIPAddresses.begin(); iter != mA->mIPAddresses.end(); ++iter)
             {
               IPAddress &ipAddress = (*iter);
-              ZS_LOG_DEBUG(String("DNSAQuery [") + string(mID) + "] A record found: " + ipAddress.string())
+              ZS_LOG_DEBUG(log("A record found") + ZS_PARAM("ip", ipAddress.string()))
             }
           } else {
-            ZS_LOG_DEBUG(String("DNSAQuery [") + string(mID) + "] A record lookup failed" + ", name=" + mName)
+            ZS_LOG_DEBUG(log("A record lookup failed") + ZS_PARAM("name", mName))
           }
 
           try {
@@ -660,7 +675,12 @@ namespace openpeer
       class DNSAAAAQuery : public DNSQuery
       {
       protected:
-        DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name) : DNSQuery(delegate), mName(name) {}
+        DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name) :
+          DNSQuery(delegate),
+          mName(name)
+        {
+          mObjectName = "DNSAAAAQuery";
+        }
 
       public:
         //---------------------------------------------------------------------
@@ -686,7 +706,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(getLock());
           if (!mQuery) {
-            ZS_LOG_WARNING(Detail, String("DNSAAAAQuery [") + string(mID) + "] AAAA was cancelled before result arrived" + ", name=" + mName)
+            ZS_LOG_WARNING(Detail, log("AAAA was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
           }
           done();
@@ -697,10 +717,10 @@ namespace openpeer
             for (IDNS::AResult::IPAddressList::iterator iter = mAAAA->mIPAddresses.begin(); iter != mAAAA->mIPAddresses.end(); ++iter)
             {
               IPAddress &ipAddress = (*iter);
-              ZS_LOG_DEBUG(String("DNSAAAAQuery [") + string(mID) + "] AAAA record found: " + ipAddress.string())
+              ZS_LOG_DEBUG(log("AAAA record found") + ZS_PARAM("ip", ipAddress.string()))
             }
           } else {
-            ZS_LOG_DEBUG(String("DNSAAAAQuery [") + string(mID) + "] AAAA record lookup failed" + ", name=" + mName)
+            ZS_LOG_DEBUG(log("AAAA record lookup failed") + ZS_PARAM("name", mName))
           }
 
           try {
@@ -709,6 +729,7 @@ namespace openpeer
           catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -739,7 +760,9 @@ namespace openpeer
           mName(name),
           mService(service),
           mProtocol(protocol)
-        {}
+        {
+          mObjectName = "DNSSRVQuery";
+        }
 
       public:
         //---------------------------------------------------------------------
@@ -769,21 +792,21 @@ namespace openpeer
         {
           AutoRecursiveLock lock(getLock());
           if (!mQuery) {
-            ZS_LOG_WARNING(Detail, String("DNSSRVQuery [") + string(mID) + "] SRV record lookup was cancelled before result arrived, name=" + mName + ", service=" + mService + ", protocol=" + mProtocol)
+            ZS_LOG_WARNING(Detail, log("SRV record lookup was cancelled before result arrived") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
             return;
           }
           done();
 
           mSRV = result;
           if (mSRV) {
-            ZS_LOG_DEBUG(String("DNSSRVQuery [") + string(mID) + "] SRV completed, name=" + mName + ", service=" + mService + ", protocol=" + mProtocol)
+            ZS_LOG_DEBUG(log("SRV completed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
             for (IDNS::SRVResult::SRVRecordList::iterator iter = mSRV->mRecords.begin(); iter != mSRV->mRecords.end(); ++iter)
             {
               SRVResult::SRVRecord &srvRecord = (*iter);
-              ZS_LOG_DEBUG(String("DNSSRVQuery [") + string(mID) + "] SRV record found, name=" + srvRecord.mName + ", port=" + string(srvRecord.mPort) + ", priority=" + string(srvRecord.mPriority) + ", weight=" + string(srvRecord.mWeight))
+              ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
             }
           } else {
-            ZS_LOG_DEBUG(String("DNSSRVQuery [") + string(mID) + "] SRV record lookup failed, name=" + mName + ", service=" + mService + ", protocol=" + mProtocol)
+            ZS_LOG_DEBUG(log("SRV record lookup failed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
           }
 
           try {
@@ -1001,7 +1024,6 @@ namespace openpeer
                             IDNS::SRVLookupTypes lookupType
                             ) :
           MessageQueueAssociator(queue),
-          mID(zsLib::createPUID()),
           mDelegate(IDNSDelegateProxy::createWeak(queue, delegate)),
           mOriginalName(name),
           mOriginalService(service),
@@ -1260,7 +1282,7 @@ namespace openpeer
 
             fixDefaultPort(srvRecord, mDefaultPort);
 
-            ZS_LOG_DEBUG(String("DNS A/AAAAA converting to SRV record: name=") + srvRecord.mName + ", port=" + string(srvRecord.mPort) + ", priority=" + string(srvRecord.mPriority) + ", weight=" + string(srvRecord.mWeight))
+            ZS_LOG_DEBUG(log("DNS A/AAAAA converting to SRV record") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
 
             data->mRecords.push_back(srvRecord);
             mSRVResult = data;
@@ -1286,6 +1308,14 @@ namespace openpeer
           report();
         }
 
+        //---------------------------------------------------------------------
+        Log::Params log(const char *message) const
+        {
+          ElementPtr objectEl = Element::create("DNSSRVResolverQuery");
+          IHelper::debugAppend(objectEl, "id", mID);
+          return Log::Params(message, objectEl);
+        }
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -1293,7 +1323,7 @@ namespace openpeer
         #pragma mark
 
         RecursiveLock mLock;
-        PUID mID;
+        AutoPUID mID;
 
         DNSSRVResolverQueryWeakPtr mThisWeak;
         IDNSDelegatePtr mDelegate;
@@ -1547,7 +1577,7 @@ namespace openpeer
           for (DNSQueryList::iterator iter = mQueries.begin(); iter != mQueries.end(); ++iter)
           {
             IDNSQueryPtr &query = (*iter);
-            ZS_LOG_DEBUG(log("cancelling DNS query") + ", query ID=" + string(query->getID()))
+            ZS_LOG_DEBUG(log("cancelling DNS query") + ZS_PARAM("query ID", query->getID()))
             query->cancel();
           }
           mDelegate.reset();
@@ -1598,10 +1628,10 @@ namespace openpeer
         virtual void onLookupCompleted(IDNSQueryPtr inQuery)
         {
           AutoRecursiveLock lock(mLock);
-          ZS_LOG_DEBUG(log("query completed") + ", query ID=" + string(inQuery->getID()))
+          ZS_LOG_DEBUG(log("query completed") + ZS_PARAM("query ID", inQuery->getID()))
 
           if (!mDelegate) {
-            ZS_LOG_WARNING(Detail, log("query result came in after delegate was gone") + ", query ID=" + string(inQuery->getID()))
+            ZS_LOG_WARNING(Detail, log("query result came in after delegate was gone") + ZS_PARAM("query ID", inQuery->getID()))
             return;
           }
 
@@ -1638,7 +1668,7 @@ namespace openpeer
           }
 
           if (mQueries.size() > 0) {
-            ZS_LOG_DEBUG(log("waiting for more queries to complete") + ", waiting total=" + string(mQueries.size()))
+            ZS_LOG_DEBUG(log("waiting for more queries to complete") + ZS_PARAM("waiting total", mQueries.size()))
             return;
           }
 
@@ -1665,9 +1695,11 @@ namespace openpeer
         #pragma mark
 
         //---------------------------------------------------------------------
-        String log(const char *message) const
+        Log::Params log(const char *message) const
         {
-          return String("DNSListQuery [") + string(mID) + "] " + message;
+          ElementPtr objectEl = Element::create("DNSListQuery");
+          IHelper::debugAppend(objectEl, "id", mID);
+          return Log::Params(message, objectEl);
         }
 
       private:
@@ -1723,11 +1755,11 @@ namespace openpeer
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv4()) {
-              ZS_LOG_DEBUG(String("DNS A record found (no resolve required): ip=") + ip.string())
+              ZS_LOG_DEBUG(log("A record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
               temp->mA = resultA;
               resultA->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_ERROR(Debug, String("DNS A record found ip but was IPv6 address for A record lookup: inut=") + name + ", result ip=" + ip.string())
+              ZS_LOG_ERROR(Debug, log("A record found ip but was IPv6 address for A record lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               temp->mAAAA = resultAAAA;
               resultAAAA->mIPAddresses.push_back(ip);
             }
@@ -1736,7 +1768,7 @@ namespace openpeer
           return temp;
         }
 
-        ZS_LOG_DEBUG(String("DNS A lookup: name=") + name)
+        ZS_LOG_DEBUG(log("A lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -1769,14 +1801,14 @@ namespace openpeer
 
           for (IPAddressList::iterator iter = ips.begin(); iter != ips.end(); ++iter) {
             const IPAddress &ip = (*iter);
-            ZS_LOG_DEBUG(String("DNS AAAA record found (no resolve required): ip=") + ip.string())
+            ZS_LOG_DEBUG(log("AAAA record found (no resolve required") + ZS_PARAM("ip", ip.string()))
           }
 
           delegate->onLookupCompleted(temp);
           return temp;
         }
 
-        ZS_LOG_DEBUG(String("DNS AAAA lookup: name=") + name)
+        ZS_LOG_DEBUG(log("AAAA lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -1812,11 +1844,11 @@ namespace openpeer
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv4()) {
-              ZS_LOG_DEBUG(String("DNS A or AAAA record found A record (no resolve required): input=") + name + ", result ip=" + ip.string())
+              ZS_LOG_DEBUG(log("A or AAAA record found A record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               temp->mA = resultA;
               resultA->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_DEBUG(String("DNS A or AAAA record found AAAA record (no resolve required): input=") + name + ", result ip=" + ip.string())
+              ZS_LOG_DEBUG(log("A or AAAA record found AAAA record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               temp->mAAAA = resultAAAA;
               resultAAAA->mIPAddresses.push_back(ip);
             }
@@ -1825,7 +1857,7 @@ namespace openpeer
           return temp;
         }
 
-        ZS_LOG_DEBUG(String("DNS A or AAAA lookup: name=") + name)
+        ZS_LOG_DEBUG(log("A or AAAA lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -1887,7 +1919,7 @@ namespace openpeer
               record.mAAAAResult = resultAAAA;
             }
 
-            ZS_LOG_DEBUG(String("DNS SRV record found SRV record (no resolve required): input=") + String(name) + ", result ip=" + ip.string())
+            ZS_LOG_DEBUG(log("SRV record found SRV record (no resolve required") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
           }
 
           result->mRecords.push_back(record);
@@ -1899,7 +1931,7 @@ namespace openpeer
           return temp;
         }
 
-        ZS_LOG_DEBUG(String("DNS SRV lookup: name=") + name + ", service=" + service + ", protocol=" + protocol + ", default port=" + string(defaultPort) + ", type=" + string((int)lookupType))
+        ZS_LOG_DEBUG(log("SRV lookup") + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("default port", defaultPort) + ZS_PARAM("type", (int)lookupType))
         
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -1912,6 +1944,12 @@ namespace openpeer
         return internal::DNSSRVQuery::create(delegate, name, service, protocol);
       }
       
+      //-----------------------------------------------------------------------
+      Log::Params DNS::log(const char *message)
+      {
+        return Log::Params(message, "DNS");
+      }
+
     }
 
     //-------------------------------------------------------------------------
@@ -2136,7 +2174,7 @@ namespace openpeer
       while (true)
       {
         if (srvResult->mRecords.size() < 1) {
-          ZS_LOG_DEBUG("DNS found no IPs to extract (i.e. end of list).")
+          ZS_LOG_DEBUG(Log::Params("DNS found no IPs to extract (i.e. end of list).", "IDNS"))
           return false;
         }
 
@@ -2155,7 +2193,7 @@ namespace openpeer
         outIP = useResult->mIPAddresses.front();
         useResult->mIPAddresses.pop_front();
 
-        ZS_LOG_DEBUG(String("DNS extracted next IP=") + outIP.string())
+        ZS_LOG_DEBUG(Log::Params("DNS extracted next IP", "IDNS") + ZS_PARAM("ip", outIP.string()))
 
         // give caller indication of which list it came from
         if (outAResult) {

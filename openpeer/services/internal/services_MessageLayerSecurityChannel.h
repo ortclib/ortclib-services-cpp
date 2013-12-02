@@ -89,10 +89,7 @@ namespace openpeer
           SecureByteBlockPtr mNextIV;
           SecureByteBlockPtr mLastIntegrity;
 
-          String getDebugValueString(
-                                     AlgorithmIndex index,
-                                     bool includeCommaPrefix = true
-                                     ) const;
+          ElementPtr toDebug(AlgorithmIndex index) const;
         };
         
         typedef std::map<AlgorithmIndex, KeyInfo> KeyMap;
@@ -125,7 +122,7 @@ namespace openpeer
         #pragma mark MessageLayerSecurityChannel => IMessageLayerSecurityChannel
         #pragma mark
 
-        static String toDebugString(IMessageLayerSecurityChannelPtr channel, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel);
 
         static MessageLayerSecurityChannelPtr create(
                                                      IMessageLayerSecurityChannelDelegatePtr delegate,
@@ -219,9 +216,10 @@ namespace openpeer
         bool isShutdown() const {return SessionState_Shutdown == mCurrentState;}
 
         RecursiveLock &getLock() const;
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
-        virtual String getDebugValueString(bool includeCommaPrefix = true) const;
+        virtual ElementPtr toDebug() const;
 
         void setState(SessionStates state);
         void setError(WORD errorCode, const char *inReason = NULL);

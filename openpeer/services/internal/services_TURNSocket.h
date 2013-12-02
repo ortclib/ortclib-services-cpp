@@ -168,7 +168,7 @@ namespace openpeer
                                     WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
                                     );
 
-        static String toDebugString(ITURNSocketPtr socket, bool includeCommaPrefix = true);
+        static ElementPtr toDebug(ITURNSocketPtr socket);
 
         virtual PUID getID() const {return mID;}
 
@@ -262,8 +262,11 @@ namespace openpeer
         bool isReady() const {return ITURNSocket::TURNSocketState_Ready ==  mCurrentState;}
         bool isShuttingDown() const {return ITURNSocket::TURNSocketState_ShuttingDown ==  mCurrentState;}
         bool isShutdown() const {return ITURNSocket::TURNSocketState_Shutdown ==  mCurrentState;}
-        String log(const char *message) const;
-        String getDebugValueString(bool includeCommaPrefix = true) const;
+
+        Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+        virtual ElementPtr toDebug() const;
+
         void fix(STUNPacketPtr stun) const;
 
         IPAddress stepGetNextServer(

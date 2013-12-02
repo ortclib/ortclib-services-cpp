@@ -153,7 +153,7 @@ namespace openpeer
         #pragma mark RUDPListener => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
         void fix(STUNPacketPtr stun) const;
 
         bool isShuttingDown() {return RUDPListenerState_ShuttingDown == mCurrentState;}

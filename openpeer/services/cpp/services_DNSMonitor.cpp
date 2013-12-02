@@ -34,6 +34,7 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/helpers.h>
+#include <zsLib/XML.h>
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -527,9 +528,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String DNSMonitor::log(const char *message) const
+      Log::Params DNSMonitor::log(const char *message) const
       {
-        return String("DNSMonitor [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("DNSMonitor");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------

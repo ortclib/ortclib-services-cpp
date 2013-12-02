@@ -53,9 +53,18 @@ namespace openpeer
       class Helper : public IHelper
       {
       public:
-        static String getDebugValue(const char *name, const String &value, bool &firstTime);
-
         static RecursiveLock &getGlobalLock();
+
+        static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
+        static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);
+        static void debugAppendNumber(ElementPtr &parentEl, const char *name, const String &value);
+        static void debugAppend(ElementPtr &parentEl, const char *name, bool value, bool ignoreIfFalse = true);
+        static void debugAppend(ElementPtr &parentEl, const Log::Param &param);
+        static void debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl);
+        static void debugAppend(ElementPtr &parentEl, ElementPtr childEl);
+
+        static String toString(ElementPtr el);
+        static ElementPtr toJSON(const char *str);
 
         static String timeToString(const Time &value);
         static Time stringToTime(const String &str);
@@ -206,6 +215,8 @@ namespace openpeer
                                      ULONG bytesPerGroup = 4,
                                      ULONG maxLineLength = 160
                                      );
+
+        static Log::Params log(const char *message);
       };
     }
   }

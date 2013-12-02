@@ -37,6 +37,7 @@
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/XML.h>
 
 #include <cryptopp/osrng.h>
 #include <cryptopp/queue.h>
@@ -187,9 +188,9 @@ namespace openpeer
       }
 
       //-------------------------------------------------------------------------
-      String IRUDPChannelStream::toDebugString(IRUDPChannelStreamPtr stream, bool includeCommaPrefix)
+      ElementPtr IRUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream)
       {
-        return IRUDPChannelStream::toDebugString(stream, includeCommaPrefix);
+        return IRUDPChannelStream::toDebug(stream);
       }
 
       //-----------------------------------------------------------------------
@@ -294,12 +295,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPChannelStream::toDebugString(IRUDPChannelStreamPtr stream, bool includeCommaPrefix)
+      ElementPtr RUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream)
       {
-        if (!stream) return String(includeCommaPrefix ? ", rudp channel stream=(null)" : "rudp channel stream=(null)");
+        if (!stream) return ElementPtr();
 
         RUDPChannelStreamPtr pThis = RUDPChannelStream::convert(stream);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -365,7 +366,7 @@ namespace openpeer
           if (mPendingReceiveData) {
             size_t size = static_cast<size_t>(mPendingReceiveData->CurrentSize());
             if (size > 0) {
-              ZS_LOG_DEBUG(log("buffered received data written to transport stream") + ", size=" + string(size))
+              ZS_LOG_DEBUG(log("buffered received data written to transport stream") + ZS_PARAM("size", size))
 
               SecureByteBlockPtr buffer(new SecureByteBlock(size));
               mPendingReceiveData->Get(buffer->BytePtr(), size);
@@ -381,7 +382,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void RUDPChannelStream::shutdown(bool shutdownOnlyOnceAllDataSent)
       {
-        ZS_LOG_DETAIL(log("shutdown called") + ", only when data sent=" + (shutdownOnlyOnceAllDataSent ? "true" : "false"))
+        ZS_LOG_DETAIL(log("shutdown called") + ZS_PARAM("only when data sent", shutdownOnlyOnceAllDataSent))
 
         if (isShutdown()) {
           ZS_LOG_DEBUG(log("shutdown called but already cancelled"))
@@ -405,7 +406,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
-        ZS_LOG_DETAIL(log("shutdown direction called") + ", state=" + string(state) + ", existing=" + string(mShutdownState))
+        ZS_LOG_DETAIL(log("shutdown direction called") + ZS_PARAM("state", string(state)) + ZS_PARAM("existing", string(mShutdownState)))
         mShutdownState = static_cast<Shutdown>(mShutdownState | state);  // you cannot stop shutting down what has already been shutting down
         if (0 != (IRUDPChannel::Shutdown_Receive & mShutdownState)) {
           // clear out the read data entirely - effectively acts as an ignore filter on the received data
@@ -424,7 +425,7 @@ namespace openpeer
       void RUDPChannelStream::holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber)
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DETAIL(log("hold sending until receive sequence number") + ", sequence number=" + sequenceToString(sequenceNumber))
+        ZS_LOG_DETAIL(log("hold sending until receive sequence number") + ZS_PARAM("sequence number", sequenceToString(sequenceNumber)))
         get(mWaitToSendUntilReceivedRemoteSequenceNumber) = sequenceNumber;
 
         if (0 == mWaitToSendUntilReceivedRemoteSequenceNumber) {
@@ -441,7 +442,7 @@ namespace openpeer
                                            bool ecnMarked
                                            )
       {
-        ZS_LOG_TRACE(log("handle packet called") + ", size=" + string(originalBufferLengthInBytes) + ", ecn=" + (ecnMarked ? "true" : "false"))
+        ZS_LOG_TRACE(log("handle packet called") + ZS_PARAM("size", originalBufferLengthInBytes) + ZS_PARAM("ecn", ecnMarked))
 
         bool fireExternalACKIfNotSent = false;
 
@@ -451,7 +452,7 @@ namespace openpeer
           if (!mDelegate) return false;
 
           if (packet->mChannelNumber != mReceivingChannelNumber) {
-            ZS_LOG_WARNING(Debug, log("incoming channel mismatch") + ", channel=" + string(mReceivingChannelNumber) + ", packet channel=" + string(packet->mChannelNumber))
+            ZS_LOG_WARNING(Debug, log("incoming channel mismatch") + ZS_PARAM("channel", mReceivingChannelNumber) + ZS_PARAM("packet channel", packet->mChannelNumber))
             return false;
           }
 
@@ -464,14 +465,14 @@ namespace openpeer
             get(mWaitToSendUntilReceivedRemoteSequenceNumber) = 0;
 
           if (sequenceNumber <= mGSNFR) {
-            ZS_LOG_WARNING(Debug, log("received duplicate packet") + ", GSNFR=" + sequenceToString(mGSNFR) + ", packet sequence number=" + sequenceToString(sequenceNumber))
+            ZS_LOG_WARNING(Debug, log("received duplicate packet") + ZS_PARAM("GSNFR", sequenceToString(mGSNFR)) + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             get(mDuplicateReceived) = true;
             return true;
           }
 
           // we can't process packets that are beyond the window in which we can process
           if (sequenceNumber > (mGSNR + OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
-            ZS_LOG_WARNING(Debug, log("received packet beyond allowed window") + ", GSNR=" + sequenceToString(mGSNR) + ", packet sequence number=" + sequenceToString(sequenceNumber))
+            ZS_LOG_WARNING(Debug, log("received packet beyond allowed window") + ZS_PARAM("GSNR", sequenceToString(mGSNR)) + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             return false;
           }
 
@@ -490,7 +491,7 @@ namespace openpeer
                       packet->isFlagSet(RUDPPacket::Flag_EC_ECNPacket)
                       );
           } catch(Exceptions::IllegalACK &) {
-            ZS_LOG_WARNING(Debug, log("received illegal ACK") + ", packet sequence number=" + sequenceToString(sequenceNumber))
+            ZS_LOG_WARNING(Debug, log("received illegal ACK") + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             setError(RUDPChannelStreamShutdownReason_IllegalStreamState, "received illegal ack");
             cancel();
             return true;
@@ -499,7 +500,7 @@ namespace openpeer
           // we handled the ack now receive the data...
           BufferedPacketMap::iterator findIter = mReceivedPackets.find(sequenceNumber);
           if (findIter != mReceivedPackets.end()) {
-            ZS_LOG_WARNING(Debug, log("received packet is duplicated and already exist in pending buffers thus dropping packet") + ", packet sequence number=" + sequenceToString(sequenceNumber))
+            ZS_LOG_WARNING(Debug, log("received packet is duplicated and already exist in pending buffers thus dropping packet") + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             // we have already received and processed this packet
             get(mDuplicateReceived) = true;
             return true;
@@ -525,7 +526,7 @@ namespace openpeer
 
               // if this packet is attempting to expand the window, only allow expansion until the last delivered packet is 3xRTT old
               if ((mLastDeliveredReadData + (mCalculatedRTT * 3)) < current) {
-                ZS_LOG_WARNING(Debug, log("last deliverd ready data too old and expanding window thus dropping packet") + ", GSNR=" + sequenceToString(mGSNR) + ", packet sequence number=" + sequenceToString(sequenceNumber))
+                ZS_LOG_WARNING(Debug, log("last deliverd ready data too old and expanding window thus dropping packet") + ZS_PARAM("GSNR", sequenceToString(mGSNR)) + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
                 return false;
               }
             }
@@ -548,7 +549,7 @@ namespace openpeer
           if (packet->isFlagSet(RUDPPacket::Flag_AR_ACKRequired))
             fireExternalACKIfNotSent = true;
 
-          ZS_LOG_TRACE(log("accepting packet into window") + ", packet sequence number=" + sequenceToString(sequenceNumber) + ", GSNR=" + sequenceToString(mGSNR) + ", GSNR parity=" + (mGSNRParity ? "on" : "off") + ", ack required=" + (fireExternalACKIfNotSent ? "true" : "false"))
+          ZS_LOG_TRACE(log("accepting packet into window") + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(mGSNR)) + ZS_PARAM("GSNR parity", (mGSNRParity ? "on" : "off")) + ZS_PARAM("ack required", fireExternalACKIfNotSent))
 
           deliverReadPackets();
 
@@ -602,11 +603,11 @@ namespace openpeer
                                                 )
       {
         ZS_LOG_TRACE(log("handle external ACK called") +
-                              ", forced ACK ID=" + string(mForceACKOfSentPacketsRequestID) +
-                              ", guarenteed delivery request ID=" + string(guarenteedDeliveryRequestID) +
-                              ", sequence number=" + sequenceToString(nextSequenceNumber) +
-                              ", GSNR=" + sequenceToString(greatestSequenceNumberReceived) +
-                              ", GSNFR=" + sequenceToString(greatestSequenceNumberFullyReceived))
+                     ZS_PARAM("forced ACK ID", mForceACKOfSentPacketsRequestID) +
+                     ZS_PARAM("guarenteed delivery request ID", guarenteedDeliveryRequestID) +
+                     ZS_PARAM("sequence number", sequenceToString(nextSequenceNumber)) +
+                     ZS_PARAM("GSNR", sequenceToString(greatestSequenceNumberReceived)) +
+                     ZS_PARAM("GSNFR", sequenceToString(greatestSequenceNumberFullyReceived)))
 
         AutoRecursiveLock lock(mLock);
         if (!mDelegate) {
@@ -667,9 +668,9 @@ namespace openpeer
             if (firstTime) {
               firstTime = false;
               ZS_LOG_TRACE(log("force ACK starting to process")  +
-                                  ", starting at ACK sequence number=" + sequenceToString(sequenceNumber) +
-                                  ", forced ACK to sequence number=" + sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber) +
-                                  ", batons available=" + string(mAvailableBurstBatons))
+                           ZS_PARAM("starting at ACK sequence number", sequenceToString(sequenceNumber)) +
+                           ZS_PARAM("forced ACK to sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)) +
+                           ZS_PARAM("batons available", mAvailableBurstBatons))
             }
 
             packet->flagForResending(mTotalPacketsToResend);  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
@@ -677,14 +678,14 @@ namespace openpeer
           }
 
           ZS_LOG_TRACE(log("forced ACK cannot ACK beyond the forced ACK point") +
-                                  ", stopped at ACK sequence number=" + sequenceToString(sequenceNumber) +
-                                  ", forced ACK to sequence number=" + sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber) +
-                                  ", batons available=" + string(mAvailableBurstBatons))
+                       ZS_PARAM("stopped at ACK sequence number", sequenceToString(sequenceNumber)) +
+                       ZS_PARAM("forced ACK to sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)) +
+                       ZS_PARAM("batons available", mAvailableBurstBatons))
         }
 
         if (mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
           // since an ACK did arrive, we can cancel this timer which ensures an ACK will arrive
-          ZS_LOG_TRACE(log("cancelling ensure data arrived timer because we did receive an ACK") + ", old timer ID=" + string(mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()))
+          ZS_LOG_TRACE(log("cancelling ensure data arrived timer because we did receive an ACK") + ZS_PARAM("old timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()))
           mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->cancel();
           mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer.reset();
         }
@@ -762,16 +763,16 @@ namespace openpeer
 
         ZS_LOG_TRACE(
                      log("get current state")
-                     + ", next sequence number=" + sequenceToString(outNextSequenceNumber)
-                     + ", GSNR=" + sequenceToString(outGreatestSequenceNumberReceived)
-                     + ", GSNFR=" + sequenceToString(outGreatestSequenceNumberFullyReceived)
-                     + ", vector=" + vectorParityField
-                     + ", vector size=" + string(outVectorSizeInBytes)
-                     + ", vp=" + (outVPFlag ? "true" : "false")
-                     + ", pg=" + (outPGFlag ? "true" : "false")
-                     + ", xp=" + (outXPFlag ? "true" : "false")
-                     + ", dp=" + (outDPFlag ? "true" : "false")
-                     + ", ec=" + (outECFlag ? "true" : "false")
+                     + ZS_PARAM("next sequence number", sequenceToString(outNextSequenceNumber))
+                     + ZS_PARAM("GSNR", sequenceToString(outGreatestSequenceNumberReceived))
+                     + ZS_PARAM("GSNFR", sequenceToString(outGreatestSequenceNumberFullyReceived))
+                     + ZS_PARAM("vector", vectorParityField)
+                     + ZS_PARAM("vector size", outVectorSizeInBytes)
+                     + ZS_PARAM("vp", outVPFlag)
+                     + ZS_PARAM("pg", outPGFlag)
+                     + ZS_PARAM("xp", outXPFlag)
+                     + ZS_PARAM("dp", outDPFlag)
+                     + ZS_PARAM("ec", outECFlag)
                      )
       }
 
@@ -795,7 +796,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void RUDPChannelStream::onTimer(TimerPtr timer)
       {
-        ZS_LOG_TRACE(log("tick") + ", timer ID=" + string(timer->getID()))
+        ZS_LOG_TRACE(log("tick") + ZS_PARAM("timer ID", timer->getID()))
 
         {
           AutoRecursiveLock lock(mLock);
@@ -804,18 +805,19 @@ namespace openpeer
           PUID ensureID = (mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer ? mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID() : 0);
           PUID addID = (mAddToAvailableBurstBatonsTimer ? mAddToAvailableBurstBatonsTimer->getID() : 0);
 
-          ZS_LOG_TRACE(log("tick") + ", comparing timer ID=" + string(timer->getID()) +
-                       ", burst ID=" + string(burstID) +
-                       ", ensure ID=" + string(ensureID) +
-                       ", addID ID=" + string(addID))
+          ZS_LOG_TRACE(log("tick") +
+                       ZS_PARAM("comparing timer ID", timer->getID()) +
+                       ZS_PARAM("burst ID", burstID) +
+                       ZS_PARAM("ensure ID", ensureID) +
+                       ZS_PARAM("addID ID", addID))
 
           if (timer == mBurstTimer) {
-            ZS_LOG_TRACE(log("burst timer is firing") + ", timer ID=" + string(timer->getID()))
+            ZS_LOG_TRACE(log("burst timer is firing") + ZS_PARAM("timer ID", timer->getID()))
             goto quickExitToSendNow;
           }
 
           if (timer == mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
-            ZS_LOG_TRACE(log("ensuring data has arrived by causing an external ACK") + ", timer ID=" + string(timer->getID()))
+            ZS_LOG_TRACE(log("ensuring data has arrived by causing an external ACK") + ZS_PARAM("timer ID", timer->getID()))
             // this is only fired once if there is data that we want to force an ACK from the remote party
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->cancel();
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer.reset();
@@ -826,19 +828,19 @@ namespace openpeer
           }
 
           if (timer == mAddToAvailableBurstBatonsTimer) {
-            ZS_LOG_TRACE(log("available burst batons timer fired") + ", timer ID=" + string(timer->getID()))
+            ZS_LOG_TRACE(log("available burst batons timer fired") + ZS_PARAM("timer ID", timer->getID()))
 
             if (0 == (rand()%2)) {
               ++mAvailableBurstBatons;
-              ZS_LOG_TRACE(log("creating a new sending burst baton now") + ", batons available=" + string(mAvailableBurstBatons))
+              ZS_LOG_TRACE(log("creating a new sending burst baton now") + ZS_PARAM("batons available", mAvailableBurstBatons))
             } else {
               ++mPacketsPerBurst;
-              ZS_LOG_TRACE(log("increasing the packets per burst") + ", packets per burst=" + string(mPacketsPerBurst))
+              ZS_LOG_TRACE(log("increasing the packets per burst") + ZS_PARAM("packets per burst", mPacketsPerBurst))
             }
             goto quickExitToSendNow;
           }
 
-          ZS_LOG_TRACE(log("unknown time has fired") + ", timer ID=" + string(timer->getID()))
+          ZS_LOG_TRACE(log("unknown time has fired") + ZS_PARAM("timer ID", timer->getID()))
         }
 
       quickExitToSendNow:
@@ -884,90 +886,100 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RUDPChannelStream::log(const char *message) const
+      Log::Params RUDPChannelStream::log(const char *message) const
       {
-        return String("RUDPChannelStream [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RUDPChannelStream");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      String RUDPChannelStream::getDebugValueString(bool includeCommaPrefix) const
+      Log::Params RUDPChannelStream::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr RUDPChannelStream::toDebug() const
       {
         AutoRecursiveLock lock(mLock);
-        bool firstTime = !includeCommaPrefix;
-        return
 
-        Helper::getDebugValue("rudp channel stream ID", string(mID), firstTime) +
+        ElementPtr resultEl = Element::create("RUDPChannelStream");
 
-        Helper::getDebugValue("delegate", mDelegate ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "id", mID);
 
-        Helper::getDebugValue("state", IRUDPChannelStream::toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", 0 != mLastError ? string(mLastError) : String(), firstTime) +
-        Helper::getDebugValue("last reason", mLastErrorReason, firstTime) +
+        IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
 
-        Helper::getDebugValue("receive stream", mReceiveStream ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("send stream", mSendStream ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "state", IRUDPChannelStream::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", mLastError);
+        IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
-        Helper::getDebugValue("send stream subscription", mSendStreamSubscription ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "receive stream", (bool)mReceiveStream);
+        IHelper::debugAppend(resultEl, "send stream", (bool)mSendStream);
 
-        Helper::getDebugValue("pending receive data", mPendingReceiveData ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "send stream subscription", (bool)mSendStreamSubscription);
 
-        Helper::getDebugValue("did receive write ready", mDidReceiveWriteReady ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "pending receive data", (bool)mPendingReceiveData);
 
-        Helper::getDebugValue("sending channel number", 0 != mSendingChannelNumber ? string(mSendingChannelNumber) : String(), firstTime) +
-        Helper::getDebugValue("receiving channel number", 0 != mReceivingChannelNumber ? string(mReceivingChannelNumber) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "did receive write ready", (bool)mDidReceiveWriteReady);
 
-        Helper::getDebugValue("minimum RTT (ms)", Duration() != mMinimumRTT ? string(mMinimumRTT.total_milliseconds()) : String(), firstTime) +
-        Helper::getDebugValue("calculated RTT (ms)", Duration() != mCalculatedRTT ? string(mCalculatedRTT.total_milliseconds()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "sending channel number", mSendingChannelNumber);
+        IHelper::debugAppend(resultEl, "receiving channel number", mReceivingChannelNumber);
 
-        Helper::getDebugValue("next sequence number", 0 != mNextSequenceNumber ? string(mNextSequenceNumber) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "minimum RTT (ms)", mMinimumRTT);
+        IHelper::debugAppend(resultEl, "calculated RTT (ms)", mCalculatedRTT);
 
-        Helper::getDebugValue("xor parity to now", mXORedParityToNow ? "1" : "0", firstTime) +
+        IHelper::debugAppend(resultEl, "next sequence number", 0 != mNextSequenceNumber ? sequenceToString(mNextSequenceNumber) : String());
 
-        Helper::getDebugValue("GSNR", 0 != mGSNR ? string(mGSNR) : String(), firstTime) +
-        Helper::getDebugValue("GSNFR", 0 != mGSNFR ? string(mGSNFR) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "xor parity to now", mXORedParityToNow ? "1" : "0");
 
-        Helper::getDebugValue("GSNR parity", mGSNRParity ? "1" : "0", firstTime) +
-        Helper::getDebugValue("xor parity to GSNFR", mXORedParityToGSNFR ? "1" : "0", firstTime) +
+        IHelper::debugAppend(resultEl, "GSNR", 0 != mGSNR ? sequenceToString(mGSNR) : String());
+        IHelper::debugAppend(resultEl, "GSNFR", 0 != mGSNFR ? sequenceToString(mGSNFR) : String());
 
-        Helper::getDebugValue("wait to send until received sequence number", 0 != mWaitToSendUntilReceivedRemoteSequenceNumber ? string(mWaitToSendUntilReceivedRemoteSequenceNumber) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "GSNR parity", mGSNRParity ? "1" : "0");
+        IHelper::debugAppend(resultEl, "xor parity to GSNFR", mXORedParityToGSNFR ? "1" : "0");
 
-        Helper::getDebugValue("shutdown state", IRUDPChannel::toString(mShutdownState), firstTime) +
+        IHelper::debugAppend(resultEl, "wait to send until received sequence number", 0 != mWaitToSendUntilReceivedRemoteSequenceNumber ? sequenceToString(mWaitToSendUntilReceivedRemoteSequenceNumber) : String());
 
-        Helper::getDebugValue("duplicate received", mDuplicateReceived ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("ECN received", mECNReceived ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "shutdown state", IRUDPChannel::toString(mShutdownState));
 
-        Helper::getDebugValue("last delivered read data", Time() != mLastDeliveredReadData ? IHelper::timeToString(mLastDeliveredReadData) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "duplicate received", mDuplicateReceived);
+        IHelper::debugAppend(resultEl, "ECN received", mECNReceived);
 
-        Helper::getDebugValue("attempting send now", mAttemptingSendNow ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "last delivered read data", mLastDeliveredReadData);
 
-        Helper::getDebugValue("sending packets", mSendingPackets.size() > 0 ? string(mSendingPackets.size()) : String(), firstTime) +
-        Helper::getDebugValue("received packets", mReceivedPackets.size() > 0 ? string(mReceivedPackets.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "attempting send now", mAttemptingSendNow);
 
-        Helper::getDebugValue("recycled buffers", mRecycleBuffers.size() > 0 ? string(mRecycleBuffers.size()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "sending packets", mSendingPackets.size());
+        IHelper::debugAppend(resultEl, "received packets", mReceivedPackets.size());
 
-        Helper::getDebugValue("random pool pos", 0 != mRandomPoolPos ? string(mRandomPoolPos) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "recycled buffers", mRecycleBuffers.size());
 
-        Helper::getDebugValue("total packets to resend", 0 != mTotalPacketsToResend ? string(mTotalPacketsToResend) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "random pool pos", mRandomPoolPos);
 
-        Helper::getDebugValue("available burst batons", 0 != mAvailableBurstBatons ? string(mAvailableBurstBatons) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "total packets to resend", mTotalPacketsToResend);
 
-        Helper::getDebugValue("burst timer", mBurstTimer ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "available burst batons", mAvailableBurstBatons);
 
-        Helper::getDebugValue("ensure data has arrived when no more burst batons available timer", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer ? String("true") : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "burst timer", (bool)mBurstTimer);
 
-        Helper::getDebugValue("add to available burst batons timer", mAddToAvailableBurstBatonsTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("add to available burst batons duration (ms)", Duration() != mAddToAvailableBurstBatonsDuation ? string(mAddToAvailableBurstBatonsDuation.total_milliseconds()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "ensure data has arrived when no more burst batons available timer", (bool)mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer);
 
-        Helper::getDebugValue("total packets per burst", 0 != mPacketsPerBurst ? string(mPacketsPerBurst) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "add to available burst batons timer", (bool)mAddToAvailableBurstBatonsTimer);
+        IHelper::debugAppend(resultEl, "add to available burst batons duration (ms)", mAddToAvailableBurstBatonsDuation);
 
-        Helper::getDebugValue("bandwidth increase frozen", mBandwidthIncreaseFrozen ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("started sending time", Time() != mStartedSendingAtTime ? string(mStartedSendingAtTime) : String(), firstTime) +
-        Helper::getDebugValue("total sending period without issues (ms)", Duration() != mTotalSendingPeriodWithoutIssues ? string(mTotalSendingPeriodWithoutIssues.total_milliseconds()) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "total packets per burst", mPacketsPerBurst);
 
-        Helper::getDebugValue("force ACKs of sent packets sending sequence number", 0 != mForceACKOfSentPacketsAtSendingSequnceNumber ? string(mForceACKOfSentPacketsAtSendingSequnceNumber) : String(), firstTime) +
-        Helper::getDebugValue("force ACKs of sent packets request ID", 0 != mForceACKOfSentPacketsRequestID ? string(mForceACKOfSentPacketsRequestID) : String(), firstTime) +
+        IHelper::debugAppend(resultEl, "bandwidth increase frozen", mBandwidthIncreaseFrozen);
+        IHelper::debugAppend(resultEl, "started sending time", mStartedSendingAtTime);
+        IHelper::debugAppend(resultEl, "total sending period without issues (ms)", mTotalSendingPeriodWithoutIssues);
 
-        Helper::getDebugValue("force ACK next time possible", mForceACKNextTimePossible ? String("true") : String(), firstTime);
+        IHelper::debugAppend(resultEl, "force ACKs of sent packets sending sequence number", 0 != mForceACKOfSentPacketsAtSendingSequnceNumber ? sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber) : String());
+        IHelper::debugAppend(resultEl, "force ACKs of sent packets request ID", mForceACKOfSentPacketsRequestID);
+
+        IHelper::debugAppend(resultEl, "force ACK next time possible", mForceACKNextTimePossible);
+
+        return resultEl;
       }
       
       //-----------------------------------------------------------------------
@@ -1021,7 +1033,7 @@ namespace openpeer
       {
         if (mCurrentState == state) return;
 
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(state))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
         mCurrentState = state;
 
         RUDPChannelStreamPtr pThis = mThisWeak.lock();
@@ -1044,19 +1056,19 @@ namespace openpeer
 
         if ((isShuttingDown()) ||
             (isShutdown())) {
-          ZS_LOG_WARNING(Detail, log("already shutting down thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("already shutting down thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         if (0 != mLastError) {
-          ZS_LOG_WARNING(Detail, log("error already set thus ignoring new error") + ", new error=" + string(errorCode) + ", new reason=" + reason + getDebugValueString())
+          ZS_LOG_WARNING(Detail, debug("error already set thus ignoring new error") + ZS_PARAM("new error", errorCode) + ZS_PARAM("new reason", reason))
           return;
         }
 
         get(mLastError) = errorCode;
         mLastErrorReason = reason;
 
-        ZS_LOG_WARNING(Detail, log("error set") + ", code=" + string(mLastError) + ", reason=" + mLastErrorReason + getDebugValueString())
+        ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
       }
 
       //-----------------------------------------------------------------------
@@ -1116,11 +1128,11 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
 
           ZS_LOG_TRACE(log("send now called") +
-                            ", available burst batons=" + string(mAvailableBurstBatons) +
-                            ", packets per burst=" + string(mPacketsPerBurst) +
-                            ", resend=" + string(mTotalPacketsToResend) +
-                            ", send size=" + string(mSendingPackets.size()) +
-                            ", write data=" + (mSendStream ? string(mSendStream->getTotalReadBuffersAvailable()) : String("0")))
+                       ZS_PARAM("available burst batons", mAvailableBurstBatons) +
+                       ZS_PARAM("packets per burst", mPacketsPerBurst) +
+                       ZS_PARAM("resend", mTotalPacketsToResend) +
+                       ZS_PARAM("send size", mSendingPackets.size()) +
+                       ZS_PARAM("write data", (mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0)))
 
           if (isShutdown()) {
             ZS_LOG_TRACE(log("already shutdown thus aborting send now"))
@@ -1130,7 +1142,7 @@ namespace openpeer
 
           // we cannot deliver data if we are waiting to send
           if (0 != mWaitToSendUntilReceivedRemoteSequenceNumber) {
-            ZS_LOG_TRACE(log("cannot send as waiting for sequence number") + ", waiting sequence number=" + sequenceToString(mWaitToSendUntilReceivedRemoteSequenceNumber))
+            ZS_LOG_TRACE(log("cannot send as waiting for sequence number") + ZS_PARAM("waiting sequence number", sequenceToString(mWaitToSendUntilReceivedRemoteSequenceNumber)))
             return false;
           }
 
@@ -1259,17 +1271,17 @@ namespace openpeer
 
                 ZS_LOG_TRACE(
                              log("generating RUDP packet ACK on first packet")
-                             + ", sequence number=" + sequenceToString(mNextSequenceNumber)
-                             + ", GSNR=" + sequenceToString(mGSNR)
-                             + ", GSNFR=" + sequenceToString(mGSNFR)
-                             + ", vector=" + vectorParityField
-                             + ", vector size=" + string(newPacket->mVectorLengthInBytes)
-                             + ", ps=" + (newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending) ? "true" : "false")
-                             + ", pg=" + (newPacket->isFlagSet(RUDPPacket::Flag_PG_ParityGSNR) ? "true" : "false")
-                             + ", xp=" + (newPacket->isFlagSet(RUDPPacket::Flag_XP_XORedParityToGSNFR) ? "true" : "false")
-                             + ", dp=" + (newPacket->isFlagSet(RUDPPacket::Flag_DP_DuplicatePacket) ? "true" : "false")
-                             + ", ec=" + (newPacket->isFlagSet(RUDPPacket::Flag_EC_ECNPacket) ? "true" : "false")
-                             + ", vp=" + (newPacket->isFlagSet(RUDPPacket::Flag_VP_VectorParity) ? "true" : "false")
+                             + ZS_PARAM("sequence number", sequenceToString(mNextSequenceNumber))
+                             + ZS_PARAM("GSNR", sequenceToString(mGSNR))
+                             + ZS_PARAM("GSNFR", sequenceToString(mGSNFR))
+                             + ZS_PARAM("vector", vectorParityField)
+                             + ZS_PARAM("vector size", newPacket->mVectorLengthInBytes)
+                             + ZS_PARAM("ps", newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending))
+                             + ZS_PARAM("pg", newPacket->isFlagSet(RUDPPacket::Flag_PG_ParityGSNR))
+                             + ZS_PARAM("xp", newPacket->isFlagSet(RUDPPacket::Flag_XP_XORedParityToGSNFR))
+                             + ZS_PARAM("dp", newPacket->isFlagSet(RUDPPacket::Flag_DP_DuplicatePacket))
+                             + ZS_PARAM("ec", newPacket->isFlagSet(RUDPPacket::Flag_EC_ECNPacket))
+                             + ZS_PARAM("vp", newPacket->isFlagSet(RUDPPacket::Flag_VP_VectorParity))
                              )
               } else {
                 // copy the vector from the first packet
@@ -1290,7 +1302,7 @@ namespace openpeer
                   (1 == packetsToSend)) {
                 newPacket->setFlag(RUDPPacket::Flag_AR_ACKRequired);
                 if (mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
-                  ZS_LOG_TRACE(log("since a newly created packet has an ACK we will cancel the current ensure timer") + ", timer ID=" + string(mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()))
+                  ZS_LOG_TRACE(log("since a newly created packet has an ACK we will cancel the current ensure timer") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()))
                   // since this packet requires an ACK this packet will act as a implicit method to hopefully get an ACK from the remote party...
                   mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->cancel();
                   mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer.reset();
@@ -1311,18 +1323,18 @@ namespace openpeer
 
               ZS_LOG_TRACE(
                            log("adding buffer to pending list")
-                           + ", sequence number=" + sequenceToString(mNextSequenceNumber)
-                           + ", packet size=" + string(packetizedLength)
-                           + ", GSNR=" + sequenceToString(mGSNR)
-                           + ", GSNFR=" + sequenceToString(mGSNFR)
-                           + ", vector size=" + string(newPacket->mVectorLengthInBytes)
-                           + ", ps=" + (newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending) ? "true" : "false")
-                           + ", pg=" + (newPacket->isFlagSet(RUDPPacket::Flag_PG_ParityGSNR) ? "true" : "false")
-                           + ", xp=" + (newPacket->isFlagSet(RUDPPacket::Flag_XP_XORedParityToGSNFR) ? "true" : "false")
-                           + ", dp=" + (newPacket->isFlagSet(RUDPPacket::Flag_DP_DuplicatePacket) ? "true" : "false")
-                           + ", ec=" + (newPacket->isFlagSet(RUDPPacket::Flag_EC_ECNPacket) ? "true" : "false")
-                           + ", ar=" + (newPacket->isFlagSet(RUDPPacket::Flag_AR_ACKRequired) ? "true" : "false")
-                           + ", vp=" + (newPacket->isFlagSet(RUDPPacket::Flag_VP_VectorParity) ? "true" : "false")
+                           + ZS_PARAM("sequence number", sequenceToString(mNextSequenceNumber))
+                           + ZS_PARAM("packet size", packetizedLength)
+                           + ZS_PARAM("GSNR", sequenceToString(mGSNR))
+                           + ZS_PARAM("GSNFR", sequenceToString(mGSNFR))
+                           + ZS_PARAM("vector size", newPacket->mVectorLengthInBytes)
+                           + ZS_PARAM("ps", newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending))
+                           + ZS_PARAM("pg", newPacket->isFlagSet(RUDPPacket::Flag_PG_ParityGSNR))
+                           + ZS_PARAM("xp", newPacket->isFlagSet(RUDPPacket::Flag_XP_XORedParityToGSNFR))
+                           + ZS_PARAM("dp", newPacket->isFlagSet(RUDPPacket::Flag_DP_DuplicatePacket))
+                           + ZS_PARAM("ec", newPacket->isFlagSet(RUDPPacket::Flag_EC_ECNPacket))
+                           + ZS_PARAM("ar", newPacket->isFlagSet(RUDPPacket::Flag_AR_ACKRequired))
+                           + ZS_PARAM("vp", newPacket->isFlagSet(RUDPPacket::Flag_VP_VectorParity))
                            )
 
               if (mSendingPackets.size() == 0) {
@@ -1348,10 +1360,10 @@ namespace openpeer
               goto sendNowQuickExit;
             }
 
-            ZS_LOG_TRACE(log("attempting to (re)send packet") + ", sequence number=" + sequenceToString(attemptToDeliver->mSequenceNumber) + ", packets to send=" + string(packetsToSend))
+            ZS_LOG_TRACE(log("attempting to (re)send packet") + ZS_PARAM("sequence number", sequenceToString(attemptToDeliver->mSequenceNumber)) + ZS_PARAM("packets to send", packetsToSend))
             bool sent = sendNowHelper(delegate, attemptToDeliverBuffer.get(), attemptToDeliverBufferSizeInBytes);
             if (!sent) {
-              ZS_LOG_WARNING(Trace, log("unable to send data onto wire as data failed to send") + ", sequence number=" + sequenceToString(attemptToDeliver->mSequenceNumber))
+              ZS_LOG_WARNING(Trace, log("unable to send data onto wire as data failed to send") + ZS_PARAM("sequence number", sequenceToString(attemptToDeliver->mSequenceNumber)))
               if (firstPacketCreated == attemptToDeliver) {
                 // failed to deliver any packet over the wire...
                 firstPacketCreated.reset();
@@ -1403,14 +1415,14 @@ namespace openpeer
         ULONG writeBuffers = mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0;
 
         ZS_LOG_TRACE(log("starting send now cleaup routine") +
-                            ", packets to resend=" + string(mTotalPacketsToResend) +
-                            ", available batons=" + string(mAvailableBurstBatons) +
-                            ", packets per burst=" + string(mPacketsPerBurst) +
-                            ", write size=" + string(writeBuffers) +
-                            ", sending size=" + string(mSendingPackets.size()) +
-                            ", force ACK next time possible=" + (mForceACKNextTimePossible ? "true" : "false") +
-                            ", force ACK ID=" + string(mForceACKOfSentPacketsRequestID) +
-                            ", forced sequence number=" + sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber))
+                     ZS_PARAM("packets to resend", mTotalPacketsToResend) +
+                     ZS_PARAM("available batons", mAvailableBurstBatons) +
+                     ZS_PARAM("packets per burst", mPacketsPerBurst) +
+                     ZS_PARAM("write size", writeBuffers) +
+                     ZS_PARAM("sending size", mSendingPackets.size()) +
+                     ZS_PARAM("force ACK next time possible", mForceACKNextTimePossible) +
+                     ZS_PARAM("force ACK ID", mForceACKOfSentPacketsRequestID) +
+                     ZS_PARAM("forced sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)))
 
         if (isShutdown()) {
           ZS_LOG_TRACE(log("already shutdown thus aborting"))
@@ -1508,11 +1520,11 @@ namespace openpeer
               burstDuration = Milliseconds(OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS);
             }
 
-            ZS_LOG_TRACE(log("creating a burst timer since there is data to send and available batons to send it") + ", timer ID=" + string(mBurstTimer->getID()) + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()) + ", burst duration=" + string(burstDuration.total_milliseconds()) + ", calculated RTT=" + string(mCalculatedRTT.total_milliseconds()))
+            ZS_LOG_TRACE(log("creating a burst timer since there is data to send and available batons to send it") + ZS_PARAM("timer ID", mBurstTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("burst duration", burstDuration.total_milliseconds()) + ZS_PARAM("calculated RTT", mCalculatedRTT.total_milliseconds()))
           }
         } else {
           if (mBurstTimer) {
-            ZS_LOG_TRACE(log("cancelling the burst timer since there are no batons available or there is no more data to send") + ", timer ID=" + string(mBurstTimer->getID()) + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()))
+            ZS_LOG_TRACE(log("cancelling the burst timer since there are no batons available or there is no more data to send") + ZS_PARAM("timer ID", mBurstTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
 
             mBurstTimer->cancel();
             mBurstTimer.reset();
@@ -1526,11 +1538,11 @@ namespace openpeer
             // The timer is set to fire at 1.5 x calculated RTT
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer = Timer::create(mThisWeak.lock(), ensureDuration, false);
 
-            ZS_LOG_TRACE(log("starting ensure timer to make sure packets get acked") + ", timer ID=" + string(mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()) + ", ensure duration=" + string(ensureDuration.total_milliseconds()) + ", calculated RTT=" + string(mCalculatedRTT.total_milliseconds()))
+            ZS_LOG_TRACE(log("starting ensure timer to make sure packets get acked") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("ensure duration", ensureDuration.total_milliseconds()) + ZS_PARAM("calculated RTT", mCalculatedRTT.total_milliseconds()))
           }
         } else {
           if (mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
-            ZS_LOG_TRACE(log("stopping ensure timer as batons available for sending still and there is outstanding unacked send data in the buffer") + ", timer ID=" + string(mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()))
+            ZS_LOG_TRACE(log("stopping ensure timer as batons available for sending still and there is outstanding unacked send data in the buffer") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->cancel();
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer.reset();
           }
@@ -1541,7 +1553,7 @@ namespace openpeer
           get(mForceACKOfSentPacketsAtSendingSequnceNumber) = mNextSequenceNumber - 1;
           get(mForceACKNextTimePossible) = false;
 
-          ZS_LOG_TRACE(log("forcing an ACK immediately") + ", ack ID=" + string(mForceACKOfSentPacketsRequestID) + ", forced sequence number=" + sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber) + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()))
+          ZS_LOG_TRACE(log("forcing an ACK immediately") + ZS_PARAM("ack ID", mForceACKOfSentPacketsRequestID) + ZS_PARAM("forced sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
 
           try {
             mDelegate->onRUDPChannelStreamSendExternalACKNow(mThisWeak.lock(), true, mForceACKOfSentPacketsRequestID);
@@ -1555,11 +1567,11 @@ namespace openpeer
         if (addBatonsTimer) {
           if (!mAddToAvailableBurstBatonsTimer) {
             mAddToAvailableBurstBatonsTimer = Timer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
-            ZS_LOG_TRACE(log("creating a new add to available batons timer") + ", timer ID=" + string(mAddToAvailableBurstBatonsTimer->getID()) + ", frozen=" + (mBandwidthIncreaseFrozen ? "true" : "false") + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()))
+            ZS_LOG_TRACE(log("creating a new add to available batons timer") + ZS_PARAM("timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("frozen", mBandwidthIncreaseFrozen) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
           }
         } else {
           if (mAddToAvailableBurstBatonsTimer) {
-            ZS_LOG_TRACE(log("cancelling add to available batons timer") + ", timer ID=" + string(mAddToAvailableBurstBatonsTimer->getID()) + ", frozen=" + (mBandwidthIncreaseFrozen ? "true" : "false") + ", available batons=" + string(mAvailableBurstBatons) + ", write size=" + string(writeBuffers) + ", sending size=" + string(mSendingPackets.size()))
+            ZS_LOG_TRACE(log("cancelling add to available batons timer") + ZS_PARAM("timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("frozen", mBandwidthIncreaseFrozen) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
             mAddToAvailableBurstBatonsTimer->cancel();
             mAddToAvailableBurstBatonsTimer.reset();
           }
@@ -1568,13 +1580,13 @@ namespace openpeer
         closeOnAllDataSent();
 
         ZS_LOG_TRACE(log("completed send now cleanup routine") +
-                            ", burst timer=" + (burstTimerRequired ? "true" : "false") +
-                            ", ensure timer=" + (ensureDataHasArrivedTimer ? "true" : "false") +
-                            ", force=" + (forceACKOfSentPacketsRequired ? "true" : "false") +
-                            ", add timer=" + (addBatonsTimer ? "true" : "false") +
-                            ", force ACK next time possible=" + (mForceACKNextTimePossible ? "true" : "false") +
-                            ", force ACK ID=" + string(mForceACKOfSentPacketsRequestID) +
-                            ", forced sequence number=" + sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber))
+                     ZS_PARAM("burst timer", burstTimerRequired) +
+                     ZS_PARAM("ensure timer", (bool)ensureDataHasArrivedTimer) +
+                     ZS_PARAM("force", forceACKOfSentPacketsRequired) +
+                     ZS_PARAM("add timer", addBatonsTimer) +
+                     ZS_PARAM("force ACK next time possible", mForceACKNextTimePossible) +
+                     ZS_PARAM("force ACK ID", mForceACKOfSentPacketsRequestID) +
+                     ZS_PARAM("forced sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)))
       }
 
       //-----------------------------------------------------------------------
@@ -1607,19 +1619,19 @@ namespace openpeer
 
           // if the next sequence number being reported is before the sequence number we have already processed then don't handle the packet
           if (nextSequenceNumber < mGSNFR) {
-            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for packet already processed") + ", sequence number=" + sequenceToString(nextSequenceNumber) + ", GSNFR=" + sequenceToString(mGSNFR))
+            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for packet already processed") + ZS_PARAM("sequence number", sequenceToString(nextSequenceNumber)) + ZS_PARAM("GSNFR", sequenceToString(mGSNFR)))
             goto handleAckQuickExit;
           }
 
           // if the packet is too far ahead from the greatest packet received then it can't be processed
           if (nextSequenceNumber > (mGSNR + OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
-            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for packet too far outside window") + ", sequence number=" + sequenceToString(nextSequenceNumber) + ", GSNR=" + sequenceToString(mGSNR))
+            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for packet too far outside window") + ZS_PARAM("sequence number", sequenceToString(nextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(mGSNR)))
             goto handleAckQuickExit;
           }
 
           // the remote party is claiming they received a packet we never sent
           if (gsnr > mNextSequenceNumber) {
-            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for a packet that was never sent") + ", local next sequence number=" + sequenceToString(mNextSequenceNumber) + ", remote GSNR=" + sequenceToString(gsnr))
+            ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for a packet that was never sent") + ZS_PARAM("local next sequence number", sequenceToString(mNextSequenceNumber)) + ZS_PARAM("remote GSNR", sequenceToString(gsnr)))
             goto handleAckQuickExit;
           }
 
@@ -1632,7 +1644,7 @@ namespace openpeer
 
             // the parity up to now must match or there is a problem
             if (xpFlag !=  gsnfrPacket->mXORedParityToNow) {
-              ZS_THROW_CUSTOM(Exceptions::IllegalACK, log("ACK on parity bit until GSNFR is not correct") + ", GSNFR ACKed parity=" + (xpFlag ? "1" : "0") + ", GSNFR sent parity=" + (gsnfrPacket->mXORedParityToNow ? "1" : "0"))
+              ZS_THROW_CUSTOM(Exceptions::IllegalACK, log("ACK on parity bit until GSNFR is not correct") + ZS_PARAM("GSNFR ACKed parity", xpFlag ? 1 : 0) + ZS_PARAM("GSNFR sent parity", gsnfrPacket->mXORedParityToNow ? 1 : 0))
             }
           }
 
@@ -1657,7 +1669,7 @@ namespace openpeer
                 if (mCalculatedRTT < mMinimumRTT)
                   mCalculatedRTT = mMinimumRTT;
 
-                ZS_LOG_TRACE(log("calculating RTT") + ", RTT milliseconds=" + string(mCalculatedRTT.total_milliseconds()))
+                ZS_LOG_TRACE(log("calculating RTT") + ZS_PARAM("RTT milliseconds", mCalculatedRTT.total_milliseconds()))
 
                 if (mCalculatedRTT > mAddToAvailableBurstBatonsDuation) {
                   mAddToAvailableBurstBatonsDuation = (mCalculatedRTT * 2);
@@ -1669,7 +1681,7 @@ namespace openpeer
                     mAddToAvailableBurstBatonsTimer.reset();
 
                     mAddToAvailableBurstBatonsTimer = Timer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
-                    ZS_LOG_TRACE(log("add to available batons timer is set too small based on calculated RTT") + ", old timer ID=" + string(oldTimerID) + ", new timer ID=" + string(mAddToAvailableBurstBatonsTimer->getID()) + ", duration milliseconds=" + string(mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+                    ZS_LOG_TRACE(log("add to available batons timer is set too small based on calculated RTT") + ZS_PARAM("old timer ID", oldTimerID) + ZS_PARAM("new timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
                   }
                 }
               }
@@ -1690,7 +1702,7 @@ namespace openpeer
               break;
             }
 
-            ZS_LOG_TRACE(log("cleaning ACKed packet") + ", sequence number=" + sequenceToString(current->mSequenceNumber) + ", GSNFR=" + sequenceToString(gsnfr))
+            ZS_LOG_TRACE(log("cleaning ACKed packet") + ZS_PARAM("sequence number", sequenceToString(current->mSequenceNumber)) + ZS_PARAM("GSNFR", sequenceToString(gsnfr)))
 
             current->flagAsReceivedByRemoteParty(mTotalPacketsToResend, mAvailableBurstBatons);
             mSendingPackets.erase(mSendingPackets.begin());
@@ -1705,7 +1717,7 @@ namespace openpeer
 
           // there will be no vector if these are equal
           if (gsnr == gsnfr) {
-            ZS_LOG_TRACE(log("ACK packet GSNR == GSNFR thus no vector will be present") + ", gsnr/gsnfr=" + sequenceToString(gsnr))
+            ZS_LOG_TRACE(log("ACK packet GSNR == GSNFR thus no vector will be present") + ZS_PARAM("gsnr/gsnfr", sequenceToString(gsnr)))
             goto handleAckQuickExit;
           }
 
@@ -1745,7 +1757,7 @@ namespace openpeer
                 couldNotCalculateVectorParity = true;
               }
 
-              ZS_LOG_TRACE(log("ignoring vectored packet because it doesn't exist as a buffered packet") + "could not calculate parity=" + (couldNotCalculateVectorParity ? "true": "false"))
+              ZS_LOG_TRACE(log("ignoring vectored packet because it doesn't exist as a buffered packet") + ZS_PARAM("could not calculate parity", couldNotCalculateVectorParity))
 
               // ignore the vector since its not reached the buffered packet yet
               ++vectorSequenceNumber;
@@ -1757,7 +1769,7 @@ namespace openpeer
               xoredParity = internal::logicalXOR(xoredParity, bufferedPacket->mRUDPPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending));
 
               // mark the current packet as being received by cleaning out the original packet data (but not the packet information)
-              ZS_LOG_TRACE(log("marking packet as received because of vector ACK") + ", sequence number=" + sequenceToString(bufferedPacket->mSequenceNumber))
+              ZS_LOG_TRACE(log("marking packet as received because of vector ACK") + ZS_PARAM("sequence number", sequenceToString(bufferedPacket->mSequenceNumber)))
               bufferedPacket->flagAsReceivedByRemoteParty(mTotalPacketsToResend, mAvailableBurstBatons);
             } else {
               // this packet was not received, do not remove the packet data
@@ -1780,7 +1792,7 @@ namespace openpeer
           if (gsnrIter != mSendingPackets.end()) {
             // now it is time to mark the gsnr as received
             BufferedPacketPtr gsnrPacket = (*gsnrIter).second;
-            ZS_LOG_TRACE(log("marking GSNR as received in vector case") + ", sequence number=" + sequenceToString(gsnrPacket->mSequenceNumber))
+            ZS_LOG_TRACE(log("marking GSNR as received in vector case") + ZS_PARAM("sequence number", sequenceToString(gsnrPacket->mSequenceNumber)))
             gsnrPacket->flagAsReceivedByRemoteParty(mTotalPacketsToResend, mAvailableBurstBatons);
           }
 
@@ -1802,22 +1814,22 @@ namespace openpeer
 
           ZS_LOG_TRACE(
                        log("handling ACK with values")
-                       + ", next sequence number=" + sequenceToString(nextSequenceNumber)
-                       + ", GSNR=" + sequenceToString(gsnr)
-                       + ", GSNFR=" + sequenceToString(gsnfr)
-                       + ", vector=" + vectorParityField
-                       + ", vector size=" + string(externalVectorLengthInBytes)
-                       + ", vp=" + (vpFlag ? "true" : "false")
-                       + ", pg=" + (pgFlag ? "true" : "false")
-                       + ", xp=" + (xpFlag ? "true" : "false")
-                       + ", dp=" + (dpFlag ? "true" : "false")
-                       + ", ec=" + (ecFlag ? "true" : "false")
+                       + ZS_PARAM("next sequence number", sequenceToString(nextSequenceNumber))
+                       + ZS_PARAM("GSNR", sequenceToString(gsnr))
+                       + ZS_PARAM("GSNFR", sequenceToString(gsnfr))
+                       + ZS_PARAM("vector", vectorParityField)
+                       + ZS_PARAM("vector size", externalVectorLengthInBytes)
+                       + ZS_PARAM("vp", vpFlag)
+                       + ZS_PARAM("pg", pgFlag)
+                       + ZS_PARAM("xp", xpFlag)
+                       + ZS_PARAM("dp", dpFlag)
+                       + ZS_PARAM("ec", ecFlag)
                        )
 
           // at this point the xoredParity must match or this ACK is bogus
           if ((!couldNotCalculateVectorParity) &&
               (xoredParity !=  vpFlag)) {
-            ZS_THROW_CUSTOM(Exceptions::IllegalACK, log("ACK on parity bit until GSNFR is not correct") + ", vector ACKed parity=" + (vpFlag ? "1" : "0") + ", calculated vector parity=" + (xoredParity ? "1" : "0"))
+            ZS_THROW_CUSTOM(Exceptions::IllegalACK, log("ACK on parity bit until GSNFR is not correct") + ZS_PARAM("vector ACKed parity", vpFlag ? 1 : 0) + ZS_PARAM("calculated vector parity", xoredParity ? 1 : 0))
           }
         }
 
@@ -1857,7 +1869,7 @@ namespace openpeer
         mTotalSendingPeriodWithoutIssues = Milliseconds(0);
 
         if (mAddToAvailableBurstBatonsTimer) {
-          ZS_LOG_TRACE(log("cancelling add to available burst batons due to loss") + ", timer ID=" + string(mAddToAvailableBurstBatonsTimer->getID()))
+          ZS_LOG_TRACE(log("cancelling add to available burst batons due to loss") + ZS_PARAM("timer ID", mAddToAvailableBurstBatonsTimer->getID()))
           mAddToAvailableBurstBatonsTimer->cancel();
           mAddToAvailableBurstBatonsTimer.reset();
         }
@@ -1865,7 +1877,7 @@ namespace openpeer
         // double the time until more batons get added
         if (!wasFrozen) {
           mAddToAvailableBurstBatonsDuation = mAddToAvailableBurstBatonsDuation * 2;
-          ZS_LOG_TRACE(log("increasing add to available burst batons duration") + ", duration milliseconds=" + string(mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+          ZS_LOG_TRACE(log("increasing add to available burst batons duration") + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
         }
 
         if (mPacketsPerBurst > 1) {
@@ -1874,14 +1886,14 @@ namespace openpeer
           mPacketsPerBurst = mPacketsPerBurst / 2;
           if (mPacketsPerBurst < 1)
             mPacketsPerBurst = 1;
-          ZS_LOG_TRACE(log("decreasing packets per burst") + ", old value=" + string(wasPacketsPerBurst) + ", new packets per burst=" + string(mPacketsPerBurst))
+          ZS_LOG_TRACE(log("decreasing packets per burst") + ZS_PARAM("old value", wasPacketsPerBurst) + ZS_PARAM("new packets per burst", mPacketsPerBurst))
           return;
         }
 
         if (mAvailableBurstBatons > 1) {
           // decrease the available batons by one (to slow sending of more bursts)
           --mAvailableBurstBatons;
-          ZS_LOG_TRACE(log("decreasing batons available") + ", available batons=" + string(mAvailableBurstBatons))
+          ZS_LOG_TRACE(log("decreasing batons available") + ZS_PARAM("available batons", mAvailableBurstBatons))
           return;
         }
 
@@ -1895,7 +1907,7 @@ namespace openpeer
             if (0 == whichBatonToDestroy) {
               packet->releaseBaton(mAvailableBurstBatons);  // release the baton from being held by the packet
               --mAvailableBurstBatons;                      // destroy the baton
-              ZS_LOG_TRACE(log("destroying a baton that was being held") + ", available batons=" + string(mAvailableBurstBatons))
+              ZS_LOG_TRACE(log("destroying a baton that was being held") + ZS_PARAM("available batons", mAvailableBurstBatons))
               return;
             }
 
@@ -1928,7 +1940,7 @@ namespace openpeer
             mAddToAvailableBurstBatonsTimer.reset();
           }
 
-          ZS_LOG_TRACE(log("good period of transmission without issue thus unfreezing/increasing baton adding frequency") + ", old add to batons timer ID=" + string(oldTimerID) + ", duration milliseconds=" + string(mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+          ZS_LOG_TRACE(log("good period of transmission without issue thus unfreezing/increasing baton adding frequency") + ZS_PARAM("old add to batons timer ID", oldTimerID) + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
         }
       }
 
@@ -1948,7 +1960,7 @@ namespace openpeer
             break;
 
           delivered = true;
-          ZS_LOG_TRACE(log("delivering read packet") + ", sequence number=" + sequenceToString(bufferedPacket->mSequenceNumber))
+          ZS_LOG_TRACE(log("delivering read packet") + ZS_PARAM("sequence number", sequenceToString(bufferedPacket->mSequenceNumber)))
 
           // remember when this packet arrived so we can not allow expansion of
           // the incoming buffer window to grow too big
@@ -1982,7 +1994,7 @@ namespace openpeer
         }
 
         if (delivered) {
-          ZS_LOG_TRACE(log("delivering read packets read ready") + ", size=" + string(totalDelivered))
+          ZS_LOG_TRACE(log("delivering read packets read ready") + ZS_PARAM("size", totalDelivered))
         }
       }
 
@@ -1992,13 +2004,13 @@ namespace openpeer
                                                   size_t maxFillSize
                                                   )
       {
-        ZS_LOG_TRACE(log("get from write buffer") + ", max size=" + string(maxFillSize))
+        ZS_LOG_TRACE(log("get from write buffer") + ZS_PARAM("max size", maxFillSize))
 
         if (!mSendStream) return 0;
 
         size_t read = mSendStream->read(outBuffer, maxFillSize);
 
-        ZS_LOG_TRACE(log("get from write buffer") + ", max size=" + string(maxFillSize) + ", read size=" + string(read))
+        ZS_LOG_TRACE(log("get from write buffer") + ZS_PARAM("max size", maxFillSize) + ZS_PARAM("read size", read))
         return read;
       }
 

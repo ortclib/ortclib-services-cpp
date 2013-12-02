@@ -33,10 +33,12 @@
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
+
 #include <zsLib/Socket.h>
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/XML.h>
 
 #include <cryptopp/osrng.h>
 
@@ -191,7 +193,7 @@ namespace openpeer
       void TURNSocket::init()
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DETAIL(log("init") + getDebugValueString())
+        ZS_LOG_DETAIL(debug("init"))
         step();
       }
 
@@ -265,10 +267,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String TURNSocket::toDebugString(ITURNSocketPtr socket, bool includeCommaPrefix)
+      ElementPtr TURNSocket::toDebug(ITURNSocketPtr socket)
       {
-        if (!socket) return String(includeCommaPrefix ? ", TURN socket=(null)" : "TURN socket=(null)");
-        return TURNSocket::convert(socket)->getDebugValueString(includeCommaPrefix);
+        if (!socket) return ElementPtr();
+        return TURNSocket::convert(socket)->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -296,7 +298,7 @@ namespace openpeer
 
         ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
 
-        ZS_LOG_DEBUG(log("is relaying UDP") + ", relaying UDP=" + (mActiveServer->mIsUDP ? "false" : "true"))
+        ZS_LOG_DEBUG(log("is relaying UDP") + ZS_PARAM("relaying UDP", mActiveServer->mIsUDP))
         return mActiveServer->mIsUDP;
       }
 
@@ -316,14 +318,14 @@ namespace openpeer
                                   bool bindChannelIfPossible
                                   )
       {
-        ZS_LOG_TRACE(log("send packet") + ", destination=" + destination.string() + ", buffer length=" + string(bufferLengthInBytes) + ", bind channel=" + (bindChannelIfPossible ? "true" : "false"))
+        ZS_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
           ZS_LOG_WARNING(Debug, log("cannot send packet over TURN as destination is invalid"))
           return false;
         }
         if (destination.isPortEmpty()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ", ip=" + destination.string())
+          ZS_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
           return false;
         }
 
@@ -336,7 +338,7 @@ namespace openpeer
           return false;
         }
         if (bufferLengthInBytes > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ", size=" + string(bufferLengthInBytes))
+          ZS_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ZS_PARAM("size", bufferLengthInBytes))
           return false;  // illegal to be so large
         }
 
@@ -378,7 +380,7 @@ namespace openpeer
 
                 // copy the entire buffer into the packet
                 memcpy(&((packet.get())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
-                ZS_LOG_TRACE(log("sending packet via bound channel") + ", channel=" + string(info->mChannelNumber) + ", destination=" + destination.string() + ", buffer length=" + string(bufferLengthInBytes) + ", bind channel=" + (bindChannelIfPossible ? "true" : "false"))
+                ZS_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
 
@@ -391,7 +393,7 @@ namespace openpeer
               if ((0 != freeChannelNumber) &&
                   (mUseChannelBinding)) {
 
-                ZS_LOG_DEBUG(log("will attempt to bind channel") + ", channel=" + string(freeChannelNumber) + ", ip=" + destination.string())
+                ZS_LOG_DEBUG(log("will attempt to bind channel") + ZS_PARAM("channel", freeChannelNumber) + ZS_PARAM("ip", destination.string()))
 
                 // we have a free channel... create a new binding... (won't happen immediately but hopefully the request will succeed)
                 ChannelInfoPtr info = ChannelInfo::create();
@@ -417,7 +419,7 @@ namespace openpeer
           {
             PermissionMap::iterator found = mPermissions.find(destination);
             if (found == mPermissions.end()) {
-              ZS_LOG_DEBUG(log("will attempt to create permision") + ", ip=" + destination.string())
+              ZS_LOG_DEBUG(log("will attempt to create permision") + ZS_PARAM("ip", destination.string()))
 
               // we do not have a permission yet to send to this address so we need to create one...
               PermissionPtr permission = Permission::create();
@@ -537,7 +539,7 @@ namespace openpeer
 
         if (length > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) return false;  // this can't be legal channel data
         if (length > (bufferLengthInBytes-sizeof(DWORD))) {
-          ZS_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ", ip = " + fromIPAddress.string() + ", reported length=" + string(length) + ", actual length=" + string(bufferLengthInBytes))
+          ZS_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("reported length", length) + ZS_PARAM("actual length", bufferLengthInBytes))
           return false;
         }
 
@@ -554,7 +556,7 @@ namespace openpeer
 
           ChannelNumberMap::iterator found = mChannelNumberMap.find(channel);
           if (mChannelNumberMap.end() == found) {
-            ZS_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ", ip = " + fromIPAddress.string() + ", channel=" + string(channel))
+            ZS_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("channel", channel))
             return false;                             // this isn't any bound channel we know about...
           }
 
@@ -696,7 +698,7 @@ namespace openpeer
 
           ServerPtr &server = (*current);
           if (requester == server->mAllocateRequester) {
-            ZS_LOG_WARNING(Detail, log("allocate request timed out") + ", server IP=" + server->mServerIP.string())
+            ZS_LOG_WARNING(Detail, log("allocate request timed out") + ZS_PARAM("server IP", server->mServerIP.string()))
             mServers.erase(current);
 
             step();
@@ -826,7 +828,7 @@ namespace openpeer
 
               if (isShutdown()) return;
               if (!server->mTCPSocket) {
-                ZS_LOG_WARNING(Detail, log("TCP socket was closed") + ", server IP=" + server->mServerIP.string())
+                ZS_LOG_WARNING(Detail, log("TCP socket was closed") + ZS_PARAM("server IP", server->mServerIP.string()))
                 return;
               }
 
@@ -980,7 +982,7 @@ namespace openpeer
                       }
 
                       if (server != mActiveServer) {
-                        ZS_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ", server IP=" + server->mServerIP.string())
+                        ZS_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ZS_PARAM("server IP", server->mServerIP.string()))
                         continue;
                       }
 
@@ -1203,11 +1205,20 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String TURNSocket::log(const char *message) const
+      Log::Params TURNSocket::log(const char *message) const
       {
-        return String("TURNSocket [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("TURNSocket");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
+      //-----------------------------------------------------------------------
+      Log::Params TURNSocket::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
       void TURNSocket::fix(STUNPacketPtr stun) const
       {
         stun->mLogObject = "TURNSocket";
@@ -1215,58 +1226,62 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String TURNSocket::getDebugValueString(bool includeCommaPrefix) const
+      ElementPtr TURNSocket::toDebug() const
       {
         AutoRecursiveLock lock(mLock);
-        bool firstTime = !includeCommaPrefix;
-        return
-        Helper::getDebugValue("turn socket id", string(mID), firstTime) +
-        Helper::getDebugValue("current state", toString(mCurrentState), firstTime) +
-        Helper::getDebugValue("last error", toString(mLastError), firstTime) +
-        Helper::getDebugValue("limit channel range (start)", 0 != mLimitChannelToRangeStart ? string(mLimitChannelToRangeStart) : String(), firstTime) +
-        Helper::getDebugValue("limit channel range (end)", 0 != mLimitChannelToRangeEnd ? string(mLimitChannelToRangeEnd) : String(), firstTime) +
-        Helper::getDebugValue("delegate", mDelegate ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("server name", mServerName, firstTime) +
-        Helper::getDebugValue("username", mUsername, firstTime) +
-        Helper::getDebugValue("password", mPassword, firstTime) +
-        Helper::getDebugValue("realm", mRealm, firstTime) +
-        Helper::getDebugValue("nonce", mNonce, firstTime) +
-        Helper::getDebugValue("udp dns query", mTURNUDPQuery ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("tcp dns query", mTURNTCPQuery ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("udp dns srv records", mTURNUDPSRVResult ? (mTURNUDPSRVResult->mRecords.size() > 0 ? string(mTURNUDPSRVResult->mRecords.size()) : String()) : String(), firstTime) +
-        Helper::getDebugValue("tcp dns srv records", mTURNTCPSRVResult ? (mTURNTCPSRVResult->mRecords.size() > 0 ? string(mTURNTCPSRVResult->mRecords.size()) : String()) : String(), firstTime) +
-        Helper::getDebugValue("use channel binding", mUseChannelBinding ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("allocated response IP", mAllocateResponseIP.string(), firstTime) +
-        Helper::getDebugValue("relayed IP", mRelayedIP.string(), firstTime) +
-        Helper::getDebugValue("reflected IP", mReflectedIP.string(), firstTime) +
-        (mActiveServer ?
-         Helper::getDebugValue("active server", String("true"), firstTime) +
-         Helper::getDebugValue("is udp", mActiveServer->mIsUDP ? String("true") : String(), firstTime) +
-         Helper::getDebugValue("server ip", mActiveServer->mServerIP.string(), firstTime) +
-         Helper::getDebugValue("tcp socket", mActiveServer->mTCPSocket ? String("true") : String(), firstTime) +
-         Helper::getDebugValue("connected", mActiveServer->mIsConnected ? String("true") : String(), firstTime) +
-         Helper::getDebugValue("write ready", mActiveServer->mInformedWriteReady ? String("true") : String(), firstTime) +
-         Helper::getDebugValue("activate after", Time() != mActiveServer->mActivateAfter ? string(mActiveServer->mActivateAfter) : String(), firstTime) +
-         Helper::getDebugValue("allocate requestor", mActiveServer->mAllocateRequester ? String("true") : String(), firstTime) +
-         Helper::getDebugValue("read buffer fill size", 0 != mActiveServer->mReadBufferFilledSizeInBytes ? string(mActiveServer->mReadBufferFilledSizeInBytes) : String(), firstTime) +
-         Helper::getDebugValue("write buffer fill size", 0 != mActiveServer->mWriteBufferFilledSizeInBytes ? string(mActiveServer->mWriteBufferFilledSizeInBytes) : String(), firstTime)
-         : String()) +
-        Helper::getDebugValue("lifetime", 0 != mLifetime ? string(mLifetime) : String(), firstTime) +
-        Helper::getDebugValue("refresh requester", mRefreshRequester ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("refresh timer", mRefreshTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("last send data to server", Time() != mLastSentDataToServer ? string(mLastSentDataToServer) : String(), firstTime) +
-        Helper::getDebugValue("last refreash timer was sent", Time() != mLastRefreshTimerWasSentAt ? string(mLastRefreshTimerWasSentAt) : String(), firstTime) +
-        Helper::getDebugValue("deallocate requester", mDeallocateRequester ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("deallocate timer", mDeallocTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("servers", mServers.size() > 0 ? string(mServers.size()) : String(), firstTime) +
-        Helper::getDebugValue("activation timer", mActivationTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("permissions", mPermissions.size() > 0 ? string(mPermissions.size()) : String(), firstTime) +
-        Helper::getDebugValue("permission timer", mPermissionTimer ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("permission requester", mPermissionRequester ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("permission max capacity", 0 != mPermissionRequesterMaxCapacity ? string(mPermissionRequesterMaxCapacity) : String(), firstTime) +
-        Helper::getDebugValue("channel IP map", mChannelIPMap.size() > 0 ? string(mChannelIPMap.size()) : String(), firstTime) +
-        Helper::getDebugValue("channel number map", mChannelNumberMap.size() > 0 ? string(mChannelNumberMap.size()) : String(), firstTime) +
-        Helper::getDebugValue("recycle buffers", mRecycledBuffers.size() > 0 ? string(mRecycledBuffers.size()) : String(), firstTime);
+        ElementPtr resultEl = Element::create("TURNSocket");
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "current state", toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last error", toString(mLastError));
+        IHelper::debugAppend(resultEl, "limit channel range (start)", mLimitChannelToRangeStart);
+        IHelper::debugAppend(resultEl, "limit channel range (end)", mLimitChannelToRangeEnd);
+        IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
+        IHelper::debugAppend(resultEl, "server name", mServerName);
+        IHelper::debugAppend(resultEl, "username", mUsername);
+        IHelper::debugAppend(resultEl, "password", mPassword);
+        IHelper::debugAppend(resultEl, "realm", mRealm);
+        IHelper::debugAppend(resultEl, "nonce", mNonce);
+        IHelper::debugAppend(resultEl, "udp dns query", (bool)mTURNUDPQuery);
+        IHelper::debugAppend(resultEl, "tcp dns query", (bool)mTURNTCPQuery);
+        IHelper::debugAppend(resultEl, "udp dns srv records", mTURNUDPSRVResult ? mTURNUDPSRVResult->mRecords.size() : 0);
+        IHelper::debugAppend(resultEl, "tcp dns srv records", mTURNTCPSRVResult ? mTURNTCPSRVResult->mRecords.size() : 0);
+        IHelper::debugAppend(resultEl, "use channel binding", mUseChannelBinding);
+        IHelper::debugAppend(resultEl, "allocated response IP", mAllocateResponseIP.string());
+        IHelper::debugAppend(resultEl, "relayed IP", mRelayedIP.string());
+        IHelper::debugAppend(resultEl, "reflected IP", mReflectedIP.string());
+        if (mActiveServer) {
+          ElementPtr activeServerEl = Element::create("active server");
+          IHelper::debugAppend(activeServerEl, "is udp", mActiveServer->mIsUDP);
+          IHelper::debugAppend(activeServerEl, "server ip", mActiveServer->mServerIP.string());
+          IHelper::debugAppend(activeServerEl, "tcp socket", (bool)mActiveServer->mTCPSocket);
+          IHelper::debugAppend(activeServerEl, "connected", mActiveServer->mIsConnected);
+          IHelper::debugAppend(activeServerEl, "write ready", mActiveServer->mInformedWriteReady);
+          IHelper::debugAppend(activeServerEl, "activate after", mActiveServer->mActivateAfter);
+          IHelper::debugAppend(activeServerEl, "allocate requestor", (bool)mActiveServer->mAllocateRequester);
+          IHelper::debugAppend(activeServerEl, "read buffer fill size", mActiveServer->mReadBufferFilledSizeInBytes);
+          IHelper::debugAppend(activeServerEl, "write buffer fill size", mActiveServer->mWriteBufferFilledSizeInBytes);
+          IHelper::debugAppend(resultEl, activeServerEl);
+        }
+        IHelper::debugAppend(resultEl, "lifetime", mLifetime);
+        IHelper::debugAppend(resultEl, "refresh requester", (bool)mRefreshRequester);
+        IHelper::debugAppend(resultEl, "refresh timer", (bool)mRefreshTimer);
+        IHelper::debugAppend(resultEl, "last send data to server", mLastSentDataToServer);
+        IHelper::debugAppend(resultEl, "last refreash timer was sent", mLastRefreshTimerWasSentAt);
+        IHelper::debugAppend(resultEl, "deallocate requester", (bool)mDeallocateRequester);
+        IHelper::debugAppend(resultEl, "deallocate timer", (bool)mDeallocTimer);
+        IHelper::debugAppend(resultEl, "servers", mServers.size());
+        IHelper::debugAppend(resultEl, "activation timer", (bool)mActivationTimer);
+        IHelper::debugAppend(resultEl, "permissions", mPermissions.size());
+        IHelper::debugAppend(resultEl, "permission timer", (bool)mPermissionTimer);
+        IHelper::debugAppend(resultEl, "permission requester", (bool)mPermissionRequester);
+        IHelper::debugAppend(resultEl, "permission max capacity", mPermissionRequesterMaxCapacity);
+        IHelper::debugAppend(resultEl, "channel IP map", mChannelIPMap.size());
+        IHelper::debugAppend(resultEl, "channel number map", mChannelNumberMap.size());
+        IHelper::debugAppend(resultEl, "recycle buffers", mRecycledBuffers.size());
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -1292,7 +1307,7 @@ namespace openpeer
 
           bool found = IDNS::extractNextIP(srv, result);
           if (!found) {
-            ZS_LOG_DEBUG(log("no more servers found") + ", server=" + (srv ? srv->mName : mServerName))
+            ZS_LOG_DEBUG(log("no more servers found") + ZS_PARAM("server", (srv ? srv->mName : mServerName)))
 
             // we failed to discover any UDP server that works
             return IPAddress();
@@ -1305,7 +1320,7 @@ namespace openpeer
             continue;
           }
 
-          ZS_LOG_DETAIL(log("found server") + ", server=" + (srv ? srv->mName : mServerName) + ", IP=" + result.string())
+          ZS_LOG_DETAIL(log("found server") + ZS_PARAM("server", (srv ? srv->mName : mServerName)) + ZS_PARAM("ip", result.string()))
 
           // we now know the next server to try
           previouslyAdded.push_back(result);
@@ -1374,7 +1389,7 @@ namespace openpeer
 
         if (!mTURNUDPSRVResult) {
           if (!mTURNUDPQuery) {
-            ZS_LOG_DEBUG(log("performing _turn._udp SRV lookup") + ", server=" + mServerName)
+            ZS_LOG_DEBUG(log("performing _turn._udp SRV lookup") + ZS_PARAM("server", mServerName))
             mTURNUDPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "udp", 3478);
           }
 
@@ -1386,7 +1401,7 @@ namespace openpeer
 
         if (!mTURNTCPSRVResult) {
           if (!mTURNTCPQuery) {
-            ZS_LOG_DEBUG(log("performing _turn._tcp SRV lookup") + ", server=" + mServerName)
+            ZS_LOG_DEBUG(log("performing _turn._tcp SRV lookup") + ZS_PARAM("server", mServerName))
             mTURNTCPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "tcp", 3478);
           }
 
@@ -1426,13 +1441,13 @@ namespace openpeer
             ServerPtr &server = (*iter);
 
             if (server->mActivateAfter > tick) {
-              ZS_LOG_DEBUG(log("next server can't activate until later") + ", when=" + string(server->mActivateAfter))
+              ZS_LOG_DEBUG(log("next server can't activate until later") + ZS_PARAM("when", server->mActivateAfter))
               break;
             }
 
             if (!server->mIsUDP) {
               if (!server->mTCPSocket) {
-                ZS_LOG_DEBUG(log("creating socket for TCP") + ", server IP=" + server->mServerIP.string())
+                ZS_LOG_DEBUG(log("creating socket for TCP") + ZS_PARAM("server IP", server->mServerIP.string()))
                 server->mTCPSocket = Socket::createTCP();
                 server->mTCPSocket->setBlocking(false);
                 try {
@@ -1454,17 +1469,17 @@ namespace openpeer
               }
 
               if (!server->mIsConnected) {
-                ZS_LOG_DEBUG(log("waiting for TCP socket to connect") + ", server IP=" + server->mServerIP.string())
+                ZS_LOG_DEBUG(log("waiting for TCP socket to connect") + ZS_PARAM("server IP", server->mServerIP.string()))
                 continue;
               }
             }
 
             if (server->mAllocateRequester) {
-              ZS_LOG_DEBUG(log("allocate requester already activated") + ", server IP=" + server->mServerIP.string())
+              ZS_LOG_DEBUG(log("allocate requester already activated") + ZS_PARAM("server IP", server->mServerIP.string()))
               continue;
             }
 
-            ZS_LOG_DETAIL(log("creating alloc request") + ", server IP=" + server->mServerIP.string() + ", is UDP=" + (server->mIsUDP ? "true" : "false"))
+            ZS_LOG_DETAIL(log("creating alloc request") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("is UDP", server->mIsUDP))
 
             mLifetime = OPENPEER_SERVICES_TURN_RECOMMENDED_LIFETIME_IN_SECONDS;
 
@@ -1653,7 +1668,7 @@ namespace openpeer
       {
         if (mCurrentState == newState) return;
 
-        ZS_LOG_BASIC(log("state changed") + ", old state=" + toString(mCurrentState) + ", new state=" + toString(newState) + ", error=" + toString(mLastError))
+        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
         mCurrentState = newState;
 
         if (!mDelegate) return;
@@ -1716,14 +1731,14 @@ namespace openpeer
 
         server->mAllocateRequester = handleAuthorizationErrors(requester, response);
         if (server->mAllocateRequester) {
-          ZS_LOG_DEBUG(log("reissued allocate requester") + ", server IP=" + server->mServerIP.string())
+          ZS_LOG_DEBUG(log("reissued allocate requester") + ZS_PARAM("server IP", server->mServerIP.string()))
           return true;
         }
 
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
-          ZS_LOG_WARNING(Detail, log("alloc request failed") + ", username=" + mUsername + ", password=" + mPassword + ", server ip=" + server->mServerIP.string())
+          ZS_LOG_WARNING(Detail, log("alloc request failed") + ZS_PARAM("username", mUsername) + ZS_PARAM("password", mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
 
           bool tryDifferentServer = true;
 
@@ -1731,7 +1746,7 @@ namespace openpeer
           switch (response->mErrorCode) {
             case STUNPacket::ErrorCode_UnknownAttribute:              {
               if (response->hasUnknownAttribute(STUNPacket::Attribute_DontFragment)) {
-                ZS_LOG_WARNING(Detail, log("alloc failed thus attempting again without DONT_FRAGMENT attribute") + ", server IP=" + server->mServerIP.string())
+                ZS_LOG_WARNING(Detail, log("alloc failed thus attempting again without DONT_FRAGMENT attribute") + ZS_PARAM("server IP", server->mServerIP.string()))
 
                 // did not understand the don't fragment, try again without it
                 STUNPacketPtr newRequest = (requester->getRequest())->clone(true);
@@ -1758,7 +1773,7 @@ namespace openpeer
 
         // if this was a proper successful response then it should be signed with integrity
         if (!response->isValidMessageIntegrity(mPassword, mUsername, mRealm)) {
-          ZS_LOG_ERROR(Detail, log("alloc response did not pass integrity check") + ", server IP=" + server->mServerIP.string())
+          ZS_LOG_ERROR(Detail, log("alloc response did not pass integrity check") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false; // this didn't have valid message integrity so it's not a valid response
         }
 
@@ -1776,7 +1791,7 @@ namespace openpeer
           mActivationTimer.reset();
         }
 
-        ZS_LOG_DETAIL(log("alloc request completed") + ", relayed ip=" + mRelayedIP.string() + ", reflected=" + mReflectedIP.string() + ", username=" + mUsername + ", password=" + mPassword + ", server ip=" + server->mServerIP.string())
+        ZS_LOG_DETAIL(log("alloc request completed") + ZS_PARAM("relayed ip", mRelayedIP.string()) + ZS_PARAM("reflected", mReflectedIP.string()) + ZS_PARAM("username", mUsername) + ZS_PARAM("password", mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
 
         setState(TURNSocketState_Ready);
 
@@ -1826,7 +1841,7 @@ namespace openpeer
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
-          ZS_LOG_WARNING(Detail, log("refresh requester failed because of error thus shutting down") + ", error=" + string(response->mErrorCode) + ", reason=" + response->mReason)
+          ZS_LOG_WARNING(Detail, log("refresh requester failed because of error thus shutting down") + ZS_PARAM("error", response->mErrorCode) + ZS_PARAM("reason", response->mReason))
 
           // this is a problem if we can't refresh... cancel the connection...
           cancel();
@@ -1892,7 +1907,7 @@ namespace openpeer
             // failed to install permission...
             for (PermissionMap::iterator iter = mPermissions.begin(); iter != mPermissions.end(); ++iter) {
               if ((*iter).second->mInstallingWithRequester == requester) {
-                ZS_LOG_WARNING(Detail, log("permission requester failed because of error") + ", error=" + string(response->mErrorCode) + ", reason=" + response->mReason)
+                ZS_LOG_WARNING(Detail, log("permission requester failed because of error") + ZS_PARAM("error", response->mErrorCode) + ZS_PARAM("reason", response->mReason))
                 (*iter).second->mInstallingWithRequester.reset();
               }
             }
@@ -1957,7 +1972,7 @@ namespace openpeer
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
-          ZS_LOG_WARNING(Detail, log("channel bind requester failed because of error") + ", error=" + string(response->mErrorCode) + ", reason=" + response->mReason)
+          ZS_LOG_WARNING(Detail, log("channel bind requester failed because of error") + ZS_PARAM("error", response->mErrorCode) + ZS_PARAM("reason", response->mReason))
 
           // we can't install channel binding... oh well... try again later...
           found->mBound = false;
@@ -1970,7 +1985,7 @@ namespace openpeer
           return false; // this didn't have valid message integrity so it's not a valid response
         }
 
-        ZS_LOG_DETAIL(log("channel bind request completed") + ", channel=" + string(found->mChannelNumber))
+        ZS_LOG_DETAIL(log("channel bind request completed") + ZS_PARAM("channel", found->mChannelNumber))
 
         // the request completed just fine...
         found->mBound = true;
@@ -2146,7 +2161,7 @@ namespace openpeer
                 (server->mIsConnected)) {
               return sendPacketOverTCPOrDropIfBufferFull(server, buffer, bufferSizeInBytes);
             }
-            ZS_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ", server IP=" + server->mServerIP.string())
+            ZS_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
             return false;
           }
 
@@ -2177,22 +2192,22 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!server)
 
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ", server IP=" + server->mServerIP.string())
+          ZS_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         if (!server->mTCPSocket) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ", server IP=" + server->mServerIP.string())
+          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
         if (!server->mIsConnected) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ", server IP=" + server->mServerIP.string())
+          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         // never allow the buffer to overflow
         if (bufferSizeInBytes > sizeof(server->mWriteBuffer)) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ", server IP=" + server->mServerIP.string() + ", sending bytes=" + string(bufferSizeInBytes) + ", capacity=" + string(sizeof(server->mWriteBuffer)))
+          ZS_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("sending bytes", bufferSizeInBytes) + ZS_PARAM("capacity", sizeof(server->mWriteBuffer)))
           return false;
         }
 
@@ -2214,7 +2229,7 @@ namespace openpeer
                 }
               }
             } catch(ISocket::Exceptions::Unspecified &error) {
-              ZS_LOG_DEBUG(log("TCP socket send failure") + ", error=" + string(error.getErrorCode()))
+              ZS_LOG_DEBUG(log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
               cancel();
               return false;
@@ -2273,7 +2288,7 @@ namespace openpeer
             }
           }
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_DEBUG(log("TCP socket send failure") + ", error=" + string(error.getErrorCode()))
+          ZS_LOG_DEBUG(log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
           cancel();
           return false;
@@ -2534,9 +2549,9 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String ITURNSocket::toDebugString(ITURNSocketPtr socket, bool includeCommaPrefix)
+    ElementPtr ITURNSocket::toDebug(ITURNSocketPtr socket)
     {
-      return internal::TURNSocket::toDebugString(socket, includeCommaPrefix);
+      return internal::TURNSocket::toDebug(socket);
     }
 
   }

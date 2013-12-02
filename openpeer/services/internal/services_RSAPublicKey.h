@@ -121,7 +121,7 @@ namespace openpeer
         #pragma mark RSAPublicKey => (internal)
         #pragma mark
 
-        String log(const char *message) const;
+        Log::Params log(const char *message) const;
 
         bool verify(
                     const BYTE *inBuffer,

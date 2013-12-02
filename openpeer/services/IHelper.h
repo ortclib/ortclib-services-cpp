@@ -71,6 +71,30 @@ namespace openpeer
 
       static IMessageQueuePtr getServiceQueue();
 
+      static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, bool value, bool ignoreIfFalse = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, CHAR value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, UCHAR value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, SHORT value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, USHORT value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, INT value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, UINT value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, LONG value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, ULONG value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, LONGLONG value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, ULONGLONG value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, FLOAT value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, DOUBLE value, bool ignoreIfZero = true);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Time &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Duration &value);
+      static void debugAppend(ElementPtr &parentEl, const Log::Param &param);
+      static void debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl);
+      static void debugAppend(ElementPtr &parentEl, ElementPtr childEl);
+
+      static String toString(ElementPtr el);
+      static ElementPtr toJSON(const char *str);
+
       static String timeToString(const Time &value);
       static Time stringToTime(const String &str);
 

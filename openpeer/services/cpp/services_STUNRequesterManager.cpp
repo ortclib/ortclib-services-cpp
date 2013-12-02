@@ -32,8 +32,10 @@
 #include <openpeer/services/internal/services_STUNRequesterManager.h>
 #include <openpeer/services/internal/services_STUNRequester.h>
 #include <openpeer/services/IHelper.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Log.h>
+#include <zsLib/XML.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 
@@ -249,9 +251,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String STUNRequesterManager::log(const char *message) const
+      Log::Params STUNRequesterManager::log(const char *message) const
       {
-        return String("STUNRequesterManager [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("STUNRequesterManager");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
     }
 

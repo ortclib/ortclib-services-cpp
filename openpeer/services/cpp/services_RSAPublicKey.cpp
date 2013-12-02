@@ -138,11 +138,11 @@ namespace openpeer
           pThis->mPublicKey.Load(byteQueue);
           pThis->mFingerprint = IHelper::convertToHex(*IHelper::hash(buffer));
           if (!pThis->mPublicKey.Validate(rng, 3)) {
-            ZS_LOG_ERROR(Basic, "Failed to load an existing public key")
+            ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing public key"))
             return RSAPublicKeyPtr();
           }
         } catch (CryptoPP::Exception &e) {
-          ZS_LOG_WARNING(Detail, String("Cryptography library threw an exception, reason=") + e.what())
+          ZS_LOG_WARNING(Detail, pThis->log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()))
           return RSAPublicKeyPtr();
         }
 
@@ -205,7 +205,7 @@ namespace openpeer
         try {
           String algorithm = signatureEl->findFirstChildElementChecked("algorithm")->getTextDecoded();
           if (algorithm != OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM) {
-            ZS_LOG_WARNING(Detail, log("signature validation algorithm is not understood, algorithm=") + algorithm)
+            ZS_LOG_WARNING(Detail, log("signature validation algorithm is not understood") + ZS_PARAM("algorithm", algorithm))
             return false;
           }
 
@@ -219,14 +219,14 @@ namespace openpeer
           SecureByteBlockPtr actualDigest = IHelper::hash((const char *)(signedElAsJSON.get()), IHelper::HashAlgorthm_SHA1);
 
           if (0 != IHelper::compare(*actualDigest, *IHelper::convertFromBase64(signatureDigestAsString))) {
-            ZS_LOG_WARNING(Detail, log("digest values did not match, signature digest=") + signatureDigestAsString + ", actual digest=" + IHelper::convertToBase64(*actualDigest))
+            ZS_LOG_WARNING(Detail, log("digest values did not match") + ZS_PARAM("signature digest", signatureDigestAsString) + ZS_PARAM("actual digest", IHelper::convertToBase64(*actualDigest)))
             return false;
           }
 
           SecureByteBlockPtr signatureDigestSigned = IHelper::convertFromBase64(signatureEl->findFirstChildElementChecked("digestSigned")->getTextDecoded());
 
           if (!verify(*actualDigest, *signatureDigestSigned)) {
-            ZS_LOG_WARNING(Detail, log("signature failed to validate") + ", fingerprint=" + mFingerprint)
+            ZS_LOG_WARNING(Detail, log("signature failed to validate") + ZS_PARAM("fingerprint", mFingerprint))
             return false;
           }
 
@@ -270,9 +270,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String RSAPublicKey::log(const char *message) const
+      Log::Params RSAPublicKey::log(const char *message) const
       {
-        return String("RSAPublicKey [") + string(mID) + "] " + message;
+        ElementPtr objectEl = Element::create("RSAPublicKey");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
@@ -288,11 +290,11 @@ namespace openpeer
         {
           bool result = verifier.VerifyMessage(inBuffer, inBufferLengthInBytes, inSignature, inSignature.size());
           if (!result) {
-            ZS_LOG_WARNING(Detail, "Signature value did not pass")
+            ZS_LOG_WARNING(Detail, log("signature verification did not pass"))
             return false;
           }
         } catch (CryptoPP::Exception &e) {
-          ZS_LOG_WARNING(Detail, String("Cryptography library threw an exception, reason=") + e.what())
+          ZS_LOG_WARNING(Detail, log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()))
           return false;
         }
         return true;

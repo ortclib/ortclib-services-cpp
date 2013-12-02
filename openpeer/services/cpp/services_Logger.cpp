@@ -43,6 +43,7 @@
 #include <zsLib/Socket.h>
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Timer.h>
+#include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 
 #include <iostream>
@@ -115,11 +116,112 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      static String getMessageString(const Log::Params &params)
+      {
+        static const char *wires[] = {"wire in", "wire out", NULL};
+        static const char *jsons[] = {"json in", "json out", NULL};
+
+        String objectString;
+
+        ElementPtr objectEl = params.object();
+
+        if (objectEl) {
+          objectString = objectEl->getValue();
+
+          ElementPtr idEl = objectEl->findFirstChildElement("id");
+          if (idEl) {
+            String objectID = idEl->getTextDecoded();
+            if (objectID.hasData()) {
+              objectString += " [" + objectID + "] ";
+            } else {
+              objectString += " [] ";
+            }
+
+            if ((objectEl->getFirstChild() == idEl) &&
+                (objectEl->getLastChild() == idEl)) {
+              objectEl.reset(); // this is now an empty object that we don't need anymore
+            }
+
+          } else {
+            objectString += " [] ";
+          }
+        }
+        if (objectEl) {
+          if (!objectEl->hasChildren()) {
+            objectEl.reset();
+          }
+        }
+
+        String message = objectString + params.message();
+
+        String alt;
+
+        ElementPtr paramsEl = params.params();
+        if (paramsEl) {
+          for (int index = 0; wires[index]; ++index) {
+            ElementPtr childEl = paramsEl->findFirstChildElement(wires[index]);
+            if (!childEl) continue;
+
+            SecureByteBlockPtr buffer = IHelper::convertFromBase64(childEl->getTextDecoded());
+            if (!buffer) continue;
+
+            alt += "\n" + IHelper::getDebugString(*buffer) + "\n";
+          }
+
+          for (int index = 0; jsons[index]; ++index) {
+            ElementPtr childEl = paramsEl->findFirstChildElement(jsons[index]);
+            if (!childEl) continue;
+
+            String json = childEl->getTextDecoded();
+            if (json.isEmpty()) continue;
+
+            alt += "\n" + json + "\n";
+          }
+        }
+
+        if (alt.hasData()) {
+          // strip out the wire stuff
+          paramsEl = paramsEl->clone()->toElement();
+
+          for (int index = 0; wires[index]; ++index) {
+            ElementPtr childEl = paramsEl->findFirstChildElement(wires[index]);
+            if (!childEl) continue;
+
+            childEl->orphan();
+          }
+
+          for (int index = 0; jsons[index]; ++index) {
+            ElementPtr childEl = paramsEl->findFirstChildElement(jsons[index]);
+            if (!childEl) continue;
+
+            childEl->orphan();
+          }
+        }
+
+        // strip out empty params
+        if (paramsEl) {
+          if (!paramsEl->hasChildren()) {
+            paramsEl.reset();
+          }
+        }
+
+        if (paramsEl) {
+          message += " " + IHelper::toString(paramsEl);
+        }
+        if (objectEl) {
+          message += " " + IHelper::toString(objectEl);
+        }
+        message += alt;
+
+        return message;
+      }
+
+      //-----------------------------------------------------------------------
       static String toColorString(
                                   const Subsystem &inSubsystem,
                                   Log::Severity inSeverity,
                                   Log::Level inLevel,
-                                  CSTR inMessage,
+                                  const Log::Params &params,
                                   CSTR inFunction,
                                   CSTR inFilePath,
                                   ULONG inLineNumber,
@@ -164,13 +266,15 @@ namespace openpeer
           case Log::None:            break;
         }
 
+//        const Log::Params &params;
+
         String result = String(OPENPEER_SERVICES_SEQUENCE_COLOUR_TIME) + current
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + colorSeverity + severity
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_THREAD + "<" + currentThreadIDAsString() + ">"
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
-                      + colorLevel + inMessage
+                      + colorLevel + getMessageString(params)
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_FILENAME + "@" + fileName
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_LINENUMBER + "(" + string(inLineNumber) + ")"
@@ -186,7 +290,7 @@ namespace openpeer
                                const Subsystem &inSubsystem,
                                Log::Severity inSeverity,
                                Log::Level inLevel,
-                               CSTR inMessage,
+                               const Log::Params &params,
                                CSTR inFunction,
                                CSTR inFilePath,
                                ULONG inLineNumber,
@@ -220,7 +324,7 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + inMessage + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
+        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + getMessageString(params) + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
         return result;
       }
 
@@ -229,7 +333,7 @@ namespace openpeer
                                     const Subsystem &inSubsystem,
                                     Log::Severity inSeverity,
                                     Log::Level inLevel,
-                                    CSTR inMessage,
+                                    const Log::Params &params,
                                     CSTR inFunction,
                                     CSTR inFilePath,
                                     ULONG inLineNumber,
@@ -246,7 +350,102 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + inMessage + (eol ? "\n" : "");
+        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + getMessageString(params) + (eol ? "\n" : "");
+        return result;
+      }
+
+      //-----------------------------------------------------------------------
+      static void appendToDoc(
+                              DocumentPtr &doc,
+                              const Log::Param param
+                              )
+      {
+        if (!param.param()) return;
+        doc->adoptAsLastChild(param.param());
+      }
+
+      //-----------------------------------------------------------------------
+      static void appendToDoc(
+                              DocumentPtr &doc,
+                              const ElementPtr &childEl
+                              )
+      {
+        if (!childEl) return;
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(childEl->getParent())
+
+        doc->adoptAsLastChild(childEl);
+      }
+
+      //-----------------------------------------------------------------------
+      static String toRawJSON(
+                              const Subsystem &inSubsystem,
+                              Log::Severity inSeverity,
+                              Log::Level inLevel,
+                              const Log::Params &params,
+                              CSTR inFunction,
+                              CSTR inFilePath,
+                              ULONG inLineNumber,
+                              bool eol = true
+                              )
+      {
+        const char *posBackslash = strrchr(inFilePath, '\\');
+        const char *posSlash = strrchr(inFilePath, '/');
+
+        const char *fileName = inFilePath;
+
+        if (!posBackslash)
+          posBackslash = posSlash;
+
+        if (!posSlash)
+          posSlash = posBackslash;
+
+        if (posSlash) {
+          if (posBackslash > posSlash)
+            posSlash = posBackslash;
+          fileName = posSlash + 1;
+        }
+
+        DocumentPtr message = Document::create();
+        ElementPtr objecEl = Element::create("object");
+        ElementPtr timeEl = Element::create("time");
+        TextPtr timeText = Text::create();
+
+        std::string current = to_simple_string(zsLib::now()).substr(12);
+
+        timeText->setValue(current);
+        timeEl->adoptAsLastChild(timeText);
+
+        appendToDoc(message, Log::Param("submodule", inSubsystem.getName()));
+        appendToDoc(message, Log::Param("severity", Log::toString(inSeverity)));
+        appendToDoc(message, Log::Param("level", Log::toString(inLevel)));
+        appendToDoc(message, Log::Param("function", inFunction));
+        appendToDoc(message, Log::Param("file", fileName));
+        appendToDoc(message, Log::Param("line", inLineNumber));
+        appendToDoc(message, Log::Param("message", params.message()));
+        message->adoptAsLastChild(timeEl);
+
+        IHelper::debugAppend(objecEl, params.object());
+        if (objecEl->hasChildren()) {
+          appendToDoc(message, objecEl);
+        }
+        appendToDoc(message, params.params());
+
+        GeneratorPtr generator = Generator::createJSONGenerator();
+        boost::shared_array<char> output = generator->write(message);
+
+        String result = (CSTR)output.get();
+        if (eol) {
+          result += "\n";
+        }
+
+        if (params.object()) {
+          params.object()->orphan();
+        }
+        if (params.params()) {
+          params.params()->orphan();
+        }
+
         return result;
       }
 
@@ -396,19 +595,7 @@ namespace openpeer
         #pragma mark LogLevelLogger => ILogDelegate
         #pragma mark
 
-        //---------------------------------------------------------------------
-        // notification of a log event
-        virtual void log(
-                         const Subsystem &,
-                         Log::Severity,
-                         Log::Level,
-                         CSTR,
-                         CSTR,
-                         CSTR,
-                         ULONG
-                         )
-        {
-        }
+        // ignored
 
       private:
         //---------------------------------------------------------------------
@@ -492,20 +679,20 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void log(
-                         const Subsystem &inSubsystem,
-                         Log::Severity inSeverity,
-                         Log::Level inLevel,
-                         CSTR inMessage,
-                         CSTR inFunction,
-                         CSTR inFilePath,
-                         ULONG inLineNumber
-                         )
+        virtual void onLog(
+                           const Subsystem &inSubsystem,
+                           Log::Severity inSeverity,
+                           Log::Level inLevel,
+                           CSTR inFunction,
+                           CSTR inFilePath,
+                           ULONG inLineNumber,
+                           const Log::Params &params
+                           )
         {
           if (mColorizeOutput) {
-            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
           } else {
-            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
           }
         }
 
@@ -582,22 +769,22 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void log(
-                         const Subsystem &inSubsystem,
-                         Log::Severity inSeverity,
-                         Log::Level inLevel,
-                         CSTR inMessage,
-                         CSTR inFunction,
-                         CSTR inFilePath,
-                         ULONG inLineNumber
-                         )
+        virtual void onLog(
+                           const Subsystem &inSubsystem,
+                           Log::Severity inSeverity,
+                           Log::Level inLevel,
+                           CSTR inFunction,
+                           CSTR inFilePath,
+                           ULONG inLineNumber,
+                           const Log::Params &params
+                           )
         {
           if (mFile.is_open()) {
             String output;
             if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+              output = toColorString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
             } else {
-              output = toBWString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+              output = toBWString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
             }
             mFile << output;
             mFile.flush();
@@ -684,28 +871,28 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void log(
-                         const Subsystem &inSubsystem,
-                         Log::Severity inSeverity,
-                         Log::Level inLevel,
-                         CSTR inMessage,
-                         CSTR inFunction,
-                         CSTR inFilePath,
-                         ULONG inLineNumber
-                         )
+        virtual void onLog(
+                           const Subsystem &inSubsystem,
+                           Log::Severity inSeverity,
+                           Log::Level inLevel,
+                           CSTR inFunction,
+                           CSTR inFilePath,
+                           ULONG inLineNumber,
+                           const Log::Params &params
+                           )
         {
 #ifdef __QNX__
 #ifndef NDEBUG
           String output;
           if (mColorizeOutput)
-            output = toColorString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber, false);
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
           else
-            output = toBWString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber, false);
+            output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
           qDebug() << output.c_str();
 #endif //ndef NDEBUG
 #endif //__QNX__
 #ifdef _WIN32
-          String output = toWindowsString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+          String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
         }
@@ -1002,15 +1189,15 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void log(
-                         const Subsystem &inSubsystem,
-                         Log::Severity inSeverity,
-                         Log::Level inLevel,
-                         CSTR inMessage,
-                         CSTR inFunction,
-                         CSTR inFilePath,
-                         ULONG inLineNumber
-                         )
+        virtual void onLog(
+                           const Subsystem &inSubsystem,
+                           Log::Severity inSeverity,
+                           Log::Level inLevel,
+                           CSTR inFunction,
+                           CSTR inFilePath,
+                           ULONG inLineNumber,
+                           const Log::Params &params
+                           )
         {
           {
             AutoRecursiveLock lock(mLock);
@@ -1023,9 +1210,9 @@ namespace openpeer
 
             String output;
             if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
             } else {
-              output = toBWString(inSubsystem, inSeverity, inLevel, inMessage, inFunction, inFilePath, inLineNumber);
+              output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
             }
 
             bool okayToSend = mBufferedList.size() < 1;
@@ -1364,6 +1551,7 @@ namespace openpeer
           bool output = false;
           String subsystem;
           String level;
+          String echo;
 
           if (split.size() > 0) {
             command = split.front(); split.pop_front();
@@ -1384,6 +1572,15 @@ namespace openpeer
                   ILogger::setLogLevel(Log::Basic);
                 } else if (level == "none") {
                   ILogger::setLogLevel(Log::None);
+                } else if ((level == "color") || (level == "colour")) {
+                  String mode = split.front(); split.pop_front();
+                  if (mode == "on") {
+                    mColorizeOutput = true;
+                    echo = "==> Setting colourization on\n";
+                  } else if (mode == "off") {
+                    mColorizeOutput = false;
+                    echo = "==> Setting colourization off\n";
+                  }
                 } else if (split.size() > 0) {
                   subsystem = level;
                   level = split.front(); split.pop_front();
@@ -1409,15 +1606,16 @@ namespace openpeer
             }
           }
 
-          String echo;
-          if (output) {
-            if (subsystem.size() > 0) {
-              echo = "==> Setting log level for \"" + subsystem + "\" to \"" + level + "\"\n";
+          if (echo.isEmpty()) {
+            if (output) {
+              if (subsystem.size() > 0) {
+                echo = "==> Setting log level for \"" + subsystem + "\" to \"" + level + "\"\n";
+              } else {
+                echo = "==> Setting all log compoment levels to \"" + level + "\"\n";
+              }
             } else {
-              echo = "==> Setting all log compoment levels to \"" + level + "\"\n";
+              echo = "==> Command not recognized \"" + input + "\"\n";
             }
-          } else {
-            echo = "==> Command not recognized \"" + input + "\"\n";
           }
           bool wouldBlock = false;
           int errorCode = 0;

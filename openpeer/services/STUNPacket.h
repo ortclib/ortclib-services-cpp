@@ -242,7 +242,7 @@ namespace openpeer
       const char *methodAsString() const;
       void log(
                Log::Level level = Log::Debug,
-               const char *logMessage = NULL
+               Log::Params params = Log::Params()
                ) const;
 
       bool isLegal(RFCs rfc) const;

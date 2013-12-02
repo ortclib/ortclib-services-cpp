@@ -36,7 +36,7 @@
 
 #include <zsLib/Log.h>
 #include <zsLib/helpers.h>
-
+#include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
 
@@ -111,12 +111,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      String TransportStream::toDebugString(ITransportStreamPtr stream, bool includeCommaPrefix)
+      ElementPtr TransportStream::toDebug(ITransportStreamPtr stream)
       {
-        if (!stream) return String(includeCommaPrefix ? ", stream=(null)" : "stream=(null)");
+        if (!stream) return ElementPtr();
 
         TransportStreamPtr pThis = TransportStream::convert(stream);
-        return pThis->getDebugValueString(includeCommaPrefix);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
@@ -148,7 +148,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
 
-        ZS_LOG_DEBUG(log("cancel called") + getDebugValueString())
+        ZS_LOG_DEBUG(debug("cancel called"))
 
         get(mShutdown) = true;
 
@@ -222,7 +222,7 @@ namespace openpeer
         }
 
         if (mBlockQueue) {
-          ZS_LOG_TRACE(log("write blocked thus putting buffer into block queue") + ", size=" + string(bufferLengthInBytes) + ", header=" + (header ? "true":"false"))
+          ZS_LOG_TRACE(log("write blocked thus putting buffer into block queue") + ZS_PARAM("size", bufferLengthInBytes) + ZS_PARAM("header", (bool)header))
           if (!mBlockHeader) {
             mBlockHeader = header;
           }
@@ -251,7 +251,7 @@ namespace openpeer
         }
 
         if (mBlockQueue) {
-          ZS_LOG_TRACE(log("write blocked thus putting buffer into block queue") + ", size=" + string(bufferToAdopt->SizeInBytes()) + ", header=" + (header ? "true":"false"))
+          ZS_LOG_TRACE(log("write blocked thus putting buffer into block queue") + ZS_PARAM("size", bufferToAdopt->SizeInBytes()) + ZS_PARAM("header", (bool)header))
           if (!mBlockHeader) {
             mBlockHeader = header;
           }
@@ -265,7 +265,7 @@ namespace openpeer
         buffer.mBuffer = bufferToAdopt;
         buffer.mHeader = header;
 
-        ZS_LOG_TRACE(log("buffer written") + ", written=" + string(bufferToAdopt->SizeInBytes()) )
+        ZS_LOG_TRACE(log("buffer written") + ZS_PARAM("written", bufferToAdopt->SizeInBytes()) )
 
         mBuffers.push_back(buffer);
 
@@ -422,7 +422,7 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         if (mBuffers.size() < 1) {
-          ZS_LOG_TRACE(log("no read buffers available") + ", read size=0")
+          ZS_LOG_TRACE(log("no read buffers available") + ZS_PARAM("read size", 0))
           return 0;
         }
 
@@ -430,7 +430,7 @@ namespace openpeer
 
         size_t readSize = (buffer.mBuffer->SizeInBytes() - buffer.mRead);
 
-        ZS_LOG_TRACE(log("read size") + ", read size=" + string(readSize))
+        ZS_LOG_TRACE(log("read size") + ZS_PARAM("read size", readSize))
 
         return readSize;
       }
@@ -441,13 +441,13 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         if (mBuffers.size() < 1) {
-          ZS_LOG_TRACE(log("no read buffers available") + ", header returned=false")
+          ZS_LOG_TRACE(log("no read buffers available") + ZS_PARAM("header returned", false))
           return StreamHeaderPtr();
         }
 
         const Buffer &buffer = mBuffers.front();
 
-        ZS_LOG_TRACE(log("header returned") + ", header=" + (buffer.mHeader ? "true":"false"))
+        ZS_LOG_TRACE(log("header returned") + ZS_PARAM("header", (bool)buffer.mHeader))
         
         return buffer.mHeader;
       }
@@ -471,7 +471,7 @@ namespace openpeer
           total += (buffer.mBuffer->SizeInBytes() - buffer.mRead);
         }
 
-        ZS_LOG_TRACE(log("total read size available") + ", read size=" + string(total) + ", buffers=" + string(mBuffers.size()))
+        ZS_LOG_TRACE(log("total read size available") + ZS_PARAM("read size", total) + ZS_PARAM("buffers", mBuffers.size()))
 
         return total;
       }
@@ -554,11 +554,11 @@ namespace openpeer
           bufferLengthInBytes -= consume;
           dest += consume;
 
-          ZS_LOG_TRACE(log("buffer read") + ", read=" + string(consume) + ", buffer available=" + string(available) + ", remaining=" + string(bufferLengthInBytes))
+          ZS_LOG_TRACE(log("buffer read") + ZS_PARAM("read", consume) + ZS_PARAM("buffer available", available) + ZS_PARAM("remaining", bufferLengthInBytes))
 
           if (buffer.mRead == buffer.mBuffer->SizeInBytes()) {
             // entire buffer has not been consumed, remove it
-            ZS_LOG_TRACE(log("entire buffer consumed") + ", buffer size=" + string(buffer.mRead))
+            ZS_LOG_TRACE(log("entire buffer consumed") + ZS_PARAM("buffer size", buffer.mRead))
             mBuffers.pop_front();
             continue;
           }
@@ -603,7 +603,7 @@ namespace openpeer
             result = temp;
           }
 
-          ZS_LOG_TRACE(log("buffer read") + ", read=" + string(result->SizeInBytes()))
+          ZS_LOG_TRACE(log("buffer read") + ZS_PARAM("read", result->SizeInBytes()))
 
           mBuffers.pop_front();
         }
@@ -669,7 +669,7 @@ namespace openpeer
           *outHeader = StreamHeaderPtr();
         }
 
-        ZS_LOG_TRACE(log("peek") + ", size=" + string(bufferLengthInBytes) + ", offset=" + string(offsetInBytes))
+        ZS_LOG_TRACE(log("peek") + ZS_PARAM("size", bufferLengthInBytes) + ZS_PARAM("offset", offsetInBytes))
 
         AutoRecursiveLock lock(getLock());
 
@@ -699,7 +699,7 @@ namespace openpeer
           size_t read = buffer.mRead;
           size_t available = buffer.mBuffer->SizeInBytes() - buffer.mRead;
 
-          ZS_LOG_TRACE(log("next peek buffer found") + ", size=" + string(buffer.mBuffer->SizeInBytes()) + ", read=" + string(read) + ", available=" + string(available))
+          ZS_LOG_TRACE(log("next peek buffer found") + ZS_PARAM("size", buffer.mBuffer->SizeInBytes()) + ZS_PARAM("read", read) + ZS_PARAM("available", available))
 
           if (offsetInBytes > 0) {
             // first consume the offset
@@ -708,7 +708,7 @@ namespace openpeer
             read += consume;
             available -= consume;
 
-            ZS_LOG_TRACE(log("skipping over bytes") + ", size=" + string(consume) + ", remaining offset=" + string(offsetInBytes) + ", available=" + string(available) + ", read=" + string(read))
+            ZS_LOG_TRACE(log("skipping over bytes") + ZS_PARAM("size", consume) + ZS_PARAM("remaining offset", offsetInBytes) + ZS_PARAM("available", available) + ZS_PARAM("read", read))
           }
 
           if (0 == available) {
@@ -737,7 +737,7 @@ namespace openpeer
           bufferLengthInBytes -= consume;
           totalRead += consume;
 
-          ZS_LOG_TRACE(log("peeking buffer") + ", size=" + string(consume) + ", read=" + string(read) + ", available=" + string(available) + ", remainging data to peek=" + string(bufferLengthInBytes))
+          ZS_LOG_TRACE(log("peeking buffer") + ZS_PARAM("size", consume) + ZS_PARAM("read", read) + ZS_PARAM("available", available) + ZS_PARAM("remainging data to peek", bufferLengthInBytes))
 
           if (0 == bufferLengthInBytes) {
             ZS_LOG_TRACE(log("peeked all requested"))
@@ -776,7 +776,7 @@ namespace openpeer
         }
 
         if (read < result->SizeInBytes()) {
-          ZS_LOG_TRACE(log("peek completed but read less than expecting / hoping to read") + ", read=" + string(read) + ", expecting=" + string(result->SizeInBytes()))
+          ZS_LOG_TRACE(log("peek completed but read less than expecting / hoping to read") + ZS_PARAM("read", read) + ZS_PARAM("expecting", result->SizeInBytes()))
 
           // read less than the expected size
           SecureByteBlockPtr newResult(new SecureByteBlock(read));
@@ -785,7 +785,7 @@ namespace openpeer
           return newResult;
         }
 
-        ZS_LOG_TRACE(log("peek completed") + ", read=" + string(read))
+        ZS_LOG_TRACE(log("peek completed") + ZS_PARAM("read", read))
         return result;
       }
 
@@ -834,7 +834,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       size_t TransportStream::skip(size_t offsetInBytes)
       {
-        ZS_LOG_TRACE(log("skip called") + ", skip=" + string(offsetInBytes))
+        ZS_LOG_TRACE(log("skip called") + ZS_PARAM("skip", offsetInBytes))
 
         AutoRecursiveLock lock(getLock());
 
@@ -867,11 +867,11 @@ namespace openpeer
           totalRead += consume;
           offsetInBytes -= consume;
 
-          ZS_LOG_TRACE(log("buffer read") + ", read=" + string(consume) + ", buffer available=" + string(available) + ", remaining to skip=" + string(offsetInBytes))
+          ZS_LOG_TRACE(log("buffer read") + ZS_PARAM("read", consume) + ZS_PARAM("buffer available", available) + ZS_PARAM("remaining to skip", offsetInBytes))
 
           if (buffer.mRead == buffer.mBuffer->SizeInBytes()) {
             // entire buffer has not been consumed, remove it
-            ZS_LOG_TRACE(log("entire buffer consumed") + ", buffer size=" + string(buffer.mRead))
+            ZS_LOG_TRACE(log("entire buffer consumed") + ZS_PARAM("buffer size", buffer.mRead))
             mBuffers.pop_front();
             continue;
           }
@@ -897,29 +897,41 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String TransportStream::log(const char *message) const
+      Log::Params TransportStream::log(const char *message) const
       {
-        return String("TransportStream [" + string(mID) + "] " + message);
+        ElementPtr objectEl = Element::create("TransportStream");
+        IHelper::debugAppend(objectEl, "id", mID);
+        return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      String TransportStream::getDebugValueString(bool includeCommaPrefix) const
+      Log::Params TransportStream::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr TransportStream::toDebug() const
       {
         AutoRecursiveLock lock(getLock());
-        bool firstTime = !includeCommaPrefix;
-        return
-        Helper::getDebugValue("transport stream id", string(mID), firstTime) +
-        Helper::getDebugValue("shutdown", mShutdown ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("reader ready", mReaderReady ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("read ready notified", mReadReadyNotified ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("write ready notified", mWriteReadyNotified ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("writer subscriptions", mWriterSubscriptions.size() > 0 ? string(mWriterSubscriptions.size()) : String(), firstTime) +
-        Helper::getDebugValue("default writer subscription", mDefaultWriterSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("reader subscriptions", mReaderSubscriptions.size() > 0 ? string(mReaderSubscriptions.size()) : String(), firstTime) +
-        Helper::getDebugValue("default reader subscription", mDefaultReaderSubscription ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("buffers", mBuffers.size() > 0 ? string(mBuffers.size()) : String(), firstTime) +
-        Helper::getDebugValue("block queue", mBlockQueue ? String("true") : String(), firstTime) +
-        Helper::getDebugValue("block header", mBlockHeader ? String("true") : String(), firstTime);
+
+        ElementPtr resultEl = Element::create("TCPMessaging");
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "shutdown", mShutdown);
+        IHelper::debugAppend(resultEl, "reader ready", mReaderReady);
+        IHelper::debugAppend(resultEl, "read ready notified", mReadReadyNotified);
+        IHelper::debugAppend(resultEl, "write ready notified", mWriteReadyNotified);
+        IHelper::debugAppend(resultEl, "writer subscriptions", mWriterSubscriptions.size());
+        IHelper::debugAppend(resultEl, "default writer subscription", (bool)mDefaultWriterSubscription);
+        IHelper::debugAppend(resultEl, "reader subscriptions", mReaderSubscriptions.size());
+        IHelper::debugAppend(resultEl, "default reader subscription", (bool)mDefaultReaderSubscription);
+        IHelper::debugAppend(resultEl, "buffers", mBuffers.size());
+        IHelper::debugAppend(resultEl, "block queue", (bool)mBlockQueue);
+        IHelper::debugAppend(resultEl, "block header", (bool)mBlockHeader);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -947,14 +959,14 @@ namespace openpeer
                             (!mWriteReadyNotified));
 
         if (notifyRead) {
-          ZS_LOG_TRACE(log("notifying ready to read") + ", subscribers=" + string(mReaderSubscriptions.size()))
+          ZS_LOG_TRACE(log("notifying ready to read") + ZS_PARAM("subscribers", mReaderSubscriptions.size()))
           mReaderSubscriptions.delegate()->onTransportStreamReaderReady(mThisWeak.lock());
 
           get(mReadReadyNotified) = true;
         }
 
         if (notifyWrite) {
-          ZS_LOG_TRACE(log("notifying ready to write") + ", subscribers=" + string(mWriterSubscriptions.size()))
+          ZS_LOG_TRACE(log("notifying ready to write") + ZS_PARAM("subscribers", mWriterSubscriptions.size()))
           mWriterSubscriptions.delegate()->onTransportStreamWriterReady(mThisWeak.lock());
 
           get(mWriteReadyNotified) = true;
@@ -986,9 +998,9 @@ namespace openpeer
     }
 
     //-----------------------------------------------------------------------
-    String ITransportStream::toDebugString(ITransportStreamPtr stream, bool includeCommaPrefix)
+    ElementPtr ITransportStream::toDebug(ITransportStreamPtr stream)
     {
-      return internal::TransportStream::toDebugString(stream, includeCommaPrefix);
+      return internal::TransportStream::toDebug(stream);
     }
     
     //-----------------------------------------------------------------------

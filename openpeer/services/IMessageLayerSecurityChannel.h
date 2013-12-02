@@ -57,7 +57,7 @@ namespace openpeer
 
       static const char *toString(SessionStates state);
 
-      static String toDebugString(IMessageLayerSecurityChannelPtr channel, bool includeCommaPrefix = true);
+      static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel);
 
       //-----------------------------------------------------------------------
       // PURPOSE: create a new channel to a remote connection

@@ -31,9 +31,13 @@
 
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/RUDPPacket.h>
+#include <openpeer/services/IHelper.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/helpers.h>
+#include <zsLib/XML.h>
+
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/crc.h>
@@ -2245,186 +2249,207 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void STUNPacket::log(
                          Log::Level level,
-                         const char *logMessage
+                         Log::Params inParams
                          ) const
     {
       if (ZS_GET_LOG_LEVEL() < level) return;
 
       // scope: log information
       {
-        String message;
+        Log::Params params(NULL, mLogObject ? mLogObject : "STUNPacket");
 
-        message = String(mLogObject) + " [" + string(mLogObjectID) + "] "
-                  + (logMessage ? logMessage : "<unspecified>")
-                  + ", RFC=" + toString(guessRFC(RFC_AllowAll))
-                  + ", class=" + classAsString()
-                  + ", method=" + methodAsString()
-                  + ", cookie=" + string(mMagicCookie, 16)
-                  + ", ID=" + internal::convertToHex(&(mTransactionID[0]), sizeof(mTransactionID));
+        params << inParams;
+
+        if (0 != mLogObjectID) {
+          if (inParams.object()) {
+            params << ZS_PARAM("original object", mLogObject);
+            params << ZS_PARAM("original id", mLogObjectID);
+          } else {
+            params << ZS_PARAM("id", mLogObjectID);
+          }
+        }
+
+        params << ZS_PARAM("RFC", toString(guessRFC(RFC_AllowAll)))
+               << ZS_PARAM("class", classAsString())
+               << ZS_PARAM("method", methodAsString())
+               << ZS_PARAM("cookie", string(mMagicCookie, 16))
+               << ZS_PARAM("transaction id", internal::convertToHex(&(mTransactionID[0]), sizeof(mTransactionID)));
 
         if (0 != mTotalRetries)
-          message += ", retries=" + string(mTotalRetries);
+          params << ZS_PARAM("retries", mTotalRetries);
 
         if (hasAttribute(STUNPacket::Attribute_ErrorCode)) {
-          message += ", error code=" + string(mErrorCode) + " (" + toString((ErrorCodes)mErrorCode) + ")";
-          message += ", reason=" + mReason;
+          params << ZS_PARAM("error code", mErrorCode);
+          params << ZS_PARAM("error code str", toString((ErrorCodes)mErrorCode));
+          params << ZS_PARAM("reason", mReason);
         }
 
         if (hasAttribute(STUNPacket::Attribute_UnknownAttribute)) {
-          message += ", unknown=";
+          ElementPtr unknownsEl = Element::create("unknowns");
           UnknownAttributeList::const_iterator iter = mUnknownAttributes.begin();
           for (bool first = true; iter != mUnknownAttributes.end(); ++iter, first = false) {
-            message += (first ? "" : ";") + string(*iter);
+            IHelper::debugAppend(unknownsEl, "unknown", string(*iter));
           }
+          params << unknownsEl;
         }
         if (hasAttribute(STUNPacket::Attribute_MappedAddress)) {
-          message += ", mapped address=" + mMappedAddress.string();
+          params << ZS_PARAM("mapped address", mMappedAddress.string());
         }
         if (hasAttribute(STUNPacket::Attribute_AlternateServer)) {
-          message += ", alternative server=" + mAlternateServer.string();
+          params << ZS_PARAM("alternative server", mAlternateServer.string());
         }
         if (hasAttribute(STUNPacket::Attribute_Username)) {
-          message += ", username=" + mUsername;
+          params << ZS_PARAM("username", mUsername);
         }
         if (!mPassword.isEmpty()) {
-          message += ", password=" + mPassword;
+          params << ZS_PARAM("password", mPassword);
         }
         if (hasAttribute(STUNPacket::Attribute_Realm)) {
-          message += ", realm=" + mRealm;
+          params << ZS_PARAM("realm", mRealm);
         }
         if (hasAttribute(STUNPacket::Attribute_Nonce)) {
-          message += ", nonce=" + mNonce;
+          params << ZS_PARAM("nonce", mNonce);
         }
         if (hasAttribute(STUNPacket::Attribute_Software)) {
-          message += ", software=" + mSoftware;
+          params << ZS_PARAM("software", mSoftware);
         }
         if (CredentialMechanisms_None != mCredentialMechanism) {
-          message += String(", credentials=") + (toString(mCredentialMechanism));
+          params << ZS_PARAM("credentials", toString(mCredentialMechanism));
         }
         if ((hasAttribute(STUNPacket::Attribute_MessageIntegrity)) &&
              (0 != mMessageIntegrityMessageLengthInBytes)) {
-          message += ", message integrity length=" + string(mMessageIntegrityMessageLengthInBytes);
-          message += ", message integrity data=" + internal::convertToHex(&(mMessageIntegrity[0]), sizeof(mMessageIntegrity));
+          params << ZS_PARAM("message integrity length", mMessageIntegrityMessageLengthInBytes);
+          params << ZS_PARAM("message integrity data", internal::convertToHex(&(mMessageIntegrity[0]), sizeof(mMessageIntegrity)));
         }
         if (hasAttribute(STUNPacket::Attribute_FingerPrint)) {
-          message += ", fingerprint=true";
+          params << ZS_PARAM("fingerprint", true);
         }
         if (hasAttribute(STUNPacket::Attribute_ChannelNumber)) {
-          message += ", channel=" + string(mChannelNumber);
+          params << ZS_PARAM("channel", mChannelNumber);
         }
         if (hasAttribute(STUNPacket::Attribute_Lifetime)) {
-          message += ", lifetime=" + string(mLifetime);
+          params << ZS_PARAM("lifetime", mLifetime);
         }
         if (hasAttribute(STUNPacket::Attribute_XORPeerAddress)) {
-          message += ", peer address=";
+          ElementPtr peersEl = Element::create("peer addresses");
           PeerAddressList::const_iterator iter = mPeerAddressList.begin();
           for (bool first = true; iter != mPeerAddressList.end(); ++iter, first = false) {
-            message += (first ? "" : ";") + (*iter).string();
+            IHelper::debugAppend(peersEl, "peer address", (*iter).string());
           }
+          params << peersEl;
         }
         if (hasAttribute(STUNPacket::Attribute_XORRelayedAddress)) {
-          message += ", relayed address=" + mRelayedAddress.string();
+          params << ZS_PARAM("relayed address", mRelayedAddress.string());
         }
         if (hasAttribute(STUNPacket::Attribute_Data)) {
-          message += ", data length=" + string(mDataLength);
-          message += String(", data=") + (mData ? "true" : "false");
+          params << ZS_PARAM("data length", mDataLength);
+          params << ZS_PARAM("data", mData);
         }
         if (hasAttribute(STUNPacket::Attribute_EvenPort)) {
-          message += String(", even port=") + (mEvenPort ? "true" : "false");
+          params << ZS_PARAM("even port", mEvenPort);
         }
         if (hasAttribute(STUNPacket::Attribute_RequestedTransport)) {
-          message += ", data length=" + string(((UINT)mRequestedTransport));
+          params << ZS_PARAM("data length", mRequestedTransport);
         }
         if (hasAttribute(STUNPacket::Attribute_DontFragment)) {
-          message += ", don't fragment=true";
+          params << ZS_PARAM("don't fragment", true);
         }
         if (hasAttribute(STUNPacket::Attribute_ReservationToken)) {
-          message += ", reservation token=" + internal::convertToHex(&(mReservationToken[0]), sizeof(mReservationToken));
+          params << ZS_PARAM("reservation token", internal::convertToHex(&(mReservationToken[0]), sizeof(mReservationToken)));
         }
         if (hasAttribute(STUNPacket::Attribute_Priority)) {
-          message += ", data length=" + string(mPriority);
+          params << ZS_PARAM("priority", mPriority);
         }
         if (hasAttribute(STUNPacket::Attribute_UseCandidate)) {
-          message += ", use candidate=true";
+          params << ZS_PARAM("use candidate", true);
         }
         if (hasAttribute(STUNPacket::Attribute_ICEControlled)) {
-          message += ", ice controlled=" + string(mIceControlled);
+          params << ZS_PARAM("ice controlled", mIceControlled);
         }
         if (hasAttribute(STUNPacket::Attribute_ICEControlling)) {
-          message += ", ice controlling=" + string(mIceControlling);
+          params << ZS_PARAM("ice controlling", mIceControlling);
         }
         if (hasAttribute(STUNPacket::Attribute_NextSequenceNumber)) {
-          message += ", next sequence number=" + string(mNextSequenceNumber) + " (" +  + string(mNextSequenceNumber & 0xFFFFFF) + ")";
+          params << ZS_PARAM("next sequence number", string(mNextSequenceNumber) + " (" +  + string(mNextSequenceNumber & 0xFFFFFF) + ")");
         }
         if (hasAttribute(STUNPacket::Attribute_NextSequenceNumber)) {
-          message += ", minimum RTT=" + string(mMinimumRTT);
+          params << ZS_PARAM("minimum RTT", mMinimumRTT);
         }
         if (hasAttribute(STUNPacket::Attribute_ConnectionInfo)) {
-          message += ", connection info=" + mConnectionInfo;
+          params << ZS_PARAM("connection info", mConnectionInfo);
         }
         if (hasAttribute(STUNPacket::Attribute_GSNR)) {
-          message += ", gsnr=" + string(mGSNR) + " (" +  + string(mGSNR & 0xFFFFFF) + ")";
+          params << ZS_PARAM("gsnr", string(mGSNR) + " (" +  + string(mGSNR & 0xFFFFFF) + ")");
         }
         if (hasAttribute(STUNPacket::Attribute_GSNFR)) {
-          message += ", gsnfr=" + string(mGSNFR) + " (" +  + string(mGSNFR & 0xFFFFFF) + ")";
+          params << ZS_PARAM("gsnfr", string(mGSNFR) + " (" +  + string(mGSNFR & 0xFFFFFF) + ")");
         }
+
         if (hasAttribute(STUNPacket::Attribute_RUDPFlags)) {
-          message += ", flags=" + string(((UINT)mReliabilityFlags));
-          message += ", flag details=";
-          message += "(--)";  // (ps)
+          String flagsStr;
+
+          params << ZS_PARAM("flags", (UINT)mReliabilityFlags);
+
+          flagsStr += "(--)";  // (ps)
           if (0 != (RUDPPacket::Flag_PG_ParityGSNR & mReliabilityFlags)) {
-            message += "(pg)";
+            flagsStr += "(pg)";
           } else {
-            message += "(--)";
+            flagsStr += "(--)";
           }
           if (0 != (RUDPPacket::Flag_XP_XORedParityToGSNFR & mReliabilityFlags)) {
-            message += "(xp)";
+            flagsStr += "(xp)";
           } else {
-            message += "(--)";
+            flagsStr += "(--)";
           }
           if (0 != (RUDPPacket::Flag_DP_DuplicatePacket & mReliabilityFlags)) {
-            message += "(dp)";
+            flagsStr += "(dp)";
           } else {
-            message += "(--)";
+            flagsStr += "(--)";
           }
           if (0 != (RUDPPacket::Flag_EC_ECNPacket & mReliabilityFlags)) {
-            message += "(ec)";
+            flagsStr += "(ec)";
           } else {
-            message += "(--)";
+            flagsStr += "(--)";
           }
-          message += "(--)";  // (eq)
-          message += "(--)";  // (ar)
+          flagsStr += "(--)";  // (eq)
+          flagsStr += "(--)";  // (ar)
           if (0 != (RUDPPacket::Flag_VP_VectorParity & mReliabilityFlags)) {
-            message += "(vp)";
+            flagsStr += "(vp)";
           } else {
-            message += "(--)";
+            flagsStr += "(--)";
           }
+
+          ZS_PARAM("flag details", flagsStr);
         }
+
         if (hasAttribute(STUNPacket::Attribute_ACKVector)) {
-          message += ", vector length=" + string(mACKVectorLength);
+          params << ZS_PARAM("vector length", mACKVectorLength);
           if (0 != mACKVectorLength) {
-            message += ", vector=" + internal::convertToHex(mACKVector.get(), mACKVectorLength);
+            params << ZS_PARAM("vector", internal::convertToHex(mACKVector.get(), mACKVectorLength));
           }
         }
         if (hasAttribute(STUNPacket::Attribute_CongestionControl)) {
           if (mLocalCongestionControl.size() > 0)
           {
-            message += ", congestion local=";
+            ElementPtr localEl = Element::create("congestion local");
             CongestionControlList::const_iterator iter = mLocalCongestionControl.begin();
             for (bool first = true; iter != mLocalCongestionControl.end(); ++iter, first = false) {
-              message += (first ? "" : ";") + string(((UINT)*iter));
+              IHelper::debugAppend(localEl, "value", string(((UINT)*iter)));
             }
+            params << localEl;
           }
           if (mRemoteCongestionControl.size() > 0)
           {
-            message += ", congestion remote=";
+            ElementPtr remoteEL = Element::create("congestion remote");
             CongestionControlList::const_iterator iter = mRemoteCongestionControl.begin();
             for (bool first = true; iter != mRemoteCongestionControl.end(); ++iter, first = false) {
-              message += (first ? "" : ";") + string(((UINT)*iter));
+              IHelper::debugAppend(remoteEL, "value", string(((UINT)*iter)));
             }
+            params << remoteEL;
           }
         }
-        ZS_LOG(Basic, message)
+
+        ZS_LOG(Basic, params)
       }
     }
 
@@ -2435,13 +2460,13 @@ namespace openpeer
         if (hasAttribute(internal::gAttributeOrdering[loop])) {
           // has the attribute but is it legal?
           if (!internal::isAttributeLegal(*this, rfc, internal::gAttributeOrdering[loop])) {
-            ZS_LOG_WARNING(Trace, "found an illegal attribute, RFC=" + toString(rfc) + ", attribute=" + toString(internal::gAttributeOrdering[loop]))
+            ZS_LOG_WARNING(Trace, Log::Params("found an illegal attribute", "STUNPacket") + ZS_PARAM("RFC", toString(rfc)) + ZS_PARAM("attribute", toString(internal::gAttributeOrdering[loop])))
             return false;
           }
         } else {
           // does not have the attribute but is it required?
           if (internal::isAttributeRequired(*this, rfc, internal::gAttributeOrdering[loop])) {
-            ZS_LOG_WARNING(Trace, "missing an attribute, RFC=" + toString(rfc) + ", attribute=" + toString(internal::gAttributeOrdering[loop]))
+            ZS_LOG_WARNING(Trace, Log::Params("missing an attribute", "STUNPacket") + ZS_PARAM("RFC", toString(rfc)) + ZS_PARAM("attribute", toString(internal::gAttributeOrdering[loop])))
             return false;
           }
         }

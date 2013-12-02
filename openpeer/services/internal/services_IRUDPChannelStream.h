@@ -104,8 +104,8 @@ namespace openpeer
                                                    );
 
         //-----------------------------------------------------------------------
-        // PURPOSE: returns a debug string containing internal object state
-        static String toDebugString(IRUDPChannelStreamPtr stream, bool includeCommaPrefix = true);
+        // PURPOSE: returns a debug object containing internal object state
+        static ElementPtr toDebug(IRUDPChannelStreamPtr stream);
 
         static IRUDPChannelStreamPtr create(
                                             IMessageQueuePtr queue,
