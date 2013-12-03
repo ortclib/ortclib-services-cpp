@@ -119,7 +119,7 @@ namespace openpeer
       static String getMessageString(const Log::Params &params)
       {
         static const char *wires[] = {"wire in", "wire out", NULL};
-        static const char *jsons[] = {"json in", "json out", NULL};
+        static const char *jsons[] = {"json in", "json out", "json", NULL};
 
         String objectString;
 
@@ -165,7 +165,7 @@ namespace openpeer
             SecureByteBlockPtr buffer = IHelper::convertFromBase64(childEl->getTextDecoded());
             if (!buffer) continue;
 
-            alt += "\n" + IHelper::getDebugString(*buffer) + "\n";
+            alt += "\n\n" + IHelper::getDebugString(*buffer) + "\n\n";
           }
 
           for (int index = 0; jsons[index]; ++index) {
@@ -175,7 +175,7 @@ namespace openpeer
             String json = childEl->getTextDecoded();
             if (json.isEmpty()) continue;
 
-            alt += "\n" + json + "\n";
+            alt += "\n\n" + json + "\n\n";
           }
         }
 

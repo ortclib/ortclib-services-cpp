@@ -964,14 +964,17 @@ namespace openpeer
           if (Duration() != mTimeout) {
             ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout.total_milliseconds()))
           }
-          ZS_LOG_BASIC("------------------------------------HTTP INFO----------------------------------")
-          if (mIsPost) {
-            if (mPostData.size() > 0) {
-              String base64 = IHelper::convertToBase64(mPostData);
-              ZS_LOG_BASIC(log("POST DATA") + ZS_PARAM("wire out", base64)) // safe to cast BYTE * as const char * because buffer is NUL terminated
+
+          if (ZS_IS_LOGGING(Trace)) {
+            ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))
+            if (mIsPost) {
+              if (mPostData.size() > 0) {
+                String base64 = IHelper::convertToBase64(mPostData);
+                ZS_LOG_BASIC(log("POST DATA") + ZS_PARAM("wire out", base64)) // safe to cast BYTE * as const char * because buffer is NUL terminated
+              }
             }
-            ZS_LOG_BASIC("------------------------------------HTTP INFO----------------------------------")
           }
+          ZS_LOG_BASIC("------------------------------------HTTP INFO----------------------------------")
         }
       }
 
@@ -1023,6 +1026,8 @@ namespace openpeer
           ZS_LOG_BASIC(log("INFO") + ZS_PARAM("HTTP response code", mResponseCode))
           ZS_LOG_BASIC(log("INFO") + ZS_PARAM("CURL result code", mResultCode))
           ZS_LOG_BASIC(log("INFO") + ZS_PARAM("CURL error message", (CSTR)(mErrorBuffer.BytePtr())))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("HEADER SIZE", mHeader.MaxRetrievable()))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("BODY SIZE", mBody.MaxRetrievable()))
           ZS_LOG_BASIC(log("----------------------------------HTTP COMPLETE--------------------------------"))
         }
         cleanupCurl();
@@ -1072,7 +1077,7 @@ namespace openpeer
 
         pThis->mHeader.Put((BYTE *)ptr, size*nmemb);
 
-        if (ZS_IS_LOGGING(Trace)) {
+        if (ZS_IS_LOGGING(Debug)) {
           if (firstHeader) {
             ZS_LOG_BASIC(pThis->log("----------------------------HTTP HEADER DATA RECEIVED--------------------------"))
           }
@@ -1129,7 +1134,7 @@ namespace openpeer
         //pThis->mBody.LazyPut((BYTE *)ptr, size*nmemb);
         pThis->mBody.Put((BYTE *)ptr, size*nmemb);
 
-        if (ZS_IS_LOGGING(Debug)) {
+        if (ZS_IS_LOGGING(Trace)) {
           ZS_LOG_BASIC(pThis->log("-----------------------------HTTP BODY DATA RECEIVED---------------------------"))
 
           SecureByteBlock buffer;

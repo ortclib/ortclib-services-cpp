@@ -264,7 +264,7 @@ namespace openpeer
       String RUDPChannel::getRemoteConnectionInfo()
       {
         AutoRecursiveLock lock(mLock);
-        ZS_LOG_DEBUG(log("get connection info called") + ZS_PARAM("info", mRemoteChannelInfo))
+        ZS_LOG_DEBUG(log("get connection info called") + ZS_PARAM("remote channel info", mRemoteChannelInfo))
         return mRemoteChannelInfo;
       }
 
