@@ -325,6 +325,7 @@ namespace openpeer
         void setError(WORD errorCode, const char *inReason = NULL);
 
         void step();
+        bool stepBackgroundingTimer();
         bool stepSocket();
         bool stepCandidates();
         bool stepActivateTimer();
@@ -382,6 +383,7 @@ namespace openpeer
         TimerPtr mKeepAliveTimer;
         TimerPtr mExpectingDataTimer;
         TimerPtr mStepTimer;
+        TimerPtr mBackgroundingTimer;
 
         ICEControls mControl;
         QWORD mConflictResolver;

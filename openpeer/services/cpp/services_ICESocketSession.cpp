@@ -55,6 +55,8 @@
 #define OPENPEER_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS (20)
 #define OPENPEER_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS (2)
 
+#define OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS (10)
+
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
 
 namespace openpeer
@@ -434,6 +436,10 @@ namespace openpeer
         mExpectSTUNOrDataWithinDuration = expectSTUNOrDataWithinWithinOrSendAliveCheck;
         mKeepAliveSTUNRequestTimeout = keepAliveSTUNRequestTimeout;
         mBackgroundingTimeout = backgroundingTimeout;
+
+        if (Duration() != mBackgroundingTimeout) {
+          ZS_THROW_INVALID_USAGE_IF(mBackgroundingTimeout < Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS))
+        }
 
         ZS_LOG_DEBUG(log("forcing step to ensure all timers are properly created"))
         (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
@@ -1261,22 +1267,6 @@ namespace openpeer
         if (isShutdown()) return;
 
         Time tick = zsLib::now();
-        if (Duration() != mBackgroundingTimeout) {
-          Duration diff = tick - mLastActivity;
-          if (diff > mBackgroundingTimeout) {
-            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
-            setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
-            cancel();
-            return;
-          }
-          mLastActivity = tick;
-        }
-
-        if (timer == mStepTimer) {
-          ZS_LOG_TRACE(log("step timer"))
-          step();
-          return;
-        }
 
         if (timer == mActivateTimer)
         {
@@ -1346,7 +1336,30 @@ namespace openpeer
             // the activation timer seems to no longer be needed, shut it down...
             ZS_LOG_DEBUG(log("did not find any more pending candidates but activation timer remained on thus need to turn it off"))
             IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+
+            mActivateTimer->cancel();
+            mActivateTimer.reset();
           }
+          return;
+        }
+
+        if (timer == mStepTimer) {
+          ZS_LOG_TRACE(log("step timer"))
+          step();
+          return;
+        }
+
+        if (timer == mBackgroundingTimer) {
+          ZS_LOG_TRACE(log("backgrounding timer"))
+
+          Duration diff = tick - mLastActivity;
+          if (diff > mBackgroundingTimeout) {
+            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
+            setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
+            cancel();
+            return;
+          }
+          mLastActivity = tick;
           return;
         }
 
@@ -1584,6 +1597,11 @@ namespace openpeer
           mStepTimer.reset();
         }
 
+        if (mBackgroundingTimer) {
+          mBackgroundingTimer->cancel();
+          mBackgroundingTimer.reset();
+        }
+
         if (mNominateRequester) {
           mNominateRequester->cancel();
           mNominateRequester.reset();
@@ -1667,6 +1685,7 @@ namespace openpeer
 
         ZS_LOG_DEBUG(debug("step"))
 
+        if (!stepBackgroundingTimer()) goto notify_nominated;
         if (!stepSocket()) goto notify_nominated;
         if (!stepCandidates()) goto notify_nominated;
         if (!stepActivateTimer()) goto notify_nominated;
@@ -1683,6 +1702,30 @@ namespace openpeer
         {
           stepNotifyNominated();
         }
+      }
+
+      //-----------------------------------------------------------------------
+      bool ICESocketSession::stepBackgroundingTimer()
+      {
+        ZS_LOG_TRACE(log("step backgrounding timer") + ZS_PARAM("need timer", Duration() != mBackgroundingTimeout))
+
+        if (Duration() != mBackgroundingTimeout) {
+          if (mBackgroundingTimer) return true;
+
+          ZS_LOG_DEBUG(log("creating backgrounding timer"))
+          mLastActivity = zsLib::now();
+          mBackgroundingTimer = Timer::create(mThisWeak.lock(), Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS));
+          return true;
+        }
+
+        if (!mBackgroundingTimer) return true;
+
+        ZS_LOG_DEBUG(log("cancelling backgrounding timer"))
+
+        mBackgroundingTimer->cancel();
+        mBackgroundingTimer.reset();
+
+        return true;
       }
 
       //-----------------------------------------------------------------------
@@ -1956,9 +1999,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("creating activate timer"))
 
-          mLastActivity = zsLib::now();
           mActivateTimer = Timer::create(mThisWeak.lock(), Milliseconds(OPENPEER_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
-
           return true;
         }
 
@@ -2011,9 +2052,7 @@ namespace openpeer
         if (!mNominated) {
           if (mStepTimer) return true;
 
-          mLastActivity = zsLib::now();
           mStepTimer = Timer::create(mThisWeak.lock(), Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS)); // this will cause candidates to start searching right away
-
           return true;
         }
 
@@ -2033,7 +2072,6 @@ namespace openpeer
         if (needed) {
           if (mExpectingDataTimer) return true;
 
-          mLastActivity = zsLib::now();
           mExpectingDataTimer = Timer::create(mThisWeak.lock(), mExpectSTUNOrDataWithinDuration); // this will cause candidates to start searching right away
 
           return true;
@@ -2055,7 +2093,6 @@ namespace openpeer
         if (needed) {
           if (mKeepAliveTimer) return true;
 
-          mLastActivity = zsLib::now();
           mKeepAliveTimer = Timer::create(mThisWeak.lock(), mKeepAliveDuration); // this will cause candidates to start searching right away
 
           return true;
