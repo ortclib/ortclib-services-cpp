@@ -1108,7 +1108,7 @@ namespace openpeer
           LocalSocketMap::iterator current = iter; ++iter;
 
           LocalSocketPtr &localSocket = (*current).second;
-          if (localSocket->mTURNInfos.size() > 0) {
+          if (localSocket->mTURNSockets.size() > 0) {
             ZS_LOG_DEBUG(log("turn socket(s) still pending shutdown") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()) + ZS_PARAM("total TURN sockets remaining", localSocket->mTURNInfos.size()))
             continue;
           }
