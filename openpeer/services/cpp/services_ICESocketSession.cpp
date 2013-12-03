@@ -1486,8 +1486,8 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "resolver", mConflictResolver);
 
         IHelper::debugAppend(resultEl, "nominate request", (bool)mNominateRequester);
-        IHelper::debugAppend(resultEl, "pending nomination", mPendingNominatation->toDebug());
-        IHelper::debugAppend(resultEl, "nominated: ", mNominated->toDebug());
+        IHelper::debugAppend(resultEl, "pending nomination", mPendingNominatation ? mPendingNominatation->toDebug() : ElementPtr());
+        IHelper::debugAppend(resultEl, "nominated: ", mNominated ? mNominated->toDebug() : ElementPtr());
 
         IHelper::debugAppend(resultEl, "last send data", mLastSentData);
         IHelper::debugAppend(resultEl, "last activity", mLastActivity);
