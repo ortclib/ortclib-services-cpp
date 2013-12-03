@@ -1284,6 +1284,8 @@ namespace openpeer
             return;
           }
 
+          bool foundPending = false;
+
           // we are going to activate the next candidate pair now...
           for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)
           {
@@ -1292,9 +1294,11 @@ namespace openpeer
               ZS_LOG_DEBUG(log("cannot activate beyond the point of nomination"))
               break;
             }
-            if (pairing->mRequester) continue;
             if (pairing->mReceivedResponse) continue; // no need to activate a second time if a response has been received
-            if (pairing->mFailed) continue; // do not activate a pair that has already failed
+            if (pairing->mRequester) continue;        // already have an outstanding requester
+            if (pairing->mFailed) continue;           // do not activate a pair that has already failed
+
+            foundPending = true;
 
             if (mFoundation) {
               if (!mFoundation->canUnfreeze(pairing)) {
@@ -1335,6 +1339,12 @@ namespace openpeer
             // activate the pair search now...
             pairing->mRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), pairing->mRemote.mIPAddress, request, (isICE ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN));
             break;  // only activate one pair at this time
+          }
+
+          if (!foundPending) {
+            // the activation timer seems to no longer be needed, shut it down...
+            ZS_LOG_DEBUG(log("did not find any more pending candidates but activation timer remained on thus need to turn it off"))
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
           }
           return;
         }
@@ -1924,7 +1934,7 @@ namespace openpeer
             continue;
           }
           if (pairing->mRequester) {
-            ZS_LOG_INSANE(log("activate timer - pairing received request") + pairing->toDebug())
+            ZS_LOG_INSANE(log("activate timer - pairing requester is already active") + pairing->toDebug())
             continue;
           }
           if (pairing->mFailed) {
@@ -1943,6 +1953,8 @@ namespace openpeer
         if (foundUnsearched) {
           if (mActivateTimer) return true;
 
+          ZS_LOG_DEBUG(log("creating activate timer"))
+
           mLastActivity = zsLib::now();
           mActivateTimer = Timer::create(mThisWeak.lock(), Milliseconds(OPENPEER_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
 
@@ -1950,6 +1962,8 @@ namespace openpeer
         }
 
         if (!mActivateTimer) return true;
+
+        ZS_LOG_DEBUG(log("stopping activate timer"))
 
         mActivateTimer->cancel();
         mActivateTimer.reset();
