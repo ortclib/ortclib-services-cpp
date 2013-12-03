@@ -192,6 +192,7 @@ namespace openpeer
       {
         ElementPtr resultEl = Element::create("IICESocket::CandidatePair");
 
+        IHelper::debugAppend(resultEl, "id", mID);
         IHelper::debugAppend(resultEl, "local candidate", mLocal.toDebug());
         IHelper::debugAppend(resultEl, "remote candidate", mRemote.toDebug());
         IHelper::debugAppend(resultEl, "received request", mReceivedRequest);
@@ -1903,7 +1904,7 @@ namespace openpeer
           for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter) {
             CandidatePairPtr &pairing = (*iter);
 
-            ZS_LOG_DEBUG(log("candidate pair") + ZS_PARAM("local ip", pairing->mLocal.mIPAddress.string()) + ZS_PARAM("remote", pairing->mRemote.mIPAddress.string()))
+            ZS_LOG_DEBUG(log("candidate pair") + ZS_PARAM("id", pairing->mID) + ZS_PARAM("local ip", pairing->mLocal.mIPAddress.string()) + ZS_PARAM("remote", pairing->mRemote.mIPAddress.string()))
           }
           ZS_LOG_DEBUG(log("--- ICE SESSION CANDIDATES END") + ZS_PARAM("control", IICESocket::toString(IICESocket::ICEControl_Controlling)))
         }

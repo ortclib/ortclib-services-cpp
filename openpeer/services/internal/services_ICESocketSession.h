@@ -136,6 +136,8 @@ namespace openpeer
           static CandidatePairPtr create();
           ElementPtr toDebug() const;
 
+          AutoPUID mID;
+
           Candidate mLocal;
           Candidate mRemote;
 
