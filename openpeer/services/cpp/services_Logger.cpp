@@ -419,6 +419,7 @@ namespace openpeer
         appendToDoc(message, Log::Param("submodule", inSubsystem.getName()));
         appendToDoc(message, Log::Param("severity", Log::toString(inSeverity)));
         appendToDoc(message, Log::Param("level", Log::toString(inLevel)));
+        appendToDoc(message, Log::Param("thread", currentThreadIDAsString()));
         appendToDoc(message, Log::Param("function", inFunction));
         appendToDoc(message, Log::Param("file", fileName));
         appendToDoc(message, Log::Param("line", inLineNumber));
