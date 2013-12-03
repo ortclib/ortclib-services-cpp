@@ -539,7 +539,7 @@ namespace openpeer
 
         // inform that the session is now connected
         if (STUNPacket::Method_Binding != stun->mMethod) {
-          ZS_LOG_DETAIL(log("received incoming STUN which is not ICE related thus handing via delgate"))
+          ZS_LOG_TRACE(log("received incoming STUN which is not ICE related thus handing via delgate"))
           return mSubscriptions.delegate()->handleICESocketSessionReceivedSTUNPacket(mThisWeak.lock(), stun, localUsernameFrag, remoteUsernameFrag);
         }
 

@@ -873,7 +873,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void RUDPChannelStream::onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
       {
-        ZS_LOG_DEBUG(log("on transport stream reader ready"))
+        ZS_LOG_TRACE(log("on transport stream reader ready"))
         sendNow();  // do NOT call from within a lock
       }
 

@@ -58,7 +58,7 @@
 
 #define OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS (4)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_turn) } }
 
 namespace openpeer
 {

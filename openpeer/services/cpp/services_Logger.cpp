@@ -1200,10 +1200,12 @@ namespace openpeer
                            )
         {
           {
-            AutoRecursiveLock lock(mLock);
+            // scope: quick exit is not logging
+            {
+              AutoRecursiveLock lock(mLock);
 
-            if (!mTelnetSocket)
-              return;
+              if (!mTelnetSocket) return;
+            }
 
             bool wouldBlock = false;
             size_t sent = 0;
@@ -1214,6 +1216,10 @@ namespace openpeer
             } else {
               output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
             }
+
+            AutoRecursiveLock lock(mLock);
+
+            if (!mTelnetSocket) return; // need to check again (small window in which it could change
 
             bool okayToSend = mBufferedList.size() < 1;
 

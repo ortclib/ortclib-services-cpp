@@ -42,7 +42,7 @@
 
 #define OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES (64*1024)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_tcp_messaging) } }
 
 namespace openpeer
 {

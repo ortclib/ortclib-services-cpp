@@ -640,7 +640,7 @@ namespace openpeer
           return true;
         }
 
-        ZS_LOG_DETAIL(log("received external ACK request or indication") + ZS_PARAM("sequence number", sequenceToString(stun->mNextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(stun->mGSNR)) + ZS_PARAM("GSNFR", sequenceToString(stun->mGSNFR)))
+        ZS_LOG_TRACE(log("received external ACK request or indication") + ZS_PARAM("sequence number", sequenceToString(stun->mNextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(stun->mGSNR)) + ZS_PARAM("GSNFR", sequenceToString(stun->mGSNFR)))
 
         mLastReceivedData = zsLib::now();
         mStream->handleExternalAck(
@@ -686,7 +686,7 @@ namespace openpeer
 
           stream = mStream;
 
-          ZS_LOG_DEBUG(log("received RUDP packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", bufferLengthInBytes))
+          ZS_LOG_TRACE(log("received RUDP packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", bufferLengthInBytes))
 
           newBuffer = boost::shared_array<BYTE>(new BYTE[bufferLengthInBytes]);
           memcpy(newBuffer.get(), buffer, bufferLengthInBytes);
@@ -716,7 +716,7 @@ namespace openpeer
 
           stream = mStream;
 
-          ZS_LOG_DEBUG(log("received notify write ready") + ZS_PARAM("stream ID", stream->getID()))
+          ZS_LOG_TRACE(log("received notify write ready") + ZS_PARAM("stream ID", stream->getID()))
         }
         stream->notifySocketWriteReady();
       }
@@ -941,7 +941,7 @@ namespace openpeer
                                                           size_t packetLengthInBytes
                                                           )
       {
-        ZS_LOG_DEBUG(log("notify channel stream send packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", packetLengthInBytes))
+        ZS_LOG_TRACE(log("notify channel stream send packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", packetLengthInBytes))
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         IPAddress remoteIP;
 
@@ -970,7 +970,8 @@ namespace openpeer
                                                               PUID guarenteeDeliveryRequestID
                                                               )
       {
-        ZS_LOG_DETAIL(log("notify channel stream send external ACK now") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("gaurantee", guarenteeDelivery))
+        ZS_LOG_TRACE(log("notify channel stream send external ACK now") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("gaurantee", guarenteeDelivery))
+
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         STUNPacketPtr stun;
 
@@ -1002,7 +1003,7 @@ namespace openpeer
           }
 
           stun->packetize(packet, packetLengthInBytes, STUNPacket::RFC_draft_RUDP);
-          ZS_LOG_DETAIL(log("STUN ACK sent") + ZS_PARAM("method", "indication") + ZS_PARAM("stun packet size", packetLengthInBytes))
+          ZS_LOG_TRACE(log("STUN ACK sent") + ZS_PARAM("method", "indication") + ZS_PARAM("stun packet size", packetLengthInBytes))
           mLastSentData = zsLib::now();
         }
 

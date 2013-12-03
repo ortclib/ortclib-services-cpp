@@ -40,7 +40,7 @@
 #include <zsLib/Stringize.h>
 
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_transport_stream) } }
 
 namespace openpeer
 {
