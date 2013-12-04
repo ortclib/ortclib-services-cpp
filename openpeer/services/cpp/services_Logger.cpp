@@ -477,7 +477,7 @@ namespace openpeer
         static LoggerThreadPtr create()
         {
           LoggerThreadPtr pThis(new LoggerThread);
-          pThis->mThread = MessageQueueThread::createBasic();
+          pThis->mThread = MessageQueueThread::createBasic("org.openpeer.services.loggerThread");
           return pThis;
         }
 
