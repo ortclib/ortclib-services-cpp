@@ -528,7 +528,6 @@ namespace openpeer
         ElementPtr resultEl = Element::create("TCPMessaging");
 
         IHelper::debugAppend(resultEl, "id", mID);
-
         IHelper::debugAppend(resultEl, "tcp messaging id", mID);
         IHelper::debugAppend(resultEl, "graceful shutdown", (bool)mGracefulShutdownReference);
         IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
