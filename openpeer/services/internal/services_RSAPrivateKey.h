@@ -71,6 +71,7 @@ namespace openpeer
                             public IRSAPrivateKey
       {
       public:
+        friend interaction IRSAPrivateKey;
         friend interaction IRSAPrivateKeyFactory;
 
         typedef CryptoPP::RSA::PrivateKey PrivateKey;
@@ -90,6 +91,8 @@ namespace openpeer
         #pragma mark
         #pragma mark RSAPrivateKey => IRSAPrivateKey
         #pragma mark
+
+        static ElementPtr toDebug(IRSAPrivateKeyPtr object);
 
         static RSAPrivateKeyPtr generate(
                                          RSAPublicKeyPtr &outPublicKey,
@@ -113,6 +116,9 @@ namespace openpeer
         #pragma mark
 
         Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+
+        virtual ElementPtr toDebug() const;
 
         virtual SecureByteBlockPtr sign(
                                         const BYTE *inBuffer,
@@ -125,7 +131,7 @@ namespace openpeer
         #pragma mark RSAPrivateKey => (data)
         #pragma mark
 
-        PUID mID;
+        AutoPUID mID;
 
         PrivateKey mPrivateKey;
       };

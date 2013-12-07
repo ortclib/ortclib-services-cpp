@@ -461,16 +461,51 @@ namespace openpeer
                           const SecureByteBlock &right
                           )
       {
+        SecureByteBlock::size_type minSize = left.SizeInBytes();
+        minSize = (right.SizeInBytes() < minSize ? right.SizeInBytes() : minSize);
+
+        int result = 0;
+
+        if (0 != minSize) {
+          result = memcmp(left, right, minSize);
+          if (0 != result) return result;
+        }
+
+        // they are equal values up to the min size so compare sizes now
+
         if (left.SizeInBytes() < right.SizeInBytes()) {
           return -1;
         }
         if (right.SizeInBytes() < left.SizeInBytes()) {
           return 1;
         }
-        if (0 == left.SizeInBytes()) {
-          return 0;
-        }
-        return memcmp(left, right, left.SizeInBytes());
+        return 0;
+      }
+
+      //-------------------------------------------------------------------------
+      bool Helper::isEmpty(SecureByteBlockPtr buffer)
+      {
+        if (!buffer) return true;
+        return (buffer->SizeInBytes() < 1);
+      }
+
+      //-------------------------------------------------------------------------
+      bool Helper::isEmpty(const SecureByteBlock &buffer)
+      {
+        return (buffer.SizeInBytes() < 1);
+      }
+
+      //-------------------------------------------------------------------------
+      bool Helper::hasData(SecureByteBlockPtr buffer)
+      {
+        if (!buffer) return false;
+        return (buffer->SizeInBytes() > 0);
+      }
+
+      //-------------------------------------------------------------------------
+      bool Helper::hasData(const SecureByteBlock &buffer)
+      {
+        return (buffer.SizeInBytes() > 0);
       }
 
       //-------------------------------------------------------------------------
@@ -599,7 +634,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       String Helper::convertToHex(
-                                  SecureByteBlock &input,
+                                  const SecureByteBlock &input,
                                   bool outputUpperCase
                                   )
       {
@@ -1574,6 +1609,30 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
+    bool IHelper::isEmpty(SecureByteBlockPtr buffer)
+    {
+      return internal::Helper::isEmpty(buffer);
+    }
+
+    //-------------------------------------------------------------------------
+    bool IHelper::isEmpty(const SecureByteBlock &buffer)
+    {
+      return internal::Helper::isEmpty(buffer);
+    }
+
+    //-------------------------------------------------------------------------
+    bool IHelper::hasData(SecureByteBlockPtr buffer)
+    {
+      return internal::Helper::hasData(buffer);
+    }
+
+    //-------------------------------------------------------------------------
+    bool IHelper::hasData(const SecureByteBlock &buffer)
+    {
+      return internal::Helper::hasData(buffer);
+    }
+    
+    //-------------------------------------------------------------------------
     SecureByteBlockPtr IHelper::clone(SecureByteBlockPtr pBuffer)
     {
       return internal::Helper::clone(pBuffer);
@@ -1657,7 +1716,7 @@ namespace openpeer
 
     //-------------------------------------------------------------------------
     String IHelper::convertToHex(
-                                 SecureByteBlock &input,
+                                 const SecureByteBlock &input,
                                  bool outputUpperCase
                                  )
     {

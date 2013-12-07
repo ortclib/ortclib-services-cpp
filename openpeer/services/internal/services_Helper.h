@@ -80,6 +80,13 @@ namespace openpeer
                            const SecureByteBlock &left,
                            const SecureByteBlock &right
                            );
+
+        static bool isEmpty(SecureByteBlockPtr buffer);
+        static bool isEmpty(const SecureByteBlock &buffer);
+
+        static bool hasData(SecureByteBlockPtr buffer);
+        static bool hasData(const SecureByteBlock &buffer);
+
         static SecureByteBlockPtr clone(SecureByteBlockPtr pBuffer);
         static SecureByteBlockPtr clone(const SecureByteBlock &buffer);
 
@@ -108,7 +115,7 @@ namespace openpeer
                                    );
 
         static String convertToHex(
-                                   SecureByteBlock &input,
+                                   const SecureByteBlock &input,
                                    bool outputUpperCase = false
                                    );
 
@@ -201,7 +208,7 @@ namespace openpeer
         static void split(
                           const String &input,
                           SplitMap &outResult,
-                          char splitChar = '/'
+                          char splitChar
                           );
         
         static const String &get(

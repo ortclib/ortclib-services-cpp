@@ -31,28 +31,37 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services_CanonicalXML.h>
-#include <openpeer/services/internal/services_DHKeyDomain.h>
-#include <openpeer/services/internal/services_DHPrivateKey.h>
-#include <openpeer/services/internal/services_DHPublicKey.h>
-#include <openpeer/services/internal/services_DNS.h>
-#include <openpeer/services/internal/services_DNSMonitor.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_HTTP.h>
-#include <openpeer/services/internal/services_ICESocket.h>
-#include <openpeer/services/internal/services_ICESocketSession.h>
-#include <openpeer/services/internal/services_MessageLayerSecurityChannel.h>
-#include <openpeer/services/internal/services_RSAPrivateKey.h>
-#include <openpeer/services/internal/services_RSAPublicKey.h>
-#include <openpeer/services/internal/services_RUDPChannel.h>
-#include <openpeer/services/internal/services_RUDPChannelStream.h>
-#include <openpeer/services/internal/services_RUDPICESocketSession.h>
-#include <openpeer/services/internal/services_RUDPListener.h>
-#include <openpeer/services/internal/services_RUDPMessaging.h>
-#include <openpeer/services/internal/services_STUNDiscovery.h>
-#include <openpeer/services/internal/services_STUNRequester.h>
-#include <openpeer/services/internal/services_STUNRequesterManager.h>
-#include <openpeer/services/internal/services_TCPMessaging.h>
-#include <openpeer/services/internal/services_TransportStream.h>
-#include <openpeer/services/internal/services_TURNSocket.h>
+#include <openpeer/services/types.h>
+
+namespace openpeer
+{
+  namespace services
+  {
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
+    #pragma mark IDHPublicKey
+    #pragma mark
+
+    interaction IDHPublicKey
+    {
+      static ElementPtr toDebug(IDHPublicKeyPtr publicKey);
+
+      static IDHPublicKeyPtr load(
+                                  const SecureByteBlock &staticPublicKey,
+                                  const SecureByteBlock &ephemeralPublicKey
+                                  );
+
+      virtual PUID getID() const = 0;
+
+      virtual void save(
+                        SecureByteBlock *outStaticPublicKey,    // pass NULL to not save this value
+                        SecureByteBlock *outEphemeralPublicKey  // pass NULL to not save this value
+                        ) const = 0;
+
+      virtual String getFingerprint() const = 0;
+    };
+  }
+}

@@ -44,7 +44,8 @@
 #define OPENPEER_SERVICE_TEST_TELNET_LOGGING_PORT         (59999)
 #define OPENPEER_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT  (51999)
 
-#define OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST                    (true)
+#define OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST                    (false)
+#define OPENPEER_SERVICE_TEST_DO_DH_TEST                               (true)
 #define OPENPEER_SERVICE_TEST_DO_DNS_TEST                              (false)
 #define OPENPEER_SERVICE_TEST_DO_ICE_SOCKET_TEST                       (false)
 #define OPENPEER_SERVICE_TEST_DO_STUN_TEST                             (false)
@@ -56,7 +57,7 @@
 #define OPENPEER_SERVICE_TEST_DNS_ZONE "dnstest.hookflash.me"
 
 // true = running as a client, false = running as a server
-#define OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT                        (false)
+#define OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT                        (true)
 #define OPENPEER_SERVICE_TEST_RUDP_SERVER_IP                           "192.168.2.220"
 #define OPENPEER_SERVICE_TEST_RUDP_SERVER_PORT                         50000
 

@@ -90,6 +90,145 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark IDHKeyDomainFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHKeyDomainFactory &IDHKeyDomainFactory::singleton()
+      {
+        return *(Factory::singleton().get());
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::generate(size_t keySizeInBits)
+      {
+        if (this) {}
+        return DHKeyDomain::generate(keySizeInBits);
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::loadPrecompiled(
+                                                          IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
+                                                          bool validate
+                                                          )
+      {
+        if (this) {}
+        return DHKeyDomain::loadPrecompiled(precompiledKey, validate);
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::load(
+                                               const SecureByteBlock &p,
+                                               const SecureByteBlock &q,
+                                               const SecureByteBlock &g,
+                                               bool validate
+                                               )
+      {
+        if (this) {}
+        return DHKeyDomain::load(p, q, g, validate);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDHPrivateKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHPrivateKeyFactory &IDHPrivateKeyFactory::singleton()
+      {
+        return *(Factory::singleton().get());
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::generate(
+                                                     IDHKeyDomainPtr keyDomain,
+                                                     IDHPublicKeyPtr &outPublicKey
+                                                     )
+      {
+        if (this) {}
+        return DHPrivateKey::generate(keyDomain, outPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::load(
+                                                 IDHKeyDomainPtr keyDomain,
+                                                 const SecureByteBlock &staticPrivateKey,
+                                                 const SecureByteBlock &ephemeralPrivateKey
+                                                 )
+      {
+        if (this) {}
+        return DHPrivateKey::load(keyDomain, staticPrivateKey, ephemeralPrivateKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::load(
+                                                 IDHKeyDomainPtr keyDomain,
+                                                 IDHPublicKeyPtr &outPublicKey,
+                                                 const SecureByteBlock &staticPrivateKey,
+                                                 const SecureByteBlock &ephemeralPrivateKey,
+                                                 const SecureByteBlock &staticPublicKey,
+                                                 const SecureByteBlock &ephemeralPublicKey
+                                                 )
+      {
+        if (this) {}
+        return DHPrivateKey::load(keyDomain, outPublicKey, staticPrivateKey, ephemeralPrivateKey, staticPublicKey, ephemeralPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::loadAndGenerateNewEphemeral(
+                                                                        IDHKeyDomainPtr keyDomain,
+                                                                        const SecureByteBlock &staticPrivateKey,
+                                                                        const SecureByteBlock &staticPublicKey,
+                                                                        IDHPublicKeyPtr &outNewPublicKey
+                                                                        )
+      {
+        if (this) {}
+        return DHPrivateKey::loadAndGenerateNewEphemeral(keyDomain, staticPrivateKey, staticPublicKey, outNewPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::loadAndGenerateNewEphemeral(
+                                                                        IDHPrivateKeyPtr templatePrivateKey,
+                                                                        IDHPublicKeyPtr templatePublicKey,
+                                                                        IDHPublicKeyPtr &outNewPublicKey
+                                                                        )
+      {
+        if (this) {}
+        return DHPrivateKey::loadAndGenerateNewEphemeral(templatePrivateKey, templatePublicKey, outNewPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDHPublicKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHPublicKeyFactory &IDHPublicKeyFactory::singleton()
+      {
+        return *(Factory::singleton().get());
+      }
+
+      //-----------------------------------------------------------------------
+      DHPublicKeyPtr IDHPublicKeyFactory::load(
+                                               const SecureByteBlock &staticPublicKey,
+                                               const SecureByteBlock &ephemeralPublicKey
+                                               )
+      {
+        if (this) {}
+        return DHPublicKey::load(staticPublicKey, ephemeralPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark IDNSFactory
       #pragma mark
 
@@ -105,6 +244,7 @@ namespace openpeer
                                         const char *name
                                         )
       {
+        if (this) {}
         return DNS::lookupA(delegate, name);
       }
 
@@ -114,6 +254,7 @@ namespace openpeer
                                            const char *name
                                            )
       {
+        if (this) {}
         return DNS::lookupAAAA(delegate, name);
       }
 
@@ -123,6 +264,7 @@ namespace openpeer
                                               const char *name
                                               )
       {
+        if (this) {}
         return DNS::lookupAorAAAA(delegate, name);
       }
 
@@ -138,6 +280,7 @@ namespace openpeer
                                           SRVLookupTypes lookupType
                                           )
       {
+        if (this) {}
         return DNS::lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
       }
 
@@ -163,6 +306,7 @@ namespace openpeer
                                       Duration timeout
                                       )
       {
+        if (this) {}
         return HTTP::get(delegate, userAgent, url, timeout);
       }
 
@@ -177,6 +321,7 @@ namespace openpeer
                                        Duration timeout
                                        )
       {
+        if (this) {}
         return HTTP::post(delegate, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);
       }
 
@@ -205,6 +350,7 @@ namespace openpeer
                                              IICESocketPtr foundationSocket
                                              )
       {
+        if (this) {}
         return internal::ICESocket::create(queue, delegate, turnServers, stunServers, port, firstWORDInAnyPacketWillNotConflictWithTURNChannels, foundationSocket);
       }
 
@@ -233,6 +379,7 @@ namespace openpeer
                                                            IICESocketSessionPtr foundation
                                                            )
       {
+        if (this) {}
         return internal::ICESocketSession::create(queue, delegate, socket, remoteUsernameFrag, remotePassword, control, foundation);
       }
 
@@ -260,6 +407,7 @@ namespace openpeer
                                                                                  const char *contextID
                                                                                  )
       {
+        if (this) {}
         return MessageLayerSecurityChannel::create(delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID);
       }
 
@@ -283,12 +431,14 @@ namespace openpeer
                                                        size_t keySizeInBits
                                                        )
       {
+        if (this) {}
         return RSAPrivateKey::generate(outPublicKey, keySizeInBits);
       }
 
       //-----------------------------------------------------------------------
       RSAPrivateKeyPtr IRSAPrivateKeyFactory::loadPrivateKey(const SecureByteBlock &buffer)
       {
+        if (this) {}
         return RSAPrivateKey::load(buffer);
       }
 
@@ -309,6 +459,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr IRSAPublicKeyFactory::loadPublicKey(const SecureByteBlock &buffer)
       {
+        if (this) {}
         return RSAPublicKey::load(buffer);
       }
 
@@ -340,6 +491,7 @@ namespace openpeer
                                                                                 STUNPacketPtr &outResponse
                                                                                 )
       {
+        if (this) {}
         return RUDPChannel::createForRUDPICESocketSessionIncoming(queue, master, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, channelOpenPacket, outResponse);
       }
 
@@ -359,6 +511,7 @@ namespace openpeer
                                                                                 ITransportStreamPtr sendStream
                                                                                 )
       {
+        if (this) {}
         return RUDPChannel::createForRUDPICESocketSessionOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, connectionInfo, receiveStream, sendStream);
       }
 
@@ -372,6 +525,7 @@ namespace openpeer
                                                             STUNPacketPtr &outResponse
                                                             )
       {
+        if (this) {}
         return RUDPChannel::createForListener(queue, master, remoteIP, incomingChannelNumber, channelOpenPacket, outResponse);
       }
 
@@ -400,6 +554,7 @@ namespace openpeer
                                                              DWORD minimumNegotiatedRTTInMilliseconds
                                                              )
       {
+        if (this) {}
         return RUDPChannelStream::create(queue, delegate, nextSequenceNumberToUseForSending, nextSequenberNumberExpectingToReceive, sendingChannelNumber, receivingChannelNumber, minimumNegotiatedRTTInMilliseconds);
       }
 
@@ -424,6 +579,7 @@ namespace openpeer
                                                                    IRUDPICESocketSessionDelegatePtr delegate
                                                                    )
       {
+        if (this) {}
         return RUDPICESocketSession::listen(queue, iceSession, delegate);
       }
 
@@ -449,6 +605,7 @@ namespace openpeer
                                                    const char *realm
                                                    )
       {
+        if (this) {}
         return RUDPListener::create(queue, delegate, port, realm);
       }
 
@@ -476,6 +633,7 @@ namespace openpeer
                                                             size_t maxMessageSizeInBytes
                                                             )
       {
+        if (this) {}
         return RUDPMessaging::acceptChannel(queue, listener, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
       }
 
@@ -489,6 +647,7 @@ namespace openpeer
                                                             size_t maxMessageSizeInBytes
                                                             )
       {
+        if (this) {}
         return RUDPMessaging::acceptChannel(queue, session, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
       }
 
@@ -503,6 +662,7 @@ namespace openpeer
                                                           size_t maxMessageSizeInBytes
                                                           )
       {
+        if (this) {}
         return RUDPMessaging::openChannel(queue, session, delegate, connectionInfo, receiveStream, sendStream, maxMessageSizeInBytes);
       }
 
@@ -527,6 +687,7 @@ namespace openpeer
                                                      IDNS::SRVResultPtr service
                                                      )
       {
+        if (this) {}
         return STUNDiscovery::create(queue, delegate, service);
       }
 
@@ -537,6 +698,7 @@ namespace openpeer
                                                      const char *srvName
                                                      )
       {
+        if (this) {}
         return STUNDiscovery::create(queue, delegate, srvName);
       }
       
@@ -564,6 +726,7 @@ namespace openpeer
                                                      Duration maxTimeout
                                                      )
       {
+        if (this) {}
         return STUNRequester::create(queue, delegate, serverIP, stun, usingRFC, maxTimeout);
       }
 
@@ -584,6 +747,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNRequesterManagerPtr ISTUNRequesterManagerFactory::createSTUNRequesterManager()
       {
+        if (this) {}
         return STUNRequesterManager::create();
       }
 
@@ -611,6 +775,7 @@ namespace openpeer
                                                    size_t maxMessageSizeInBytes
                                                    )
       {
+        if (this) {}
         return internal::TCPMessaging::accept(delegate, receiveStream, sendStream, framesHaveChannelNumber, socket, maxMessageSizeInBytes);
       }
 
@@ -624,6 +789,7 @@ namespace openpeer
                                                     size_t maxMessageSizeInBytes
                                                     )
       {
+        if (this) {}
         return internal::TCPMessaging::connect(delegate, receiveStream, sendStream, framesHaveChannelNumber, remoteIP, maxMessageSizeInBytes);
       }
 
@@ -647,6 +813,7 @@ namespace openpeer
                                                          ITransportStreamReaderDelegatePtr readerDelegate
                                                          )
       {
+        if (this) {}
         return internal::TransportStream::create(writerDelegate, readerDelegate);
       }
 
@@ -666,32 +833,34 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TURNSocketPtr ITURNSocketFactory::create(
-                                         IMessageQueuePtr queue,
-                                         ITURNSocketDelegatePtr delegate,
-                                         const char *turnServer,
-                                         const char *turnServerUsername,
-                                         const char *turnServerPassword,
-                                         bool useChannelBinding,
-                                         WORD limitChannelToRangeStart,
-                                         WORD limitChannelRoRangeEnd
-                                         )
+                                               IMessageQueuePtr queue,
+                                               ITURNSocketDelegatePtr delegate,
+                                               const char *turnServer,
+                                               const char *turnServerUsername,
+                                               const char *turnServerPassword,
+                                               bool useChannelBinding,
+                                               WORD limitChannelToRangeStart,
+                                               WORD limitChannelRoRangeEnd
+                                               )
       {
+        if (this) {}
         return TURNSocket::create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
       }
 
       //-----------------------------------------------------------------------
       TURNSocketPtr ITURNSocketFactory::create(
-                                         IMessageQueuePtr queue,
-                                         ITURNSocketDelegatePtr delegate,
-                                         IDNS::SRVResultPtr srvTURNUDP,
-                                         IDNS::SRVResultPtr srvTURNTCP,
-                                         const char *turnServerUsername,
-                                         const char *turnServerPassword,
-                                         bool useChannelBinding,
-                                         WORD limitChannelToRangeStart,
-                                         WORD limitChannelRoRangeEnd
-                                         )
+                                               IMessageQueuePtr queue,
+                                               ITURNSocketDelegatePtr delegate,
+                                               IDNS::SRVResultPtr srvTURNUDP,
+                                               IDNS::SRVResultPtr srvTURNTCP,
+                                               const char *turnServerUsername,
+                                               const char *turnServerPassword,
+                                               bool useChannelBinding,
+                                               WORD limitChannelToRangeStart,
+                                               WORD limitChannelRoRangeEnd
+                                               )
       {
+        if (this) {}
         return TURNSocket::create(queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
       }
     }

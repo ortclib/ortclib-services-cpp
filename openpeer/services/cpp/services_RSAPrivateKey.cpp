@@ -82,10 +82,9 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RSAPrivateKey::RSAPrivateKey() :
-        mID(zsLib::createPUID())
+      RSAPrivateKey::RSAPrivateKey()
       {
-        ZS_LOG_DEBUG("created")
+        ZS_LOG_DEBUG(log("created"))
       }
 
       //-----------------------------------------------------------------------
@@ -93,7 +92,7 @@ namespace openpeer
       {
         if(isNoop()) return;
         
-        ZS_LOG_DEBUG("destoyed")
+        ZS_LOG_DEBUG(log("destoyed"))
       }
 
       //-----------------------------------------------------------------------
@@ -111,6 +110,13 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      ElementPtr RSAPrivateKey::toDebug(IRSAPrivateKeyPtr object)
+      {
+        if (!object) return ElementPtr();
+        return convert(object)->toDebug();
+      }
+
+      //-----------------------------------------------------------------------
       RSAPrivateKeyPtr RSAPrivateKey::generate(
                                                RSAPublicKeyPtr &outPublicKey,
                                                size_t keySizeInBits
@@ -121,7 +127,7 @@ namespace openpeer
 
         RSAPrivateKeyPtr pThis(new RSAPrivateKey);
 
-        ZS_LOG_DEBUG(pThis->log("generated private key"))
+        ZS_LOG_DEBUG(pThis->log("generating private key"))
 
         pThis->mPrivateKey.GenerateRandomWithKeySize(rng, static_cast<unsigned int>(keySizeInBits));
         if (!pThis->mPrivateKey.Validate(rng, 3)) {
@@ -144,12 +150,17 @@ namespace openpeer
         byteQueue.Get(publicKeyBuffer, outputLengthInBytes);
 
         outPublicKey = IRSAPublicKeyForRSAPrivateKey::load(publicKeyBuffer);
+
+        ZS_LOG_DEBUG(pThis->debug("generated private key") + IRSAPublicKey::toDebug(outPublicKey))
+
         return pThis;
       }
 
       //-----------------------------------------------------------------------
       RSAPrivateKeyPtr RSAPrivateKey::load(const SecureByteBlock &buffer)
       {
+        if (IHelper::isEmpty(buffer)) return RSAPrivateKeyPtr();
+
         AutoSeededRandomPool rng;
 
         ByteQueue byteQueue;
@@ -158,14 +169,20 @@ namespace openpeer
 
         RSAPrivateKeyPtr pThis(new RSAPrivateKey);
 
+        ZS_LOG_DEBUG(pThis->log("loading public key"))
+
         try {
           pThis->mPrivateKey.Load(byteQueue);
+
+#define WARNING_CACHE_ALREADY_VALIDATED_PRIVATE_KEY 1
+#define WARNING_CACHE_ALREADY_VALIDATED_PRIVATE_KEY 2
+
           if (!pThis->mPrivateKey.Validate(rng, 3)) {
-            ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key"))
+            ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key") + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
             return RSAPrivateKeyPtr();
           }
         } catch (CryptoPP::Exception &e) {
-          ZS_LOG_ERROR(Basic, pThis->log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()))
+          ZS_LOG_ERROR(Basic, pThis->log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()) + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
           return RSAPrivateKeyPtr();
         }
 
@@ -206,14 +223,22 @@ namespace openpeer
 
         SecureByteBlockPtr output(new SecureByteBlock);
 
+        if (IHelper::isEmpty(buffer)) return output;
+
         ByteQueue queue;
         queue.Put(buffer, buffer.SizeInBytes());
 
         ByteQueue *outputQueue = new ByteQueue;
 
         PK_DecryptorFilter filter(rng, decryptor, outputQueue);
-        queue.CopyTo(filter);
-        filter.MessageEnd();
+        try {
+          queue.CopyTo(filter);
+          filter.MessageEnd();
+        } catch(CryptoPP::Exception &e) {
+          ZS_LOG_ERROR(Basic, log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()) + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
+          output->CleanNew(0);
+          return output;
+        }
 
         size_t outputLengthInBytes = (size_t)outputQueue->CurrentSize();
         output->CleanNew(outputLengthInBytes);
@@ -238,6 +263,26 @@ namespace openpeer
         return Log::Params(message, objectEl);
       }
 
+      //-----------------------------------------------------------------------
+      Log::Params RSAPrivateKey::debug(const char *message) const
+      {
+        return Log::Params(message, toDebug());
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr RSAPrivateKey::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("RSAPrivateKey");
+
+        SecureByteBlockPtr output = save();
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "private key", output ? IHelper::convertToHex(*output) : String());
+
+        return resultEl;
+      }
+      
       //-----------------------------------------------------------------------
       SecureByteBlockPtr RSAPrivateKey::sign(
                                              const BYTE *inBuffer,
@@ -267,6 +312,12 @@ namespace openpeer
     #pragma mark
     #pragma mark IRSAPrivateKey
     #pragma mark
+
+    //-------------------------------------------------------------------------
+    ElementPtr IRSAPrivateKey::toDebug(IRSAPrivateKeyPtr object)
+    {
+      return internal::RSAPrivateKey::toDebug(object);
+    }
 
     //-------------------------------------------------------------------------
     IRSAPrivateKeyPtr IRSAPrivateKey::generate(

@@ -32,10 +32,9 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/IRSAPublicKey.h>
+#include <openpeer/services/IDHKeyDomain.h>
 
-#include <cryptopp/rsa.h>
-#include <cryptopp/secblock.h>
+#include <cryptopp/dh.h>
 
 namespace openpeer
 {
@@ -48,15 +47,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRSAPublicKeyForRSAPrivateKey
+      #pragma mark IDHKeyDomainForDHPrivateKey
       #pragma mark
 
-      interaction IRSAPublicKeyForRSAPrivateKey
+      interaction IDHKeyDomainForDHPrivateKey
       {
-        IRSAPublicKeyForRSAPrivateKey &forPrivateKey() {return *this;}
-        const IRSAPublicKeyForRSAPrivateKey &forPrivateKey() const {return *this;}
+        IDHKeyDomainForDHPrivateKey &forDHPrivateKey() {return *this;}
+        const IDHKeyDomainForDHPrivateKey &forDHPrivateKey() const {return *this;}
 
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
+        typedef CryptoPP::DH DH;
+
+        virtual PUID getID() const = 0;
+
+        virtual DH &getDH() const = 0;
       };
 
       //-----------------------------------------------------------------------
@@ -64,84 +67,91 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RSAPublicKey
+      #pragma mark DHKeyDomain
       #pragma mark
 
-      class RSAPublicKey : public Noop,
-                           public IRSAPublicKey,
-                           public IRSAPublicKeyForRSAPrivateKey
+      class DHKeyDomain : public Noop,
+                          public IDHKeyDomain,
+                          public IDHKeyDomainForDHPrivateKey
       {
       public:
-        friend interaction IRSAPublicKeyFactory;
-        friend interaction IRSAPublicKey;
+        friend interaction IDHKeyDomainFactory;
+        friend interaction IDHKeyDomain;
 
-        typedef CryptoPP::RSA::PublicKey PublicKey;
+        typedef CryptoPP::DH DH;
 
       protected:
-        RSAPublicKey();
+        DHKeyDomain();
         
-        RSAPublicKey(Noop) : Noop(true) {};
+        DHKeyDomain(Noop) : Noop(true) {};
 
       public:
-        ~RSAPublicKey();
+        ~DHKeyDomain();
 
-        static RSAPublicKeyPtr convert(IRSAPublicKeyPtr publicKey);
-
-      protected:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RSAPublicKey => IRSAPublicKey
-        #pragma mark
-
-        static ElementPtr toDebug(IRSAPublicKeyPtr object);
-
-        static RSAPublicKeyPtr generate(RSAPrivateKeyPtr &outPrivatekey);
-
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
-
-        virtual SecureByteBlockPtr save() const;
-
-        virtual String getFingerprint() const;
-
-        virtual bool verify(
-                            const SecureByteBlock &inOriginalBufferSigned,
-                            const SecureByteBlock &inSignature
-                            ) const;
-
-        virtual bool verify(
-                            const String &inOriginalStringSigned,
-                            const SecureByteBlock &inSignature
-                            ) const;
-
-        virtual bool verifySignature(ElementPtr signedEl) const;
-
-        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const;
+        static DHKeyDomainPtr convert(IDHKeyDomainPtr privateKey);
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RSAPublicKey => (internal)
+        #pragma mark DHKeyDomain => IDHKeyDomain
+        #pragma mark
+
+        static ElementPtr toDebug(IDHKeyDomainPtr keyDomain);
+
+        static DHKeyDomainPtr generate(size_t keySizeInBits);
+
+        static DHKeyDomainPtr loadPrecompiled(
+                                              IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
+                                              bool validate
+                                              );
+
+        static DHKeyDomainPtr load(
+                                   const SecureByteBlock &p,
+                                   const SecureByteBlock &q,
+                                   const SecureByteBlock &g,
+                                   bool validate = true
+                                   );
+
+        virtual PUID getID() const {return mID;}
+
+        virtual KeyDomainPrecompiledTypes getPrecompiledType() const;
+
+        virtual void save(
+                          SecureByteBlock &p,
+                          SecureByteBlock &q,
+                          SecureByteBlock &g
+                          ) const;
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DHKeyDomain => IDHKeyDomainForDHPrivateKey
+        #pragma mark
+
+        // (duplicate) virtual PUID getID() const;
+
+        virtual DH &getDH() const;
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DHKeyDomain => (internal)
         #pragma mark
 
         Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
 
         virtual ElementPtr toDebug() const;
 
-        bool verify(
-                    const BYTE *inBuffer,
-                    size_t inBufferLengthInBytes,
-                    const SecureByteBlock &inSignature
-                    ) const;
+        bool validate() const;
 
       private:
         //-------------------------------------------------------------------
         #pragma mark
-        #pragma mark RSAPrivateKey => (data)
+        #pragma mark DHKeyDomain => (data)
         #pragma mark
 
         AutoPUID mID;
-        PublicKey mPublicKey;
-        String mFingerprint;
+        mutable DH mDH;
       };
 
       //-----------------------------------------------------------------------
@@ -149,15 +159,28 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRSAPublicKeyFactory
+      #pragma mark IDHKeyDomainFactory
       #pragma mark
 
-      interaction IRSAPublicKeyFactory
+      interaction IDHKeyDomainFactory
       {
-        static IRSAPublicKeyFactory &singleton();
+        static IDHKeyDomainFactory &singleton();
 
-        virtual RSAPublicKeyPtr loadPublicKey(const SecureByteBlock &buffer);
+        virtual DHKeyDomainPtr generate(size_t keySizeInBits);
+
+        virtual DHKeyDomainPtr loadPrecompiled(
+                                               IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
+                                               bool validate
+                                               );
+
+        virtual DHKeyDomainPtr load(
+                                    const SecureByteBlock &p,
+                                    const SecureByteBlock &q,
+                                    const SecureByteBlock &g,
+                                    bool validate
+                                    );
       };
+      
     }
   }
 }

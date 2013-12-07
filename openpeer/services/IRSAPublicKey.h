@@ -33,7 +33,7 @@
 
 #include <openpeer/services/types.h>
 
-#define OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM "http://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
+#define OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
 
 namespace openpeer
 {
@@ -49,6 +49,8 @@ namespace openpeer
 
     interaction IRSAPublicKey
     {
+      static ElementPtr toDebug(IRSAPublicKeyPtr object);
+
       static IRSAPublicKeyPtr generate(IRSAPrivateKeyPtr &outPrivateKey);
 
       static IRSAPublicKeyPtr load(const SecureByteBlock &buffer);

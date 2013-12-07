@@ -46,6 +46,7 @@ namespace openpeer { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTE
 typedef openpeer::services::ILogger ILogger;
 
 void doTestCanonicalXML();
+void doTestDH();
 void doTestDNS();
 void doTestICESocket();
 void doTestSTUNDiscovery();
@@ -144,7 +145,10 @@ namespace BoostReplacement
   
   void runAllTests()
   {
+    BOOST_INSTALL_LOGGER()
+
     BOOST_RUN_TEST_FUNC(doTestCanonicalXML)
+    BOOST_RUN_TEST_FUNC(doTestDH)
     BOOST_RUN_TEST_FUNC(doTestDNS)
     BOOST_RUN_TEST_FUNC(doTestICESocket)
     BOOST_RUN_TEST_FUNC(doTestSTUNDiscovery)
@@ -153,5 +157,7 @@ namespace BoostReplacement
     BOOST_RUN_TEST_FUNC(doTestRUDPListener)
     BOOST_RUN_TEST_FUNC(doTestRUDPICESocket)
     BOOST_RUN_TEST_FUNC(doTestTCPMessagingLoopback)
+
+    BOOST_UNINSTALL_LOGGER()
   }
 }

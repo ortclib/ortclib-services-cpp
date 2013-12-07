@@ -40,7 +40,7 @@
 #include <list>
 #include <map>
 
-#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "http://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
+#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
 
 namespace openpeer
 {
@@ -74,6 +74,7 @@ namespace openpeer
         {
           DecodingType_Unknown,
           DecodingType_PrivateKey,
+          DecodingType_Agreement,
           DecodingType_Passphrase,
         };
 
@@ -164,9 +165,19 @@ namespace openpeer
 
         virtual String getRemoteContextID() const;
 
+        virtual IDHKeyDomainPtr getDHRemoteKeyDomain() const;
+
+        virtual IDHPublicKeyPtr getDHRemotePublicKey() const;
+
         virtual void setReceiveKeyingDecoding(
                                               IRSAPrivateKeyPtr decodingPrivateKey,
                                               IRSAPublicKeyPtr decodingPublicKey
+                                              );
+
+        virtual void setReceiveKeyingDecoding(
+                                              IDHPrivateKeyPtr localPrivateKey,
+                                              IDHPublicKeyPtr localPublicKey,
+                                              IDHPublicKeyPtr remotePublicKey = IDHPublicKeyPtr()
                                               );
 
         virtual void setReceiveKeyingDecoding(const char *passphrase);
@@ -176,6 +187,12 @@ namespace openpeer
         virtual void setReceiveKeyingMaterialSigningPublicKey(IRSAPublicKeyPtr remotePublicKey);
 
         virtual void setSendKeyingEncoding(IRSAPublicKeyPtr remotePublicKey);
+
+        virtual void setSendKeyingEncoding(
+                                           IDHPrivateKeyPtr localPrivateKey,
+                                           IDHPublicKeyPtr remotePublicKey,
+                                           IDHPublicKeyPtr includeFullLocalPublicKey = IDHPublicKeyPtr()
+                                           );
 
         virtual void setSendKeyingEncoding(const char *passphrase);
 
@@ -258,6 +275,15 @@ namespace openpeer
 
         IRSAPublicKeyPtr mSendingEncodingRemotePublicKey;
         String mSendingEncodingPassphrase;
+
+        IDHPrivateKeyPtr mDHLocalPrivateKey;
+        IDHPublicKeyPtr mDHLocalPublicKey;
+
+        IDHKeyDomainPtr mDHRemoteKeyDomain;
+        IDHPublicKeyPtr mDHRemotePublicKey;
+        IDHPublicKeyPtr mDHEncodingFullLocalPublicKey;
+
+        SecureByteBlockPtr mDHAgreedKey;
 
         DocumentPtr mSendKeyingNeedingToSignDoc;  // temporary document containing the send keying material needing to be signed
         ElementPtr mSendKeyingNeedToSignEl;       // temporary element containing the send keying material needing to be signed (once notified it is signed, this element get set to EleemntPtr())

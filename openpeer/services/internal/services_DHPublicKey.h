@@ -32,10 +32,7 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/IRSAPublicKey.h>
-
-#include <cryptopp/rsa.h>
-#include <cryptopp/secblock.h>
+#include <openpeer/services/IDHPublicKey.h>
 
 namespace openpeer
 {
@@ -48,100 +45,94 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRSAPublicKeyForRSAPrivateKey
+      #pragma mark IDHPublicKeyForDHPrivateKey
       #pragma mark
 
-      interaction IRSAPublicKeyForRSAPrivateKey
+      interaction IDHPublicKeyForDHPrivateKey
       {
-        IRSAPublicKeyForRSAPrivateKey &forPrivateKey() {return *this;}
-        const IRSAPublicKeyForRSAPrivateKey &forPrivateKey() const {return *this;}
+        IDHPublicKeyForDHPrivateKey &forDHPrivateKey() {return *this;}
+        const IDHPublicKeyForDHPrivateKey &forDHPrivateKey() const {return *this;}
 
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
+        virtual const SecureByteBlock &getStaticPublicKey() const = 0;
+        virtual const SecureByteBlock &getEphemeralPublicKey() const = 0;
       };
-
+      
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RSAPublicKey
+      #pragma mark DHPublicKey
       #pragma mark
 
-      class RSAPublicKey : public Noop,
-                           public IRSAPublicKey,
-                           public IRSAPublicKeyForRSAPrivateKey
+      class DHPublicKey : public Noop,
+                          public IDHPublicKey,
+                          public IDHPublicKeyForDHPrivateKey
       {
       public:
-        friend interaction IRSAPublicKeyFactory;
-        friend interaction IRSAPublicKey;
-
-        typedef CryptoPP::RSA::PublicKey PublicKey;
+        friend interaction IDHPublicKeyFactory;
+        friend interaction IDHPublicKey;
 
       protected:
-        RSAPublicKey();
+        DHPublicKey();
         
-        RSAPublicKey(Noop) : Noop(true) {};
+        DHPublicKey(Noop) : Noop(true) {};
 
       public:
-        ~RSAPublicKey();
+        ~DHPublicKey();
 
-        static RSAPublicKeyPtr convert(IRSAPublicKeyPtr publicKey);
+        static DHPublicKeyPtr convert(IDHPublicKeyPtr privateKey);
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RSAPublicKey => IRSAPublicKey
+        #pragma mark DHPublicKey => IDHPublicKey
         #pragma mark
 
-        static ElementPtr toDebug(IRSAPublicKeyPtr object);
+        static ElementPtr toDebug(IDHPublicKeyPtr keyDomain);
 
-        static RSAPublicKeyPtr generate(RSAPrivateKeyPtr &outPrivatekey);
+        static DHPublicKeyPtr load(
+                                   const SecureByteBlock &staticPublicKey,
+                                   const SecureByteBlock &ephemeralPublicKey
+                                   );
 
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
+        virtual PUID getID() const {return mID;}
 
-        virtual SecureByteBlockPtr save() const;
+        virtual void save(
+                          SecureByteBlock *outStaticPublicKey,
+                          SecureByteBlock *outEphemeralPublicKey
+                          ) const;
 
         virtual String getFingerprint() const;
 
-        virtual bool verify(
-                            const SecureByteBlock &inOriginalBufferSigned,
-                            const SecureByteBlock &inSignature
-                            ) const;
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DHPublicKey => IDHPublicKeyForDHPrivateKey
+        #pragma mark
 
-        virtual bool verify(
-                            const String &inOriginalStringSigned,
-                            const SecureByteBlock &inSignature
-                            ) const;
-
-        virtual bool verifySignature(ElementPtr signedEl) const;
-
-        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const;
+        virtual const SecureByteBlock &getStaticPublicKey() const;
+        virtual const SecureByteBlock &getEphemeralPublicKey() const;
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RSAPublicKey => (internal)
+        #pragma mark DHPublicKey => (internal)
         #pragma mark
 
         Log::Params log(const char *message) const;
-
+        Log::Params debug(const char *message) const;
         virtual ElementPtr toDebug() const;
-
-        bool verify(
-                    const BYTE *inBuffer,
-                    size_t inBufferLengthInBytes,
-                    const SecureByteBlock &inSignature
-                    ) const;
 
       private:
         //-------------------------------------------------------------------
         #pragma mark
-        #pragma mark RSAPrivateKey => (data)
+        #pragma mark DHPublicKey => (data)
         #pragma mark
 
         AutoPUID mID;
-        PublicKey mPublicKey;
-        String mFingerprint;
+
+        SecureByteBlock mStaticPublicKey;
+        SecureByteBlock mEphemeralPublicKey;
       };
 
       //-----------------------------------------------------------------------
@@ -149,15 +140,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRSAPublicKeyFactory
+      #pragma mark IDHPublicKeyFactory
       #pragma mark
 
-      interaction IRSAPublicKeyFactory
+      interaction IDHPublicKeyFactory
       {
-        static IRSAPublicKeyFactory &singleton();
+        static IDHPublicKeyFactory &singleton();
 
-        virtual RSAPublicKeyPtr loadPublicKey(const SecureByteBlock &buffer);
+        virtual DHPublicKeyPtr load(
+                                    const SecureByteBlock &staticPublicKey,
+                                    const SecureByteBlock &ephemeralPublicKey
+                                    );
       };
+      
     }
   }
 }

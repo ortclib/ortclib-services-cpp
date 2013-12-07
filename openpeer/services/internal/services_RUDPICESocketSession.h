@@ -247,11 +247,11 @@ namespace openpeer
 
         static IRUDPICESocketSessionFactory &singleton();
 
-        static RUDPICESocketSessionPtr listen(
-                                              IMessageQueuePtr queue,
-                                              IICESocketSessionPtr iceSession,
-                                              IRUDPICESocketSessionDelegatePtr delegate
-                                              );
+        virtual RUDPICESocketSessionPtr listen(
+                                               IMessageQueuePtr queue,
+                                               IICESocketSessionPtr iceSession,
+                                               IRUDPICESocketSessionDelegatePtr delegate
+                                               );
       };
       
     }

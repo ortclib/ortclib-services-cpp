@@ -49,7 +49,6 @@ void doTestCanonicalXML()
 
   BOOST_INSTALL_LOGGER();
 
-
   {
     const char *input =
     "<!DOCTYPE doc [\n"

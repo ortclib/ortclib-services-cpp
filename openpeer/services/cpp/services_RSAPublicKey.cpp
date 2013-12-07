@@ -86,8 +86,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RSAPublicKey::RSAPublicKey() :
-        mID(zsLib::createPUID())
+      RSAPublicKey::RSAPublicKey()
       {
         ZS_LOG_DEBUG(log("created"))
       }
@@ -115,6 +114,13 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      ElementPtr RSAPublicKey::toDebug(IRSAPublicKeyPtr object)
+      {
+        if (!object) return ElementPtr();
+        return convert(object)->toDebug();
+      }
+
+      //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::generate(RSAPrivateKeyPtr &outPrivatekey)
       {
         RSAPublicKeyPtr result;
@@ -125,6 +131,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::load(const SecureByteBlock &buffer)
       {
+        if (IHelper::isEmpty(buffer)) return RSAPublicKeyPtr();
+
         AutoSeededRandomPool rng;
 
         ByteQueue byteQueue;
@@ -245,14 +253,22 @@ namespace openpeer
 
         SecureByteBlockPtr output(new SecureByteBlock);
 
+        if (IHelper::isEmpty(buffer)) return output;
+
         ByteQueue queue;
         queue.Put(buffer, buffer.SizeInBytes());
 
         ByteQueue *outputQueue = new ByteQueue;
-
         PK_EncryptorFilter filter(rng, encryptor, outputQueue);
-        queue.CopyTo(filter);
-        filter.MessageEnd();
+
+        try {
+          queue.CopyTo(filter);
+          filter.MessageEnd();
+        } catch(CryptoPP::Exception &e) {
+          ZS_LOG_ERROR(Basic, log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()) + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
+          output->CleanNew(0);
+          return output;
+        }
 
         size_t outputLengthInBytes = (size_t)outputQueue->CurrentSize();
         output->CleanNew(outputLengthInBytes);
@@ -275,6 +291,21 @@ namespace openpeer
         ElementPtr objectEl = Element::create("RSAPublicKey");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr RSAPublicKey::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("RSAPublicKey");
+
+        SecureByteBlockPtr output = save();
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "fingerprint", mFingerprint);
+        IHelper::debugAppend(resultEl, "public key", output ? IHelper::convertToHex(*output) : String());
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -308,6 +339,12 @@ namespace openpeer
     #pragma mark
     #pragma mark IRSAPublicKey
     #pragma mark
+
+    //-------------------------------------------------------------------------
+    ElementPtr IRSAPublicKey::toDebug(IRSAPublicKeyPtr object)
+    {
+      return internal::RSAPublicKey::toDebug(object);
+    }
 
     //-------------------------------------------------------------------------
     IRSAPublicKeyPtr IRSAPublicKey::generate(IRSAPrivateKeyPtr &outPrivateKey)

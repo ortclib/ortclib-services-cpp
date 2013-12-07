@@ -50,6 +50,8 @@ namespace openpeer
 
     interaction IRSAPrivateKey
     {
+      static ElementPtr toDebug(IRSAPrivateKeyPtr object);
+
       static IRSAPrivateKeyPtr generate(
                                         IRSAPublicKeyPtr &outPublicKey,
                                         size_t keySizeInBits = OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE

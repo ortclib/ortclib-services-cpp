@@ -139,6 +139,18 @@ namespace openpeer
     typedef boost::shared_ptr<ICanonicalXML> ICanonicalXMLPtr;
     typedef boost::weak_ptr<ICanonicalXML> ICanonicalXMLWeakPtr;
 
+    interaction IDHKeyDomain;
+    typedef boost::shared_ptr<IDHKeyDomain> IDHKeyDomainPtr;
+    typedef boost::weak_ptr<IDHKeyDomain> IDHKeyDomainWeakPtr;
+
+    interaction IDHPrivateKey;
+    typedef boost::shared_ptr<IDHPrivateKey> IDHPrivateKeyPtr;
+    typedef boost::weak_ptr<IDHPrivateKey> IDHPrivateKeyWeakPtr;
+
+    interaction IDHPublicKey;
+    typedef boost::shared_ptr<IDHPublicKey> IDHPublicKeyPtr;
+    typedef boost::weak_ptr<IDHPublicKey> IDHPublicKeyWeakPtr;
+
     interaction IDNS;
     typedef boost::shared_ptr<IDNS> IDNSPtr;
     typedef boost::weak_ptr<IDNS> IDNSWeakPtr;

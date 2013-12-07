@@ -109,6 +109,18 @@ namespace openpeer
       typedef boost::shared_ptr<DNS> DNSPtr;
       typedef boost::weak_ptr<DNS> DNSWeakPtr;
 
+      interaction DHKeyDomain;
+      typedef boost::shared_ptr<DHKeyDomain> DHKeyDomainPtr;
+      typedef boost::weak_ptr<DHKeyDomain> DHKeyDomainWeakPtr;
+
+      interaction DHPrivateKey;
+      typedef boost::shared_ptr<DHPrivateKey> DHPrivateKeyPtr;
+      typedef boost::weak_ptr<DHPrivateKey> DHPrivateKeyWeakPtr;
+
+      interaction DHPublicKey;
+      typedef boost::shared_ptr<DHPublicKey> DHPublicKeyPtr;
+      typedef boost::weak_ptr<DHPublicKey> DHPublicKeyWeakPtr;
+
       class DNSMonitor;
       typedef boost::shared_ptr<DNSMonitor> DNSMonitorPtr;
       typedef boost::weak_ptr<DNSMonitor> DNSMonitorWeakPtr;

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0024391C178F438C00B79368 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0024391B178F438C00B79368 /* Security.framework */; };
+		00579B8C185133C400CB4951 /* TestDH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00579B8B185133C400CB4951 /* TestDH.cpp */; };
 		0063C4AD16CAA54300E6DB4D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4AC16CAA54300E6DB4D /* UIKit.framework */; };
 		0063C4AF16CAA54300E6DB4D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4AE16CAA54300E6DB4D /* Foundation.framework */; };
 		0063C4B116CAA54300E6DB4D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4B016CAA54300E6DB4D /* CoreGraphics.framework */; };
@@ -99,6 +100,7 @@
 
 /* Begin PBXFileReference section */
 		0024391B178F438C00B79368 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		00579B8B185133C400CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
 		0063C4A916CAA54300E6DB4D /* hfservicesTest_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hfservicesTest_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0063C4AC16CAA54300E6DB4D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0063C4AE16CAA54300E6DB4D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -217,6 +219,7 @@
 				0063C58016CAA62600E6DB4D /* boost_replacement.h */,
 				0063C58216CAA62600E6DB4D /* main.cpp */,
 				0063C58316CAA62600E6DB4D /* TestCanonicalXML.cpp */,
+				00579B8B185133C400CB4951 /* TestDH.cpp */,
 				0063C58416CAA62600E6DB4D /* TestDNS.cpp */,
 				0063C58516CAA62600E6DB4D /* TestICESocket.cpp */,
 				0063C58616CAA62600E6DB4D /* TestRUDPICESocket.cpp */,
@@ -435,6 +438,7 @@
 			files = (
 				0063C6E916CAA62600E6DB4D /* boost_replacement.cpp in Sources */,
 				0063C6EB16CAA62600E6DB4D /* TestCanonicalXML.cpp in Sources */,
+				00579B8C185133C400CB4951 /* TestDH.cpp in Sources */,
 				0063C6EC16CAA62600E6DB4D /* TestDNS.cpp in Sources */,
 				0063C6ED16CAA62600E6DB4D /* TestICESocket.cpp in Sources */,
 				0063C6EE16CAA62600E6DB4D /* TestRUDPICESocket.cpp in Sources */,

@@ -175,6 +175,18 @@ namespace openpeer
       virtual String getRemoteContextID() const = 0;
 
       //-----------------------------------------------------------------------
+      // PURPOSE: Obtain the remote Diffie-Hellman keying material.
+      // NOTE:    This is needed to extract out the correct Diffie-Hellman
+      //          keying material when it's incoming.
+      virtual IDHKeyDomainPtr getDHRemoteKeyDomain() const = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Obtain the remote Diffie-Hellman keying material.
+      // NOTE:    This is needed to extract out the correct Diffie-Hellman
+      //          keying material when it's incoming.
+      virtual IDHPublicKeyPtr getDHRemotePublicKey() const = 0;
+
+      //-----------------------------------------------------------------------
       // PURPOSE: If the remote party encoded their keying materials using
       //          a public key, this rountine can be called to decode that
       //          keying material by providing the associated private key.
@@ -184,6 +196,20 @@ namespace openpeer
       virtual void setReceiveKeyingDecoding(
                                             IRSAPrivateKeyPtr decodingPrivateKey,
                                             IRSAPublicKeyPtr decodingPublicKey
+                                            ) = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: If the remote party encoded their keying materials using
+      //          a Diffie-Hellman stlye public key, this rountine can be
+      //          called to decode that keying material by providing the
+      //          associated private key.
+      // NOTE:    When "needsReceiveKeyingDecodingPrivateKey" return true,
+      //          call this routine to provide the keying material needed
+      //          to decode the receive keying material.
+      virtual void setReceiveKeyingDecoding(
+                                            IDHPrivateKeyPtr localPrivateKey,
+                                            IDHPublicKeyPtr localPublicKey,
+                                            IDHPublicKeyPtr remotePublicKey = IDHPublicKeyPtr()
                                             ) = 0;
 
       //-----------------------------------------------------------------------
@@ -222,6 +248,18 @@ namespace openpeer
       //          routine can be used to provide a public key to use to
       //          encode the send keying material.
       virtual void setSendKeyingEncoding(IRSAPublicKeyPtr remotePublicKey) = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Calling this routine causes the keying material to be
+      //          encoded using the private key specified.
+      // NOTE:    When "needsSendKeyingEncodingMaterial" returns true, this
+      //          routine can be used to provide a public key to use to
+      //          encode the send keying material.
+      virtual void setSendKeyingEncoding(
+                                         IDHPrivateKeyPtr localPrivateKey,
+                                         IDHPublicKeyPtr remotePublicKey,
+                                         IDHPublicKeyPtr includeFullLocalPublicKey = IDHPublicKeyPtr()
+                                         ) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Calling this routine causes the keying material to be encoded

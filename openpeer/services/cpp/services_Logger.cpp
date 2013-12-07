@@ -62,7 +62,8 @@
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
-#define OPENPEER_DEFAULT_OUTGOING_TELNET_PORT (59999)
+#define OPENPEER_SERVICES_DEFAULT_OUTGOING_TELNET_PORT (59999)
+#define OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS (60)
 
 #define OPENPEER_SERVICES_SEQUENCE_ESCAPE                    "\x1B"
 #define OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET              OPENPEER_SERVICES_SEQUENCE_ESCAPE "[0m"
@@ -163,7 +164,7 @@ namespace openpeer
             if (!childEl) continue;
 
             SecureByteBlockPtr buffer = IHelper::convertFromBase64(childEl->getTextDecoded());
-            if (!buffer) continue;
+            if (IHelper::isEmpty(buffer)) continue;
 
             alt += "\n\n" + IHelper::getDebugString(*buffer) + "\n\n";
           }
@@ -964,7 +965,7 @@ namespace openpeer
           }
 
           if (0 == mListenPort) {
-            mListenPort = OPENPEER_DEFAULT_OUTGOING_TELNET_PORT;
+            mListenPort = OPENPEER_SERVICES_DEFAULT_OUTGOING_TELNET_PORT;
           }
 
           // do this from outside the stack to prevent this from happening during any kind of lock
@@ -1041,7 +1042,8 @@ namespace openpeer
           mClosed(false),
           mListenPort(0),
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
-          mStartListenTime(zsLib::now())
+          mStartListenTime(zsLib::now()),
+          mBacklogDataUntil(zsLib::now() + Seconds(OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
         {}
 
         //---------------------------------------------------------------------
@@ -1201,15 +1203,25 @@ namespace openpeer
                            )
         {
           {
+            bool okayToBacklog = false;
+
             // scope: quick exit is not logging
             {
               AutoRecursiveLock lock(mLock);
 
-              if (!mTelnetSocket) return;
+              if (!mTelnetSocket) {
+                Time tick = zsLib::now();
+
+                if (tick > mBacklogDataUntil) {
+                  // clear out any pending data since we can't backlog any longer
+                  mBufferedList.clear();
+                  return;
+                }
+
+                okayToBacklog = true;
+              }
             }
 
-            bool wouldBlock = false;
-            size_t sent = 0;
 
             String output;
             if (mColorizeOutput) {
@@ -1220,16 +1232,23 @@ namespace openpeer
 
             AutoRecursiveLock lock(mLock);
 
-            if (!mTelnetSocket) return; // need to check again (small window in which it could change
-
-            bool okayToSend = mBufferedList.size() < 1;
+            bool connected = (bool)mTelnetSocket;
 
             if (mOutgoingMode) {
-              if (!mConnected) return;
+              if (!mConnected) connected = false;
             }
+
+            if ((!connected) &&
+                (!okayToBacklog)) {
+              return;
+            }
+
+            bool okayToSend = (connected) && (mBufferedList.size() < 1);
+            size_t sent = 0;
 
             if (okayToSend) {
               int errorCode = 0;
+              bool wouldBlock = false;
               sent = mTelnetSocket->send((const BYTE *)(output.c_str()), output.length(), &wouldBlock, 0, &errorCode);
               if (!wouldBlock) {
                 if (0 != errorCode) {
@@ -1642,6 +1661,8 @@ namespace openpeer
 
         SocketPtr mListenSocket;
         ISocketPtr mTelnetSocket;
+
+        Time mBacklogDataUntil;
 
         bool mClosed;
 

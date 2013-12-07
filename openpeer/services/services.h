@@ -33,6 +33,9 @@
 
 #include <openpeer/services/types.h>
 #include <openpeer/services/ICanonicalXML.h>
+#include <openpeer/services/IDHKeyDomain.h>
+#include <openpeer/services/IDHPrivateKey.h>
+#include <openpeer/services/IDHPublicKey.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IHelper.h>
 #include <openpeer/services/IHTTP.h>

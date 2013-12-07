@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00579B8A185133B300CB4951 /* TestDH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00579B89185133B300CB4951 /* TestDH.cpp */; };
 		0063C3E916CAA03800E6DB4D /* boost_replacement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28716CAA03800E6DB4D /* boost_replacement.cpp */; };
 		0063C3EA16CAA03800E6DB4D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28A16CAA03800E6DB4D /* main.cpp */; };
 		0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */; };
@@ -99,6 +100,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		00579B89185133B300CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
 		0063C1D716CA9F8500E6DB4D /* hfservicesTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hfservicesTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0063C28716CAA03800E6DB4D /* boost_replacement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boost_replacement.cpp; sourceTree = "<group>"; };
 		0063C28816CAA03800E6DB4D /* boost_replacement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boost_replacement.h; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				0063C28816CAA03800E6DB4D /* boost_replacement.h */,
 				0063C28A16CAA03800E6DB4D /* main.cpp */,
 				0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */,
+				00579B89185133B300CB4951 /* TestDH.cpp */,
 				0063C28C16CAA03800E6DB4D /* TestDNS.cpp */,
 				0063C28D16CAA03800E6DB4D /* TestICESocket.cpp */,
 				0063C28E16CAA03800E6DB4D /* TestRUDPICESocket.cpp */,
@@ -371,6 +374,7 @@
 				0063C3F116CAA03800E6DB4D /* TestSTUNDiscovery.cpp in Sources */,
 				0063C3F216CAA03800E6DB4D /* TestTURNSocket.cpp in Sources */,
 				00ABD44E17A8431D00178078 /* TestTCPMessagingLoopback.cpp in Sources */,
+				00579B8A185133B300CB4951 /* TestDH.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
