@@ -105,6 +105,10 @@ namespace openpeer
       typedef boost::shared_ptr<ByteQueue> ByteQueuePtr;
       typedef boost::weak_ptr<ByteQueue> ByteQueueWeakPtr;
 
+      interaction Cache;
+      typedef boost::shared_ptr<Cache> CachePtr;
+      typedef boost::weak_ptr<Cache> CacheWeakPtr;
+
       interaction DNS;
       typedef boost::shared_ptr<DNS> DNSPtr;
       typedef boost::weak_ptr<DNS> DNSWeakPtr;

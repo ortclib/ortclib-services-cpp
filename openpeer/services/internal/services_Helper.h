@@ -96,6 +96,11 @@ namespace openpeer
                                                   const BYTE *buffer,
                                                   size_t bufferLengthInBytes
                                                   );
+        static SecureByteBlockPtr convertToBuffer(
+                                                  boost::shared_array<char> arrayStr,
+                                                  size_t lengthInChars = SIZE_T_MAX,
+                                                  bool wipeOriginal = true
+                                                  );
 
         static String convertToBase64(
                                       const BYTE *buffer,

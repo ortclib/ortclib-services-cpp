@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		000CC03717A475F90075E86C /* services_Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC03617A475F90075E86C /* services_Logger.cpp */; };
+		001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 001AEF591853DE9300029ABC /* services_Cache.cpp */; };
 		003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD317A607190002EB47 /* services_MessageLayerSecurityChannel.cpp */; };
 		003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */; };
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
@@ -42,6 +43,9 @@
 		000CC03417A475B50075E86C /* ILogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ILogger.h; sourceTree = "<group>"; };
 		000CC03517A475E00075E86C /* services_Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Logger.h; sourceTree = "<group>"; };
 		000CC03617A475F90075E86C /* services_Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Logger.cpp; sourceTree = "<group>"; };
+		001AEF571853DDDD00029ABC /* ICache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICache.h; sourceTree = "<group>"; };
+		001AEF581853DE6600029ABC /* services_Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Cache.h; sourceTree = "<group>"; };
+		001AEF591853DE9300029ABC /* services_Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Cache.cpp; sourceTree = "<group>"; };
 		003BEDCD17A606E80002EB47 /* IMessageLayerSecurityChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageLayerSecurityChannel.h; sourceTree = "<group>"; };
 		003BEDCE17A606E80002EB47 /* IRSAPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPrivateKey.h; sourceTree = "<group>"; };
 		003BEDCF17A606E80002EB47 /* IRSAPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPublicKey.h; sourceTree = "<group>"; };
@@ -172,6 +176,7 @@
 				0095D93816CA83EA005F53D3 /* internal */,
 				0095D96816CA83EA005F53D3 /* types.h */,
 				0095D95916CA83EA005F53D3 /* services.h */,
+				001AEF571853DDDD00029ABC /* ICache.h */,
 				0095D93216CA83EA005F53D3 /* ICanonicalXML.h */,
 				0084FFF5184FA171009F6934 /* IDHKeyDomain.h */,
 				0084FFF6184FA171009F6934 /* IDHPrivateKey.h */,
@@ -207,6 +212,7 @@
 			isa = PBXGroup;
 			children = (
 				0095D92C16CA83EA005F53D3 /* services_services.cpp */,
+				001AEF591853DE9300029ABC /* services_Cache.cpp */,
 				0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */,
 				0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */,
 				0084FFFB184FD5E6009F6934 /* services_DHPrivateKey.cpp */,
@@ -244,6 +250,7 @@
 			children = (
 				0095D94D16CA83EA005F53D3 /* types.h */,
 				0095D93916CA83EA005F53D3 /* services.h */,
+				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
 				0084FFFA184FA5DA009F6934 /* services_DHKeyDomain.h */,
 				0084FFFD184FD5FD009F6934 /* services_DHPrivateKey.h */,
@@ -362,6 +369,7 @@
 				003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */,
 				003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */,
 				0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */,
+				001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */,
 				003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */,
 				003BEECE17A747510002EB47 /* services_TransportStream.cpp in Sources */,
 				00ABD44917A8423900178078 /* services_TCPMessaging.cpp in Sources */,

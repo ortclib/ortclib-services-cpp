@@ -33,6 +33,8 @@
 
 #include <openpeer/services/types.h>
 
+#include <boost/shared_array.hpp>
+
 #include <zsLib/Log.h>
 
 // FOR COMPATIBILITY WITH ENCYPRTION ALGORITHMS, SEE:
@@ -124,6 +126,11 @@ namespace openpeer
       static SecureByteBlockPtr convertToBuffer(
                                                 const BYTE *buffer,
                                                 size_t bufferLengthInBytes
+                                                );
+      static SecureByteBlockPtr convertToBuffer(
+                                                boost::shared_array<char> arrayStr,
+                                                size_t lengthInChars = SIZE_T_MAX,
+                                                bool wipeOriginal = true
                                                 );
 
       static String convertToBase64(

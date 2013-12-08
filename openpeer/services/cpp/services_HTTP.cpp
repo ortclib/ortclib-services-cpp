@@ -1322,7 +1322,7 @@ namespace openpeer
     bool IHTTP::isInformational(HTTPStatusCodes httpStatusCode)
     {
       return ((httpStatusCode >= HTTPStatusCode_InformationalStart) &&
-              (httpStatusCode >= HTTPStatusCode_InformationalEnd));
+              (httpStatusCode <= HTTPStatusCode_InformationalEnd));
     }
 
     //-------------------------------------------------------------------------
@@ -1334,14 +1334,14 @@ namespace openpeer
         }
       }
       return ((httpStatusCode >= HTTPStatusCode_SuccessfulStart) &&
-              (httpStatusCode >= HTTPStatusCode_SuccessfulEnd));
+              (httpStatusCode <= HTTPStatusCode_SuccessfulEnd));
     }
 
     //-------------------------------------------------------------------------
     bool IHTTP::isRedirection(HTTPStatusCodes httpStatusCode)
     {
       return ((httpStatusCode >= HTTPStatusCode_RedirectionStart) &&
-              (httpStatusCode >= HTTPStatusCode_RedirectionEnd));
+              (httpStatusCode <= HTTPStatusCode_RedirectionEnd));
     }
 
     //-------------------------------------------------------------------------

@@ -135,6 +135,14 @@ namespace openpeer
     typedef boost::shared_ptr<SecureByteBlock> SecureByteBlockPtr;
     typedef boost::weak_ptr<SecureByteBlock> SecureByteBlockWeakPtr;
 
+    interaction ICache;
+    typedef boost::shared_ptr<ICache> ICachePtr;
+    typedef boost::weak_ptr<ICache> ICacheWeakPtr;
+
+    interaction ICacheDelegate;
+    typedef boost::shared_ptr<ICacheDelegate> ICacheDelegatePtr;
+    typedef boost::weak_ptr<ICacheDelegate> ICacheDelegateWeakPtr;
+
     interaction ICanonicalXML;
     typedef boost::shared_ptr<ICanonicalXML> ICanonicalXMLPtr;
     typedef boost::weak_ptr<ICanonicalXML> ICanonicalXMLWeakPtr;

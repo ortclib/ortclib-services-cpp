@@ -566,6 +566,26 @@ namespace openpeer
         return output;
       }
 
+      //-------------------------------------------------------------------------
+      SecureByteBlockPtr Helper::convertToBuffer(
+                                                 boost::shared_array<char> arrayStr,
+                                                 size_t lengthInChars,
+                                                 bool wipeOriginal
+                                                 )
+      {
+        if (!arrayStr.get()) return convertToBuffer((const BYTE *)NULL, 0);
+
+        if (SIZE_T_MAX == lengthInChars) {
+          lengthInChars = strlen(arrayStr.get());
+        }
+
+        SecureByteBlockPtr result = convertToBuffer((const BYTE *)(arrayStr.get()), lengthInChars);
+        if (wipeOriginal) {
+          memset(arrayStr.get(), 0, lengthInChars * sizeof(char));
+        }
+        return result;
+      }
+
       //-----------------------------------------------------------------------
       String Helper::convertToBase64(
                                      const BYTE *buffer,
@@ -1669,6 +1689,16 @@ namespace openpeer
                                                 )
     {
       return internal::Helper::convertToBuffer(buffer, bufferLengthInBytes);
+    }
+
+    //-------------------------------------------------------------------------
+    SecureByteBlockPtr IHelper::convertToBuffer(
+                                                boost::shared_array<char> arrayStr,
+                                                size_t lengthInChars,
+                                                bool wipeOriginal
+                                                )
+    {
+      return internal::Helper::convertToBuffer(arrayStr, lengthInChars, wipeOriginal);
     }
 
     //-------------------------------------------------------------------------
