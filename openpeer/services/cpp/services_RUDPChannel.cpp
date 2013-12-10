@@ -206,6 +206,18 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      RUDPChannelPtr RUDPChannel::convert(ForRUDPICESocketSessionPtr channel)
+      {
+        return boost::dynamic_pointer_cast<RUDPChannel>(channel);
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPChannelPtr RUDPChannel::convert(ForRUDPListenerPtr channel)
+      {
+        return boost::dynamic_pointer_cast<RUDPChannel>(channel);
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

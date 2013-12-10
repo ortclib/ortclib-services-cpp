@@ -82,6 +82,19 @@ namespace openpeer
 
       static ElementPtr toDebug(IICESocketSessionPtr session);
 
+      //-----------------------------------------------------------------------
+      // PURPOSE: Create a peer to peer connected session when the remote
+      //          candidates are already known.
+      static IICESocketSessionPtr create(
+                                         IICESocketSessionDelegatePtr delegate,
+                                         IICESocketPtr socket,
+                                         const char *remoteUsernameFrag,
+                                         const char *remotePassword,
+                                         const CandidateList &remoteCandidates,
+                                         ICEControls control,
+                                         IICESocketSessionPtr foundation = IICESocketSessionPtr()
+                                         );
+
       virtual PUID getID() const = 0;
 
       virtual IICESocketSessionSubscriptionPtr subscribe(IICESocketSessionDelegatePtr delegate) = 0;

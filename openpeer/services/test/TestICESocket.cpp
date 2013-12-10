@@ -394,7 +394,7 @@ namespace openpeer
           IICESocket::CandidateList remoteCandidates;
           remote->getLocalCandidates(remoteCandidates);
 
-          IICESocketSessionPtr session = mICESocket->createSessionFromRemoteCandidates(mThisWeak.lock(), remoteUsernameFrag, remotePassword, remoteCandidates, control);
+          IICESocketSessionPtr session = IICESocketSession::create(mThisWeak.lock(), mICESocket, remoteUsernameFrag, remotePassword, remoteCandidates, control);
           mSessions.push_back(session);
 
           return session;

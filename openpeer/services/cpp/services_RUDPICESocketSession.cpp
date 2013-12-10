@@ -277,11 +277,11 @@ namespace openpeer
 
         if (mPendingSessions.size() < 1) return IRUDPChannelPtr();
 
-        RUDPChannelPtr found = mPendingSessions.front();
-        found->forSession().setDelegate(delegate);
-        found->forSession().setStreams(receiveStream, sendStream);
+        UseRUDPChannelPtr found = mPendingSessions.front();
+        found->setDelegate(delegate);
+        found->setStreams(receiveStream, sendStream);
         mPendingSessions.pop_front();
-        return found;
+        return RUDPChannel::convert(found);
       }
 
       //-----------------------------------------------------------------------
@@ -357,7 +357,7 @@ namespace openpeer
           return;
         }
 
-        RUDPChannelPtr session;
+        UseRUDPChannelPtr session;
 
         // scope: figure out which session this belongs
         {
@@ -373,7 +373,7 @@ namespace openpeer
         }
 
         // push the RUDP packet to the session to handle
-        session->forSession().handleRUDP(rudp, buffer, bufferLengthInBytes);
+        session->handleRUDP(rudp, buffer, bufferLengthInBytes);
       }
 
       //-----------------------------------------------------------------------
@@ -409,7 +409,7 @@ namespace openpeer
 
         do
         {
-          RUDPChannelPtr session;
+          UseRUDPChannelPtr session;
 
           // scope: next we attempt to see if there is already a session that handles this IP/channel pairing
           {
@@ -431,7 +431,7 @@ namespace openpeer
           }
 
           if (session) {
-            bool handled = session->forSession().handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
+            bool handled = session->handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
             if ((handled) && (!response)) return true;
           } else {
             bool handled =  handleUnknownChannel(stun, response);
@@ -472,7 +472,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
-          (*iter).second->forSession().notifyWriteReady();
+          (*iter).second->notifyWriteReady();
         }
       }
 
@@ -486,38 +486,40 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       void RUDPICESocketSession::onRUDPChannelStateChanged(
-                                                           RUDPChannelPtr channel,
+                                                           RUDPChannelPtr inChannel,
                                                            RUDPChannelStates state
                                                            )
       {
+        UseRUDPChannelPtr channel = inChannel;
+
         AutoRecursiveLock lock(getLock());
 
         switch (state) {
           case IRUDPChannel::RUDPChannelState_Connecting: break;
           case IRUDPChannel::RUDPChannelState_Connected:
           {
-            WORD channelNumber = channel->forSession().getIncomingChannelNumber();
+            WORD channelNumber = channel->getIncomingChannelNumber();
             SessionMap::iterator found = mLocalChannelNumberSessions.find(channelNumber);
             if (found == mLocalChannelNumberSessions.end()) return;
 
-            mRemoteChannelNumberSessions[channel->forSession().getOutgoingChannelNumber()] = channel;
+            mRemoteChannelNumberSessions[channel->getOutgoingChannelNumber()] = channel;
             break;
           }
           case IRUDPChannel::RUDPChannelState_ShuttingDown: break;
           case IRUDPChannel::RUDPChannelState_Shutdown:
           {
-            ZS_LOG_DEBUG(log("channel closed notification") + ZS_PARAM("channel ID", channel->forSession().getID()))
+            ZS_LOG_DEBUG(log("channel closed notification") + ZS_PARAM("channel ID", channel->getID()))
             for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter)
             {
               if ((*iter).second != channel) continue;
-              ZS_LOG_TRACE(log("clearing out local channel number") + ZS_PARAM("local channel number", channel->forSession().getIncomingChannelNumber()))
+              ZS_LOG_TRACE(log("clearing out local channel number") + ZS_PARAM("local channel number", channel->getIncomingChannelNumber()))
               mLocalChannelNumberSessions.erase(iter);
               break;
             }
             for (SessionMap::iterator iter = mRemoteChannelNumberSessions.begin(); iter != mRemoteChannelNumberSessions.end(); ++iter)
             {
               if ((*iter).second != channel) continue;
-              ZS_LOG_TRACE(log("clearing out remote channel number") + ZS_PARAM("remote channel number", channel->forSession().getOutgoingChannelNumber()))
+              ZS_LOG_TRACE(log("clearing out remote channel number") + ZS_PARAM("remote channel number", channel->getOutgoingChannelNumber()))
               mRemoteChannelNumberSessions.erase(iter);
               break;
             }
@@ -632,8 +634,8 @@ namespace openpeer
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
 
           switch (get(mLastError)) {
-            case IICESocketSession::ICESocketSessionShutdownReason_None:    (*iter).second->forSession().shutdown(); break;
-            default:                                                        (*iter).second->forSession().shutdownFromTimeout(); break;
+            case IICESocketSession::ICESocketSessionShutdownReason_None:    (*iter).second->shutdown(); break;
+            default:                                                        (*iter).second->shutdownFromTimeout(); break;
           }
         }
 
@@ -844,9 +846,9 @@ namespace openpeer
         if (!isReady()) return;
 
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
-          SessionMap::iterator found = mRemoteChannelNumberSessions.find((*iter).second->forSession().getOutgoingChannelNumber());
+          SessionMap::iterator found = mRemoteChannelNumberSessions.find((*iter).second->getOutgoingChannelNumber());
           if (found == mRemoteChannelNumberSessions.end()) {
-            (*iter).second->forSession().issueConnectIfNotIssued();
+            (*iter).second->issueConnectIfNotIssued();
           }
         }
       }

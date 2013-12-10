@@ -50,6 +50,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IRUDPChannelForRUDPListener;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -67,6 +69,10 @@ namespace openpeer
       public:
         friend interaction IRUDPListenerFactory;
 
+        typedef IRUDPChannelForRUDPListener UseRUDPChannel;
+        typedef shared_ptr<UseRUDPChannel> UseRUDPChannelPtr;
+        typedef weak_ptr<UseRUDPChannel> UseRUDPChannelWeakPtr;
+
         typedef boost::shared_array<BYTE> RecycledPacketBuffer;
         typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
 
@@ -75,9 +81,9 @@ namespace openpeer
         typedef IPAddress RemoteIP;
         typedef WORD ChannelNumber;
         typedef std::pair<RemoteIP, WORD> ChannelPair;
-        typedef std::map<ChannelPair, RUDPChannelPtr, CompareChannelPair> SessionMap;
+        typedef std::map<ChannelPair, UseRUDPChannelPtr, CompareChannelPair> SessionMap;
 
-        typedef std::list<RUDPChannelPtr> PendingSessionList;
+        typedef std::list<UseRUDPChannelPtr> PendingSessionList;
 
       protected:
         RUDPListener(

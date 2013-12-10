@@ -130,6 +130,9 @@ namespace openpeer
     using zsLib::XML::ElementPtr;
     using zsLib::XML::Document;
     using zsLib::XML::DocumentPtr;
+    using boost::shared_ptr;
+    using boost::weak_ptr;
+    using boost::dynamic_pointer_cast;
 
     typedef CryptoPP::SecBlock<byte, CryptoPP::AllocatorWithNul<byte> > SecureByteBlock;
     typedef boost::shared_ptr<SecureByteBlock> SecureByteBlockPtr;

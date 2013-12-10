@@ -192,13 +192,14 @@ namespace openpeer
 
               candidates.push_back(candidate);
 
-              mSocketSession = mSocket->createSessionFromRemoteCandidates(
-                                                                          IICESocketSessionDelegatePtr(),
-                                                                          "serverUsernameFrag",
-                                                                          NULL,
-                                                                          candidates,
-                                                                          IICESocket::ICEControl_Controlling
-                                                                          );
+              mSocketSession = IICESocketSession::create(
+                                                         IICESocketSessionDelegatePtr(),
+                                                         mSocket,
+                                                         "serverUsernameFrag",
+                                                         NULL,
+                                                         candidates,
+                                                         IICESocket::ICEControl_Controlling
+                                                         );
               mSocketSession->endOfRemoteCandidates();
 
               mRUDPSocketSession = IRUDPICESocketSession::listen(getAssociatedMessageQueue(), mSocketSession, mThisWeak.lock());

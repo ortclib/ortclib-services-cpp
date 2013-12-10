@@ -44,6 +44,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction ISTUNRequesterManagerForSTUNRequester;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -54,8 +56,11 @@ namespace openpeer
 
       interaction ISTUNRequesterForSTUNRequesterManager
       {
-        ISTUNRequesterForSTUNRequesterManager &forManager() {return *this;}
-        const ISTUNRequesterForSTUNRequesterManager &forManager() const {return *this;}
+        typedef ISTUNRequesterForSTUNRequesterManager ForSTUNRequesterManager;
+        typedef shared_ptr<ForSTUNRequesterManager> ForSTUNRequesterManagerPtr;
+        typedef weak_ptr<ForSTUNRequesterManager> ForSTUNRequesterManagerWeakPtr;
+
+        virtual PUID getID() const = 0;
 
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,
@@ -80,6 +85,10 @@ namespace openpeer
       public:
         friend interaction ISTUNRequesterFactory;
 
+        typedef ISTUNRequesterManagerForSTUNRequester UseSTUNRequesterManager;
+        typedef shared_ptr<UseSTUNRequesterManager> UseSTUNRequesterManagerPtr;
+        typedef weak_ptr<UseSTUNRequesterManager> UseSTUNRequesterManagerWeakPtr;
+
       protected:
         STUNRequester(
                       IMessageQueuePtr queue,
@@ -96,6 +105,9 @@ namespace openpeer
 
       public:
         ~STUNRequester();
+
+        static STUNRequesterPtr convert(ISTUNRequesterPtr object);
+        static STUNRequesterPtr convert(ForSTUNRequesterManagerPtr object);
 
       protected:
         //---------------------------------------------------------------------
@@ -129,6 +141,8 @@ namespace openpeer
         #pragma mark
         #pragma mark STUNRequester => ISTUNRequesterForSTUNRequesterManager
         #pragma mark
+
+        // (duplicate) virtual PUID getID() const;
 
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,

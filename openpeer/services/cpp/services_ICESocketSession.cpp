@@ -158,20 +158,6 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      ICESocketSessionPtr IICESocketSessionForICESocket::create(
-                                                                IMessageQueuePtr queue,
-                                                                IICESocketSessionDelegatePtr delegate,
-                                                                ICESocketPtr socket,
-                                                                const char *remoteUsernameFrag,
-                                                                const char *remotePassword,
-                                                                ICEControls control,
-                                                                IICESocketSessionPtr foundation
-                                                                )
-      {
-        return IICESocketSessionFactory::singleton().create(queue, delegate, socket, remoteUsernameFrag, remotePassword, control, foundation);
-      }
-
-      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -216,16 +202,16 @@ namespace openpeer
       ICESocketSession::ICESocketSession(
                                          IMessageQueuePtr queue,
                                          IICESocketSessionDelegatePtr delegate,
-                                         ICESocketPtr socket,
+                                         UseICESocketPtr socket,
                                          const char *remoteUsernameFrag,
                                          const char *remotePassword,
                                          ICEControls control,
-                                         IICESocketSessionPtr foundation
+                                         ICESocketSessionPtr foundation
                                          ) :
         MessageQueueAssociator(queue),
         mICESocketWeak(socket),
         mCurrentState(ICESocketSessionState_Pending),
-        mFoundation(ICESocketSession::convert(foundation)),
+        mFoundation(foundation),
         mRemoteUsernameFrag(remoteUsernameFrag),
         mRemotePassword(remotePassword),
         mControl(control),
@@ -271,6 +257,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      ICESocketSessionPtr ICESocketSession::convert(ForICESocketPtr session)
+      {
+        return boost::dynamic_pointer_cast<ICESocketSession>(session);
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -288,11 +280,36 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      ICESocketSessionPtr ICESocketSession::create(
+                                                   IICESocketSessionDelegatePtr delegate,
+                                                   IICESocketPtr inSocket,
+                                                   const char *remoteUsernameFrag,
+                                                   const char *remotePassword,
+                                                   const CandidateList &remoteCandidates,
+                                                   ICEControls control,
+                                                   IICESocketSessionPtr foundation
+                                                   )
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!inSocket)
+
+        UseICESocketPtr socket = ICESocket::convert(inSocket);
+
+        ICESocketSessionPtr pThis(new ICESocketSession(socket->getMessageQueue(), delegate, ICESocket::convert(socket), remoteUsernameFrag, remotePassword, control, ICESocketSession::convert(foundation)));
+        pThis->mThisWeak = pThis;
+        pThis->init();
+
+        if (socket->attach(pThis)) {
+          pThis->updateRemoteCandidates(remoteCandidates);
+        }
+        return pThis;
+      }
+
+      //-----------------------------------------------------------------------
       IICESocketPtr ICESocketSession::getSocket()
       {
-        ICESocketPtr socket = mICESocketWeak.lock();
+        UseICESocketPtr socket = mICESocketWeak.lock();
         if (!socket) return IICESocketPtr();
-        return socket->forICESocketSession().getSocket();
+        return ICESocket::convert(socket);
       }
 
       //-----------------------------------------------------------------------
@@ -510,23 +527,6 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      ICESocketSessionPtr ICESocketSession::create(
-                                                   IMessageQueuePtr queue,
-                                                   IICESocketSessionDelegatePtr delegate,
-                                                   ICESocketPtr socket,
-                                                   const char *remoteUsernameFrag,
-                                                   const char *remotePassword,
-                                                   ICEControls control,
-                                                   IICESocketSessionPtr foundation
-                                                   )
-      {
-        ICESocketSessionPtr pThis(new ICESocketSession(queue, delegate, socket, remoteUsernameFrag, remotePassword, control, foundation));
-        pThis->mThisWeak = pThis;
-        pThis->init();
-        return pThis;
-      }
-
-      //-----------------------------------------------------------------------
       bool ICESocketSession::handleSTUNPacket(
                                               const IICESocket::Candidate &viaLocalCandidate,
                                               const IPAddress &source,
@@ -726,9 +726,9 @@ namespace openpeer
 
                 mNominated = found;
 
-                ICESocketPtr socket = mICESocketWeak.lock();
+                UseICESocketPtr socket = mICESocketWeak.lock();
                 if (socket) {
-                  socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+                  socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
                 }
 
                 // this should be happening, but just in case, clear out any nomination process in progress
@@ -1076,9 +1076,9 @@ namespace openpeer
           mNominated = usePair;
           mPendingNominatation.reset();
 
-          ICESocketPtr socket = mICESocketWeak.lock();
+          UseICESocketPtr socket = mICESocketWeak.lock();
           if (socket) {
-            socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+            socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
           }
 
           get(mInformedWriteReady) = false;
@@ -1159,9 +1159,9 @@ namespace openpeer
             mNominated->mRequester.reset();
           }
 
-          ICESocketPtr socket = mICESocketWeak.lock();
+          UseICESocketPtr socket = mICESocketWeak.lock();
           if (socket) {
-            socket->forICESocketSession().removeRoute(mThisWeak.lock());
+            socket->removeRoute(mThisWeak.lock());
           }
           mNominated.reset();
 
@@ -1449,10 +1449,10 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RecursiveLock &ICESocketSession::getLock() const
       {
-        ICESocketPtr socket = mICESocketWeak.lock();
+        UseICESocketPtr socket = mICESocketWeak.lock();
         if (!socket)
           return mBogusLock;
-        return socket->forICESocketSession().getLock();
+        return socket->getLock();
       }
 
       //-----------------------------------------------------------------------
@@ -2189,9 +2189,9 @@ namespace openpeer
 
             mNominated = pairing;
 
-            ICESocketPtr socket = mICESocketWeak.lock();
+            UseICESocketPtr socket = mICESocketWeak.lock();
             if (socket) {
-              socket->forICESocketSession().addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+              socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
             }
 
             // we are now connected to this IP address...
@@ -2329,14 +2329,14 @@ namespace openpeer
           ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
-        ICESocketPtr socket = mICESocketWeak.lock();
+        UseICESocketPtr socket = mICESocketWeak.lock();
         if (!socket) {
           ZS_LOG_WARNING(Debug, log("cannot send packet as ICE socket is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
         ZS_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
-        return socket->forICESocketSession().sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
+        return socket->sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
       }
 
       //-----------------------------------------------------------------------
@@ -2409,6 +2409,19 @@ namespace openpeer
         case ICESocketSessionShutdownReason_CandidateSearchFailed:  return "Candidate search failed";
       }
       return IHTTP::toString(IHTTP::toStatusCode((WORD)reason));
+    }
+
+    IICESocketSessionPtr IICESocketSession::create(
+                                                   IICESocketSessionDelegatePtr delegate,
+                                                   IICESocketPtr socket,
+                                                   const char *remoteUsernameFrag,
+                                                   const char *remotePassword,
+                                                   const CandidateList &remoteCandidates,
+                                                   ICEControls control,
+                                                   IICESocketSessionPtr foundation
+                                                   )
+    {
+      return internal::IICESocketSessionFactory::singleton().create(delegate, socket, remoteUsernameFrag, remotePassword, remoteCandidates, control, foundation);
     }
   }
 }

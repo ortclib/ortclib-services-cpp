@@ -52,8 +52,9 @@ namespace openpeer
 
       interaction IDHKeyDomainForDHPrivateKey
       {
-        IDHKeyDomainForDHPrivateKey &forDHPrivateKey() {return *this;}
-        const IDHKeyDomainForDHPrivateKey &forDHPrivateKey() const {return *this;}
+        typedef IDHKeyDomainForDHPrivateKey ForDHPrivateKey;
+        typedef shared_ptr<ForDHPrivateKey> ForDHPrivateKeyPtr;
+        typedef weak_ptr<ForDHPrivateKey> ForDHPrivateKeyWeakPtr;
 
         typedef CryptoPP::DH DH;
 
@@ -89,6 +90,7 @@ namespace openpeer
         ~DHKeyDomain();
 
         static DHKeyDomainPtr convert(IDHKeyDomainPtr privateKey);
+        static DHKeyDomainPtr convert(ForDHPrivateKeyPtr object);
 
       protected:
         //---------------------------------------------------------------------

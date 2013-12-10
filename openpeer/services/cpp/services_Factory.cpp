@@ -370,17 +370,17 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       ICESocketSessionPtr IICESocketSessionFactory::create(
-                                                           IMessageQueuePtr queue,
                                                            IICESocketSessionDelegatePtr delegate,
-                                                           ICESocketPtr socket,
+                                                           IICESocketPtr socket,
                                                            const char *remoteUsernameFrag,
                                                            const char *remotePassword,
+                                                           const CandidateList &remoteCandidates,
                                                            ICEControls control,
                                                            IICESocketSessionPtr foundation
                                                            )
       {
         if (this) {}
-        return internal::ICESocketSession::create(queue, delegate, socket, remoteUsernameFrag, remotePassword, control, foundation);
+        return internal::ICESocketSession::create(delegate, socket, remoteUsernameFrag, remotePassword, remoteCandidates, control, foundation);
       }
 
       //-----------------------------------------------------------------------

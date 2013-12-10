@@ -40,6 +40,9 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IDHKeyDomainForDHPrivateKey;
+      interaction IDHPublicKeyForDHPrivateKey;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -55,8 +58,16 @@ namespace openpeer
         friend interaction IDHPrivateKeyFactory;
         friend interaction IDHPrivateKey;
 
+        typedef IDHKeyDomainForDHPrivateKey UseDHKeyDomain;
+        typedef shared_ptr<UseDHKeyDomain> UseDHKeyDomainPtr;
+        typedef weak_ptr<UseDHKeyDomain> UseDHKeyDomainWeakPtr;
+
+        typedef IDHPublicKeyForDHPrivateKey UseDHPublicKey;
+        typedef shared_ptr<UseDHPublicKey> UseDHPublicKeyPtr;
+        typedef weak_ptr<UseDHPublicKey> UseDHPublicKeyWeakPtr;
+
       protected:
-        DHPrivateKey(IDHKeyDomainPtr keyDomain);
+        DHPrivateKey(UseDHKeyDomainPtr keyDomain);
         
         DHPrivateKey(Noop) : Noop(true) {};
 
@@ -136,7 +147,7 @@ namespace openpeer
 
         AutoPUID mID;
 
-        DHKeyDomainPtr mKeyDomain;
+        UseDHKeyDomainPtr mKeyDomain;
 
         SecureByteBlock mStaticPrivateKey;
         SecureByteBlock mEphemeralPrivateKey;

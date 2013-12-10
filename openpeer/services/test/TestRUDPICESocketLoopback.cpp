@@ -520,7 +520,7 @@ namespace openpeer
           IICESocket::CandidateList remoteCandidates;
           remote->getLocalCandidates(remoteCandidates);
 
-          IICESocketSessionPtr iceSession = mRUDPSocket->createSessionFromRemoteCandidates(IICESocketSessionDelegatePtr(), remote->getLocalUsernameFrag(), remote->getLocalPassword(), remoteCandidates, control);
+          IICESocketSessionPtr iceSession = IICESocketSession::create(IICESocketSessionDelegatePtr(), mRUDPSocket, remote->getLocalUsernameFrag(), remote->getLocalPassword(), remoteCandidates, control);
           mICESessions.push_back(iceSession);
 
           IRUDPICESocketSessionPtr rudpSession = IRUDPICESocketSession::listen(getAssociatedMessageQueue(), iceSession, mThisWeak.lock());

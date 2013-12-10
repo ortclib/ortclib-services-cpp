@@ -232,7 +232,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocketPtr ICESocket::convert(IICESocketPtr socket)
       {
-        return boost::dynamic_pointer_cast<ICESocket>(socket);
+        return dynamic_pointer_cast<ICESocket>(socket);
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocketPtr ICESocket::convert(ForICESocketSessionPtr socket)
+      {
+        return dynamic_pointer_cast<ICESocket>(socket);
       }
 
       //-----------------------------------------------------------------------
@@ -416,37 +422,6 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IICESocketSessionPtr ICESocket::createSessionFromRemoteCandidates(
-                                                                        IICESocketSessionDelegatePtr delegate,
-                                                                        const char *remoteUsernameFrag,
-                                                                        const char *remotePassword,
-                                                                        const CandidateList &remoteCandidates,
-                                                                        ICEControls control,
-                                                                        IICESocketSessionPtr foundation
-                                                                        )
-      {
-        ZS_THROW_INVALID_ARGUMENT_IF(!remoteUsernameFrag)
-
-        AutoRecursiveLock lock(mLock);
-
-        ICESocketSessionPtr session = IICESocketSessionForICESocket::create(getAssociatedMessageQueue(), delegate, mThisWeak.lock(), remoteUsernameFrag, remotePassword, control, foundation);
-        ZS_THROW_BAD_STATE_IF(!session)
-
-        if ((isShuttingDown()) ||
-            (isShutdown())) {
-          ZS_LOG_WARNING(Basic, log("create session called after socket is being shutdown"))
-          // immediately close the session since we are shutting down
-          session->forICESocket().close();
-          return session;
-        }
-
-        // remember the session for later
-        mSessions[session->forICESocket().getID()] = session;
-        session->forICESocket().updateRemoteCandidates(remoteCandidates);
-        return session;
-      }
-
-      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -454,6 +429,28 @@ namespace openpeer
       #pragma mark ICESocket => IICESocketForICESocketSession
       #pragma mark
 
+      //-----------------------------------------------------------------------
+      bool ICESocket::attach(ICESocketSessionPtr inSession)
+      {
+        UseICESocketSessionPtr session = inSession;
+
+        ZS_THROW_INVALID_ARGUMENT_IF(!session)
+
+        AutoRecursiveLock lock(mLock);
+
+        if ((isShuttingDown()) ||
+            (isShutdown())) {
+          ZS_LOG_WARNING(Basic, log("create session called after socket is being shutdown"))
+          // immediately close the session since we are shutting down
+          session->close();
+          return false;
+        }
+
+        // remember the session for later
+        mSessions[session->getID()] = session;
+        return true;
+      }
+      
       //-----------------------------------------------------------------------
       bool ICESocket::sendTo(
                              const Candidate &viaLocalCandidate,
@@ -544,7 +541,7 @@ namespace openpeer
         for (QuickRouteMap::iterator iter = mRoutes.begin(); iter != mRoutes.end(); ) {
           QuickRouteMap::iterator current = iter; ++iter;
 
-          ICESocketSessionPtr &session = (*current).second;
+          UseICESocketSessionPtr &session = (*current).second;
           if (session == inSession) {
             mRoutes.erase(current);
           }
@@ -563,7 +560,7 @@ namespace openpeer
           return;
         }
 
-        removeRoute((*found).second);
+        removeRoute(ICESocketSession::convert((*found).second));
         mSessions.erase(found);
         
         step();
@@ -660,7 +657,7 @@ namespace openpeer
         LocalSocketPtr &localSocket = (*found).second;
 
         for(ICESocketSessionMap::iterator iter = mSessions.begin(); iter != mSessions.end(); ++iter) {
-          (*iter).second->forICESocket().notifyLocalWriteReady(*(localSocket->mLocal));
+          (*iter).second->notifyLocalWriteReady(*(localSocket->mLocal));
         }
 
         for (TURNInfoMap::iterator iter = localSocket->mTURNInfos.begin(); iter != localSocket->mTURNInfos.end(); ++iter) {
@@ -855,7 +852,7 @@ namespace openpeer
         const Candidate &viaLocalCandidate = *((*foundInfo).second->mRelay);
 
         for(ICESocketSessionMap::iterator iter = mSessions.begin(); iter != mSessions.end(); ++iter) {
-          (*iter).second->forICESocket().notifyRelayWriteReady(viaLocalCandidate);
+          (*iter).second->notifyRelayWriteReady(viaLocalCandidate);
         }
       }
 
@@ -1163,7 +1160,7 @@ namespace openpeer
 
           // close down all the ICE sessions immediately
           for(ICESocketSessionMap::iterator iter = temp.begin(); iter != temp.end(); ++iter) {
-            (*iter).second->forICESocket().close();
+            (*iter).second->close();
           }
         }
 
@@ -2003,7 +2000,7 @@ namespace openpeer
             if (ISTUNRequesterManager::handleSTUNPacket(source, stun)) return;
           }
 
-          ICESocketSessionPtr next;
+          UseICESocketSessionPtr next;
 
           if (STUNPacket::Method_Binding == stun->mMethod) {
             if ((STUNPacket::Class_Request != stun->mClass) &&
@@ -2044,7 +2041,7 @@ namespace openpeer
               if (!next) {
                 next = (*(mSessions.begin())).second;
               } else {
-                ICESocketSessionMap::iterator iter = mSessions.find(next->forICESocket().getID());
+                ICESocketSessionMap::iterator iter = mSessions.find(next->getID());
                 if (iter == mSessions.end()) {
                   // should have been found BUT it is possible the list was
                   // changed while outside the lock so start the search from
@@ -2064,7 +2061,7 @@ namespace openpeer
             }
 
             if (!next) break;
-            if (next->forICESocket().handleSTUNPacket(viaCandidate, source, stun, localUsernameFrag, remoteUsernameFrag)) return;
+            if (next->handleSTUNPacket(viaCandidate, source, stun, localUsernameFrag, remoteUsernameFrag)) return;
           }
 
           ZS_LOG_WARNING(Debug, log("did not find session that handles STUN packet"))
@@ -2096,7 +2093,7 @@ namespace openpeer
           }
         }
 
-        ICESocketSessionPtr next;
+        UseICESocketSessionPtr next;
 
         // try to find a quick route to the session
         {
@@ -2111,7 +2108,7 @@ namespace openpeer
           // we found a quick route - but does it actually handle the packet
           // (it is possible for two routes to have same IP in strange firewall
           // configruations thus we might pick the wrong session)
-          if (next->forICESocket().handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
+          if (next->handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
 
           // we chose wrong, so allow the "hunt" method to take over
           next.reset();
@@ -2128,7 +2125,7 @@ namespace openpeer
             if (!next) {
               next = (*(mSessions.begin())).second;
             } else {
-              ICESocketSessionMap::iterator iter = mSessions.find(next->forICESocket().getID());
+              ICESocketSessionMap::iterator iter = mSessions.find(next->getID());
               if (iter == mSessions.end()) {
                 next = (*(mSessions.begin())).second;   // start the search over since the previous entry we last searched was not in the map
               } else {
@@ -2140,7 +2137,7 @@ namespace openpeer
           }
 
           if (!next) break;
-          if (next->forICESocket().handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
+          if (next->handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
         }
 
         ZS_LOG_WARNING(Trace, log("did not find any socket session to handle data packet"))

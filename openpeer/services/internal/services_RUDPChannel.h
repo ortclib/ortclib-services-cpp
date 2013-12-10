@@ -57,8 +57,9 @@ namespace openpeer
 
       interaction IRUDPChannelForRUDPICESocketSession
       {
-        IRUDPChannelForRUDPICESocketSession &forSession() {return *this;}
-        const IRUDPChannelForRUDPICESocketSession &forSession() const {return *this;}
+        typedef IRUDPChannelForRUDPICESocketSession ForRUDPICESocketSession;
+        typedef shared_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionPtr;
+        typedef weak_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionWeakPtr;
 
         static RUDPChannelPtr createForRUDPICESocketSessionIncoming(
                                                                     IMessageQueuePtr queue,
@@ -129,8 +130,9 @@ namespace openpeer
 
       interaction IRUDPChannelForRUDPListener
       {
-        IRUDPChannelForRUDPListener &forListener() {return *this;}
-        const IRUDPChannelForRUDPListener &forListener() const {return *this;}
+        typedef IRUDPChannelForRUDPListener ForRUDPListener;
+        typedef shared_ptr<ForRUDPListener> ForRUDPListenerPtr;
+        typedef weak_ptr<ForRUDPListener> ForRUDPListenerWeakPtr;
 
         static RUDPChannelPtr createForListener(
                                                 IMessageQueuePtr queue,
@@ -219,6 +221,8 @@ namespace openpeer
         ~RUDPChannel();
 
         static RUDPChannelPtr convert(IRUDPChannelPtr channel);
+        static RUDPChannelPtr convert(ForRUDPICESocketSessionPtr channel);
+        static RUDPChannelPtr convert(ForRUDPListenerPtr channel);
 
       protected:
         //---------------------------------------------------------------------

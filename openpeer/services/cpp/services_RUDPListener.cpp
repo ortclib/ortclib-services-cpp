@@ -299,11 +299,11 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
         if (mPendingSessions.size() < 1) return IRUDPChannelPtr();
 
-        RUDPChannelPtr session = mPendingSessions.front();
+        UseRUDPChannelPtr session = mPendingSessions.front();
         mPendingSessions.pop_front();
-        session->forListener().setDelegate(delegate);
-        session->forListener().setStreams(receiveStream, sendStream);
-        return session;
+        session->setDelegate(delegate);
+        session->setStreams(receiveStream, sendStream);
+        return RUDPChannel::convert(session);
       }
 
       //-----------------------------------------------------------------------
@@ -401,7 +401,7 @@ namespace openpeer
             break;
           }
 
-          RUDPChannelPtr session;
+          UseRUDPChannelPtr session;
 
           // scope: next we attempt to see if there is already a session that handles this IP/channel pairing
           if ((stun->hasAttribute(STUNPacket::Attribute_Username)) &&
@@ -424,7 +424,7 @@ namespace openpeer
 
           if (!response) {
             if (session) {
-              bool handled = session->forListener().handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
+              bool handled = session->handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
               if ((handled) && (!response)) return;
               break;
             } else {
@@ -457,7 +457,7 @@ namespace openpeer
         // try and parse this as an RUDPPacket now
         RUDPPacketPtr rudp = RUDPPacket::parseIfRUDP(buffer.get(), bytesRead);
         if (rudp) {
-          RUDPChannelPtr session;
+          UseRUDPChannelPtr session;
 
           // scope: figure out which session this belongs
           {
@@ -471,7 +471,7 @@ namespace openpeer
           }
 
           // push the RUDP packet to the session to handle
-          session->forListener().handleRUDP(rudp, buffer.get(), bytesRead);
+          session->handleRUDP(rudp, buffer.get(), bytesRead);
         }
       }
 
@@ -481,8 +481,8 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
-          RUDPChannelPtr session = (*iter).second;
-          session->forListener().notifyWriteReady();
+          UseRUDPChannelPtr session = (*iter).second;
+          session->notifyWriteReady();
         }
       }
 
@@ -584,8 +584,8 @@ namespace openpeer
 
         if (mLocalChannelNumberSessions.size() > 0) {
           for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
-            RUDPChannelPtr session = (*iter).second;
-            session->forListener().shutdown();
+            UseRUDPChannelPtr session = (*iter).second;
+            session->shutdown();
           }
         }
 

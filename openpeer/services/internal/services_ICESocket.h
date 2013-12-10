@@ -53,6 +53,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IICESocketSessionForICESocket;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -63,10 +65,13 @@ namespace openpeer
 
       interaction IICESocketForICESocketSession
       {
-        IICESocketForICESocketSession &forICESocketSession() {return *this;}
-        const IICESocketForICESocketSession &forICESocketSession() const {return *this;}
+        typedef IICESocketForICESocketSession ForICESocketSession;
+        typedef shared_ptr<ForICESocketSession> ForICESocketSessionPtr;
+        typedef weak_ptr<ForICESocketSession> ForICESocketSessionWeakPtr;
 
-        virtual IICESocketPtr getSocket() const = 0;
+        virtual IMessageQueuePtr getMessageQueue() const = 0;
+
+        virtual bool attach(ICESocketSessionPtr session) = 0;
 
         virtual RecursiveLock &getLock() const = 0;
 
@@ -105,14 +110,18 @@ namespace openpeer
         friend interaction IICESocketFactory;
         friend interaction IICESocket;
 
+        typedef IICESocketSessionForICESocket UseICESocketSession;
+        typedef shared_ptr<UseICESocketSession> UseICESocketSessionPtr;
+        typedef weak_ptr<UseICESocketSession> UseICESocketSessionWeakPtr;
+
         typedef boost::shared_array<BYTE> RecycledPacketBuffer;
         typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
 
         typedef std::list<IPAddress> IPAddressList;
 
-        typedef std::map<PUID, ICESocketSessionPtr> ICESocketSessionMap;
+        typedef std::map<PUID, UseICESocketSessionPtr> ICESocketSessionMap;
 
-        typedef std::map<IPAddress, ICESocketSessionPtr> QuickRouteMap;
+        typedef std::map<IPAddress, UseICESocketSessionPtr> QuickRouteMap;
 
         struct TURNInfo
         {
@@ -207,6 +216,7 @@ namespace openpeer
         ~ICESocket();
 
         static ICESocketPtr convert(IICESocketPtr socket);
+        static ICESocketPtr convert(ForICESocketSessionPtr socket);
 
       protected:
         //---------------------------------------------------------------------
@@ -247,16 +257,8 @@ namespace openpeer
                                         CandidateList &outCandidates,
                                         String *outLocalCandidateVersion = NULL
                                         );
-        virtual String getLocalCandidatesVersion() const;
 
-        virtual IICESocketSessionPtr createSessionFromRemoteCandidates(
-                                                                       IICESocketSessionDelegatePtr delegate,
-                                                                       const char *remoteUsernameFrag,
-                                                                       const char *remotePassword,
-                                                                       const CandidateList &remoteCandidates,
-                                                                       ICEControls control,
-                                                                       IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                                                       );
+        virtual String getLocalCandidatesVersion() const;
 
         virtual void monitorWriteReadyOnAllSessions(bool monitor = true);
 
@@ -265,7 +267,10 @@ namespace openpeer
         #pragma mark ICESocket => IICESocketForICESocketSession
         #pragma mark
 
-        virtual IICESocketPtr getSocket() const {return mThisWeak.lock();}
+        virtual IMessageQueuePtr getMessageQueue() const {return getAssociatedMessageQueue();}
+
+        virtual bool attach(ICESocketSessionPtr session);
+
         virtual RecursiveLock &getLock() const {return mLock;}
 
         virtual bool sendTo(
@@ -476,9 +481,12 @@ namespace openpeer
 }
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::internal::IICESocketForICESocketSession)
+ZS_DECLARE_PROXY_TYPEDEF(zsLib::IMessageQueuePtr, IMessageQueuePtr)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::internal::ICESocketSessionPtr, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocket, IICESocket)
-ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getSocket, IICESocketPtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getMessageQueue, IMessageQueuePtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_1(attach, bool, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getLock, RecursiveLock &)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_5(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionClosed, PUID)

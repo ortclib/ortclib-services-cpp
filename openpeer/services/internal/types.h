@@ -96,6 +96,9 @@ namespace openpeer
       using zsLib::XML::Generator;
       using zsLib::XML::GeneratorPtr;
       using zsLib::XML::WalkSink;
+      using boost::shared_ptr;
+      using boost::weak_ptr;
+      using boost::dynamic_pointer_cast;
 
       using CryptoPP::AutoSeededRandomPool;
       using CryptoPP::ByteQueue;

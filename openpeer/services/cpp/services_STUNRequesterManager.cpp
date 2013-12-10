@@ -56,7 +56,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      STUNRequesterManagerPtr ISTUNRequesterManagerForSTUNRequester::singleton()
+      ISTUNRequesterManagerForSTUNRequester::ForSTUNRequesterPtr ISTUNRequesterManagerForSTUNRequester::singleton()
       {
         return STUNRequesterManager::singleton();
       }
@@ -159,7 +159,7 @@ namespace openpeer
 
         ZS_THROW_INVALID_USAGE_IF(!stun)
 
-        STUNRequesterPtr requester;
+        UseSTUNRequesterPtr requester;
 
         // scope: we cannot call the requester from within the lock because
         //        the requester might be calling the manager at the same
@@ -186,7 +186,7 @@ namespace openpeer
           //          Basically, rule of thumb, do not call delegates
           //          synchronously from within the scope of a lock.
           ZS_LOG_TRACE(log("forwarding request to requester object"))
-          remove = requester->forManager().handleSTUNPacket(fromIPAddress, stun);
+          remove = requester->handleSTUNPacket(fromIPAddress, stun);
         } else{
           ZS_LOG_TRACE(log("requester object was previously destroyed thus removing from requester manager"))
           remove = true;
@@ -197,11 +197,11 @@ namespace openpeer
 
           STUNRequesterMap::iterator iter = mRequesters.find(key);
           if (iter == mRequesters.end())
-            return requester;
+            return STUNRequester::convert(requester);
 
           mRequesters.erase(iter);
         }
-        return remove ? requester : ISTUNRequesterPtr();
+        return remove ? STUNRequester::convert(requester) : ISTUNRequesterPtr();
       }
 
       //-----------------------------------------------------------------------
@@ -214,27 +214,29 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       void STUNRequesterManager::monitorStart(
-                                              STUNRequesterPtr requester,
+                                              STUNRequesterPtr inRequester,
                                               STUNPacketPtr request
                                               )
       {
+        UseSTUNRequesterPtr requester = inRequester;
+
         ZS_THROW_INVALID_USAGE_IF(!requester)
 
         QWORDPair key = getKey(request);
 
         AutoRecursiveLock lock(mLock);
-        mRequesters[key] = STUNRequesterPair(requester, requester.get());
+        mRequesters[key] = STUNRequesterPair(requester, requester->getID());
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequesterManager::monitorStop(STUNRequester *requester)
+      void STUNRequesterManager::monitorStop(STUNRequester &inRequester)
       {
-        ZS_THROW_INVALID_USAGE_IF(!requester)
+        UseSTUNRequester &requester = inRequester;
 
         AutoRecursiveLock lock(mLock);
 
         for (STUNRequesterMap::iterator iter = mRequesters.begin(); iter != mRequesters.end(); ++iter) {
-          if ((*iter).second.second == requester) {
+          if ((*iter).second.second == requester.getID()) {
             // found the requester, remove it from the monitor map
             mRequesters.erase(iter);
             return;

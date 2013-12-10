@@ -50,8 +50,9 @@ namespace openpeer
 
       interaction IDHPublicKeyForDHPrivateKey
       {
-        IDHPublicKeyForDHPrivateKey &forDHPrivateKey() {return *this;}
-        const IDHPublicKeyForDHPrivateKey &forDHPrivateKey() const {return *this;}
+        typedef IDHPublicKeyForDHPrivateKey ForPrivateKey;
+        typedef boost::shared_ptr<ForPrivateKey> ForPrivateKeyPtr;
+        typedef boost::weak_ptr<ForPrivateKey> ForPrivateKeyWeakPtr;
 
         virtual const SecureByteBlock &getStaticPublicKey() const = 0;
         virtual const SecureByteBlock &getEphemeralPublicKey() const = 0;

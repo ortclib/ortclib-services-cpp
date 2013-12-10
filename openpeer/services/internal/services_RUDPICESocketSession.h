@@ -46,6 +46,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IRUDPChannelForRUDPICESocketSession;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -64,13 +66,17 @@ namespace openpeer
         friend interaction IRUDPICESocketSessionFactory;
         friend interaction IRUDPICESocketSession;
 
+        typedef IRUDPChannelForRUDPICESocketSession UseRUDPChannel;
+        typedef shared_ptr<UseRUDPChannel> UseRUDPChannelPtr;
+        typedef weak_ptr<UseRUDPChannel> UseRUDPChannelWeakPtr;
+
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocket::ICEControls ICEControls;
 
         typedef WORD ChannelNumber;
-        typedef std::map<ChannelNumber, RUDPChannelPtr> SessionMap;
+        typedef std::map<ChannelNumber, UseRUDPChannelPtr> SessionMap;
 
-        typedef std::list<RUDPChannelPtr> PendingSessionList;
+        typedef std::list<UseRUDPChannelPtr> PendingSessionList;
 
       protected:
         RUDPICESocketSession(
@@ -91,7 +97,7 @@ namespace openpeer
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => RUDPICESocketSession
+        #pragma mark RUDPICESocketSession => IRUDPICESocketSession
         #pragma mark
 
         static ElementPtr toDebug(IRUDPICESocketSessionPtr session);

@@ -96,9 +96,21 @@ namespace openpeer
       void STUNRequester::init()
       {
         AutoRecursiveLock lock(mLock);
-        STUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
-        manager->forRequester().monitorStart(mThisWeak.lock(), mSTUNRequest);
+        UseSTUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
+        manager->monitorStart(mThisWeak.lock(), mSTUNRequest);
         step();
+      }
+
+      //-----------------------------------------------------------------------
+      STUNRequesterPtr STUNRequester::convert(ISTUNRequesterPtr object)
+      {
+        return dynamic_pointer_cast<STUNRequester>(object);
+      }
+
+      //-----------------------------------------------------------------------
+      STUNRequesterPtr STUNRequester::convert(ForSTUNRequesterManagerPtr object)
+      {
+        return dynamic_pointer_cast<STUNRequester>(object);
       }
 
       //-----------------------------------------------------------------------
@@ -335,8 +347,8 @@ namespace openpeer
           mDelegate.reset();
 
           // tie the lifetime of the monitoring to the delegate
-          STUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
-          manager->forRequester().monitorStop(this);
+          UseSTUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
+          manager->monitorStop(*this);
         }
 
         if (mTimer) {

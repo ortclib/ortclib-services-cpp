@@ -62,20 +62,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IDHPrivateKeyForDHPrivateKey
-      #pragma mark
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
       #pragma mark DHPrivateKey
       #pragma mark
 
       //-----------------------------------------------------------------------
-      DHPrivateKey::DHPrivateKey(IDHKeyDomainPtr keyDomain) :
-        mKeyDomain(DHKeyDomain::convert(keyDomain))
+      DHPrivateKey::DHPrivateKey(UseDHKeyDomainPtr keyDomain) :
+        mKeyDomain(keyDomain)
       {
         ZS_LOG_DEBUG(log("created"))
 
@@ -114,17 +106,19 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       DHPrivateKeyPtr DHPrivateKey::generate(
-                                             IDHKeyDomainPtr keyDomain,
+                                             IDHKeyDomainPtr inKeyDomain,
                                              IDHPublicKeyPtr &outPublicKey
                                              )
       {
+        UseDHKeyDomainPtr keyDomain = DHKeyDomain::convert(inKeyDomain);
+
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
         DHPrivateKeyPtr pThis(new DHPrivateKey(keyDomain));
 
         AutoSeededRandomPool rnd;
 
-        DH &dh = pThis->mKeyDomain->forDHPrivateKey().getDH();
+        DH &dh = pThis->mKeyDomain->getDH();
 
         DH2 dh2(dh);
 
@@ -155,7 +149,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
-        DHPrivateKeyPtr pThis(new DHPrivateKey(keyDomain));
+        DHPrivateKeyPtr pThis(new DHPrivateKey(DHKeyDomain::convert(keyDomain)));
 
         pThis->mStaticPrivateKey.Assign(staticPrivateKey);
         pThis->mEphemeralPrivateKey.Assign(ephemeralPrivateKey);
@@ -193,17 +187,19 @@ namespace openpeer
       
       //-----------------------------------------------------------------------
       DHPrivateKeyPtr DHPrivateKey::loadAndGenerateNewEphemeral(
-                                                                IDHKeyDomainPtr keyDomain,
+                                                                IDHKeyDomainPtr inKeyDomain,
                                                                 const SecureByteBlock &staticPrivateKey,
                                                                 const SecureByteBlock &staticPublicKey,
                                                                 IDHPublicKeyPtr &outNewPublicKey
                                                                 )
       {
+        UseDHKeyDomainPtr keyDomain = DHKeyDomain::convert(inKeyDomain);
+
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
         DHPrivateKeyPtr pThis(new DHPrivateKey(keyDomain));
 
-        DH &dh = pThis->mKeyDomain->forDHPrivateKey().getDH();
+        DH &dh = pThis->mKeyDomain->getDH();
 
         AutoSeededRandomPool rnd;
 
@@ -270,7 +266,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IDHKeyDomainPtr DHPrivateKey::getKeyDomain() const
       {
-        return mKeyDomain;
+        return DHKeyDomain::convert(mKeyDomain);
       }
 
       //-----------------------------------------------------------------------
@@ -280,16 +276,16 @@ namespace openpeer
 
         AutoSeededRandomPool rnd;
 
-        DH &dh = mKeyDomain->forDHPrivateKey().getDH();
+        DH &dh = mKeyDomain->getDH();
 
         DH2 dh2(dh);
 
         SecureByteBlockPtr key(new SecureByteBlock(dh2.AgreedValueLength()));
 
-        DHPublicKeyPtr publicKey = DHPublicKey::convert(otherPartyPublicKey);
+        UseDHPublicKeyPtr publicKey = DHPublicKey::convert(otherPartyPublicKey);
 
-        const SecureByteBlock &staticPublicKey = publicKey->forDHPrivateKey().getStaticPublicKey();
-        const SecureByteBlock &ephemeralPublicKey = publicKey->forDHPrivateKey().getEphemeralPublicKey();
+        const SecureByteBlock &staticPublicKey = publicKey->getStaticPublicKey();
+        const SecureByteBlock &ephemeralPublicKey = publicKey->getEphemeralPublicKey();
 
         try {
           if(!dh2.Agree((*key), mStaticPrivateKey, mEphemeralPrivateKey, staticPublicKey, ephemeralPublicKey)) {
@@ -339,7 +335,7 @@ namespace openpeer
         ElementPtr resultEl = Element::create("DHPrivateKey");
 
         IHelper::debugAppend(resultEl, "id", mID);
-        IHelper::debugAppend(resultEl, "key domain id", mKeyDomain->forDHPrivateKey().getID());
+        IHelper::debugAppend(resultEl, "key domain id", mKeyDomain->getID());
 
         IHelper::debugAppend(resultEl, "static private key", IHelper::convertToHex(mStaticPrivateKey, true));
         IHelper::debugAppend(resultEl, "ephemeral private key", IHelper::convertToHex(mEphemeralPrivateKey, true));

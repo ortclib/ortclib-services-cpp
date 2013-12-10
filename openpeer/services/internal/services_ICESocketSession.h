@@ -50,6 +50,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IICESocketForICESocketSession;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -60,21 +62,12 @@ namespace openpeer
 
       interaction IICESocketSessionForICESocket
       {
+        typedef IICESocketSessionForICESocket ForICESocket;
+        typedef shared_ptr<ForICESocket> ForICESocketPtr;
+        typedef weak_ptr<ForICESocket> ForICESocketWeakPtr;
+
         typedef IICESocketSession::ICEControls ICEControls;
         typedef IICESocketSession::CandidateList CandidateList;
-
-        IICESocketSessionForICESocket &forICESocket() {return *this;}
-        const IICESocketSessionForICESocket &forICESocket() const {return *this;}
-
-        static ICESocketSessionPtr create(
-                                          IMessageQueuePtr queue,
-                                          IICESocketSessionDelegatePtr delegate,
-                                          ICESocketPtr socket,
-                                          const char *remoteUsernameFrag,
-                                          const char *remotePassword,
-                                          ICEControls control,
-                                          IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                          );
 
         virtual PUID getID() const = 0;
         virtual void close() = 0;
@@ -120,6 +113,10 @@ namespace openpeer
         friend interaction IICESocketSessionFactory;
         friend interaction IICESocketSession;
 
+        typedef IICESocketForICESocketSession UseICESocket;
+        typedef shared_ptr<UseICESocket> UseICESocketPtr;
+        typedef weak_ptr<UseICESocket> UseICESocketWeakPtr;
+
         typedef IICESocketSession::ICEControls ICEControls;
         typedef IICESocketSession::CandidateList CandidateList;
 
@@ -154,18 +151,20 @@ namespace openpeer
         ICESocketSession(
                          IMessageQueuePtr queue,
                          IICESocketSessionDelegatePtr delegate,
-                         ICESocketPtr socket,
+                         UseICESocketPtr socket,
                          const char *remoteUsernameFrag,
                          const char *remotePassword,
                          ICEControls control,
-                         IICESocketSessionPtr foundation = IICESocketSessionPtr()
+                         ICESocketSessionPtr foundation = ICESocketSessionPtr()
                          );
 
         ICESocketSession(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();
 
+      public:
         static ICESocketSessionPtr convert(IICESocketSessionPtr session);
+        static ICESocketSessionPtr convert(ForICESocketPtr session);
 
       public:
         ~ICESocketSession();
@@ -177,6 +176,16 @@ namespace openpeer
         #pragma mark
 
         static ElementPtr toDebug(IICESocketSessionPtr socket);
+
+        static ICESocketSessionPtr create(
+                                          IICESocketSessionDelegatePtr delegate,
+                                          IICESocketPtr socket,
+                                          const char *remoteUsernameFrag,
+                                          const char *remotePassword,
+                                          const CandidateList &remoteCandidates,
+                                          ICEControls control,
+                                          IICESocketSessionPtr foundation = IICESocketSessionPtr()
+                                          );
 
         virtual PUID getID() const {return mID;}
 
@@ -225,16 +234,6 @@ namespace openpeer
         #pragma mark
         #pragma mark ICESocketSession => IICESocketSessionForICESocket
         #pragma mark
-
-        static ICESocketSessionPtr create(
-                                          IMessageQueuePtr queue,
-                                          IICESocketSessionDelegatePtr delegate,
-                                          ICESocketPtr socket,
-                                          const char *remoteUsernameFrag,
-                                          const char *remotePassword,
-                                          ICEControls control,
-                                          IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                          );
 
         // (duplicate) virtual PUID getID() const;
         // (duplicate) virtual void close();
@@ -359,7 +358,7 @@ namespace openpeer
 
         AutoPUID mID;
         ICESocketSessionWeakPtr mThisWeak;
-        ICESocketWeakPtr mICESocketWeak;
+        UseICESocketWeakPtr mICESocketWeak;
 
         ICESocketSessionStates mCurrentState;
         AutoWORD mLastError;
@@ -424,16 +423,17 @@ namespace openpeer
 
       interaction IICESocketSessionFactory
       {
+        typedef IICESocket::CandidateList CandidateList;
         typedef IICESocketSession::ICEControls ICEControls;
 
         static IICESocketSessionFactory &singleton();
 
         virtual ICESocketSessionPtr create(
-                                           IMessageQueuePtr queue,
                                            IICESocketSessionDelegatePtr delegate,
-                                           ICESocketPtr socket,
+                                           IICESocketPtr socket,
                                            const char *remoteUsernameFrag,
                                            const char *remotePassword,
+                                           const CandidateList &remoteCandidates,
                                            ICEControls control,
                                            IICESocketSessionPtr foundation = IICESocketSessionPtr()
                                            );

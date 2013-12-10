@@ -43,6 +43,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction ISTUNRequesterForSTUNRequesterManager;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -53,16 +55,17 @@ namespace openpeer
 
       interaction ISTUNRequesterManagerForSTUNRequester
       {
-        ISTUNRequesterManagerForSTUNRequester &forRequester() {return *this;}
-        const ISTUNRequesterManagerForSTUNRequester &forRequester() const {return *this;}
+        typedef ISTUNRequesterManagerForSTUNRequester ForSTUNRequester;
+        typedef shared_ptr<ForSTUNRequester> ForSTUNRequesterPtr;
+        typedef weak_ptr<ForSTUNRequester> ForSTUNRequesterWeakPtr;
 
-        static STUNRequesterManagerPtr singleton();
+        static ForSTUNRequesterPtr singleton();
 
         virtual void monitorStart(
                                   STUNRequesterPtr requester,
                                   STUNPacketPtr stunRequest
                                   ) = 0;
-        virtual void monitorStop(STUNRequester *requester) = 0;
+        virtual void monitorStop(STUNRequester &requester) = 0;
       };
 
       //-----------------------------------------------------------------------
@@ -81,6 +84,10 @@ namespace openpeer
         friend interaction ISTUNRequesterManagerFactory;
         friend interaction ISTUNRequesterManager;
         friend interaction ISTUNRequesterManagerForSTUNRequester;
+
+        typedef ISTUNRequesterForSTUNRequesterManager UseSTUNRequester;
+        typedef shared_ptr<UseSTUNRequester> UseSTUNRequesterPtr;
+        typedef weak_ptr<UseSTUNRequester> UseSTUNRequesterWeakPtr;
 
         typedef std::pair<QWORD, QWORD> QWORDPair;
 
@@ -123,7 +130,7 @@ namespace openpeer
                                   STUNRequesterPtr requester,
                                   STUNPacketPtr stunRequest
                                   );
-        virtual void monitorStop(STUNRequester *requester);
+        virtual void monitorStop(STUNRequester &requester);
 
       protected:
         //---------------------------------------------------------------------
@@ -143,7 +150,8 @@ namespace openpeer
         PUID mID;
         STUNRequesterManagerWeakPtr mThisWeak;
 
-        typedef std::pair<STUNRequesterWeakPtr, STUNRequester *> STUNRequesterPair;
+        typedef PUID STUNRequesterID;
+        typedef std::pair<UseSTUNRequesterWeakPtr, STUNRequesterID> STUNRequesterPair;
         typedef std::map<QWORDPair, STUNRequesterPair> STUNRequesterMap;
         STUNRequesterMap mRequesters;
       };

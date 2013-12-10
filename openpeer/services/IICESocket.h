@@ -213,18 +213,6 @@ namespace openpeer
       virtual String getLocalCandidatesVersion() const = 0;
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Create a peer to peer connected session when the remote
-      //          candidates are already known.
-      virtual IICESocketSessionPtr createSessionFromRemoteCandidates(
-                                                                     IICESocketSessionDelegatePtr delegate,
-                                                                     const char *remoteUsernameFrag,
-                                                                     const char *remotePassword,
-                                                                     const CandidateList &remoteCandidates,
-                                                                     ICEControls control,
-                                                                     IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                                                     ) = 0;
-
-      //-----------------------------------------------------------------------
       // PURPOSE: Enable or disable write ready notifications on all sessions
       virtual void monitorWriteReadyOnAllSessions(bool monitor = true) = 0;
     };
