@@ -37,6 +37,7 @@
 #include <openpeer/services/IDHKeyDomain.h>
 #include <openpeer/services/IDHPrivateKey.h>
 #include <openpeer/services/IDHPublicKey.h>
+#include <openpeer/services/ICache.h>
 
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
@@ -47,7 +48,9 @@
 
 #define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_TOTAL_SEND_KEYS 3
 
-#define OPENPEER_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS (60*3)
+#define OPENPEER_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS (2*(60*60))
+
+#define OPENPEER_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE "https://meta.openpeer.org/caching/mls/nonce/"
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_mls) } }
 
@@ -815,9 +818,6 @@ namespace openpeer
         }
         if (writer == mSendStreamEncoded) {
           get(mSendStreamEncodedWriteReady) = true;
-
-          // typically happens when the wire notifies that it's ready to read data thus need to notify outer layer that it can send data
-          mSendStreamDecoded->notifyReaderReadyToRead();
         }
         step();
       }
@@ -1225,7 +1225,8 @@ namespace openpeer
 
             Time expires = IHelper::stringToTime(getElementTextAndDecode(keyingEl->findFirstChildElement("expires")));
             Time tick = zsLib::now();
-            if (tick > expires) {
+            if ((tick > expires) ||
+                (Time() == expires)) {
               ZS_LOG_ERROR(Detail, log("signed keying bundle has expired") + ZS_PARAM("expires", expires) + ZS_PARAM("now", tick))
               setError(IHTTP::HTTPStatusCode_RequestTimeout, "signed keying bundle has expired");
               goto receive_error_out;
@@ -1362,8 +1363,20 @@ namespace openpeer
               decodingPassphrase = mReceivingDecodingPassphrase;
             }
 
-#define WARNING_CHECK_NONCE_NOT_SEEN_BEFORE 1
-#define WARNING_CHECK_NONCE_NOT_SEEN_BEFORE 2
+            // scope: check if nonce seen before
+            {
+              String hashNonce = IHelper::convertToHex(*IHelper::hash(nonce));
+              String nonceNamespace = OPENPEER_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE + hashNonce;
+
+              String result = ICache::singleton()->fetch(nonceNamespace);
+              if (result.hasData()) {
+                ZS_LOG_ERROR(Detail, log("keying encoding seen previously") + ZS_PARAM("nonce", nonce) + ZS_PARAM("nonce namespace", nonceNamespace))
+                setError(IHTTP::HTTPStatusCode_Forbidden, "keyhing encoding information was seen previously");
+                goto receive_error_out;
+              }
+
+              ICache::singleton()->store(nonceNamespace, expires, "1");
+            }
 
             // scope: santity check on algorithms receiving
             {
@@ -1484,32 +1497,20 @@ namespace openpeer
           return false;
         }
 
-        if (mLocalContextID.isEmpty()) {
-          ZS_LOG_DEBUG(log("missing local context ID thus cannot send data remotely"))
-          return false;
-        }
-
-        if ((!mSendingEncodingRemotePublicKey) &&
-            (!mDHRemotePublicKey) &&
-            (mSendingEncodingPassphrase.isEmpty())) {
-          ZS_LOG_DEBUG(log("send keying material is not ready"))
+        if (!isSendingReady()) {
+          ZS_LOG_DEBUG(log("sending isn't ready because of missing information"))
           setState(SessionState_WaitingForNeededInformation);
           return false;
         }
 
-        if (mDHRemotePublicKey) {
-          if (!mDHLocalPrivateKey) {
-            ZS_LOG_DEBUG(log("send DH keying material is not ready"))
-            setState(SessionState_WaitingForNeededInformation);
-            return false;
-          }
+        // notify the "outer" that it can now send data over the wire
+        if (!mNotifySendStreamDecodedReadyToReady) {
+          get(mNotifySendStreamDecodedReadyToReady) = true;
+          mSendStreamDecoded->notifyReaderReadyToRead();
         }
 
         if (mSendKeyingNeedingToSignDoc) {
-          if (mSendKeyingNeedToSignEl) {
-            ZS_LOG_DEBUG(log("send signature not created"))
-            return false;
-          }
+          ZS_THROW_INVALID_ASSUMPTION_IF(mSendKeyingNeedToSignEl)
 
           ElementPtr keyingEl;
           try {
@@ -1763,6 +1764,46 @@ namespace openpeer
         return true;
       }
 
+      //-----------------------------------------------------------------------
+      bool MessageLayerSecurityChannel::isSendingReady() const
+      {
+        AutoRecursiveLock lock(getLock());
+
+        if (!mSendStreamEncodedWriteReady) {
+          ZS_LOG_DEBUG(log("cannot send encoded stream until lower layer transport (typically 'wire' transport) indicates it is ready to send data"))
+          return false;
+        }
+
+        if (mLocalContextID.isEmpty()) {
+          ZS_LOG_TRACE(log("missing local context ID thus cannot send data remotely"))
+          return false;
+        }
+
+        if ((!mSendingEncodingRemotePublicKey) &&
+            (!mDHRemotePublicKey) &&
+            (mSendingEncodingPassphrase.isEmpty())) {
+          ZS_LOG_TRACE(log("send keying material is not ready"))
+          return false;
+        }
+
+        if (mDHRemotePublicKey) {
+          if (!mDHLocalPrivateKey) {
+            ZS_LOG_TRACE(log("send DH keying material is not ready"))
+            return false;
+          }
+        }
+
+        if (mSendKeyingNeedingToSignDoc) {
+          if (mSendKeyingNeedToSignEl) {
+            ZS_LOG_TRACE(log("send signature not created"))
+            return false;
+          }
+        }
+
+        ZS_LOG_TRACE(log("sending is ready"))
+        return true;
+      }
+      
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

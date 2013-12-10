@@ -206,6 +206,14 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      bool TransportStream::isWriterReady() const
+      {
+        AutoRecursiveLock lock(getLock());
+        if (isShutdown()) return false;
+        return mReaderReady;
+      }
+
+      //-----------------------------------------------------------------------
       void TransportStream::write(
                                   const BYTE *inBuffer,
                                   size_t bufferLengthInBytes,
@@ -952,10 +960,10 @@ namespace openpeer
 
         // only notify if this is the first buffer added or after each read operation (as have to wait until read called before notifying again)
         bool notifyRead = ((mBuffers.size() > 0) &&
-                           (mReaderReady) &&
                            (!mReadReadyNotified));
 
         bool notifyWrite = ((mBuffers.size() < 1) &&
+                            (mReaderReady) &&         // can only notify write ready when reader has reported it's ready to read
                             (!mWriteReadyNotified));
 
         if (notifyRead) {

@@ -104,6 +104,10 @@ namespace openpeer
       virtual ITransportStreamPtr getStream() const = 0;
 
       //-----------------------------------------------------------------------
+      // PURPOSE: check if the writer has been informed the reader is ready
+      virtual bool isWriterReady() const = 0;
+
+      //-----------------------------------------------------------------------
       // PURPOSE: clears out all data pending in the stream and prevents any
       //          more data being read/written
       virtual void cancel() = 0;

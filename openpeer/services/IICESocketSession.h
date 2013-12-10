@@ -74,13 +74,8 @@ namespace openpeer
       enum ICESocketSessionShutdownReasons
       {
         ICESocketSessionShutdownReason_None                   = IHTTP::HTTPStatusCode_None,
-
-        ICESocketSessionShutdownReason_Timeout                = IHTTP::HTTPStatusCode_RequestTimeout,
         ICESocketSessionShutdownReason_BackgroundingTimeout   = IHTTP::HTTPStatusCode_Networkconnecttimeouterror,
-
         ICESocketSessionShutdownReason_CandidateSearchFailed  = IHTTP::HTTPStatusCode_NotFound,
-
-        ICESocketSessionShutdownReason_DelegateGone           = IHTTP::HTTPStatusCode_Gone,
       };
 
       static const char *toString(ICESocketSessionShutdownReasons reason);

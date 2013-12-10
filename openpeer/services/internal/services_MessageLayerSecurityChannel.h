@@ -252,6 +252,8 @@ namespace openpeer
                                       SecureByteBlockPtr keying = SecureByteBlockPtr()
                                       );
 
+        bool isSendingReady() const;
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -300,10 +302,10 @@ namespace openpeer
         DocumentPtr mReceiveKeyingSignedDoc;      // temporary document needed to resolve receive signing public key
         ElementPtr mReceiveKeyingSignedEl;        // temporary eleemnt needed to resolve receive signing public key
 
-        ITransportStreamReaderPtr mReceiveStreamEncoded;  // typically connected to on-the-wire transport
-        ITransportStreamWriterPtr mReceiveStreamDecoded;  // typically connected to "outer" layer
-        ITransportStreamReaderPtr mSendStreamDecoded;     // typically connected to "outer" layer
-        ITransportStreamWriterPtr mSendStreamEncoded;     // typically connected to on-the-wire transport
+        ITransportStreamReaderPtr mReceiveStreamEncoded;  // typically connected to incoming on-the-wire transport
+        ITransportStreamWriterPtr mReceiveStreamDecoded;  // typically connected to "outer" layer for "outer" to receive decoded on-the-wire data
+        ITransportStreamReaderPtr mSendStreamDecoded;     // typically connected to "outer" layer for "outer" to send and encode data on-on-the-wire
+        ITransportStreamWriterPtr mSendStreamEncoded;     // typically connected to outgoing on-the-wire transport
 
         ITransportStreamReaderSubscriptionPtr mReceiveStreamEncodedSubscription;
         ITransportStreamWriterSubscriptionPtr mReceiveStreamDecodedSubscription;
@@ -312,6 +314,7 @@ namespace openpeer
 
         AutoBool mReceiveStreamDecodedWriteReady;
         AutoBool mSendStreamEncodedWriteReady;
+        AutoBool mNotifySendStreamDecodedReadyToReady;
 
         KeyMap mReceiveKeys;
         KeyMap mSendKeys;

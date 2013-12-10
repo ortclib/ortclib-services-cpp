@@ -126,6 +126,8 @@ namespace openpeer
 
         virtual ITransportStreamPtr getStream() const;
 
+        virtual bool isWriterReady() const;
+
         virtual void write(
                            const BYTE *buffer,
                            size_t bufferLengthInBytes,

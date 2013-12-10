@@ -123,7 +123,7 @@ namespace openpeer
       virtual void shutdown(Duration lingerTime = Seconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_SECONDS)) = 0;
 
       //-----------------------------------------------------------------------
-      // PURPOSE: return the current statte of the connection
+      // PURPOSE: return the current state of the connection
       virtual SessionStates getState(
                                      WORD *outLastErrorCode = NULL,
                                      String *outLastErrorReason = NULL

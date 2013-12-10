@@ -2405,10 +2405,8 @@ namespace openpeer
     {
       switch (reason) {
         case ICESocketSessionShutdownReason_None:                   return "None";
-        case ICESocketSessionShutdownReason_Timeout:                return "Timeout";
         case ICESocketSessionShutdownReason_BackgroundingTimeout:   return "Backgrounding timeout";
         case ICESocketSessionShutdownReason_CandidateSearchFailed:  return "Candidate search failed";
-        case ICESocketSessionShutdownReason_DelegateGone:           return "Delegate gone";
       }
       return IHTTP::toString(IHTTP::toStatusCode((WORD)reason));
     }
