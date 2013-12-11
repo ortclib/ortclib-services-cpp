@@ -1039,7 +1039,6 @@ namespace openpeer
           mColorizeOutput(colorizeOutput),
           mOutgoingMode(false),
           mConnected(false),
-          mClosed(false),
           mListenPort(0),
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
           mStartListenTime(zsLib::now()),
@@ -1087,7 +1086,7 @@ namespace openpeer
             return;
           }
 
-          mClosed = true;
+          get(mClosed) = true;
 
           TelnetLoggerPtr pThis = mThisWeak.lock();
           if (pThis) {
@@ -1202,231 +1201,217 @@ namespace openpeer
                            const Log::Params &params
                            )
         {
+          bool okayToBacklog = false;
+
+          // scope: quick exit is not logging
           {
-            bool okayToBacklog = false;
-
-            // scope: quick exit is not logging
-            {
-              AutoRecursiveLock lock(mLock);
-
-              if (!mTelnetSocket) {
-                Time tick = zsLib::now();
-
-                if (tick > mBacklogDataUntil) {
-                  // clear out any pending data since we can't backlog any longer
-                  mBufferedList.clear();
-                  return;
-                }
-
-                okayToBacklog = true;
-              }
-            }
-
-
-            String output;
-            if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
-            } else {
-              output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
-            }
-
             AutoRecursiveLock lock(mLock);
 
-            bool connected = (bool)mTelnetSocket;
+            if (!mTelnetSocket) {
+              Time tick = zsLib::now();
 
-            if (mOutgoingMode) {
-              if (!mConnected) connected = false;
-            }
-
-            if ((!connected) &&
-                (!okayToBacklog)) {
-              return;
-            }
-
-            bool okayToSend = (connected) && (mBufferedList.size() < 1);
-            size_t sent = 0;
-
-            if (okayToSend) {
-              int errorCode = 0;
-              bool wouldBlock = false;
-              sent = mTelnetSocket->send((const BYTE *)(output.c_str()), output.length(), &wouldBlock, 0, &errorCode);
-              if (!wouldBlock) {
-                if (0 != errorCode) {
-                  connectOutgoingAgain();
-                  return;
-                }
+              if (tick > mBacklogDataUntil) {
+                // clear out any pending data since we can't backlog any longer
+                mBufferedList.clear();
+                return;
               }
-            }
 
-            if (sent < output.length()) {
-              // we need to buffer the data for later...
-              size_t length = (output.length() - sent);
-              BufferedData data;
-              boost::shared_array<BYTE> buffer(new BYTE[length]);
-              memcpy(&(buffer[0]), output.c_str() + sent, length);
-              
-              data.first = buffer;
-              data.second = length;
-              
-              mBufferedList.push_back(data);
+              okayToBacklog = true;
             }
           }
-          postCloseCheck();
+
+
+          String output;
+          if (mColorizeOutput) {
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+          } else {
+            output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+          }
+
+          AutoRecursiveLock lock(mLock);
+
+          bool connected = (bool)mTelnetSocket;
+
+          if (mOutgoingMode) {
+            if (!mConnected) connected = false;
+          }
+
+          if ((!connected) &&
+              (!okayToBacklog)) {
+            return;
+          }
+
+          bool okayToSend = (connected) && (mBufferedList.size() < 1);
+          size_t sent = 0;
+
+          if (okayToSend) {
+            int errorCode = 0;
+            bool wouldBlock = false;
+            sent = mTelnetSocket->send((const BYTE *)(output.c_str()), output.length(), &wouldBlock, 0, &errorCode);
+            if (!wouldBlock) {
+              if (0 != errorCode) {
+                connectOutgoingAgain();
+                return;
+              }
+            }
+          }
+
+          if (sent < output.length()) {
+            // we need to buffer the data for later...
+            size_t length = (output.length() - sent);
+            BufferedData data;
+            boost::shared_array<BYTE> buffer(new BYTE[length]);
+            memcpy(&(buffer[0]), output.c_str() + sent, length);
+
+            data.first = buffer;
+            data.second = length;
+
+            mBufferedList.push_back(data);
+          }
         }
 
         //---------------------------------------------------------------------
         virtual void onReadReady(ISocketPtr inSocket)
         {
-          {
-            AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(mLock);
 
-            if (mOutgoingMode) {
-              if (!mConnected) return;
+          if (mOutgoingMode) {
+            if (!mConnected) return;
+          }
+
+          if (inSocket == mListenSocket) {
+            if (mTelnetSocket)
+            {
+              mTelnetSocket->close();
+              mTelnetSocket.reset();
             }
 
-            if (inSocket == mListenSocket) {
-              if (mTelnetSocket)
-              {
-                mTelnetSocket->close();
-                mTelnetSocket.reset();
-              }
+            IPAddress ignored;
+            int noThrowError = 0;
+            mTelnetSocket = mListenSocket->accept(ignored, &noThrowError);
+            if (!mTelnetSocket)
+              return;
 
-              IPAddress ignored;
-              int noThrowError = 0;
-              mTelnetSocket = mListenSocket->accept(ignored, &noThrowError);
-              if (!mTelnetSocket)
-                return;
-
-              try {
+            try {
 #ifndef __QNX__
-                mTelnetSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+              mTelnetSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-              } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
-              }
-
-              mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
-              mTelnetSocket->setDelegate(mThisWeak.lock());
+            } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
             }
 
-            if (inSocket == mTelnetSocket) {
-              char buffer[1024+1];
-              memset(&(buffer[0]), 0, sizeof(buffer));
-              size_t length = 0;
+            mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
+            mTelnetSocket->setDelegate(mThisWeak.lock());
+          }
 
-              bool wouldBlock = false;
-              int errorCode = 0;
-              length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer)-sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
+          if (inSocket == mTelnetSocket) {
+            char buffer[1024+1];
+            memset(&(buffer[0]), 0, sizeof(buffer));
+            size_t length = 0;
 
-              if (length < 1) return;
+            bool wouldBlock = false;
+            int errorCode = 0;
+            length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer)-sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
 
-              mCommand += (CSTR)(&buffer[0]);
-              if (mCommand.size() > (sizeof(buffer)*3)) {
-                mCommand.clear();
+            if (length < 1) return;
+
+            mCommand += (CSTR)(&buffer[0]);
+            if (mCommand.size() > (sizeof(buffer)*3)) {
+              mCommand.clear();
+            }
+            while (true) {
+              const char *posLineFeed = strchr(mCommand, '\n');
+              const char *posCarrageReturn = strchr(mCommand, '\r');
+
+              if ((NULL == posLineFeed) &&
+                  (NULL == posCarrageReturn)) {
+                return;
               }
-              while (true) {
-                const char *posLineFeed = strchr(mCommand, '\n');
-                const char *posCarrageReturn = strchr(mCommand, '\r');
 
-                if ((NULL == posLineFeed) &&
-                    (NULL == posCarrageReturn)) {
-                  return;
-                }
+              if (NULL == posCarrageReturn)
+                posCarrageReturn = posLineFeed;
+              if (NULL == posLineFeed)
+                posLineFeed = posCarrageReturn;
 
-                if (NULL == posCarrageReturn)
-                  posCarrageReturn = posLineFeed;
-                if (NULL == posLineFeed)
-                  posLineFeed = posCarrageReturn;
+              if (posCarrageReturn < posLineFeed)
+                posLineFeed = posCarrageReturn;
 
-                if (posCarrageReturn < posLineFeed)
-                  posLineFeed = posCarrageReturn;
+              String command = mCommand.substr(0, (posLineFeed - mCommand.c_str()));
+              mCommand = mCommand.substr((posLineFeed - mCommand.c_str()) + 1);
 
-                String command = mCommand.substr(0, (posLineFeed - mCommand.c_str()));
-                mCommand = mCommand.substr((posLineFeed - mCommand.c_str()) + 1);
-                
-                if (command.size() > 0) {
-                  handleCommand(command);
-                }
+              if (command.size() > 0) {
+                handleCommand(command);
               }
             }
           }
-
-          postCloseCheck();
         }
 
         //---------------------------------------------------------------------
         virtual void onWriteReady(ISocketPtr socket)
         {
-          {
-            AutoRecursiveLock lock(mLock);
-            if (socket != mTelnetSocket) return;
+          AutoRecursiveLock lock(mLock);
+          if (socket != mTelnetSocket) return;
 
-            if (mOutgoingMode) {
-              mConnected = true;
-            }
-
-            if (!mStringToSendUponConnection.isEmpty()) {
-
-              size_t length = mStringToSendUponConnection.length();
-
-              BufferedData data;
-              boost::shared_array<BYTE> buffer(new BYTE[length]);
-              memcpy(&(buffer[0]), mStringToSendUponConnection.c_str(), length);
-
-              data.first = buffer;
-              data.second = length;
-
-              mBufferedList.push_front(data);
-
-              mStringToSendUponConnection.clear();
-            }
-
-            while (mBufferedList.size() > 0) {
-              BufferedData &data = mBufferedList.front();
-              bool wouldBlock = false;
-              size_t sent = 0;
-
-              int errorCode = 0;
-              sent = mTelnetSocket->send(data.first.get(), data.second, &wouldBlock, 0, &errorCode);
-              if (!wouldBlock) {
-                if (0 != errorCode) {
-                  connectOutgoingAgain();
-                  return;
-                }
-              }
-
-              if (sent == data.second) {
-                mBufferedList.pop_front();
-                continue;
-              }
-
-              size_t length = (data.second - sent);
-              memmove(data.first.get(), data.first.get() + sent, length);
-              data.second = length;
-              break;
-            }
+          if (mOutgoingMode) {
+            mConnected = true;
           }
-          postCloseCheck();
+
+          if (!mStringToSendUponConnection.isEmpty()) {
+
+            size_t length = mStringToSendUponConnection.length();
+
+            BufferedData data;
+            boost::shared_array<BYTE> buffer(new BYTE[length]);
+            memcpy(&(buffer[0]), mStringToSendUponConnection.c_str(), length);
+
+            data.first = buffer;
+            data.second = length;
+
+            mBufferedList.push_front(data);
+
+            mStringToSendUponConnection.clear();
+          }
+
+          while (mBufferedList.size() > 0) {
+            BufferedData &data = mBufferedList.front();
+            bool wouldBlock = false;
+            size_t sent = 0;
+
+            int errorCode = 0;
+            sent = mTelnetSocket->send(data.first.get(), data.second, &wouldBlock, 0, &errorCode);
+            if (!wouldBlock) {
+              if (0 != errorCode) {
+                connectOutgoingAgain();
+                return;
+              }
+            }
+
+            if (sent == data.second) {
+              mBufferedList.pop_front();
+              continue;
+            }
+
+            size_t length = (data.second - sent);
+            memmove(data.first.get(), data.first.get() + sent, length);
+            data.second = length;
+            break;
+          }
         }
 
         //---------------------------------------------------------------------
         virtual void onException(ISocketPtr inSocket)
         {
-          {
-            AutoRecursiveLock lock(mLock);
-            if (inSocket == mListenSocket) {
-              mListenSocket->close();
-              mListenSocket.reset();
-              if (!mClosed) {
-                mStartListenTime = zsLib::now();
-                listen();
-              }
-            }
-            if (inSocket == mTelnetSocket) {
-              connectOutgoingAgain();
+          AutoRecursiveLock lock(mLock);
+          if (inSocket == mListenSocket) {
+            mListenSocket->close();
+            mListenSocket.reset();
+            if (!mClosed) {
+              mStartListenTime = zsLib::now();
+              listen();
             }
           }
-
-          postCloseCheck();
+          if (inSocket == mTelnetSocket) {
+            connectOutgoingAgain();
+          }
         }
 
         //---------------------------------------------------------------------
@@ -1530,23 +1515,6 @@ namespace openpeer
           mTelnetSocket->connect(result, &wouldBlock, &errorCode);
           if (0 != errorCode) {
           }
-        }
-
-        //---------------------------------------------------------------------
-        void postCloseCheck()
-        {
-          if (mOutgoingMode) {
-            if (mTelnetSocket) return;
-            if (mServers) return;
-
-            close();
-            return;
-          }
-          
-          if (mListenTimer) return;
-          if (mListenSocket) return;
-
-          close();
         }
 
         //---------------------------------------------------------------------
@@ -1664,7 +1632,7 @@ namespace openpeer
 
         Time mBacklogDataUntil;
 
-        bool mClosed;
+        AutoBool mClosed;
 
         String mCommand;
 
