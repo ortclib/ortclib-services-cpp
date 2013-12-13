@@ -243,24 +243,24 @@ namespace openpeer
         ZS_LOG_DEBUG(log("channel openned"))
 
         // found a useable channel number therefor create a new session
-        RUDPChannelPtr session = IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionOutgoing(
-                                                                                                            getAssociatedMessageQueue(),
-                                                                                                            mThisWeak.lock(),
-                                                                                                            delegate,
-                                                                                                            iceSession->getConnectedRemoteIP(),
-                                                                                                            channelNumber,
-                                                                                                            iceSession->getLocalUsernameFrag(),
-                                                                                                            iceSession->getLocalPassword(),
-                                                                                                            iceSession->getRemoteUsernameFrag(),
-                                                                                                            iceSession->getRemotePassword(),
-                                                                                                            connectionInfo,
-                                                                                                            receiveStream,
-                                                                                                            sendStream
-                                                                                                            );
+        UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPICESocketSessionOutgoing(
+                                                                                          getAssociatedMessageQueue(),
+                                                                                          mThisWeak.lock(),
+                                                                                          delegate,
+                                                                                          iceSession->getConnectedRemoteIP(),
+                                                                                          channelNumber,
+                                                                                          iceSession->getLocalUsernameFrag(),
+                                                                                          iceSession->getLocalPassword(),
+                                                                                          iceSession->getRemoteUsernameFrag(),
+                                                                                          iceSession->getRemotePassword(),
+                                                                                          connectionInfo,
+                                                                                          receiveStream,
+                                                                                          sendStream
+                                                                                          );
 
         mLocalChannelNumberSessions[channelNumber] = session;
         issueChannelConnectIfPossible();
-        return session;
+        return RUDPChannel::convert(session);
       }
 
       //-----------------------------------------------------------------------
@@ -802,18 +802,18 @@ namespace openpeer
           if (!hasCandidate) break;
 
           // found a useable channel number therefor create a new session
-          RUDPChannelPtr session = IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionIncoming(
-                                                                                                              getAssociatedMessageQueue(),
-                                                                                                              mThisWeak.lock(),
-                                                                                                              mICESession->getConnectedRemoteIP(),
-                                                                                                              channelNumber,
-                                                                                                              mICESession->getLocalUsernameFrag(),
-                                                                                                              mICESession->getLocalPassword(),
-                                                                                                              mICESession->getRemoteUsernameFrag(),
-                                                                                                              mICESession->getRemotePassword(),
-                                                                                                              stun,
-                                                                                                              response
-                                                                                                              );
+          UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPICESocketSessionIncoming(
+                                                                                            getAssociatedMessageQueue(),
+                                                                                            mThisWeak.lock(),
+                                                                                            mICESession->getConnectedRemoteIP(),
+                                                                                            channelNumber,
+                                                                                            mICESession->getLocalUsernameFrag(),
+                                                                                            mICESession->getLocalPassword(),
+                                                                                            mICESession->getRemoteUsernameFrag(),
+                                                                                            mICESession->getRemotePassword(),
+                                                                                            stun,
+                                                                                            response
+                                                                                            );
           if (!response) {
             // there must be a response or it is an error
             stun->mErrorCode = STUNPacket::ErrorCode_BadRequest;

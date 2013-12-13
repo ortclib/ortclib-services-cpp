@@ -43,6 +43,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IRSAPublicKeyForRSAPrivateKey;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -53,10 +55,13 @@ namespace openpeer
 
       interaction IRSAPrivateKeyForRSAPublicKey
       {
-        IRSAPrivateKeyForRSAPublicKey &forRSAPublicKey() {return *this;}
-        const IRSAPrivateKeyForRSAPublicKey &forRSAPublicKey() const {return *this;}
+        typedef IRSAPrivateKeyForRSAPublicKey ForPublicKey;
+        typedef shared_ptr<ForPublicKey> ForPublicKeyPtr;
+        typedef weak_ptr<ForPublicKey> ForPublicKeyWeakPtr;
 
-        static RSAPrivateKeyPtr generate(RSAPublicKeyPtr &outPublicKey);
+        static ForPublicKeyPtr generate(RSAPublicKeyPtr &outPublicKey);
+
+        virtual ~IRSAPrivateKeyForRSAPublicKey() {} // need to make base polymorphic - remove if another virtual method is added
       };
 
       //-----------------------------------------------------------------------
@@ -68,11 +73,16 @@ namespace openpeer
       #pragma mark
 
       class RSAPrivateKey : public Noop,
-                            public IRSAPrivateKey
+                            public IRSAPrivateKey,
+                            public IRSAPrivateKeyForRSAPublicKey
       {
       public:
         friend interaction IRSAPrivateKey;
         friend interaction IRSAPrivateKeyFactory;
+
+        typedef IRSAPublicKeyForRSAPrivateKey UsePublicKey;
+        typedef shared_ptr<UsePublicKey> UsePublicKeyPtr;
+        typedef weak_ptr<UsePublicKey> UsePublicKeyWeakPtr;
 
         typedef CryptoPP::RSA::PrivateKey PrivateKey;
 
@@ -85,6 +95,7 @@ namespace openpeer
         ~RSAPrivateKey();
 
         static RSAPrivateKeyPtr convert(IRSAPrivateKeyPtr privateKey);
+        static RSAPrivateKeyPtr convert(ForPublicKeyPtr privateKey);
 
       protected:
         //---------------------------------------------------------------------

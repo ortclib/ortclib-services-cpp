@@ -43,6 +43,8 @@ namespace openpeer
   {
     namespace internal
     {
+      interaction IRSAPrivateKeyForRSAPublicKey;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -53,10 +55,13 @@ namespace openpeer
 
       interaction IRSAPublicKeyForRSAPrivateKey
       {
-        IRSAPublicKeyForRSAPrivateKey &forPrivateKey() {return *this;}
-        const IRSAPublicKeyForRSAPrivateKey &forPrivateKey() const {return *this;}
+        typedef IRSAPublicKeyForRSAPrivateKey ForPrivateKey;
+        typedef shared_ptr<ForPrivateKey> ForPrivateKeyPtr;
+        typedef weak_ptr<ForPrivateKey> ForPrivateKeyWeakPtr;
 
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
+        static ForPrivateKeyPtr load(const SecureByteBlock &buffer);
+
+        virtual ~IRSAPublicKeyForRSAPrivateKey() {} // need a virtual function to make this class polymorphic (if another virtual method is added then remove this)
       };
 
       //-----------------------------------------------------------------------
@@ -75,6 +80,10 @@ namespace openpeer
         friend interaction IRSAPublicKeyFactory;
         friend interaction IRSAPublicKey;
 
+        typedef IRSAPrivateKeyForRSAPublicKey UsePrivateKey;
+        typedef shared_ptr<UsePrivateKey> UsePrivateKeyPtr;
+        typedef weak_ptr<UsePrivateKey> UsePrivateKeyWeakPtr;
+
         typedef CryptoPP::RSA::PublicKey PublicKey;
 
       protected:
@@ -86,6 +95,7 @@ namespace openpeer
         ~RSAPublicKey();
 
         static RSAPublicKeyPtr convert(IRSAPublicKeyPtr publicKey);
+        static RSAPublicKeyPtr convert(ForPrivateKeyPtr publicKey);
 
       protected:
         //---------------------------------------------------------------------

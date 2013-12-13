@@ -59,6 +59,8 @@ namespace openpeer
 
       using CryptoPP::PK_DecryptorFilter;
 
+      typedef IRSAPrivateKeyForRSAPublicKey::ForPublicKeyPtr ForPublicKeyPtr;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -68,7 +70,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RSAPrivateKeyPtr IRSAPrivateKeyForRSAPublicKey::generate(RSAPublicKeyPtr &outPublicKey)
+      ForPublicKeyPtr IRSAPrivateKeyForRSAPublicKey::generate(RSAPublicKeyPtr &outPublicKey)
       {
         return IRSAPrivateKeyFactory::singleton().generate(outPublicKey);
       }
@@ -97,6 +99,12 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       RSAPrivateKeyPtr RSAPrivateKey::convert(IRSAPrivateKeyPtr privateKey)
+      {
+        return boost::dynamic_pointer_cast<RSAPrivateKey>(privateKey);
+      }
+
+      //-----------------------------------------------------------------------
+      RSAPrivateKeyPtr RSAPrivateKey::convert(ForPublicKeyPtr privateKey)
       {
         return boost::dynamic_pointer_cast<RSAPrivateKey>(privateKey);
       }
@@ -149,7 +157,7 @@ namespace openpeer
 
         byteQueue.Get(publicKeyBuffer, outputLengthInBytes);
 
-        outPublicKey = IRSAPublicKeyForRSAPrivateKey::load(publicKeyBuffer);
+        outPublicKey = RSAPublicKey::convert(UsePublicKey::load(publicKeyBuffer));
 
         ZS_LOG_DEBUG(pThis->debug("generated private key") + IRSAPublicKey::toDebug(outPublicKey))
 

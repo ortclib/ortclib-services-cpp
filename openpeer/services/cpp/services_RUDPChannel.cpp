@@ -55,6 +55,9 @@ namespace openpeer
     {
       typedef zsLib::ITimerDelegateProxy ITimerDelegateProxy;
 
+      typedef IRUDPChannelForRUDPICESocketSession::ForRUDPICESocketSessionPtr ForRUDPICESocketSessionPtr;
+      typedef IRUDPChannelForRUDPListener::ForRUDPListenerPtr ForRUDPListenerPtr;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -78,37 +81,37 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionIncoming(
-                                                                                                IMessageQueuePtr queue,
-                                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                                                const IPAddress &remoteIP,
-                                                                                                WORD incomingChannelNumber,
-                                                                                                const char *localUsernameFrag,
-                                                                                                const char *localPassword,
-                                                                                                const char *remoteUsernameFrag,
-                                                                                                const char *remotePassword,
-                                                                                                STUNPacketPtr channelOpenPacket,
-                                                                                                STUNPacketPtr &outResponse
-                                                                                                )
+      ForRUDPICESocketSessionPtr IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionIncoming(
+                                                                                                            IMessageQueuePtr queue,
+                                                                                                            IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                                                            const IPAddress &remoteIP,
+                                                                                                            WORD incomingChannelNumber,
+                                                                                                            const char *localUsernameFrag,
+                                                                                                            const char *localPassword,
+                                                                                                            const char *remoteUsernameFrag,
+                                                                                                            const char *remotePassword,
+                                                                                                            STUNPacketPtr channelOpenPacket,
+                                                                                                            STUNPacketPtr &outResponse
+                                                                                                            )
       {
         return IRUDPChannelFactory::singleton().createForRUDPICESocketSessionIncoming(queue, master, remoteIP, incomingChannelNumber, localUsernameFrag, localPassword, remoteUsernameFrag, remotePassword, channelOpenPacket, outResponse);
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionOutgoing(
-                                                                                                IMessageQueuePtr queue,
-                                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                                                IRUDPChannelDelegatePtr delegate,
-                                                                                                const IPAddress &remoteIP,
-                                                                                                WORD incomingChannelNumber,
-                                                                                                const char *localUsernameFrag,
-                                                                                                const char *localPassword,
-                                                                                                const char *remoteUsernameFrag,
-                                                                                                const char *remotePassword,
-                                                                                                const char *connectionInfo,
-                                                                                                ITransportStreamPtr receiveStream,
-                                                                                                ITransportStreamPtr sendStream
-                                                                                                )
+      ForRUDPICESocketSessionPtr IRUDPChannelForRUDPICESocketSession::createForRUDPICESocketSessionOutgoing(
+                                                                                                            IMessageQueuePtr queue,
+                                                                                                            IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                                                            IRUDPChannelDelegatePtr delegate,
+                                                                                                            const IPAddress &remoteIP,
+                                                                                                            WORD incomingChannelNumber,
+                                                                                                            const char *localUsernameFrag,
+                                                                                                            const char *localPassword,
+                                                                                                            const char *remoteUsernameFrag,
+                                                                                                            const char *remotePassword,
+                                                                                                            const char *connectionInfo,
+                                                                                                            ITransportStreamPtr receiveStream,
+                                                                                                            ITransportStreamPtr sendStream
+                                                                                                            )
       {
         return IRUDPChannelFactory::singleton().createForRUDPICESocketSessionOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUsernameFrag, localPassword, remoteUsernameFrag, remotePassword, connectionInfo, receiveStream, sendStream);
       }
@@ -121,14 +124,14 @@ namespace openpeer
       #pragma mark IRUDPChannelForRUDPListener
       #pragma mark
 
-      RUDPChannelPtr IRUDPChannelForRUDPListener::createForListener(
-                                                                    IMessageQueuePtr queue,
-                                                                    IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                    const IPAddress &remoteIP,
-                                                                    WORD incomingChannelNumber,
-                                                                    STUNPacketPtr channelOpenPacket,
-                                                                    STUNPacketPtr &outResponse
-                                                                    )
+      ForRUDPListenerPtr IRUDPChannelForRUDPListener::createForListener(
+                                                                        IMessageQueuePtr queue,
+                                                                        IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                        const IPAddress &remoteIP,
+                                                                        WORD incomingChannelNumber,
+                                                                        STUNPacketPtr channelOpenPacket,
+                                                                        STUNPacketPtr &outResponse
+                                                                        )
       {
         return IRUDPChannelFactory::singleton().createForListener(queue, master, remoteIP, incomingChannelNumber, channelOpenPacket, outResponse);
       }

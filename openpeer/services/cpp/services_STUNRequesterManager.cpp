@@ -47,6 +47,8 @@ namespace openpeer
   {
     namespace internal
     {
+      typedef ISTUNRequesterManagerForSTUNRequester::ForSTUNRequesterPtr ForSTUNRequesterPtr;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -56,7 +58,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      ISTUNRequesterManagerForSTUNRequester::ForSTUNRequesterPtr ISTUNRequesterManagerForSTUNRequester::singleton()
+      ForSTUNRequesterPtr ISTUNRequesterManagerForSTUNRequester::singleton()
       {
         return STUNRequesterManager::singleton();
       }

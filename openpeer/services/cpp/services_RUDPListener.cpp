@@ -813,7 +813,7 @@ namespace openpeer
           ChannelPair local(remoteIP, channelNumber);
           ChannelPair remote(remoteIP, stun->mChannelNumber);
 
-          RUDPChannelPtr session = IRUDPChannelForRUDPListener::createForListener(getAssociatedMessageQueue(), mThisWeak.lock(), remoteIP, channelNumber, stun, response);
+          UseRUDPChannelPtr session = UseRUDPChannel::createForListener(getAssociatedMessageQueue(), mThisWeak.lock(), remoteIP, channelNumber, stun, response);
           if (!response) {
             // there must be a response or it is an error
             stun->mErrorCode = STUNPacket::ErrorCode_BadRequest;

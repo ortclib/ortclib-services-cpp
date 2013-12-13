@@ -61,33 +61,33 @@ namespace openpeer
         typedef shared_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionPtr;
         typedef weak_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionWeakPtr;
 
-        static RUDPChannelPtr createForRUDPICESocketSessionIncoming(
-                                                                    IMessageQueuePtr queue,
-                                                                    IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                    const IPAddress &remoteIP,
-                                                                    WORD incomingChannelNumber,
-                                                                    const char *localUsernameFrag,
-                                                                    const char *localPassword,
-                                                                    const char *remoteUsernameFrag,
-                                                                    const char *remotePassword,
-                                                                    STUNPacketPtr channelOpenPacket,
-                                                                    STUNPacketPtr &outResponse
-                                                                    );
+        static ForRUDPICESocketSessionPtr createForRUDPICESocketSessionIncoming(
+                                                                                IMessageQueuePtr queue,
+                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                                const IPAddress &remoteIP,
+                                                                                WORD incomingChannelNumber,
+                                                                                const char *localUsernameFrag,
+                                                                                const char *localPassword,
+                                                                                const char *remoteUsernameFrag,
+                                                                                const char *remotePassword,
+                                                                                STUNPacketPtr channelOpenPacket,
+                                                                                STUNPacketPtr &outResponse
+                                                                                );
 
-        static RUDPChannelPtr createForRUDPICESocketSessionOutgoing(
-                                                                    IMessageQueuePtr queue,
-                                                                    IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                    IRUDPChannelDelegatePtr delegate,
-                                                                    const IPAddress &remoteIP,
-                                                                    WORD incomingChannelNumber,
-                                                                    const char *localUsernameFrag,
-                                                                    const char *localPassword,
-                                                                    const char *remoteUsernameFrag,
-                                                                    const char *remotePassword,
-                                                                    const char *connectionInfo,
-                                                                    ITransportStreamPtr receiveStream,
-                                                                    ITransportStreamPtr sendStream
-                                                                    );
+        static ForRUDPICESocketSessionPtr createForRUDPICESocketSessionOutgoing(
+                                                                                IMessageQueuePtr queue,
+                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                                IRUDPChannelDelegatePtr delegate,
+                                                                                const IPAddress &remoteIP,
+                                                                                WORD incomingChannelNumber,
+                                                                                const char *localUsernameFrag,
+                                                                                const char *localPassword,
+                                                                                const char *remoteUsernameFrag,
+                                                                                const char *remotePassword,
+                                                                                const char *connectionInfo,
+                                                                                ITransportStreamPtr receiveStream,
+                                                                                ITransportStreamPtr sendStream
+                                                                                );
 
         virtual PUID getID() const = 0;
 
@@ -134,14 +134,14 @@ namespace openpeer
         typedef shared_ptr<ForRUDPListener> ForRUDPListenerPtr;
         typedef weak_ptr<ForRUDPListener> ForRUDPListenerWeakPtr;
 
-        static RUDPChannelPtr createForListener(
-                                                IMessageQueuePtr queue,
-                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                const IPAddress &remoteIP,
-                                                WORD incomingChannelNumber,
-                                                STUNPacketPtr channelOpenPacket,
-                                                STUNPacketPtr &outResponse
-                                                );
+        static ForRUDPListenerPtr createForListener(
+                                                    IMessageQueuePtr queue,
+                                                    IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                    const IPAddress &remoteIP,
+                                                    WORD incomingChannelNumber,
+                                                    STUNPacketPtr channelOpenPacket,
+                                                    STUNPacketPtr &outResponse
+                                                    );
 
         virtual void setDelegate(IRUDPChannelDelegatePtr delegate) = 0;
         virtual void setStreams(
@@ -568,7 +568,7 @@ namespace openpeer
                                                  STUNPacketPtr &outResponse
                                                  );
       };
-      
+
     }
   }
 }
