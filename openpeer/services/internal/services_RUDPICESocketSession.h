@@ -66,9 +66,7 @@ namespace openpeer
         friend interaction IRUDPICESocketSessionFactory;
         friend interaction IRUDPICESocketSession;
 
-        typedef IRUDPChannelForRUDPICESocketSession UseRUDPChannel;
-        typedef shared_ptr<UseRUDPChannel> UseRUDPChannelPtr;
-        typedef weak_ptr<UseRUDPChannel> UseRUDPChannelWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPICESocketSession, UseRUDPChannel)
 
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocket::ICEControls ICEControls;

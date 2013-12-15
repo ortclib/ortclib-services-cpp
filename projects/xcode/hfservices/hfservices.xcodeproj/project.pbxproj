@@ -130,6 +130,7 @@
 		00ABD44817A8423900178078 /* services_TCPMessaging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_TCPMessaging.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		00ABD44A17A8424900178078 /* services_TCPMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_TCPMessaging.h; sourceTree = "<group>"; };
 		00ABD44B17A8426100178078 /* ITCPMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ITCPMessaging.h; sourceTree = "<group>"; };
+		00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_AllocatorWithNul.h; sourceTree = "<group>"; };
 		00FF147817AAB85E00F5DEB8 /* IWakeDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IWakeDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -250,6 +251,7 @@
 			children = (
 				0095D94D16CA83EA005F53D3 /* types.h */,
 				0095D93916CA83EA005F53D3 /* services.h */,
+				00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */,
 				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
 				0084FFFA184FA5DA009F6934 /* services_DHKeyDomain.h */,

@@ -63,7 +63,7 @@ namespace openpeer
 
       using CryptoPP::PK_EncryptorFilter;
 
-      typedef IRSAPublicKeyForRSAPrivateKey::ForPrivateKeyPtr ForPrivateKeyPtr;
+      ZS_DECLARE_TYPEDEF_PTR(IRSAPublicKeyForRSAPrivateKey::ForPrivateKey, ForPrivateKey)
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -104,13 +104,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::convert(IRSAPublicKeyPtr publicKey)
       {
-        return boost::dynamic_pointer_cast<RSAPublicKey>(publicKey);
+        return dynamic_pointer_cast<RSAPublicKey>(publicKey);
       }
 
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::convert(ForPrivateKeyPtr publicKey)
       {
-        return boost::dynamic_pointer_cast<RSAPublicKey>(publicKey);
+        return dynamic_pointer_cast<RSAPublicKey>(publicKey);
       }
 
       //-----------------------------------------------------------------------

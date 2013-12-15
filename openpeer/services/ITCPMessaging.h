@@ -56,6 +56,8 @@ namespace openpeer
 
     interaction ITCPMessaging
     {
+      ZS_DECLARE_STRUCT_PTR(ChannelHeader)
+
       enum SessionStates
       {
         SessionState_Pending,
@@ -65,10 +67,6 @@ namespace openpeer
       };
 
       static const char *toString(SessionStates state);
-
-      struct ChannelHeader;
-      typedef boost::shared_ptr<ChannelHeader> ChannelHeaderPtr;
-      typedef boost::weak_ptr<ChannelHeader> ChannelHeaderWeakPtr;
 
       struct ChannelHeader : public ITransportStream::StreamHeader
       {

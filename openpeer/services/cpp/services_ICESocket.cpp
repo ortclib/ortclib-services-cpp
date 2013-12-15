@@ -868,10 +868,11 @@ namespace openpeer
       void ICESocket::onSTUNDiscoverySendPacket(
                                                 ISTUNDiscoveryPtr discovery,
                                                 IPAddress destination,
-                                                boost::shared_array<BYTE> packet,
-                                                size_t packetLengthInBytes
+                                                SecureByteBlockPtr packet
                                                 )
       {
+        ZS_THROW_INVALID_ARGUMENT_IF(!packet)
+
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
           ZS_LOG_TRACE(log("cannot send packet as already shutdown"))
@@ -880,13 +881,13 @@ namespace openpeer
 
         LocalSocketSTUNDiscoveryMap::iterator found = mSocketSTUNs.find(discovery);
         if (found == mSocketSTUNs.end()) {
-          ZS_LOG_WARNING(Debug, log("cannot send STUN packet as STUN discovery does not match any STUN socket") + ZS_PARAM("socket ID", discovery->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
+          ZS_LOG_WARNING(Debug, log("cannot send STUN packet as STUN discovery does not match any STUN socket") + ZS_PARAM("socket ID", discovery->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packet->SizeInBytes()))
           return;
         }
 
         LocalSocketPtr &localSocket = (*found).second;
 
-        ZS_LOG_TRACE(log("sending packet for STUN discovery") + ZS_PARAM("via", localSocket->mLocal->mIPAddress.string()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
+        ZS_LOG_TRACE(log("sending packet for STUN discovery") + ZS_PARAM("via", localSocket->mLocal->mIPAddress.string()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packet->SizeInBytes()))
 
         try {
           bool wouldBlock = false;
@@ -898,7 +899,7 @@ namespace openpeer
             return;
           }
 #endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-          localSocket->mSocket->sendTo(destination, packet.get(), packetLengthInBytes, &wouldBlock);
+          localSocket->mSocket->sendTo(destination, *packet, packet->SizeInBytes(), &wouldBlock);
         } catch(ISocket::Exceptions::Unspecified &error) {
           ZS_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }

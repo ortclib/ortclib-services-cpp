@@ -253,13 +253,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocketSessionPtr ICESocketSession::convert(IICESocketSessionPtr session)
       {
-        return boost::dynamic_pointer_cast<ICESocketSession>(session);
+        return dynamic_pointer_cast<ICESocketSession>(session);
       }
 
       //-----------------------------------------------------------------------
       ICESocketSessionPtr ICESocketSession::convert(ForICESocketPtr session)
       {
-        return boost::dynamic_pointer_cast<ICESocketSession>(session);
+        return dynamic_pointer_cast<ICESocketSession>(session);
       }
 
       //-----------------------------------------------------------------------
@@ -701,10 +701,8 @@ namespace openpeer
             response->mPassword = mLocalPassword;
             response->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
 
-            boost::shared_array<BYTE> buffer;
-            size_t bufferLengthInBytes = 0;
-            response->packetize(buffer, bufferLengthInBytes, STUNPacket::RFC_5245_ICE);
-            sendTo(viaLocalCandidate, source, buffer.get(), bufferLengthInBytes, false);
+            SecureByteBlockPtr buffer = response->packetize(STUNPacket::RFC_5245_ICE);
+            sendTo(viaLocalCandidate, source, *buffer, buffer->SizeInBytes(), false);
           }
 
           if ((failedIntegrity) || (!correctRole)) {
@@ -963,10 +961,11 @@ namespace openpeer
       void ICESocketSession::onSTUNRequesterSendPacket(
                                                        ISTUNRequesterPtr requester,
                                                        IPAddress destination,
-                                                       boost::shared_array<BYTE> packet,
-                                                       size_t packetLengthInBytes
+                                                       SecureByteBlockPtr packet
                                                        )
       {
+        ZS_THROW_INVALID_ARGUMENT_IF(!packet)
+
         ZS_LOG_TRACE(log("on stun requester send packet"))
 
         AutoRecursiveLock lock(getLock());
@@ -974,13 +973,13 @@ namespace openpeer
 
         if (requester == mNominateRequester) {
           ZS_THROW_BAD_STATE_IF(!mPendingNominatation)
-          sendTo(mPendingNominatation->mLocal, destination, packet.get(), packetLengthInBytes, false);
+          sendTo(mPendingNominatation->mLocal, destination, *packet, packet->SizeInBytes(), false);
           return;
         }
 
         if (requester == mAliveCheckRequester) {
             ZS_THROW_BAD_STATE_IF(!mNominated)
-            sendTo(mNominated->mLocal, destination, packet.get(), packetLengthInBytes, false);
+            sendTo(mNominated->mLocal, destination, *packet, packet->SizeInBytes(), false);
             return;
         }
 
@@ -990,7 +989,7 @@ namespace openpeer
           {
             CandidatePairPtr pairing = (*iter);
             if (requester == pairing->mRequester) {
-              sendTo(pairing->mLocal, destination, packet.get(), packetLengthInBytes, false);
+              sendTo(pairing->mLocal, destination, *packet, packet->SizeInBytes(), false);
               return;
             }
           }
@@ -1384,10 +1383,8 @@ namespace openpeer
             indication->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
           }
 
-          boost::shared_array<BYTE> buffer;
-          size_t length = 0;
-          indication->packetize(buffer, length, STUNPacket::RFC_5245_ICE);
-          sendTo(mNominated->mLocal, mNominated->mRemote.mIPAddress, buffer.get(), length, true);
+          SecureByteBlockPtr buffer = indication->packetize(STUNPacket::RFC_5245_ICE);
+          sendTo(mNominated->mLocal, mNominated->mRemote.mIPAddress, *buffer, buffer->SizeInBytes(), true);
         }
 
         if (timer == mExpectingDataTimer)

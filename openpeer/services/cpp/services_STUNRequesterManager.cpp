@@ -47,7 +47,7 @@ namespace openpeer
   {
     namespace internal
     {
-      typedef ISTUNRequesterManagerForSTUNRequester::ForSTUNRequesterPtr ForSTUNRequesterPtr;
+      ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester::ForSTUNRequester, ForSTUNRequester)
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

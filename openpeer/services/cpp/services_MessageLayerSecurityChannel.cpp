@@ -240,7 +240,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageLayerSecurityChannelPtr MessageLayerSecurityChannel::convert(IMessageLayerSecurityChannelPtr channel)
       {
-        return boost::dynamic_pointer_cast<MessageLayerSecurityChannel>(channel);
+        return dynamic_pointer_cast<MessageLayerSecurityChannel>(channel);
       }
 
       //-----------------------------------------------------------------------

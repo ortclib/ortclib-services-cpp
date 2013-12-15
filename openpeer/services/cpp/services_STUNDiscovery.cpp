@@ -204,15 +204,14 @@ namespace openpeer
       void STUNDiscovery::onSTUNRequesterSendPacket(
                                                     ISTUNRequesterPtr requester,
                                                     IPAddress destination,
-                                                    boost::shared_array<BYTE> packet,
-                                                    size_t packetLengthInBytes
+                                                    SecureByteBlockPtr packet
                                                     )
       {
         AutoRecursiveLock lock(mLock);
         if (requester != mSTUNRequester) return;
 
         try {
-          mDelegate->onSTUNDiscoverySendPacket(mThisWeak.lock(), mServer, packet, packetLengthInBytes);
+          mDelegate->onSTUNDiscoverySendPacket(mThisWeak.lock(), mServer, packet);
         } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
           cancel(); return;
         }

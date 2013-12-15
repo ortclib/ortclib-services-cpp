@@ -58,13 +58,8 @@ namespace openpeer
         friend interaction IDHPrivateKeyFactory;
         friend interaction IDHPrivateKey;
 
-        typedef IDHKeyDomainForDHPrivateKey UseDHKeyDomain;
-        typedef shared_ptr<UseDHKeyDomain> UseDHKeyDomainPtr;
-        typedef weak_ptr<UseDHKeyDomain> UseDHKeyDomainWeakPtr;
-
-        typedef IDHPublicKeyForDHPrivateKey UseDHPublicKey;
-        typedef shared_ptr<UseDHPublicKey> UseDHPublicKeyPtr;
-        typedef weak_ptr<UseDHPublicKey> UseDHPublicKeyWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IDHKeyDomainForDHPrivateKey, UseDHKeyDomain)
+        ZS_DECLARE_TYPEDEF_PTR(IDHPublicKeyForDHPrivateKey, UseDHPublicKey)
 
       protected:
         DHPrivateKey(UseDHKeyDomainPtr keyDomain);

@@ -216,10 +216,7 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    void RUDPPacket::packetize(
-                               boost::shared_array<BYTE> &outBuffer,
-                               size_t &outBufferLengthInBytes
-                               ) const
+    SecureByteBlockPtr RUDPPacket::packetize() const
     {
       log(Log::Trace, "packetize");
       ZS_THROW_BAD_STATE_IF(mDataLengthInBytes > 0xFFFF)
@@ -229,10 +226,9 @@ namespace openpeer
 
       size_t length = OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes) + mDataLengthInBytes;
 
-      outBuffer = boost::shared_array<BYTE>(new BYTE[length]);
-      outBufferLengthInBytes = length;
+      SecureByteBlockPtr outBuffer(new SecureByteBlock(length));
 
-      BYTE *packet = outBuffer.get();
+      BYTE *packet = *outBuffer;
       memset(packet, 0, length);  // make sure to set the entire packet to "0" so all defaults are appropriately set
 
       // put in channel number and length
@@ -260,6 +256,7 @@ namespace openpeer
         ZS_THROW_BAD_STATE_IF(NULL == mData)  // cannot have set a length but forgot to specify the pointer
         memcpy(&(packet[OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes)]), &(mData[0]), mDataLengthInBytes);
       }
+      return outBuffer;
     }
 
     //-------------------------------------------------------------------------

@@ -55,8 +55,8 @@ namespace openpeer
     {
       typedef zsLib::ITimerDelegateProxy ITimerDelegateProxy;
 
-      typedef IRUDPChannelForRUDPICESocketSession::ForRUDPICESocketSessionPtr ForRUDPICESocketSessionPtr;
-      typedef IRUDPChannelForRUDPListener::ForRUDPListenerPtr ForRUDPListenerPtr;
+      ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPICESocketSession::ForRUDPICESocketSession, ForRUDPICESocketSession)
+      ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPListener::ForRUDPListener, ForRUDPListener)
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -205,19 +205,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(IRUDPChannelPtr channel)
       {
-        return boost::dynamic_pointer_cast<RUDPChannel>(channel);
+        return dynamic_pointer_cast<RUDPChannel>(channel);
       }
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(ForRUDPICESocketSessionPtr channel)
       {
-        return boost::dynamic_pointer_cast<RUDPChannel>(channel);
+        return dynamic_pointer_cast<RUDPChannel>(channel);
       }
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(ForRUDPListenerPtr channel)
       {
-        return boost::dynamic_pointer_cast<RUDPChannel>(channel);
+        return dynamic_pointer_cast<RUDPChannel>(channel);
       }
 
       //-----------------------------------------------------------------------
@@ -689,7 +689,7 @@ namespace openpeer
                                    )
       {
         IRUDPChannelStreamPtr stream;
-        boost::shared_array<BYTE> newBuffer;
+        SecureByteBlockPtr newBuffer;
 
         // scope: do the work in the context of a lock but call the stream outside the lock
         {
@@ -703,17 +703,16 @@ namespace openpeer
 
           ZS_LOG_TRACE(log("received RUDP packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", bufferLengthInBytes))
 
-          newBuffer = boost::shared_array<BYTE>(new BYTE[bufferLengthInBytes]);
-          memcpy(newBuffer.get(), buffer, bufferLengthInBytes);
+          newBuffer = IHelper::convertToBuffer(buffer, bufferLengthInBytes);
 
           // fix the pointer to point to the newly constructed buffer
           if (NULL != rudp->mData)
-            rudp->mData = (newBuffer.get() + (rudp->mData - buffer));
+            rudp->mData = ((*newBuffer) + (rudp->mData - buffer));
 
           mLastReceivedData = zsLib::now();
         }
 
-        stream->handlePacket(rudp, newBuffer, bufferLengthInBytes, false);
+        stream->handlePacket(rudp, newBuffer, false);
       }
 
       //-----------------------------------------------------------------------
@@ -991,8 +990,7 @@ namespace openpeer
         STUNPacketPtr stun;
 
         IPAddress remoteIP;
-        boost::shared_array<BYTE> packet;
-        size_t packetLengthInBytes = 0;
+        SecureByteBlockPtr packet;
 
         {
           AutoRecursiveLock lock(mLock);
@@ -1017,13 +1015,13 @@ namespace openpeer
             return;
           }
 
-          stun->packetize(packet, packetLengthInBytes, STUNPacket::RFC_draft_RUDP);
-          ZS_LOG_TRACE(log("STUN ACK sent") + ZS_PARAM("method", "indication") + ZS_PARAM("stun packet size", packetLengthInBytes))
+          packet = stun->packetize(STUNPacket::RFC_draft_RUDP);
+          ZS_LOG_TRACE(log("STUN ACK sent") + ZS_PARAM("method", "indication") + ZS_PARAM("stun packet size", packet->SizeInBytes()))
           mLastSentData = zsLib::now();
         }
 
         try {
-          master->notifyRUDPChannelSendPacket(mThisWeak.lock(), remoteIP, packet.get(), packetLengthInBytes);
+          master->notifyRUDPChannelSendPacket(mThisWeak.lock(), remoteIP, *packet, packet->SizeInBytes());
         } catch(IRUDPChannelDelegateForSessionAndListenerProxy::Exceptions::DelegateGone &) {
           ZS_LOG_WARNING(Detail, log("master delegate gone for send external ack now"))
           setError(RUDPChannelShutdownReason_DelegateGone, "delegate gone");
@@ -1044,11 +1042,10 @@ namespace openpeer
       void RUDPChannel::onSTUNRequesterSendPacket(
                                                   ISTUNRequesterPtr requester,
                                                   IPAddress destination,
-                                                  boost::shared_array<BYTE> packet,
-                                                  size_t packetLengthInBytes
+                                                  SecureByteBlockPtr packet
                                                   )
       {
-        ZS_LOG_DEBUG(log("notify requester send packet") + ZS_PARAM("ip", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
+        ZS_LOG_DEBUG(log("notify requester send packet") + ZS_PARAM("ip", destination.string()) + ZS_PARAM("length", packet->SizeInBytes()))
 
         IRUDPChannelDelegateForSessionAndListenerPtr master;
         bool isShuttdingDown = false;
@@ -1065,7 +1062,7 @@ namespace openpeer
         }
 
         try {
-          bool result = master->notifyRUDPChannelSendPacket(mThisWeak.lock(), destination, packet.get(), packetLengthInBytes);
+          bool result = master->notifyRUDPChannelSendPacket(mThisWeak.lock(), destination, *packet, packet->SizeInBytes());
           if ((!result) &&
               (isShuttdingDown)) {
             goto do_shutdown;

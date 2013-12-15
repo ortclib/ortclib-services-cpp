@@ -87,8 +87,7 @@ namespace openpeer
         typedef boost::shared_array<BYTE> RecycleBuffer;
         typedef std::list<RecycleBuffer> RecycleBufferList;
 
-        struct BufferedPacket;
-        typedef boost::shared_ptr<BufferedPacket> BufferedPacketPtr;
+        ZS_DECLARE_STRUCT_PTR(BufferedPacket)
 
         typedef std::map<QWORD, BufferedPacketPtr> BufferedPacketMap;
 
@@ -155,8 +154,7 @@ namespace openpeer
 
         virtual bool handlePacket(
                                   RUDPPacketPtr packet,
-                                  boost::shared_array<BYTE> originalBuffer,
-                                  size_t originalBufferLengthInBytes,
+                                  SecureByteBlockPtr originalBuffer,
                                   bool ecnMarked
                                   );
 
@@ -301,8 +299,7 @@ namespace openpeer
           Time mTimeSentOrReceived;
 
           RUDPPacketPtr mRUDPPacket;
-          boost::shared_array<BYTE> mPacket;
-          size_t mPacketLengthInBytes;
+          SecureByteBlockPtr mPacket;
 
           // used for sending packets
           bool mXORedParityToNow;               // only used on buffered packets being sent over the wire to keep track of the current parity state to "this" packet

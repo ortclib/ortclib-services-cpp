@@ -168,9 +168,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      class ServiceThread;
-      typedef boost::shared_ptr<ServiceThread> ServiceThreadPtr;
-      typedef boost::weak_ptr<ServiceThread> ServiceThreadWeakPtr;
+      ZS_DECLARE_CLASS_PTR(ServiceThread)
 
       class ServiceThread
       {

@@ -56,7 +56,6 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitor::DNSMonitor(IMessageQueuePtr queue) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
         mCtx(NULL)
       {
       }

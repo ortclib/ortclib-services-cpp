@@ -54,37 +54,14 @@ namespace openpeer
 
     namespace internal
     {
-      class DNSQuery;
-      typedef boost::shared_ptr<DNSQuery> DNSQueryPtr;
-      typedef boost::weak_ptr<DNSQuery> DNSQueryWeakPtr;
-
-      class DNSAQuery;
-      typedef boost::shared_ptr<DNSAQuery> DNSAQueryPtr;
-      typedef boost::weak_ptr<DNSAQuery> DNSAQueryWeakPtr;
-
-      class DNSAAAAQuery;
-      typedef boost::shared_ptr<DNSAAAAQuery> DNSAAAAQueryPtr;
-      typedef boost::weak_ptr<DNSAAAAQuery> DNSAAAAQueryWeakPtr;
-
-      class DNSSRVQuery;
-      typedef boost::shared_ptr<DNSSRVQuery> DNSSRVQueryPtr;
-      typedef boost::weak_ptr<DNSSRVQuery> DNSSRVQueryWeakPtr;
-
-      class DNSAorAAAAQuery;
-      typedef boost::shared_ptr<DNSAorAAAAQuery> DNSAorAAAAQueryPtr;
-      typedef boost::weak_ptr<DNSAorAAAAQuery> DNSAorAAAAQueryWeakPtr;
-
-      class DNSSRVResolverQuery;
-      typedef boost::shared_ptr<DNSSRVResolverQuery> DNSSRVResolverQueryPtr;
-      typedef boost::weak_ptr<DNSSRVResolverQuery> DNSSRVResolverQueryWeakPtr;
-
-      class DNSInstantResultQuery;
-      typedef boost::shared_ptr<DNSInstantResultQuery> DNSInstantResultQueryPtr;
-      typedef boost::weak_ptr<DNSInstantResultQuery> DNSInstantResultQueryWeakPtr;
-
-      class DNSListQuery;
-      typedef boost::shared_ptr<DNSListQuery> DNSListQueryPtr;
-      typedef boost::weak_ptr<DNSListQuery> DNSListQueryWeakPtr;
+      ZS_DECLARE_CLASS_PTR(DNSQuery)
+      ZS_DECLARE_CLASS_PTR(DNSAQuery)
+      ZS_DECLARE_CLASS_PTR(DNSAAAAQuery)
+      ZS_DECLARE_CLASS_PTR(DNSSRVQuery)
+      ZS_DECLARE_CLASS_PTR(DNSAorAAAAQuery)
+      ZS_DECLARE_CLASS_PTR(DNSSRVResolverQuery)
+      ZS_DECLARE_CLASS_PTR(DNSInstantResultQuery)
+      ZS_DECLARE_CLASS_PTR(DNSListQuery)
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -367,9 +344,7 @@ namespace openpeer
         // this indirection where a strong reference is maintained to that
         // object with a weak reference to the real object thus the DNSQuery
         // can be cancelled by just deleted the DNSQuery object.
-        class DNSIndirectReference;
-        typedef boost::shared_ptr<DNSIndirectReference> DNSIndirectReferencePtr;
-        typedef boost::weak_ptr<DNSIndirectReference> DNSIndirectReferenceWeakPtr;
+        ZS_DECLARE_CLASS_PTR(DNSIndirectReference)
 
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------

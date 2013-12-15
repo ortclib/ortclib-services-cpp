@@ -131,7 +131,6 @@ namespace openpeer
 
     interaction IRUDPChannelDelegate
     {
-      typedef services::IRUDPChannelPtr IRUDPChannelPtr;
       typedef IRUDPChannel::RUDPChannelStates RUDPChannelStates;
 
       virtual void onRDUPChannelStateChanged(

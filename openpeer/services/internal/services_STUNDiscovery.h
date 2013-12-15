@@ -121,8 +121,7 @@ namespace openpeer
         virtual void onSTUNRequesterSendPacket(
                                                ISTUNRequesterPtr requester,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                );
 
         virtual bool handleSTUNRequesterResponse(

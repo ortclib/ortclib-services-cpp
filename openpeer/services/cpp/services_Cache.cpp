@@ -69,7 +69,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       CachePtr Cache::convert(ICachePtr cache)
       {
-        return boost::dynamic_pointer_cast<Cache>(cache);
+        return dynamic_pointer_cast<Cache>(cache);
       }
 
       //-----------------------------------------------------------------------

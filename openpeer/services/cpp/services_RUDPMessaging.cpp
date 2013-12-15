@@ -106,7 +106,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr RUDPMessaging::convert(IRUDPMessagingPtr messaging)
       {
-        return boost::dynamic_pointer_cast<RUDPMessaging>(messaging);
+        return dynamic_pointer_cast<RUDPMessaging>(messaging);
       }
 
       //-----------------------------------------------------------------------

@@ -55,13 +55,9 @@ namespace openpeer
 
     interaction IICESocket
     {
-      struct Candidate;
-      struct TURNServerInfo;
-      struct STUNServerInfo;
-
-      typedef boost::shared_ptr<Candidate> CandidatePtr;
-      typedef boost::shared_ptr<TURNServerInfo> TURNServerInfoPtr;
-      typedef boost::shared_ptr<STUNServerInfo> STUNServerInfoPtr;
+      ZS_DECLARE_STRUCT_PTR(Candidate)
+      ZS_DECLARE_STRUCT_PTR(TURNServerInfo)
+      ZS_DECLARE_STRUCT_PTR(STUNServerInfo)
 
       enum ICESocketStates
       {

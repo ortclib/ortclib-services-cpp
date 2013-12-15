@@ -63,9 +63,8 @@ namespace openpeer
         friend class HTTPGlobalSafeReference;
         friend interaction IHTTPFactory;
 
-        class HTTPQuery;
-        typedef boost::shared_ptr<HTTPQuery> HTTPQueryPtr;
-        typedef boost::weak_ptr<HTTPQuery> HTTPQueryWeakPtr;
+        ZS_DECLARE_CLASS_PTR(HTTPQuery)
+
         friend class HTTPQuery;
 
       protected:

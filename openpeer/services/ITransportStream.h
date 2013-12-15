@@ -47,12 +47,12 @@ namespace openpeer
 
     interaction ITransportStream
     {
+      ZS_DECLARE_INTERACTION_PTR(StreamHeader)
+
       interaction StreamHeader
       {
         virtual ~StreamHeader() {}  // needs virtual method to ensure dynamic casting works
       };
-      typedef boost::shared_ptr<StreamHeader> StreamHeaderPtr;
-      typedef boost::weak_ptr<StreamHeader> StreamHeaderWeakPtr;
 
       enum Endians
       {

@@ -99,7 +99,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TransportStreamPtr TransportStream::convert(ITransportStreamPtr stream)
       {
-        return boost::dynamic_pointer_cast<TransportStream>(stream);
+        return dynamic_pointer_cast<TransportStream>(stream);
       }
 
       //-----------------------------------------------------------------------

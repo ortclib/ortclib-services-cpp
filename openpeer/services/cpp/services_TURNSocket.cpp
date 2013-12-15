@@ -210,7 +210,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TURNSocketPtr TURNSocket::convert(ITURNSocketPtr socket)
       {
-        return boost::dynamic_pointer_cast<TURNSocket>(socket);
+        return dynamic_pointer_cast<TURNSocket>(socket);
       }
 
       //-----------------------------------------------------------------------
@@ -413,7 +413,7 @@ namespace openpeer
           sendData->mData = buffer;
           sendData->mDataLength = bufferLengthInBytes;
 
-          sendData->packetize(packet, packetLengthInBytes, STUNPacket::RFC_5766_TURN);
+          SecureByteBlockPtr packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
 
           // scope: we need to check if there is a permission set to be able to even contact this address
           {
@@ -425,7 +425,7 @@ namespace openpeer
               PermissionPtr permission = Permission::create();
 
               permission->mPeerAddress = destination;
-              permission->mPendingData.push_back(std::pair<boost::shared_array<BYTE>, size_t>(packet, packetLengthInBytes));
+              permission->mPendingData.push_back(packet);
 
               mPermissions[destination] = permission;
 
@@ -439,7 +439,7 @@ namespace openpeer
 
             if (!permission->mInstalled) {
               // the permission hasn't been installed yet so we still can't send the data...
-              permission->mPendingData.push_back(std::pair<boost::shared_array<BYTE>, size_t>(packet, packetLengthInBytes));
+              permission->mPendingData.push_back(packet);
               return true;
             }
           }
@@ -618,8 +618,7 @@ namespace openpeer
       void TURNSocket::onSTUNRequesterSendPacket(
                                                  ISTUNRequesterPtr requester,
                                                  IPAddress destination,
-                                                 boost::shared_array<BYTE> packet,
-                                                 size_t packetLengthInBytes
+                                                 SecureByteBlockPtr packet
                                                  )
       {
         ServerPtr server;
@@ -652,7 +651,7 @@ namespace openpeer
           }
         }
 
-        sendPacketOrDopPacketIfBufferFull(server, packet.get(), packetLengthInBytes);
+        sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }
 
       //-----------------------------------------------------------------------
@@ -1934,7 +1933,7 @@ namespace openpeer
               // we have to deliver any pending packets now...
               for (Permission::PendingDataList::iterator pendingIter = (*iter).second->mPendingData.begin(); pendingIter != (*iter).second->mPendingData.end(); ++pendingIter) {
                 // this is in a format ready to go (post STUN encoded already)...
-                tempList.push_back(std::pair<boost::shared_array<BYTE>, size_t>((*pendingIter).first, (*pendingIter).second));
+                tempList.push_back(*pendingIter);
               }
               // clear out all the pending data, we have sent what we possibly can...
               (*iter).second->mPendingData.clear();
@@ -1944,7 +1943,7 @@ namespace openpeer
 
         // now we can send out those permissions while not in the context of a lock
         for (Permission::PendingDataList::iterator iter = tempList.begin(); iter != tempList.end(); ++iter) {
-          sendPacketOrDopPacketIfBufferFull(mActiveServer, (*iter).first.get(), (*iter).second);
+          sendPacketOrDopPacketIfBufferFull(mActiveServer, *(*iter), (*iter)->SizeInBytes());
         }
         return true;
       }

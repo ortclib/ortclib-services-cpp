@@ -56,9 +56,7 @@ namespace openpeer
 
       interaction ISTUNRequesterForSTUNRequesterManager
       {
-        typedef ISTUNRequesterForSTUNRequesterManager ForSTUNRequesterManager;
-        typedef shared_ptr<ForSTUNRequesterManager> ForSTUNRequesterManagerPtr;
-        typedef weak_ptr<ForSTUNRequesterManager> ForSTUNRequesterManagerWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterForSTUNRequesterManager, ForSTUNRequesterManager)
 
         virtual PUID getID() const = 0;
 
@@ -85,9 +83,7 @@ namespace openpeer
       public:
         friend interaction ISTUNRequesterFactory;
 
-        typedef ISTUNRequesterManagerForSTUNRequester UseSTUNRequesterManager;
-        typedef shared_ptr<UseSTUNRequesterManager> UseSTUNRequesterManagerPtr;
-        typedef weak_ptr<UseSTUNRequesterManager> UseSTUNRequesterManagerWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, UseSTUNRequesterManager)
 
       protected:
         STUNRequester(

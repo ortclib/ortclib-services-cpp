@@ -51,6 +51,11 @@ namespace openpeer
 
     interaction IDNS
     {
+      ZS_DECLARE_STRUCT_PTR(AResult)
+
+      ZS_DECLARE_STRUCT_PTR(SRVResult)
+      ZS_DECLARE_TYPEDEF_PTR(std::list<SRVResultPtr>, SRVResultList)
+
       //-----------------------------------------------------------------------
       struct AResult
       {
@@ -60,14 +65,15 @@ namespace openpeer
         UINT   mTTL;
         IPAddressList mIPAddresses;
       };
-      typedef boost::shared_ptr<AResult> AResultPtr;
 
-      typedef AResult AAAAResult;
-      typedef AResultPtr AAAAResultPtr;
+      ZS_DECLARE_TYPEDEF_PTR(AResult, AAAAResult)
 
       //-----------------------------------------------------------------------
       struct SRVResult
       {
+        ZS_DECLARE_STRUCT_PTR(SRVRecord)
+        ZS_DECLARE_TYPEDEF_PTR(std::list<SRVRecord>, SRVRecordList)
+
         struct SRVRecord
         {
           String mName;
@@ -79,17 +85,12 @@ namespace openpeer
           AAAAResultPtr mAAAAResult;
         };
 
-        typedef boost::shared_ptr<SRVRecord> SRVRecordPtr;
-        typedef std::list<SRVRecord> SRVRecordList;
-
         String mName;
         String mService;
         String mProtocol;
         UINT   mTTL;
         SRVRecordList mRecords;
       };
-      typedef boost::shared_ptr<SRVResult> SRVResultPtr;
-      typedef std::list<SRVResultPtr> SRVResultList;
 
       enum SRVLookupTypes {
         SRVLookupType_LookupOnly =               0x0000,                                                                // just do the basic SRV lookup and do not resolve any results or perform any fallback lookups
@@ -227,12 +228,9 @@ namespace openpeer
 
     interaction IDNSQuery
     {
-      typedef IDNS::AResult AResult;
-      typedef IDNS::AResultPtr AResultPtr;
-      typedef IDNS::AAAAResult AAAAResult;
-      typedef IDNS::AAAAResultPtr AAAAResultPtr;
-      typedef IDNS::SRVResult SRVResult;
-      typedef IDNS::SRVResultPtr SRVResultPtr;
+      ZS_DECLARE_TYPEDEF_PTR(IDNS::AResult, AResult)
+      ZS_DECLARE_TYPEDEF_PTR(IDNS::AAAAResult, AAAAResult)
+      ZS_DECLARE_TYPEDEF_PTR(IDNS::SRVResult, SRVResult)
 
       virtual PUID getID() const = 0;
 
@@ -260,8 +258,6 @@ namespace openpeer
 
     interaction IDNSDelegate
     {
-      typedef services::IDNSQueryPtr IDNSQueryPtr;
-
       virtual void onLookupCompleted(IDNSQueryPtr query) = 0;
     };
   }

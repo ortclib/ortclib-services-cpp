@@ -34,64 +34,9 @@
 #include <zsLib/types.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
-#include <cryptopp/secblock.h>
 
-namespace CryptoPP
-{
-  template <class T, bool T_Align16 = false>
-  class AllocatorWithNul : public AllocatorBase<T>
-  {
-  public:
-    CRYPTOPP_INHERIT_ALLOCATOR_TYPES
-
-    pointer allocate(size_type n, const void * = NULL)
-    {
-      AllocatorBase<T>::CheckSize(n);
-      if (n == 0)
-        return NULL;
-
-      pointer result = NULL;
-
-#if CRYPTOPP_BOOL_ALIGN16_ENABLED
-      if (T_Align16 && n*sizeof(T) >= 16) {
-        result = (pointer)AlignedAllocate(n*sizeof(T) + sizeof(T));
-        memset(result, 0, n*sizeof(T) + sizeof(T));
-        return result;
-      }
-#endif
-
-      result = (pointer)UnalignedAllocate(n*sizeof(T) + sizeof(T));
-      memset(result, 0, n*sizeof(T) + sizeof(T));
-      return result;
-    }
-
-    void deallocate(void *p, size_type n)
-    {
-      SecureWipeArray((pointer)p, n);
-
-#if CRYPTOPP_BOOL_ALIGN16_ENABLED
-      if (T_Align16 && n*sizeof(T) >= 16)
-        return AlignedDeallocate(p);
-#endif
-
-      UnalignedDeallocate(p);
-    }
-
-    pointer reallocate(T *p, size_type oldSize, size_type newSize, bool preserve)
-    {
-      return StandardReallocate(*this, p, oldSize, newSize, preserve);
-    }
-
-    // VS.NET STL enforces the policy of "All STL-compliant allocators have to provide a
-    // template class member called rebind".
-    template <class U> struct rebind { typedef AllocatorWithNul<U, T_Align16> other; };
-#if _MSC_VER >= 1500
-    AllocatorWithNul() {}
-    template <class U, bool A> AllocatorWithNul(const AllocatorWithNul<U, A> &) {}
-#endif
-  };
-
-}
+// special case where CryptoPP extension class is needed
+#include <openpeer/services/internal/services_AllocatorWithNul.h>
 
 namespace openpeer
 {
@@ -119,247 +64,75 @@ namespace openpeer
     using zsLib::Duration;
     using zsLib::Seconds;
     using zsLib::IPAddress;
-    using zsLib::Socket;
-    using zsLib::SocketPtr;
-    using zsLib::ISocketDelegate;
-    using zsLib::ISocketDelegatePtr;
     using zsLib::RecursiveLock;
-    using zsLib::IMessageQueuePtr;
     using zsLib::Log;
-    using zsLib::XML::Element;
-    using zsLib::XML::ElementPtr;
-    using zsLib::XML::Document;
-    using zsLib::XML::DocumentPtr;
-    using boost::shared_ptr;
-    using boost::weak_ptr;
+
     using boost::dynamic_pointer_cast;
 
-    typedef CryptoPP::SecBlock<byte, CryptoPP::AllocatorWithNul<byte> > SecureByteBlock;
-    typedef boost::shared_ptr<SecureByteBlock> SecureByteBlockPtr;
-    typedef boost::weak_ptr<SecureByteBlock> SecureByteBlockWeakPtr;
+    ZS_DECLARE_USING_PTR(zsLib, Socket)
+    ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
+    ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
 
-    interaction ICache;
-    typedef boost::shared_ptr<ICache> ICachePtr;
-    typedef boost::weak_ptr<ICache> ICacheWeakPtr;
+    ZS_DECLARE_USING_PTR(zsLib::XML, Element)
+    ZS_DECLARE_USING_PTR(zsLib::XML, Document)
 
-    interaction ICacheDelegate;
-    typedef boost::shared_ptr<ICacheDelegate> ICacheDelegatePtr;
-    typedef boost::weak_ptr<ICacheDelegate> ICacheDelegateWeakPtr;
+    typedef CryptoPP::SecBlock<byte, CryptoPP::AllocatorWithNul<byte> > SecureByteBlockWithNulAllocator;
+    ZS_DECLARE_TYPEDEF_PTR(SecureByteBlockWithNulAllocator, SecureByteBlock)
 
-    interaction ICanonicalXML;
-    typedef boost::shared_ptr<ICanonicalXML> ICanonicalXMLPtr;
-    typedef boost::weak_ptr<ICanonicalXML> ICanonicalXMLWeakPtr;
+    ZS_DECLARE_INTERACTION_PTR(ICache)
+    ZS_DECLARE_INTERACTION_PTR(ICacheDelegate)
+    ZS_DECLARE_INTERACTION_PTR(ICanonicalXML)
+    ZS_DECLARE_INTERACTION_PTR(IDHKeyDomain)
+    ZS_DECLARE_INTERACTION_PTR(IDHPrivateKey)
+    ZS_DECLARE_INTERACTION_PTR(IDHPublicKey)
+    ZS_DECLARE_INTERACTION_PTR(IDNS)
+    ZS_DECLARE_INTERACTION_PTR(IDNSQuery)
+    ZS_DECLARE_INTERACTION_PTR(IICESocket)
+    ZS_DECLARE_INTERACTION_PTR(IICESocketSession)
+    ZS_DECLARE_INTERACTION_PTR(IHTTP)
+    ZS_DECLARE_INTERACTION_PTR(IHTTPQuery)
+    ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel)
+    ZS_DECLARE_INTERACTION_PTR(IRSAPrivateKey)
+    ZS_DECLARE_INTERACTION_PTR(IRSAPublicKey)
+    ZS_DECLARE_INTERACTION_PTR(IRUDPListener)
+    ZS_DECLARE_INTERACTION_PTR(IRUDPMessaging)
+    ZS_DECLARE_INTERACTION_PTR(IRUDPChannel)
+    ZS_DECLARE_INTERACTION_PTR(IRUDPICESocketSession)
+    ZS_DECLARE_INTERACTION_PTR(ISTUNDiscovery)
+    ZS_DECLARE_INTERACTION_PTR(ISTUNRequester)
+    ZS_DECLARE_INTERACTION_PTR(ITCPMessaging)
+    ZS_DECLARE_INTERACTION_PTR(ITransportStream)
+    ZS_DECLARE_INTERACTION_PTR(ITransportStreamReader)
+    ZS_DECLARE_INTERACTION_PTR(ITransportStreamWriter)
+    ZS_DECLARE_INTERACTION_PTR(ITURNSocket)
 
-    interaction IDHKeyDomain;
-    typedef boost::shared_ptr<IDHKeyDomain> IDHKeyDomainPtr;
-    typedef boost::weak_ptr<IDHKeyDomain> IDHKeyDomainWeakPtr;
+    ZS_DECLARE_INTERACTION_PROXY(IDNSDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IICESocketDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IICESocketSessionDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IHTTPQueryDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IMessageLayerSecurityChannelDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPListenerDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPMessagingDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPICESocketSessionDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ISTUNDiscoveryDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ISTUNRequesterDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ITCPMessagingDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamReaderDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamWriterDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(ITURNSocketDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IWakeDelegate)
 
-    interaction IDHPrivateKey;
-    typedef boost::shared_ptr<IDHPrivateKey> IDHPrivateKeyPtr;
-    typedef boost::weak_ptr<IDHPrivateKey> IDHPrivateKeyWeakPtr;
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSubscription, IICESocketDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSessionSubscription, IICESocketSessionDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IMessageLayerSecurityChannelSubscription, IMessageLayerSecurityChannelDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IRUDPICESocketSessionSubscription, IRUDPICESocketSessionDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITCPMessagingSubscription, ITCPMessagingDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamReaderSubscription, ITransportStreamReaderDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamWriterSubscription, ITransportStreamWriterDelegate)
 
-    interaction IDHPublicKey;
-    typedef boost::shared_ptr<IDHPublicKey> IDHPublicKeyPtr;
-    typedef boost::weak_ptr<IDHPublicKey> IDHPublicKeyWeakPtr;
+    ZS_DECLARE_STRUCT_PTR(RUDPPacket)
+    ZS_DECLARE_STRUCT_PTR(STUNPacket)
 
-    interaction IDNS;
-    typedef boost::shared_ptr<IDNS> IDNSPtr;
-    typedef boost::weak_ptr<IDNS> IDNSWeakPtr;
-
-    interaction IDNSDelegate;
-    typedef boost::shared_ptr<IDNSDelegate> IDNSDelegatePtr;
-    typedef boost::weak_ptr<IDNSDelegate> IDNSDelegateWeakPtr;
-    typedef zsLib::Proxy<IDNSDelegate> IDNSDelegateProxy;
-
-    interaction IDNSQuery;
-    typedef boost::shared_ptr<IDNSQuery> IDNSQueryPtr;
-    typedef boost::weak_ptr<IDNSQuery> IDNSQueryWeakPtr;
-
-    interaction IICESocket;
-    typedef boost::shared_ptr<IICESocket> IICESocketPtr;
-    typedef boost::weak_ptr<IICESocket> IICESocketWeakPtr;
-
-    interaction IICESocketDelegate;
-    typedef boost::shared_ptr<IICESocketDelegate> IICESocketDelegatePtr;
-    typedef boost::weak_ptr<IICESocketDelegate> IICESocketDelegateWeakPtr;
-    typedef zsLib::Proxy<IICESocketDelegate> IICESocketDelegateProxy;
-
-    interaction IICESocketSubscription;
-    typedef boost::shared_ptr<IICESocketSubscription> IICESocketSubscriptionPtr;
-    typedef boost::weak_ptr<IICESocketSubscription> IICESocketSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<IICESocketDelegate, IICESocketSubscription> IICESocketDelegateSubscriptions;
-
-    interaction IICESocketSession;
-    typedef boost::shared_ptr<IICESocketSession> IICESocketSessionPtr;
-    typedef boost::weak_ptr<IICESocketSession> IICESocketSessionWeakPtr;
-
-    interaction IICESocketSessionDelegate;
-    typedef boost::shared_ptr<IICESocketSessionDelegate> IICESocketSessionDelegatePtr;
-    typedef boost::weak_ptr<IICESocketSessionDelegate> IICESocketSessionDelegateWeakPtr;
-    typedef zsLib::Proxy<IICESocketSessionDelegate> IICESocketSessionDelegateProxy;
-
-    interaction IICESocketSessionSubscription;
-    typedef boost::shared_ptr<IICESocketSessionSubscription> IICESocketSessionSubscriptionPtr;
-    typedef boost::weak_ptr<IICESocketSessionSubscription> IICESocketSessionSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<IICESocketSessionDelegate, IICESocketSessionSubscription> IICESocketSessionDelegateSubscriptions;
-
-    interaction IHTTP;
-    typedef boost::shared_ptr<IHTTP> IHTTPPtr;
-    typedef boost::weak_ptr<IHTTP> IHTTPWeakPtr;
-
-    interaction IHTTPQuery;
-    typedef boost::shared_ptr<IHTTPQuery> IHTTPQueryPtr;
-    typedef boost::weak_ptr<IHTTPQuery> IHTTPQueryWeakPtr;
-
-    interaction IHTTPQueryDelegate;
-    typedef boost::shared_ptr<IHTTPQueryDelegate> IHTTPQueryDelegatePtr;
-    typedef boost::weak_ptr<IHTTPQueryDelegate> IHTTPQueryDelegateWeakPtr;
-    typedef zsLib::Proxy<IHTTPQueryDelegate> IHTTPQueryDelegateProxy;
-
-    interaction IMessageLayerSecurityChannel;
-    typedef boost::shared_ptr<IMessageLayerSecurityChannel> IMessageLayerSecurityChannelPtr;
-    typedef boost::weak_ptr<IMessageLayerSecurityChannel> IMessageLayerSecurityChannelWeakPtr;
-
-    interaction IMessageLayerSecurityChannelDelegate;
-    typedef boost::shared_ptr<IMessageLayerSecurityChannelDelegate> IMessageLayerSecurityChannelDelegatePtr;
-    typedef boost::weak_ptr<IMessageLayerSecurityChannelDelegate> IMessageLayerSecurityChannelDelegateWeakPtr;
-    typedef zsLib::Proxy<IMessageLayerSecurityChannelDelegate> IMessageLayerSecurityChannelDelegateProxy;
-
-    interaction IMessageLayerSecurityChannelSubscription;
-    typedef boost::shared_ptr<IMessageLayerSecurityChannelSubscription> IMessageLayerSecurityChannelSubscriptionPtr;
-    typedef boost::weak_ptr<IMessageLayerSecurityChannelSubscription> IMessageLayerSecurityChannelSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<IMessageLayerSecurityChannelDelegate, IMessageLayerSecurityChannelSubscription> IMessageLayerSecurityChannelDelegateSubscriptions;
-
-    interaction IRSAPrivateKey;
-    typedef boost::shared_ptr<IRSAPrivateKey> IRSAPrivateKeyPtr;
-    typedef boost::weak_ptr<IRSAPrivateKey> IRSAPrivateKeyWeakPtr;
-
-    interaction IRSAPublicKey;
-    typedef boost::shared_ptr<IRSAPublicKey> IRSAPublicKeyPtr;
-    typedef boost::weak_ptr<IRSAPublicKey> IRSAPublicKeyWeakPtr;
-    
-    interaction IRUDPListener;
-    typedef boost::shared_ptr<IRUDPListener> IRUDPListenerPtr;
-    typedef boost::weak_ptr<IRUDPListener> IRUDPListenerWeakPtr;
-
-    interaction IRUDPListenerDelegate;
-    typedef boost::shared_ptr<IRUDPListenerDelegate> IRUDPListenerDelegatePtr;
-    typedef boost::weak_ptr<IRUDPListenerDelegate> IRUDPListenerDelegateWeakPtr;
-    typedef zsLib::Proxy<IRUDPListenerDelegate> IRUDPListenerDelegateProxy;
-
-    interaction IRUDPMessaging;
-    typedef boost::shared_ptr<IRUDPMessaging> IRUDPMessagingPtr;
-    typedef boost::weak_ptr<IRUDPMessaging> IRUDPMessagingWeakPtr;
-
-    interaction IRUDPMessagingDelegate;
-    typedef boost::shared_ptr<IRUDPMessagingDelegate> IRUDPMessagingDelegatePtr;
-    typedef boost::weak_ptr<IRUDPMessagingDelegate> IRUDPMessagingDelegateWeakPtr;
-    typedef zsLib::Proxy<IRUDPMessagingDelegate> IRUDPMessagingDelegateProxy;
-
-    struct RUDPPacket;
-    typedef boost::shared_ptr<RUDPPacket> RUDPPacketPtr;
-    typedef boost::weak_ptr<RUDPPacket> RUDPPacketWeakPtr;
-
-    interaction IRUDPChannel;
-    typedef boost::shared_ptr<IRUDPChannel> IRUDPChannelPtr;
-    typedef boost::weak_ptr<IRUDPChannel> IRUDPChannelWeakPtr;
-
-    interaction IRUDPChannelDelegate;
-    typedef boost::shared_ptr<IRUDPChannelDelegate> IRUDPChannelDelegatePtr;
-    typedef boost::weak_ptr<IRUDPChannelDelegate> IRUDPChannelDelegateWeakPtr;
-    typedef zsLib::Proxy<IRUDPChannelDelegate> IRUDPChannelDelegateProxy;
-
-    interaction IRUDPICESocketSession;
-    typedef boost::shared_ptr<IRUDPICESocketSession> IRUDPICESocketSessionPtr;
-    typedef boost::weak_ptr<IRUDPICESocketSession> IRUDPICESocketSessionWeakPtr;
-
-    interaction IRUDPICESocketSessionSubscription;
-    typedef boost::shared_ptr<IRUDPICESocketSessionSubscription> IRUDPICESocketSessionSubscriptionPtr;
-    typedef boost::weak_ptr<IRUDPICESocketSessionSubscription> IRUDPICESocketSessionSubscriptionWeakPtr;
-
-    interaction IRUDPICESocketSessionDelegate;
-    typedef boost::shared_ptr<IRUDPICESocketSessionDelegate> IRUDPICESocketSessionDelegatePtr;
-    typedef boost::weak_ptr<IRUDPICESocketSessionDelegate> IRUDPICESocketSessionDelegateWeakPtr;
-    typedef zsLib::Proxy<IRUDPICESocketSessionDelegate> IRUDPICESocketSessionDelegateProxy;
-    typedef zsLib::ProxySubscriptions<IRUDPICESocketSessionDelegate, IRUDPICESocketSessionSubscription> IRUDPICESocketSessionDelegateSubscriptions;
-
-    interaction ISTUNDiscovery;
-    typedef boost::shared_ptr<ISTUNDiscovery> ISTUNDiscoveryPtr;
-    typedef boost::weak_ptr<ISTUNDiscovery> ISTUNDiscoveryWeakPtr;
-
-    interaction ISTUNDiscoveryDelegate;
-    typedef boost::shared_ptr<ISTUNDiscoveryDelegate> ISTUNDiscoveryDelegatePtr;
-    typedef boost::weak_ptr<ISTUNDiscoveryDelegate> ISTUNDiscoveryDelegateWeakPtr;
-    typedef zsLib::Proxy<ISTUNDiscoveryDelegate> ISTUNDiscoveryDelegateProxy;
-
-    interaction ISTUNRequester;
-    typedef boost::shared_ptr<ISTUNRequester> ISTUNRequesterPtr;
-    typedef boost::weak_ptr<ISTUNRequester> ISTUNRequesterWeakPtr;
-
-    interaction ISTUNRequesterDelegate;
-    typedef boost::shared_ptr<ISTUNRequesterDelegate> ISTUNRequesterDelegatePtr;
-    typedef boost::weak_ptr<ISTUNRequesterDelegate> ISTUNRequesterDelegateWeakPtr;
-    typedef zsLib::Proxy<ISTUNRequesterDelegate> ISTUNRequesterDelegateProxy;
-
-    struct STUNPacket;
-    typedef boost::shared_ptr<STUNPacket> STUNPacketPtr;
-    typedef boost::weak_ptr<STUNPacket> STUNPacketWeakPtr;
-
-    interaction ITCPMessaging;
-    typedef boost::shared_ptr<ITCPMessaging> ITCPMessagingPtr;
-    typedef boost::weak_ptr<ITCPMessaging> ITCPMessagingWeakPtr;
-
-    interaction ITCPMessagingDelegate;
-    typedef boost::shared_ptr<ITCPMessagingDelegate> ITCPMessagingDelegatePtr;
-    typedef boost::weak_ptr<ITCPMessagingDelegate> ITCPMessagingDelegateWeakPtr;
-
-    interaction ITCPMessagingSubscription;
-    typedef boost::shared_ptr<ITCPMessagingSubscription> ITCPMessagingSubscriptionPtr;
-    typedef boost::weak_ptr<ITCPMessagingSubscription> ITCPMessagingSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<ITCPMessagingDelegate, ITCPMessagingSubscription> ITCPMessagingDelegateSubscriptions;
-
-    interaction ITransportStream;
-    typedef boost::shared_ptr<ITransportStream> ITransportStreamPtr;
-    typedef boost::weak_ptr<ITransportStream> ITransportStreamWeakPtr;
-
-    interaction ITransportStreamWriter;
-    typedef boost::shared_ptr<ITransportStreamWriter> ITransportStreamWriterPtr;
-    typedef boost::weak_ptr<ITransportStreamWriter> ITransportStreamWriterWeakPtr;
-
-    interaction ITransportStreamWriterDelegate;
-    typedef boost::shared_ptr<ITransportStreamWriterDelegate> ITransportStreamWriterDelegatePtr;
-    typedef boost::weak_ptr<ITransportStreamWriterDelegate> ITransportStreamWriterDelegateWeakPtr;
-
-    interaction ITransportStreamWriterSubscription;
-    typedef boost::shared_ptr<ITransportStreamWriterSubscription> ITransportStreamWriterSubscriptionPtr;
-    typedef boost::weak_ptr<ITransportStreamWriterSubscription> ITransportStreamWriterSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<ITransportStreamWriterDelegate, ITransportStreamWriterSubscription> ITransportStreamWriterDelegateSubscriptions;
-
-    interaction ITransportStreamReader;
-    typedef boost::shared_ptr<ITransportStreamReader> ITransportStreamReaderPtr;
-    typedef boost::weak_ptr<ITransportStreamReader> ITransportStreamReaderWeakPtr;
-
-    interaction ITransportStreamReaderDelegate;
-    typedef boost::shared_ptr<ITransportStreamReaderDelegate> ITransportStreamReaderDelegatePtr;
-    typedef boost::weak_ptr<ITransportStreamReaderDelegate> ITransportStreamReaderDelegateWeakPtr;
-
-    interaction ITransportStreamReaderSubscription;
-    typedef boost::shared_ptr<ITransportStreamReaderSubscription> ITransportStreamReaderSubscriptionPtr;
-    typedef boost::weak_ptr<ITransportStreamReaderSubscription> ITransportStreamReaderSubscriptionWeakPtr;
-    typedef zsLib::ProxySubscriptions<ITransportStreamReaderDelegate, ITransportStreamReaderSubscription> ITransportStreamReaderDelegateSubscriptions;
-
-    interaction ITURNSocket;
-    typedef boost::shared_ptr<ITURNSocket> ITURNSocketPtr;
-    typedef boost::weak_ptr<ITURNSocket> ITURNSocketWeakPtr;
-
-    interaction ITURNSocketDelegate;
-    typedef boost::shared_ptr<ITURNSocketDelegate> ITURNSocketDelegatePtr;
-    typedef boost::weak_ptr<ITURNSocketDelegate> ITURNSocketDelegateWeakPtr;
-    typedef zsLib::Proxy<ITURNSocketDelegate> ITURNSocketDelegateProxy;
-
-    interaction IWakeDelegate;
-    typedef boost::shared_ptr<IWakeDelegate> IWakeDelegatePtr;
-    typedef boost::weak_ptr<IWakeDelegate> IWakeDelegateWeakPtr;
-    typedef zsLib::Proxy<IWakeDelegate> IWakeDelegateProxy;
   }
 }

@@ -65,9 +65,7 @@ namespace openpeer
 
       interaction IICESocketForICESocketSession
       {
-        typedef IICESocketForICESocketSession ForICESocketSession;
-        typedef shared_ptr<ForICESocketSession> ForICESocketSessionPtr;
-        typedef weak_ptr<ForICESocketSession> ForICESocketSessionWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IICESocketForICESocketSession, ForICESocketSession)
 
         virtual IMessageQueuePtr getMessageQueue() const = 0;
 
@@ -110,9 +108,11 @@ namespace openpeer
         friend interaction IICESocketFactory;
         friend interaction IICESocket;
 
-        typedef IICESocketSessionForICESocket UseICESocketSession;
-        typedef shared_ptr<UseICESocketSession> UseICESocketSessionPtr;
-        typedef weak_ptr<UseICESocketSession> UseICESocketSessionWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IICESocketSessionForICESocket, UseICESocketSession)
+
+        ZS_DECLARE_STRUCT_PTR(TURNInfo)
+        ZS_DECLARE_STRUCT_PTR(STUNInfo)
+        ZS_DECLARE_STRUCT_PTR(LocalSocket)
 
         typedef boost::shared_array<BYTE> RecycledPacketBuffer;
         typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
@@ -156,9 +156,6 @@ namespace openpeer
                    );
         };
 
-        typedef boost::shared_ptr<TURNInfo> TURNInfoPtr;
-        typedef boost::shared_ptr<STUNInfo> STUNInfoPtr;
-
         typedef std::map<TURNInfoPtr, TURNInfoPtr> TURNInfoMap;
         typedef std::map<ITURNSocketPtr, TURNInfoPtr> TURNInfoSocketMap;
         typedef std::map<IPAddress, TURNInfoPtr> TURNInfoRelatedIPMap;
@@ -188,9 +185,6 @@ namespace openpeer
           void clearTURN(ITURNSocketPtr turnSocket);
           void clearSTUN(ISTUNDiscoveryPtr stunDiscovery);
         };
-
-        typedef boost::shared_ptr<LocalSocket> LocalSocketPtr;
-        typedef boost::weak_ptr<LocalSocket> LocalSocketWeakPtr;
 
         typedef IPAddress LocalIP;
         typedef std::map<LocalIP, LocalSocketPtr> LocalSocketIPAddressMap;
@@ -329,8 +323,7 @@ namespace openpeer
         virtual void onSTUNDiscoverySendPacket(
                                                ISTUNDiscoveryPtr discovery,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                );
 
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery);

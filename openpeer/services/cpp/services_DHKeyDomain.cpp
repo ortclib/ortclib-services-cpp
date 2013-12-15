@@ -384,13 +384,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DHKeyDomainPtr DHKeyDomain::convert(IDHKeyDomainPtr publicKey)
       {
-        return boost::dynamic_pointer_cast<DHKeyDomain>(publicKey);
+        return dynamic_pointer_cast<DHKeyDomain>(publicKey);
       }
 
       //-----------------------------------------------------------------------
       DHKeyDomainPtr DHKeyDomain::convert(ForDHPrivateKeyPtr object)
       {
-        return boost::dynamic_pointer_cast<DHKeyDomain>(object);
+        return dynamic_pointer_cast<DHKeyDomain>(object);
       }
 
       //-----------------------------------------------------------------------

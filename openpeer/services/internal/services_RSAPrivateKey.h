@@ -55,9 +55,7 @@ namespace openpeer
 
       interaction IRSAPrivateKeyForRSAPublicKey
       {
-        typedef IRSAPrivateKeyForRSAPublicKey ForPublicKey;
-        typedef shared_ptr<ForPublicKey> ForPublicKeyPtr;
-        typedef weak_ptr<ForPublicKey> ForPublicKeyWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRSAPrivateKeyForRSAPublicKey, ForPublicKey)
 
         static ForPublicKeyPtr generate(RSAPublicKeyPtr &outPublicKey);
 
@@ -80,9 +78,7 @@ namespace openpeer
         friend interaction IRSAPrivateKey;
         friend interaction IRSAPrivateKeyFactory;
 
-        typedef IRSAPublicKeyForRSAPrivateKey UsePublicKey;
-        typedef shared_ptr<UsePublicKey> UsePublicKeyPtr;
-        typedef weak_ptr<UsePublicKey> UsePublicKeyWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRSAPublicKeyForRSAPrivateKey, UsePublicKey)
 
         typedef CryptoPP::RSA::PrivateKey PrivateKey;
 

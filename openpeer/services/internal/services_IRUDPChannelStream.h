@@ -170,8 +170,7 @@ namespace openpeer
         //          it will return false.
         virtual bool handlePacket(
                                   RUDPPacketPtr packet,
-                                  boost::shared_array<BYTE> originalBuffer,
-                                  size_t originalBufferLengthInBytes,
+                                  SecureByteBlockPtr originalBuffer,
                                   bool ecnMarked
                                   ) = 0;
 

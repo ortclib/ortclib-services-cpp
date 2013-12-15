@@ -459,9 +459,7 @@ namespace openpeer
       #pragma mark LoggerThread
       #pragma mark
 
-      class LoggerThread;
-      typedef boost::shared_ptr<LoggerThread> LoggerThreadPtr;
-      typedef boost::weak_ptr<LoggerThread> LoggerThreadWeakPtr;
+      ZS_DECLARE_CLASS_PTR(LoggerThread)
 
       //-----------------------------------------------------------------------
       class LoggerThread
@@ -508,9 +506,7 @@ namespace openpeer
       #pragma mark LogLevelLogger
       #pragma mark
 
-      class LogLevelLogger;
-      typedef boost::shared_ptr<LogLevelLogger> LogLevelLoggerPtr;
-      typedef boost::weak_ptr<LogLevelLogger> LogLevelLoggerWeakPtr;
+      ZS_DECLARE_CLASS_PTR(LogLevelLogger)
 
       //-----------------------------------------------------------------------
       class LogLevelLogger : public ILogDelegate
@@ -627,9 +623,7 @@ namespace openpeer
       #pragma mark StdOutLogger
       #pragma mark
 
-      class StdOutLogger;
-      typedef boost::shared_ptr<StdOutLogger> StdOutLoggerPtr;
-      typedef boost::weak_ptr<StdOutLogger> StdOutLoggerWeakPtr;
+      ZS_DECLARE_CLASS_PTR(StdOutLogger)
 
       class StdOutLogger : public ILogDelegate
       {
@@ -716,9 +710,7 @@ namespace openpeer
       #pragma mark FileLogger
       #pragma mark
 
-      class FileLogger;
-      typedef boost::shared_ptr<FileLogger> FileLoggerPtr;
-      typedef boost::weak_ptr<FileLogger> FileLoggerWeakPtr;
+      ZS_DECLARE_CLASS_PTR(FileLogger)
 
       class FileLogger : public ILogDelegate
       {
@@ -813,9 +805,7 @@ namespace openpeer
       #pragma mark DebuggerLogger
       #pragma mark
 
-      class DebuggerLogger;
-      typedef boost::shared_ptr<DebuggerLogger> DebuggerLoggerPtr;
-      typedef boost::weak_ptr<DebuggerLogger> DebuggerLoggerWeakPtr;
+      ZS_DECLARE_CLASS_PTR(DebuggerLogger)
 
       class DebuggerLogger : public ILogDelegate
       {
@@ -917,9 +907,7 @@ namespace openpeer
       #pragma mark TelnetLogger
       #pragma mark
 
-      class TelnetLogger;
-      typedef boost::shared_ptr<TelnetLogger> TelnetLoggerPtr;
-      typedef boost::weak_ptr<TelnetLogger> TelnetLoggerWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TelnetLogger)
 
       class TelnetLogger : public ILogDelegate,
                            public MessageQueueAssociator,

@@ -69,9 +69,7 @@ namespace openpeer
       public:
         friend interaction IRUDPListenerFactory;
 
-        typedef IRUDPChannelForRUDPListener UseRUDPChannel;
-        typedef shared_ptr<UseRUDPChannel> UseRUDPChannelPtr;
-        typedef weak_ptr<UseRUDPChannel> UseRUDPChannelWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPListener, UseRUDPChannel)
 
         typedef boost::shared_array<BYTE> RecycledPacketBuffer;
         typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;

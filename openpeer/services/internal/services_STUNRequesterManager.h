@@ -55,9 +55,7 @@ namespace openpeer
 
       interaction ISTUNRequesterManagerForSTUNRequester
       {
-        typedef ISTUNRequesterManagerForSTUNRequester ForSTUNRequester;
-        typedef shared_ptr<ForSTUNRequester> ForSTUNRequesterPtr;
-        typedef weak_ptr<ForSTUNRequester> ForSTUNRequesterWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, ForSTUNRequester)
 
         static ForSTUNRequesterPtr singleton();
 
@@ -85,9 +83,7 @@ namespace openpeer
         friend interaction ISTUNRequesterManager;
         friend interaction ISTUNRequesterManagerForSTUNRequester;
 
-        typedef ISTUNRequesterForSTUNRequesterManager UseSTUNRequester;
-        typedef shared_ptr<UseSTUNRequester> UseSTUNRequesterPtr;
-        typedef weak_ptr<UseSTUNRequester> UseSTUNRequesterWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterForSTUNRequesterManager, UseSTUNRequester)
 
         typedef std::pair<QWORD, QWORD> QWORDPair;
 

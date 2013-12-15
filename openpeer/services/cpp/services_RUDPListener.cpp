@@ -666,11 +666,9 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
-        boost::shared_array<BYTE> packetized;
-        size_t packetizedLength = 0;
-        stun->packetize(packetized, packetizedLength, STUNPacket::Method_Binding == stun->mMethod ? (stun->mPriorityIncluded ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN) : STUNPacket::RFC_draft_RUDP);
+        SecureByteBlockPtr packetized = stun->packetize(STUNPacket::Method_Binding == stun->mMethod ? (stun->mPriorityIncluded ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN) : STUNPacket::RFC_draft_RUDP);
 
-        return sendTo(destination, packetized.get(), packetizedLength);
+        return sendTo(destination, *packetized, packetized->SizeInBytes());
       }
 
       //-----------------------------------------------------------------------

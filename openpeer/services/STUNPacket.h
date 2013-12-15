@@ -248,11 +248,7 @@ namespace openpeer
       bool isLegal(RFCs rfc) const;
       RFCs guessRFC(RFCs allowedRFCs) const;
 
-      void packetize(
-                     boost::shared_array<BYTE> &outPacket,
-                     size_t &outPacketLengthInBytes,
-                     RFCs rfc
-                     );
+      SecureByteBlockPtr packetize(RFCs rfc);
 
       bool isValidResponseTo(
                              STUNPacketPtr stunRequest,

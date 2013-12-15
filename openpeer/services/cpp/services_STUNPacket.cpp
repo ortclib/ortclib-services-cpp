@@ -2481,15 +2481,11 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    void STUNPacket::packetize(
-                               boost::shared_array<BYTE> &outPacket,
-                               size_t &outPacketLengthInBytes,
-                               RFCs rfc
-                               )
+    SecureByteBlockPtr STUNPacket::packetize(RFCs rfc)
     {
       log(Log::Trace, "packetize");
 
-      outPacketLengthInBytes = OPENPEER_STUN_HEADER_SIZE_IN_BYTES;
+      size_t outPacketLengthInBytes = OPENPEER_STUN_HEADER_SIZE_IN_BYTES;
 
       // count the length of all the attributes when they are packetized
       {
@@ -2505,9 +2501,9 @@ namespace openpeer
 
       //**********************************************************************
       // now we know the packet size, we fill it up...
-      outPacket = boost::shared_array<BYTE>(new BYTE[outPacketLengthInBytes]);
+      SecureByteBlockPtr outPacket(new SecureByteBlock(outPacketLengthInBytes));
 
-      BYTE *packet = outPacket.get();
+      BYTE *packet = *outPacket;
       memset(packet, 0, outPacketLengthInBytes);
 
       //0                   1                   2                   3
@@ -2544,6 +2540,8 @@ namespace openpeer
           }
         }
       }
+
+      return outPacket;
     }
 
     //-------------------------------------------------------------------------

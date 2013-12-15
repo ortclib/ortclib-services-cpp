@@ -110,7 +110,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TCPMessagingPtr TCPMessaging::convert(ITCPMessagingPtr channel)
       {
-        return boost::dynamic_pointer_cast<TCPMessaging>(channel);
+        return dynamic_pointer_cast<TCPMessaging>(channel);
       }
 
       //-----------------------------------------------------------------------
@@ -149,7 +149,7 @@ namespace openpeer
         pThis->mThisWeak = pThis;
 
         int errorCode = 0;
-        pThis->mSocket = boost::dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
+        pThis->mSocket = dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
         if (!pThis->mSocket) {
           ZS_LOG_ERROR(Detail, pThis->log("failed to accept socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
@@ -814,7 +814,7 @@ namespace openpeer
     //-----------------------------------------------------------------------
     ITCPMessaging::ChannelHeaderPtr ITCPMessaging::ChannelHeader::convert(ITransportStream::StreamHeaderPtr header)
     {
-      return boost::dynamic_pointer_cast<ChannelHeader>(header);
+      return dynamic_pointer_cast<ChannelHeader>(header);
     }
 
   }

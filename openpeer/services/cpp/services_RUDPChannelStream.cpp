@@ -283,7 +283,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPChannelStreamPtr RUDPChannelStream::convert(IRUDPChannelStreamPtr stream)
       {
-        return boost::dynamic_pointer_cast<RUDPChannelStream>(stream);
+        return dynamic_pointer_cast<RUDPChannelStream>(stream);
       }
 
       //-----------------------------------------------------------------------
@@ -437,12 +437,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool RUDPChannelStream::handlePacket(
                                            RUDPPacketPtr packet,
-                                           boost::shared_array<BYTE> originalBuffer,
-                                           size_t originalBufferLengthInBytes,
+                                           SecureByteBlockPtr originalBuffer,
                                            bool ecnMarked
                                            )
       {
-        ZS_LOG_TRACE(log("handle packet called") + ZS_PARAM("size", originalBufferLengthInBytes) + ZS_PARAM("ecn", ecnMarked))
+        ZS_LOG_TRACE(log("handle packet called") + ZS_PARAM("size", originalBuffer->SizeInBytes()) + ZS_PARAM("ecn", ecnMarked))
 
         bool fireExternalACKIfNotSent = false;
 
@@ -537,7 +536,6 @@ namespace openpeer
           bufferedPacket->mSequenceNumber = sequenceNumber;
           bufferedPacket->mRUDPPacket = packet;
           bufferedPacket->mPacket = originalBuffer;
-          bufferedPacket->mPacketLengthInBytes = originalBufferLengthInBytes;
 
           mReceivedPackets[sequenceNumber] = bufferedPacket;
           if (sequenceNumber > mGSNR) {
@@ -1181,8 +1179,7 @@ namespace openpeer
           while (0 != packetsToSend)
           {
             BufferedPacketPtr attemptToDeliver;
-            boost::shared_array<BYTE> attemptToDeliverBuffer;
-            size_t attemptToDeliverBufferSizeInBytes = 0;
+            SecureByteBlockPtr attemptToDeliverBuffer;
 
             // scope: grab the next buffer to be resent over the wire
             {
@@ -1202,7 +1199,6 @@ namespace openpeer
                   if (packet->mFlagForResendingInNextBurst) {
                     attemptToDeliver = packet;
                     attemptToDeliverBuffer = packet->mPacket;
-                    attemptToDeliverBufferSizeInBytes = packet->mPacketLengthInBytes;
                   }
                 }
               }
@@ -1309,9 +1305,8 @@ namespace openpeer
                 }
               }
 
-              boost::shared_array<BYTE> packetizedBuffer;
-              size_t packetizedLength = 0;
-              newPacket->packetize(packetizedBuffer, packetizedLength);
+              SecureByteBlockPtr packetizedBuffer = newPacket->packetize();
+              ZS_THROW_BAD_STATE_IF(!packetizedBuffer)
 
               BufferedPacketPtr bufferedPacket = BufferedPacket::create();
               bufferedPacket->mSequenceNumber = mNextSequenceNumber;
@@ -1319,12 +1314,11 @@ namespace openpeer
               bufferedPacket->mXORedParityToNow = mXORedParityToNow;          // when the remore party reports their GSNFR parity in an ACK, this value is required to verify it is accurate
               bufferedPacket->mRUDPPacket = newPacket;
               bufferedPacket->mPacket = packetizedBuffer;
-              bufferedPacket->mPacketLengthInBytes = packetizedLength;
 
               ZS_LOG_TRACE(
                            log("adding buffer to pending list")
                            + ZS_PARAM("sequence number", sequenceToString(mNextSequenceNumber))
-                           + ZS_PARAM("packet size", packetizedLength)
+                           + ZS_PARAM("packet size", packetizedBuffer->SizeInBytes())
                            + ZS_PARAM("GSNR", sequenceToString(mGSNR))
                            + ZS_PARAM("GSNFR", sequenceToString(mGSNFR))
                            + ZS_PARAM("vector size", newPacket->mVectorLengthInBytes)
@@ -1352,7 +1346,6 @@ namespace openpeer
 
               attemptToDeliver = bufferedPacket;
               attemptToDeliverBuffer = packetizedBuffer;
-              attemptToDeliverBufferSizeInBytes = packetizedLength;
             }
 
             if (!attemptToDeliver) {
@@ -1361,7 +1354,7 @@ namespace openpeer
             }
 
             ZS_LOG_TRACE(log("attempting to (re)send packet") + ZS_PARAM("sequence number", sequenceToString(attemptToDeliver->mSequenceNumber)) + ZS_PARAM("packets to send", packetsToSend))
-            bool sent = sendNowHelper(delegate, attemptToDeliverBuffer.get(), attemptToDeliverBufferSizeInBytes);
+            bool sent = sendNowHelper(delegate, *attemptToDeliverBuffer, attemptToDeliverBuffer->SizeInBytes());
             if (!sent) {
               ZS_LOG_WARNING(Trace, log("unable to send data onto wire as data failed to send") + ZS_PARAM("sequence number", sequenceToString(attemptToDeliver->mSequenceNumber)))
               if (firstPacketCreated == attemptToDeliver) {
@@ -2095,7 +2088,6 @@ namespace openpeer
         pThis->mSequenceNumber = 0;
         pThis->mTimeSentOrReceived = zsLib::now();
         pThis->mXORedParityToNow = false;
-        pThis->mPacketLengthInBytes = 0;
         pThis->mHoldsBaton = false;
         pThis->mFlaggedAsFailedToReceive = false;
         pThis->mFlagForResendingInNextBurst = false;
@@ -2111,7 +2103,6 @@ namespace openpeer
         doNotResend(ioTotalPacketsToResend);
         releaseBaton(ioAvailableBatons);
         mPacket.reset();
-        mPacketLengthInBytes = 0;
       }
 
       //-----------------------------------------------------------------------

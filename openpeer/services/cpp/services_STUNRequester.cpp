@@ -381,12 +381,10 @@ namespace openpeer
           ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration", mCurrentTimeout.total_milliseconds()))
 
           // send off the packet NOW
-          boost::shared_array<BYTE> packet;
-          size_t packetLengthInBytes = 0;
-          mSTUNRequest->packetize(packet, packetLengthInBytes, mUsingRFC);
+          SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
 
           try {
-            mDelegate->onSTUNRequesterSendPacket(mThisWeak.lock(), mServerIP, packet, packetLengthInBytes);
+            mDelegate->onSTUNRequesterSendPacket(mThisWeak.lock(), mServerIP, packet);
           } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
             ZS_LOG_WARNING(Trace, log("delegate gone thus cancelling requester"))
             cancel();

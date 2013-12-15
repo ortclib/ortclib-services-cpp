@@ -101,7 +101,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPICESocketSessionPtr RUDPICESocketSession::convert(IRUDPICESocketSessionPtr session)
       {
-        return boost::dynamic_pointer_cast<RUDPICESocketSession>(session);
+        return dynamic_pointer_cast<RUDPICESocketSession>(session);
       }
 
       //-----------------------------------------------------------------------
@@ -458,11 +458,9 @@ namespace openpeer
           IICESocketSessionPtr session = getICESession();
           if (!session) return false;
 
-          boost::shared_array<BYTE> packetized;
-          size_t packetizedLength = 0;
-          response->packetize(packetized, packetizedLength, STUNPacket::RFC_draft_RUDP);
+          SecureByteBlockPtr packetized = response->packetize(STUNPacket::RFC_draft_RUDP);
 
-          mICESession->sendPacket(packetized.get(), packetizedLength);
+          mICESession->sendPacket(*packetized, packetized->SizeInBytes());
         }
         return true;
       }

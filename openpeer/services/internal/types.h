@@ -60,186 +60,73 @@ namespace openpeer
       using zsLib::CSTR;
       using zsLib::PTRNUMBER;
       using zsLib::Milliseconds;
-      using zsLib::Timer;
-      using zsLib::TimerPtr;
-      using zsLib::ITimerDelegate;
-      using zsLib::ITimerDelegatePtr;
-      using zsLib::ISocket;
-      using zsLib::ISocketPtr;
-      using zsLib::ISocketDelegate;
-      using zsLib::Socket;
-      using zsLib::SocketPtr;
-      using zsLib::SocketWeakPtr;
-      using zsLib::ThreadPtr;
-      using zsLib::Event;
-      using zsLib::EventPtr;
       using zsLib::MessageQueueAssociator;
       using zsLib::Subsystem;
-      using zsLib::LogPtr;
-      using zsLib::ILogDelegate;
-      using zsLib::Timer;
-      using zsLib::TimerPtr;
-      using zsLib::ITimerDelegate;
-      using zsLib::ITimerDelegatePtr;
-      using zsLib::MessageQueueThread;
-      using zsLib::MessageQueueThreadPtr;
-      using zsLib::XML::AttributePtr;
-      using zsLib::XML::Document;
-      using zsLib::XML::DocumentPtr;
-      using zsLib::XML::Node;
-      using zsLib::XML::NodePtr;
-      using zsLib::XML::Text;
-      using zsLib::XML::TextPtr;
-      using zsLib::XML::CommentPtr;
-      using zsLib::XML::UnknownPtr;
-      using zsLib::XML::DeclarationPtr;
-      using zsLib::XML::Generator;
-      using zsLib::XML::GeneratorPtr;
+
       using zsLib::XML::WalkSink;
-      using boost::shared_ptr;
-      using boost::weak_ptr;
+
+      ZS_DECLARE_USING_PTR(zsLib, Timer)
+      ZS_DECLARE_USING_PTR(zsLib, ITimerDelegate)
+      ZS_DECLARE_USING_PTR(zsLib, ISocket)
+      ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
+      ZS_DECLARE_USING_PTR(zsLib, Socket)
+      ZS_DECLARE_USING_PTR(zsLib, Thread)
+      ZS_DECLARE_USING_PTR(zsLib, Event)
+      ZS_DECLARE_USING_PTR(zsLib, Log)
+      ZS_DECLARE_USING_PTR(zsLib, ILogDelegate)
+      ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
+
+      ZS_DECLARE_USING_PTR(zsLib::XML, Attribute)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Document)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Node)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Text)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Comment)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Unknown)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Declaration)
+      ZS_DECLARE_USING_PTR(zsLib::XML, Generator)
+
       using boost::dynamic_pointer_cast;
 
       using CryptoPP::AutoSeededRandomPool;
-      using CryptoPP::ByteQueue;
       using CryptoPP::HexEncoder;
       using CryptoPP::HexDecoder;
 
-      typedef boost::shared_ptr<ByteQueue> ByteQueuePtr;
-      typedef boost::weak_ptr<ByteQueue> ByteQueueWeakPtr;
+      ZS_DECLARE_TYPEDEF_PTR(CryptoPP::ByteQueue, ByteQueue)
 
-      interaction Cache;
-      typedef boost::shared_ptr<Cache> CachePtr;
-      typedef boost::weak_ptr<Cache> CacheWeakPtr;
+      ZS_DECLARE_CLASS_PTR(Cache)
+      ZS_DECLARE_CLASS_PTR(DNS)
+      ZS_DECLARE_CLASS_PTR(DHKeyDomain)
+      ZS_DECLARE_CLASS_PTR(DHPrivateKey)
+      ZS_DECLARE_CLASS_PTR(DHPublicKey)
+      ZS_DECLARE_CLASS_PTR(DNSMonitor)
+      ZS_DECLARE_CLASS_PTR(DNSQuery)
+      ZS_DECLARE_CLASS_PTR(Factory)
+      ZS_DECLARE_CLASS_PTR(ICESocket)
+      ZS_DECLARE_CLASS_PTR(ICESocketSession)
+      ZS_DECLARE_CLASS_PTR(HTTP)
+      ZS_DECLARE_CLASS_PTR(MessageLayerSecurityChannel)
+      ZS_DECLARE_CLASS_PTR(RSAPrivateKey)
+      ZS_DECLARE_CLASS_PTR(RSAPublicKey)
+      ZS_DECLARE_CLASS_PTR(RUDPChannel)
+      ZS_DECLARE_CLASS_PTR(RUDPChannelStream)
+      ZS_DECLARE_CLASS_PTR(RUDPICESocket)
+      ZS_DECLARE_CLASS_PTR(RUDPICESocketSession)
+      ZS_DECLARE_CLASS_PTR(RUDPListener)
+      ZS_DECLARE_CLASS_PTR(RUDPMessaging)
+      ZS_DECLARE_CLASS_PTR(STUNDiscovery)
+      ZS_DECLARE_CLASS_PTR(STUNRequester)
+      ZS_DECLARE_CLASS_PTR(STUNRequesterManager)
+      ZS_DECLARE_CLASS_PTR(TCPMessaging)
+      ZS_DECLARE_CLASS_PTR(TransportStream)
+      ZS_DECLARE_CLASS_PTR(TURNSocket)
 
-      interaction DNS;
-      typedef boost::shared_ptr<DNS> DNSPtr;
-      typedef boost::weak_ptr<DNS> DNSWeakPtr;
+      ZS_DECLARE_INTERACTION_PTR(IRUDPChannelStream)
 
-      interaction DHKeyDomain;
-      typedef boost::shared_ptr<DHKeyDomain> DHKeyDomainPtr;
-      typedef boost::weak_ptr<DHKeyDomain> DHKeyDomainWeakPtr;
-
-      interaction DHPrivateKey;
-      typedef boost::shared_ptr<DHPrivateKey> DHPrivateKeyPtr;
-      typedef boost::weak_ptr<DHPrivateKey> DHPrivateKeyWeakPtr;
-
-      interaction DHPublicKey;
-      typedef boost::shared_ptr<DHPublicKey> DHPublicKeyPtr;
-      typedef boost::weak_ptr<DHPublicKey> DHPublicKeyWeakPtr;
-
-      class DNSMonitor;
-      typedef boost::shared_ptr<DNSMonitor> DNSMonitorPtr;
-      typedef boost::weak_ptr<DNSMonitor> DNSMonitorWeakPtr;
-
-      class DNSQuery;
-      typedef boost::shared_ptr<DNSQuery> DNSQueryPtr;
-      typedef boost::weak_ptr<DNSQuery> DNSQueryWeakPtr;
-
-      class Factory;
-      typedef boost::shared_ptr<Factory> FactoryPtr;
-      typedef boost::weak_ptr<Factory> FactoryWeakPtr;
-
-      class ICESocket;
-      typedef boost::shared_ptr<ICESocket> ICESocketPtr;
-      typedef boost::weak_ptr<ICESocket> ICESocketWeakPtr;
-
-      interaction IICESocketForICESocketSession;
-      typedef boost::shared_ptr<IICESocketForICESocketSession> IICESocketForICESocketSessionPtr;
-      typedef boost::weak_ptr<IICESocketForICESocketSession> IICESocketForICESocketSessionWeakPtr;
-      typedef zsLib::Proxy<IICESocketForICESocketSession> IICESocketForICESocketSessionProxy;
-
-      class ICESocketSession;
-      typedef boost::shared_ptr<ICESocketSession> ICESocketSessionPtr;
-      typedef boost::weak_ptr<ICESocketSession> ICESocketSessionWeakPtr;
-
-      interaction HTTP;
-      typedef boost::shared_ptr<HTTP> HTTPPtr;
-      typedef boost::weak_ptr<HTTP> HTTPWeakPtr;
-
-      interaction MessageLayerSecurityChannel;
-      typedef boost::shared_ptr<MessageLayerSecurityChannel> MessageLayerSecurityChannelPtr;
-      typedef boost::weak_ptr<MessageLayerSecurityChannel> MessageLayerSecurityChannelWeakPtr;
-
-      class RSAPrivateKey;
-      typedef boost::shared_ptr<RSAPrivateKey> RSAPrivateKeyPtr;
-      typedef boost::weak_ptr<RSAPrivateKey> RSAPrivateKeyWeakPtr;
-
-      class RSAPublicKey;
-      typedef boost::shared_ptr<RSAPublicKey> RSAPublicKeyPtr;
-      typedef boost::weak_ptr<RSAPublicKey> RSAPublicKeyWeakPtr;
-
-      class RUDPChannel;
-      typedef boost::shared_ptr<RUDPChannel> RUDPChannelPtr;
-      typedef boost::weak_ptr<RUDPChannel> RUDPChannelWeakPtr;
-
-      interaction IRUDPChannelDelegateForSessionAndListener;
-      typedef boost::shared_ptr<IRUDPChannelDelegateForSessionAndListener> IRUDPChannelDelegateForSessionAndListenerPtr;
-      typedef boost::weak_ptr<IRUDPChannelDelegateForSessionAndListener> IRUDPChannelDelegateForSessionAndListenerWeakPtr;
-      typedef zsLib::Proxy<IRUDPChannelDelegateForSessionAndListener> IRUDPChannelDelegateForSessionAndListenerProxy;
-
-      interaction IRUDPChannelStream;
-      typedef boost::shared_ptr<IRUDPChannelStream> IRUDPChannelStreamPtr;
-      typedef boost::weak_ptr<IRUDPChannelStream> IRUDPChannelStreamWeakPtr;
-
-      interaction IRUDPChannelStreamDelegate;
-      typedef boost::shared_ptr<IRUDPChannelStreamDelegate> IRUDPChannelStreamDelegatePtr;
-      typedef boost::weak_ptr<IRUDPChannelStreamDelegate> IRUDPChannelStreamDelegateWeakPtr;
-      typedef zsLib::Proxy<IRUDPChannelStreamDelegate> IRUDPChannelStreamDelegateProxy;
-
-      interaction IRUDPChannelStreamAsync;
-      typedef boost::shared_ptr<IRUDPChannelStreamAsync> IRUDPChannelStreamAsyncPtr;
-      typedef boost::weak_ptr<IRUDPChannelStreamAsync> IRUDPChannelStreamAsyncWeakPtr;
-      typedef zsLib::Proxy<IRUDPChannelStreamAsync> IRUDPChannelStreamAsyncProxy;
-
-      class RUDPChannelStream;
-      typedef boost::shared_ptr<RUDPChannelStream> RUDPChannelStreamPtr;
-      typedef boost::weak_ptr<RUDPChannelStream> RUDPChannelStreamWeakPtr;
-
-      class RUDPICESocket;
-      typedef boost::shared_ptr<RUDPICESocket> RUDPICESocketPtr;
-      typedef boost::weak_ptr<RUDPICESocket> RUDPICESocketWeakPtr;
-
-      interaction IRUDPICESocketForRUDPICESocketSession;
-      typedef boost::shared_ptr<IRUDPICESocketForRUDPICESocketSession> IRUDPICESocketForRUDPICESocketSessionPtr;
-      typedef boost::weak_ptr<IRUDPICESocketForRUDPICESocketSession> IRUDPICESocketForRUDPICESocketSessionWeakPtr;
-      typedef zsLib::Proxy<IRUDPICESocketForRUDPICESocketSession> IRUDPICESocketForRUDPICESocketSessionProxy;
-
-      class RUDPICESocketSession;
-      typedef boost::shared_ptr<RUDPICESocketSession> RUDPICESocketSessionPtr;
-      typedef boost::weak_ptr<RUDPICESocketSession> RUDPICESocketSessionWeakPtr;
-
-      class RUDPListener;
-      typedef boost::shared_ptr<RUDPListener> RUDPListenerPtr;
-      typedef boost::weak_ptr<RUDPListener> RUDPListenerWeakPtr;
-
-      class RUDPMessaging;
-      typedef boost::shared_ptr<RUDPMessaging> RUDPMessagingPtr;
-      typedef boost::weak_ptr<RUDPMessaging> RUDPMessagingWeakPtr;
-
-      class STUNDiscovery;
-      typedef boost::shared_ptr<STUNDiscovery> STUNDiscoveryPtr;
-      typedef boost::weak_ptr<STUNDiscovery> STUNDiscoveryWeakPtr;
-
-      class STUNRequester;
-      typedef boost::shared_ptr<STUNRequester> STUNRequesterPtr;
-      typedef boost::weak_ptr<STUNRequester> STUNRequesterWeakPtr;
-
-      class STUNRequesterManager;
-      typedef boost::shared_ptr<STUNRequesterManager> STUNRequesterManagerPtr;
-      typedef boost::weak_ptr<STUNRequesterManager> STUNRequesterManagerWeakPtr;
-
-      class TCPMessaging;
-      typedef boost::shared_ptr<TCPMessaging> TCPMessagingPtr;
-      typedef boost::weak_ptr<TCPMessaging> TCPMessagingWeakPtr;
-
-      class TransportStream;
-      typedef boost::shared_ptr<TransportStream> TransportStreamPtr;
-      typedef boost::weak_ptr<TransportStream> TransportStreamWeakPtr;
-
-      class TURNSocket;
-      typedef boost::shared_ptr<TURNSocket> TURNSocketPtr;
-      typedef boost::weak_ptr<TURNSocket> TURNSocketWeakPtr;
+      ZS_DECLARE_INTERACTION_PROXY(IICESocketForICESocketSession)
+      ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelDelegateForSessionAndListener)
+      ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelStreamDelegate)
+      ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelStreamAsync)
+      ZS_DECLARE_INTERACTION_PROXY(IRUDPICESocketForRUDPICESocketSession)
     }
   }
 }

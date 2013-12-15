@@ -52,9 +52,7 @@ namespace openpeer
 
       interaction IDHKeyDomainForDHPrivateKey
       {
-        typedef IDHKeyDomainForDHPrivateKey ForDHPrivateKey;
-        typedef shared_ptr<ForDHPrivateKey> ForDHPrivateKeyPtr;
-        typedef weak_ptr<ForDHPrivateKey> ForDHPrivateKeyWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IDHKeyDomainForDHPrivateKey, ForDHPrivateKey)
 
         typedef CryptoPP::DH DH;
 

@@ -120,8 +120,7 @@ namespace openpeer
       virtual void onSTUNDiscoverySendPacket(
                                              ISTUNDiscoveryPtr discovery,
                                              IPAddress destination,
-                                             boost::shared_array<BYTE> packet,
-                                             size_t packetLengthInBytes
+                                             SecureByteBlockPtr packet
                                              ) = 0;
 
       //-----------------------------------------------------------------------
@@ -132,6 +131,8 @@ namespace openpeer
 }
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::ISTUNDiscoveryDelegate)
-ZS_DECLARE_PROXY_METHOD_4(onSTUNDiscoverySendPacket, openpeer::services::ISTUNDiscoveryPtr, IPAddress, boost::shared_array<BYTE>, size_t)
-ZS_DECLARE_PROXY_METHOD_1(onSTUNDiscoveryCompleted, openpeer::services::ISTUNDiscoveryPtr)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ISTUNDiscoveryPtr, ISTUNDiscoveryPtr)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::SecureByteBlockPtr, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_METHOD_3(onSTUNDiscoverySendPacket, ISTUNDiscoveryPtr, IPAddress, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_METHOD_1(onSTUNDiscoveryCompleted, ISTUNDiscoveryPtr)
 ZS_DECLARE_PROXY_END()

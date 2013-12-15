@@ -50,9 +50,7 @@ namespace openpeer
 
       interaction IDHPublicKeyForDHPrivateKey
       {
-        typedef IDHPublicKeyForDHPrivateKey ForPrivateKey;
-        typedef boost::shared_ptr<ForPrivateKey> ForPrivateKeyPtr;
-        typedef boost::weak_ptr<ForPrivateKey> ForPrivateKeyWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IDHPublicKeyForDHPrivateKey, ForPrivateKey)
 
         virtual const SecureByteBlock &getStaticPublicKey() const = 0;
         virtual const SecureByteBlock &getEphemeralPublicKey() const = 0;

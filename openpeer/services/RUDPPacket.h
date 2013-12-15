@@ -113,10 +113,7 @@ namespace openpeer
                                        size_t packetLengthInBytes
                                        );
 
-      void packetize(
-                     boost::shared_array<BYTE> &outBuffer,
-                     size_t &outBufferLengthInBytes
-                     ) const;
+      SecureByteBlockPtr packetize() const;
 
       bool isFlagSet(Flags flag) const;
       bool isFlagSet(VectorFlags flag) const;

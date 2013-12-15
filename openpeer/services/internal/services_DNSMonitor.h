@@ -53,9 +53,7 @@ namespace openpeer
       class DNSAAAAQuery;
       class DNSSRVQuery;
 
-      class DNSMonitor;
-      typedef boost::shared_ptr<DNSMonitor> DNSMonitorPtr;
-      typedef boost::weak_ptr<DNSMonitor> DNSMonitorWeakPtr;
+      ZS_DECLARE_CLASS_PTR(DNSMonitor)
 
       class DNSMonitor : public MessageQueueAssociator,
                          public ISocketDelegate,
@@ -65,6 +63,14 @@ namespace openpeer
         friend class DNSAQuery;
         friend class DNSAAAAQuery;
         friend class DNSSRVQuery;
+
+        ZS_DECLARE_STRUCT_PTR(CacheInfo)
+        ZS_DECLARE_STRUCT_PTR(ACacheInfo)
+        ZS_DECLARE_STRUCT_PTR(SRVCacheInfo)
+
+        ZS_DECLARE_TYPEDEF_PTR(ACacheInfo, AAAACacheInfo)
+
+        ZS_DECLARE_INTERACTION_PTR(IResult)
 
         typedef PUID QueryID;
 
@@ -80,9 +86,6 @@ namespace openpeer
           virtual void onAAAAResult(IDNS::AAAAResultPtr result) = 0;
           virtual void onSRVResult(IDNS::SRVResultPtr result) = 0;
         };
-
-        typedef boost::shared_ptr<IResult> IResultPtr;
-        typedef boost::weak_ptr<IResult> IResultWeakPtr;
 
         typedef std::list<IResultPtr> ResultList;
 
@@ -113,8 +116,6 @@ namespace openpeer
           ACacheInfo() : CacheInfo(), mFlags(0) {};
         };
 
-        typedef ACacheInfo AAAACacheInfo;
-
         struct SRVCacheInfo : public CacheInfo
         {
           String mName;
@@ -128,11 +129,6 @@ namespace openpeer
 
           virtual void onSRVResult(struct dns_rr_srv *record, int status);
         };
-
-        typedef boost::shared_ptr<CacheInfo> CacheInfoPtr;
-        typedef boost::shared_ptr<ACacheInfo> ACacheInfoPtr;
-        typedef boost::shared_ptr<AAAACacheInfo> AAAACacheInfoPtr;
-        typedef boost::shared_ptr<SRVCacheInfo> SRVCacheInfoPtr;
 
         typedef std::list<ACacheInfoPtr> ACacheList;
         typedef std::list<AAAACacheInfoPtr> AAAACacheList;
@@ -184,7 +180,7 @@ namespace openpeer
         Log::Params log(const char *message) const;
 
       private:
-        PUID mID;
+        AutoPUID mID;
 
         mutable RecursiveLock mLock;
         DNSMonitorWeakPtr mThisWeak;

@@ -85,7 +85,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DHPrivateKeyPtr DHPrivateKey::convert(IDHPrivateKeyPtr publicKey)
       {
-        return boost::dynamic_pointer_cast<DHPrivateKey>(publicKey);
+        return dynamic_pointer_cast<DHPrivateKey>(publicKey);
       }
 
       //-----------------------------------------------------------------------

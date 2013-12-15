@@ -87,14 +87,9 @@ namespace openpeer
         typedef std::list<IPAddress> IPAddressList;
         typedef IDNS::SRVResultPtr SRVResultPtr;
 
-        struct Server;
-        typedef boost::shared_ptr<Server> ServerPtr;
-
-        struct Permission;
-        typedef boost::shared_ptr<Permission> PermissionPtr;
-
-        struct ChannelInfo;
-        typedef boost::shared_ptr<ChannelInfo> ChannelInfoPtr;
+        ZS_DECLARE_STRUCT_PTR(Server)
+        ZS_DECLARE_STRUCT_PTR(Permission)
+        ZS_DECLARE_STRUCT_PTR(ChannelInfo)
 
         typedef std::list<ServerPtr> ServerList;
 
@@ -218,8 +213,7 @@ namespace openpeer
         virtual void onSTUNRequesterSendPacket(
                                                ISTUNRequesterPtr requester,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                );
 
         virtual bool handleSTUNRequesterResponse(
@@ -405,7 +399,7 @@ namespace openpeer
           Time mLastSentDataAt;
           ISTUNRequesterPtr mInstallingWithRequester;
 
-          typedef std::list< std::pair<boost::shared_array<BYTE>, size_t> > PendingDataList;
+          typedef std::list<SecureByteBlockPtr> PendingDataList;
           PendingDataList mPendingData;
         };
 

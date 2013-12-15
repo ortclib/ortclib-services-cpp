@@ -57,9 +57,7 @@ namespace openpeer
 
       interaction IRUDPChannelForRUDPICESocketSession
       {
-        typedef IRUDPChannelForRUDPICESocketSession ForRUDPICESocketSession;
-        typedef shared_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionPtr;
-        typedef weak_ptr<ForRUDPICESocketSession> ForRUDPICESocketSessionWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPICESocketSession, ForRUDPICESocketSession)
 
         static ForRUDPICESocketSessionPtr createForRUDPICESocketSessionIncoming(
                                                                                 IMessageQueuePtr queue,
@@ -130,9 +128,7 @@ namespace openpeer
 
       interaction IRUDPChannelForRUDPListener
       {
-        typedef IRUDPChannelForRUDPListener ForRUDPListener;
-        typedef shared_ptr<ForRUDPListener> ForRUDPListenerPtr;
-        typedef weak_ptr<ForRUDPListener> ForRUDPListenerWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPListener, ForRUDPListener)
 
         static ForRUDPListenerPtr createForListener(
                                                     IMessageQueuePtr queue,
@@ -385,8 +381,7 @@ namespace openpeer
         virtual void onSTUNRequesterSendPacket(
                                                ISTUNRequesterPtr requester,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                );
 
         virtual bool handleSTUNRequesterResponse(

@@ -62,9 +62,7 @@ namespace openpeer
 
       interaction IICESocketSessionForICESocket
       {
-        typedef IICESocketSessionForICESocket ForICESocket;
-        typedef shared_ptr<ForICESocket> ForICESocketPtr;
-        typedef weak_ptr<ForICESocket> ForICESocketWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IICESocketSessionForICESocket, ForICESocket)
 
         typedef IICESocketSession::ICEControls ICEControls;
         typedef IICESocketSession::CandidateList CandidateList;
@@ -113,15 +111,12 @@ namespace openpeer
         friend interaction IICESocketSessionFactory;
         friend interaction IICESocketSession;
 
-        typedef IICESocketForICESocketSession UseICESocket;
-        typedef shared_ptr<UseICESocket> UseICESocketPtr;
-        typedef weak_ptr<UseICESocket> UseICESocketWeakPtr;
+        ZS_DECLARE_TYPEDEF_PTR(IICESocketForICESocketSession, UseICESocket)
+
+        ZS_DECLARE_STRUCT_PTR(CandidatePair)
 
         typedef IICESocketSession::ICEControls ICEControls;
         typedef IICESocketSession::CandidateList CandidateList;
-
-        struct CandidatePair;
-        typedef boost::shared_ptr<CandidatePair> CandidatePairPtr;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -283,8 +278,7 @@ namespace openpeer
         virtual void onSTUNRequesterSendPacket(
                                                ISTUNRequesterPtr requester,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                );
 
         virtual bool handleSTUNRequesterResponse(
