@@ -26,7 +26,7 @@
 		0095DAD316CA83EB005F53D3 /* services_ICESocketSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92416CA83EA005F53D3 /* services_ICESocketSession.cpp */; };
 		0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92516CA83EA005F53D3 /* services_RUDPChannel.cpp */; };
 		0095DAD516CA83EB005F53D3 /* services_RUDPChannelStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92616CA83EA005F53D3 /* services_RUDPChannelStream.cpp */; };
-		0095DAD716CA83EB005F53D3 /* services_RUDPICESocketSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92816CA83EA005F53D3 /* services_RUDPICESocketSession.cpp */; };
+		0095DAD716CA83EB005F53D3 /* services_RUDPTransport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92816CA83EA005F53D3 /* services_RUDPTransport.cpp */; };
 		0095DAD816CA83EB005F53D3 /* services_RUDPListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92916CA83EA005F53D3 /* services_RUDPListener.cpp */; };
 		0095DAD916CA83EB005F53D3 /* services_RUDPMessaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92A16CA83EA005F53D3 /* services_RUDPMessaging.cpp */; };
 		0095DADA16CA83EB005F53D3 /* services_RUDPPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92B16CA83EA005F53D3 /* services_RUDPPacket.cpp */; };
@@ -78,7 +78,7 @@
 		0095D92416CA83EA005F53D3 /* services_ICESocketSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_ICESocketSession.cpp; sourceTree = "<group>"; };
 		0095D92516CA83EA005F53D3 /* services_RUDPChannel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_RUDPChannel.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		0095D92616CA83EA005F53D3 /* services_RUDPChannelStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_RUDPChannelStream.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		0095D92816CA83EA005F53D3 /* services_RUDPICESocketSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPICESocketSession.cpp; sourceTree = "<group>"; };
+		0095D92816CA83EA005F53D3 /* services_RUDPTransport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPTransport.cpp; sourceTree = "<group>"; };
 		0095D92916CA83EA005F53D3 /* services_RUDPListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPListener.cpp; sourceTree = "<group>"; };
 		0095D92A16CA83EA005F53D3 /* services_RUDPMessaging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPMessaging.cpp; sourceTree = "<group>"; };
 		0095D92B16CA83EA005F53D3 /* services_RUDPPacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPPacket.cpp; sourceTree = "<group>"; };
@@ -106,7 +106,7 @@
 		0095D94216CA83EA005F53D3 /* services_IRUDPChannelStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_IRUDPChannelStream.h; sourceTree = "<group>"; };
 		0095D94316CA83EA005F53D3 /* services_RUDPChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPChannel.h; sourceTree = "<group>"; };
 		0095D94416CA83EA005F53D3 /* services_RUDPChannelStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPChannelStream.h; sourceTree = "<group>"; };
-		0095D94616CA83EA005F53D3 /* services_RUDPICESocketSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPICESocketSession.h; sourceTree = "<group>"; };
+		0095D94616CA83EA005F53D3 /* services_RUDPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPTransport.h; sourceTree = "<group>"; };
 		0095D94716CA83EA005F53D3 /* services_RUDPListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPListener.h; sourceTree = "<group>"; };
 		0095D94816CA83EA005F53D3 /* services_RUDPMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_RUDPMessaging.h; sourceTree = "<group>"; };
 		0095D94916CA83EA005F53D3 /* services_STUNDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_STUNDiscovery.h; sourceTree = "<group>"; };
@@ -115,7 +115,7 @@
 		0095D94C16CA83EA005F53D3 /* services_TURNSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_TURNSocket.h; sourceTree = "<group>"; };
 		0095D94D16CA83EA005F53D3 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		0095D94E16CA83EA005F53D3 /* IRUDPChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRUDPChannel.h; sourceTree = "<group>"; };
-		0095D95016CA83EA005F53D3 /* IRUDPICESocketSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRUDPICESocketSession.h; sourceTree = "<group>"; };
+		0095D95016CA83EA005F53D3 /* IRUDPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRUDPTransport.h; sourceTree = "<group>"; };
 		0095D95116CA83EA005F53D3 /* IRUDPListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRUDPListener.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		0095D95216CA83EA005F53D3 /* IRUDPMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRUDPMessaging.h; sourceTree = "<group>"; };
 		0095D95316CA83EA005F53D3 /* ISTUNDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISTUNDiscovery.h; sourceTree = "<group>"; };
@@ -192,7 +192,7 @@
 				003BEDCE17A606E80002EB47 /* IRSAPrivateKey.h */,
 				003BEDCF17A606E80002EB47 /* IRSAPublicKey.h */,
 				0095D94E16CA83EA005F53D3 /* IRUDPChannel.h */,
-				0095D95016CA83EA005F53D3 /* IRUDPICESocketSession.h */,
+				0095D95016CA83EA005F53D3 /* IRUDPTransport.h */,
 				0095D95116CA83EA005F53D3 /* IRUDPListener.h */,
 				0095D95216CA83EA005F53D3 /* IRUDPMessaging.h */,
 				0095D95716CA83EA005F53D3 /* RUDPPacket.h */,
@@ -231,7 +231,7 @@
 				003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */,
 				0095D92516CA83EA005F53D3 /* services_RUDPChannel.cpp */,
 				0095D92616CA83EA005F53D3 /* services_RUDPChannelStream.cpp */,
-				0095D92816CA83EA005F53D3 /* services_RUDPICESocketSession.cpp */,
+				0095D92816CA83EA005F53D3 /* services_RUDPTransport.cpp */,
 				0095D92916CA83EA005F53D3 /* services_RUDPListener.cpp */,
 				0095D92A16CA83EA005F53D3 /* services_RUDPMessaging.cpp */,
 				0095D92B16CA83EA005F53D3 /* services_RUDPPacket.cpp */,
@@ -271,7 +271,7 @@
 				0095D94216CA83EA005F53D3 /* services_IRUDPChannelStream.h */,
 				0095D94316CA83EA005F53D3 /* services_RUDPChannel.h */,
 				0095D94416CA83EA005F53D3 /* services_RUDPChannelStream.h */,
-				0095D94616CA83EA005F53D3 /* services_RUDPICESocketSession.h */,
+				0095D94616CA83EA005F53D3 /* services_RUDPTransport.h */,
 				0095D94716CA83EA005F53D3 /* services_RUDPListener.h */,
 				0095D94816CA83EA005F53D3 /* services_RUDPMessaging.h */,
 				0095D94916CA83EA005F53D3 /* services_STUNDiscovery.h */,
@@ -357,7 +357,7 @@
 				0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */,
 				0095DAD516CA83EB005F53D3 /* services_RUDPChannelStream.cpp in Sources */,
-				0095DAD716CA83EB005F53D3 /* services_RUDPICESocketSession.cpp in Sources */,
+				0095DAD716CA83EB005F53D3 /* services_RUDPTransport.cpp in Sources */,
 				0095DAD816CA83EB005F53D3 /* services_RUDPListener.cpp in Sources */,
 				0095DAD916CA83EB005F53D3 /* services_RUDPMessaging.cpp in Sources */,
 				0095DADA16CA83EB005F53D3 /* services_RUDPPacket.cpp in Sources */,
