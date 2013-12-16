@@ -31,13 +31,16 @@
 
 #include <openpeer/services/internal/services_DNSMonitor.h>
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/ICache.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/helpers.h>
 #include <zsLib/XML.h>
+#include <zsLib/Numeric.h>
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
+#define OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.openpeer.org/caching/dns/"
 
 namespace openpeer
 {
@@ -45,6 +48,350 @@ namespace openpeer
   {
     namespace internal
     {
+      using zsLib::Numeric;
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark (helpers)
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      static Log::Params slog(const char *message)
+      {
+        return DNSMonitor::slog(message);
+      }
+
+      //-----------------------------------------------------------------------
+      static String getGenericCookieName(const String &name, int flags, const char *type)
+      {
+        String hash = IHelper::convertToHex(*IHelper::hash(name + ":" + string(flags)));
+        return String(OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE) + type + "/" + hash;
+      }
+
+      //-----------------------------------------------------------------------
+      static String getCookieName(
+                                  const String &name,
+                                  IDNS::SRVLookupTypes lookupType,
+                                  int flags
+                                  )
+      {
+        return getGenericCookieName(name, flags, IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa");
+      }
+
+      //-----------------------------------------------------------------------
+      static String getAAAACookieName(const String &name, int flags)
+      {
+        return getGenericCookieName(name, flags, "aaaa");
+      }
+
+      //-----------------------------------------------------------------------
+      static String getSRVCookieName(
+                                     const String &name,
+                                     const String &service,
+                                     const String &protocol,
+                                     int flags
+                                     )
+      {
+        return getGenericCookieName(name + ":" + service + ":" + protocol, flags, "srv");
+      }
+
+      //-----------------------------------------------------------------------
+      static ElementPtr toElement(
+                                  const IDNS::AResult &result,
+                                  const char *elementName
+                                  )
+      {
+        ElementPtr typeEl = Element::create(elementName);
+        ElementPtr ipsEl = Element::create("ips");
+
+        for (IDNS::AResult::IPAddressList::const_iterator iter = result.mIPAddresses.begin(); iter != result.mIPAddresses.end(); ++iter)
+        {
+          const IPAddress &address = (*iter);
+          IHelper::debugAppend(ipsEl, "ip", address.string());
+
+          ZS_LOG_TRACE(slog("adding ip") + ZS_PARAM("ip", string(address)))
+        }
+
+        IHelper::debugAppend(typeEl, "name", result.mName);
+        IHelper::debugAppend(typeEl, "ttl", result.mTTL);
+        IHelper::debugAppend(typeEl, ipsEl);
+
+        ZS_LOG_TRACE(slog("adding A / AAAA") + ZS_PARAM("name", result.mName) + ZS_PARAM("ttl", result.mTTL) + ZS_PARAM("ips", result.mIPAddresses.size()))
+        return typeEl;
+      }
+
+      //-----------------------------------------------------------------------
+      static void store(
+                        const String &name,
+                        IDNS::SRVLookupTypes lookupType,
+                        const IDNS::AResult &info,
+                        int flags,
+                        const Time &expires
+                        )
+      {
+        const char *elementName = IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa";
+        String cookieName = getCookieName(name, lookupType, flags);
+
+        ElementPtr typeEl = toElement(info, elementName);
+        IHelper::debugAppend(typeEl, "expires", expires);
+
+        String cacheData = IHelper::toString(typeEl);
+
+        ZS_LOG_TRACE(slog("storing A / AAAA result") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", info.mName) + ZS_PARAM("ttl", info.mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("ips", info.mIPAddresses.size()) + ZS_PARAM("expires", expires))
+        ICache::singleton()->store(cookieName, expires, cacheData);
+      }
+
+      //-----------------------------------------------------------------------
+      static void store(
+                        const String &name,
+                        const IDNS::SRVResult &info,
+                        int flags,
+                        const Time &expires
+                        )
+      {
+        String cookieName = getSRVCookieName(info.mName, info.mService, info.mProtocol, flags);
+
+        ElementPtr srvEl = Element::create("srv");
+
+        ElementPtr recordsEl = Element::create("records");
+
+        for (IDNS::SRVResult::SRVRecordList::const_iterator recordsIter = info.mRecords.begin(); recordsIter != info.mRecords.end(); ++recordsIter)
+        {
+          const IDNS::SRVResult::SRVRecord &record = (*recordsIter);
+
+          ElementPtr recordEl = Element::create("record");
+          IHelper::debugAppend(recordEl, "name", record.mName);
+          IHelper::debugAppend(recordEl, "priority", record.mPriority);
+          IHelper::debugAppend(recordEl, "weight", record.mWeight);
+          IHelper::debugAppend(recordEl, "port", record.mPort);
+
+          if (record.mAResult) {
+            ElementPtr typeEl = toElement(*record.mAResult, "a");
+            IHelper::debugAppend(recordEl, typeEl);
+          }
+          if (record.mAAAAResult) {
+            ElementPtr typeEl = toElement(*record.mAAAAResult, "aaaa");
+            IHelper::debugAppend(recordEl, typeEl);
+          }
+          IHelper::debugAppend(recordsEl, recordEl);
+
+          ZS_LOG_TRACE(slog("adding SRV record") + ZS_PARAM("name", record.mName) + ZS_PARAM("priority", record.mPriority) + ZS_PARAM("weight", record.mWeight) + ZS_PARAM("port", record.mPort) + ZS_PARAM("a", (bool)record.mAResult) + ZS_PARAM("aaaa", (bool)record.mAAAAResult))
+        }
+
+        IHelper::debugAppend(srvEl, "name", info.mName);
+        IHelper::debugAppend(srvEl, "service", info.mService);
+        IHelper::debugAppend(srvEl, "protocol", info.mProtocol);
+        IHelper::debugAppend(srvEl, "ttl", info.mTTL);
+        IHelper::debugAppend(srvEl, recordsEl);
+
+        IHelper::debugAppend(srvEl, "expires", expires);
+
+        String cacheData = IHelper::toString(srvEl);
+
+        ZS_LOG_TRACE(slog("storing SRV result") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", info.mName) + ZS_PARAM("service", info.mService) + ZS_PARAM("protocol", info.mProtocol) + ZS_PARAM("ttl", info.mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("records", info.mRecords.size()) + ZS_PARAM("expires", expires))
+        ICache::singleton()->store(cookieName, expires, cacheData);
+      }
+
+      //-----------------------------------------------------------------------
+      static String getText(
+                            ElementPtr parentEl,
+                            const char *name
+                            )
+      {
+        ElementPtr childEl = parentEl->findFirstChildElement(name);
+        if (!childEl) return String();
+
+        String childData = childEl->getTextDecoded();
+        return childData;
+      }
+
+      //-----------------------------------------------------------------------
+      template <typename RESULTTYPE>
+      static RESULTTYPE convertNoThrow(
+                                       ElementPtr parentEl,
+                                       const char *name
+                                       )
+      {
+        RESULTTYPE value = 0;
+
+        try {
+          String childData = getText(parentEl, name);
+          if (childData.isEmpty()) return value;
+
+          value = Numeric<RESULTTYPE>(childData);
+        } catch(typename Numeric<RESULTTYPE>::ValueOutOfRange &) {
+        }
+        return value;
+      }
+
+      //-----------------------------------------------------------------------
+      static void fill(
+                       IDNS::AResult &result,
+                       ElementPtr typeEl
+                       )
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!typeEl)
+
+        result.mName = getText(typeEl, "name");
+        result.mTTL = convertNoThrow<UINT>(typeEl, "ttl");
+
+        ElementPtr ipsEl = typeEl->findFirstChildElement("ips");
+        if (ipsEl) {
+          ElementPtr ipEl = ipsEl->findFirstChildElement("ip");
+          while (ipEl) {
+
+            String value = ipEl->getTextDecoded();
+            if (value.hasData()) {
+              IPAddress ip(value);
+
+              if (!ip.isEmpty()) {
+                result.mIPAddresses.push_back(ip);
+                ZS_LOG_TRACE(slog("found IP") + ZS_PARAM("ip", value))
+              }
+            }
+
+            ipEl = ipEl->findNextSiblingElement("ip");
+          }
+        }
+
+        ZS_LOG_TRACE(slog("found A / AAAA") + ZS_PARAM("name", result.mName) + ZS_PARAM("ttl", result.mTTL) + ZS_PARAM("ips", result.mIPAddresses.size()))
+      }
+
+      //-----------------------------------------------------------------------
+      static IDNS::AResultPtr fetch(
+                                    const String &name,
+                                    IDNS::SRVLookupTypes lookupType,
+                                    int flags,
+                                    Time &outExpires
+                                    )
+      {
+        const char *elementName = IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa";
+        String cookieName = getCookieName(name, lookupType, flags);
+
+        String dataStr = ICache::singleton()->fetch(cookieName);
+        if (dataStr.isEmpty()) {
+          ZS_LOG_TRACE(slog("no cache entry exists for A / AAAA result") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("flags", flags))
+          return IDNS::AResultPtr();
+        }
+
+        ElementPtr typeEl = IHelper::toJSON(dataStr);
+        if (!typeEl) {
+          ZS_LOG_WARNING(Detail, slog("failed to parse cached A / AAAA DNS entry") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("flags", flags) + ZS_PARAM("json", dataStr))
+          return IDNS::AResultPtr();
+        }
+
+        IDNS::AResultPtr result = IDNS::AResultPtr(new IDNS::AResult);
+
+        fill(*result, typeEl);
+
+        String expiresStr = getText(typeEl, "expires");
+        if (expiresStr.hasData()) {
+          outExpires = IHelper::stringToTime(expiresStr);
+        }
+
+        ZS_LOG_TRACE(slog("fetched A / AAAA result") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", result->mName) + ZS_PARAM("ttl", result->mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("ips", result->mIPAddresses.size()) + ZS_PARAM("expires", outExpires))
+        return result;
+      }
+
+      //-----------------------------------------------------------------------
+      static IDNS::SRVResultPtr fetch(
+                                      const String &name,
+                                      const String &service,
+                                      const String &protocol,
+                                      int flags,
+                                      Time &outExpires
+                                      )
+      {
+        String cookieName = getSRVCookieName(name, service, protocol, flags);
+        String dataStr = ICache::singleton()->fetch(cookieName);
+        if (dataStr.isEmpty()) {
+          ZS_LOG_TRACE(slog("no cache entry exists for SRV result") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("flags", flags))
+          return IDNS::SRVResultPtr();
+        }
+
+        ElementPtr rootEl = IHelper::toJSON(dataStr);
+        if (!rootEl) {
+          ZS_LOG_WARNING(Detail, slog("failed to parse cached SRV DNS entry") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("flags", flags))
+          return IDNS::SRVResultPtr();
+        }
+
+        IDNS::SRVResultPtr result = IDNS::SRVResultPtr(new IDNS::SRVResult);
+
+        ElementPtr recordsEl = rootEl->findFirstChildElement("records");
+        if (recordsEl) {
+          ElementPtr recordEl = recordsEl->findFirstChildElement("record");
+          while (recordEl) {
+            IDNS::SRVResult::SRVRecord record;
+
+            record.mName = getText(recordEl, "name");
+            record.mPriority = convertNoThrow<decltype(record.mPriority)>(rootEl, "priority");
+            record.mWeight = convertNoThrow<decltype(record.mWeight)>(rootEl, "weight");
+            record.mPort = convertNoThrow<decltype(record.mPort)>(rootEl, "port");
+
+            // scope: a
+            {
+              ElementPtr aEl = recordEl->findFirstChildElement("a");
+              if (aEl) {
+                IDNS::AResultPtr result = IDNS::AResultPtr(new IDNS::AResult);
+                fill(*result, aEl);
+                record.mAResult = result;
+              }
+            }
+            // scope: aaaa
+            {
+              ElementPtr aaaaEl = recordEl->findFirstChildElement("aaaa");
+              if (aaaaEl) {
+                IDNS::AAAAResultPtr result = IDNS::AAAAResultPtr(new IDNS::AAAAResult);
+                fill(*result, aaaaEl);
+                record.mAAAAResult = result;
+              }
+            }
+
+            ZS_LOG_TRACE(slog("found SRV record") + ZS_PARAM("name", record.mName) + ZS_PARAM("priority", record.mPriority) + ZS_PARAM("weight", record.mWeight) + ZS_PARAM("port", record.mPort) + ZS_PARAM("a", (bool)record.mAResult) + ZS_PARAM("aaaa", (bool)record.mAAAAResult))
+
+            recordEl = recordEl->findNextSiblingElement("record");
+          }
+        }
+
+        result->mName = getText(rootEl, "name");
+        result->mService = getText(rootEl, "service");
+        result->mProtocol = getText(rootEl, "protocol");
+        result->mTTL = convertNoThrow<decltype(result->mTTL)>(rootEl, "ttl");
+
+        String expiresStr = getText(rootEl, "expires");
+        if (expiresStr.hasData()) {
+          outExpires = IHelper::stringToTime(expiresStr);
+        }
+
+        ZS_LOG_TRACE(slog("fetched SRV result") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", result->mName) + ZS_PARAM("service", result->mService) + ZS_PARAM("protocol", result->mProtocol) + ZS_PARAM("ttl", result->mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("records", result->mRecords.size()) + ZS_PARAM("expires", outExpires))
+        return result;
+      }
+
+      //-----------------------------------------------------------------------
+      static void clear(
+                        const String &name,
+                        IDNS::SRVLookupTypes lookupType,
+                        int flags
+                        )
+      {
+        String cookieName = getCookieName(name, lookupType, flags);
+        ICache::singleton()->clear(cookieName);
+      }
+
+      //-----------------------------------------------------------------------
+      static void clear(
+                        const String &name,
+                        const String &service,
+                        const String &protocol,
+                        int flags
+                        )
+      {
+        ICache::singleton()->clear(getSRVCookieName(name, service, protocol, flags));
+      }
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -103,6 +450,13 @@ namespace openpeer
         AutoRecursiveLock lock(Helper::getGlobalLock());
         static DNSMonitorPtr monitor = DNSMonitor::create(Helper::getServiceQueue());
         return monitor;
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params DNSMonitor::slog(const char *message)
+      {
+        DNSMonitorPtr pThis = singleton();
+        return pThis->log(message);
       }
 
       //-----------------------------------------------------------------------
@@ -275,6 +629,8 @@ namespace openpeer
           useInfo = ACacheInfoPtr(new ACacheInfo);
           useInfo->mName = name;
           useInfo->mFlags = flags;
+
+          useInfo->mResult = fetch(useInfo->mName, aMode ? IDNS::SRVLookupType_AutoLookupA : IDNS::SRVLookupType_AutoLookupAAAA, flags, useInfo->mExpires);
         }
 
         if (Time() != useInfo->mExpires) {
@@ -290,6 +646,9 @@ namespace openpeer
             return;
           }
         }
+
+        // did not find in cache or expired
+        clear(useInfo->mName, aMode ? IDNS::SRVLookupType_AutoLookupA : IDNS::SRVLookupType_AutoLookupAAAA, flags);
 
         useInfo->mPendingResults.push_back(result);
 
@@ -350,6 +709,8 @@ namespace openpeer
           useInfo->mService = service;
           useInfo->mProtocol = protocol;
           useInfo->mFlags = flags;
+
+          useInfo->mResult = fetch(useInfo->mName, useInfo->mService, useInfo->mProtocol, flags, useInfo->mExpires);
         }
 
         if (Time() != useInfo->mExpires) {
@@ -361,6 +722,9 @@ namespace openpeer
             return;
           }
         }
+
+        // did not find in cache or expired
+        clear(useInfo->mName, useInfo->mService, useInfo->mProtocol, flags);
 
         useInfo->mPendingResults.push_back(result);
 
@@ -557,6 +921,8 @@ namespace openpeer
 
           mResult = data;
           mExpires = zsLib::now() + Seconds(record->dnsa4_ttl);
+
+          store(mName, IDNS::SRVLookupType_AutoLookupA, *data, mFlags, mExpires);
         } else {
           switch (status) {
             case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
@@ -587,6 +953,8 @@ namespace openpeer
 
           mResult = data;
           mExpires = zsLib::now() + Seconds(record->dnsa6_ttl);
+
+          store(mName, IDNS::SRVLookupType_AutoLookupAAAA, *data, mFlags, mExpires);
         } else {
           switch (status) {
             case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
@@ -634,6 +1002,8 @@ namespace openpeer
 
           mResult = data;
           mExpires = zsLib::now() + Seconds(record->dnssrv_ttl);
+
+          store(mName, *data, mFlags, mExpires);
         } else {
           switch (status) {
             case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;

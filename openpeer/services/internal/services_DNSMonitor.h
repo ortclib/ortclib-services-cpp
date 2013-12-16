@@ -146,6 +146,8 @@ namespace openpeer
 
         static DNSMonitorPtr singleton();
 
+        static Log::Params slog(const char *message);
+
       protected:
         void createDNSContext();
         void cleanIfNoneOutstanding();
