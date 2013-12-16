@@ -614,7 +614,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!remotePublicKey)
 
-        ZS_LOG_DEBUG(log("receive key signing public key") + ZS_PARAM("public key fingerprint", remotePublicKey->getFingerprint()))
+        ZS_LOG_DEBUG(log("set receive key signing public key") + ZS_PARAM("public key fingerprint", remotePublicKey->getFingerprint()))
 
         AutoRecursiveLock lock(getLock());
 
@@ -938,7 +938,7 @@ namespace openpeer
 
         MessageLayerSecurityChannelPtr pThis = mThisWeak.lock();
         if (pThis) {
-          ZS_LOG_DEBUG(debug("attempting to report state to delegate"))
+          ZS_LOG_DEBUG(debug("attempting to report state to delegate") + ZS_PARAM("total", mSubscriptions.size()))
           mSubscriptions.delegate()->onMessageLayerSecurityChannelStateChanged(pThis, mCurrentState);
         }
       }
@@ -985,7 +985,7 @@ namespace openpeer
       bool MessageLayerSecurityChannel::stepReceive()
       {
         if (!mReceiveStreamDecodedWriteReady) {
-          ZS_LOG_DEBUG(log("cannot read encoded stream until notified that it's okay to write to decoded stream"))
+          ZS_LOG_TRACE(log("cannot read encoded stream until notified that it's okay to write to decoded stream"))
           return true;
         }
 
@@ -993,14 +993,14 @@ namespace openpeer
             (mReceiveKeyingSignedEl)) {
 
           if (!mReceiveSigningPublicKey) {
-            ZS_LOG_DEBUG(log("waiting for receive keying materials"))
+            ZS_LOG_TRACE(log("waiting for receive keying materials"))
             setState(SessionState_WaitingForNeededInformation);
             return true;
           }
 
           bool returnResult = false;
           if (!stepProcessReceiveKeying(returnResult)) {
-            ZS_LOG_DEBUG(log("receive keying did not complete"))
+            ZS_LOG_TRACE(log("receive keying did not complete"))
             return returnResult;
           }
 
@@ -1008,12 +1008,12 @@ namespace openpeer
         }
 
         if (mReceiveStreamEncoded->getTotalReadBuffersAvailable() < 1) {
-          ZS_LOG_DEBUG(log("nothing to decode"))
+          ZS_LOG_TRACE(log("nothing to decode"))
           return true;
         }
 
         if (mRemoteContextID.hasData()) {
-          ZS_LOG_DEBUG(log("already decoded at least one packet") + ZS_PARAM("remote context ID", mRemoteContextID))
+          ZS_LOG_TRACE(log("already decoded at least one packet") + ZS_PARAM("remote context ID", mRemoteContextID))
           if (mReceiveKeys.size() < 1) {
             bool hasReceiveInformation = true;
 
@@ -1027,7 +1027,7 @@ namespace openpeer
             hasReceiveInformation = hasReceiveInformation && (mReceiveSigningPublicKey);
 
             if (!hasReceiveInformation) {
-              ZS_LOG_DEBUG(log("waiting for receive keying materials"))
+              ZS_LOG_TRACE(log("waiting for receive keying materials"))
               setState(SessionState_WaitingForNeededInformation);
               return true;
             }
@@ -1139,7 +1139,7 @@ namespace openpeer
 
           bool returnResult = false;
           if (!stepProcessReceiveKeying(returnResult, streamBuffer)) {
-            ZS_LOG_DEBUG(log("receive keying did not complete"))
+            ZS_LOG_TRACE(log("receive keying did not complete"))
             return returnResult;
           }
         }
@@ -1205,7 +1205,7 @@ namespace openpeer
             }
 
             if (!mReceiveSigningPublicKey) {
-              ZS_LOG_DEBUG(log("waiting for receive material signing public key"))
+              ZS_LOG_TRACE(log("waiting for receive material signing public key"))
               goto receive_waiting_for_information;
             }
 
@@ -1269,7 +1269,7 @@ namespace openpeer
 
               if ((!mDHLocalPrivateKey) ||
                   (!mDHLocalPublicKey)) {
-                ZS_LOG_DEBUG(log("waiting for receive DH keying materials"))
+                ZS_LOG_TRACE(log("waiting for receive DH keying materials"))
                 goto receive_waiting_for_information;
               }
 
@@ -1493,12 +1493,12 @@ namespace openpeer
       bool MessageLayerSecurityChannel::stepSendKeying()
       {
         if (!mSendStreamEncodedWriteReady) {
-          ZS_LOG_DEBUG(log("cannot send encoded stream until lower layer transport (typically 'wire' transport) indicates it is ready to send data"))
+          ZS_LOG_TRACE(log("cannot send encoded stream until lower layer transport (typically 'wire' transport) indicates it is ready to send data"))
           return false;
         }
 
         if (!isSendingReady()) {
-          ZS_LOG_DEBUG(log("sending isn't ready because of missing information"))
+          ZS_LOG_TRACE(log("sending isn't ready because of missing information"))
           setState(SessionState_WaitingForNeededInformation);
           return false;
         }

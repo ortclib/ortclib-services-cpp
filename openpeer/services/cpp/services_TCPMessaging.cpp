@@ -557,7 +557,7 @@ namespace openpeer
 
         TCPMessagingPtr pThis = mThisWeak.lock();
         if (pThis) {
-          ZS_LOG_DEBUG(debug("attempting to report state to delegate"))
+          ZS_LOG_DEBUG(debug("attempting to report state to delegate") + ZS_PARAM("total", mSubscriptions.size()))
           mSubscriptions.delegate()->onTCPMessagingStateChanged(pThis, mCurrentState);
         }
 
@@ -656,7 +656,7 @@ namespace openpeer
         if (0 == sent) {
           // nothing to send?
           if (mSendStream->getTotalReadBuffersAvailable() < 1) {
-            ZS_LOG_DEBUG(log("no data was sent because there was nothing to send (try again when data added to send)"))
+            ZS_LOG_TRACE(log("no data was sent because there was nothing to send (try again when data added to send)"))
             get(mTCPWriteReady) = true;
             return;
           }
