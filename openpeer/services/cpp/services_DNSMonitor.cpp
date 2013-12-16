@@ -621,6 +621,8 @@ namespace openpeer
           if (info->mName != name) continue;
           if (info->mFlags != flags) continue;
 
+          ZS_LOG_TRACE(log("using memeory cache to resolve A / AAAA") + ZS_PARAM("type", aMode ? "A" : "AAAA") + ZS_PARAM("name", info->mName) + ZS_PARAM("flags", info->mFlags) + ZS_PARAM("expires", info->mExpires) + ZS_PARAM("result", (bool)info->mResult))
+
           useInfo = info;
           break;
         }
@@ -631,12 +633,16 @@ namespace openpeer
           useInfo->mFlags = flags;
 
           useInfo->mResult = fetch(useInfo->mName, aMode ? IDNS::SRVLookupType_AutoLookupA : IDNS::SRVLookupType_AutoLookupAAAA, flags, useInfo->mExpires);
+
+          useList.push_back(useInfo);
         }
 
         if (Time() != useInfo->mExpires) {
           Time tick = zsLib::now();
           
           if (tick < useInfo->mExpires) {
+            ZS_LOG_TRACE(log("notify A / AAAA resolution from cache"))
+
             // use cached result
             if (aMode) {
               result->onAResult(useInfo->mResult);
@@ -645,9 +651,12 @@ namespace openpeer
             }
             return;
           }
+
+          ZS_LOG_TRACE(log("memory cache expired for A / AAAA") + ZS_PARAM("now", tick))
         }
 
         // did not find in cache or expired
+        useInfo->mResult = IDNS::AResultPtr();
         clear(useInfo->mName, aMode ? IDNS::SRVLookupType_AutoLookupA : IDNS::SRVLookupType_AutoLookupAAAA, flags);
 
         useInfo->mPendingResults.push_back(result);
@@ -699,6 +708,8 @@ namespace openpeer
           if (info->mProtocol != protocol) continue;
           if (info->mFlags != flags) continue;
 
+          ZS_LOG_TRACE(log("using memeory cache to resolve SRV") + ZS_PARAM("name", info->mName) + ZS_PARAM("service", info->mService) + ZS_PARAM("protocol", info->mProtocol) + ZS_PARAM("flags", info->mFlags) + ZS_PARAM("expires", info->mExpires) + ZS_PARAM("result", (bool)info->mResult))
+
           useInfo = info;
           break;
         }
@@ -711,6 +722,8 @@ namespace openpeer
           useInfo->mFlags = flags;
 
           useInfo->mResult = fetch(useInfo->mName, useInfo->mService, useInfo->mProtocol, flags, useInfo->mExpires);
+
+          mSRVCacheList.push_back(useInfo);
         }
 
         if (Time() != useInfo->mExpires) {
@@ -718,12 +731,16 @@ namespace openpeer
 
           if (tick < useInfo->mExpires) {
             // use cached result
+            ZS_LOG_TRACE(log("notify SRV resolution from cache"))
             result->onSRVResult(useInfo->mResult);
             return;
           }
+
+          ZS_LOG_TRACE(log("memory cache expired for SRV") + ZS_PARAM("now", tick))
         }
 
         // did not find in cache or expired
+        useInfo->mResult = IDNS::SRVResultPtr();
         clear(useInfo->mName, useInfo->mService, useInfo->mProtocol, flags);
 
         useInfo->mPendingResults.push_back(result);

@@ -1008,6 +1008,7 @@ namespace openpeer
           mDefaultWeight(defaultWeight),
           mLookupType(lookupType)
         {
+          ZS_LOG_TRACE(log("created"))
         }
 
         //---------------------------------------------------------------------
@@ -1023,48 +1024,31 @@ namespace openpeer
                                        mDefaultWeight,
                                        IDNS::SRVLookupType_LookupOnly
                                        );  // do an actual SRV DNS lookup which will not resolve the A or AAAA records
-        }
 
-        //---------------------------------------------------------------------
-        void report()
-        {
-          if (!isComplete()) return;
-          if (!mDelegate) return;
-
-          mResolvers.clear();
-
-          try {
-            mDelegate->onLookupCompleted(mThisWeak.lock());
-          } catch(IDNSDelegateProxy::Exceptions::DelegateGone &) {
-          }
-          mDelegate.reset();
-        }
-
-        //---------------------------------------------------------------------
-        bool find(
-                  IDNSQueryPtr inQuery,
-                  IDNS::SRVResult::SRVRecord * &outRecord,
-                  IDNSQueryPtr * &outQuery
-                  )
-        {
-          outRecord = NULL;
-          outQuery = NULL;
-          if (!mSRVResult)
-            return false;
-
-          IDNS::SRVResult::SRVRecordList::iterator recIter = mSRVResult->mRecords.begin();
-          ResolverList::iterator resIter = mResolvers.begin();
-          for (; recIter != mSRVResult->mRecords.end() && resIter != mResolvers.end(); ++recIter, ++resIter) {
-            if (inQuery == (*resIter)) {
-              outQuery = &(*resIter);
-              outRecord = &(*recIter);
-              return true;
+          // SRV might fail but perhaps we can do a backup lookup in parallel...
+          IDNSQueryPtr backupQuery;
+          if (IDNS::SRVLookupType_FallbackToALookup == (mLookupType & IDNS::SRVLookupType_FallbackToALookup)) {
+            if (IDNS::SRVLookupType_FallbackToAAAALookup == (mLookupType & IDNS::SRVLookupType_FallbackToAAAALookup)) {
+              backupQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), mOriginalName);
+            } else {
+              backupQuery = IDNS::lookupA(mThisWeak.lock(), mOriginalName);
             }
+          } else {
+            if (IDNS::SRVLookupType_FallbackToAAAALookup == (mLookupType & IDNS::SRVLookupType_FallbackToAAAALookup))
+              backupQuery = IDNS::lookupAAAA(mThisWeak.lock(), mOriginalName);
           }
-          return false;
+
+          mBackupLookup = backupQuery;
         }
 
       public:
+        //---------------------------------------------------------------------
+        ~DNSSRVResolverQuery()
+        {
+          mThisWeak.reset();
+          ZS_LOG_TRACE(log("destroyed"))
+        }
+
         //---------------------------------------------------------------------
         static DNSSRVResolverQueryPtr create(
                                              IDNSDelegatePtr delegate,
@@ -1098,6 +1082,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual bool hasResult() const
         {
+          AutoRecursiveLock lock(mLock);
           if (!isComplete()) return false;
           return (bool)mSRVResult;
         }
@@ -1105,25 +1090,49 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual bool isComplete() const
         {
+          AutoRecursiveLock lock(mLock);
+          return mDidComplete;
+
           // all the sub resolvers must be complete...
           for (ResolverList::const_iterator iter = mResolvers.begin(); iter != mResolvers.end(); ++iter) {
             if (*iter)
               return false;   // at least one resolver is still active
           }
 
-          if (mBackupLookup) {
-            return mBackupLookup->isComplete();
+          if (mSRVLookup) {
+            if (!mSRVLookup->isComplete()) {
+              return false;
+            }
           }
-          return mSRVLookup->isComplete();
+
+          if (mBackupLookup) {
+            if (!mBackupLookup->isComplete()) {
+              return false;
+            }
+          }
+
+          return true;
         }
 
+        //---------------------------------------------------------------------
         virtual AResultPtr getA() const {return AResultPtr();}
-        virtual AAAAResultPtr getAAAA() const {return AAAAResultPtr();}
-        virtual SRVResultPtr getSRV() const {return IDNS::cloneSRV(mSRVResult);}
 
+        //---------------------------------------------------------------------
+        virtual AAAAResultPtr getAAAA() const {return AAAAResultPtr();}
+
+        //---------------------------------------------------------------------
+        virtual SRVResultPtr getSRV() const
+        {
+          AutoRecursiveLock lock(mLock);
+          return IDNS::cloneSRV(mSRVResult);
+        }
+
+        //---------------------------------------------------------------------
         virtual void cancel()
         {
           AutoRecursiveLock lock(mLock);
+
+          get(mDidComplete) = true;
 
           if (mSRVLookup)
             mSRVLookup->cancel();
@@ -1149,16 +1158,7 @@ namespace openpeer
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
           AutoRecursiveLock lock(mLock);
-
-          if (mSRVLookup == query) {
-            handleSRVCompleted();
-            return;
-          }
-          if (mBackupLookup == query) {
-            handleBackupCompleted();
-            return;
-          }
-          handleResolverCompleted(query);
+          step();
         }
 
       protected:
@@ -1168,119 +1168,173 @@ namespace openpeer
         #pragma mark
 
         //---------------------------------------------------------------------
-        void handleSRVCompleted()
+        void step()
         {
-          if (mSRVLookup->hasResult()) {
-            mSRVResult = mSRVLookup->getSRV();
+          ZS_LOG_TRACE(log("step") + toDebug())
 
-            // the SRV resolved so now we must do a lookup for each SRV result
-            IDNS::SRVResult::SRVRecordList::iterator iter = mSRVResult->mRecords.begin();
-            for (; iter != mSRVResult->mRecords.end(); ++iter) {
-              // first we should check if this is actually an IP address
-              if (IPAddress::isConvertable((*iter).mName)) {
-                IPAddress temp((*iter).mName, (*iter).mPort);
-                IDNS::AResultPtr ipResult(new IDNS::AResult);
+          if (!stepHandleSRVCompleted()) return;
+          if (!stepHandleBackupCompleted()) return;
+          if (!stepHandleResolversCompleted()) return;
 
-                ipResult->mName = (*iter).mName;
-                ipResult->mTTL = mSRVResult->mTTL;
-                ipResult->mIPAddresses.push_back(temp);
+          ZS_LOG_DEBUG(log("step complete") + toDebug())
 
-                if (temp.isIPv4()) {
-                  (*iter).mAResult = ipResult;
-                } else {
-                  (*iter).mAAAAResult = ipResult;
-                }
+          get(mDidComplete) = true;
 
-                IDNSQueryPtr subQuery;
-                mResolvers.push_back(subQuery); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
-                continue; // we don't need to go any futher
+          report();
+        }
+
+        //---------------------------------------------------------------------
+        bool stepHandleSRVCompleted()
+        {
+          if (mSRVResult) {
+            ZS_LOG_TRACE(log("already have a result"))
+            return true;
+          }
+
+          if (!mSRVLookup->isComplete()) {
+            ZS_LOG_TRACE(log("waiting for SRV to complete"))
+            return false;
+          }
+
+          if (!mSRVLookup->hasResult()) {
+            ZS_LOG_TRACE(log("SRV lookup failed to resolve (will check if there is a backup)"))
+            return true;
+          }
+
+          mSRVResult = mSRVLookup->getSRV();
+
+          ZS_LOG_DEBUG(log("SRV result found") + toDebug())
+
+          // the SRV resolved so now we must do a lookup for each SRV result
+          for (IDNS::SRVResult::SRVRecordList::iterator iter = mSRVResult->mRecords.begin(); iter != mSRVResult->mRecords.end(); ++iter) {
+            // first we should check if this is actually an IP address
+            if (IPAddress::isConvertable((*iter).mName)) {
+              IPAddress temp((*iter).mName, (*iter).mPort);
+              IDNS::AResultPtr ipResult(new IDNS::AResult);
+
+              ipResult->mName = (*iter).mName;
+              ipResult->mTTL = mSRVResult->mTTL;
+              ipResult->mIPAddresses.push_back(temp);
+
+              if (temp.isIPv4()) {
+                (*iter).mAResult = ipResult;
+              } else {
+                (*iter).mAAAAResult = ipResult;
               }
 
               IDNSQueryPtr subQuery;
-              if (IDNS::SRVLookupType_AutoLookupA == (mLookupType & IDNS::SRVLookupType_AutoLookupA)) {
-                if (IDNS::SRVLookupType_AutoLookupAAAA == (mLookupType & IDNS::SRVLookupType_AutoLookupAAAA)) {
-                  subQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), (*iter).mName);
-                } else {
-                  subQuery = IDNS::lookupA(mThisWeak.lock(), (*iter).mName);
-                }
+              mResolvers.push_back(subQuery); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
+              continue; // we don't need to go any futher
+            }
+
+            IDNSQueryPtr subQuery;
+            if (IDNS::SRVLookupType_AutoLookupA == (mLookupType & IDNS::SRVLookupType_AutoLookupA)) {
+              if (IDNS::SRVLookupType_AutoLookupAAAA == (mLookupType & IDNS::SRVLookupType_AutoLookupAAAA)) {
+                subQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), (*iter).mName);
               } else {
-                subQuery = IDNS::lookupAAAA(mThisWeak.lock(), (*iter).mName);
+                subQuery = IDNS::lookupA(mThisWeak.lock(), (*iter).mName);
               }
-              mResolvers.push_back(subQuery);
-            }
-            report();
-            return;
-          }
-
-          // SRV failed but perhaps we can do a backup lookup...
-          IDNSQueryPtr backupQuery;
-          if (IDNS::SRVLookupType_FallbackToALookup == (mLookupType & IDNS::SRVLookupType_FallbackToALookup)) {
-            if (IDNS::SRVLookupType_FallbackToAAAALookup == (mLookupType & IDNS::SRVLookupType_FallbackToAAAALookup)) {
-              backupQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), mOriginalName);
             } else {
-              backupQuery = IDNS::lookupA(mThisWeak.lock(), mOriginalName);
+              subQuery = IDNS::lookupAAAA(mThisWeak.lock(), (*iter).mName);
             }
-          } else {
-            if (IDNS::SRVLookupType_FallbackToAAAALookup == (mLookupType & IDNS::SRVLookupType_FallbackToAAAALookup))
-              backupQuery = IDNS::lookupAAAA(mThisWeak.lock(), mOriginalName);
+            mResolvers.push_back(subQuery);
           }
 
-          mBackupLookup = backupQuery;
-          if (mBackupLookup)
-            return; // we haven't finished searching yet...
-
-          report();
+          return true;
         }
 
         //---------------------------------------------------------------------
-        void handleBackupCompleted()
+        bool stepHandleBackupCompleted()
         {
-          if (mBackupLookup->hasResult()) {
-            // we didn't have an SRV result but now we will fake one
-            IDNS::SRVResultPtr data(new IDNS::SRVResult);
-
-            AResultPtr resultA = mBackupLookup->getA();
-            AAAAResultPtr resultAAAA = mBackupLookup->getAAAA();
-
-            data->mName = mOriginalName;
-            data->mService = mOriginalService;
-            data->mProtocol = mOriginalProtocol;
-            data->mTTL = (resultA ? resultA->mTTL : resultAAAA->mTTL);
-
-            IDNS::SRVResult::SRVRecord srvRecord;
-            srvRecord.mPriority = mDefaultPriority;
-            srvRecord.mWeight = mDefaultWeight;
-            srvRecord.mPort = 0;
-            srvRecord.mName = mOriginalName;
-            srvRecord.mAResult = resultA;
-            srvRecord.mAAAAResult = resultAAAA;
-
-            fixDefaultPort(srvRecord, mDefaultPort);
-
-            ZS_LOG_DEBUG(log("DNS A/AAAAA converting to SRV record") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
-
-            data->mRecords.push_back(srvRecord);
-            mSRVResult = data;
+          if (mSRVResult) {
+            ZS_LOG_TRACE(log("already have a result"))
+            return true;
           }
-          report();
+
+          if (!mBackupLookup->hasResult()) {
+            ZS_LOG_WARNING(Trace, log("SRV and backup failed to resolve"))
+            return true;
+          }
+
+          // we didn't have an SRV result but now we will fake one
+          IDNS::SRVResultPtr data(new IDNS::SRVResult);
+
+          AResultPtr resultA = mBackupLookup->getA();
+          AAAAResultPtr resultAAAA = mBackupLookup->getAAAA();
+
+          data->mName = mOriginalName;
+          data->mService = mOriginalService;
+          data->mProtocol = mOriginalProtocol;
+          data->mTTL = (resultA ? resultA->mTTL : resultAAAA->mTTL);
+
+          IDNS::SRVResult::SRVRecord srvRecord;
+          srvRecord.mPriority = mDefaultPriority;
+          srvRecord.mWeight = mDefaultWeight;
+          srvRecord.mPort = 0;
+          srvRecord.mName = mOriginalName;
+          srvRecord.mAResult = resultA;
+          srvRecord.mAAAAResult = resultAAAA;
+
+          fixDefaultPort(srvRecord, mDefaultPort);
+
+          ZS_LOG_DEBUG(log("DNS A/AAAAA converting to SRV record") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
+
+          data->mRecords.push_back(srvRecord);
+          mSRVResult = data;
+
+          return true;
         }
 
         //---------------------------------------------------------------------
-        virtual void handleResolverCompleted(IDNSQueryPtr query)
+        virtual bool stepHandleResolversCompleted()
         {
-          IDNS::SRVResult::SRVRecord *foundRecord = NULL;
-          IDNSQueryPtr *foundQuery = NULL;
+          if (mResolvers.size() < 1) {
+            ZS_LOG_TRACE(log("no resolvers found"))
+            return true;
+          }
 
-          ZS_THROW_BAD_STATE_IF(!find(query, foundRecord, foundQuery))
+          if (!mSRVResult) {
+            ZS_LOG_TRACE(log("no SRV result found"))
+            return true;
+          }
 
-          foundRecord->mAResult = query->getA();
-          foundRecord->mAAAAResult = query->getAAAA();
+          IDNS::SRVResult::SRVRecordList::iterator recIter = mSRVResult->mRecords.begin();
+          ResolverList::iterator resIter = mResolvers.begin();
+          for (; recIter != mSRVResult->mRecords.end() && resIter != mResolvers.end(); ++recIter, ++resIter) {
+            IDNS::SRVResult::SRVRecord &record = (*recIter);
+            IDNSQueryPtr &query = (*resIter);
 
-          fixDefaultPort(*foundRecord, foundRecord->mPort);
+            if (query) {
+              if (!query->isComplete()) {
+                ZS_LOG_TRACE(log("waiting on at least one resolver to complete"))
+                return false;
+              }
 
-          (*foundQuery).reset();            // mark this query as complete (even though it has failed)
+              record.mAResult = query->getA();
+              record.mAAAAResult = query->getAAAA();
 
-          report();
+              fixDefaultPort(record, record.mPort);
+
+              query.reset();
+            }
+          }
+
+          ZS_LOG_TRACE(log("all resolvers are complete"))
+          return true;
+        }
+
+        //---------------------------------------------------------------------
+        void report()
+        {
+          if (!mDelegate) return;
+
+          mResolvers.clear();
+
+          try {
+            mDelegate->onLookupCompleted(mThisWeak.lock());
+          } catch(IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          }
+          mDelegate.reset();
         }
 
         //---------------------------------------------------------------------
@@ -1291,17 +1345,45 @@ namespace openpeer
           return Log::Params(message, objectEl);
         }
 
+        //---------------------------------------------------------------------
+        virtual ElementPtr toDebug() const
+        {
+          ElementPtr resultEl = Element::create("DNSSRVResolverQuery");
+          IHelper::debugAppend(resultEl, "id", mID);
+          IHelper::debugAppend(resultEl, "completed", mDidComplete);
+
+          IHelper::debugAppend(resultEl, "name", mOriginalName);
+          IHelper::debugAppend(resultEl, "service", mOriginalService);
+          IHelper::debugAppend(resultEl, "protocol", mOriginalProtocol);
+
+          IHelper::debugAppend(resultEl, "default port", mDefaultPort);
+          IHelper::debugAppend(resultEl, "default priority", mDefaultPriority);
+          IHelper::debugAppend(resultEl, "default weight", mDefaultWeight);
+
+          IHelper::debugAppend(resultEl, "SRV lookup", (bool)mSRVLookup);
+          IHelper::debugAppend(resultEl, "backup lookup", (bool)mBackupLookup);
+
+          IHelper::debugAppend(resultEl, "SRV result", (bool)mSRVResult);
+
+          IHelper::debugAppend(resultEl, "lookup type", mLookupType);
+
+          IHelper::debugAppend(resultEl, "resolvers", mResolvers.size());
+          return resultEl;
+        }
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark DNSSRVResolverQuery => (data)
         #pragma mark
 
-        RecursiveLock mLock;
+        mutable RecursiveLock mLock;
         AutoPUID mID;
 
         DNSSRVResolverQueryWeakPtr mThisWeak;
         IDNSDelegatePtr mDelegate;
+
+        AutoBool mDidComplete;
 
         String mOriginalName;
         String mOriginalService;
