@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_RSAPrivateKey.h>
 #include <openpeer/services/internal/services_RSAPublicKey.h>
+#include <openpeer/services/ICache.h>
 #include <openpeer/services/IHelper.h>
 #include <zsLib/Log.h>
 #include <zsLib/helpers.h>
@@ -40,6 +41,9 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/rsa.h>
 
+#define OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_NAMESPACE "https://meta.openpeer.org/caching/rsaprivatekey/"
+#define OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE "1"
+#define OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS ((24)*365)
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -60,6 +64,24 @@ namespace openpeer
       using CryptoPP::PK_DecryptorFilter;
 
       ZS_DECLARE_TYPEDEF_PTR(IRSAPrivateKeyForRSAPublicKey::ForPublicKey, ForPublicKey)
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark (helpers)
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      static String getCookieName(const SecureByteBlock &buffer)
+      {
+        String keyHash = IHelper::convertToHex(*IHelper::hash(buffer, IHelper::HashAlgorthm_SHA256));
+
+        String cookieName = OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_NAMESPACE + keyHash;
+
+        return cookieName;
+      }
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -161,6 +183,8 @@ namespace openpeer
 
         ZS_LOG_DEBUG(pThis->debug("generated private key") + IRSAPublicKey::toDebug(outPublicKey))
 
+        get(pThis->mDidGenerate) = true;
+
         return pThis;
       }
 
@@ -182,12 +206,19 @@ namespace openpeer
         try {
           pThis->mPrivateKey.Load(byteQueue);
 
-#define WARNING_CACHE_ALREADY_VALIDATED_PRIVATE_KEY 1
-#define WARNING_CACHE_ALREADY_VALIDATED_PRIVATE_KEY 2
+          String cookieName = getCookieName(buffer);
 
-          if (!pThis->mPrivateKey.Validate(rng, 3)) {
-            ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key") + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
-            return RSAPrivateKeyPtr();
+          bool alreadyValidated = ICache::singleton()->fetch(cookieName).hasData();
+
+          if (!alreadyValidated) {
+            if (!pThis->mPrivateKey.Validate(rng, 3)) {
+              ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key") + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
+              return RSAPrivateKeyPtr();
+            }
+            ICache::singleton()->store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
+            ZS_LOG_DEBUG(pThis->log("remembering that private key has already validated") + ZS_PARAM("cookie", cookieName))
+          } else {
+            ZS_LOG_DEBUG(pThis->log("already validated private key") + ZS_PARAM("cookie", cookieName))
           }
         } catch (CryptoPP::Exception &e) {
           ZS_LOG_ERROR(Basic, pThis->log("cryptography library threw an exception") + ZS_PARAM("reason", e.what()) + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
@@ -208,6 +239,13 @@ namespace openpeer
         output->CleanNew(outputLengthInBytes);
 
         byteQueue.Get(*output, outputLengthInBytes);
+
+        if (mDidGenerate) {
+          String cookieName = getCookieName(*output);
+
+          ICache::singleton()->store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
+          ZS_LOG_DEBUG(log("remembering that private key has already validated") + ZS_PARAM("cookie", cookieName))
+        }
         return output;
       }
 

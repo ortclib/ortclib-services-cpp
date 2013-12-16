@@ -60,6 +60,7 @@ namespace openpeer
       using zsLib::CSTR;
       using zsLib::PTRNUMBER;
       using zsLib::Milliseconds;
+      using zsLib::Hours;
       using zsLib::MessageQueueAssociator;
       using zsLib::Subsystem;
 
