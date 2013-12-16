@@ -33,7 +33,7 @@
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/internal/services_RUDPChannel.h>
-#include <openpeer/services/IRUDPICESocketSession.h>
+#include <openpeer/services/IRUDPTransport.h>
 #include <openpeer/services/IICESocketSession.h>
 #include <openpeer/services/ISTUNRequester.h>
 
@@ -46,27 +46,27 @@ namespace openpeer
   {
     namespace internal
     {
-      interaction IRUDPChannelForRUDPICESocketSession;
+      interaction IRUDPChannelForRUDPTransport;
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession
+      #pragma mark RUDPTransport
       #pragma mark
 
-      class RUDPICESocketSession : public Noop,
-                                   public MessageQueueAssociator,
-                                   public IRUDPICESocketSession,
-                                   public IICESocketSessionDelegate,
-                                   public IRUDPChannelDelegateForSessionAndListener
+      class RUDPTransport : public Noop,
+                            public MessageQueueAssociator,
+                            public IRUDPTransport,
+                            public IICESocketSessionDelegate,
+                            public IRUDPChannelDelegateForSessionAndListener
       {
       public:
-        friend interaction IRUDPICESocketSessionFactory;
-        friend interaction IRUDPICESocketSession;
+        friend interaction IRUDPTransportFactory;
+        friend interaction IRUDPTransport;
 
-        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPICESocketSession, UseRUDPChannel)
+        ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPTransport, UseRUDPChannel)
 
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocket::ICEControls ICEControls;
@@ -77,43 +77,43 @@ namespace openpeer
         typedef std::list<UseRUDPChannelPtr> PendingSessionList;
 
       protected:
-        RUDPICESocketSession(
-                             IMessageQueuePtr queue,
-                             IICESocketSessionPtr iceSession,
-                             IRUDPICESocketSessionDelegatePtr delegate
-                             );
+        RUDPTransport(
+                      IMessageQueuePtr queue,
+                      IICESocketSessionPtr iceSession,
+                      IRUDPTransportDelegatePtr delegate
+                      );
 
-        RUDPICESocketSession(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPTransport(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();
 
-        static RUDPICESocketSessionPtr convert(IRUDPICESocketSessionPtr session);
+        static RUDPTransportPtr convert(IRUDPTransportPtr session);
 
       public:
-        ~RUDPICESocketSession();
+        ~RUDPTransport();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => IRUDPICESocketSession
+        #pragma mark RUDPTransport => IRUDPTransport
         #pragma mark
 
-        static ElementPtr toDebug(IRUDPICESocketSessionPtr session);
+        static ElementPtr toDebug(IRUDPTransportPtr session);
 
-        static RUDPICESocketSessionPtr listen(
-                                              IMessageQueuePtr queue,
-                                              IICESocketSessionPtr iceSession,
-                                              IRUDPICESocketSessionDelegatePtr delegate
-                                              );
+        static RUDPTransportPtr listen(
+                                       IMessageQueuePtr queue,
+                                       IICESocketSessionPtr iceSession,
+                                       IRUDPTransportDelegatePtr delegate
+                                       );
 
         virtual PUID getID() const {return mID;}
 
-        virtual IRUDPICESocketSessionSubscriptionPtr subscribe(IRUDPICESocketSessionDelegatePtr delegate);
+        virtual IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate);
 
-        virtual RUDPICESocketSessionStates getState(
-                                                    WORD *outLastErrorCode = NULL,
-                                                    String *outLastErrorReason = NULL
-                                                    ) const;
+        virtual RUDPTransportStates getState(
+                                             WORD *outLastErrorCode = NULL,
+                                             String *outLastErrorReason = NULL
+                                             ) const;
 
         virtual void shutdown();
 
@@ -134,7 +134,7 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => IICESocketSessionDelegate
+        #pragma mark RUDPTransport => IICESocketSessionDelegate
         #pragma mark
 
         virtual void onICESocketSessionStateChanged(
@@ -161,7 +161,7 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => IRUDPChannelDelegateForSessionAndListener
+        #pragma mark RUDPTransport => IRUDPChannelDelegateForSessionAndListener
         #pragma mark
 
         virtual void onRUDPChannelStateChanged(
@@ -179,7 +179,7 @@ namespace openpeer
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => (internal)
+        #pragma mark RUDPTransport => (internal)
         #pragma mark
 
         RecursiveLock &getLock() const;
@@ -188,16 +188,16 @@ namespace openpeer
         Log::Params debug(const char *message) const;
         void fix(STUNPacketPtr stun) const;
 
-        bool isReady() {return RUDPICESocketSessionState_Ready == mCurrentState;}
-        bool isShuttingDown() const {return RUDPICESocketSessionState_ShuttingDown == mCurrentState;}
-        bool isShutdown() const {return RUDPICESocketSessionState_Shutdown == mCurrentState;}
+        bool isReady() {return RUDPTransportState_Ready == mCurrentState;}
+        bool isShuttingDown() const {return RUDPTransportState_ShuttingDown == mCurrentState;}
+        bool isShutdown() const {return RUDPTransportState_Shutdown == mCurrentState;}
 
         virtual ElementPtr toDebug() const;
 
         void cancel();
         void step();
 
-        void setState(RUDPICESocketSessionStates state);
+        void setState(RUDPTransportStates state);
         void setError(WORD errorCode, const char *inReason = NULL);
 
         bool handleUnknownChannel(
@@ -210,20 +210,20 @@ namespace openpeer
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark RUDPICESocketSession => (data)
+        #pragma mark RUDPTransport => (data)
         #pragma mark
 
         mutable RecursiveLock mLock;
 
         AutoPUID mID;
-        RUDPICESocketSessionWeakPtr mThisWeak;
+        RUDPTransportWeakPtr mThisWeak;
 
-        RUDPICESocketSessionPtr mGracefulShutdownReference;
+        RUDPTransportPtr mGracefulShutdownReference;
 
-        IRUDPICESocketSessionDelegateSubscriptions mSubscriptions;
-        IRUDPICESocketSessionSubscriptionPtr mDefaultSubscription;
+        IRUDPTransportDelegateSubscriptions mSubscriptions;
+        IRUDPTransportSubscriptionPtr mDefaultSubscription;
 
-        RUDPICESocketSessionStates mCurrentState;
+        RUDPTransportStates mCurrentState;
         AutoWORD mLastError;
         String mLastErrorReason;
 
@@ -241,20 +241,20 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRUDPICESocketSessionFactory
+      #pragma mark IRUDPTransportFactory
       #pragma mark
 
-      interaction IRUDPICESocketSessionFactory
+      interaction IRUDPTransportFactory
       {
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocket::ICEControls ICEControls;
 
-        static IRUDPICESocketSessionFactory &singleton();
+        static IRUDPTransportFactory &singleton();
 
-        virtual RUDPICESocketSessionPtr listen(
-                                               IMessageQueuePtr queue,
-                                               IICESocketSessionPtr iceSession,
-                                               IRUDPICESocketSessionDelegatePtr delegate
+        virtual RUDPTransportPtr listen(
+                                        IMessageQueuePtr queue,
+                                        IICESocketSessionPtr iceSession,
+                                        IRUDPTransportDelegatePtr delegate
                                                );
       };
       

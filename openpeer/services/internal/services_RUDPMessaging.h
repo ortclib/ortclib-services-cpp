@@ -101,7 +101,7 @@ namespace openpeer
 
         static RUDPMessagingPtr acceptChannel(
                                               IMessageQueuePtr queue,
-                                              IRUDPICESocketSessionPtr session,
+                                              IRUDPTransportPtr session,
                                               IRUDPMessagingDelegatePtr delegate,
                                               ITransportStreamPtr receiveStream,
                                               ITransportStreamPtr sendStream,
@@ -110,7 +110,7 @@ namespace openpeer
 
         static RUDPMessagingPtr openChannel(
                                             IMessageQueuePtr queue,
-                                            IRUDPICESocketSessionPtr session,
+                                            IRUDPTransportPtr session,
                                             IRUDPMessagingDelegatePtr delegate,
                                             const char *connectionInfo,
                                             ITransportStreamPtr receiveStream,
@@ -246,7 +246,7 @@ namespace openpeer
 
         virtual RUDPMessagingPtr acceptChannel(
                                                IMessageQueuePtr queue,
-                                               IRUDPICESocketSessionPtr session,
+                                               IRUDPTransportPtr session,
                                                IRUDPMessagingDelegatePtr delegate,
                                                ITransportStreamPtr receiveStream,
                                                ITransportStreamPtr sendStream,
@@ -255,7 +255,7 @@ namespace openpeer
 
         virtual RUDPMessagingPtr openChannel(
                                              IMessageQueuePtr queue,
-                                             IRUDPICESocketSessionPtr session,
+                                             IRUDPTransportPtr session,
                                              IRUDPMessagingDelegatePtr delegate,
                                              const char *connectionInfo,
                                              ITransportStreamPtr receiveStream,

@@ -478,41 +478,41 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr IRUDPChannelFactory::createForRUDPICESocketSessionIncoming(
-                                                                                IMessageQueuePtr queue,
-                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                                const IPAddress &remoteIP,
-                                                                                WORD incomingChannelNumber,
-                                                                                const char *localUserFrag,
-                                                                                const char *localPassword,
-                                                                                const char *remoteUserFrag,
-                                                                                const char *remotePassword,
-                                                                                STUNPacketPtr channelOpenPacket,
-                                                                                STUNPacketPtr &outResponse
-                                                                                )
+      RUDPChannelPtr IRUDPChannelFactory::createForRUDPTransportIncoming(
+                                                                         IMessageQueuePtr queue,
+                                                                         IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                         const IPAddress &remoteIP,
+                                                                         WORD incomingChannelNumber,
+                                                                         const char *localUserFrag,
+                                                                         const char *localPassword,
+                                                                         const char *remoteUserFrag,
+                                                                         const char *remotePassword,
+                                                                         STUNPacketPtr channelOpenPacket,
+                                                                         STUNPacketPtr &outResponse
+                                                                         )
       {
         if (this) {}
-        return RUDPChannel::createForRUDPICESocketSessionIncoming(queue, master, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, channelOpenPacket, outResponse);
+        return RUDPChannel::createForRUDPTransportIncoming(queue, master, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, channelOpenPacket, outResponse);
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr IRUDPChannelFactory::createForRUDPICESocketSessionOutgoing(
-                                                                                IMessageQueuePtr queue,
-                                                                                IRUDPChannelDelegateForSessionAndListenerPtr master,
-                                                                                IRUDPChannelDelegatePtr delegate,
-                                                                                const IPAddress &remoteIP,
-                                                                                WORD incomingChannelNumber,
-                                                                                const char *localUserFrag,
-                                                                                const char *localPassword,
-                                                                                const char *remoteUserFrag,
-                                                                                const char *remotePassword,
-                                                                                const char *connectionInfo,
-                                                                                ITransportStreamPtr receiveStream,
-                                                                                ITransportStreamPtr sendStream
-                                                                                )
+      RUDPChannelPtr IRUDPChannelFactory::createForRUDPTransportOutgoing(
+                                                                         IMessageQueuePtr queue,
+                                                                         IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                         IRUDPChannelDelegatePtr delegate,
+                                                                         const IPAddress &remoteIP,
+                                                                         WORD incomingChannelNumber,
+                                                                         const char *localUserFrag,
+                                                                         const char *localPassword,
+                                                                         const char *remoteUserFrag,
+                                                                         const char *remotePassword,
+                                                                         const char *connectionInfo,
+                                                                         ITransportStreamPtr receiveStream,
+                                                                         ITransportStreamPtr sendStream
+                                                                         )
       {
         if (this) {}
-        return RUDPChannel::createForRUDPICESocketSessionOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, connectionInfo, receiveStream, sendStream);
+        return RUDPChannel::createForRUDPTransportOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, connectionInfo, receiveStream, sendStream);
       }
 
       //-----------------------------------------------------------------------
@@ -563,24 +563,24 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark IRUDPICESocketSessionFactory
+      #pragma mark IRUDPTransportFactory
       #pragma mark
 
       //-----------------------------------------------------------------------
-      IRUDPICESocketSessionFactory &IRUDPICESocketSessionFactory::singleton()
+      IRUDPTransportFactory &IRUDPTransportFactory::singleton()
       {
         return *(Factory::singleton().get());
       }
 
       //-----------------------------------------------------------------------
-      RUDPICESocketSessionPtr IRUDPICESocketSessionFactory::listen(
-                                                                   IMessageQueuePtr queue,
-                                                                   IICESocketSessionPtr iceSession,
-                                                                   IRUDPICESocketSessionDelegatePtr delegate
-                                                                   )
+      RUDPTransportPtr IRUDPTransportFactory::listen(
+                                                            IMessageQueuePtr queue,
+                                                            IICESocketSessionPtr iceSession,
+                                                            IRUDPTransportDelegatePtr delegate
+                                                            )
       {
         if (this) {}
-        return RUDPICESocketSession::listen(queue, iceSession, delegate);
+        return RUDPTransport::listen(queue, iceSession, delegate);
       }
 
       //-----------------------------------------------------------------------
@@ -640,7 +640,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr IRUDPMessagingFactory::acceptChannel(
                                                             IMessageQueuePtr queue,
-                                                            IRUDPICESocketSessionPtr session,
+                                                            IRUDPTransportPtr session,
                                                             IRUDPMessagingDelegatePtr delegate,
                                                             ITransportStreamPtr receiveStream,
                                                             ITransportStreamPtr sendStream,
@@ -654,7 +654,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr IRUDPMessagingFactory::openChannel(
                                                           IMessageQueuePtr queue,
-                                                          IRUDPICESocketSessionPtr session,
+                                                          IRUDPTransportPtr session,
                                                           IRUDPMessagingDelegatePtr delegate,
                                                           const char *connectionInfo,
                                                           ITransportStreamPtr receiveStream,

@@ -33,7 +33,7 @@
 #include <openpeer/services/internal/services_Helper.h>
 
 #include <openpeer/services/IRUDPListener.h>
-#include <openpeer/services/IRUDPICESocketSession.h>
+#include <openpeer/services/IRUDPTransport.h>
 
 #include <cryptopp/queue.h>
 
@@ -157,7 +157,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr RUDPMessaging::acceptChannel(
                                                     IMessageQueuePtr queue,
-                                                    IRUDPICESocketSessionPtr session,
+                                                    IRUDPTransportPtr session,
                                                     IRUDPMessagingDelegatePtr delegate,
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
@@ -186,7 +186,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr RUDPMessaging::openChannel(
                                                   IMessageQueuePtr queue,
-                                                  IRUDPICESocketSessionPtr session,
+                                                  IRUDPTransportPtr session,
                                                   IRUDPMessagingDelegatePtr delegate,
                                                   const char *connectionInfo,
                                                   ITransportStreamPtr receiveStream,
@@ -643,7 +643,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     IRUDPMessagingPtr IRUDPMessaging::acceptChannel(
                                                     IMessageQueuePtr queue,
-                                                    IRUDPICESocketSessionPtr session,
+                                                    IRUDPTransportPtr session,
                                                     IRUDPMessagingDelegatePtr delegate,
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
@@ -656,7 +656,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     IRUDPMessagingPtr IRUDPMessaging::openChannel(
                                                   IMessageQueuePtr queue,
-                                                  IRUDPICESocketSessionPtr session,
+                                                  IRUDPTransportPtr session,
                                                   IRUDPMessagingDelegatePtr delegate,
                                                   const char *connectionInfo,
                                                   ITransportStreamPtr receiveStream,

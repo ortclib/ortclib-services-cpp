@@ -51,7 +51,7 @@
 #include <openpeer/services/RUDPPacket.h>
 #include <openpeer/services/RUDPProtocol.h>
 #include <openpeer/services/IRUDPChannel.h>
-#include <openpeer/services/IRUDPICESocketSession.h>
+#include <openpeer/services/IRUDPTransport.h>
 #include <openpeer/services/IRUDPListener.h>
 #include <openpeer/services/IRUDPMessaging.h>
 #include <openpeer/services/ISTUNRequester.h>

@@ -110,7 +110,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(RUDPChannel)
       ZS_DECLARE_CLASS_PTR(RUDPChannelStream)
       ZS_DECLARE_CLASS_PTR(RUDPICESocket)
-      ZS_DECLARE_CLASS_PTR(RUDPICESocketSession)
+      ZS_DECLARE_CLASS_PTR(RUDPTransport)
       ZS_DECLARE_CLASS_PTR(RUDPListener)
       ZS_DECLARE_CLASS_PTR(RUDPMessaging)
       ZS_DECLARE_CLASS_PTR(STUNDiscovery)
@@ -126,7 +126,7 @@ namespace openpeer
       ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelDelegateForSessionAndListener)
       ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelStreamDelegate)
       ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelStreamAsync)
-      ZS_DECLARE_INTERACTION_PROXY(IRUDPICESocketForRUDPICESocketSession)
+      ZS_DECLARE_INTERACTION_PROXY(IRUDPICESocketForRUDPTransport)
     }
   }
 }

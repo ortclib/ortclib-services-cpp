@@ -47,37 +47,37 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
-    #pragma mark IRUDPICESocketSession
+    #pragma mark IRUDPTransport
     #pragma mark
 
-    interaction IRUDPICESocketSession
+    interaction IRUDPTransport
     {
-      enum RUDPICESocketSessionStates
+      enum RUDPTransportStates
       {
-        RUDPICESocketSessionState_Pending,
-        RUDPICESocketSessionState_Ready,
-        RUDPICESocketSessionState_ShuttingDown,
-        RUDPICESocketSessionState_Shutdown,
+        RUDPTransportState_Pending,
+        RUDPTransportState_Ready,
+        RUDPTransportState_ShuttingDown,
+        RUDPTransportState_Shutdown,
       };
 
-      static const char *toString(RUDPICESocketSessionStates state);
+      static const char *toString(RUDPTransportStates state);
 
-      static ElementPtr toDebug(IRUDPICESocketSessionPtr session);
+      static ElementPtr toDebug(IRUDPTransportPtr session);
 
-      static IRUDPICESocketSessionPtr listen(
-                                             IMessageQueuePtr queue,
-                                             IICESocketSessionPtr iceSession,
-                                             IRUDPICESocketSessionDelegatePtr delegate
-                                             );
+      static IRUDPTransportPtr listen(
+                                      IMessageQueuePtr queue,
+                                      IICESocketSessionPtr iceSession,
+                                      IRUDPTransportDelegatePtr delegate
+                                      );
 
       virtual PUID getID() const = 0;
 
-      virtual IRUDPICESocketSessionSubscriptionPtr subscribe(IRUDPICESocketSessionDelegatePtr delegate) = 0;
+      virtual IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate) = 0;
 
-      virtual RUDPICESocketSessionStates getState(
-                                                  WORD *outLastErrorCode = NULL,
-                                                  String *outLastErrorReason = NULL
-                                                  ) const = 0;
+      virtual RUDPTransportStates getState(
+                                           WORD *outLastErrorCode = NULL,
+                                           String *outLastErrorReason = NULL
+                                           ) const = 0;
 
       virtual void shutdown() = 0;
 
@@ -104,20 +104,20 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
-    #pragma mark IRUDPICESocketSessionDelegate
+    #pragma mark IRUDPTransportDelegate
     #pragma mark
 
-    interaction IRUDPICESocketSessionDelegate
+    interaction IRUDPTransportDelegate
     {
-      typedef services::IRUDPICESocketSessionPtr IRUDPICESocketSessionPtr;
-      typedef IRUDPICESocketSession::RUDPICESocketSessionStates RUDPICESocketSessionStates;
+      typedef services::IRUDPTransportPtr IRUDPTransportPtr;
+      typedef IRUDPTransport::RUDPTransportStates RUDPTransportStates;
 
-      virtual void onRUDPICESocketSessionStateChanged(
-                                                      IRUDPICESocketSessionPtr session,
-                                                      RUDPICESocketSessionStates state
-                                                      ) = 0;
+      virtual void onRUDPTransportStateChanged(
+                                               IRUDPTransportPtr session,
+                                               RUDPTransportStates state
+                                               ) = 0;
 
-      virtual void onRUDPICESocketSessionChannelWaiting(IRUDPICESocketSessionPtr session) = 0;
+      virtual void onRUDPTransportChannelWaiting(IRUDPTransportPtr session) = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -125,10 +125,10 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
-    #pragma mark IRUDPICESocketSessionSubscription
+    #pragma mark IRUDPTransportSubscription
     #pragma mark
 
-    interaction IRUDPICESocketSessionSubscription
+    interaction IRUDPTransportSubscription
     {
       virtual PUID getID() const = 0;
 
@@ -139,17 +139,17 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPICESocketSessionDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPICESocketSessionPtr, IRUDPICESocketSessionPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPICESocketSessionDelegate::RUDPICESocketSessionStates, RUDPICESocketSessionStates)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPICESocketSessionStateChanged, IRUDPICESocketSessionPtr, RUDPICESocketSessionStates)
-ZS_DECLARE_PROXY_METHOD_1(onRUDPICESocketSessionChannelWaiting, IRUDPICESocketSessionPtr)
+ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPTransportDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPTransportPtr, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPTransportDelegate::RUDPTransportStates, RUDPTransportStates)
+ZS_DECLARE_PROXY_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
+ZS_DECLARE_PROXY_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_END()
 
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IRUDPICESocketSessionDelegate, openpeer::services::IRUDPICESocketSessionSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPICESocketSessionPtr, IRUDPICESocketSessionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPICESocketSession::RUDPICESocketSessionStates, RUDPICESocketSessionStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onRUDPICESocketSessionStateChanged, IRUDPICESocketSessionPtr, RUDPICESocketSessionStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onRUDPICESocketSessionChannelWaiting, IRUDPICESocketSessionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IRUDPTransportDelegate, openpeer::services::IRUDPTransportSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPTransportPtr, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPTransport::RUDPTransportStates, RUDPTransportStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

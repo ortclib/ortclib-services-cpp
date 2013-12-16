@@ -29,7 +29,7 @@
 
  */
 
-#include <openpeer/services/internal/services_RUDPICESocketSession.h>
+#include <openpeer/services/internal/services_RUDPTransport.h>
 #include <openpeer/services/internal/services_RUDPChannel.h>
 #include <openpeer/services/internal/services_Helper.h>
 
@@ -61,17 +61,17 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession
+      #pragma mark RUDPTransport
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RUDPICESocketSession::RUDPICESocketSession(
-                                                 IMessageQueuePtr queue,
-                                                 IICESocketSessionPtr iceSession,
-                                                 IRUDPICESocketSessionDelegatePtr delegate
-                                                 ) :
+      RUDPTransport::RUDPTransport(
+                                   IMessageQueuePtr queue,
+                                   IICESocketSessionPtr iceSession,
+                                   IRUDPTransportDelegatePtr delegate
+                                   ) :
         MessageQueueAssociator(queue),
-        mCurrentState(RUDPICESocketSessionState_Pending),
+        mCurrentState(RUDPTransportState_Pending),
         mICESession(iceSession)
       {
         ZS_LOG_BASIC(log("created"))
@@ -82,7 +82,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::init()
+      void RUDPTransport::init()
       {
         AutoRecursiveLock lock(getLock());
 
@@ -90,7 +90,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      RUDPICESocketSession::~RUDPICESocketSession()
+      RUDPTransport::~RUDPTransport()
       {
         if (isNoop()) return;
         mThisWeak.reset();
@@ -99,9 +99,9 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      RUDPICESocketSessionPtr RUDPICESocketSession::convert(IRUDPICESocketSessionPtr session)
+      RUDPTransportPtr RUDPTransport::convert(IRUDPTransportPtr session)
       {
-        return dynamic_pointer_cast<RUDPICESocketSession>(session);
+        return dynamic_pointer_cast<RUDPTransport>(session);
       }
 
       //-----------------------------------------------------------------------
@@ -109,51 +109,51 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession => RUDPICESocketSession
+      #pragma mark RUDPTransport => RUDPTransport
       #pragma mark
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPICESocketSession::toDebug(IRUDPICESocketSessionPtr session)
+      ElementPtr RUDPTransport::toDebug(IRUDPTransportPtr session)
       {
         if (!session) return ElementPtr();
 
-        RUDPICESocketSessionPtr pThis = RUDPICESocketSession::convert(session);
+        RUDPTransportPtr pThis = RUDPTransport::convert(session);
         return pThis->toDebug();
       }
       
       //-----------------------------------------------------------------------
-      RUDPICESocketSessionPtr RUDPICESocketSession::listen(
-                                                           IMessageQueuePtr queue,
-                                                           IICESocketSessionPtr iceSession,
-                                                           IRUDPICESocketSessionDelegatePtr delegate
-                                                           )
+      RUDPTransportPtr RUDPTransport::listen(
+                                             IMessageQueuePtr queue,
+                                             IICESocketSessionPtr iceSession,
+                                             IRUDPTransportDelegatePtr delegate
+                                             )
       {
-        RUDPICESocketSessionPtr pThis(new RUDPICESocketSession(queue, iceSession, delegate));
+        RUDPTransportPtr pThis(new RUDPTransport(queue, iceSession, delegate));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
       }
 
       //-----------------------------------------------------------------------
-      IRUDPICESocketSessionSubscriptionPtr RUDPICESocketSession::subscribe(IRUDPICESocketSessionDelegatePtr originalDelegate)
+      IRUDPTransportSubscriptionPtr RUDPTransport::subscribe(IRUDPTransportDelegatePtr originalDelegate)
       {
         AutoRecursiveLock lock(getLock());
         if (!originalDelegate) return mDefaultSubscription;
 
-        IRUDPICESocketSessionSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
+        IRUDPTransportSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IRUDPICESocketSessionDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IRUDPTransportDelegatePtr delegate = mSubscriptions.delegate(subscription);
 
         if (delegate) {
-          RUDPICESocketSessionPtr pThis = mThisWeak.lock();
+          RUDPTransportPtr pThis = mThisWeak.lock();
 
-          if (RUDPICESocketSessionState_Pending != mCurrentState) {
-            delegate->onRUDPICESocketSessionStateChanged(pThis, mCurrentState);
+          if (RUDPTransportState_Pending != mCurrentState) {
+            delegate->onRUDPTransportStateChanged(pThis, mCurrentState);
           }
 
           if (mPendingSessions.size() > 0) {
             // inform the delegate of the new session waiting...
-            mSubscriptions.delegate()->onRUDPICESocketSessionChannelWaiting(mThisWeak.lock());
+            mSubscriptions.delegate()->onRUDPTransportChannelWaiting(mThisWeak.lock());
           }
         }
 
@@ -165,10 +165,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IRUDPICESocketSession::RUDPICESocketSessionStates RUDPICESocketSession::getState(
-                                                                                       WORD *outLastErrorCode,
-                                                                                       String *outLastErrorReason
-                                                                                       ) const
+      IRUDPTransport::RUDPTransportStates RUDPTransport::getState(
+                                                                  WORD *outLastErrorCode,
+                                                                  String *outLastErrorReason
+                                                                  ) const
       {
         AutoRecursiveLock lock(getLock());
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -177,26 +177,26 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::shutdown()
+      void RUDPTransport::shutdown()
       {
         AutoRecursiveLock lock(getLock());
         cancel();
       }
 
       //-----------------------------------------------------------------------
-      IICESocketSessionPtr RUDPICESocketSession::getICESession() const
+      IICESocketSessionPtr RUDPTransport::getICESession() const
       {
         AutoRecursiveLock lock(getLock());
         return mICESession;
       }
 
       //-----------------------------------------------------------------------
-      IRUDPChannelPtr RUDPICESocketSession::openChannel(
-                                                        IRUDPChannelDelegatePtr delegate,
-                                                        const char *connectionInfo,
-                                                        ITransportStreamPtr receiveStream,
-                                                        ITransportStreamPtr sendStream
-                                                        )
+      IRUDPChannelPtr RUDPTransport::openChannel(
+                                                 IRUDPChannelDelegatePtr delegate,
+                                                 const char *connectionInfo,
+                                                 ITransportStreamPtr receiveStream,
+                                                 ITransportStreamPtr sendStream
+                                                 )
       {
         AutoRecursiveLock lock(getLock());
         if ((isShuttingDown()) ||
@@ -243,20 +243,20 @@ namespace openpeer
         ZS_LOG_DEBUG(log("channel openned"))
 
         // found a useable channel number therefor create a new session
-        UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPICESocketSessionOutgoing(
-                                                                                          getAssociatedMessageQueue(),
-                                                                                          mThisWeak.lock(),
-                                                                                          delegate,
-                                                                                          iceSession->getConnectedRemoteIP(),
-                                                                                          channelNumber,
-                                                                                          iceSession->getLocalUsernameFrag(),
-                                                                                          iceSession->getLocalPassword(),
-                                                                                          iceSession->getRemoteUsernameFrag(),
-                                                                                          iceSession->getRemotePassword(),
-                                                                                          connectionInfo,
-                                                                                          receiveStream,
-                                                                                          sendStream
-                                                                                          );
+        UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPTransportOutgoing(
+                                                                                   getAssociatedMessageQueue(),
+                                                                                   mThisWeak.lock(),
+                                                                                   delegate,
+                                                                                   iceSession->getConnectedRemoteIP(),
+                                                                                   channelNumber,
+                                                                                   iceSession->getLocalUsernameFrag(),
+                                                                                   iceSession->getLocalPassword(),
+                                                                                   iceSession->getRemoteUsernameFrag(),
+                                                                                   iceSession->getRemotePassword(),
+                                                                                   connectionInfo,
+                                                                                   receiveStream,
+                                                                                   sendStream
+                                                                                   );
 
         mLocalChannelNumberSessions[channelNumber] = session;
         issueChannelConnectIfPossible();
@@ -264,11 +264,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IRUDPChannelPtr RUDPICESocketSession::acceptChannel(
-                                                          IRUDPChannelDelegatePtr delegate,
-                                                          ITransportStreamPtr receiveStream,
-                                                          ITransportStreamPtr sendStream
-                                                          )
+      IRUDPChannelPtr RUDPTransport::acceptChannel(
+                                                   IRUDPChannelDelegatePtr delegate,
+                                                   ITransportStreamPtr receiveStream,
+                                                   ITransportStreamPtr sendStream
+                                                   )
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
@@ -289,14 +289,14 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession => IICESocketSessionDelegate
+      #pragma mark RUDPTransport => IICESocketSessionDelegate
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::onICESocketSessionStateChanged(
-                                                                IICESocketSessionPtr session,
-                                                                ICESocketSessionStates state
-                                                                )
+      void RUDPTransport::onICESocketSessionStateChanged(
+                                                         IICESocketSessionPtr session,
+                                                         ICESocketSessionStates state
+                                                         )
       {
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) {
@@ -333,17 +333,17 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::onICESocketSessionNominationChanged(IICESocketSessionPtr session)
+      void RUDPTransport::onICESocketSessionNominationChanged(IICESocketSessionPtr session)
       {
         // ignored
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::handleICESocketSessionReceivedPacket(
-                                                                      IICESocketSessionPtr ignore,
-                                                                      const BYTE *buffer,
-                                                                      size_t bufferLengthInBytes
-                                                                      )
+      void RUDPTransport::handleICESocketSessionReceivedPacket(
+                                                               IICESocketSessionPtr ignore,
+                                                               const BYTE *buffer,
+                                                               size_t bufferLengthInBytes
+                                                               )
       {
         if (ZS_IS_LOGGING(Insane)) {
           String base64 = Helper::convertToBase64(buffer, bufferLengthInBytes);
@@ -377,12 +377,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPICESocketSession::handleICESocketSessionReceivedSTUNPacket(
-                                                                          IICESocketSessionPtr session,
-                                                                          STUNPacketPtr stun,
-                                                                          const String &localUsernameFrag,
-                                                                          const String &remoteUsernameFrag
-                                                                          )
+      bool RUDPTransport::handleICESocketSessionReceivedSTUNPacket(
+                                                                   IICESocketSessionPtr session,
+                                                                   STUNPacketPtr stun,
+                                                                   const String &localUsernameFrag,
+                                                                   const String &remoteUsernameFrag
+                                                                   )
       {
         // next we ignore all responses/error responses because they would have been handled by a requester
         if ((STUNPacket::Class_Response == stun->mClass) ||
@@ -466,7 +466,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::onICESocketSessionWriteReady(IICESocketSessionPtr session)
+      void RUDPTransport::onICESocketSessionWriteReady(IICESocketSessionPtr session)
       {
         AutoRecursiveLock lock(getLock());
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
@@ -479,14 +479,14 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession => IRUDPChannelDelegateForSessionAndListener
+      #pragma mark RUDPTransport => IRUDPChannelDelegateForSessionAndListener
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::onRUDPChannelStateChanged(
-                                                           RUDPChannelPtr inChannel,
-                                                           RUDPChannelStates state
-                                                           )
+      void RUDPTransport::onRUDPChannelStateChanged(
+                                                    RUDPChannelPtr inChannel,
+                                                    RUDPChannelStates state
+                                                    )
       {
         UseRUDPChannelPtr channel = inChannel;
 
@@ -534,12 +534,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPICESocketSession::notifyRUDPChannelSendPacket(
-                                                             RUDPChannelPtr channel,
-                                                             const IPAddress &remoteIP,
-                                                             const BYTE *packet,
-                                                             size_t packetLengthInBytes
-                                                             )
+      bool RUDPTransport::notifyRUDPChannelSendPacket(
+                                                      RUDPChannelPtr channel,
+                                                      const IPAddress &remoteIP,
+                                                      const BYTE *packet,
+                                                      size_t packetLengthInBytes
+                                                      )
       {
         IICESocketSessionPtr session = getICESession();
         if (!session) {
@@ -560,42 +560,42 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark RUDPICESocketSession => (internal)
+      #pragma mark RUDPTransport => (internal)
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RecursiveLock &RUDPICESocketSession::getLock() const
+      RecursiveLock &RUDPTransport::getLock() const
       {
         return mLock;
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPICESocketSession::log(const char *message) const
+      Log::Params RUDPTransport::log(const char *message) const
       {
-        ElementPtr objectEl = Element::create("RUDPICESocketSession");
+        ElementPtr objectEl = Element::create("RUDPTransport");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPICESocketSession::debug(const char *message) const
+      Log::Params RUDPTransport::debug(const char *message) const
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::fix(STUNPacketPtr stun) const
+      void RUDPTransport::fix(STUNPacketPtr stun) const
       {
-        stun->mLogObject = "RUDPICESocketSession";
+        stun->mLogObject = "RUDPTransport";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPICESocketSession::toDebug() const
+      ElementPtr RUDPTransport::toDebug() const
       {
         AutoRecursiveLock lock(getLock());
 
-        ElementPtr resultEl = Element::create("RUDPICESocketSession");
+        ElementPtr resultEl = Element::create("RUDPTransport");
 
         IHelper::debugAppend(resultEl, "id", mID);
 
@@ -604,7 +604,7 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
         IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
 
-        IHelper::debugAppend(resultEl, "state", IRUDPICESocketSession::toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "state", IRUDPTransport::toString(mCurrentState));
         IHelper::debugAppend(resultEl, "last error", mLastError);
         IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
 
@@ -620,14 +620,14 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::cancel()
+      void RUDPTransport::cancel()
       {
         AutoRecursiveLock lock(getLock());  // just in case
         if (isShutdown()) return;
 
         if (!mGracefulShutdownReference) mGracefulShutdownReference = mThisWeak.lock();
 
-        setState(RUDPICESocketSessionState_ShuttingDown);
+        setState(RUDPTransportState_ShuttingDown);
 
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
 
@@ -644,7 +644,7 @@ namespace openpeer
           }
         }
 
-        setState(RUDPICESocketSessionState_Shutdown);
+        setState(RUDPTransportState_Shutdown);
 
         mGracefulShutdownReference.reset();
 
@@ -665,7 +665,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::step()
+      void RUDPTransport::step()
       {
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -679,15 +679,15 @@ namespace openpeer
           case IICESocketSession::ICESocketSessionState_Prepared:
           case IICESocketSession::ICESocketSessionState_Searching:
           case IICESocketSession::ICESocketSessionState_Haulted:
-          case IICESocketSession::ICESocketSessionState_Nominating: setState(RUDPICESocketSessionState_Pending); break;
+          case IICESocketSession::ICESocketSessionState_Nominating: setState(RUDPTransportState_Pending); break;
           case IICESocketSession::ICESocketSessionState_Nominated:
-          case IICESocketSession::ICESocketSessionState_Completed:  setState(RUDPICESocketSessionState_Ready); break;
+          case IICESocketSession::ICESocketSessionState_Completed:  setState(RUDPTransportState_Ready); break;
           case IICESocketSession::ICESocketSessionState_Shutdown:   cancel(); break;
         }
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::setState(RUDPICESocketSessionStates state)
+      void RUDPTransport::setState(RUDPTransportStates state)
       {
         if (state == mCurrentState) return;
 
@@ -695,15 +695,15 @@ namespace openpeer
 
         mCurrentState = state;
 
-        RUDPICESocketSessionPtr pThis = mThisWeak.lock();
+        RUDPTransportPtr pThis = mThisWeak.lock();
 
         if (pThis) {
-          mSubscriptions.delegate()->onRUDPICESocketSessionStateChanged(pThis, mCurrentState);
+          mSubscriptions.delegate()->onRUDPTransportStateChanged(pThis, mCurrentState);
         }
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::setError(WORD errorCode, const char *inReason)
+      void RUDPTransport::setError(WORD errorCode, const char *inReason)
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -722,7 +722,7 @@ namespace openpeer
       }
       
       //-----------------------------------------------------------------------
-      bool RUDPICESocketSession::handleUnknownChannel(
+      bool RUDPTransport::handleUnknownChannel(
                                                       STUNPacketPtr &stun,
                                                       STUNPacketPtr &response
                                                       )
@@ -800,18 +800,18 @@ namespace openpeer
           if (!hasCandidate) break;
 
           // found a useable channel number therefor create a new session
-          UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPICESocketSessionIncoming(
-                                                                                            getAssociatedMessageQueue(),
-                                                                                            mThisWeak.lock(),
-                                                                                            mICESession->getConnectedRemoteIP(),
-                                                                                            channelNumber,
-                                                                                            mICESession->getLocalUsernameFrag(),
-                                                                                            mICESession->getLocalPassword(),
-                                                                                            mICESession->getRemoteUsernameFrag(),
-                                                                                            mICESession->getRemotePassword(),
-                                                                                            stun,
-                                                                                            response
-                                                                                            );
+          UseRUDPChannelPtr session = UseRUDPChannel::createForRUDPTransportIncoming(
+                                                                                     getAssociatedMessageQueue(),
+                                                                                     mThisWeak.lock(),
+                                                                                     mICESession->getConnectedRemoteIP(),
+                                                                                     channelNumber,
+                                                                                     mICESession->getLocalUsernameFrag(),
+                                                                                     mICESession->getLocalPassword(),
+                                                                                     mICESession->getRemoteUsernameFrag(),
+                                                                                     mICESession->getRemotePassword(),
+                                                                                     stun,
+                                                                                     response
+                                                                                     );
           if (!response) {
             // there must be a response or it is an error
             stun->mErrorCode = STUNPacket::ErrorCode_BadRequest;
@@ -831,14 +831,14 @@ namespace openpeer
           mPendingSessions.push_back(session);
 
           // inform the delegate of the new session waiting...
-          mSubscriptions.delegate()->onRUDPICESocketSessionChannelWaiting(mThisWeak.lock());
+          mSubscriptions.delegate()->onRUDPTransportChannelWaiting(mThisWeak.lock());
         } while (false);  // using as a scope rather than as a loop
 
         return (bool)response;
       }
 
       //-----------------------------------------------------------------------
-      void RUDPICESocketSession::issueChannelConnectIfPossible()
+      void RUDPTransport::issueChannelConnectIfPossible()
       {
         AutoRecursiveLock lock(getLock());
         if (!isReady()) return;
@@ -857,36 +857,36 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
-    #pragma mark IRUDPICESocketSession
+    #pragma mark IRUDPTransport
     #pragma mark
 
     //-------------------------------------------------------------------------
-    const char *IRUDPICESocketSession::toString(RUDPICESocketSessionStates states)
+    const char *IRUDPTransport::toString(RUDPTransportStates states)
     {
       switch (states) {
-        case RUDPICESocketSessionState_Pending:       return "Preparing";
-        case RUDPICESocketSessionState_Ready:         return "Ready";
-        case RUDPICESocketSessionState_ShuttingDown:  return "Shutting down";
-        case RUDPICESocketSessionState_Shutdown:      return "Shutdown";
+        case RUDPTransportState_Pending:       return "Preparing";
+        case RUDPTransportState_Ready:         return "Ready";
+        case RUDPTransportState_ShuttingDown:  return "Shutting down";
+        case RUDPTransportState_Shutdown:      return "Shutdown";
         default: break;
       }
       return "UNDEFINED";
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IRUDPICESocketSession::toDebug(IRUDPICESocketSessionPtr session)
+    ElementPtr IRUDPTransport::toDebug(IRUDPTransportPtr session)
     {
-      return internal::RUDPICESocketSession::toDebug(session);
+      return internal::RUDPTransport::toDebug(session);
     }
 
     //-------------------------------------------------------------------------
-    IRUDPICESocketSessionPtr IRUDPICESocketSession::listen(
+    IRUDPTransportPtr IRUDPTransport::listen(
                                                            IMessageQueuePtr queue,
                                                            IICESocketSessionPtr iceSession,
-                                                           IRUDPICESocketSessionDelegatePtr delegate
+                                                           IRUDPTransportDelegatePtr delegate
                                                            )
     {
-      return internal::IRUDPICESocketSessionFactory::singleton().listen(queue, iceSession, delegate);
+      return internal::IRUDPTransportFactory::singleton().listen(queue, iceSession, delegate);
     }
   }
 }

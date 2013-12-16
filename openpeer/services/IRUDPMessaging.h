@@ -103,7 +103,7 @@ namespace openpeer
       //          accepted channel closed before the accept was called).
       static IRUDPMessagingPtr acceptChannel(
                                              IMessageQueuePtr queue,
-                                             IRUDPICESocketSessionPtr session,
+                                             IRUDPTransportPtr session,
                                              IRUDPMessagingDelegatePtr delegate,
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
@@ -117,7 +117,7 @@ namespace openpeer
       //          RUDP session was closed before this was called).
       static IRUDPMessagingPtr openChannel(
                                            IMessageQueuePtr queue,
-                                           IRUDPICESocketSessionPtr session,
+                                           IRUDPTransportPtr session,
                                            IRUDPMessagingDelegatePtr delegate,
                                            const char *connectionInfo,
                                            ITransportStreamPtr receiveStream,
