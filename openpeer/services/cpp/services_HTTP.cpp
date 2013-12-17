@@ -105,7 +105,7 @@ namespace openpeer
         mShouldShutdown(false),
         mMultiCurl(NULL)
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
@@ -119,7 +119,7 @@ namespace openpeer
         if (isNoop()) return;
 
         mThisWeak.reset();
-        ZS_LOG_DEBUG(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
         cancel();
       }
 

@@ -182,7 +182,7 @@ namespace openpeer
         mLastSentData(zsLib::now()),
         mLastReceivedData(zsLib::now())
       {
-        ZS_LOG_BASIC(log("created"))
+        ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
@@ -198,7 +198,7 @@ namespace openpeer
         if(isNoop()) return;
         
         mThisWeak.reset();
-        ZS_LOG_BASIC(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
         cancel(false);
       }
 
@@ -1542,7 +1542,7 @@ namespace openpeer
       void RUDPChannel::setState(RUDPChannelStates state)
       {
         if (mCurrentState == state) return;
-        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 

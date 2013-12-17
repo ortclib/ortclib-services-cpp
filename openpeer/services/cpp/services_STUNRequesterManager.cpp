@@ -101,7 +101,7 @@ namespace openpeer
       STUNRequesterManager::STUNRequesterManager() :
         mID(zsLib::createPUID())
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DETAIL(log("created"))
       }
 
       STUNRequesterManager::~STUNRequesterManager()
@@ -109,7 +109,7 @@ namespace openpeer
         if(isNoop()) return;
         
         mThisWeak.reset();
-        ZS_LOG_DEBUG(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------

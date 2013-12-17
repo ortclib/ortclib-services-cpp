@@ -211,7 +211,7 @@ namespace openpeer
         mSendStreamDecoded(sendStreamDecoded->getReader()),
         mSendStreamEncoded(sendStreamEncoded->getWriter())
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
         ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)
       }
@@ -232,7 +232,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageLayerSecurityChannel::~MessageLayerSecurityChannel()
       {
-        ZS_LOG_DEBUG(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
         mThisWeak.reset();
         cancel();
       }
@@ -933,7 +933,7 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_DEBUG(log("state changed") + ZS_PARAM("state", IMessageLayerSecurityChannel::toString(state)) + ZS_PARAM("old state", IMessageLayerSecurityChannel::toString(mCurrentState)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("state", IMessageLayerSecurityChannel::toString(state)) + ZS_PARAM("old state", IMessageLayerSecurityChannel::toString(mCurrentState)))
         mCurrentState = state;
 
         MessageLayerSecurityChannelPtr pThis = mThisWeak.lock();
@@ -1561,7 +1561,7 @@ namespace openpeer
         }
 
         if (mSendKeys.size() > 0) {
-          ZS_LOG_DEBUG(log("already sent keying materials"))
+          ZS_LOG_TRACE(log("already sent keying materials"))
           return true;
         }
 
@@ -1692,7 +1692,7 @@ namespace openpeer
         }
 
         if (mSendStreamDecoded->getTotalReadBuffersAvailable() < 1) {
-          ZS_LOG_DEBUG(log("no data to be sent over the wire"))
+          ZS_LOG_TRACE(log("no data to be sent over the wire"))
           return true;
         }
 
@@ -1753,14 +1753,14 @@ namespace openpeer
       bool MessageLayerSecurityChannel::stepCheckConnected()
       {
         if (mSendKeys.size() < 1) {
-          ZS_LOG_DEBUG(log("no send keys set, not sending yet..."))
+          ZS_LOG_TRACE(log("no send keys set, not sending yet..."))
           return false;
         }
         if (mReceiveKeys.size() < 1) {
-          ZS_LOG_DEBUG(log("no receive keys set, not sending yet..."))
+          ZS_LOG_TRACE(log("no receive keys set, not sending yet..."))
           return false;
         }
-        ZS_LOG_DEBUG(log("connected"))
+        ZS_LOG_TRACE(log("connected"))
         return true;
       }
 

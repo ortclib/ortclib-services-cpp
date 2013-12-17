@@ -181,17 +181,9 @@ namespace openpeer
         mTURNServers(turnServers),
         mSTUNServers(stunServers),
 
-//        mTURNSRVUDPResult(srvTURNUDP),
-//        mTURNSRVTCPResult(srvTURNTCP),
-//        mTURNServer(turnServer ? turnServer : ""),
-//        mTURNUsername(turnUsername ? turnUsername : ""),
-//        mTURNPassword(turnPassword ? turnPassword : ""),
         mFirstWORDInAnyPacketWillNotConflictWithTURNChannels(firstWORDInAnyPacketWillNotConflictWithTURNChannels),
         mTURNLastUsed(zsLib::now()),
         mTURNShutdownIfNotUsedBy(Seconds(OPENPEER_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS)),
-
-//        mSTUNSRVResult(srvSTUN),
-//        mSTUNServer(stunServer ? stunServer : ""),
 
         mLastCandidateCRC(0)
       {

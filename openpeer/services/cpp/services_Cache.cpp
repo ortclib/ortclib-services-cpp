@@ -56,14 +56,14 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Cache::Cache()
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
       Cache::~Cache()
       {
         mThisWeak.reset();
-        ZS_LOG_DEBUG(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------

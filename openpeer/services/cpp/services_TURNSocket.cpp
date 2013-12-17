@@ -150,7 +150,7 @@ namespace openpeer
         mPermissionRequesterMaxCapacity(0)
       {
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
-        ZS_LOG_BASIC(log("created"))
+        ZS_LOG_DETAIL(log("created"))
 #ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
         mServerName = OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP;
 #endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
@@ -203,7 +203,7 @@ namespace openpeer
         if(isNoop()) return;
         
         mThisWeak.reset();
-        ZS_LOG_BASIC(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
         cancel();
       }
 
@@ -1334,7 +1334,7 @@ namespace openpeer
       {
         if ((mServers.size() > 0) ||
             (mActiveServer)) {
-          ZS_LOG_DEBUG(log("servers are already prepared"))
+          ZS_LOG_TRACE(log("servers are already prepared"))
           return true;
         }
 
@@ -1517,7 +1517,7 @@ namespace openpeer
           }
 
           if (found) {
-            ZS_LOG_DETAIL(log("will create permisson request now"))
+            ZS_LOG_DEBUG(log("will create permisson request now"))
             requestPermissionsNow();
           }
         }
@@ -1667,7 +1667,7 @@ namespace openpeer
       {
         if (mCurrentState == newState) return;
 
-        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
         mCurrentState = newState;
 
         if (!mDelegate) return;
@@ -1858,8 +1858,6 @@ namespace openpeer
           mLifetime = response->mLifetime;
         }
 
-        ZS_LOG_DETAIL(log("refresh request completed"))
-        // the request completed just fine...
         return true;
       }
 

@@ -74,7 +74,7 @@ namespace openpeer
         mCurrentState(RUDPTransportState_Pending),
         mICESession(iceSession)
       {
-        ZS_LOG_BASIC(log("created"))
+        ZS_LOG_DETAIL(log("created"))
 
         if (delegate) {
           mDefaultSubscription = mSubscriptions.subscribe(delegate);
@@ -93,8 +93,9 @@ namespace openpeer
       RUDPTransport::~RUDPTransport()
       {
         if (isNoop()) return;
+
         mThisWeak.reset();
-        ZS_LOG_BASIC(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"))
         cancel();
       }
 
@@ -691,7 +692,7 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
 
         mCurrentState = state;
 

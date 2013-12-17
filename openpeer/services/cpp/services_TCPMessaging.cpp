@@ -87,7 +87,7 @@ namespace openpeer
         mSendingQueue(new ByteQueue),
         mReceivingQueue(new ByteQueue)
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
         ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)
       }
@@ -102,8 +102,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TCPMessaging::~TCPMessaging()
       {
-        ZS_LOG_DEBUG(log("destroyed"))
         mThisWeak.reset();
+        ZS_LOG_DETAIL(log("destroyed"))
         shutdown(Seconds(0));
       }
 
@@ -552,7 +552,7 @@ namespace openpeer
       {
         if (state == mCurrentState) return;
 
-        ZS_LOG_DEBUG(log("state changed") + ZS_PARAM("state", ITCPMessaging::toString(state)) + ZS_PARAM("old state", ITCPMessaging::toString(mCurrentState)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("state", ITCPMessaging::toString(state)) + ZS_PARAM("old state", ITCPMessaging::toString(mCurrentState)))
         mCurrentState = state;
 
         TCPMessagingPtr pThis = mThisWeak.lock();

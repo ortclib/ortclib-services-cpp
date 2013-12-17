@@ -256,7 +256,7 @@ namespace openpeer
         mTotalSendingPeriodWithoutIssues(Milliseconds(0)),
         mForceACKOfSentPacketsRequestID(0)
       {
-        ZS_LOG_BASIC(log("created"))
+        ZS_LOG_DETAIL(log("created"))
         if (mCalculatedRTT < mMinimumRTT)
           mCalculatedRTT = mMinimumRTT;
 
@@ -275,8 +275,8 @@ namespace openpeer
       {
         if(isNoop()) return;
         
-        ZS_LOG_BASIC(log("destroyed"))
         mThisWeak.reset();
+        ZS_LOG_DETAIL(log("destroyed"))
         cancel();
       }
 
@@ -1031,7 +1031,7 @@ namespace openpeer
       {
         if (mCurrentState == state) return;
 
-        ZS_LOG_BASIC(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
+        ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
         mCurrentState = state;
 
         RUDPChannelStreamPtr pThis = mThisWeak.lock();
