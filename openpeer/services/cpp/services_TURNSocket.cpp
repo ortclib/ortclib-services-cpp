@@ -2302,7 +2302,7 @@ namespace openpeer
         if (isShutdown()) return;
 
         if (!mActiveServer) {
-          ZS_LOG_WARNING(Detail, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
+          ZS_LOG_WARNING(Trace, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
           return;
         }
 
