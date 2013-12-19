@@ -1999,7 +1999,7 @@ namespace openpeer
           if (STUNPacket::Method_Binding == stun->mMethod) {
             if ((STUNPacket::Class_Request != stun->mClass) &&
                 (STUNPacket::Class_Indication != stun->mClass)) {
-              ZS_LOG_WARNING(Detail, log("ignoring STUN binding which is not a request/indication"))
+              ZS_LOG_WARNING(Debug, log("ignoring STUN binding which is not a request/indication"))
               return;
             }
           }
