@@ -1251,6 +1251,16 @@ namespace openpeer
             return true;
           }
 
+          if (!mBackupLookup) {
+            ZS_LOG_DEBUG(log("back-up query was not used"))
+            return true;
+          }
+
+          if (!mBackupLookup->isComplete()) {
+            ZS_LOG_TRACE(log("waiting for backup query to resolve"))
+            return false;
+          }
+
           if (!mBackupLookup->hasResult()) {
             ZS_LOG_WARNING(Trace, log("SRV and backup failed to resolve"))
             return true;
