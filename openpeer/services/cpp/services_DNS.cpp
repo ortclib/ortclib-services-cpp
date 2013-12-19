@@ -830,6 +830,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         void init(const char *name)
         {
+          AutoRecursiveLock lock(mLock);
           mALookup = IDNS::lookupA(mThisWeak.lock(), name);
           mAAAALookup = IDNS::lookupAAAA(mThisWeak.lock(), name);
         }
@@ -1014,6 +1015,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         void init()
         {
+          AutoRecursiveLock lock(mLock);
           mSRVLookup = IDNS::lookupSRV(
                                        mThisWeak.lock(),
                                        mOriginalName,
@@ -1191,6 +1193,11 @@ namespace openpeer
             return true;
           }
 
+          if (!mSRVLookup) {
+            ZS_LOG_ERROR(Detail, debug("primary lookup failed to create interface"))
+            return true;
+          }
+
           if (!mSRVLookup->isComplete()) {
             ZS_LOG_TRACE(log("waiting for SRV to complete"))
             return false;
@@ -1353,6 +1360,12 @@ namespace openpeer
           ElementPtr objectEl = Element::create("DNSSRVResolverQuery");
           IHelper::debugAppend(objectEl, "id", mID);
           return Log::Params(message, objectEl);
+        }
+
+        //---------------------------------------------------------------------
+        Log::Params debug(const char *message) const
+        {
+          return Log::Params(message, toDebug());
         }
 
         //---------------------------------------------------------------------
