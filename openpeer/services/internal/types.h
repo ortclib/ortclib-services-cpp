@@ -48,6 +48,7 @@ namespace openpeer
     namespace internal
     {
       using zsLib::string;
+      using zsLib::CSTR;
       using zsLib::AutoBool;
       using zsLib::AutoPUID;
       using zsLib::AutoWORD;

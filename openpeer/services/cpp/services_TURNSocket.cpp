@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_TURNSocket.h>
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_wire.h>
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 
@@ -318,27 +319,27 @@ namespace openpeer
                                   bool bindChannelIfPossible
                                   )
       {
-        ZS_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet over TURN as destination is invalid"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination is invalid"))
           return false;
         }
         if (destination.isPortEmpty()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
           return false;
         }
 
         if (NULL == buffer) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as buffer is NULL"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer is NULL"))
           return false;
         }
         if (0 == bufferLengthInBytes) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as buffer length is empty"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is empty"))
           return false;
         }
         if (bufferLengthInBytes > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ZS_PARAM("size", bufferLengthInBytes))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ZS_PARAM("size", bufferLengthInBytes))
           return false;  // illegal to be so large
         }
 
@@ -354,7 +355,7 @@ namespace openpeer
           }
 
           if (!isReady()) {
-            ZS_LOG_WARNING(Detail, log("cannot send packet as TURN is not ready"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet as TURN is not ready"))
             return false;
           }
 
@@ -380,7 +381,7 @@ namespace openpeer
 
                 // copy the entire buffer into the packet
                 memcpy(&((packet.get())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
-                ZS_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
+                OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
 
@@ -539,7 +540,7 @@ namespace openpeer
 
         if (length > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) return false;  // this can't be legal channel data
         if (length > (bufferLengthInBytes-sizeof(DWORD))) {
-          ZS_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("reported length", length) + ZS_PARAM("actual length", bufferLengthInBytes))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("reported length", length) + ZS_PARAM("actual length", bufferLengthInBytes))
           return false;
         }
 
@@ -556,7 +557,7 @@ namespace openpeer
 
           ChannelNumberMap::iterator found = mChannelNumberMap.find(channel);
           if (mChannelNumberMap.end() == found) {
-            ZS_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("channel", channel))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("channel", channel))
             return false;                             // this isn't any bound channel we know about...
           }
 
@@ -583,7 +584,7 @@ namespace openpeer
 
         if (mActiveServer) {
           if (!mActiveServer->mIsUDP) {
-            ZS_LOG_DEBUG(log("notified delegate sender is write ready however we are sending via TCP so we will ignore this notification"))
+            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notified delegate sender is write ready however we are sending via TCP so we will ignore this notification"))
             return;
           }
         }
@@ -811,7 +812,7 @@ namespace openpeer
             }
 
             if (!server) {
-              ZS_LOG_WARNING(Detail, log("read ready notification on socket does not match any known servers"))
+              OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("read ready notification on socket does not match any known servers"))
               return;
             }
 
@@ -827,7 +828,7 @@ namespace openpeer
 
               if (isShutdown()) return;
               if (!server->mTCPSocket) {
-                ZS_LOG_WARNING(Detail, log("TCP socket was closed") + ZS_PARAM("server IP", server->mServerIP.string()))
+                OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TCP socket was closed") + ZS_PARAM("server IP", server->mServerIP.string()))
                 return;
               }
 
@@ -959,7 +960,7 @@ namespace openpeer
                 case STUNPacket::ParseLookAheadState_STUNPacket:                            {
                   parseAgain = true;
                   if (ISTUNRequesterManager::handleSTUNPacket(server->mServerIP, stun)) {
-                    ZS_LOG_TRACE(log("STUN request handled via request manager"))
+                    OPENPEER_SERVICES_WIRE_LOG_TRACE(log("STUN request handled via request manager"))
                     continue;  // if this was handled by the requester manager then nothing more to do
                   }
 
@@ -981,7 +982,7 @@ namespace openpeer
                       }
 
                       if (server != mActiveServer) {
-                        ZS_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ZS_PARAM("server IP", server->mServerIP.string()))
+                        OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ZS_PARAM("server IP", server->mServerIP.string()))
                         continue;
                       }
 
@@ -993,7 +994,7 @@ namespace openpeer
                     case STUNPacket::Class_ErrorResponse:
                     default:                                {
                       // if this was truly a response that was cared about it would have already been handled by the requester manager so ignore the response
-                      ZS_LOG_WARNING(Detail, log("TURN received a respose (or error response) but it was not handle (likely obsolete)"))
+                      OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN received a respose (or error response) but it was not handle (likely obsolete)"))
                       continue;
                     }
                   }
@@ -1003,7 +1004,7 @@ namespace openpeer
             }
           }
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
-          ZS_LOG_WARNING(Detail, log("delegate gone"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("delegate gone"))
           cancel();
           return;
         }
@@ -1015,7 +1016,7 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
 
         if (isShutdown()) {
-          ZS_LOG_WARNING(Detail, log("server notified write ready while shutdown"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("server notified write ready while shutdown"))
           return;
         }
 
@@ -1035,7 +1036,7 @@ namespace openpeer
         }
 
         if (!server) {
-          ZS_LOG_WARNING(Detail, log("notify write ready did not match any known TCP server connections"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("notify write ready did not match any known TCP server connections"))
           return;
         }
 
@@ -1076,7 +1077,7 @@ namespace openpeer
         }
 
         if (!server) {
-          ZS_LOG_WARNING(Detail, log("notify write ready did not match any known TCP server connections"))
+          ZS_LOG_WARNING(Detail, log("exception notification did not match any known TCP server connections"))
           return;
         }
 
@@ -2147,7 +2148,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
           if (isShutdown()) {
-            ZS_LOG_WARNING(Debug, log("send packet failed as TURN is shutdown"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN is shutdown"))
             return false;
           }
 
@@ -2158,7 +2159,7 @@ namespace openpeer
                 (server->mIsConnected)) {
               return sendPacketOverTCPOrDropIfBufferFull(server, buffer, bufferSizeInBytes);
             }
-            ZS_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
             return false;
           }
 
@@ -2173,7 +2174,7 @@ namespace openpeer
         try {
           return delegate->notifyTURNSocketSendPacket(pThis, serverIP, buffer, bufferSizeInBytes);
         } catch(ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TURN delegate is gone"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN delegate is gone"))
           cancel();
         }
         return false;
@@ -2189,22 +2190,22 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!server)
 
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         if (!server->mTCPSocket) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ZS_PARAM("server IP", server->mServerIP.string()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
         if (!server->mIsConnected) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         // never allow the buffer to overflow
         if (bufferSizeInBytes > sizeof(server->mWriteBuffer)) {
-          ZS_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("sending bytes", bufferSizeInBytes) + ZS_PARAM("capacity", sizeof(server->mWriteBuffer)))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("sending bytes", bufferSizeInBytes) + ZS_PARAM("capacity", sizeof(server->mWriteBuffer)))
           return false;
         }
 
@@ -2226,7 +2227,7 @@ namespace openpeer
                 }
               }
             } catch(ISocket::Exceptions::Unspecified &error) {
-              ZS_LOG_DEBUG(log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
+              OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
               cancel();
               return false;
@@ -2255,7 +2256,7 @@ namespace openpeer
             informWriteReady();
           }
           if (!wasRoom) {
-            ZS_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange??)"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange??)"))
           }
           return wasRoom;
         }
@@ -2269,7 +2270,7 @@ namespace openpeer
             // we have exhasted the send buffer - horray! nothing more to do now...
             server->mWriteBufferFilledSizeInBytes = 0;
             if (!wasRoom) {
-              ZS_LOG_WARNING(Debug, log("data was sent over the wire but buffer capacity was reached"))
+              OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("data was sent over the wire but buffer capacity was reached"))
             }
             return wasRoom;
           }
@@ -2285,13 +2286,13 @@ namespace openpeer
             }
           }
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_DEBUG(log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
           cancel();
           return false;
         }
         if (!wasRoom) {
-          ZS_LOG_WARNING(Debug, log("data was not completely sent over the wire and buffer capacity was reached"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("data was not completely sent over the wire and buffer capacity was reached"))
         }
         return wasRoom;
       }
@@ -2302,7 +2303,7 @@ namespace openpeer
         if (isShutdown()) return;
 
         if (!mActiveServer) {
-          ZS_LOG_WARNING(Trace, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
           return;
         }
 

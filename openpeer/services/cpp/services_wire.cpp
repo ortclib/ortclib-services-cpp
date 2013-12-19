@@ -29,17 +29,45 @@
 
  */
 
-#include <openpeer/services/services.h>
-#include <openpeer/services/internal/services.h>
+#include <openpeer/services/types.h>
+#include <openpeer/services/internal/services_wire.h>
 
 #include <zsLib/Log.h>
 
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_http) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_ice) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_turn) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_rudp) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_mls) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_tcp_messaging) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_transport_stream) } }
-namespace openpeer { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_wire) } } }
+namespace openpeer { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(openpeer_services_wire) } } }
+
+namespace openpeer
+{
+  namespace services
+  {
+    namespace wire
+    {
+      //-----------------------------------------------------------------------
+      bool isLogging(Log::Level level)
+      {
+        return level <= ZS_GET_LOG_LEVEL();
+      }
+
+      //-----------------------------------------------------------------------
+      void log(
+               Log::Severity severity,
+               Log::Level level,
+               const Log::Params &params,
+               CSTR function,
+               CSTR filePath,
+               ULONG lineNumber
+               )
+      {
+        Log::singleton()->log(
+                              ZS_GET_SUBSYSTEM(),
+                              severity,
+                              level,
+                              params,
+                              function,
+                              filePath,
+                              lineNumber
+                              );
+      }
+    }
+  }
+}

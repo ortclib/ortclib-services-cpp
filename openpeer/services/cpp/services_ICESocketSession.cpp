@@ -36,6 +36,7 @@
 #include <openpeer/services/internal/services_ICESocketSession.h>
 #include <openpeer/services/internal/services_ICESocket.h>
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_wire.h>
 
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/ISTUNRequester.h>
@@ -537,28 +538,28 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!stun)
 
-        ZS_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag))
+        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag))
 
         if (mSubscriptions.size() < 1) {
-          ZS_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
           return false;
         }
 
         // inform that the session is now connected
         if (STUNPacket::Method_Binding != stun->mMethod) {
-          ZS_LOG_TRACE(log("received incoming STUN which is not ICE related thus handing via delgate"))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("received incoming STUN which is not ICE related thus handing via delgate"))
           return mSubscriptions.delegate()->handleICESocketSessionReceivedSTUNPacket(mThisWeak.lock(), stun, localUsernameFrag, remoteUsernameFrag);
         }
 
         AutoRecursiveLock lock(getLock());
 
         if (localUsernameFrag != mLocalUsernameFrag) {
-          ZS_LOG_DEBUG(log("local username frag does not match") + ZS_PARAM("expecting", mLocalUsernameFrag) + ZS_PARAM("received", localUsernameFrag))
+          OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("local username frag does not match") + ZS_PARAM("expecting", mLocalUsernameFrag) + ZS_PARAM("received", localUsernameFrag))
           return false;
         }
 
         if (remoteUsernameFrag != mRemoteUsernameFrag) {
-          ZS_LOG_DEBUG(log("remote username frag does not match") + ZS_PARAM("expecting", mRemoteUsernameFrag) + ZS_PARAM("received", remoteUsernameFrag))
+          OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("remote username frag does not match") + ZS_PARAM("expecting", mRemoteUsernameFrag) + ZS_PARAM("received", remoteUsernameFrag))
           return false;
         }
 
@@ -814,22 +815,22 @@ namespace openpeer
           AutoRecursiveLock lock(getLock());
           if ((NULL == packet) ||
               (0 == packetLengthInBytes)) {
-            ZS_LOG_WARNING(Trace, log("incoming data packet is NULL or of 0 length thus ignoring"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming data packet is NULL or of 0 length thus ignoring"))
             return false;
           }
 
           if (isShutdown()) {
-            ZS_LOG_WARNING(Trace, log("already shutdown thus ignoring incoming data packet"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("already shutdown thus ignoring incoming data packet"))
             return false;
           }
 
           if (!mNominated) {
-            ZS_LOG_WARNING(Trace, log("cannot process data packets without a nominated ice pair"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("cannot process data packets without a nominated ice pair"))
             return false;                                          // can't receive if not connected
           }
 
           if (!isCandidateMatch(mNominated, viaLocalCandidate, source)) {
-            ZS_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated canddiate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated canddiate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
             return false;
           }
 
@@ -855,18 +856,18 @@ namespace openpeer
         if (mInformedWriteReady) return;
 
         if (!mNominated) {
-          ZS_LOG_TRACE(log("notify local write ready cannot inform delegate since nomination process is incomplete"))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify local write ready cannot inform delegate since nomination process is incomplete"))
           return;
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
         get(mInformedWriteReady) = false;
 
-        ZS_LOG_TRACE(log("notify local write ready"))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify local write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
         get(mInformedWriteReady) = true;
@@ -880,18 +881,18 @@ namespace openpeer
         if (mInformedWriteReady) return;
 
         if (!mNominated) {
-          ZS_LOG_TRACE(log("notify relay write ready cannot inform delegate since nomination process is incomplete"))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready cannot inform delegate since nomination process is incomplete"))
           return;
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          ZS_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
         get(mInformedWriteReady) = false;
 
-        ZS_LOG_TRACE(log("notify relay write ready"))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
         get(mInformedWriteReady) = true;
@@ -2332,7 +2333,7 @@ namespace openpeer
           return false;
         }
 
-        ZS_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE((log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData)))
         return socket->sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
       }
 

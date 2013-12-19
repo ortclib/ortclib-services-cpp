@@ -17,6 +17,7 @@
 		00840004185005BD009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840001185005BD009F6934 /* services_DHKeyDomain.cpp */; };
 		00840005185005BD009F6934 /* services_DHPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840002185005BD009F6934 /* services_DHPrivateKey.cpp */; };
 		00840006185005BD009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840003185005BD009F6934 /* services_DHPublicKey.cpp */; };
+		008C0E7D18628D2B0034958B /* services_wire.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008C0E7C18628D2B0034958B /* services_wire.cpp */; };
 		0095DE1716CA8A17005F53D3 /* services_CanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095DC8B16CA8A16005F53D3 /* services_CanonicalXML.cpp */; };
 		0095DE1816CA8A17005F53D3 /* services_DNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095DC8C16CA8A16005F53D3 /* services_DNS.cpp */; };
 		0095DE1916CA8A17005F53D3 /* services_DNSMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095DC8D16CA8A16005F53D3 /* services_DNSMonitor.cpp */; };
@@ -83,6 +84,8 @@
 		0084FFB3184F9DE5009F6934 /* IDHKeyDomain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHKeyDomain.h; sourceTree = "<group>"; };
 		0084FFB4184F9DE5009F6934 /* IDHPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHPrivateKey.h; sourceTree = "<group>"; };
 		0084FFB5184F9DE5009F6934 /* IDHPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHPublicKey.h; sourceTree = "<group>"; };
+		008C0E7C18628D2B0034958B /* services_wire.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_wire.cpp; sourceTree = "<group>"; };
+		008C0E7E18628D750034958B /* services_wire.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_wire.h; sourceTree = "<group>"; };
 		0095DC1516CA8802005F53D3 /* libhfservices_ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhfservices_ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		0095DC8B16CA8A16005F53D3 /* services_CanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_CanonicalXML.cpp; sourceTree = "<group>"; };
 		0095DC8C16CA8A16005F53D3 /* services_DNS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_DNS.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -254,6 +257,7 @@
 				00ABD40917A7FFE700178078 /* services_TCPMessaging.cpp */,
 				003BEE0517A6F4F80002EB47 /* services_TransportStream.cpp */,
 				0095DC9F16CA8A16005F53D3 /* services_TURNSocket.cpp */,
+				008C0E7C18628D2B0034958B /* services_wire.cpp */,
 			);
 			path = cpp;
 			sourceTree = "<group>";
@@ -292,6 +296,7 @@
 				00ABD40817A7FFA700178078 /* services_TCPMessaging.h */,
 				003BEE0417A6F4CC0002EB47 /* services_TransportStream.h */,
 				0095DCBA16CA8A16005F53D3 /* services_TURNSocket.h */,
+				008C0E7E18628D750034958B /* services_wire.h */,
 			);
 			path = internal;
 			sourceTree = "<group>";
@@ -365,6 +370,7 @@
 				0095DE2516CA8A17005F53D3 /* services_RUDPPacket.cpp in Sources */,
 				0095DE2616CA8A17005F53D3 /* services_services.cpp in Sources */,
 				0095DE2716CA8A17005F53D3 /* services_STUNDiscovery.cpp in Sources */,
+				008C0E7D18628D2B0034958B /* services_wire.cpp in Sources */,
 				0095DE2816CA8A17005F53D3 /* services_STUNPacket.cpp in Sources */,
 				0095DE2916CA8A17005F53D3 /* services_STUNRequester.cpp in Sources */,
 				0095DE2A16CA8A17005F53D3 /* services_STUNRequesterManager.cpp in Sources */,

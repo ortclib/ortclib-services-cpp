@@ -16,6 +16,7 @@
 		00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */; };
 		0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */; };
 		0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFB184FD5E6009F6934 /* services_DHPrivateKey.cpp */; };
+		008C0EBF18629F360034958B /* services_wire.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008C0EBE18629F360034958B /* services_wire.cpp */; };
 		0095DACC16CA83EB005F53D3 /* services_CanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */; };
 		0095DACD16CA83EB005F53D3 /* services_DNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91E16CA83EA005F53D3 /* services_DNS.cpp */; };
 		0095DACE16CA83EB005F53D3 /* services_DNSMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91F16CA83EA005F53D3 /* services_DNSMonitor.cpp */; };
@@ -67,6 +68,8 @@
 		0084FFFD184FD5FD009F6934 /* services_DHPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_DHPrivateKey.h; sourceTree = "<group>"; };
 		0084FFFE184FF5F5009F6934 /* services_DHPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_DHPublicKey.h; sourceTree = "<group>"; };
 		0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_DHPublicKey.cpp; sourceTree = "<group>"; };
+		008C0EBE18629F360034958B /* services_wire.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_wire.cpp; sourceTree = "<group>"; };
+		008C0EC018629F4B0034958B /* services_wire.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_wire.h; sourceTree = "<group>"; };
 		0095D8B116CA83CB005F53D3 /* libhfservices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhfservices.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_CanonicalXML.cpp; sourceTree = "<group>"; };
 		0095D91E16CA83EA005F53D3 /* services_DNS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_DNS.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -242,6 +245,7 @@
 				00ABD44817A8423900178078 /* services_TCPMessaging.cpp */,
 				003BEECD17A747510002EB47 /* services_TransportStream.cpp */,
 				0095D93116CA83EA005F53D3 /* services_TURNSocket.cpp */,
+				008C0EBE18629F360034958B /* services_wire.cpp */,
 			);
 			path = cpp;
 			sourceTree = "<group>";
@@ -280,6 +284,7 @@
 				00ABD44A17A8424900178078 /* services_TCPMessaging.h */,
 				003BEECC17A7473B0002EB47 /* services_TransportStream.h */,
 				0095D94C16CA83EA005F53D3 /* services_TURNSocket.h */,
+				008C0EC018629F4B0034958B /* services_wire.h */,
 			);
 			path = internal;
 			sourceTree = "<group>";
@@ -363,6 +368,7 @@
 				0095DADA16CA83EB005F53D3 /* services_RUDPPacket.cpp in Sources */,
 				0095DADB16CA83EB005F53D3 /* services_services.cpp in Sources */,
 				0095DADC16CA83EB005F53D3 /* services_STUNDiscovery.cpp in Sources */,
+				008C0EBF18629F360034958B /* services_wire.cpp in Sources */,
 				0095DADD16CA83EB005F53D3 /* services_STUNPacket.cpp in Sources */,
 				0095DADE16CA83EB005F53D3 /* services_STUNRequester.cpp in Sources */,
 				0095DADF16CA83EB005F53D3 /* services_STUNRequesterManager.cpp in Sources */,

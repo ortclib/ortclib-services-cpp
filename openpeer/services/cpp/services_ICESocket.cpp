@@ -33,6 +33,7 @@
 #include <openpeer/services/internal/services_ICESocketSession.h>
 #include <openpeer/services/internal/services_TURNSocket.h>
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_wire.h>
 
 #include <openpeer/services/ISTUNRequesterManager.h>
 #include <openpeer/services/IHTTP.h>
@@ -453,7 +454,7 @@ namespace openpeer
                              )
       {
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -466,7 +467,7 @@ namespace openpeer
 
           LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(getViaLocalIP(viaLocalCandidate));
           if (found == mSocketLocalIPs.end()) {
-            ZS_LOG_WARNING(Detail, log("did not find local IP to use"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("did not find local IP to use"))
             return false;
           }
 
@@ -483,7 +484,7 @@ namespace openpeer
 
         if (viaLocalCandidate.mType == Type_Relayed) {
           if (!turnSocket) {
-            ZS_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
             return false;
           }
 
@@ -492,7 +493,7 @@ namespace openpeer
         }
 
         if (!socket) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -508,10 +509,10 @@ namespace openpeer
           }
 #endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
           size_t bytesSent = socket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
-          ZS_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           if (ZS_IS_LOGGING(Insane)) {
             String base64 = IHelper::convertToBase64(buffer, bytesSent);
-            ZS_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
+            OPENPEER_SERVICES_WIRE_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
           }
           return ((!wouldBlock) && (bufferLengthInBytes == bytesSent));
         } catch(ISocket::Exceptions::Unspecified &error) {
@@ -600,7 +601,7 @@ namespace openpeer
 
           LocalSocketMap::iterator found = mSockets.find(socket);
           if (found == mSockets.end()) {
-            ZS_LOG_WARNING(Detail, log("UDP socket is not ready"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
             return;
           }
 
@@ -615,11 +616,11 @@ namespace openpeer
             bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE, &wouldBlock);
             if (0 == bytesRead) return;
 
-            ZS_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()))
+            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()))
 
             if (ZS_IS_LOGGING(Insane)) {
               String base64 = Helper::convertToBase64(buffer.get(), bytesRead);
-              ZS_LOG_INSANE(log("RECEIVE PACKET ON WIRE") + ZS_PARAM("source", source.string()) + ZS_PARAM("wire in", base64))
+              OPENPEER_SERVICES_WIRE_LOG_INSANE(log("RECEIVE PACKET ON WIRE") + ZS_PARAM("source", source.string()) + ZS_PARAM("wire in", base64))
             }
 
           } catch(ISocket::Exceptions::Unspecified &error) {
@@ -637,12 +638,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onWriteReady(ISocketPtr socket)
       {
-        ZS_LOG_TRACE(log("write ready"))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("write ready"))
         AutoRecursiveLock lock(mLock);
 
         LocalSocketMap::iterator found = mSockets.find(socket);
         if (found == mSockets.end()) {
-          ZS_LOG_WARNING(Detail, log("UDP socket is not ready"))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
           return;
         }
 
@@ -655,7 +656,7 @@ namespace openpeer
         for (TURNInfoMap::iterator iter = localSocket->mTURNInfos.begin(); iter != localSocket->mTURNInfos.end(); ++iter) {
           TURNInfoPtr &turnInfo = (*iter).second;
           if (turnInfo->mTURNSocket) {
-            ZS_LOG_TRACE(log("notifying TURN socket of write ready") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
+            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notifying TURN socket of write ready") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
             turnInfo->mTURNSocket->notifyWriteReady();
           }
         }
@@ -763,7 +764,7 @@ namespace openpeer
           AutoRecursiveLock lock(getLock());
           LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
           if (found == mSocketTURNs.end()) {
-            ZS_LOG_WARNING(Detail, log("TURN not associated with any local socket"))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN not associated with any local socket"))
             return;
           }
           LocalSocketPtr &localSocket = (*found).second;
@@ -787,16 +788,16 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
-        ZS_LOG_TRACE(log("sending packet for TURN") + ZS_PARAM("TURN socket ID", socket->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet for TURN") + ZS_PARAM("TURN socket ID", socket->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
 
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as ICE socket is shutdown") + ZS_PARAM("TURN socket ID", socket->getID()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as ICE socket is shutdown") + ZS_PARAM("TURN socket ID", socket->getID()))
           return false;
         }
 
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
         if (found == mSocketTURNs.end()) {
-          ZS_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as TURN socket does not match any local socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", socket->getID()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as TURN socket does not match any local socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", socket->getID()))
           return false;
         }
         LocalSocketPtr &localSocket = (*found).second;
@@ -814,11 +815,11 @@ namespace openpeer
           size_t bytesSent = localSocket->mSocket->sendTo(destination, packet, packetLengthInBytes, &wouldBlock);
           bool sent = ((!wouldBlock) && (bytesSent == packetLengthInBytes));
           if (!sent) {
-            ZS_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as UDP socket did not send the data") + ZS_PARAM("would block", wouldBlock) + ZS_PARAM("bytes sent", bytesSent))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as UDP socket did not send the data") + ZS_PARAM("would block", wouldBlock) + ZS_PARAM("bytes sent", bytesSent))
           }
           return sent;
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
+          OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
         return false;
       }
@@ -826,13 +827,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onTURNSocketWriteReady(ITURNSocketPtr socket)
       {
-        ZS_LOG_TRACE(log("notified that TURN is write ready") + ZS_PARAM("TURN socket ID", socket->getID()))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notified that TURN is write ready") + ZS_PARAM("TURN socket ID", socket->getID()))
 
         AutoRecursiveLock lock(mLock);
 
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
         if (found == mSocketTURNs.end()) {
-          ZS_LOG_WARNING(Debug, log("cannot notify socket write ready as TURN socket does not match current TURN socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", + socket->getID()))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot notify socket write ready as TURN socket does not match current TURN socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", + socket->getID()))
           return;
         }
 
@@ -893,7 +894,7 @@ namespace openpeer
 #endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
           localSocket->mSocket->sendTo(destination, *packet, packet->SizeInBytes(), &wouldBlock);
         } catch(ISocket::Exceptions::Unspecified &error) {
-          ZS_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
+          OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
       }
 
@@ -1965,7 +1966,7 @@ namespace openpeer
         STUNPacketPtr stun = STUNPacket::parseIfSTUN(buffer, bufferLengthInBytes, STUNPacket::RFC_AllowAll, false, "ICESocket", mID);
 
         if (stun) {
-          ZS_LOG_DEBUG(log("received STUN packet") + ZS_PARAM("via candidate", viaCandidate.toDebug()) + ZS_PARAM("source ip", source.string()) + ZS_PARAM("class", stun->classAsString()) + ZS_PARAM("method", stun->methodAsString()))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("received STUN packet") + ZS_PARAM("via candidate", viaCandidate.toDebug()) + ZS_PARAM("source ip", source.string()) + ZS_PARAM("class", stun->classAsString()) + ZS_PARAM("method", stun->methodAsString()))
           ITURNSocketPtr turn;
           if (IICESocket::Type_Relayed != normalize(viaCandidate.mType)) {
 
@@ -2133,7 +2134,7 @@ namespace openpeer
           if (next->handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
         }
 
-        ZS_LOG_WARNING(Trace, log("did not find any socket session to handle data packet"))
+        OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("did not find any socket session to handle data packet"))
       }
 
       //-----------------------------------------------------------------------
