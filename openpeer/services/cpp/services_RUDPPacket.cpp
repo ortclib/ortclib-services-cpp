@@ -464,7 +464,11 @@ namespace openpeer
       vectorEncoderFinalize(ioVectorState, xorParity, vectorLengthInBytes);
 
       setFlag(Flag_VP_VectorParity, xorParity);
+#ifdef _ANDROID
+     mVectorLengthInBytes = static_cast<BYTE>(vectorLengthInBytes);
+#else
       mVectorLengthInBytes = static_cast<decltype(mVectorLengthInBytes)>(vectorLengthInBytes);
+#endif
     }
 
     //-------------------------------------------------------------------------

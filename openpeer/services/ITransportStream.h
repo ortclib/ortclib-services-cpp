@@ -257,7 +257,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the total number of the buffers "written" to the
       //          FIFO write stream that are still available to read.
+#ifdef _ANDROID
+      virtual size_t getTotalReadBuffersAvailable() const = 0;
+#else
       virtual size_type getTotalReadBuffersAvailable() const = 0;
+#endif
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the size of all data "written" buffer available to

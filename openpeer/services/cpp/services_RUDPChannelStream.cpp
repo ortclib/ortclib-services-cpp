@@ -1296,8 +1296,11 @@ namespace openpeer
 
               size_t bytesRead = getFromWriteBuffer(&(temp[0]), availableBytes);
               newPacket->mData = &(temp[0]);
+#ifdef _ANDROID
+			  newPacket->mDataLengthInBytes = bytesRead;
+#else
               newPacket->mDataLengthInBytes = static_cast<decltype(newPacket->mDataLengthInBytes)>(bytesRead);
-
+#endif
               if ((mSendStream->getTotalReadBuffersAvailable() < 1) ||
                   (1 == packetsToSend)) {
                 newPacket->setFlag(RUDPPacket::Flag_AR_ACKRequired);
@@ -2115,6 +2118,16 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+
+#ifdef _ANDROID
+      void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend)
+      {
+        if (!mPacket) return;
+        if (mFlagForResendingInNextBurst) return;
+        mFlagForResendingInNextBurst = true;
+        ++ioTotalPacketsToResend;
+      }
+#else
       void RUDPChannelStream::BufferedPacket::flagForResending(size_t &ioTotalPacketsToResend)
       {
         if (!mPacket) return;
@@ -2122,7 +2135,7 @@ namespace openpeer
         mFlagForResendingInNextBurst = true;
         ++ioTotalPacketsToResend;
       }
-
+#endif
       //-----------------------------------------------------------------------
       void RUDPChannelStream::BufferedPacket::doNotResend(ULONG &ioTotalPacketsToResend)
       {
