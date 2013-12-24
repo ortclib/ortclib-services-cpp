@@ -18,11 +18,11 @@ LOCAL_C_INCLUDES:= $(LOCAL_PATH) \
 $(LOCAL_PATH)/openpeer/services/internal \
 $(LOCAL_PATH)/../zsLib \
 $(LOCAL_PATH)/../zsLib/internal \
-$(LOCAL_PATH)/../cryptopp/projects/android \
+$(LOCAL_PATH)/../build/android/cryptopp/include \
 $(LOCAL_PATH)/.. \
-$(LOCAL_PATH)/../curl/projects/android/curl/include \
+$(LOCAL_PATH)/../build/android/curl/include \
 $(LOCAL_PATH)/../udns \
-$(LOCAL_PATH)/../boost/projects/android/build/include/boost-1_53 \
+$(LOCAL_PATH)/../build/android/boost/include/boost-1_53 \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.4.3/include \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.4.3/libs/armeabi/include \
 
