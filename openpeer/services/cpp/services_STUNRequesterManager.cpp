@@ -170,8 +170,7 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
           STUNRequesterMap::iterator iter = mRequesters.find(key);
           if (iter == mRequesters.end()) {
-            ZS_LOG_TRACE(log("did not find STUN requester for STUN packet"))
-            stun->log(Log::Trace, "handleSTUNPacket-requester-not-found");
+            ZS_LOG_WARNING(Trace, log("did not find STUN requester for STUN packet") + ZS_PARAM("stun packet", stun->toDebug()))
             return ISTUNRequesterPtr();
           }
 

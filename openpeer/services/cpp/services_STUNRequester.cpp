@@ -157,7 +157,7 @@ namespace openpeer
 
         if (mDelegate) {
           if (ZS_IS_LOGGING(Trace)) {
-            mSTUNRequest->log(Log::Trace, log("cancelled"));
+            ZS_LOG_BASIC(log("cancelled") + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
           }
         }
 
@@ -307,7 +307,7 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
           ZS_LOG_WARNING(Detail, log("request timed out") + ZS_PARAM("on try number", mTryNumber) + ZS_PARAM("timeout duration", totalTime.total_milliseconds()))
           if (mSTUNRequest) {
-            mSTUNRequest->log(Log::Trace, log("timed-out"));
+            ZS_LOG_TRACE(log("timed-out") + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
           }
           try {
             if (mDelegate) {

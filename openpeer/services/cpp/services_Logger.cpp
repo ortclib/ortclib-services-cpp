@@ -1681,7 +1681,6 @@ namespace openpeer
     void ILogger::installTelnetLogger(WORD listenPort, ULONG maxSecondsWaitForSocketToBeAvailable,  bool colorizeOutput)
     {
       AutoRecursiveLock lock(IHelper::getGlobalLock());
-
       internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonListener();
       if (singleton) {
         bool change = false;
