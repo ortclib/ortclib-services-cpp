@@ -686,9 +686,9 @@ namespace openpeer
                            )
         {
           if (mColorizeOutput) {
-            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
+            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           } else {
-            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
+            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           }
         }
 
@@ -776,9 +776,9 @@ namespace openpeer
           if (mFile.is_open()) {
             String output;
             if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
+              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
             } else {
-              output = toBWString(inSubsystem, inSeverity, inLevel, params.message(), inFunction, inFilePath, inLineNumber);
+              output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
             }
             mFile << output;
             mFile.flush();
