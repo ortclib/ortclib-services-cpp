@@ -38,6 +38,7 @@
 		0095DADF16CA83EB005F53D3 /* services_STUNRequesterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D93016CA83EA005F53D3 /* services_STUNRequesterManager.cpp */; };
 		0095DAE016CA83EB005F53D3 /* services_TURNSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D93116CA83EA005F53D3 /* services_TURNSocket.cpp */; };
 		00ABD44917A8423900178078 /* services_TCPMessaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00ABD44817A8423900178078 /* services_TCPMessaging.cpp */; };
+		00F11C7C189B6D5E00EB33BB /* services_Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00F11C7B189B6D5E00EB33BB /* services_Settings.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +135,9 @@
 		00ABD44A17A8424900178078 /* services_TCPMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_TCPMessaging.h; sourceTree = "<group>"; };
 		00ABD44B17A8426100178078 /* ITCPMessaging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ITCPMessaging.h; sourceTree = "<group>"; };
 		00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_AllocatorWithNul.h; sourceTree = "<group>"; };
+		00F11C79189B6D3900EB33BB /* ISettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ISettings.h; sourceTree = "<group>"; };
+		00F11C7A189B6D4D00EB33BB /* services_Settings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Settings.h; sourceTree = "<group>"; };
+		00F11C7B189B6D5E00EB33BB /* services_Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Settings.cpp; sourceTree = "<group>"; };
 		00FF147817AAB85E00F5DEB8 /* IWakeDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IWakeDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -200,6 +204,7 @@
 				0095D95216CA83EA005F53D3 /* IRUDPMessaging.h */,
 				0095D95716CA83EA005F53D3 /* RUDPPacket.h */,
 				0095D95816CA83EA005F53D3 /* RUDPProtocol.h */,
+				00F11C79189B6D3900EB33BB /* ISettings.h */,
 				0095D95316CA83EA005F53D3 /* ISTUNDiscovery.h */,
 				0095D95A16CA83EA005F53D3 /* STUNPacket.h */,
 				0095D95416CA83EA005F53D3 /* ISTUNRequester.h */,
@@ -238,6 +243,7 @@
 				0095D92916CA83EA005F53D3 /* services_RUDPListener.cpp */,
 				0095D92A16CA83EA005F53D3 /* services_RUDPMessaging.cpp */,
 				0095D92B16CA83EA005F53D3 /* services_RUDPPacket.cpp */,
+				00F11C7B189B6D5E00EB33BB /* services_Settings.cpp */,
 				0095D92D16CA83EA005F53D3 /* services_STUNDiscovery.cpp */,
 				0095D92E16CA83EA005F53D3 /* services_STUNPacket.cpp */,
 				0095D92F16CA83EA005F53D3 /* services_STUNRequester.cpp */,
@@ -278,6 +284,7 @@
 				0095D94616CA83EA005F53D3 /* services_RUDPTransport.h */,
 				0095D94716CA83EA005F53D3 /* services_RUDPListener.h */,
 				0095D94816CA83EA005F53D3 /* services_RUDPMessaging.h */,
+				00F11C7A189B6D4D00EB33BB /* services_Settings.h */,
 				0095D94916CA83EA005F53D3 /* services_STUNDiscovery.h */,
 				0095D94A16CA83EA005F53D3 /* services_STUNRequester.h */,
 				0095D94B16CA83EA005F53D3 /* services_STUNRequesterManager.h */,
@@ -376,6 +383,7 @@
 				000CC03717A475F90075E86C /* services_Logger.cpp in Sources */,
 				003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */,
 				003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */,
+				00F11C7C189B6D5E00EB33BB /* services_Settings.cpp in Sources */,
 				0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */,
 				001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */,
 				003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */,

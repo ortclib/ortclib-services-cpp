@@ -54,6 +54,7 @@
 #include <openpeer/services/IRUDPTransport.h>
 #include <openpeer/services/IRUDPListener.h>
 #include <openpeer/services/IRUDPMessaging.h>
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/ISTUNRequester.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 #include <openpeer/services/ITCPMessaging.h>

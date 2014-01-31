@@ -52,6 +52,7 @@
 #include <openpeer/services/internal/services_RUDPTransport.h>
 #include <openpeer/services/internal/services_RUDPListener.h>
 #include <openpeer/services/internal/services_RUDPMessaging.h>
+#include <openpeer/services/internal/services_Settings.h>
 #include <openpeer/services/internal/services_STUNDiscovery.h>
 #include <openpeer/services/internal/services_STUNRequester.h>
 #include <openpeer/services/internal/services_STUNRequesterManager.h>

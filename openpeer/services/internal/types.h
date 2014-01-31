@@ -115,6 +115,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(RUDPTransport)
       ZS_DECLARE_CLASS_PTR(RUDPListener)
       ZS_DECLARE_CLASS_PTR(RUDPMessaging)
+      ZS_DECLARE_CLASS_PTR(Settings)
       ZS_DECLARE_CLASS_PTR(STUNDiscovery)
       ZS_DECLARE_CLASS_PTR(STUNRequester)
       ZS_DECLARE_CLASS_PTR(STUNRequesterManager)
