@@ -11,6 +11,7 @@ LOCAL_CFLAGS	:= -Wall \
 -fPIC \
 -frtti \
 -fexceptions \
+-fpermissive \
 -D_ANDROID \
 
 LOCAL_MODULE    := hfservices_android
