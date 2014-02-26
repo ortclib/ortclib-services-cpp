@@ -2118,8 +2118,13 @@ namespace openpeer
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing == mNominated) {
-            ZS_LOG_INSANE(log("cancel lower priority - pairing found nominated") + pairing->toDebug())
+            ZS_LOG_INSANE(log("cancel lower priority (skipping found nominated pair)") + pairing->toDebug())
             foundNominated = true;
+            continue;
+          }
+
+          if (!foundNominated) {
+            ZS_LOG_INSANE(log("cancel lower priority (skipping pairing with higher priority than nominated)") + pairing->toDebug())
             continue;
           }
 
@@ -2128,7 +2133,7 @@ namespace openpeer
             continue;
           }
 
-          ZS_LOG_DEBUG(log("cancelling requester for candidate") + pairing->toDebug())
+          ZS_LOG_DEBUG(log("cancelling lower priority requester for candidate") + pairing->toDebug())
 
           pairing->mRequester->cancel();
           pairing->mRequester.reset();
