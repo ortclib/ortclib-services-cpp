@@ -45,7 +45,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Cache
+      #pragma mark Backgrounding
       #pragma mark
 
       class Backgrounding : public IBackgrounding
@@ -107,7 +107,7 @@ namespace openpeer
         #pragma mark Backgrounding => friend Query
         #pragma mark
 
-        virtual size_t totalPending(PUID backgroundingID);
+        virtual size_t totalPending(PUID backgroundingID) const;
 
       protected:
         //---------------------------------------------------------------------
@@ -132,6 +132,8 @@ namespace openpeer
           Notifier(IBackgroundingNotifierPtr notifier) : mBackgroundingID(notifier->getID()) {}
 
         public:
+          ~Notifier();
+
           static NotifierPtr create(IBackgroundingNotifierPtr notifier);
 
         protected:
@@ -197,9 +199,9 @@ namespace openpeer
 
           virtual PUID getID() const {return mBackgroundingID;}
 
-          virtual size_t totalBackgroundingSubscribersStillPending();
+          virtual bool isReady() const;
 
-          virtual bool isReady();
+          virtual size_t totalBackgroundingSubscribersStillPending() const;
 
         protected:
           PUID mBackgroundingID;

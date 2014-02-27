@@ -869,6 +869,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr MessageLayerSecurityChannel::toDebug() const
       {
+        AutoRecursiveLock lock(getLock());
+
         ElementPtr resultEl = Element::create("MessageLayerSecurityChannel");
 
         IHelper::debugAppend(resultEl, "id", mID);

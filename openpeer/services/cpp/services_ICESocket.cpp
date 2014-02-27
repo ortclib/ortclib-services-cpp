@@ -977,6 +977,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr ICESocket::toDebug() const
       {
+        AutoRecursiveLock lock(getLock());
+
         ElementPtr resultEl = Element::create("ICESocket");
 
         IHelper::debugAppend(resultEl, "id", mID);

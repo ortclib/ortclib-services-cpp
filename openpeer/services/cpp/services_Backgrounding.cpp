@@ -53,6 +53,7 @@ namespace openpeer
       #pragma mark (helpers)
       #pragma mark
 
+      //-----------------------------------------------------------------------
       IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier)
       {
         return Backgrounding::getBackgroundingNotifier(notifier);
@@ -168,19 +169,20 @@ namespace openpeer
         mCurrentBackgroundingID = zsLib::createPUID();
         mTotalWaiting = mSubscriptions.size();
 
-        mQuery = Query::create(mCurrentBackgroundingID);
+        QueryPtr query = mQuery = Query::create(mCurrentBackgroundingID);
 
         if (0 == mTotalWaiting) {
           if (mNotifyWhenReady) {
             mNotifyWhenReady->onBackgroundingReady(mQuery);
             mNotifyWhenReady.reset();
+            mQuery.reset();
           }
         } else {
           ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(mCurrentBackgroundingID);
           mSubscriptions.delegate()->onBackgroundingGoingToBackground(exchangeNotifier);
         }
 
-        return mQuery;
+        return query;
       }
 
       //-----------------------------------------------------------------------
@@ -241,7 +243,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::totalPending(PUID backgroundingID)
+      size_t Backgrounding::totalPending(PUID backgroundingID) const
       {
         ZS_LOG_DETAIL(log("returning from background"))
 
@@ -279,6 +281,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr Backgrounding::toDebug() const
       {
+        AutoRecursiveLock lock(getLock());
+
         ElementPtr resultEl = Element::create("Backgrounding");
 
         IHelper::debugAppend(resultEl, "id", mID);
@@ -300,6 +304,15 @@ namespace openpeer
       #pragma mark
       #pragma mark Backgrounding::Notifier
       #pragma mark
+
+      //-----------------------------------------------------------------------
+      Backgrounding::Notifier::~Notifier()
+      {
+        if (mNotified) return;
+
+        BackgroundingPtr singleton = Backgrounding::singleton();
+        singleton->notifyReady(mBackgroundingID);
+      }
 
       //-----------------------------------------------------------------------
       Backgrounding::NotifierPtr Backgrounding::Notifier::create(IBackgroundingNotifierPtr notifier)
@@ -365,7 +378,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      bool Backgrounding::Query::isReady()
+      bool Backgrounding::Query::isReady() const
       {
         BackgroundingPtr singleton = Backgrounding::singleton();
         AutoRecursiveLock lock(singleton->getLock());
@@ -374,7 +387,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::Query::totalBackgroundingSubscribersStillPending()
+      size_t Backgrounding::Query::totalBackgroundingSubscribersStillPending() const
       {
         BackgroundingPtr singleton = Backgrounding::singleton();
         AutoRecursiveLock lock(singleton->getLock());

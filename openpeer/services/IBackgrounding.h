@@ -123,9 +123,9 @@ namespace openpeer
     {
       virtual PUID getID() const = 0;
 
-      virtual size_t totalBackgroundingSubscribersStillPending() = 0;
+      virtual bool isReady() const = 0;
 
-      virtual bool isReady() = 0;
+      virtual size_t totalBackgroundingSubscribersStillPending() const = 0;
     };
 
     //-------------------------------------------------------------------------
