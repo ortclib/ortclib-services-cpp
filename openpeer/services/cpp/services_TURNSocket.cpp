@@ -70,6 +70,8 @@ namespace openpeer
       using zsLib::ITimerDelegateProxy;
       typedef TURNSocket::IPAddressList IPAddressList;
 
+      using zsLib::ISocketDelegateProxy;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -195,6 +197,9 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
+
+        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+
         step();
       }
 
@@ -839,6 +844,14 @@ namespace openpeer
 
                 if (0 != bytesAvailable) {
                   bytesRead = server->mTCPSocket->receive(&(server->mReadBuffer[server->mReadBufferFilledSizeInBytes]), bytesAvailable, &wouldBlock);
+
+                  if (0 == bytesRead) {
+                    if (!wouldBlock) {
+                      ZS_LOG_WARNING(Detail, log("server closed TURN TCP socket") + ZS_PARAM("server ip", server->mServerIP.string()))
+                      onException(socket);
+                      return;
+                    }
+                  }
                 }
 
                 if (0 == bytesRead)
@@ -846,6 +859,7 @@ namespace openpeer
 
                 server->mReadBufferFilledSizeInBytes += bytesRead;
               } catch(ISocket::Exceptions::Unspecified &) {
+                ZS_LOG_WARNING(Detail, log("attempt to read TCP TURN socket failed") + ZS_PARAM("server ip", server->mServerIP.string()))
                 onException(socket);
                 return;
               }
@@ -1123,8 +1137,6 @@ namespace openpeer
         }
 
         if (timer == mRefreshTimer) {
-          if (mRefreshRequester) return;  // if there already is a referesh timer then we don't need to do another one...
-
           // figure out how much time do we have before the lifetime expires
           DWORD totalSeconds = (mLifetime > (OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS+30) ? mLifetime - OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS : mLifetime / 2);
           if (totalSeconds < OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS)
@@ -1141,21 +1153,7 @@ namespace openpeer
             return;
           }
 
-          mLastRefreshTimerWasSentAt = current;
-
-          ZS_LOG_DEBUG(log("refresh requester starting now"))
-
-          ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
-
-          // this is the refresh timer... time to perform another refresh now...
-          STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
-          fix(newRequest);
-          newRequest->mUsername = mUsername;
-          newRequest->mPassword = mPassword;
-          newRequest->mRealm = mRealm;
-          newRequest->mNonce = mNonce;
-          newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
-          mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+          refreshNow();
           return;
         }
 
@@ -1201,6 +1199,77 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark TURNSocket => IBackgroundingDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG(log("going to background thus will attempt to refresh TURN socket now to ensure we have the maximum lifetime before the TURN server deletes this client's bindings"))
+
+        if (mPermissionTimer) {
+          requestPermissionsNow();
+        }
+
+        refreshNow();
+      }
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingGoingToBackgroundNow()
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG(log("going to the background immediately thus cancel any pending refresh requester"))
+
+        if (mRefreshRequester) {
+          mRefreshRequester->cancel();
+          mRefreshRequester.reset();
+        }
+
+        mBackgroundingNotifier.reset();
+      }
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingReturningFromBackground()
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG("returning from background")
+
+        if (mActiveServer) {
+          if (mActiveServer->mTCPSocket) {
+            ZS_LOG_DEBUG(log("returning from background and will force active TCP socket to check if it can be read by simulating a read-ready"))
+            ISocketDelegateProxy::create(mThisWeak.lock())->onReadReady(mActiveServer->mTCPSocket);
+          }
+        } else {
+          for (ServerList::iterator iter = mServers.begin(); iter != mServers.end(); ++iter)
+          {
+            ServerPtr &server = (*iter);
+            if (!server->mTCPSocket) continue;
+
+            ZS_LOG_DEBUG(log("returning from background and will force TCP socket to check if it can be read by simulating a read-ready") + ZS_PARAM("server ip", server->mServerIP.string()))
+            ISocketDelegateProxy::create(mThisWeak.lock())->onReadReady(server->mTCPSocket);
+          }
+        }
+
+        // force a refresh of the TURN socket immediately
+        refreshNow();
+
+        if (mPermissionTimer) {
+          requestPermissionsNow();
+        }
+
+        // perform routine maintanence
+        step();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark TURNSocket => (internal)
       #pragma mark
 
@@ -1235,6 +1304,10 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "current state", toString(mCurrentState));
         IHelper::debugAppend(resultEl, "last error", toString(mLastError));
+
+        IHelper::debugAppend(resultEl, "backgrounding subscription", (bool)mBackgroundingSubscription);
+        IHelper::debugAppend(resultEl, "backgrounding notifier", (bool)mBackgroundingNotifier);
+
         IHelper::debugAppend(resultEl, "limit channel range (start)", mLimitChannelToRangeStart);
         IHelper::debugAppend(resultEl, "limit channel range (end)", mLimitChannelToRangeEnd);
         IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
@@ -1548,6 +1621,13 @@ namespace openpeer
 
         if (!mGracefulShutdownReference) mGracefulShutdownReference = mThisWeak.lock();                        // prevent object from being destroyed before the graceful shutdown...
 
+        mBackgroundingNotifier.reset();
+
+        if (mBackgroundingSubscription) {
+          mBackgroundingSubscription->cancel();
+          mBackgroundingSubscription.reset();
+        }
+
         mServers.clear();
 
         if (mRefreshRequester) {
@@ -1838,6 +1918,11 @@ namespace openpeer
 
         mRefreshRequester = handleAuthorizationErrors(requester, response);
 
+        if (!mRefreshRequester) {
+          // can now go to background because TURN refresh is complete
+          mBackgroundingNotifier.reset();
+        }
+
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
@@ -2070,6 +2155,36 @@ namespace openpeer
         }
       }
 
+      //-----------------------------------------------------------------------
+      void TURNSocket::refreshNow()
+      {
+        if (mRefreshRequester) {
+          ZS_LOG_TRACE(log("refresh timer not started as already have an outstanding refresh requester"))
+          return;
+        }
+
+        if (!mRefreshTimer) {
+          ZS_LOG_TRACE(log("cannot perform a refresh as refresh timer for TURN socket is not setup thus not in a state to perform refreshes"))
+          return;
+        }
+
+        mLastRefreshTimerWasSentAt = zsLib::now();
+
+        ZS_LOG_DEBUG(log("refresh requester starting now"))
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+
+        // this is the refresh timer... time to perform another refresh now...
+        STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
+        fix(newRequest);
+        newRequest->mUsername = mUsername;
+        newRequest->mPassword = mPassword;
+        newRequest->mRealm = mRealm;
+        newRequest->mNonce = mNonce;
+        newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
+        mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+      }
+      
       //-----------------------------------------------------------------------
       void TURNSocket::refreshChannels()
       {

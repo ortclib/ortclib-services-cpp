@@ -162,7 +162,7 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
 
         if (mNotifyWhenReady) {
-          ZS_LOG_DETAIL(log("notifying obsolete backgrounding completion delegate that it is ready"))
+          ZS_LOG_DETAIL(log("notifying obsolete backgrounding completion delegate that it is ready") + ZS_PARAM("obsolete backgrounding id", mCurrentBackgroundingID))
           mNotifyWhenReady->onBackgroundingReady(mQuery);
           mNotifyWhenReady.reset();
           mQuery.reset();
@@ -180,6 +180,8 @@ namespace openpeer
         mTotalNotifiersCreated = 0;
 
         if (0 == mTotalWaiting) {
+          ZS_LOG_DETAIL(log("no subscribers to backgrounding thus backgrounding completed immediately") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID))
+
           if (mNotifyWhenReady) {
             mNotifyWhenReady->onBackgroundingReady(mQuery);
             mNotifyWhenReady.reset();
@@ -192,6 +194,8 @@ namespace openpeer
 
           // race condition where subscriber could cancel backgrounding subscription between time size was fetched and when notifications were sent
           mTotalWaiting = mTotalNotifiersCreated;
+
+          ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("total", mTotalWaiting))
         }
 
         return query;
@@ -226,9 +230,10 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Backgrounding::notifyReady(PUID backgroundingID)
       {
-        ZS_LOG_DETAIL(log("returning from background"))
+        ZS_LOG_DETAIL(log("received notification that notifier is complete") + ZS_PARAM("backgrounding id", backgroundingID))
 
         AutoRecursiveLock lock(getLock());
+
         if (backgroundingID != mCurrentBackgroundingID) {
           ZS_LOG_WARNING(Debug, log("notification of backgrounding ready for obsolete backgrounding session"))
           return;
@@ -238,6 +243,8 @@ namespace openpeer
 
         --mTotalWaiting;
         --mTotalNotifiersCreated;
+
+        ZS_LOG_DETAIL(log("total waiting background notifiers changed") + ZS_PARAM("current backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("waiting", mTotalWaiting))
 
         if (mNotifyWhenReady) {
           ZS_LOG_DETAIL(log("notifying backgrounding completion delegate that it is ready"))
@@ -258,11 +265,9 @@ namespace openpeer
       //-----------------------------------------------------------------------
       size_t Backgrounding::totalPending(PUID backgroundingID) const
       {
-        ZS_LOG_DETAIL(log("returning from background"))
-
         AutoRecursiveLock lock(getLock());
         if (backgroundingID != mCurrentBackgroundingID) {
-          ZS_LOG_WARNING(Debug, log("obsolete backgrounding query is always ready"))
+          ZS_LOG_WARNING(Debug, log("obsolete backgrounding query is always ready thus total waiting is always \"0\""))
           return 0;
         }
 

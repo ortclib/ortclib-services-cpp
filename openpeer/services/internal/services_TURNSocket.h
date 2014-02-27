@@ -33,6 +33,7 @@
 
 #include <openpeer/services/internal/types.h>
 
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/ITURNSocket.h>
 #include <openpeer/services/ISTUNRequester.h>
 #include <openpeer/services/IDNS.h>
@@ -76,7 +77,8 @@ namespace openpeer
                          public ISTUNRequesterDelegate,
                          public IDNSDelegate,
                          public ISocketDelegate,
-                         public ITimerDelegate
+                         public ITimerDelegate,
+                         public IBackgroundingDelegate
       {
       public:
         friend interaction ITURNSocket;
@@ -247,6 +249,17 @@ namespace openpeer
 
         virtual void onTimer(TimerPtr timer);
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TURNSocket => IBackgroundingDelegate
+        #pragma mark
+
+        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+
+        virtual void onBackgroundingGoingToBackgroundNow();
+
+        virtual void onBackgroundingReturningFromBackground();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -305,6 +318,8 @@ namespace openpeer
                                     );
 
         void requestPermissionsNow();
+
+        void refreshNow();
 
         void refreshChannels();
 
@@ -433,6 +448,9 @@ namespace openpeer
 
         TURNSocketStates mCurrentState;
         TURNSocketErrors mLastError;
+
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
+        IBackgroundingNotifierPtr mBackgroundingNotifier;
 
         WORD mLimitChannelToRangeStart;
         WORD mLimitChannelToRangeEnd;
