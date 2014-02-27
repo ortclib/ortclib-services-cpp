@@ -53,13 +53,28 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to the backgrounding state
-      static IBackgroundingSubscriptionPtr subscribe(IICESocketDelegatePtr delegate);
+      static IBackgroundingSubscriptionPtr subscribe(IBackgroundingDelegatePtr delegate);
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Subscribe to the backgrounding state
+      // PURPOSE: Notifies the application is about to go into the background
+      // PARAMS:  readyDelegate - pass in a delegate which will get a callback
+      //                          when all backgrounding subscribers are ready
+      //                          to go into the background
+      // RETURNS: a query interface about the current backgrounding state
       static IBackgroundingQueryPtr notifyGoingToBackground(
                                                             IBackgroundingCompletionDelegatePtr readyDelegate = IBackgroundingCompletionDelegatePtr()
                                                             );
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Notifies the application is goinging to the background
+      //          immediately
+      static void notifyGoingToBackgroundNow();
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Notifies the application is returning from to the background
+      static void notifyReturningFromBackground();
+
+      virtual ~IBackgrounding() {}  // needed to ensure virtual table is created in order to use dynamic cast
     };
 
     //-------------------------------------------------------------------------
@@ -72,6 +87,8 @@ namespace openpeer
 
     interaction IBackgroundingNotifier
     {
+      virtual PUID getID() const = 0;
+
       virtual void ready() = 0;
     };
 
@@ -106,9 +123,9 @@ namespace openpeer
     {
       virtual PUID getID() const = 0;
 
-      virtual ULONG totalBackgroundingSubscribersStillPending() = 0;
+      virtual size_t totalBackgroundingSubscribersStillPending() = 0;
 
-      virtual void isReady() = 0;
+      virtual bool isReady() = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -121,7 +138,7 @@ namespace openpeer
 
     interaction IBackgroundingCompletionDelegate
     {
-      virtual void onBackgroundingReady() = 0;
+      virtual void onBackgroundingReady(IBackgroundingQueryPtr query) = 0;
     };
     
     //-------------------------------------------------------------------------
@@ -174,3 +191,9 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingNotifie
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_0(onBackgroundingGoingToBackgroundNow)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_0(onBackgroundingReturningFromBackground)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
+
+ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingCompletionDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingQueryPtr, IBackgroundingQueryPtr)
+ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReady, IBackgroundingQueryPtr)
+ZS_DECLARE_PROXY_END()
+

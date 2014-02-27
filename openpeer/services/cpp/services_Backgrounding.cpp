@@ -31,8 +31,6 @@
 
 #include <openpeer/services/internal/services_Backgrounding.h>
 
-#if 0
-
 #include <openpeer/services/IHelper.h>
 
 #include <zsLib/XML.h>
@@ -52,120 +50,208 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Cache
+      #pragma mark (helpers)
+      #pragma mark
+
+      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier)
+      {
+        return Backgrounding::getBackgroundingNotifier(notifier);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Cache::Cache()
+      Backgrounding::Backgrounding() :
+        mCurrentBackgroundingID(zsLib::createPUID()),
+        mTotalWaiting(0)
       {
         ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      Cache::~Cache()
+      Backgrounding::~Backgrounding()
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::convert(ICachePtr cache)
+      BackgroundingPtr Backgrounding::convert(IBackgroundingPtr backgrounding)
       {
-        return dynamic_pointer_cast<Cache>(cache);
+        return dynamic_pointer_cast<Backgrounding>(backgrounding);
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::create()
+      BackgroundingPtr Backgrounding::create()
       {
-        CachePtr pThis(new Cache());
+        BackgroundingPtr pThis(new Backgrounding());
         pThis->mThisWeak = pThis;
         return pThis;
       }
 
       //-----------------------------------------------------------------------
+      BackgroundingPtr Backgrounding::singleton()
+      {
+        AutoRecursiveLock lock(IHelper::getGlobalLock());
+        BackgroundingPtr pThis = IBackgroundingFactory::singleton().createForBackgrounding();
+        return pThis;
+      }
+
+      //-----------------------------------------------------------------------
+      IBackgroundingNotifierPtr Backgrounding::getBackgroundingNotifier(IBackgroundingNotifierPtr inNotifier)
+      {
+        return Notifier::create(inNotifier);
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Cache => ICache
+      #pragma mark Backgrounding => IBackgrounding
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void Cache::setup(ICacheDelegatePtr delegate)
+      ElementPtr Backgrounding::toDebug(BackgroundingPtr backgrounding)
       {
-        singleton()->actualSetup(delegate);
+        if (!backgrounding) return ElementPtr();
+
+        BackgroundingPtr pThis = Backgrounding::convert(backgrounding);
+        return pThis->toDebug();
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::singleton()
+      IBackgroundingSubscriptionPtr Backgrounding::subscribe(IBackgroundingDelegatePtr originalDelegate)
       {
-        static CachePtr singleton = Cache::create();
-        return singleton;
+        ZS_LOG_DETAIL(log("subscribing to backgrounding"))
+
+        AutoRecursiveLock lock(getLock());
+        if (!originalDelegate) return IBackgroundingSubscriptionPtr();
+
+        IBackgroundingSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
+
+        // IBackgroundingDelegatePtr delegate = mSubscriptions.delegate(subscription);
+
+        //if (delegate) {
+          // BackgroundingPtr pThis = mThisWeak.lock();
+
+          // nothing to event at this point
+        //}
+
+        return subscription;
       }
 
       //-----------------------------------------------------------------------
-      String Cache::fetch(const char *cookieNamePath) const
+      IBackgroundingQueryPtr Backgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
       {
-        if (!cookieNamePath) return String();
+        ZS_LOG_DETAIL(log("going to background") + ZS_PARAM("delegate", (bool)readyDelegate))
 
-        ICacheDelegatePtr delegate;
+        AutoRecursiveLock lock(getLock());
 
-        {
-          AutoRecursiveLock lock(mLock);
-          delegate = mDelegate;
+        if (mNotifyWhenReady) {
+          ZS_LOG_DETAIL(log("notifying obsolete backgrounding completion delegate that it is ready"))
+          mNotifyWhenReady->onBackgroundingReady(mQuery);
+          mNotifyWhenReady.reset();
+          mQuery.reset();
         }
 
-        if (!delegate) {
-          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath))
-          return String();
+        if (readyDelegate) {
+          mNotifyWhenReady = IBackgroundingCompletionDelegateProxy::createWeak(readyDelegate);
         }
 
-        return delegate->fetch(cookieNamePath);
+        mCurrentBackgroundingID = zsLib::createPUID();
+        mTotalWaiting = mSubscriptions.size();
+
+        mQuery = Query::create(mCurrentBackgroundingID);
+
+        if (0 == mTotalWaiting) {
+          if (mNotifyWhenReady) {
+            mNotifyWhenReady->onBackgroundingReady(mQuery);
+            mNotifyWhenReady.reset();
+          }
+        } else {
+          ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(mCurrentBackgroundingID);
+          mSubscriptions.delegate()->onBackgroundingGoingToBackground(exchangeNotifier);
+        }
+
+        return mQuery;
       }
 
       //-----------------------------------------------------------------------
-      void Cache::store(
-                        const char *cookieNamePath,
-                        Time expires,
-                        const char *str
-                        )
+      void Backgrounding::notifyGoingToBackgroundNow()
       {
-        if (!cookieNamePath) return;
-        if (!str) clear(cookieNamePath);
-        if (!(*str)) clear(cookieNamePath);
+        ZS_LOG_DETAIL(log("going to background now"))
 
-        ICacheDelegatePtr delegate;
+        AutoRecursiveLock lock(getLock());
+        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow();
+      }
 
-        {
-          AutoRecursiveLock lock(mLock);
-          delegate = mDelegate;
-        }
+      //-----------------------------------------------------------------------
+      void Backgrounding::notifyReturningFromBackground()
+      {
+        ZS_LOG_DETAIL(log("returning from background"))
 
-        if (!delegate) {
-          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot store cookie)") + ZS_PARAM("cookie name", cookieNamePath) + ZS_PARAM("expires", expires) + ZS_PARAM("value", str))
+        AutoRecursiveLock lock(getLock());
+        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding => friend Notifier
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Backgrounding::notifyReady(PUID backgroundingID)
+      {
+        ZS_LOG_DETAIL(log("returning from background"))
+
+        AutoRecursiveLock lock(getLock());
+        if (backgroundingID != mCurrentBackgroundingID) {
+          ZS_LOG_WARNING(Debug, log("notification of backgrounding ready for obsolete backgrounding session"))
           return;
         }
 
-        delegate->store(cookieNamePath, expires, str);
+        ZS_THROW_BAD_STATE_IF(0 == mTotalWaiting)
+
+        --mTotalWaiting;
+
+        if (mNotifyWhenReady) {
+          ZS_LOG_DETAIL(log("notifying backgrounding completion delegate that it is ready"))
+          mNotifyWhenReady->onBackgroundingReady(mQuery);
+          mNotifyWhenReady.reset();
+          mQuery.reset();
+        }
       }
 
       //-----------------------------------------------------------------------
-      void Cache::clear(const char *cookieNamePath)
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding => friend Query
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      size_t Backgrounding::totalPending(PUID backgroundingID)
       {
-        if (!cookieNamePath) return;
+        ZS_LOG_DETAIL(log("returning from background"))
 
-        ICacheDelegatePtr delegate;
-
-        {
-          AutoRecursiveLock lock(mLock);
-          delegate = mDelegate;
+        AutoRecursiveLock lock(getLock());
+        if (backgroundingID != mCurrentBackgroundingID) {
+          ZS_LOG_WARNING(Debug, log("obsolete backgrounding query is always ready"))
+          return 0;
         }
 
-        if (!delegate) {
-          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot clear cookie)") + ZS_PARAM("cookie name", cookieNamePath))
-          return;
-        }
-        delegate->clear(cookieNamePath);
+        return mTotalWaiting;
       }
       
       //-----------------------------------------------------------------------
@@ -173,26 +259,129 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Cache => (internal)
+      #pragma mark Backgrounding => (internal)
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Log::Params Cache::log(const char *message) const
+      Log::Params Backgrounding::log(const char *message) const
       {
-        ElementPtr objectEl = Element::create("services::Cache");
+        ElementPtr objectEl = Element::create("services::Backgrounding");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
       }
 
       //-----------------------------------------------------------------------
-      void Cache::actualSetup(ICacheDelegatePtr delegate)
+      Log::Params Backgrounding::debug(const char *message) const
       {
-        AutoRecursiveLock lock(mLock);
-        mDelegate = delegate;
-
-        ZS_LOG_DEBUG(log("setup called") + ZS_PARAM("has delegate", (bool)delegate))
+        return Log::Params(message, toDebug());
       }
 
+      //-----------------------------------------------------------------------
+      ElementPtr Backgrounding::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("Backgrounding");
+
+        IHelper::debugAppend(resultEl, "id", mID);
+
+        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+
+        IHelper::debugAppend(resultEl, "current backgrounding id", mCurrentBackgroundingID);
+        IHelper::debugAppend(resultEl, "total waiting", mTotalWaiting);
+        IHelper::debugAppend(resultEl, "notification delegate", (bool)mNotifyWhenReady);
+        IHelper::debugAppend(resultEl, "query", (bool)mQuery);
+
+        return resultEl;
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding::Notifier
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      Backgrounding::NotifierPtr Backgrounding::Notifier::create(IBackgroundingNotifierPtr notifier)
+      {
+        return NotifierPtr(new Notifier(notifier));
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding::Notifier => IBackgroundingNotifier
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Backgrounding::Notifier::ready()
+      {
+        BackgroundingPtr singleton = Backgrounding::singleton();
+        AutoRecursiveLock lock(singleton->getLock());
+
+        if (mNotified) return;
+
+        get(mNotified) = true;
+
+        singleton->notifyReady(mBackgroundingID);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding::ExchangedNotifier
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      Backgrounding::ExchangedNotifierPtr Backgrounding::ExchangedNotifier::create(PUID backgroundingID)
+      {
+        return ExchangedNotifierPtr(new ExchangedNotifier(backgroundingID));
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding::Query
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      Backgrounding::QueryPtr Backgrounding::Query::create(PUID backgroundingID)
+      {
+        return QueryPtr(new Query(backgroundingID));
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding::Query => IBackgroundingQuery
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      bool Backgrounding::Query::isReady()
+      {
+        BackgroundingPtr singleton = Backgrounding::singleton();
+        AutoRecursiveLock lock(singleton->getLock());
+
+        return 0 == singleton->totalPending(mBackgroundingID);
+      }
+
+      //-----------------------------------------------------------------------
+      size_t Backgrounding::Query::totalBackgroundingSubscribersStillPending()
+      {
+        BackgroundingPtr singleton = Backgrounding::singleton();
+        AutoRecursiveLock lock(singleton->getLock());
+
+        return singleton->totalPending(mBackgroundingID);
+      }
+      
     }
 
     //-------------------------------------------------------------------------
@@ -200,22 +389,38 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
-    #pragma mark ICache
+    #pragma mark IBackgrounding
     #pragma mark
 
     //-------------------------------------------------------------------------
-    void ICache::setup(ICacheDelegatePtr delegate)
+    ElementPtr IBackgrounding::toDebug()
     {
-      internal::Cache::setup(delegate);
+      return internal::Backgrounding::toDebug(internal::Backgrounding::singleton());
     }
 
     //-------------------------------------------------------------------------
-    ICachePtr ICache::singleton()
+    IBackgroundingSubscriptionPtr IBackgrounding::subscribe(IBackgroundingDelegatePtr delegate)
     {
-      return internal::Cache::singleton();
+      return internal::Backgrounding::singleton()->subscribe(delegate);
     }
 
+    //-------------------------------------------------------------------------
+    IBackgroundingQueryPtr IBackgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
+    {
+      return internal::Backgrounding::singleton()->notifyGoingToBackground(readyDelegate);
+    }
+
+    //-------------------------------------------------------------------------
+    void IBackgrounding::notifyGoingToBackgroundNow()
+    {
+      return internal::Backgrounding::singleton()->notifyGoingToBackgroundNow();
+    }
+
+    //-------------------------------------------------------------------------
+    void IBackgrounding::notifyReturningFromBackground()
+    {
+      return internal::Backgrounding::singleton()->notifyReturningFromBackground();
+    }
   }
 }
 
-#endif //0

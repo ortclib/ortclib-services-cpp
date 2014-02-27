@@ -33,6 +33,7 @@
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/internal/services_AllocatorWithNul.h>
+#include <openpeer/services/internal/services_Backgrounding.h>
 #include <openpeer/services/internal/services_Cache.h>
 #include <openpeer/services/internal/services_CanonicalXML.h>
 #include <openpeer/services/internal/services_DHKeyDomain.h>

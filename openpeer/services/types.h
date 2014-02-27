@@ -144,7 +144,7 @@ namespace openpeer
 
     namespace internal
     {
-      static IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
+      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
     }
 
   }

@@ -90,6 +90,27 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark IBackgroundingFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IBackgroundingFactory &IBackgroundingFactory::singleton()
+      {
+        return *(Factory::singleton().get());
+      }
+
+      //-----------------------------------------------------------------------
+      BackgroundingPtr IBackgroundingFactory::createForBackgrounding()
+      {
+        if (this) {}
+        return Backgrounding::create();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark IDHKeyDomainFactory
       #pragma mark
 

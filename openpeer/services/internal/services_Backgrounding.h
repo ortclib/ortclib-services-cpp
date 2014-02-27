@@ -51,22 +51,32 @@ namespace openpeer
       class Backgrounding : public IBackgrounding
       {
       public:
+        friend interaction IBackgroundingFactory;
         friend interaction IBackgrounding;
 
         ZS_DECLARE_CLASS_PTR(Notifier)
+        ZS_DECLARE_CLASS_PTR(ExchangedNotifier)
+        ZS_DECLARE_CLASS_PTR(Query)
+
+        friend class Notifier;
+        friend class Query;
 
       protected:
         Backgrounding();
 
+        static BackgroundingPtr create();
+
       public:
         ~Backgrounding();
 
-      protected:
+      public:
         static BackgroundingPtr convert(IBackgroundingPtr backgrounding);
 
-        static BackgroundingPtr create();
         static BackgroundingPtr singleton();
 
+        static IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
+
+      protected:
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark Backgrounding => IBackgrounding
@@ -74,11 +84,30 @@ namespace openpeer
 
         static ElementPtr toDebug(BackgroundingPtr backgrounding);
 
-        virtual IBackgroundingSubscriptionPtr subscribe(IICESocketDelegatePtr delegate);
+        virtual IBackgroundingSubscriptionPtr subscribe(IBackgroundingDelegatePtr delegate);
 
         virtual IBackgroundingQueryPtr notifyGoingToBackground(
                                                                IBackgroundingCompletionDelegatePtr readyDelegate = IBackgroundingCompletionDelegatePtr()
                                                                );
+
+        virtual void notifyGoingToBackgroundNow();
+
+        virtual void notifyReturningFromBackground();
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding => friend Notifier
+        #pragma mark
+
+        void notifyReady(PUID backgroundingID);
+        RecursiveLock &getLock() const {return mLock;}
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding => friend Query
+        #pragma mark
+
+        virtual size_t totalPending(PUID backgroundingID);
 
       protected:
         //---------------------------------------------------------------------
@@ -87,6 +116,9 @@ namespace openpeer
         #pragma mark
 
         Log::Params log(const char *message) const;
+        Log::Params debug(const char *message) const;
+
+        virtual ElementPtr toDebug() const;
 
       public:
         //---------------------------------------------------------------------
@@ -97,19 +129,79 @@ namespace openpeer
         class Notifier : public IBackgroundingNotifier
         {
         protected:
-          Notifier(PUID notifierID);
+          Notifier(IBackgroundingNotifierPtr notifier) : mBackgroundingID(notifier->getID()) {}
+
+        public:
+          static NotifierPtr create(IBackgroundingNotifierPtr notifier);
 
         protected:
           //-------------------------------------------------------------------
           #pragma mark
-          #pragma mark Backgrounding::Notifier
+          #pragma mark Backgrounding::Notifier => IBackgroundingNotifier
           #pragma mark
+
+          virtual PUID getID() const {return mBackgroundingID;}
+
           virtual void ready();
 
         protected:
-          BackgroundingPtr mOuter;
-
           AutoBool mNotified;
+          PUID mBackgroundingID;
+        };
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding::ExchangedNotifier
+        #pragma mark
+
+        class ExchangedNotifier : public IBackgroundingNotifier
+        {
+        protected:
+          ExchangedNotifier(PUID backgroundingID) : mBackgroundingID(backgroundingID) {}
+
+        public:
+          static ExchangedNotifierPtr create(PUID backgroundingID);
+
+        protected:
+          //-------------------------------------------------------------------
+          #pragma mark
+          #pragma mark Backgrounding::ExchangedNotifier => IBackgroundingNotifier
+          #pragma mark
+
+          virtual PUID getID() const {return mBackgroundingID;}
+
+          virtual void ready() {}
+
+        protected:
+          PUID mBackgroundingID;
+        };
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding::Query
+        #pragma mark
+
+        class Query : public IBackgroundingQuery
+        {
+        protected:
+          Query(PUID backgroundingID) : mBackgroundingID(backgroundingID) {}
+
+        public:
+          static QueryPtr create(PUID backgroundingID);
+
+        protected:
+          //-------------------------------------------------------------------
+          #pragma mark
+          #pragma mark Backgrounding::Query => IBackgroundingQuery
+          #pragma mark
+
+          virtual PUID getID() const {return mBackgroundingID;}
+
+          virtual size_t totalBackgroundingSubscribersStillPending();
+
+          virtual bool isReady();
+
+        protected:
           PUID mBackgroundingID;
         };
 
@@ -126,8 +218,26 @@ namespace openpeer
         IBackgroundingDelegateSubscriptions mSubscriptions;
 
         PUID mCurrentBackgroundingID;
+        size_t mTotalWaiting;
         IBackgroundingCompletionDelegatePtr mNotifyWhenReady;
+        QueryPtr mQuery;
       };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IBackgroundingFactory
+      #pragma mark
+
+      interaction IBackgroundingFactory
+      {
+        static IBackgroundingFactory &singleton();
+
+        virtual BackgroundingPtr createForBackgrounding();
+      };
+
     }
   }
 }
