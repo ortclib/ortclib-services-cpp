@@ -102,9 +102,7 @@ namespace openpeer
 
     interaction IBackgroundingDelegate
     {
-      virtual void onBackgroundingGoingToBackground(
-                                                    IBackgroundingNotifierPtr notifier
-                                                    ) = 0;
+      virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier) = 0;
 
       virtual void onBackgroundingGoingToBackgroundNow() = 0;
 

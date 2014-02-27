@@ -56,7 +56,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier)
       {
-        return Backgrounding::getBackgroundingNotifier(notifier);
+        return Backgrounding::singleton()->getBackgroundingNotifier(notifier);
       }
 
       //-----------------------------------------------------------------------
@@ -70,7 +70,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Backgrounding::Backgrounding() :
         mCurrentBackgroundingID(zsLib::createPUID()),
-        mTotalWaiting(0)
+        mTotalWaiting(0),
+        mTotalNotifiersCreated(0)
       {
         ZS_LOG_DETAIL(log("created"))
       }
@@ -107,6 +108,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IBackgroundingNotifierPtr Backgrounding::getBackgroundingNotifier(IBackgroundingNotifierPtr inNotifier)
       {
+        {
+          AutoRecursiveLock lock(IHelper::getGlobalLock());
+          ++mTotalNotifiersCreated;
+        }
+
         return Notifier::create(inNotifier);
       }
 
@@ -171,6 +177,8 @@ namespace openpeer
 
         QueryPtr query = mQuery = Query::create(mCurrentBackgroundingID);
 
+        mTotalNotifiersCreated = 0;
+
         if (0 == mTotalWaiting) {
           if (mNotifyWhenReady) {
             mNotifyWhenReady->onBackgroundingReady(mQuery);
@@ -179,7 +187,11 @@ namespace openpeer
           }
         } else {
           ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(mCurrentBackgroundingID);
+
           mSubscriptions.delegate()->onBackgroundingGoingToBackground(exchangeNotifier);
+
+          // race condition where subscriber could cancel backgrounding subscription between time size was fetched and when notifications were sent
+          mTotalWaiting = mTotalNotifiersCreated;
         }
 
         return query;
@@ -225,6 +237,7 @@ namespace openpeer
         ZS_THROW_BAD_STATE_IF(0 == mTotalWaiting)
 
         --mTotalWaiting;
+        --mTotalNotifiersCreated;
 
         if (mNotifyWhenReady) {
           ZS_LOG_DETAIL(log("notifying backgrounding completion delegate that it is ready"))
@@ -293,6 +306,8 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "total waiting", mTotalWaiting);
         IHelper::debugAppend(resultEl, "notification delegate", (bool)mNotifyWhenReady);
         IHelper::debugAppend(resultEl, "query", (bool)mQuery);
+
+        IHelper::debugAppend(resultEl, "total notifiers created", mTotalNotifiersCreated);
 
         return resultEl;
       }

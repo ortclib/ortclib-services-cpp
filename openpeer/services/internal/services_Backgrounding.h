@@ -74,7 +74,7 @@ namespace openpeer
 
         static BackgroundingPtr singleton();
 
-        static IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
+        virtual IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
 
       protected:
         //---------------------------------------------------------------------
@@ -223,6 +223,8 @@ namespace openpeer
         size_t mTotalWaiting;
         IBackgroundingCompletionDelegatePtr mNotifyWhenReady;
         QueryPtr mQuery;
+
+        size_t mTotalNotifiersCreated;
       };
 
       //-----------------------------------------------------------------------

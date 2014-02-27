@@ -134,13 +134,6 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Set the maximum size of a message expecting to receive
       virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) = 0;
-
-      //-----------------------------------------------------------------------
-      // PURPOSE: Force the TCP socket to be read immediately
-      // NOTE:    Use this method to test the socket receive will not throw
-      //          an error, typically checked after an application is
-      //          backgrounded.
-      virtual void forceReadNow() = 0;
     };
 
     //-------------------------------------------------------------------------
