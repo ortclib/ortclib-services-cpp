@@ -1225,6 +1225,11 @@ namespace openpeer
         }
 
         refreshNow();
+
+        if ((mRefreshRequester) ||
+            (mDeallocateRequester)) {
+          mBackgroundingNotifier = notifier;
+        }
       }
 
       //-----------------------------------------------------------------------
@@ -1632,8 +1637,6 @@ namespace openpeer
 
         if (!mGracefulShutdownReference) mGracefulShutdownReference = mThisWeak.lock();                        // prevent object from being destroyed before the graceful shutdown...
 
-        mBackgroundingNotifier.reset();
-
         if (mBackgroundingSubscription) {
           mBackgroundingSubscription->cancel();
           mBackgroundingSubscription.reset();
@@ -1734,6 +1737,8 @@ namespace openpeer
         setState(ITURNSocket::TURNSocketState_Shutdown);
 
         ZS_LOG_DETAIL(log("performing final cleanup"))
+
+        mBackgroundingNotifier.reset();
 
         if (mDeallocTimer) {
           mDeallocTimer->cancel();
@@ -1905,6 +1910,8 @@ namespace openpeer
           mDeallocateRequester = replacementRequester;
           return true;
         }
+
+        mBackgroundingNotifier.reset();
 
         ZS_LOG_DETAIL(log("dealloc request completed"))
 
