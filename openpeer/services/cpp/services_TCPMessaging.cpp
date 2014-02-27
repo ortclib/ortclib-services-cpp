@@ -50,6 +50,7 @@ namespace openpeer
   {
     using zsLib::DWORD;
     using zsLib::Timer;
+    using zsLib::ISocketDelegateProxy;
 
     namespace internal
     {
@@ -293,6 +294,18 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
         mMaxMessageSizeInBytes = maxMessageSizeInBytes;
+      }
+
+      //-----------------------------------------------------------------------
+      void TCPMessaging::forceReadNow()
+      {
+        AutoRecursiveLock lock(getLock());
+        if (!mSocket) return;
+
+        ZS_LOG_DEBUG(log("force read now on TCP socket"))
+
+        // fake a read notification
+        ISocketDelegateProxy::create(mThisWeak.lock())->onReadReady(mSocket);
       }
 
       //-----------------------------------------------------------------------

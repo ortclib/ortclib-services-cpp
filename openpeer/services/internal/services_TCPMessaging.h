@@ -129,6 +129,8 @@ namespace openpeer
 
         virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes);
 
+        virtual void forceReadNow();
+
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark TCPMessaging => ITransportStreamReaderDelegate
