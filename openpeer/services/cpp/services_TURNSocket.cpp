@@ -32,6 +32,8 @@
 #include <openpeer/services/internal/services_TURNSocket.h>
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/internal/services_wire.h>
+
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 
@@ -150,13 +152,12 @@ namespace openpeer
         mLifetime(0),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0)
+        mPermissionRequesterMaxCapacity(0),
+        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_DETAIL(log("created"))
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-        mServerName = OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP;
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
       }
 
       //-----------------------------------------------------------------------
@@ -186,7 +187,9 @@ namespace openpeer
         mLifetime(0),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0)
+        mPermissionRequesterMaxCapacity(0),
+        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_BASIC(log("created"))
@@ -197,6 +200,9 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
+
+        String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
+        Helper::parseIPs(restricted, mRestrictedIPs);
 
         mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
 
@@ -333,6 +339,11 @@ namespace openpeer
         if (destination.isPortEmpty()) {
           OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
           return false;
+        }
+
+        if (!Helper::containsIP(mRestrictedIPs, destination)) {
+          ZS_LOG_WARNING(Trace, log("preventing packet from going via TURN server to destination as destination is not in restricted IP list") + ZS_PARAM("destination", destination.string()))
+          return true;
         }
 
         if (NULL == buffer) {
@@ -1414,8 +1425,8 @@ namespace openpeer
 
         IPAddressList previouslyContactedUDPServers;
         IPAddressList previouslyContactedTCPServers;
-        bool udpExhausted = false;
-        bool tcpExhausted = false;
+        bool udpExhausted = mForceTURNUseTCP;   // if true then no UDP server will ever be used
+        bool tcpExhausted = mForceTURNUseUDP;   // if true then no TCP server will ever be used
 
         Time activateAfter = zsLib::now();
 
@@ -2541,11 +2552,11 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TURNSocket::Server::Server() :
-      mIsUDP(true),
-      mIsConnected(false),
-      mInformedWriteReady(false),
-      mReadBufferFilledSizeInBytes(0),
-      mWriteBufferFilledSizeInBytes(0)
+        mIsUDP(true),
+        mIsConnected(false),
+        mInformedWriteReady(false),
+        mReadBufferFilledSizeInBytes(0),
+        mWriteBufferFilledSizeInBytes(0)
       {
         memset(&(mReadBuffer[0]), 0, sizeof(mReadBuffer));
         memset(&(mWriteBuffer[0]), 0, sizeof(mWriteBuffer));

@@ -37,6 +37,7 @@
 
 #include <openpeer/services/ISTUNRequesterManager.h>
 #include <openpeer/services/IHTTP.h>
+#include <openpeer/services/ISettings.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
@@ -186,7 +187,9 @@ namespace openpeer
         mTURNLastUsed(zsLib::now()),
         mTURNShutdownIfNotUsedBy(Seconds(OPENPEER_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS)),
 
-        mLastCandidateCRC(0)
+        mLastCandidateCRC(0),
+
+        mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN))
       {
         ZS_LOG_BASIC(log("created"))
 
@@ -208,6 +211,9 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(log("init"))
+
+        String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
+        Helper::parseIPs(restricted, mRestrictedIPs);
 
         step();
       }
@@ -500,14 +506,17 @@ namespace openpeer
         // attempt to send the packet over the UDP buffer
         try {
           bool wouldBlock = false;
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-          if (true) return true;
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-          if (!destination.isAddressEqual(IPAddress(OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP))) {
+
+          if (mForceUseTURN) {
+            ZS_LOG_WARNING(Trace, log("preventing data packet from going to destination due to TURN restriction") + ZS_PARAM("destination", destination.string()))
+            return true;     // simulates forcing via TURN by refusing to send out any packets over local UDP (does not block STUN discovery)
+          }
+
+          if (!Helper::containsIP(mRestrictedIPs, destination)) {
+            ZS_LOG_WARNING(Trace, log("preventing data packet from going to destination as destination is not in restricted IP list") + ZS_PARAM("destination", destination.string()))
             return true;
           }
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
+
           size_t bytesSent = socket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
           OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           if (ZS_IS_LOGGING(Insane)) {
@@ -804,14 +813,12 @@ namespace openpeer
 
         try {
           bool wouldBlock = false;
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-          if (true) return true;
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-          if (!destination.isAddressEqual(IPAddress(OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP))) {
+
+          if (!Helper::containsIP(mRestrictedIPs, destination)) {
+            ZS_LOG_WARNING(Trace, log("preventing TURN packet from going to destination as destination is not in restricted IP list") + ZS_PARAM("destination", destination.string()))
             return true;
           }
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
+
           size_t bytesSent = localSocket->mSocket->sendTo(destination, packet, packetLengthInBytes, &wouldBlock);
           bool sent = ((!wouldBlock) && (bytesSent == packetLengthInBytes));
           if (!sent) {
@@ -884,14 +891,12 @@ namespace openpeer
 
         try {
           bool wouldBlock = false;
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-          if (true) return;
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-          if (!destination.isAddressEqual(IPAddress(OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP))) {
+
+          if (!Helper::containsIP(mRestrictedIPs, destination)) {
+            ZS_LOG_WARNING(Trace, log("preventing STUN packet from going to destination as destination is not in restricted IP list") + ZS_PARAM("destination", destination.string()))
             return;
           }
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
+
           localSocket->mSocket->sendTo(destination, *packet, packet->SizeInBytes(), &wouldBlock);
         } catch(ISocket::Exceptions::Unspecified &error) {
           OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))

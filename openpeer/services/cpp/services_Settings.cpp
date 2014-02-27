@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_Settings.h>
+#include <openpeer/services/internal/services.h>
 
 #include <openpeer/services/IHelper.h>
 
@@ -556,6 +557,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Settings::applyDefaults()
       {
+        setBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN, false);
+        setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP, false);
+        setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP, false);
+        setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS, "");
+        setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS, "");
       }
 
       //-----------------------------------------------------------------------

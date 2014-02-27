@@ -32,6 +32,8 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
+#include <openpeer/services/internal/services_Helper.h>
+
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ITURNSocket.h>
@@ -46,6 +48,9 @@
 #include <zsLib/Log.h>
 
 #include <list>
+
+#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                        "openpeer/services/debug/force-packets-over-turn"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS  "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
 
 namespace openpeer
 {
@@ -122,6 +127,8 @@ namespace openpeer
         typedef std::map<PUID, UseICESocketSessionPtr> ICESocketSessionMap;
 
         typedef std::map<IPAddress, UseICESocketSessionPtr> QuickRouteMap;
+
+        typedef Helper::IPAddressMap IPAddressMap;
 
         struct TURNInfo
         {
@@ -445,6 +452,9 @@ namespace openpeer
 
         AutoBool            mNotifiedCandidateChanged;
         DWORD               mLastCandidateCRC;
+
+        bool                mForceUseTURN;
+        IPAddressMap        mRestrictedIPs;
       };
 
       //-----------------------------------------------------------------------

@@ -1401,6 +1401,57 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark (other)
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Helper::parseIPs(const String  &ipList, IPAddressMap &outMap)
+      {
+        outMap.clear();
+
+        if (ipList.isEmpty()) return;
+
+        SplitMap splits;
+
+        split(ipList, splits, ',');
+
+        for (int i = 0; i < splits.size(); ++i) {
+          String value = (*(splits.find(i))).second;
+
+          value.trim();
+
+          try {
+            IPAddress ip(value);
+            ip.setPort(0);  // strip off any port
+
+            outMap[ip] = true;
+          } catch(IPAddress::Exceptions::ParseError &) {
+          }
+        }
+      }
+
+      //-----------------------------------------------------------------------
+      bool Helper::containsIP(
+                              const IPAddressMap &inMap,
+                              const IPAddress &inIP,
+                              bool emptyMapReturns
+                              )
+      {
+        if (inMap.empty()) return emptyMapReturns;
+
+        IPAddress ip(inIP);
+        if (ip.getPort()) {
+          ip.setPort(0);
+        }
+
+        return inMap.find(ip) != inMap.end();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
     }
 
     //-------------------------------------------------------------------------
