@@ -101,7 +101,7 @@ namespace openpeer
       BackgroundingPtr Backgrounding::singleton()
       {
         AutoRecursiveLock lock(IHelper::getGlobalLock());
-        BackgroundingPtr pThis = IBackgroundingFactory::singleton().createForBackgrounding();
+        static BackgroundingPtr pThis = IBackgroundingFactory::singleton().createForBackgrounding();
         return pThis;
       }
 
@@ -246,7 +246,8 @@ namespace openpeer
 
         ZS_LOG_DETAIL(log("total waiting background notifiers changed") + ZS_PARAM("current backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("waiting", mTotalWaiting))
 
-        if (mNotifyWhenReady) {
+        if ((mNotifyWhenReady) &&
+            (0 == mTotalWaiting)) {
           ZS_LOG_DETAIL(log("notifying backgrounding completion delegate that it is ready"))
           mNotifyWhenReady->onBackgroundingReady(mQuery);
           mNotifyWhenReady.reset();
