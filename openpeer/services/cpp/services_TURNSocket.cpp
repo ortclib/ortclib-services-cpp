@@ -724,7 +724,7 @@ namespace openpeer
 
         if (requester == mRefreshRequester) {
           ZS_LOG_WARNING(Detail, log("refresh requester timed out thus issuing shutdown"))
-          mRefreshRequester.reset();
+          clearRefreshRequester();
           // this is bad... but what can we do?? this is considered shutdown now...
           mLastError = TURNSocketError_RefreshTimeout;
           cancel();
@@ -748,7 +748,7 @@ namespace openpeer
           }
 
           // we aren't going to treat as fatal but we will try immediately again (perhaps it should be fatal)
-          mPermissionRequester.reset();
+          clearPermissionRequester();
 
           step();
           return;
@@ -1226,10 +1226,9 @@ namespace openpeer
 
         refreshNow();
 
-        if ((mRefreshRequester) ||
-            (mDeallocateRequester)) {
-          mBackgroundingNotifier = notifier;
-        }
+        mBackgroundingNotifier = notifier;
+
+        clearBackgroundingNotifierIfPossible();
       }
 
       //-----------------------------------------------------------------------
@@ -1239,10 +1238,8 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("going to the background immediately thus cancel any pending refresh requester"))
 
-        if (mRefreshRequester) {
-          mRefreshRequester->cancel();
-          mRefreshRequester.reset();
-        }
+        clearRefreshRequester();
+        clearPermissionRequester();
 
         mBackgroundingNotifier.reset();
       }
@@ -1644,14 +1641,8 @@ namespace openpeer
 
         mServers.clear();
 
-        if (mRefreshRequester) {
-          mRefreshRequester->cancel();
-          mRefreshRequester.reset();
-        }
-        if (mPermissionRequester) {
-          mPermissionRequester->cancel();
-          mPermissionRequester.reset();
-        }
+        clearRefreshRequester();
+        clearPermissionRequester();
 
         mPermissions.clear();
         for (ChannelIPMap::iterator iter = mChannelIPMap.begin(); iter != mChannelIPMap.end(); ++iter) {
@@ -1721,10 +1712,7 @@ namespace openpeer
             }
 
             if (!originalDelegate) {
-              if (mDeallocateRequester) {
-                mDeallocateRequester->cancel();
-                mDeallocateRequester.reset();
-              }
+              clearDeallocateRequester();
             }
           }
 
@@ -1748,10 +1736,7 @@ namespace openpeer
         mGracefulShutdownReference.reset();
         mDelegate.reset();
 
-        if (mDeallocateRequester) {
-          mDeallocateRequester->cancel();
-          mDeallocateRequester.reset();
-        }
+        clearDeallocateRequester();
 
         mActiveServer.reset();
 
@@ -1911,7 +1896,7 @@ namespace openpeer
           return true;
         }
 
-        mBackgroundingNotifier.reset();
+        clearDeallocateRequester();
 
         ZS_LOG_DETAIL(log("dealloc request completed"))
 
@@ -1935,11 +1920,7 @@ namespace openpeer
         if (requester != mRefreshRequester) return false;
 
         mRefreshRequester = handleAuthorizationErrors(requester, response);
-
-        if (!mRefreshRequester) {
-          // can now go to background because TURN refresh is complete
-          mBackgroundingNotifier.reset();
-        }
+        clearBackgroundingNotifierIfPossible();
 
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
@@ -2097,10 +2078,7 @@ namespace openpeer
       void TURNSocket::requestPermissionsNow()
       {
         // we don't care of the previous permissions succeeded or not, we are going to send one right now
-        if (mPermissionRequester) {
-          mPermissionRequester->cancel();
-          mPermissionRequester.reset();
-        }
+        clearPermissionRequester();
 
         // scope: clear our permissions that have not seen data sent out in a long time
         {
@@ -2523,6 +2501,19 @@ namespace openpeer
         return ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getMaxTimeout());
       }
 
+      //-----------------------------------------------------------------------
+      void TURNSocket::clearBackgroundingNotifierIfPossible()
+      {
+        if (!mBackgroundingNotifier) return;
+        if (mRefreshRequester) return;
+        if (mDeallocateRequester) return;
+        if (mPermissionRequester) return;
+
+        ZS_LOG_DEBUG(log("ready to go to the background"))
+
+        mBackgroundingNotifier.reset();
+      }
+      
       //-------------------------------------------------------------------------
       void TURNSocket::getBuffer(RecycledPacketBuffer &outBuffer)
       {

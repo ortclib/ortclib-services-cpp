@@ -357,8 +357,9 @@ namespace openpeer
         void sendKeepAliveNow();
         void sendAliveCheckRequest();
 
-        void clearAliveCheckRequester()   {if (!mAliveCheckRequester) return; mAliveCheckRequester->cancel(); mAliveCheckRequester.reset(); mBackgroundingNotifier.reset();}
-        void clearNominateRequester()     {if (!mNominateRequester) return; mNominateRequester->cancel(); mNominateRequester.reset(); mBackgroundingNotifier.reset();}
+        void clearBackgroundingNotifierIfPossible();
+        void clearAliveCheckRequester()   {if (mAliveCheckRequester) { mAliveCheckRequester->cancel(); mAliveCheckRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearNominateRequester()     {if (mNominateRequester) { mNominateRequester->cancel(); mNominateRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
 
       protected:
         //---------------------------------------------------------------------

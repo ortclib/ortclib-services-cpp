@@ -216,7 +216,7 @@ namespace openpeer
         ZS_LOG_DETAIL(log("returning from background"))
 
         AutoRecursiveLock lock(getLock());
-        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow();
+        mSubscriptions.delegate()->onBackgroundingReturningFromBackground();
       }
 
       //-----------------------------------------------------------------------

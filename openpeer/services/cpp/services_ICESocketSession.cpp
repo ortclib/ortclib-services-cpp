@@ -435,8 +435,6 @@ namespace openpeer
                      ZS_PARAM("send keep alive (ms)", sendKeepAliveIndications.total_milliseconds()) +
                      ZS_PARAM("expecting data within (ms)", expectSTUNOrDataWithinWithinOrSendAliveCheck.total_milliseconds()))
 
-        mBackgroundingNotifier.reset();
-
         if (mKeepAliveTimer) {
           ZS_LOG_DEBUG(log("cancelling current keep alive timer"))
           mKeepAliveTimer->cancel();
@@ -453,6 +451,8 @@ namespace openpeer
           mExpectingDataTimer->cancel();
           mExpectingDataTimer.reset();
         }
+
+        clearBackgroundingNotifierIfPossible();
 
         mKeepAliveDuration = sendKeepAliveIndications;
         mExpectSTUNOrDataWithinDuration = expectSTUNOrDataWithinWithinOrSendAliveCheck;
@@ -1456,14 +1456,10 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("going to background") + ZS_PARAM("now", mWentToBackgroundAt))
 
-        mBackgroundingNotifier.reset();
-
         sendAliveCheckRequest();
 
-        if ((mAliveCheckRequester) ||
-            (mNominateRequester)) {
-          mBackgroundingNotifier = notifier;
-        }
+        mBackgroundingNotifier = notifier;
+        clearBackgroundingNotifierIfPossible();
       }
 
       //-----------------------------------------------------------------------
@@ -2403,6 +2399,18 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("foundation not found thus can proceed with activation") + ZS_PARAM("derived", derivedPairing->toDebug()))
         return true;
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::clearBackgroundingNotifierIfPossible()
+      {
+        if (!mBackgroundingNotifier) return;
+        if (mAliveCheckRequester) return;
+        if (mNominateRequester) return;
+
+        ZS_LOG_DEBUG(log("ready for backgrounding"))
+
+        mBackgroundingNotifier.reset();
       }
     }
 
