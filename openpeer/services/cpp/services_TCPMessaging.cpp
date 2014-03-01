@@ -353,12 +353,15 @@ namespace openpeer
           size_t bytesRead = mSocket->receive(buffer.BytePtr(), OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES, &wouldBlock);
 
           if (0 == bytesRead) {
-            ZS_LOG_WARNING(Detail, log("notified of data to read but no data available to read") + ZS_PARAM("would block", wouldBlock))
 
             if (!wouldBlock) {
+              ZS_LOG_WARNING(Trace, log("notified of data to read but no data available to read (server closed socket)") + ZS_PARAM("would block", wouldBlock))
               setError(IHTTP::HTTPStatusCode_NoContent, "server issued shutdown on socket connection");
               cancel();
+              return;
             }
+
+            ZS_LOG_TRACE(log("notified of data to read but no data available to read (probably a connectivity check)") + ZS_PARAM("would block", wouldBlock))
             return;
           }
 
@@ -514,6 +517,7 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("handling return from background by forcing the socket to read immediately (to check if socket is alive)"))
 
+        if (SessionState_Connected != mCurrentState) return;
         onReadReady(mSocket);
       }
 
