@@ -1620,7 +1620,7 @@ namespace openpeer
 
                 LocalSocketPtr &checkSocket = (*currentCheckIter).second;
                 if (checkSocket == localSocket) {
-                  ZS_LOG_TRACE(log("turn check - no need to compare against same socket"))
+                  ZS_LOG_TRACE(log("turn check - no need to compare against same socket (i.e. self)"))
                   continue;
                 }
 
@@ -1633,10 +1633,18 @@ namespace openpeer
                 }
 
               did_not_find_turn_connection:
-                ZS_LOG_TRACE(log("since a TURN connection does not already exist for the other socket no need to check for duplication") + checkSocket->mLocal->toDebug())
+                ZS_LOG_TRACE(log("since a TURN connection does not exist for the alternative local socket there's no need to check if it's duplicate or not") + checkSocket->mLocal->toDebug())
                 continue;
 
               found_turn_connection:
+
+                // NOTE: must check "check socket" against "local socket"
+                // followed by "local socket" against "check socket" because it
+                // is possible the local socket could contain an extra IP
+                // that was not found in the check socket. Only if every IP
+                // in the check socket was found in every IP of the local
+                // socket and every IP in the local socket is found in the
+                // check socket do we truly consider it a full duplicate.
 
                 for (STUNInfoDiscoveryMap::iterator stunCheckIter = checkSocket->mSTUNDiscoveries.begin(); stunCheckIter != checkSocket->mSTUNDiscoveries.end(); )
                 {
@@ -1655,15 +1663,17 @@ namespace openpeer
                     if (stunLocalInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                     if (stunCheckInfo->mReflexive->mIPAddress != stunLocalInfo->mReflexive->mIPAddress) {
-                      ZS_LOG_TRACE(log("turn check - mapped address does not match thus still allowed to create TURN") + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()) + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()))
-                      goto reflexive_mismatch;
+                      ZS_LOG_TRACE(log("turn check - mapped address does not match (but perhaps it will match another discovered IP)") + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()) + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()))
+                      continue;
                     }
+
                     found = true;
                     break;
                   }
+
                   if (found) continue;
 
-                  ZS_LOG_TRACE(log("turn check - mapped address does not exist thus still allowed to create TURN") + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()))
+                  ZS_LOG_TRACE(log("turn check - mapped address in checked socket does not exist in local socket thus still allowed to create TURN") + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()))
                   goto reflexive_mismatch;
                 }
 
@@ -1684,17 +1694,19 @@ namespace openpeer
                     if (stunCheckInfo->mReflexive->mIPAddress.isAddressEmpty()) continue;
 
                     if (stunLocalInfo->mReflexive->mIPAddress != stunCheckInfo->mReflexive->mIPAddress) {
-                      ZS_LOG_TRACE(log("turn check - mapped address does not match thus still allowed to create TURN") + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()) + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()))
-                      goto reflexive_mismatch;
+                      ZS_LOG_TRACE(log("turn check - mapped address does not match (but perhaps it will match another discovered IP)") + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()) + ZS_PARAM("check candidate", stunCheckInfo->mReflexive->toDebug()))
+                      continue;
                     }
                     found = true;
                     break;
                   }
                   if (found) continue;
 
-                  ZS_LOG_TRACE(log("turn check - mapped address does not exist thus still allowed to create TURN") + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()))
+                  ZS_LOG_TRACE(log("turn check - mapped address in local socket does not exist in checked socket thus still allowed to create TURN") + ZS_PARAM("local candidate", stunLocalInfo->mReflexive->toDebug()))
                   goto reflexive_mismatch;
                 }
+
+                goto reflexive_all_duplicate;
 
               reflexive_mismatch:
                 ZS_LOG_TRACE(log("at least one reflexive mapped address is different or missing compared to this local socket") + checkSocket->mLocal->toDebug())

@@ -1527,7 +1527,7 @@ namespace openpeer
             ServerPtr &server = (*iter);
 
             if (server->mActivateAfter > tick) {
-              ZS_LOG_DEBUG(log("next server can't activate until later") + ZS_PARAM("when", server->mActivateAfter))
+              ZS_LOG_TRACE(log("next server can't activate until later") + ZS_PARAM("when", server->mActivateAfter))
               break;
             }
 
@@ -1555,13 +1555,13 @@ namespace openpeer
               }
 
               if (!server->mIsConnected) {
-                ZS_LOG_DEBUG(log("waiting for TCP socket to connect") + ZS_PARAM("server IP", server->mServerIP.string()))
+                ZS_LOG_TRACE(log("waiting for TCP socket to connect") + ZS_PARAM("server IP", server->mServerIP.string()))
                 continue;
               }
             }
 
             if (server->mAllocateRequester) {
-              ZS_LOG_DEBUG(log("allocate requester already activated") + ZS_PARAM("server IP", server->mServerIP.string()))
+              ZS_LOG_TRACE(log("allocate requester already activated") + ZS_PARAM("server IP", server->mServerIP.string()))
               continue;
             }
 
@@ -1582,7 +1582,7 @@ namespace openpeer
 
         // check to see if we know the relayed IP... if not we better get it
         if (mRelayedIP.isAddressEmpty()) {
-          ZS_LOG_DEBUG(log("waiting for a TURN allocation to complete"))
+          ZS_LOG_TRACE(log("waiting for a TURN allocation to complete"))
           return;
         }
 
