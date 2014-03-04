@@ -1893,6 +1893,7 @@ namespace openpeer
         ISTUNRequesterPtr replacementRequester = handleAuthorizationErrors(requester, response);
         if (replacementRequester) {
           mDeallocateRequester = replacementRequester;
+          ZS_LOG_TRACE(log("replacement dealloc requester created") + ZS_PARAM("requester", mDeallocateRequester->getID()))
           return true;
         }
 
@@ -1920,6 +1921,12 @@ namespace openpeer
         if (requester != mRefreshRequester) return false;
 
         mRefreshRequester = handleAuthorizationErrors(requester, response);
+
+        if (mRefreshRequester) {
+          ZS_LOG_TRACE(log("replacement refresh requester created") + ZS_PARAM("requester", mRefreshRequester->getID()))
+          return true;
+        }
+
         clearBackgroundingNotifierIfPossible();
 
         if ((0 != response->mErrorCode) ||
@@ -1963,6 +1970,8 @@ namespace openpeer
 
           mPermissionRequester = handleAuthorizationErrors(requester, response);
           if (mPermissionRequester) {
+            ZS_LOG_TRACE(log("replacement permission requester created") + ZS_PARAM("requester", mPermissionRequester->getID()))
+
             // failed to install permission... but we are trying again
             for (PermissionMap::iterator iter = mPermissions.begin(); iter != mPermissions.end(); ++iter) {
               if ((*iter).second->mInstallingWithRequester == requester) {
@@ -2049,7 +2058,10 @@ namespace openpeer
 
         // we found - try to handle basic authorization issues...
         found->mChannelBindRequester = handleAuthorizationErrors(requester, response);
-        if (found->mChannelBindRequester) return true;
+        if (found->mChannelBindRequester) {
+          ZS_LOG_TRACE(log("replacement channel bind requester created") + ZS_PARAM("requester", found->mChannelBindRequester->getID()))
+          return true;
+        }
 
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
