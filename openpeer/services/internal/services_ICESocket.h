@@ -49,8 +49,10 @@
 
 #include <list>
 
-#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                        "openpeer/services/debug/force-packets-over-turn"
-#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS  "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
+#define OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "openpeer/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
+
+#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                            "openpeer/services/debug/force-packets-over-turn"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS      "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
 
 namespace openpeer
 {
