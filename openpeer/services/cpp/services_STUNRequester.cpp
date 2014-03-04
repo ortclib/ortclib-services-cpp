@@ -378,7 +378,7 @@ namespace openpeer
           // we have a stun request but not a timer, setup the timer now...
           mTimer = Timer::create(mThisWeak.lock(), mCurrentTimeout, false);
 
-          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration", mCurrentTimeout.total_milliseconds()))
+          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration", mCurrentTimeout.total_milliseconds()) + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
 
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
