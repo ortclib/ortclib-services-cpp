@@ -1597,7 +1597,7 @@ namespace openpeer
                       ZS_LOG_TRACE(log("cannot create TURN as STUN discovery not complete") + ZS_PARAM("stun discovery ID", stunInfo->mSTUNDiscovery->getID()) + stunInfo->mReflexive->toDebug())
 
                       allConnected = false;
-                      goto all_stun_discoveries_done;
+                      goto not_all_stun_discoveries_done;
                     }
                   }
                 }
