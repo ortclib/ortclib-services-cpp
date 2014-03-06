@@ -1792,7 +1792,7 @@ namespace openpeer
 
         STUNPacketPtr request = requester->getRequest();
         if (STUNPacket::Method_Allocate != request->mMethod) {
-          ZS_LOG_DEBUG(log("not an allocation request"))
+          ZS_LOG_INSANE(log("not an allocation request"))
           return false;
         }
 

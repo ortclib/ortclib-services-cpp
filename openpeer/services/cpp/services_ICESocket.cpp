@@ -85,6 +85,7 @@ namespace openpeer
   {
     using zsLib::IPv6PortPair;
     using zsLib::string;
+    using zsLib::Numeric;
     typedef CryptoPP::CRC32 CRC32;
 
     namespace internal
@@ -96,22 +97,6 @@ namespace openpeer
       #pragma mark
       #pragma mark (helpers)
       #pragma mark
-
-      //-----------------------------------------------------------------------
-      static bool compareLocalIPs(const IPAddress &ip1, const IPAddress &ip2)
-      {
-        if (ip1.isIPv4()) {
-          if (ip2.isIPv4()) {
-            return ip1 < ip2;
-          }
-          return true;
-        }
-
-        if (ip2.isIPv4())
-          return false;
-
-        return ip1 < ip2;
-      }
 
       //-----------------------------------------------------------------------
       static bool isEqual(const IICESocket::Candidate &candidate1, const IICESocket::Candidate &candidate2)
@@ -185,13 +170,23 @@ namespace openpeer
 
         mFirstWORDInAnyPacketWillNotConflictWithTURNChannels(firstWORDInAnyPacketWillNotConflictWithTURNChannels),
         mTURNLastUsed(zsLib::now()),
-        mTURNShutdownIfNotUsedBy(Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS))),
 
         mLastCandidateCRC(0),
 
-        mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN))
+        mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN)),
+        mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6))
       {
         ZS_LOG_BASIC(log("created"))
+
+        String networkOrder = ISettings::getString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER);
+        if (networkOrder.hasData()) {
+          IHelper::SplitMap split;
+          IHelper::split(networkOrder, split, ';');
+          for (int index = 0; index < split.size(); ++index)
+          {
+            mInterfaceOrders[(*split.find(index)).second] = index;
+          }
+        }
 
         mDefaultSubscription = mSubscriptions.subscribe(delegate, queue);
 
@@ -1032,6 +1027,13 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "notified candidates changed", mNotifiedCandidateChanged);
         IHelper::debugAppend(resultEl, "candidate crc", mLastCandidateCRC);
 
+        IHelper::debugAppend(resultEl, "force use turn", mForceUseTURN);
+        IHelper::debugAppend(resultEl, "restricted IPs", mRestrictedIPs.size());
+
+        IHelper::debugAppend(resultEl, "interface name order", mInterfaceOrders.size());
+
+        IHelper::debugAppend(resultEl, "support ipv6", mSupportIPv6);
+
         return resultEl;
       }
 
@@ -1287,7 +1289,7 @@ namespace openpeer
           try {
             socket = Socket::createUDP();
 
-            socket->bind(ip);
+            socket->bind(bindIP);
             socket->setBlocking(false);
             try {
 #ifndef __QNX__
@@ -1313,7 +1315,7 @@ namespace openpeer
             continue;
           }
 
-          ZS_LOG_DEBUG(log("bind successful"))
+          ZS_LOG_DEBUG(log("bind successful") + ZS_PARAM("IP", bindIP.string()))
 
           LocalSocketPtr localSocket(new LocalSocket(mComponentID, mNextLocalPreference));
 
@@ -1456,10 +1458,13 @@ namespace openpeer
 
         bool shouldSleep = false;
 
-        if (mTURNLastUsed + mTURNShutdownIfNotUsedBy < tick)
-        {
-          // the socket can be put to sleep...
-          mTURNShutdownIfNotUsedBy = Seconds(OPENPEER_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS);  // reset to minimum again...
+        if (Duration() != mTURNShutdownIfNotUsedBy) {
+          if (mTURNLastUsed + mTURNShutdownIfNotUsedBy < tick) {
+            // the socket can be put to sleep...
+            mTURNShutdownIfNotUsedBy = Duration();  // reset no need to wake up...
+            shouldSleep = true;
+          }
+        } else {
           shouldSleep = true;
         }
 
@@ -1856,6 +1861,105 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool ICESocket::getLocalIPs(IPAddressList &outIPs)
       {
+        class Sorter
+        {
+        public:
+          //-------------------------------------------------------------------
+          struct Data
+          {
+            IPAddress mIP;
+            OrderID mOrderIndex;
+            ULONG mIndex;
+
+            Data() : mOrderIndex(0), mIndex(0) {}
+          };
+
+          //-------------------------------------------------------------------
+          static bool compareLocalIPs(const Data &data1, const Data &data2)
+          {
+            if (data1.mOrderIndex < data2.mOrderIndex) return true;
+            if (data1.mOrderIndex > data2.mOrderIndex) return false;
+            if (data1.mIndex < data2.mIndex) return true;
+            if (data1.mIndex > data2.mIndex) return false;
+
+            if (data1.mIP.isIPv4()) {
+              if (data2.mIP.isIPv4()) {
+                return data1.mIP < data2.mIP;
+              }
+              return true;
+            }
+
+            if (data2.mIP.isIPv4())
+              return false;
+            
+            return data1.mIP < data2.mIP;
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(const IPAddress &ip)
+          {
+            Data data;
+            data.mIP = ip;
+            return data;
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(
+                              const IPAddress &ip,
+                              const char *name,
+                              const InterfaceNameToOrderMap &prefs
+                              )
+          {
+            Data data;
+
+            data.mIP = ip;
+
+            if (prefs.size() > 0) {
+              const char *numStr = name + strlen(name);
+
+              for (; numStr != name; --numStr) {
+                if ('\0' == *numStr) continue;
+                if (isdigit(*numStr)) continue;
+
+                ++numStr; // skip the non-digit
+                break;
+              }
+
+              String namePart;
+
+              if (numStr != name) {
+
+                // found a number on the end
+                size_t length = (numStr - name);
+
+                namePart = name;
+                namePart = namePart.substr(0, length);
+
+                try {
+                  data.mIndex = Numeric<decltype(data.mIndex)>(numStr);
+                } catch(Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
+                  ZS_LOG_WARNING(Detail, Log::Params("number failed to convert", "ICESocket") + ZS_PARAM("name", name))
+                }
+              } else {
+                namePart = name;
+              }
+
+              InterfaceNameToOrderMap::const_iterator found = prefs.find(namePart);
+              if (found != prefs.end()) {
+                data.mOrderIndex = (*found).second;
+              } else {
+                data.mOrderIndex = prefs.size();  // last
+              }
+            }
+
+            return data;
+          }
+        };
+
+        typedef std::list<Sorter::Data> DataList;
+
+        DataList data;
+
 #ifdef _WIN32
         // http://tangentsoft.net/wskfaq/examples/ipaddr.html
 
@@ -1887,7 +1991,7 @@ namespace openpeer
 
               ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("ip", ip.string()))
 
-              outIPs.push_back(ip);
+              data.push_back(Sorter::prepare(ip));
             }
           }
         }
@@ -1907,6 +2011,10 @@ namespace openpeer
         ioctl(fd, SIOCGIFADDR, &ifr);
 
         close(fd);
+
+#define WARNING_THIS_IS_NOT_RIGHT 1
+#define WARNING_THIS_IS_NOT_RIGHT 2
+
 #else
         ifaddrs *ifAddrStruct = NULL;
         ifaddrs *ifa = NULL;
@@ -1920,10 +2028,9 @@ namespace openpeer
           if (AF_INET == ifa ->ifa_addr->sa_family) {
             ip = IPAddress(*((sockaddr_in *)ifa->ifa_addr));      // this is an IPv4 address
           } else if (AF_INET6 == ifa->ifa_addr->sa_family) {
-#if 0
-            // NOT GOING TO SUPPORT JUST YET
-            ip = IPAddress(*((sockaddr_in6 *)ifa->ifa_addr));     // this is an IPv6 address
-#endif //0
+            if (mSupportIPv6) {
+              ip = IPAddress(*((sockaddr_in6 *)ifa->ifa_addr));     // this is an IPv6 address
+            }
           }
 
           // do not add these addresses...
@@ -1933,9 +2040,9 @@ namespace openpeer
 
           ip.setPort(mBindPort);
 
-          ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("local IP", ip.string()))
+          ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("local IP", ip.string()) + ZS_PARAM("name", ifa->ifa_name))
 
-          outIPs.push_back(ip);
+          data.push_back(Sorter::prepare(ip, ifa->ifa_name, mInterfaceOrders));
         }
         ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
 
@@ -1945,12 +2052,19 @@ namespace openpeer
         }
 #endif //_WIN32
 
-        outIPs.sort(compareLocalIPs);
+        data.sort(Sorter::compareLocalIPs);
+
+        for (DataList::iterator iter = data.begin(); iter != data.end(); ++iter)
+        {
+          Sorter::Data &value = (*iter);
+          outIPs.push_back(value.mIP);
+        }
 
         if (outIPs.empty()) {
           ZS_LOG_DEBUG(log("failed to read any local IPs"))
           return false;
         }
+
         return true;
       }
 

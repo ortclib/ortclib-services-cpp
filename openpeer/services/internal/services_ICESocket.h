@@ -54,6 +54,9 @@
 #define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                            "openpeer/services/debug/force-packets-over-turn"
 #define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS      "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
 
+#define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                      "openpeer/services/interface-name-order"
+#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                    "openpeer/services/support-ipv6"
+
 namespace openpeer
 {
   namespace services
@@ -195,11 +198,14 @@ namespace openpeer
           void clearSTUN(ISTUNDiscoveryPtr stunDiscovery);
         };
 
+        typedef String InterfaceName;
+        typedef ULONG OrderID;
         typedef IPAddress LocalIP;
         typedef std::map<LocalIP, LocalSocketPtr> LocalSocketIPAddressMap;
         typedef std::map<ITURNSocketPtr, LocalSocketPtr> LocalSocketTURNSocketMap;
         typedef std::map<ISTUNDiscoveryPtr, LocalSocketPtr> LocalSocketSTUNDiscoveryMap;
         typedef std::map<ISocketPtr, LocalSocketPtr> LocalSocketMap;
+        typedef std::map<InterfaceName, OrderID> InterfaceNameToOrderMap;
 
       protected:
         ICESocket(
@@ -457,6 +463,10 @@ namespace openpeer
 
         bool                mForceUseTURN;
         IPAddressMap        mRestrictedIPs;
+
+        InterfaceNameToOrderMap mInterfaceOrders;
+
+        bool                mSupportIPv6;
       };
 
       //-----------------------------------------------------------------------

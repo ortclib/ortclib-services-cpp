@@ -560,9 +560,11 @@ namespace openpeer
         setBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP, false);
+        setBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6, false);
         setUInt(OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS, 60*5);
         setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS, "");
         setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS, "");
+        setString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER, "lo;en;pdp_ip;stf;gif;bbptp;p2p");
       }
 
       //-----------------------------------------------------------------------
