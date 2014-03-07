@@ -151,6 +151,8 @@ namespace openpeer
         TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
+        AutoRecursiveLock lock(pThis->getLock());
+
         int errorCode = 0;
         pThis->mSocket = dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
         if (!pThis->mSocket) {
@@ -184,6 +186,9 @@ namespace openpeer
 
         TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->getLock());
+
         pThis->mRemoteIP = remoteIP;
         get(pThis->mConnectIssued) = true;
 

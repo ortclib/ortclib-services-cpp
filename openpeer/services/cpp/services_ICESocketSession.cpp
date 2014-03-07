@@ -234,7 +234,6 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocketSession::init()
       {
-
         AutoRecursiveLock lock(getLock());
 
         mSocketSubscription = getSocket()->subscribe(mThisWeak.lock());
@@ -300,6 +299,8 @@ namespace openpeer
 
         ICESocketSessionPtr pThis(new ICESocketSession(socket->getMessageQueue(), delegate, ICESocket::convert(socket), remoteUsernameFrag, remotePassword, control, ICESocketSession::convert(foundation)));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->getLock());
         pThis->init();
 
         if (socket->attach(pThis)) {

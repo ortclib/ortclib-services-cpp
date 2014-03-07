@@ -342,6 +342,8 @@ namespace openpeer
                                              ));
 
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->mLock);
         get(pThis->mIncoming) = true;
         pThis->init();
         // do not allow sending to the remote party until we receive an ACK or data
@@ -544,7 +546,7 @@ namespace openpeer
               mOpenRequest.reset();
             }
 
-            setError(RUDPChannelShutdownReason_OpenFailure, "open channel failure");
+            setError(RUDPChannelShutdownReason_RemoteClosed, "remote channel disconnection received");
             cancel(false);
             return true;
           }
@@ -874,6 +876,8 @@ namespace openpeer
                                              ));
 
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->mLock);
         get(pThis->mIncoming) = true;
         pThis->mRealm = stun->mRealm;
         pThis->mNonce = stun->mNonce;
