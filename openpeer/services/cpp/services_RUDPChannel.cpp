@@ -1101,7 +1101,7 @@ namespace openpeer
                                                     STUNPacketPtr response
                                                     )
       {
-        ZS_LOG_DEBUG(log("notify requester received reply") + ZS_PARAM("ip", fromIPAddress.string()))
+        ZS_LOG_DEBUG(log("notify requester received reply") + ZS_PARAM("ip", fromIPAddress.string()) + response->toDebug())
 
         AutoRecursiveLock lock(mLock);
         if (!mMasterDelegate) return false;

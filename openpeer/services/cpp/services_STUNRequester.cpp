@@ -231,7 +231,7 @@ namespace openpeer
           if (!mSTUNRequest) return false;
 
           if (!packet->isValidResponseTo(mSTUNRequest, mUsingRFC)) {
-            ZS_LOG_TRACE(log("determined this response is not a proper validated response"))
+            ZS_LOG_TRACE(log("determined this response is not a proper validated response") + packet->toDebug())
             return false;
           }
 

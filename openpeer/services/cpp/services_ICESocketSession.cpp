@@ -1007,7 +1007,7 @@ namespace openpeer
                                                          STUNPacketPtr response
                                                          )
       {
-        ZS_LOG_TRACE(log("handle STUN requester response"))
+        ZS_LOG_TRACE(log("handle STUN requester response") + response->toDebug())
 
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) return false;

@@ -2298,7 +2298,7 @@ namespace openpeer
             if (next->handleSTUNPacket(viaCandidate, source, stun, localUsernameFrag, remoteUsernameFrag)) return;
           }
 
-          ZS_LOG_WARNING(Debug, log("did not find session that handles STUN packet"))
+          ZS_LOG_WARNING(Debug, log("did not find session that handles STUN packet") + stun->toDebug())
 
           // no STUN outlets left to check so just exit...
           return;
