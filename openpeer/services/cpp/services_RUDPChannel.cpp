@@ -1449,10 +1449,8 @@ namespace openpeer
         }
 
         if (mOpenRequest) {
-          if (!mOpenRequest->isComplete()) {
-            mOpenRequest->cancel();
-            mOpenRequest.reset();
-          }
+          mOpenRequest->cancel();
+          // WARNING: DO NOT CALL RESET ON mOpenRequest HERE
         }
 
         if (mGracefulShutdownReference) {
@@ -1463,12 +1461,11 @@ namespace openpeer
               return;
             }
 
-            if (((mOpenRequest) ||
-                 (mIncoming)) &&
-                (!mSTUNRequestPreviouslyTimedOut)) {
+            if (!mSTUNRequestPreviouslyTimedOut) {
 
               // if we had a successful open request then we must shutdown
-              if (!mShutdownRequest) {
+              if ((mOpenRequest) &&
+                  (!mShutdownRequest)) {
                 // create the shutdown request...
                 STUNPacketPtr stun = STUNPacket::createRequest(STUNPacket::Method_ReliableChannelOpen);
                 fix(stun);
