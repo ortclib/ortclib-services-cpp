@@ -72,8 +72,10 @@
 
 #define OPENPEER_SERVICES_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS (10)
 
-#define OPENPEER_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS (1)
+#define OPENPEER_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS (2)
 #define OPENPEER_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS (30)
+
+#define OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX (0xFFFF)
 
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
@@ -158,8 +160,6 @@ namespace openpeer
         mBindPort(port),
         mUsernameFrag(IHelper::randomString(20)),
         mPassword(IHelper::randomString(20)),
-
-        mNextLocalPreference(0xFFFF),
 
         mRebindAttemptStartTime(zsLib::now()),
 
@@ -528,10 +528,16 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::addRoute(ICESocketSessionPtr session, const IPAddress &source)
+      void ICESocket::addRoute(
+                               ICESocketSessionPtr session,
+                               const IPAddress &viaIP,
+                               const IPAddress &viaLocalIP,
+                               const IPAddress &source
+                               )
       {
         removeRoute(session);
-        mRoutes[source] = session;
+        RouteTuple tuple(viaIP, viaLocalIP, source);
+        mRoutes[tuple] = session;
       }
 
       //-----------------------------------------------------------------------
@@ -638,7 +644,7 @@ namespace openpeer
 
         // this method cannot be called within the scope of a lock because it
         // calls a delegate synchronously
-        internalReceivedData(*viaLocalCandidate, source, buffer.get(), bytesRead);
+        internalReceivedData(*viaLocalCandidate, *viaLocalCandidate, source, buffer.get(), bytesRead);
       }
 
       //-----------------------------------------------------------------------
@@ -765,6 +771,7 @@ namespace openpeer
                                                      )
       {
         // WARNING: This method cannot be called within a lock as it calls delegates synchronously.
+        CandidatePtr viaCandidate;
         CandidatePtr viaLocalCandidate;
         {
           AutoRecursiveLock lock(getLock());
@@ -778,10 +785,11 @@ namespace openpeer
           TURNInfoSocketMap::iterator foundInfo = localSocket->mTURNSockets.find(socket);
           ZS_THROW_BAD_STATE_IF(foundInfo == localSocket->mTURNSockets.end()) // dangling TURN socket reference must not happen
 
-          viaLocalCandidate = (*foundInfo).second->mRelay;
+          viaCandidate = (*foundInfo).second->mRelay;
+          viaLocalCandidate = localSocket->mLocal;
         }
 
-        internalReceivedData(*viaLocalCandidate,source, packet, packetLengthInBytes);
+        internalReceivedData(*viaCandidate, *viaLocalCandidate,source, packet, packetLengthInBytes);
       }
 
       //-----------------------------------------------------------------------
@@ -1000,7 +1008,6 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "usernameFrag", mUsernameFrag);
         IHelper::debugAppend(resultEl, "password", mPassword);
 
-        IHelper::debugAppend(resultEl, "next local preference", mNextLocalPreference);
         IHelper::debugAppend(resultEl, "socket local IPs", mSocketLocalIPs.size());
         IHelper::debugAppend(resultEl, "turn sockets", mSocketTURNs.size());
         IHelper::debugAppend(resultEl, "stun sockets", mSocketSTUNs.size());
@@ -1051,9 +1058,15 @@ namespace openpeer
 
         setState(ICESocketState_ShuttingDown);
 
-        if (mRebindTimer) {
-          mRebindTimer->cancel();
-          mRebindTimer.reset();
+        clearRebindTimer();
+
+        for (LocalSocketMap::iterator iter_DoNotUse = mSockets.begin(); iter_DoNotUse != mSockets.end(); )
+        {
+          LocalSocketMap::iterator current = iter_DoNotUse; ++iter_DoNotUse;
+
+          LocalSocketPtr &localSocket = (*current).second;
+
+          stopSTUNAndTURN(localSocket);
         }
 
         for (LocalSocketMap::iterator iter = mSockets.begin(); iter != mSockets.end(); )
@@ -1062,70 +1075,7 @@ namespace openpeer
 
           LocalSocketPtr &localSocket = (*current).second;
 
-          for (TURNInfoMap::iterator infoIter = localSocket->mTURNInfos.begin(); infoIter != localSocket->mTURNInfos.end();)
-          {
-            TURNInfoMap::iterator infoCurrent = infoIter; ++infoIter;
-
-            TURNInfoPtr turnInfo = (*infoCurrent).second;
-
-            if (turnInfo->mTURNRetryTimer) {
-              turnInfo->mTURNRetryTimer->cancel();
-              turnInfo->mTURNRetryTimer.reset();
-            }
-
-            if (turnInfo->mTURNSocket) {
-              ZS_LOG_DEBUG(log("shutting down TURN socket") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
-
-              turnInfo->mTURNSocket->shutdown();
-              if (ITURNSocket::TURNSocketState_Shutdown == turnInfo->mTURNSocket->getState()) {
-                ZS_LOG_DEBUG(log("TURN socket shutdown completed") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
-
-                localSocket->clearTURN(turnInfo->mTURNSocket);
-                clearTURN(turnInfo->mTURNSocket);
-
-                turnInfo->mTURNSocket.reset();
-              }
-            }
-          }
-
-          for (STUNInfoMap::iterator infoIter = localSocket->mSTUNInfos.begin(); infoIter != localSocket->mSTUNInfos.end();)
-          {
-            STUNInfoMap::iterator infoCurrent = infoIter; ++infoIter;
-
-            STUNInfoPtr stunInfo = (*infoCurrent).second;
-
-            if (stunInfo->mSTUNDiscovery) {
-              ZS_LOG_DEBUG(log("cancelling STUN discovery") + ZS_PARAM("stun socket id", stunInfo->mSTUNDiscovery->getID()))
-
-              localSocket->clearSTUN(stunInfo->mSTUNDiscovery);
-              clearSTUN(stunInfo->mSTUNDiscovery);
-              stunInfo->mSTUNDiscovery->cancel();
-              stunInfo->mSTUNDiscovery.reset();
-            }
-          }
-        }
-
-        for (LocalSocketMap::iterator iter = mSockets.begin(); iter != mSockets.end(); )
-        {
-          LocalSocketMap::iterator current = iter; ++iter;
-
-          LocalSocketPtr &localSocket = (*current).second;
-          if (localSocket->mTURNSockets.size() > 0) {
-            ZS_LOG_DEBUG(log("turn socket(s) still pending shutdown") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()) + ZS_PARAM("total TURN sockets remaining", localSocket->mTURNInfos.size()))
-            continue;
-          }
-
-          if (localSocket->mSocket) {
-            localSocket->mSocket->close();
-            localSocket->mSocket.reset();
-          }
-
-          LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(localSocket->mLocal->mIPAddress);
-          if (found != mSocketLocalIPs.end()) {
-            mSocketLocalIPs.erase(found);
-          }
-
-          mSockets.erase(current);
+          if (!closeIfTURNGone(localSocket)) continue;
         }
 
         if (mGracefulShutdownReference) {
@@ -1142,16 +1092,12 @@ namespace openpeer
 
         mGracefulShutdownReference.reset();
 
-        for (LocalSocketMap::iterator iter = mSockets.begin(); iter != mSockets.end(); ++iter)
+        for (LocalSocketMap::iterator iter_DoNotUse = mSockets.begin(); iter_DoNotUse != mSockets.end();)
         {
-          LocalSocketPtr &localSocket = (*iter).second;
+          LocalSocketMap::iterator current = iter_DoNotUse; ++iter_DoNotUse;
+          LocalSocketPtr &localSocket = (*current).second;
 
-          if (localSocket->mSocket) {
-            ZS_LOG_WARNING(Detail, log("performing hard shutdown on socket") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()))
-
-            localSocket->mSocket->close();
-            localSocket->mSocket.reset();
-          }
+          hardClose(localSocket);
         }
 
         mSubscriptions.clear();
@@ -1263,11 +1209,47 @@ namespace openpeer
         IPAddressList localIPs;
         if (!getLocalIPs(localIPs)) {
           ZS_LOG_WARNING(Detail, log("failed to obtain any local IPs"))
-          return (mSockets.size() > 0);
         }
 
         bool hadNone = (mSockets.size() < 1);
 
+        // clear out sockets that are now gone
+        {
+          for (LocalSocketMap::iterator iter_DoNotUse = mSockets.begin(); iter_DoNotUse != mSockets.end(); )
+          {
+            LocalSocketMap::iterator current = iter_DoNotUse;
+            ++iter_DoNotUse;
+
+            LocalSocketPtr localSocket = (*current).second;
+
+            IPAddress &existingIP = localSocket->mLocal->mIPAddress;
+
+            bool found = false;
+
+            for (IPAddressList::iterator iter = localIPs.begin(); iter != localIPs.end(); ++iter)
+            {
+              IPAddress &ip = (*iter);
+
+              IPAddress bindIP(ip);
+              bindIP.setPort(mBindPort);
+
+              if (!bindIP.isEqualIgnoringIPv4Format(existingIP)) continue;
+
+              ZS_LOG_TRACE(log("existing local IP found") + ZS_PARAM("ip", bindIP.string()))
+
+              found = true;
+              break;
+            }
+
+            if (found) continue;
+
+            ZS_LOG_WARNING(Basic, log("IP address is now gone thus must unbind from network") + ZS_PARAM("ip", existingIP.string()))
+
+            hardClose(localSocket);
+          }
+        }
+
+        ULONG nextLocalPreference = OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX;
 
         for (IPAddressList::iterator iter = localIPs.begin(); iter != localIPs.end(); ++iter)
         {
@@ -1276,9 +1258,22 @@ namespace openpeer
           IPAddress bindIP(ip);
           bindIP.setPort(mBindPort);
 
+          ULONG localPreference = nextLocalPreference;
+
+          nextLocalPreference -= 0xF;
+          if (nextLocalPreference > OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX) {
+            ZS_LOG_WARNING(Basic, log("unexpected local preference wrap around -- that a lot of IPs!"))
+            --nextLocalPreference;
+            nextLocalPreference = (nextLocalPreference | OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX);
+          }
+
           LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(bindIP);
           if (found != mSocketLocalIPs.end()) {
             ZS_LOG_TRACE(log("already bound") + ZS_PARAM("ip", string(ip)))
+
+            LocalSocketPtr localSocket = (*found).second;
+
+            localSocket->updateLocalPreference(localPreference);  // update the local preference based on the ordering of the local IPs
             continue;
           }
 
@@ -1317,14 +1312,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("bind successful") + ZS_PARAM("IP", bindIP.string()))
 
-          LocalSocketPtr localSocket(new LocalSocket(mComponentID, mNextLocalPreference));
-
-          mNextLocalPreference -= 0xF;
-          if (mNextLocalPreference > 0xFFFF) {
-            ZS_LOG_WARNING(Basic, log("unexpected local preference wrap around"))
-            --mNextLocalPreference;
-            mNextLocalPreference = (mNextLocalPreference | 0xFFFF);
-          }
+          LocalSocketPtr localSocket(new LocalSocket(mComponentID, localPreference));
 
           localSocket->mSocket = socket;
           localSocket->mLocal->mIPAddress = bindIP;
@@ -1340,10 +1328,12 @@ namespace openpeer
 
         if ((hadNone) &&
             (mSockets.size() > 0)) {
-          if (mRebindTimer) {
-            mRebindTimer->cancel();
-            mRebindTimer.reset();
-          }
+          clearRebindTimer();
+        }
+
+        if ((!hadNone) &&
+            (mSockets.size() < 1)) {
+          clearRebindTimer();
         }
 
         if (!mRebindTimer) {
@@ -1382,7 +1372,7 @@ namespace openpeer
           LocalSocketPtr &localSocket = (*iter).second;
 
           if (localSocket->mSTUNInfos.size() < 1) {
-            ULONG localPreference = 0xFFFF;
+            ULONG localPreference = localSocket->mLocal->mLocalPreference;
             for (STUNServerInfoList::iterator infoIter = mSTUNServers.begin(); infoIter != mSTUNServers.end(); ++infoIter)
             {
               STUNServerInfoPtr &stunServerInfo = (*infoIter);
@@ -1478,7 +1468,7 @@ namespace openpeer
           LocalSocketPtr &localSocket = (*iter).second;
 
           if (localSocket->mTURNInfos.size() < 1) {
-            ULONG localPreference = 0xFFFF;
+            ULONG localPreference = localSocket->mLocal->mLocalPreference;
             for (TURNServerInfoList::iterator infoIter = mTURNServers.begin(); infoIter != mTURNServers.end(); ++infoIter)
             {
               TURNServerInfoPtr &turnServerInfo = (*infoIter);
@@ -2069,6 +2059,120 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      void ICESocket::stopSTUNAndTURN(LocalSocketPtr localSocket)
+      {
+        for (TURNInfoMap::iterator infoIter = localSocket->mTURNInfos.begin(); infoIter != localSocket->mTURNInfos.end();)
+        {
+          TURNInfoMap::iterator infoCurrent = infoIter; ++infoIter;
+
+          TURNInfoPtr turnInfo = (*infoCurrent).second;
+
+          if (turnInfo->mTURNRetryTimer) {
+            turnInfo->mTURNRetryTimer->cancel();
+            turnInfo->mTURNRetryTimer.reset();
+          }
+
+          if (turnInfo->mTURNSocket) {
+            ZS_LOG_DEBUG(log("shutting down TURN socket") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
+
+            turnInfo->mTURNSocket->shutdown();
+            if (ITURNSocket::TURNSocketState_Shutdown == turnInfo->mTURNSocket->getState()) {
+              ZS_LOG_DEBUG(log("TURN socket shutdown completed") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
+
+              localSocket->clearTURN(turnInfo->mTURNSocket);
+              clearTURN(turnInfo->mTURNSocket);
+
+              turnInfo->mTURNSocket.reset();
+            }
+          }
+        }
+
+        for (STUNInfoMap::iterator infoIter = localSocket->mSTUNInfos.begin(); infoIter != localSocket->mSTUNInfos.end();)
+        {
+          STUNInfoMap::iterator infoCurrent = infoIter; ++infoIter;
+
+          STUNInfoPtr stunInfo = (*infoCurrent).second;
+
+          if (stunInfo->mSTUNDiscovery) {
+            ZS_LOG_DEBUG(log("cancelling STUN discovery") + ZS_PARAM("stun socket id", stunInfo->mSTUNDiscovery->getID()))
+
+            localSocket->clearSTUN(stunInfo->mSTUNDiscovery);
+            clearSTUN(stunInfo->mSTUNDiscovery);
+            stunInfo->mSTUNDiscovery->cancel();
+            stunInfo->mSTUNDiscovery.reset();
+          }
+        }
+      }
+
+      //-----------------------------------------------------------------------
+      bool ICESocket::closeIfTURNGone(LocalSocketPtr localSocket)
+      {
+        if (localSocket->mTURNSockets.size() > 0) {
+          ZS_LOG_DEBUG(log("turn socket(s) still pending") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()) + ZS_PARAM("total TURN sockets remaining", localSocket->mTURNInfos.size()))
+          return false;
+        }
+
+        clearRelated(localSocket);
+        return true;
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocket::hardClose(LocalSocketPtr localSocket)
+      {
+        if (localSocket->mSocket) {
+          ZS_LOG_WARNING(Detail, log("performing hard shutdown on socket") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()))
+        }
+
+        clearRelated(localSocket);
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocket::clearRelated(LocalSocketPtr localSocket)
+      {
+        stopSTUNAndTURN(localSocket);
+
+        for (TURNInfoMap::iterator iter = localSocket->mTURNInfos.begin(); iter != localSocket->mTURNInfos.end(); ++iter) {
+          TURNInfoPtr &turnInfo = (*iter).second;
+          if (turnInfo->mTURNSocket) {
+            clearTURN(turnInfo->mTURNSocket);
+            turnInfo->mTURNSocket->shutdown();
+            turnInfo->mTURNSocket.reset();
+          }
+        }
+
+        localSocket->mTURNSockets.clear();  // forget any remaining alive
+
+        if (localSocket->mSocket) {
+          LocalSocketMap::iterator found = mSockets.find(localSocket->mSocket);
+          if (found != mSockets.end()) {
+            mSockets.erase(found);
+          }
+
+          localSocket->mSocket->close();
+          localSocket->mSocket.reset();
+        }
+
+        LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(localSocket->mLocal->mIPAddress);
+        if (found != mSocketLocalIPs.end()) {
+          mSocketLocalIPs.erase(found);
+        }
+
+        for (QuickRouteMap::iterator iter_DoNotUse = mRoutes.begin(); iter_DoNotUse != mRoutes.end(); )
+        {
+          QuickRouteMap::iterator current = iter_DoNotUse;
+          ++iter_DoNotUse;
+
+          const RouteTuple &tuple = (*current).first;
+
+          const IPAddress &viaLocalIP = boost::get<1>(tuple);
+          
+          if (!viaLocalIP.isEqualIgnoringIPv4Format(localSocket->mLocal->mIPAddress)) continue;
+          
+          mRoutes.erase(current);
+        }
+      }
+      
+      //-----------------------------------------------------------------------
       void ICESocket::clearTURN(ITURNSocketPtr turn)
       {
         if (!turn) return;
@@ -2091,6 +2195,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::internalReceivedData(
                                            const Candidate &viaCandidate,
+                                           const Candidate &viaLocalCandidate,
                                            const IPAddress &source,
                                            const BYTE *buffer,
                                            size_t bufferLengthInBytes
@@ -2227,7 +2332,8 @@ namespace openpeer
         // try to find a quick route to the session
         {
           AutoRecursiveLock lock(getLock());
-          QuickRouteMap::iterator found = mRoutes.find(source);
+          RouteTuple tuple(viaCandidate.mIPAddress, viaLocalCandidate.mIPAddress, source);
+          QuickRouteMap::iterator found = mRoutes.find(tuple);
           if (found != mRoutes.end()) {
             next = (*found).second;
           }
@@ -2368,13 +2474,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocket::LocalSocket::LocalSocket(
                                           WORD componentID,
-                                          ULONG nextLocalPreference
+                                          ULONG localPreference
                                           )
       {
         mLocal = CandidatePtr(new Candidate);
-        mLocal->mLocalPreference = nextLocalPreference;
         mLocal->mType = ICESocket::Type_Local;
         mLocal->mComponentID = componentID;
+        updateLocalPreference(localPreference);
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocket::LocalSocket::updateLocalPreference(ULONG localPreference)
+      {
+        mLocal->mLocalPreference = localPreference;
         mLocal->mPriority = ((1 << 24)*(static_cast<DWORD>(mLocal->mType))) + ((1 << 8)*(static_cast<DWORD>(mLocal->mLocalPreference))) + (256 - mLocal->mComponentID);
       }
 

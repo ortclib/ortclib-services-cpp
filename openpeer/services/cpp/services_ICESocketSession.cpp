@@ -731,7 +731,7 @@ namespace openpeer
 
                 UseICESocketPtr socket = mICESocketWeak.lock();
                 if (socket) {
-                  socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+                  socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
                 }
 
                 // this should be happening, but just in case, clear out any nomination process in progress
@@ -1079,7 +1079,7 @@ namespace openpeer
 
           UseICESocketPtr socket = mICESocketWeak.lock();
           if (socket) {
-            socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+            socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
           }
 
           get(mInformedWriteReady) = false;
@@ -2223,7 +2223,7 @@ namespace openpeer
 
             UseICESocketPtr socket = mICESocketWeak.lock();
             if (socket) {
-              socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+              socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
             }
 
             // we are now connected to this IP address...
