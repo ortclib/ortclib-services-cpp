@@ -32,7 +32,9 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
+#include <openpeer/services/internal/services_Helper.h>
 
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/ITURNSocket.h>
 #include <openpeer/services/ISTUNRequester.h>
 #include <openpeer/services/IDNS.h>
@@ -44,16 +46,13 @@
 
 #define OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
 
-// *** DEBUGGING ONLY - DO _NOT_ ENABLE OTHERWISE ***
-// #define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_TCP
-
-// *** DEBUGGING ONLY - DO _NOT_ ENABLE OTHERWISE ***
-//#define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-//#define OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP "174.129.95.12"
-
 #include <list>
 #include <map>
 #include <utility>
+
+#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "openpeer/services/debug/force-turn-to-use-udp"
+#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "openpeer/services/debug/force-turn-to-use-tcp"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "openpeer/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
 
 namespace openpeer
 {
@@ -76,7 +75,8 @@ namespace openpeer
                          public ISTUNRequesterDelegate,
                          public IDNSDelegate,
                          public ISocketDelegate,
-                         public ITimerDelegate
+                         public ITimerDelegate,
+                         public IBackgroundingDelegate
       {
       public:
         friend interaction ITURNSocket;
@@ -99,6 +99,8 @@ namespace openpeer
 
         typedef std::map<IPAddress, ChannelInfoPtr, CompareIP> ChannelIPMap;
         typedef std::map<WORD, ChannelInfoPtr> ChannelNumberMap;
+
+        typedef Helper::IPAddressMap IPAddressMap;
 
       protected:
 
@@ -247,6 +249,17 @@ namespace openpeer
 
         virtual void onTimer(TimerPtr timer);
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TURNSocket => IBackgroundingDelegate
+        #pragma mark
+
+        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+
+        virtual void onBackgroundingGoingToBackgroundNow();
+
+        virtual void onBackgroundingReturningFromBackground();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -306,6 +319,8 @@ namespace openpeer
 
         void requestPermissionsNow();
 
+        void refreshNow();
+
         void refreshChannels();
 
         bool sendPacketOrDopPacketIfBufferFull(
@@ -325,6 +340,11 @@ namespace openpeer
         WORD getNextChannelNumber();
 
         ISTUNRequesterPtr handleAuthorizationErrors(ISTUNRequesterPtr requester, STUNPacketPtr response);
+
+        void clearBackgroundingNotifierIfPossible();
+        void clearRefreshRequester()      {if (mRefreshRequester) { mRefreshRequester->cancel(); mRefreshRequester.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearPermissionRequester()   {if (mPermissionRequester) { mPermissionRequester->cancel(); mPermissionRequester.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearDeallocateRequester()   {if (mDeallocateRequester) { mDeallocateRequester->cancel(); mDeallocateRequester.reset(); } clearBackgroundingNotifierIfPossible();}
 
         void getBuffer(RecycledPacketBuffer &outBuffer);
         void recycleBuffer(RecycledPacketBuffer &buffer);
@@ -434,6 +454,9 @@ namespace openpeer
         TURNSocketStates mCurrentState;
         TURNSocketErrors mLastError;
 
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
+        IBackgroundingNotifierPtr mBackgroundingNotifier;
+
         WORD mLimitChannelToRangeStart;
         WORD mLimitChannelToRangeEnd;
 
@@ -482,6 +505,10 @@ namespace openpeer
         ChannelNumberMap mChannelNumberMap;
 
         RecycledPacketBufferList mRecycledBuffers;
+
+        bool          mForceTURNUseTCP;
+        bool          mForceTURNUseUDP;
+        IPAddressMap  mRestrictedIPs;
       };
 
       //-----------------------------------------------------------------------

@@ -271,7 +271,7 @@ namespace openpeer
           return true;
         }
 
-        ZS_LOG_BASIC(log("found mapped address") + ZS_PARAM("mapped address", response->mMappedAddress.string()))
+        ZS_LOG_BASIC(log("found mapped address") + ZS_PARAM("mapped address", response->mMappedAddress.string()) + response->toDebug())
         mMapppedAddress = response->mMappedAddress;
 
         // we now have a reply, inform the delegate

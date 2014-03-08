@@ -48,7 +48,8 @@ namespace openpeer
       #pragma mark Factory
       #pragma mark
 
-      class Factory : public IDHKeyDomainFactory,
+      class Factory : public IBackgroundingFactory,
+                      public IDHKeyDomainFactory,
                       public IDHPrivateKeyFactory,
                       public IDHPublicKeyFactory,
                       public IDNSFactory,

@@ -13,6 +13,7 @@
 		003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */; };
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
 		003BEECE17A747510002EB47 /* services_TransportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEECD17A747510002EB47 /* services_TransportStream.cpp */; };
+		007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */; };
 		00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */; };
 		0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */; };
 		0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFB184FD5E6009F6934 /* services_DHPrivateKey.cpp */; };
@@ -60,6 +61,9 @@
 		003BEECB17A747270002EB47 /* ITransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ITransportStream.h; sourceTree = "<group>"; };
 		003BEECC17A7473B0002EB47 /* services_TransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_TransportStream.h; sourceTree = "<group>"; };
 		003BEECD17A747510002EB47 /* services_TransportStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_TransportStream.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		007E8F8F18C0DC3100364908 /* IBackgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackgrounding.h; sourceTree = "<group>"; };
+		007E8F9018C0DC4700364908 /* services_Backgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Backgrounding.h; sourceTree = "<group>"; };
+		007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Backgrounding.cpp; sourceTree = "<group>"; };
 		0084FFF5184FA171009F6934 /* IDHKeyDomain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHKeyDomain.h; sourceTree = "<group>"; };
 		0084FFF6184FA171009F6934 /* IDHPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHPrivateKey.h; sourceTree = "<group>"; };
 		0084FFF7184FA171009F6934 /* IDHPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDHPublicKey.h; sourceTree = "<group>"; };
@@ -184,6 +188,7 @@
 				0095D93816CA83EA005F53D3 /* internal */,
 				0095D96816CA83EA005F53D3 /* types.h */,
 				0095D95916CA83EA005F53D3 /* services.h */,
+				007E8F8F18C0DC3100364908 /* IBackgrounding.h */,
 				001AEF571853DDDD00029ABC /* ICache.h */,
 				0095D93216CA83EA005F53D3 /* ICanonicalXML.h */,
 				0084FFF5184FA171009F6934 /* IDHKeyDomain.h */,
@@ -221,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				0095D92C16CA83EA005F53D3 /* services_services.cpp */,
+				007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */,
 				001AEF591853DE9300029ABC /* services_Cache.cpp */,
 				0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */,
 				0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */,
@@ -262,6 +268,7 @@
 				0095D94D16CA83EA005F53D3 /* types.h */,
 				0095D93916CA83EA005F53D3 /* services.h */,
 				00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */,
+				007E8F9018C0DC4700364908 /* services_Backgrounding.h */,
 				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
 				0084FFFA184FA5DA009F6934 /* services_DHKeyDomain.h */,
@@ -368,6 +375,7 @@
 				00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */,
 				0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */,
+				007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */,
 				0095DAD516CA83EB005F53D3 /* services_RUDPChannelStream.cpp in Sources */,
 				0095DAD716CA83EB005F53D3 /* services_RUDPTransport.cpp in Sources */,
 				0095DAD816CA83EB005F53D3 /* services_RUDPListener.cpp in Sources */,

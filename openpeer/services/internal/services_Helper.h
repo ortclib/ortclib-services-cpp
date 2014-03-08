@@ -229,6 +229,23 @@ namespace openpeer
                                      );
 
         static Log::Params log(const char *message);
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark (other)
+        #pragma mark
+
+        typedef std::map<IPAddress, bool> IPAddressMap;
+
+        static void parseIPs(
+                             const String &ipList,
+                             IPAddressMap &outMap
+                             );
+        static bool containsIP(
+                               const IPAddressMap &inMap,
+                               const IPAddress &ip,
+                               bool emptyMapReturns = true
+                               );
       };
     }
   }

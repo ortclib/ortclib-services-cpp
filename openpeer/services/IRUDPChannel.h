@@ -66,6 +66,7 @@ namespace openpeer
       {
         RUDPChannelShutdownReason_None                = IHTTP::HTTPStatusCode_None,
 
+        RUDPChannelShutdownReason_RemoteClosed        = IHTTP::HTTPStatusCode_ClientClosedRequest,
         RUDPChannelShutdownReason_OpenFailure         = IHTTP::HTTPStatusCode_NoResponse,
         RUDPChannelShutdownReason_DelegateGone        = IHTTP::HTTPStatusCode_Gone,
         RUDPChannelShutdownReason_Timeout             = IHTTP::HTTPStatusCode_RequestTimeout,

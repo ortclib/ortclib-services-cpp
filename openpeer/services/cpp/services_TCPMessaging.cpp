@@ -50,6 +50,7 @@ namespace openpeer
   {
     using zsLib::DWORD;
     using zsLib::Timer;
+    using zsLib::ISocketDelegateProxy;
 
     namespace internal
     {
@@ -97,6 +98,8 @@ namespace openpeer
       {
         AutoRecursiveLock lock(getLock());
         mSendStreamSubscription = mSendStream->subscribe(mThisWeak.lock());
+
+        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
       }
 
       //-----------------------------------------------------------------------
@@ -148,6 +151,8 @@ namespace openpeer
         TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
+        AutoRecursiveLock lock(pThis->getLock());
+
         int errorCode = 0;
         pThis->mSocket = dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
         if (!pThis->mSocket) {
@@ -181,6 +186,9 @@ namespace openpeer
 
         TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->getLock());
+
         pThis->mRemoteIP = remoteIP;
         get(pThis->mConnectIssued) = true;
 
@@ -350,9 +358,15 @@ namespace openpeer
           size_t bytesRead = mSocket->receive(buffer.BytePtr(), OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES, &wouldBlock);
 
           if (0 == bytesRead) {
-            ZS_LOG_WARNING(Detail, log("notified of data to read but no data available to read") + ZS_PARAM("would block", wouldBlock))
-            setError(IHTTP::HTTPStatusCode_NoContent, "server issues shutdown on socket connection");
-            cancel();
+
+            if (!wouldBlock) {
+              ZS_LOG_WARNING(Trace, log("notified of data to read but no data available to read (server closed socket)") + ZS_PARAM("would block", wouldBlock))
+              setError(IHTTP::HTTPStatusCode_NoContent, "server issued shutdown on socket connection");
+              cancel();
+              return;
+            }
+
+            ZS_LOG_TRACE(log("notified of data to read but no data available to read (probably a connectivity check)") + ZS_PARAM("would block", wouldBlock))
             return;
           }
 
@@ -497,6 +511,26 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark TCPMessaging => IBackgroundingDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void TCPMessaging::onBackgroundingReturningFromBackground()
+      {
+        AutoRecursiveLock lock(getLock());
+        if (!mSocket) return;
+
+        ZS_LOG_DEBUG(log("handling return from background by forcing the socket to read immediately (to check if socket is alive)"))
+
+        if (SessionState_Connected != mCurrentState) return;
+        onReadReady(mSocket);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark TCPMessaging  => (internal)
       #pragma mark
 
@@ -528,21 +562,33 @@ namespace openpeer
         ElementPtr resultEl = Element::create("TCPMessaging");
 
         IHelper::debugAppend(resultEl, "id", mID);
-        IHelper::debugAppend(resultEl, "tcp messaging id", mID);
         IHelper::debugAppend(resultEl, "graceful shutdown", (bool)mGracefulShutdownReference);
+
         IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
         IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
+
+        IHelper::debugAppend(resultEl, "backgrounding subscription", (bool)mBackgroundingSubscription);
+
         IHelper::debugAppend(resultEl, "state", ITCPMessaging::toString(mCurrentState));
+
         IHelper::debugAppend(resultEl, "last error", mLastError);
         IHelper::debugAppend(resultEl, "last reason", mLastErrorReason);
+
         IHelper::debugAppend(resultEl, "receive stream", ITransportStream::toDebug(mReceiveStream->getStream()));
         IHelper::debugAppend(resultEl, "send stream", ITransportStream::toDebug(mSendStream->getStream()));
         IHelper::debugAppend(resultEl, "send stream subscription", (bool)mSendStreamSubscription);
+
+        IHelper::debugAppend(resultEl, "frames have channel number", (bool)mFramesHaveChannelNumber);
         IHelper::debugAppend(resultEl, "max size", mMaxMessageSizeInBytes);
+
+        IHelper::debugAppend(resultEl, "connect issued", mConnectIssued);
         IHelper::debugAppend(resultEl, "write ready", mTCPWriteReady);
         IHelper::debugAppend(resultEl, "remote IP", mRemoteIP.string());
         IHelper::debugAppend(resultEl, "socket", (bool)mSocket);
         IHelper::debugAppend(resultEl, "linger timer", (bool)mLingerTimer);
+
+        IHelper::debugAppend(resultEl, "sending queue size", mSendingQueue ? mSendingQueue->CurrentSize() : 0);
+        IHelper::debugAppend(resultEl, "receiving queue size", mReceivingQueue ? mReceivingQueue->CurrentSize() : 0);
 
         return resultEl;
       }
@@ -597,6 +643,11 @@ namespace openpeer
         }
 
         setState(SessionState_ShuttingDown);
+
+        if (mBackgroundingSubscription) {
+          mBackgroundingSubscription->cancel();
+          mBackgroundingSubscription.reset();
+        }
 
         if (mLingerTimer) {
           if (!mGracefulShutdownReference) {

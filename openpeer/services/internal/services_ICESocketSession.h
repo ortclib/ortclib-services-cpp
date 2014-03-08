@@ -33,6 +33,8 @@
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IICESocketSession.h>
+
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/ISTUNRequester.h>
 
 #include <openpeer/services/IWakeDelegate.h>
@@ -105,7 +107,8 @@ namespace openpeer
                                public IWakeDelegate,
                                public IICESocketDelegate,
                                public ISTUNRequesterDelegate,
-                               public ITimerDelegate
+                               public ITimerDelegate,
+                               public IBackgroundingDelegate
       {
       public:
         friend interaction IICESocketSessionFactory;
@@ -296,6 +299,17 @@ namespace openpeer
 
         virtual void onTimer(TimerPtr timer);
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ICESocketSession => IBackgroundingDelegate
+        #pragma mark
+
+        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+
+        virtual void onBackgroundingGoingToBackgroundNow();
+
+        virtual void onBackgroundingReturningFromBackground();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -318,7 +332,6 @@ namespace openpeer
         void setError(WORD errorCode, const char *inReason = NULL);
 
         void step();
-        bool stepBackgroundingTimer();
         bool stepSocket();
         bool stepCandidates();
         bool stepActivateTimer();
@@ -341,6 +354,12 @@ namespace openpeer
                     );
 
         bool canUnfreeze(CandidatePairPtr derivedPairing);
+        void sendKeepAliveNow();
+        void sendAliveCheckRequest();
+
+        void clearBackgroundingNotifierIfPossible();
+        void clearAliveCheckRequester()   {if (mAliveCheckRequester) { mAliveCheckRequester->cancel(); mAliveCheckRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearNominateRequester()     {if (mNominateRequester) { mNominateRequester->cancel(); mNominateRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
 
       protected:
         //---------------------------------------------------------------------
@@ -361,6 +380,9 @@ namespace openpeer
         IICESocketSessionDelegateSubscriptions mSubscriptions;
         IICESocketSessionSubscriptionPtr mDefaultSubscription;
 
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
+        IBackgroundingNotifierPtr mBackgroundingNotifier;
+
         AutoBool mInformedWriteReady;
 
         IICESocketSubscriptionPtr mSocketSubscription;
@@ -376,7 +398,6 @@ namespace openpeer
         TimerPtr mKeepAliveTimer;
         TimerPtr mExpectingDataTimer;
         TimerPtr mStepTimer;
-        TimerPtr mBackgroundingTimer;
 
         ICEControls mControl;
         QWORD mConflictResolver;
@@ -387,7 +408,7 @@ namespace openpeer
         CandidatePairPtr mPreviouslyNominated;
 
         Time mLastSentData;
-        Time mLastActivity;
+        Time mWentToBackgroundAt;
         CandidatePairPtr mLastNotifiedNominated;
 
         ISTUNRequesterPtr mAliveCheckRequester;

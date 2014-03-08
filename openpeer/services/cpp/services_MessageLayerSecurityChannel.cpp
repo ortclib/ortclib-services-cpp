@@ -869,6 +869,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr MessageLayerSecurityChannel::toDebug() const
       {
+        AutoRecursiveLock lock(getLock());
+
         ElementPtr resultEl = Element::create("MessageLayerSecurityChannel");
 
         IHelper::debugAppend(resultEl, "id", mID);
@@ -1102,6 +1104,8 @@ namespace openpeer
 
             SecureByteBlockPtr output = IHelper::decrypt(*(keyInfo.mSendKey), *(keyInfo.mNextIV), input);
 
+            String hashDecryptedBuffer = IHelper::convertToHex(*IHelper::hash(*output));
+
             if (!output) {
               ZS_LOG_ERROR(Detail, log("unable to decrypte buffer"))
               setError(IHTTP::HTTPStatusCode_Unauthorized, "unable to decrypt buffer");
@@ -1118,7 +1122,10 @@ namespace openpeer
 
             SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + IHelper::convertToHex(*IHelper::hash(*output)) + ":" + hexIV).c_str());
 
-            ZS_LOG_DEBUG(log("received data from wire") + ZS_PARAM("buffer size", streamBuffer->SizeInBytes()) + ZS_PARAM("encrypted size", input.SizeInBytes()) + ZS_PARAM("decrypted size", output->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("calculated integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("received integrity", IHelper::convertToHex(*integrity)))
+            if (ZS_IS_LOGGING(Debug)) {
+              String hashEncryptedBuffer = IHelper::convertToHex(*IHelper::hash(input));
+              ZS_LOG_DEBUG(log("received data from wire") + ZS_PARAM("keying index", algorithm) + ZS_PARAM("buffer size", streamBuffer->SizeInBytes()) + ZS_PARAM("encrypted size", input.SizeInBytes()) + ZS_PARAM("decrypted size", output->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("calculated integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("received integrity", IHelper::convertToHex(*integrity)) + ZS_PARAM("integrity passphrase", keyInfo.mIntegrityPassphrase) + ZS_PARAM("decrypted data hash", hashDecryptedBuffer) + ZS_PARAM("encrypted data hash", hashEncryptedBuffer))
+            }
 
             if (0 != IHelper::compare(*calculatedIntegrity, *integrity)) {
               ZS_LOG_ERROR(Debug,log("integrity failed on packet"))
@@ -1721,7 +1728,9 @@ namespace openpeer
 
           String hexIV = IHelper::convertToHex(*keyInfo.mNextIV);
 
-          SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + IHelper::convertToHex(*IHelper::hash(*buffer)) + ":" + hexIV).c_str());
+          String hashDecryptedBuffer = IHelper::convertToHex(*IHelper::hash(*buffer));
+
+          SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + hashDecryptedBuffer + ":" + hexIV).c_str());
 
           // calculate the next IV and remember the integrity field
           keyInfo.mNextIV = IHelper::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
@@ -1742,7 +1751,10 @@ namespace openpeer
             ZS_LOG_INSANE(log("stream buffer write") + ZS_PARAM("wire out", str))
           }
 
-          ZS_LOG_DEBUG(log("sending data on wire") + ZS_PARAM("buffer size", output->SizeInBytes()) + ZS_PARAM("decrypted size", buffer->SizeInBytes()) + ZS_PARAM("encrypted size", encrypted->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("integrity", IHelper::convertToHex(*calculatedIntegrity)))
+          if (ZS_IS_LOGGING(Debug)) {
+            String hashEncryptedBuffer = IHelper::convertToHex(*IHelper::hash(*encrypted));
+            ZS_LOG_DEBUG(log("sending data on wire") + ZS_PARAM("keying index", index) + ZS_PARAM("buffer size", output->SizeInBytes()) + ZS_PARAM("decrypted size", buffer->SizeInBytes()) + ZS_PARAM("encrypted size", encrypted->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("integrity passphrase", keyInfo.mIntegrityPassphrase) + ZS_PARAM("decrypted data hash", hashDecryptedBuffer) + ZS_PARAM("encrypted data hash", hashEncryptedBuffer))
+          }
           mSendStreamEncoded->write(output, header);
         }
 

@@ -32,6 +32,7 @@
 #pragma once
 
 #include <openpeer/services/ITCPMessaging.h>
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/internal/types.h>
 
 #include <zsLib/Socket.h>
@@ -59,7 +60,8 @@ namespace openpeer
                            public ITCPMessaging,
                            public ITransportStreamReaderDelegate,
                            public ISocketDelegate,
-                           public ITimerDelegate
+                           public ITimerDelegate,
+                           public IBackgroundingDelegate
       {
       public:
         friend interaction ITCPMessagingFactory;
@@ -152,6 +154,17 @@ namespace openpeer
 
         virtual void onTimer(TimerPtr timer);
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TCPMessaging => IBackgroundingDelegate
+        #pragma mark
+
+        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier) {}
+
+        virtual void onBackgroundingGoingToBackgroundNow() {}
+
+        virtual void onBackgroundingReturningFromBackground();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -187,6 +200,8 @@ namespace openpeer
 
         ITCPMessagingDelegateSubscriptions mSubscriptions;
         ITCPMessagingSubscriptionPtr mDefaultSubscription;
+
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
 
         SessionStates mCurrentState;
 

@@ -32,6 +32,8 @@
 #include <openpeer/services/internal/services_TURNSocket.h>
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/internal/services_wire.h>
+
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 
@@ -69,6 +71,8 @@ namespace openpeer
     {
       using zsLib::ITimerDelegateProxy;
       typedef TURNSocket::IPAddressList IPAddressList;
+
+      using zsLib::ISocketDelegateProxy;
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -148,13 +152,12 @@ namespace openpeer
         mLifetime(0),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0)
+        mPermissionRequesterMaxCapacity(0),
+        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_DETAIL(log("created"))
-#ifdef OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
-        mServerName = OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_SERVER_IP;
-#endif //OPENPEER_SERVICES_TURNSOCKET_DEBUGGING_FORCE_USE_TURN_WITH_UDP
       }
 
       //-----------------------------------------------------------------------
@@ -184,7 +187,9 @@ namespace openpeer
         mLifetime(0),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0)
+        mPermissionRequesterMaxCapacity(0),
+        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_BASIC(log("created"))
@@ -195,6 +200,12 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
+
+        String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
+        Helper::parseIPs(restricted, mRestrictedIPs);
+
+        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+
         step();
       }
 
@@ -328,6 +339,11 @@ namespace openpeer
         if (destination.isPortEmpty()) {
           OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
           return false;
+        }
+
+        if (!Helper::containsIP(mRestrictedIPs, destination)) {
+          ZS_LOG_WARNING(Trace, log("preventing packet from going via TURN server to destination as destination is not in restricted IP list") + ZS_PARAM("destination", destination.string()))
+          return true;
         }
 
         if (NULL == buffer) {
@@ -708,7 +724,7 @@ namespace openpeer
 
         if (requester == mRefreshRequester) {
           ZS_LOG_WARNING(Detail, log("refresh requester timed out thus issuing shutdown"))
-          mRefreshRequester.reset();
+          clearRefreshRequester();
           // this is bad... but what can we do?? this is considered shutdown now...
           mLastError = TURNSocketError_RefreshTimeout;
           cancel();
@@ -732,7 +748,7 @@ namespace openpeer
           }
 
           // we aren't going to treat as fatal but we will try immediately again (perhaps it should be fatal)
-          mPermissionRequester.reset();
+          clearPermissionRequester();
 
           step();
           return;
@@ -839,6 +855,14 @@ namespace openpeer
 
                 if (0 != bytesAvailable) {
                   bytesRead = server->mTCPSocket->receive(&(server->mReadBuffer[server->mReadBufferFilledSizeInBytes]), bytesAvailable, &wouldBlock);
+
+                  if (0 == bytesRead) {
+                    if (!wouldBlock) {
+                      ZS_LOG_WARNING(Detail, log("server closed TURN TCP socket") + ZS_PARAM("server ip", server->mServerIP.string()))
+                      onException(socket);
+                      return;
+                    }
+                  }
                 }
 
                 if (0 == bytesRead)
@@ -846,6 +870,7 @@ namespace openpeer
 
                 server->mReadBufferFilledSizeInBytes += bytesRead;
               } catch(ISocket::Exceptions::Unspecified &) {
+                ZS_LOG_WARNING(Detail, log("attempt to read TCP TURN socket failed") + ZS_PARAM("server ip", server->mServerIP.string()))
                 onException(socket);
                 return;
               }
@@ -1123,8 +1148,6 @@ namespace openpeer
         }
 
         if (timer == mRefreshTimer) {
-          if (mRefreshRequester) return;  // if there already is a referesh timer then we don't need to do another one...
-
           // figure out how much time do we have before the lifetime expires
           DWORD totalSeconds = (mLifetime > (OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS+30) ? mLifetime - OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS : mLifetime / 2);
           if (totalSeconds < OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS)
@@ -1141,21 +1164,7 @@ namespace openpeer
             return;
           }
 
-          mLastRefreshTimerWasSentAt = current;
-
-          ZS_LOG_DEBUG(log("refresh requester starting now"))
-
-          ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
-
-          // this is the refresh timer... time to perform another refresh now...
-          STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
-          fix(newRequest);
-          newRequest->mUsername = mUsername;
-          newRequest->mPassword = mPassword;
-          newRequest->mRealm = mRealm;
-          newRequest->mNonce = mNonce;
-          newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
-          mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+          refreshNow();
           return;
         }
 
@@ -1201,6 +1210,79 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark TURNSocket => IBackgroundingDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG(log("going to background thus will attempt to refresh TURN socket now to ensure we have the maximum lifetime before the TURN server deletes this client's bindings"))
+
+        if (mPermissionTimer) {
+          requestPermissionsNow();
+        }
+
+        refreshNow();
+
+        mBackgroundingNotifier = notifier;
+
+        clearBackgroundingNotifierIfPossible();
+      }
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingGoingToBackgroundNow()
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG(log("going to the background immediately thus cancel any pending refresh requester"))
+
+        clearRefreshRequester();
+        clearPermissionRequester();
+
+        mBackgroundingNotifier.reset();
+      }
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingReturningFromBackground()
+      {
+        AutoRecursiveLock lock(mLock);
+
+        ZS_LOG_DEBUG("returning from background")
+
+        if (mActiveServer) {
+          if (mActiveServer->mTCPSocket) {
+            ZS_LOG_DEBUG(log("returning from background and will force active TCP socket to check if it can be read by simulating a read-ready"))
+            ISocketDelegateProxy::create(mThisWeak.lock())->onReadReady(mActiveServer->mTCPSocket);
+          }
+        } else {
+          for (ServerList::iterator iter = mServers.begin(); iter != mServers.end(); ++iter)
+          {
+            ServerPtr &server = (*iter);
+            if (!server->mTCPSocket) continue;
+
+            ZS_LOG_DEBUG(log("returning from background and will force TCP socket to check if it can be read by simulating a read-ready") + ZS_PARAM("server ip", server->mServerIP.string()))
+            ISocketDelegateProxy::create(mThisWeak.lock())->onReadReady(server->mTCPSocket);
+          }
+        }
+
+        // force a refresh of the TURN socket immediately
+        refreshNow();
+
+        if (mPermissionTimer) {
+          requestPermissionsNow();
+        }
+
+        // perform routine maintanence
+        step();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark TURNSocket => (internal)
       #pragma mark
 
@@ -1235,6 +1317,10 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "current state", toString(mCurrentState));
         IHelper::debugAppend(resultEl, "last error", toString(mLastError));
+
+        IHelper::debugAppend(resultEl, "backgrounding subscription", (bool)mBackgroundingSubscription);
+        IHelper::debugAppend(resultEl, "backgrounding notifier", (bool)mBackgroundingNotifier);
+
         IHelper::debugAppend(resultEl, "limit channel range (start)", mLimitChannelToRangeStart);
         IHelper::debugAppend(resultEl, "limit channel range (end)", mLimitChannelToRangeEnd);
         IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
@@ -1341,8 +1427,8 @@ namespace openpeer
 
         IPAddressList previouslyContactedUDPServers;
         IPAddressList previouslyContactedTCPServers;
-        bool udpExhausted = false;
-        bool tcpExhausted = false;
+        bool udpExhausted = mForceTURNUseTCP;   // if true then no UDP server will ever be used
+        bool tcpExhausted = mForceTURNUseUDP;   // if true then no TCP server will ever be used
 
         Time activateAfter = zsLib::now();
 
@@ -1441,7 +1527,7 @@ namespace openpeer
             ServerPtr &server = (*iter);
 
             if (server->mActivateAfter > tick) {
-              ZS_LOG_DEBUG(log("next server can't activate until later") + ZS_PARAM("when", server->mActivateAfter))
+              ZS_LOG_TRACE(log("next server can't activate until later") + ZS_PARAM("when", server->mActivateAfter))
               break;
             }
 
@@ -1469,13 +1555,13 @@ namespace openpeer
               }
 
               if (!server->mIsConnected) {
-                ZS_LOG_DEBUG(log("waiting for TCP socket to connect") + ZS_PARAM("server IP", server->mServerIP.string()))
+                ZS_LOG_TRACE(log("waiting for TCP socket to connect") + ZS_PARAM("server IP", server->mServerIP.string()))
                 continue;
               }
             }
 
             if (server->mAllocateRequester) {
-              ZS_LOG_DEBUG(log("allocate requester already activated") + ZS_PARAM("server IP", server->mServerIP.string()))
+              ZS_LOG_TRACE(log("allocate requester already activated") + ZS_PARAM("server IP", server->mServerIP.string()))
               continue;
             }
 
@@ -1496,7 +1582,7 @@ namespace openpeer
 
         // check to see if we know the relayed IP... if not we better get it
         if (mRelayedIP.isAddressEmpty()) {
-          ZS_LOG_DEBUG(log("waiting for a TURN allocation to complete"))
+          ZS_LOG_TRACE(log("waiting for a TURN allocation to complete"))
           return;
         }
 
@@ -1548,16 +1634,15 @@ namespace openpeer
 
         if (!mGracefulShutdownReference) mGracefulShutdownReference = mThisWeak.lock();                        // prevent object from being destroyed before the graceful shutdown...
 
+        if (mBackgroundingSubscription) {
+          mBackgroundingSubscription->cancel();
+          mBackgroundingSubscription.reset();
+        }
+
         mServers.clear();
 
-        if (mRefreshRequester) {
-          mRefreshRequester->cancel();
-          mRefreshRequester.reset();
-        }
-        if (mPermissionRequester) {
-          mPermissionRequester->cancel();
-          mPermissionRequester.reset();
-        }
+        clearRefreshRequester();
+        clearPermissionRequester();
 
         mPermissions.clear();
         for (ChannelIPMap::iterator iter = mChannelIPMap.begin(); iter != mChannelIPMap.end(); ++iter) {
@@ -1627,10 +1712,7 @@ namespace openpeer
             }
 
             if (!originalDelegate) {
-              if (mDeallocateRequester) {
-                mDeallocateRequester->cancel();
-                mDeallocateRequester.reset();
-              }
+              clearDeallocateRequester();
             }
           }
 
@@ -1644,6 +1726,8 @@ namespace openpeer
 
         ZS_LOG_DETAIL(log("performing final cleanup"))
 
+        mBackgroundingNotifier.reset();
+
         if (mDeallocTimer) {
           mDeallocTimer->cancel();
           mDeallocTimer.reset();
@@ -1652,10 +1736,7 @@ namespace openpeer
         mGracefulShutdownReference.reset();
         mDelegate.reset();
 
-        if (mDeallocateRequester) {
-          mDeallocateRequester->cancel();
-          mDeallocateRequester.reset();
-        }
+        clearDeallocateRequester();
 
         mActiveServer.reset();
 
@@ -1711,7 +1792,7 @@ namespace openpeer
 
         STUNPacketPtr request = requester->getRequest();
         if (STUNPacket::Method_Allocate != request->mMethod) {
-          ZS_LOG_DEBUG(log("not an allocation request"))
+          ZS_LOG_INSANE(log("not an allocation request"))
           return false;
         }
 
@@ -1812,8 +1893,11 @@ namespace openpeer
         ISTUNRequesterPtr replacementRequester = handleAuthorizationErrors(requester, response);
         if (replacementRequester) {
           mDeallocateRequester = replacementRequester;
+          ZS_LOG_TRACE(log("replacement dealloc requester created") + ZS_PARAM("requester", mDeallocateRequester->getID()))
           return true;
         }
+
+        clearDeallocateRequester();
 
         ZS_LOG_DETAIL(log("dealloc request completed"))
 
@@ -1837,6 +1921,13 @@ namespace openpeer
         if (requester != mRefreshRequester) return false;
 
         mRefreshRequester = handleAuthorizationErrors(requester, response);
+
+        if (mRefreshRequester) {
+          ZS_LOG_TRACE(log("replacement refresh requester created") + ZS_PARAM("requester", mRefreshRequester->getID()))
+          return true;
+        }
+
+        clearBackgroundingNotifierIfPossible();
 
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
@@ -1879,6 +1970,8 @@ namespace openpeer
 
           mPermissionRequester = handleAuthorizationErrors(requester, response);
           if (mPermissionRequester) {
+            ZS_LOG_TRACE(log("replacement permission requester created") + ZS_PARAM("requester", mPermissionRequester->getID()))
+
             // failed to install permission... but we are trying again
             for (PermissionMap::iterator iter = mPermissions.begin(); iter != mPermissions.end(); ++iter) {
               if ((*iter).second->mInstallingWithRequester == requester) {
@@ -1965,7 +2058,10 @@ namespace openpeer
 
         // we found - try to handle basic authorization issues...
         found->mChannelBindRequester = handleAuthorizationErrors(requester, response);
-        if (found->mChannelBindRequester) return true;
+        if (found->mChannelBindRequester) {
+          ZS_LOG_TRACE(log("replacement channel bind requester created") + ZS_PARAM("requester", found->mChannelBindRequester->getID()))
+          return true;
+        }
 
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
@@ -1994,10 +2090,7 @@ namespace openpeer
       void TURNSocket::requestPermissionsNow()
       {
         // we don't care of the previous permissions succeeded or not, we are going to send one right now
-        if (mPermissionRequester) {
-          mPermissionRequester->cancel();
-          mPermissionRequester.reset();
-        }
+        clearPermissionRequester();
 
         // scope: clear our permissions that have not seen data sent out in a long time
         {
@@ -2070,6 +2163,36 @@ namespace openpeer
         }
       }
 
+      //-----------------------------------------------------------------------
+      void TURNSocket::refreshNow()
+      {
+        if (mRefreshRequester) {
+          ZS_LOG_TRACE(log("refresh timer not started as already have an outstanding refresh requester"))
+          return;
+        }
+
+        if (!mRefreshTimer) {
+          ZS_LOG_TRACE(log("cannot perform a refresh as refresh timer for TURN socket is not setup thus not in a state to perform refreshes"))
+          return;
+        }
+
+        mLastRefreshTimerWasSentAt = zsLib::now();
+
+        ZS_LOG_DEBUG(log("refresh requester starting now"))
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+
+        // this is the refresh timer... time to perform another refresh now...
+        STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
+        fix(newRequest);
+        newRequest->mUsername = mUsername;
+        newRequest->mPassword = mPassword;
+        newRequest->mRealm = mRealm;
+        newRequest->mNonce = mNonce;
+        newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
+        mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+      }
+      
       //-----------------------------------------------------------------------
       void TURNSocket::refreshChannels()
       {
@@ -2390,6 +2513,19 @@ namespace openpeer
         return ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getMaxTimeout());
       }
 
+      //-----------------------------------------------------------------------
+      void TURNSocket::clearBackgroundingNotifierIfPossible()
+      {
+        if (!mBackgroundingNotifier) return;
+        if (mRefreshRequester) return;
+        if (mDeallocateRequester) return;
+        if (mPermissionRequester) return;
+
+        ZS_LOG_DEBUG(log("ready to go to the background"))
+
+        mBackgroundingNotifier.reset();
+      }
+      
       //-------------------------------------------------------------------------
       void TURNSocket::getBuffer(RecycledPacketBuffer &outBuffer)
       {
@@ -2426,11 +2562,11 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TURNSocket::Server::Server() :
-      mIsUDP(true),
-      mIsConnected(false),
-      mInformedWriteReady(false),
-      mReadBufferFilledSizeInBytes(0),
-      mWriteBufferFilledSizeInBytes(0)
+        mIsUDP(true),
+        mIsConnected(false),
+        mInformedWriteReady(false),
+        mReadBufferFilledSizeInBytes(0),
+        mWriteBufferFilledSizeInBytes(0)
       {
         memset(&(mReadBuffer[0]), 0, sizeof(mReadBuffer));
         memset(&(mWriteBuffer[0]), 0, sizeof(mWriteBuffer));

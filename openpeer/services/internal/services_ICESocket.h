@@ -32,6 +32,8 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
+#include <openpeer/services/internal/services_Helper.h>
+
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ITURNSocket.h>
@@ -46,6 +48,15 @@
 #include <zsLib/Log.h>
 
 #include <list>
+#include <boost/tuple/tuple.hpp>
+
+#define OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "openpeer/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
+
+#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                            "openpeer/services/debug/force-packets-over-turn"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS      "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
+
+#define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                      "openpeer/services/interface-name-order"
+#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                    "openpeer/services/support-ipv6"
 
 namespace openpeer
 {
@@ -81,7 +92,12 @@ namespace openpeer
                             bool isUserData
                             ) = 0;
 
-        virtual void addRoute(ICESocketSessionPtr session, const IPAddress &source) = 0;
+        virtual void addRoute(
+                              ICESocketSessionPtr session,
+                              const IPAddress &viaIP,
+                              const IPAddress &viaLocalIP,
+                              const IPAddress &source
+                              ) = 0;
         virtual void removeRoute(ICESocketSessionPtr session) = 0;
 
         virtual void onICESocketSessionClosed(PUID sessionID) = 0;
@@ -121,7 +137,29 @@ namespace openpeer
 
         typedef std::map<PUID, UseICESocketSessionPtr> ICESocketSessionMap;
 
-        typedef std::map<IPAddress, UseICESocketSessionPtr> QuickRouteMap;
+        typedef IPAddress ViaIP;
+        typedef IPAddress ViaLocalIP;
+        typedef IPAddress SourceIP;
+        typedef boost::tuple<ViaIP, ViaLocalIP, SourceIP> RouteTuple;
+
+        struct RouteLess : public std::binary_function<RouteTuple, RouteTuple, bool>
+        {
+          bool operator() (const RouteTuple& __x, const RouteTuple& __y) const
+          {
+            if (boost::get<2>(__x) < boost::get<2>(__y)) return true;   // compare source IP first
+            if (boost::get<2>(__x) > boost::get<2>(__y)) return false;
+            if (boost::get<0>(__x) < boost::get<0>(__y)) return true;   // compare ViaIP next
+            if (boost::get<0>(__x) > boost::get<0>(__y)) return false;
+            if (boost::get<1>(__x) < boost::get<1>(__y)) return true;   // compare ViaLocalIP next
+            if (boost::get<1>(__x) > boost::get<1>(__y)) return false;
+
+            return false; // they are equal, so not less than
+          }
+        };
+
+        typedef std::map<RouteTuple, UseICESocketSessionPtr, RouteLess> QuickRouteMap;
+
+        typedef Helper::IPAddressMap IPAddressMap;
 
         struct TURNInfo
         {
@@ -179,18 +217,23 @@ namespace openpeer
 
           LocalSocket(
                       WORD componentID,
-                      ULONG nextLocalPreference
+                      ULONG localPreference
                       );
+
+          void updateLocalPreference(ULONG localPreference);
 
           void clearTURN(ITURNSocketPtr turnSocket);
           void clearSTUN(ISTUNDiscoveryPtr stunDiscovery);
         };
 
+        typedef String InterfaceName;
+        typedef ULONG OrderID;
         typedef IPAddress LocalIP;
         typedef std::map<LocalIP, LocalSocketPtr> LocalSocketIPAddressMap;
         typedef std::map<ITURNSocketPtr, LocalSocketPtr> LocalSocketTURNSocketMap;
         typedef std::map<ISTUNDiscoveryPtr, LocalSocketPtr> LocalSocketSTUNDiscoveryMap;
         typedef std::map<ISocketPtr, LocalSocketPtr> LocalSocketMap;
+        typedef std::map<InterfaceName, OrderID> InterfaceNameToOrderMap;
 
       protected:
         ICESocket(
@@ -275,7 +318,12 @@ namespace openpeer
                             bool isUserData
                             );
 
-        virtual void addRoute(ICESocketSessionPtr session, const IPAddress &source);
+        virtual void addRoute(
+                              ICESocketSessionPtr session,
+                              const IPAddress &viaIP,
+                              const IPAddress &viaLocalIP,
+                              const IPAddress &source
+                              );
         virtual void removeRoute(ICESocketSessionPtr session);
 
         virtual void onICESocketSessionClosed(PUID sessionID);
@@ -361,6 +409,12 @@ namespace openpeer
         void setError(WORD errorCode, const char *inReason = NULL);
 
         bool getLocalIPs(IPAddressList &outIPs);
+
+        void stopSTUNAndTURN(LocalSocketPtr localSocket);
+        bool closeIfTURNGone(LocalSocketPtr localSocket);
+        void hardClose(LocalSocketPtr localSocket);
+        void clearRelated(LocalSocketPtr localSocket);
+
         void clearTURN(ITURNSocketPtr turn);
         void clearSTUN(ISTUNDiscoveryPtr stun);
 
@@ -369,6 +423,7 @@ namespace openpeer
         //        deliver data to delegates synchronously.
         void internalReceivedData(
                                   const Candidate &viaCandidate,
+                                  const Candidate &viaLocalCandidate,
                                   const IPAddress &source,
                                   const BYTE *buffer,
                                   size_t bufferLengthInBytes
@@ -376,6 +431,8 @@ namespace openpeer
 
         void getBuffer(RecycledPacketBuffer &outBuffer);
         void recycleBuffer(RecycledPacketBuffer &buffer);
+
+        void clearRebindTimer() { if (mRebindTimer) {mRebindTimer->cancel(); mRebindTimer.reset();} }
 
       public:
         //---------------------------------------------------------------------
@@ -418,8 +475,6 @@ namespace openpeer
         String              mUsernameFrag;
         String              mPassword;
 
-        ULONG               mNextLocalPreference;
-
         LocalSocketIPAddressMap     mSocketLocalIPs;
         LocalSocketTURNSocketMap    mSocketTURNs;
         LocalSocketSTUNDiscoveryMap mSocketSTUNs;
@@ -445,6 +500,13 @@ namespace openpeer
 
         AutoBool            mNotifiedCandidateChanged;
         DWORD               mLastCandidateCRC;
+
+        bool                mForceUseTURN;
+        IPAddressMap        mRestrictedIPs;
+
+        InterfaceNameToOrderMap mInterfaceOrders;
+
+        bool                mSupportIPv6;
       };
 
       //-----------------------------------------------------------------------
@@ -483,6 +545,6 @@ ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_1(attach, bool, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getLock, RecursiveLock &)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_5(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionClosed, PUID)
-ZS_DECLARE_PROXY_METHOD_SYNC_2(addRoute, openpeer::services::internal::ICESocketSessionPtr, const IPAddress &)
+ZS_DECLARE_PROXY_METHOD_SYNC_4(addRoute, openpeer::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)
 ZS_DECLARE_PROXY_METHOD_SYNC_1(removeRoute, openpeer::services::internal::ICESocketSessionPtr)
 ZS_DECLARE_PROXY_END()

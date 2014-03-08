@@ -142,6 +142,8 @@ namespace openpeer
 
         RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->mLock);
         pThis->mChannel = listener->acceptChannel(pThis, pThis->mWireReceiveStream->getStream(), pThis->mWireSendStream->getStream());
         pThis->init();
         if (!pThis->mChannel) {
@@ -171,6 +173,8 @@ namespace openpeer
 
         RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->mLock);
         pThis->mChannel = session->acceptChannel(pThis, pThis->mWireReceiveStream->getStream(), pThis->mWireSendStream->getStream());
         pThis->init();
         if (!pThis->mChannel) {
@@ -201,6 +205,8 @@ namespace openpeer
 
         RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->mLock);
         pThis->mChannel = session->openChannel(pThis, connectionInfo, pThis->mWireReceiveStream->getStream(), pThis->mWireSendStream->getStream());
         pThis->init();
         if (!pThis->mChannel) {

@@ -186,7 +186,7 @@ namespace openpeer
           //
           //          Basically, rule of thumb, do not call delegates
           //          synchronously from within the scope of a lock.
-          ZS_LOG_TRACE(log("forwarding request to requester object"))
+          ZS_LOG_TRACE(log("forwarding request to requester object") + ZS_PARAM("stun packet", stun->toDebug()))
           remove = requester->handleSTUNPacket(fromIPAddress, stun);
         } else{
           ZS_LOG_TRACE(log("requester object was previously destroyed thus removing from requester manager"))

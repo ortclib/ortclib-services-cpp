@@ -1371,6 +1371,8 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual ElementPtr toDebug() const
         {
+          AutoRecursiveLock lock(mLock);
+
           ElementPtr resultEl = Element::create("DNSSRVResolverQuery");
           IHelper::debugAppend(resultEl, "id", mID);
           IHelper::debugAppend(resultEl, "completed", mDidComplete);

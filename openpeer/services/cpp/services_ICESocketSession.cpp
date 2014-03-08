@@ -218,7 +218,6 @@ namespace openpeer
         mControl(control),
         mConflictResolver(randomQWORD()),
         mLastSentData(zsLib::now()),
-        mLastActivity(zsLib::now()),
         mLastReceivedDataOrSTUN(zsLib::now()),
         mKeepAliveDuration(Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS))
       {
@@ -235,9 +234,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocketSession::init()
       {
-
         AutoRecursiveLock lock(getLock());
+
         mSocketSubscription = getSocket()->subscribe(mThisWeak.lock());
+
+        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+
         step();
       }
 
@@ -297,6 +299,8 @@ namespace openpeer
 
         ICESocketSessionPtr pThis(new ICESocketSession(socket->getMessageQueue(), delegate, ICESocket::convert(socket), remoteUsernameFrag, remotePassword, control, ICESocketSession::convert(foundation)));
         pThis->mThisWeak = pThis;
+
+        AutoRecursiveLock lock(pThis->getLock());
         pThis->init();
 
         if (socket->attach(pThis)) {
@@ -440,8 +444,7 @@ namespace openpeer
 
         if (mAliveCheckRequester) {
           ZS_LOG_DEBUG(log("cancelling current alive check requester"))
-          mAliveCheckRequester->cancel();
-          mAliveCheckRequester.reset();
+          clearAliveCheckRequester();
         }
 
         if (mExpectingDataTimer) {
@@ -449,6 +452,8 @@ namespace openpeer
           mExpectingDataTimer->cancel();
           mExpectingDataTimer.reset();
         }
+
+        clearBackgroundingNotifierIfPossible();
 
         mKeepAliveDuration = sendKeepAliveIndications;
         mExpectSTUNOrDataWithinDuration = expectSTUNOrDataWithinWithinOrSendAliveCheck;
@@ -727,15 +732,12 @@ namespace openpeer
 
                 UseICESocketPtr socket = mICESocketWeak.lock();
                 if (socket) {
-                  socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+                  socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
                 }
 
                 // this should be happening, but just in case, clear out any nomination process in progress
                 mPendingNominatation.reset();
-                if (mNominateRequester) {
-                  mNominateRequester->cancel();
-                  mNominateRequester.reset();
-                }
+                clearNominateRequester();
 
                 get(mInformedWriteReady) = false;
 
@@ -791,8 +793,8 @@ namespace openpeer
 
               if (mAliveCheckRequester) {
                 ZS_LOG_DEBUG(log("alive check requester is no longer needed as STUN request/integrity bind was received"))
-                mAliveCheckRequester->cancel();
-                mAliveCheckRequester.reset();
+
+                clearAliveCheckRequester();
               }
             }
           }
@@ -838,8 +840,7 @@ namespace openpeer
 
           if (mAliveCheckRequester) {
             ZS_LOG_DEBUG(log("alive check requester is no longer needed as data was received"))
-            mAliveCheckRequester->cancel();
-            mAliveCheckRequester.reset();
+            clearAliveCheckRequester();
           }
         }
 
@@ -1006,7 +1007,7 @@ namespace openpeer
                                                          STUNPacketPtr response
                                                          )
       {
-        ZS_LOG_TRACE(log("handle STUN requester response"))
+        ZS_LOG_TRACE(log("handle STUN requester response") + response->toDebug())
 
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) return false;
@@ -1062,7 +1063,7 @@ namespace openpeer
             ZS_LOG_DEBUG(log("alive check request succeeded") + usePair->toDebug())
             mLastReceivedDataOrSTUN = zsLib::now();
 
-            mAliveCheckRequester.reset();
+            clearAliveCheckRequester();
             return true;
           }
 
@@ -1072,13 +1073,14 @@ namespace openpeer
 
           // we are now established to the remote party
 
-          mNominateRequester.reset();
+          clearNominateRequester();
+
           mNominated = usePair;
           mPendingNominatation.reset();
 
           UseICESocketPtr socket = mICESocketWeak.lock();
           if (socket) {
-            socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+            socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
           }
 
           get(mInformedWriteReady) = false;
@@ -1146,7 +1148,7 @@ namespace openpeer
         if (requester == mAliveCheckRequester) {
           ZS_LOG_WARNING(Detail, log("alive connectivity check failed (probably a connection timeout)") + mNominated->toDebug())
 
-          mAliveCheckRequester.reset();
+          clearAliveCheckRequester();
 
           mPreviouslyNominated = mNominated;
 
@@ -1205,7 +1207,7 @@ namespace openpeer
         }
 
         if (requester == mNominateRequester) {
-          mNominateRequester.reset();
+          clearNominateRequester();
 
           // we were nominating this candidate but it isn't responding! We will not nominate this pair but instead will start the scan again...
           for (CandidatePairList::iterator iter = mCandidatePairs.begin(); iter != mCandidatePairs.end(); ++iter)
@@ -1259,6 +1261,71 @@ namespace openpeer
       #pragma mark
       #pragma mark ICESocketSession => ITimerDelegate
       #pragma mark
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::sendKeepAliveNow()
+      {
+        if (!mKeepAliveTimer) return;     // not legal to send keep alives right now
+        if (mNominateRequester) return;   // can't do keep alives during a nomination process
+        if (!mNominated) return;          // can't do keep alives if not connected
+
+        ZS_LOG_DETAIL(log("keep alive") + mNominated->toDebug())
+
+        STUNPacketPtr indication = STUNPacket::createIndication(STUNPacket::Method_Binding);
+        fix(indication);
+
+        if (mRemotePassword.hasData()) {
+          indication->mUsername = mRemoteUsernameFrag + ":" + mLocalUsernameFrag;
+          indication->mPassword = mRemotePassword;
+          indication->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
+        }
+
+        SecureByteBlockPtr buffer = indication->packetize(STUNPacket::RFC_5245_ICE);
+        sendTo(mNominated->mLocal, mNominated->mRemote.mIPAddress, *buffer, buffer->SizeInBytes(), true);
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::sendAliveCheckRequest()
+      {
+        if (!mExpectingDataTimer) return; // not legel to send alive check request right now
+        if (mNominateRequester) return;   // can't do keep alives during a nomination process
+        if (!mNominated) return;          // can't do keep alives if not connected
+
+        if (mAliveCheckRequester) {
+          ZS_LOG_WARNING(Detail, log("alive check requester already activated"))
+          return;
+        }
+
+        ZS_LOG_TRACE(log("expecting data timer fired"))
+
+        //...................................................................
+        // NOTE: Servers will *NOT* send regular connectivity checks to
+        // their clients. This responsibility is left to the client so
+        // the client cannot expect to receive data within a time frame
+        // when connecting to a server.
+        //
+        // However the keep alive check mechanism can be used to probe if
+        // a server is still alive as the server will respond to the request
+        // albeit without security credentials.
+
+        STUNPacketPtr request = STUNPacket::createRequest(STUNPacket::Method_Binding);
+        fix(request);
+        bool isICE = false;
+
+        if (mRemotePassword.hasData()) {
+          ZS_LOG_WARNING(Detail, log("expected STUN request or indication or data within the expected window but did not receive (thus will attempt to do a connectivity check)"))
+          isICE = true;
+          request->mUsername = mRemoteUsernameFrag + ":" + mLocalUsernameFrag;
+          request->mPassword = mRemotePassword;
+          request->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
+          request->mIceControllingIncluded = true;
+          request->mIceControlling = mConflictResolver;
+          request->mPriorityIncluded = true;
+          request->mPriority = mNominated->mLocal.mPriority;
+        }
+
+        mAliveCheckRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mNominated->mRemote.mIPAddress, request, (isICE ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN), mKeepAliveSTUNRequestTimeout);
+      }
 
       //-----------------------------------------------------------------------
       void ICESocketSession::onTimer(TimerPtr timer)
@@ -1349,91 +1416,84 @@ namespace openpeer
           return;
         }
 
-        if (timer == mBackgroundingTimer) {
-          ZS_LOG_TRACE(log("backgrounding timer"))
-
-          Duration diff = tick - mLastActivity;
-          if (diff > mBackgroundingTimeout) {
-            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
-            setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
-            cancel();
-            return;
-          }
-          mLastActivity = tick;
-          return;
-        }
-
         if (timer == mKeepAliveTimer)
         {
-          if (mNominateRequester) return;  // can't do keep alives during a nomination process
-          if (!mNominated) return;  // can't do keep alives if not connected
-
           // we are going to check the ICE socket to see if it can shutdown TURN at this time...
           if (mLastSentData + mKeepAliveDuration > tick) {
             ZS_LOG_TRACE(log("no need to fire keep alive timer as data was sent within keep alive window"))
             return;  // not enough time has passed since sending data to send more...
           }
 
-          ZS_LOG_DETAIL(log("keep alive") + mNominated->toDebug())
-          STUNPacketPtr indication = STUNPacket::createIndication(STUNPacket::Method_Binding);
-          fix(indication);
-
-          if (mRemotePassword.hasData()) {
-            indication->mUsername = mRemoteUsernameFrag + ":" + mLocalUsernameFrag;
-            indication->mPassword = mRemotePassword;
-            indication->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
-          }
-
-          SecureByteBlockPtr buffer = indication->packetize(STUNPacket::RFC_5245_ICE);
-          sendTo(mNominated->mLocal, mNominated->mRemote.mIPAddress, *buffer, buffer->SizeInBytes(), true);
+          sendKeepAliveNow();
+          return;
         }
 
         if (timer == mExpectingDataTimer)
         {
-          if (mNominateRequester) return;  // can't do keep alives during a nomination process
-          if (!mNominated) return;  // can't do keep alives if not connected
-
           if (mLastReceivedDataOrSTUN + mExpectSTUNOrDataWithinDuration > tick) {
             ZS_LOG_TRACE(log("received STUN request or indication or data within the expected window so no need to test if remote party is alive"))
             return;
           }
 
-          if (mAliveCheckRequester) {
-            ZS_LOG_WARNING(Detail, log("alive check requester already activated"))
-            return;
-          }
-
-          ZS_LOG_TRACE(log("expecting data timer fired"))
-
-          //...................................................................
-          // NOTE: Servers will *NOT* send regular connectivity checks to
-          // their clients. This responsibility is leftto the client so
-          // the client cannot expect to receive data within a time frame
-          // when connecting to a server.
-          //
-          // However the keep alive check mechanism can be used to probe if
-          // a server is still alive as the server will respond to the request
-          // albeit without security credentials.
-
-          STUNPacketPtr request = STUNPacket::createRequest(STUNPacket::Method_Binding);
-          fix(request);
-          bool isICE = false;
-
-          if (mRemotePassword.hasData()) {
-            ZS_LOG_WARNING(Detail, log("expected STUN request or indication or data within the expected window but did not receive (thus will attempt to do a connectivity check)"))
-            isICE = true;
-            request->mUsername = mRemoteUsernameFrag + ":" + mLocalUsernameFrag;
-            request->mPassword = mRemotePassword;
-            request->mCredentialMechanism = STUNPacket::CredentialMechanisms_ShortTerm;
-            request->mIceControllingIncluded = true;
-            request->mIceControlling = mConflictResolver;
-            request->mPriorityIncluded = true;
-            request->mPriority = mNominated->mLocal.mPriority;
-          }
-
-          mAliveCheckRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mNominated->mRemote.mIPAddress, request, (isICE ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN), mKeepAliveSTUNRequestTimeout);
+          sendAliveCheckRequest();
           return;
         }
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ICESocketSession => IBackgroundingDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      {
+        AutoRecursiveLock lock(getLock());
+
+        mWentToBackgroundAt = zsLib::now();
+
+        ZS_LOG_DEBUG(log("going to background") + ZS_PARAM("now", mWentToBackgroundAt))
+
+        sendAliveCheckRequest();
+
+        mBackgroundingNotifier = notifier;
+        clearBackgroundingNotifierIfPossible();
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::onBackgroundingGoingToBackgroundNow()
+      {
+        AutoRecursiveLock lock(getLock());
+
+        ZS_LOG_DEBUG(log("going to background now"))
+
+        mBackgroundingNotifier.reset();
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::onBackgroundingReturningFromBackground()
+      {
+        AutoRecursiveLock lock(getLock());
+
+        if (Time() != mWentToBackgroundAt) {
+          Time tick = zsLib::now();
+
+          Duration diff = tick - mWentToBackgroundAt;
+          mWentToBackgroundAt = Time();
+
+          if (diff > mBackgroundingTimeout) {
+            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("now", tick) + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
+            setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
+            cancel();
+            return;
+          }
+        }
+
+        // force an alive check requester
+        sendAliveCheckRequest();
       }
 
       //-----------------------------------------------------------------------
@@ -1488,6 +1548,10 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
         IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
+
+        IHelper::debugAppend(resultEl, "backgrounding subsscription", (bool)mBackgroundingSubscription);
+        IHelper::debugAppend(resultEl, "backgrounding notifier", (bool)mBackgroundingNotifier);
+
         IHelper::debugAppend(resultEl, "informed write ready", mInformedWriteReady);
 
         IHelper::debugAppend(resultEl, "socket subscription", (bool)mSocketSubscription);
@@ -1512,7 +1576,7 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "nominated: ", mNominated ? mNominated->toDebug() : ElementPtr());
 
         IHelper::debugAppend(resultEl, "last send data", mLastSentData);
-        IHelper::debugAppend(resultEl, "last activity", mLastActivity);
+        IHelper::debugAppend(resultEl, "went to background at", mWentToBackgroundAt);
 
         IHelper::debugAppend(resultEl, "need to notify nominated", mLastNotifiedNominated == mNominated);
 
@@ -1561,6 +1625,13 @@ namespace openpeer
           mSocketSubscription.reset();
         }
 
+        mBackgroundingNotifier.reset();
+
+        if (mBackgroundingSubscription) {
+          mBackgroundingSubscription->cancel();
+          mBackgroundingSubscription.reset();
+        }
+
         mFoundation.reset();
 
         IICESocketForICESocketSessionPtr iceSocket = mICESocketWeak.lock();
@@ -1585,34 +1656,18 @@ namespace openpeer
           mExpectingDataTimer.reset();
         }
 
-        if (mAliveCheckRequester) {
-          mAliveCheckRequester->cancel();
-          mAliveCheckRequester.reset();
-        }
-
         if (mStepTimer) {
           mStepTimer->cancel();
           mStepTimer.reset();
         }
 
-        if (mBackgroundingTimer) {
-          mBackgroundingTimer->cancel();
-          mBackgroundingTimer.reset();
-        }
+        clearAliveCheckRequester();
 
-        if (mNominateRequester) {
-          mNominateRequester->cancel();
-          mNominateRequester.reset();
-        }
+        clearNominateRequester();
         mPendingNominatation.reset();
         mNominated.reset();
 
         mLastNotifiedNominated.reset();
-
-        if (mAliveCheckRequester) {
-          mAliveCheckRequester->cancel();
-          mAliveCheckRequester.reset();
-        }
 
         // scope: we have to completely cancel the old searches...
         {
@@ -1683,7 +1738,6 @@ namespace openpeer
 
         ZS_LOG_DEBUG(debug("step"))
 
-        if (!stepBackgroundingTimer()) goto notify_nominated;
         if (!stepSocket()) goto notify_nominated;
         if (!stepCandidates()) goto notify_nominated;
         if (!stepActivateTimer()) goto notify_nominated;
@@ -1700,30 +1754,6 @@ namespace openpeer
         {
           stepNotifyNominated();
         }
-      }
-
-      //-----------------------------------------------------------------------
-      bool ICESocketSession::stepBackgroundingTimer()
-      {
-        ZS_LOG_TRACE(log("step backgrounding timer") + ZS_PARAM("need timer", Duration() != mBackgroundingTimeout))
-
-        if (Duration() != mBackgroundingTimeout) {
-          if (mBackgroundingTimer) return true;
-
-          ZS_LOG_DEBUG(log("creating backgrounding timer"))
-          mLastActivity = zsLib::now();
-          mBackgroundingTimer = Timer::create(mThisWeak.lock(), Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS));
-          return true;
-        }
-
-        if (!mBackgroundingTimer) return true;
-
-        ZS_LOG_DEBUG(log("cancelling backgrounding timer"))
-
-        mBackgroundingTimer->cancel();
-        mBackgroundingTimer.reset();
-
-        return true;
       }
 
       //-----------------------------------------------------------------------
@@ -2118,8 +2148,13 @@ namespace openpeer
           CandidatePairPtr &pairing = (*iter);
 
           if (pairing == mNominated) {
-            ZS_LOG_INSANE(log("cancel lower priority - pairing found nominated") + pairing->toDebug())
+            ZS_LOG_INSANE(log("cancel lower priority (skipping found nominated pair)") + pairing->toDebug())
             foundNominated = true;
+            continue;
+          }
+
+          if (!foundNominated) {
+            ZS_LOG_INSANE(log("cancel lower priority (skipping pairing with higher priority than nominated)") + pairing->toDebug())
             continue;
           }
 
@@ -2128,7 +2163,7 @@ namespace openpeer
             continue;
           }
 
-          ZS_LOG_DEBUG(log("cancelling requester for candidate") + pairing->toDebug())
+          ZS_LOG_DEBUG(log("cancelling lower priority requester for candidate") + pairing->toDebug())
 
           pairing->mRequester->cancel();
           pairing->mRequester.reset();
@@ -2189,7 +2224,7 @@ namespace openpeer
 
             UseICESocketPtr socket = mICESocketWeak.lock();
             if (socket) {
-              socket->addRoute(mThisWeak.lock(), mNominated->mRemote.mIPAddress);
+              socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
             }
 
             // we are now connected to this IP address...
@@ -2365,6 +2400,18 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("foundation not found thus can proceed with activation") + ZS_PARAM("derived", derivedPairing->toDebug()))
         return true;
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::clearBackgroundingNotifierIfPossible()
+      {
+        if (!mBackgroundingNotifier) return;
+        if (mAliveCheckRequester) return;
+        if (mNominateRequester) return;
+
+        ZS_LOG_DEBUG(log("ready for backgrounding"))
+
+        mBackgroundingNotifier.reset();
       }
     }
 
