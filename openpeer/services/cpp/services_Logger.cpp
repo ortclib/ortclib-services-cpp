@@ -117,7 +117,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      static String getMessageString(const Log::Params &params)
+      static String getMessageString(
+                                     const Log::Params &params,
+                                     bool prettyPrint
+                                     )
       {
         static const char *wires[] = {"wire in", "wire out", NULL};
         static const char *jsons[] = {"json in", "json out", "json", NULL};
@@ -176,7 +179,13 @@ namespace openpeer
             String json = childEl->getTextDecoded();
             if (json.isEmpty()) continue;
 
-            alt += "\n\n" + json + "\n\n";
+            if (prettyPrint) {
+              DocumentPtr doc = Document::createFromParsedJSON(json);
+              boost::shared_array<char> output = doc->writeAsJSON(true);
+              alt += "\n\n" + String((CSTR)output.get()) + "\n\n";
+            } else {
+              alt += "\n\n" + json + "\n\n";
+            }
           }
         }
 
@@ -226,6 +235,7 @@ namespace openpeer
                                   CSTR inFunction,
                                   CSTR inFilePath,
                                   ULONG inLineNumber,
+                                  bool prettyPrint,
                                   bool eol = true
                                   )
       {
@@ -275,7 +285,7 @@ namespace openpeer
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_THREAD + "<" + currentThreadIDAsString() + ">"
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
-                      + colorLevel + getMessageString(params)
+                      + colorLevel + getMessageString(params, prettyPrint)
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_FILENAME + "@" + fileName
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_LINENUMBER + "(" + string(inLineNumber) + ")"
@@ -295,6 +305,7 @@ namespace openpeer
                                CSTR inFunction,
                                CSTR inFilePath,
                                ULONG inLineNumber,
+                               bool prettyPrint,
                                bool eol = true
                                )
       {
@@ -325,7 +336,7 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + getMessageString(params) + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
+        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + getMessageString(params, prettyPrint) + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
         return result;
       }
 
@@ -338,6 +349,7 @@ namespace openpeer
                                     CSTR inFunction,
                                     CSTR inFilePath,
                                     ULONG inLineNumber,
+                                    bool prettyPrint,
                                     bool eol = true
                                     )
       {
@@ -351,7 +363,7 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + getMessageString(params) + (eol ? "\n" : "");
+        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + getMessageString(params, prettyPrint) + (eol ? "\n" : "");
         return result;
       }
 
@@ -636,7 +648,10 @@ namespace openpeer
 
       public:
         //---------------------------------------------------------------------
-        StdOutLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        StdOutLogger(bool colorizeOutput) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput)
+          {}
 
         //---------------------------------------------------------------------
         static StdOutLoggerPtr create(bool colorizeOutput)
@@ -686,9 +701,9 @@ namespace openpeer
                            )
         {
           if (mColorizeOutput) {
-            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           } else {
-            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           }
         }
 
@@ -700,6 +715,7 @@ namespace openpeer
 
         StdOutLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
       };
 
       //-----------------------------------------------------------------------
@@ -724,7 +740,10 @@ namespace openpeer
 
       public:
         //---------------------------------------------------------------------
-        FileLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        FileLogger(bool colorizeOutput) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput)
+          {}
 
         //---------------------------------------------------------------------
         static FileLoggerPtr create(const char *fileName, bool colorizeOutput)
@@ -776,9 +795,9 @@ namespace openpeer
           if (mFile.is_open()) {
             String output;
             if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
             } else {
-              output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+              output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
             }
             mFile << output;
             mFile.flush();
@@ -793,6 +812,7 @@ namespace openpeer
 
         FileLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
 
         std::ofstream mFile;
       };
@@ -818,7 +838,10 @@ namespace openpeer
 
       public:
         //---------------------------------------------------------------------
-        DebuggerLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        DebuggerLogger(bool colorizeOutput) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput)
+          {}
 
         //---------------------------------------------------------------------
         static DebuggerLoggerPtr create(bool colorizeOutput)
@@ -877,14 +900,14 @@ namespace openpeer
 #ifndef NDEBUG
           String output;
           if (mColorizeOutput)
-            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint, false);
           else
-            output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
+            output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint, false);
           qDebug() << output.c_str();
 #endif //ndef NDEBUG
 #endif //__QNX__
 #ifdef _WIN32
-          String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+          String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
         }
@@ -897,6 +920,7 @@ namespace openpeer
 
         DebuggerLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
       };
 
       //-----------------------------------------------------------------------
@@ -1025,6 +1049,7 @@ namespace openpeer
                      ) :
           MessageQueueAssociator(queue),
           mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput),
           mOutgoingMode(false),
           mConnected(false),
           mListenPort(0),
@@ -1211,7 +1236,7 @@ namespace openpeer
 
           String output;
           if (mColorizeOutput) {
-            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           } else {
             output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           }
@@ -1554,6 +1579,15 @@ namespace openpeer
                   ILogger::setLogLevel(Log::Basic);
                 } else if (level == "none") {
                   ILogger::setLogLevel(Log::None);
+                } else if (level == "pretty") {
+                  String mode = split.front(); split.pop_front();
+                  if (mode == "on") {
+                    mPrettyPrint = true;
+                    echo = "==> Setting pretty print on\n";
+                  } else if (mode == "off") {
+                    mPrettyPrint = false;
+                    echo = "==> Setting pretty print off\n";
+                  }
                 } else if ((level == "color") || (level == "colour")) {
                   String mode = split.front(); split.pop_front();
                   if (mode == "on") {
@@ -1614,6 +1648,7 @@ namespace openpeer
 
         TelnetLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
 
         SocketPtr mListenSocket;
         ISocketPtr mTelnetSocket;
