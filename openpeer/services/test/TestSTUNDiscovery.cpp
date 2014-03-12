@@ -52,7 +52,6 @@ using zsLib::WORD;
 using zsLib::ULONG;
 using zsLib::Socket;
 using zsLib::SocketPtr;
-using zsLib::ISocketPtr;
 using zsLib::IPAddress;
 using zsLib::IMessageQueue;
 using openpeer::services::IDNS;
@@ -139,8 +138,7 @@ namespace openpeer
         virtual void onSTUNDiscoverySendPacket(
                                                ISTUNDiscoveryPtr discovery,
                                                zsLib::IPAddress destination,
-                                               boost::shared_array<zsLib::BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                )
         {
           zsLib::AutoLock lock(mLock);
@@ -148,11 +146,11 @@ namespace openpeer
           BOOST_CHECK(discovery);
           BOOST_CHECK(!destination.isAddressEmpty());
           BOOST_CHECK(!destination.isPortEmpty());
-          BOOST_CHECK(packet.get());
-          BOOST_CHECK(packetLengthInBytes > 0);
+          BOOST_CHECK(packet->BytePtr());
+          BOOST_CHECK(packet->SizeInBytes());
           BOOST_CHECK(mSocket);
 
-          mSocket->sendTo(destination, packet.get(), packetLengthInBytes);
+          mSocket->sendTo(destination, packet->BytePtr(), packet->SizeInBytes());
         }
 
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
@@ -170,7 +168,7 @@ namespace openpeer
           mSocket.reset();
         }
 
-        virtual void onReadReady(ISocketPtr socket)
+        virtual void onReadReady(SocketPtr socket)
         {
           zsLib::AutoLock lock(mLock);
           BOOST_CHECK(socket);
@@ -188,14 +186,14 @@ namespace openpeer
           ISTUNDiscovery::handlePacket(ip, &(buffer[0]), readBytes);
         }
 
-        virtual void onWriteReady(ISocketPtr socket)
+        virtual void onWriteReady(SocketPtr socket)
         {
 //          zsLib::AutoLock lock(mLock);
 //          BOOST_CHECK(socket);
 //          BOOST_CHECK(socket == mSocket);
         }
 
-        virtual void onException(ISocketPtr socket)
+        virtual void onException(SocketPtr socket)
         {
 //          zsLib::AutoLock lock(mLock);
 //          BOOST_CHECK(socket);

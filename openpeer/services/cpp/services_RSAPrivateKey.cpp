@@ -208,14 +208,14 @@ namespace openpeer
 
           String cookieName = getCookieName(buffer);
 
-          bool alreadyValidated = ICache::singleton()->fetch(cookieName).hasData();
+          bool alreadyValidated = ICache::fetch(cookieName).hasData();
 
           if (!alreadyValidated) {
             if (!pThis->mPrivateKey.Validate(rng, 3)) {
               ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing private key") + ZS_PARAM("buffer", IHelper::convertToHex(buffer)))
               return RSAPrivateKeyPtr();
             }
-            ICache::singleton()->store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
+            ICache::store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
             ZS_LOG_DEBUG(pThis->log("remembering that private key has already validated") + ZS_PARAM("cookie", cookieName))
           } else {
             ZS_LOG_DEBUG(pThis->log("already validated private key") + ZS_PARAM("cookie", cookieName))
@@ -243,7 +243,7 @@ namespace openpeer
         if (mDidGenerate) {
           String cookieName = getCookieName(*output);
 
-          ICache::singleton()->store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
+          ICache::store(cookieName, zsLib::now() + Hours(OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS), OPENPEER_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE);
           ZS_LOG_DEBUG(log("remembering that private key has already validated") + ZS_PARAM("cookie", cookieName))
         }
         return output;

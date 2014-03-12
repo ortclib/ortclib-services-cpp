@@ -60,7 +60,6 @@ using zsLib::WORD;
 using zsLib::ULONG;
 using zsLib::Socket;
 using zsLib::SocketPtr;
-using zsLib::ISocketPtr;
 using zsLib::IPAddress;
 using zsLib::String;
 using zsLib::IMessageQueue;

@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_Factory.h>
 
+#include <zsLib/helpers.h>
 #include <zsLib/Log.h>
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
@@ -60,29 +61,15 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Factory::override(FactoryPtr override)
       {
-        singleton()->mOverride = override;
+        singleton().mOverride = override;
       }
 
       //-----------------------------------------------------------------------
-      FactoryPtr &Factory::singleton()
+      Factory &Factory::singleton()
       {
-        static FactoryPtr global = Factory::create();
-        if (global->mOverride) return global->mOverride;
-        return global;
-      }
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Factory => (internal)
-      #pragma mark
-
-      //-----------------------------------------------------------------------
-      FactoryPtr Factory::create()
-      {
-        return FactoryPtr(new Factory);
+        static Factory singleton = Singleton<Factory, false>::ref();
+        if (singleton.mOverride) return (*singleton.mOverride);
+        return singleton;
       }
 
       //-----------------------------------------------------------------------
@@ -96,7 +83,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IBackgroundingFactory &IBackgroundingFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -117,7 +104,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IDHKeyDomainFactory &IDHKeyDomainFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -160,7 +147,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IDHPrivateKeyFactory &IDHPrivateKeyFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -232,7 +219,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IDHPublicKeyFactory &IDHPublicKeyFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -256,7 +243,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IDNSFactory &IDNSFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -316,7 +303,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IHTTPFactory &IHTTPFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -357,7 +344,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IICESocketFactory &IICESocketFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -386,7 +373,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IICESocketSessionFactory &IICESocketSessionFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -415,7 +402,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IMessageLayerSecurityChannelFactory &IMessageLayerSecurityChannelFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -443,7 +430,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRSAPrivateKeyFactory &IRSAPrivateKeyFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -474,7 +461,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRSAPublicKeyFactory &IRSAPublicKeyFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -495,7 +482,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRUDPChannelFactory &IRUDPChannelFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -561,7 +548,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRUDPChannelStreamFactory &IRUDPChannelStreamFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -590,7 +577,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRUDPTransportFactory &IRUDPTransportFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -615,7 +602,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IRUDPListenerFactory &IRUDPListenerFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -641,7 +628,7 @@ namespace openpeer
       //-------------------------------------------------------------------------
       IRUDPMessagingFactory &IRUDPMessagingFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -698,7 +685,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ISTUNDiscoveryFactory &ISTUNDiscoveryFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -734,7 +721,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ISTUNRequesterFactory &ISTUNRequesterFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -762,7 +749,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ISTUNRequesterManagerFactory &ISTUNRequesterManagerFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -783,7 +770,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ITCPMessagingFactory &ITCPMessagingFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -825,7 +812,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ITransportStreamFactory &ITransportStreamFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -849,7 +836,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ITURNSocketFactory &ITURNSocketFactory::singleton()
       {
-        return *(Factory::singleton().get());
+        return Factory::singleton();
       }
 
       //-----------------------------------------------------------------------

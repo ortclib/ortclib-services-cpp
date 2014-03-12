@@ -268,7 +268,7 @@ namespace openpeer
         try {
           IPAddress local = mUDPSocket->getLocalAddress();
           return local;
-        } catch(ISocket::Exceptions::Unspecified &) {
+        } catch(Socket::Exceptions::Unspecified &) {
         }
         return IPAddress();
       }
@@ -315,7 +315,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void RUDPListener::onReadReady(ISocketPtr socket)
+      void RUDPListener::onReadReady(SocketPtr socket)
       {
         IPAddress remote;
         STUNPacketPtr stun;
@@ -332,7 +332,7 @@ namespace openpeer
 
           try {
             bytesRead = mUDPSocket->receiveFrom(remote, buffer.get(), OPENPEER_SERVICES_RUDPLISTENER_RECYCLE_BUFFER_SIZE);
-          } catch(ISocket::Exceptions::Unspecified &) {
+          } catch(Socket::Exceptions::Unspecified &) {
             cancel();
             return;
           }
@@ -477,7 +477,7 @@ namespace openpeer
 
 
       //-----------------------------------------------------------------------
-      void RUDPListener::onWriteReady(ISocketPtr socket)
+      void RUDPListener::onWriteReady(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
@@ -487,7 +487,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::onException(ISocketPtr socket)
+      void RUDPListener::onException(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
       }
@@ -649,8 +649,8 @@ namespace openpeer
           mUDPSocket->setDelegate(mThisWeak.lock());
           IPAddress local = mUDPSocket->getLocalAddress();
           mBindPort = local.getPort();
-          ZS_THROW_CUSTOM_PROPERTIES_1_IF(ISocket::Exceptions::Unspecified, 0 == mBindPort, 0)
-        } catch(ISocket::Exceptions::Unspecified &) {
+          ZS_THROW_CUSTOM_PROPERTIES_1_IF(Socket::Exceptions::Unspecified, 0 == mBindPort, 0)
+        } catch(Socket::Exceptions::Unspecified &) {
           cancel();
           return false;
         }
@@ -687,7 +687,7 @@ namespace openpeer
           size_t bytesSent = mUDPSocket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
           ZS_LOG_TRACE(log("sendTo called") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           return (bytesSent == bufferLengthInBytes);
-        } catch(ISocket::Exceptions::Unspecified &) {
+        } catch(Socket::Exceptions::Unspecified &) {
           ZS_LOG_ERROR(Detail, log("sendTo exception") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes))
           return false;
         }

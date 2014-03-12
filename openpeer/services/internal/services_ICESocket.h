@@ -232,7 +232,7 @@ namespace openpeer
         typedef std::map<LocalIP, LocalSocketPtr> LocalSocketIPAddressMap;
         typedef std::map<ITURNSocketPtr, LocalSocketPtr> LocalSocketTURNSocketMap;
         typedef std::map<ISTUNDiscoveryPtr, LocalSocketPtr> LocalSocketSTUNDiscoveryMap;
-        typedef std::map<ISocketPtr, LocalSocketPtr> LocalSocketMap;
+        typedef std::map<SocketPtr, LocalSocketPtr> LocalSocketMap;
         typedef std::map<InterfaceName, OrderID> InterfaceNameToOrderMap;
 
       protected:
@@ -333,9 +333,9 @@ namespace openpeer
         #pragma mark ICESocket => ISocketDelegate
         #pragma mark
 
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
         #pragma mark

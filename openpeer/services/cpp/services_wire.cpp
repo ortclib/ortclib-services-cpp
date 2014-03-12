@@ -42,6 +42,8 @@ namespace openpeer
   {
     namespace wire
     {
+      ZS_DECLARE_USING_PTR(zsLib, Log)
+
       //-----------------------------------------------------------------------
       bool isLogging(Log::Level level)
       {
@@ -58,15 +60,15 @@ namespace openpeer
                ULONG lineNumber
                )
       {
-        Log::singleton()->log(
-                              ZS_GET_SUBSYSTEM(),
-                              severity,
-                              level,
-                              params,
-                              function,
-                              filePath,
-                              lineNumber
-                              );
+        zsLib::Log::log(
+                        ZS_GET_SUBSYSTEM(),
+                        severity,
+                        level,
+                        params,
+                        function,
+                        filePath,
+                        lineNumber
+                        );
       }
     }
   }

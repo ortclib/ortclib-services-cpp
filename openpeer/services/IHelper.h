@@ -69,9 +69,10 @@ namespace openpeer
       typedef size_t Index;
       typedef std::map<Index, String> SplitMap;
 
-      static RecursiveLock &getGlobalLock();
+      static RecursiveLockPtr getGlobalLock();
 
       static IMessageQueuePtr getServiceQueue();
+      static IMessageQueuePtr getLoggerQueue();
 
       static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
       static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);

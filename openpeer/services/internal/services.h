@@ -46,13 +46,14 @@
 #include <openpeer/services/internal/services_ICESocket.h>
 #include <openpeer/services/internal/services_ICESocketSession.h>
 #include <openpeer/services/internal/services_MessageLayerSecurityChannel.h>
+#include <openpeer/services/internal/services_MessageQueueManager.h>
 #include <openpeer/services/internal/services_RSAPrivateKey.h>
 #include <openpeer/services/internal/services_RSAPublicKey.h>
 #include <openpeer/services/internal/services_RUDPChannel.h>
 #include <openpeer/services/internal/services_RUDPChannelStream.h>
-#include <openpeer/services/internal/services_RUDPTransport.h>
 #include <openpeer/services/internal/services_RUDPListener.h>
 #include <openpeer/services/internal/services_RUDPMessaging.h>
+#include <openpeer/services/internal/services_RUDPTransport.h>
 #include <openpeer/services/internal/services_Settings.h>
 #include <openpeer/services/internal/services_STUNDiscovery.h>
 #include <openpeer/services/internal/services_STUNRequester.h>

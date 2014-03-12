@@ -521,7 +521,7 @@ namespace openpeer
             OPENPEER_SERVICES_WIRE_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
           }
           return ((!wouldBlock) && (bufferLengthInBytes == bytesSent));
-        } catch(ISocket::Exceptions::Unspecified &error) {
+        } catch(Socket::Exceptions::Unspecified &error) {
           ZS_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
         return false;
@@ -591,15 +591,15 @@ namespace openpeer
           LocalSocketPtr &localSocket = (*iter).second;
 
           if (monitor) {
-            localSocket->mSocket->monitor(ISocket::Monitor::All);
+            localSocket->mSocket->monitor(Socket::Monitor::All);
           } else {
-            localSocket->mSocket->monitor((ISocket::Monitor::Options)(ISocket::Monitor::Read | ISocket::Monitor::Exception));
+            localSocket->mSocket->monitor((Socket::Monitor::Options)(Socket::Monitor::Read | Socket::Monitor::Exception));
           }
         }
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::onReadReady(ISocketPtr socket)
+      void ICESocket::onReadReady(SocketPtr socket)
       {
         boost::shared_array<BYTE> buffer;
         CandidatePtr viaLocalCandidate;
@@ -628,14 +628,14 @@ namespace openpeer
             bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE, &wouldBlock);
             if (0 == bytesRead) return;
 
-            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()))
+            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()) + ZS_PARAM("handle", socket->getSocket()))
 
             if (ZS_IS_LOGGING(Insane)) {
               String base64 = Helper::convertToBase64(buffer.get(), bytesRead);
               OPENPEER_SERVICES_WIRE_LOG_INSANE(log("RECEIVE PACKET ON WIRE") + ZS_PARAM("source", source.string()) + ZS_PARAM("wire in", base64))
             }
 
-          } catch(ISocket::Exceptions::Unspecified &error) {
+          } catch(Socket::Exceptions::Unspecified &error) {
             ZS_LOG_ERROR(Detail, log("receiveFrom error") + ZS_PARAM("error", error.errorCode()))
             cancel();
             return;
@@ -648,7 +648,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::onWriteReady(ISocketPtr socket)
+      void ICESocket::onWriteReady(SocketPtr socket)
       {
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("write ready"))
         AutoRecursiveLock lock(mLock);
@@ -675,7 +675,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::onException(ISocketPtr socket)
+      void ICESocket::onException(SocketPtr socket)
       {
         ZS_LOG_DETAIL(log("on exception"))
         AutoRecursiveLock lock(mLock);
@@ -830,7 +830,7 @@ namespace openpeer
             OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as UDP socket did not send the data") + ZS_PARAM("would block", wouldBlock) + ZS_PARAM("bytes sent", bytesSent))
           }
           return sent;
-        } catch(ISocket::Exceptions::Unspecified &error) {
+        } catch(Socket::Exceptions::Unspecified &error) {
           OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
         return false;
@@ -903,7 +903,7 @@ namespace openpeer
           }
 
           localSocket->mSocket->sendTo(destination, *packet, packet->SizeInBytes(), &wouldBlock);
-        } catch(ISocket::Exceptions::Unspecified &error) {
+        } catch(Socket::Exceptions::Unspecified &error) {
           OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
       }
@@ -1288,9 +1288,9 @@ namespace openpeer
             socket->setBlocking(false);
             try {
 #ifndef __QNX__
-              socket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+              socket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-            } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
+            } catch(Socket::Exceptions::UnsupportedSocketOption &) {
             }
 
             IPAddress local = socket->getLocalAddress();
@@ -1299,8 +1299,8 @@ namespace openpeer
 
             mBindPort = local.getPort();
             bindIP.setPort(mBindPort);
-            ZS_THROW_CUSTOM_PROPERTIES_1_IF(ISocket::Exceptions::Unspecified, 0 == mBindPort, 0)
-          } catch(ISocket::Exceptions::Unspecified &error) {
+            ZS_THROW_CUSTOM_PROPERTIES_1_IF(Socket::Exceptions::Unspecified, 0 == mBindPort, 0)
+          } catch(Socket::Exceptions::Unspecified &error) {
             ZS_LOG_ERROR(Detail, log("bind error") + ZS_PARAM("error", error.errorCode()))
             socket.reset();
           }

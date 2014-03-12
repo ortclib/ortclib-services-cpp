@@ -1,3 +1,4 @@
+
 /*
 
  Copyright (c) 2013, SMB Phone Inc.
@@ -61,7 +62,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       static Log::Params slog(const char *message)
       {
-        return DNSMonitor::slog(message);
+        DNSMonitorPtr singleton = DNSMonitor::singleton();
+        if (!singleton) {
+          return DNSMonitor::slog(message);
+        }
+        return singleton->log(message);
       }
 
       //-----------------------------------------------------------------------
@@ -141,7 +146,7 @@ namespace openpeer
         String cacheData = IHelper::toString(typeEl);
 
         ZS_LOG_TRACE(slog("storing A / AAAA result") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", info.mName) + ZS_PARAM("ttl", info.mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("ips", info.mIPAddresses.size()) + ZS_PARAM("expires", expires))
-        ICache::singleton()->store(cookieName, expires, cacheData);
+        ICache::store(cookieName, expires, cacheData);
       }
 
       //-----------------------------------------------------------------------
@@ -192,7 +197,7 @@ namespace openpeer
         String cacheData = IHelper::toString(srvEl);
 
         ZS_LOG_TRACE(slog("storing SRV result") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", info.mName) + ZS_PARAM("service", info.mService) + ZS_PARAM("protocol", info.mProtocol) + ZS_PARAM("ttl", info.mTTL) + ZS_PARAM("flags", flags) + ZS_PARAM("records", info.mRecords.size()) + ZS_PARAM("expires", expires))
-        ICache::singleton()->store(cookieName, expires, cacheData);
+        ICache::store(cookieName, expires, cacheData);
       }
 
       //-----------------------------------------------------------------------
@@ -271,7 +276,7 @@ namespace openpeer
         const char *elementName = IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa";
         String cookieName = getCookieName(name, lookupType, flags);
 
-        String dataStr = ICache::singleton()->fetch(cookieName);
+        String dataStr = ICache::fetch(cookieName);
         if (dataStr.isEmpty()) {
           ZS_LOG_TRACE(slog("no cache entry exists for A / AAAA result") + ZS_PARAM("type", elementName) + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("flags", flags))
           return IDNS::AResultPtr();
@@ -306,7 +311,7 @@ namespace openpeer
                                       )
       {
         String cookieName = getSRVCookieName(name, service, protocol, flags);
-        String dataStr = ICache::singleton()->fetch(cookieName);
+        String dataStr = ICache::fetch(cookieName);
         if (dataStr.isEmpty()) {
           ZS_LOG_TRACE(slog("no cache entry exists for SRV result") + ZS_PARAM("cookie", cookieName) + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("flags", flags))
           return IDNS::SRVResultPtr();
@@ -378,7 +383,7 @@ namespace openpeer
                         )
       {
         String cookieName = getCookieName(name, lookupType, flags);
-        ICache::singleton()->clear(cookieName);
+        ICache::clear(cookieName);
       }
 
       //-----------------------------------------------------------------------
@@ -389,7 +394,7 @@ namespace openpeer
                         int flags
                         )
       {
-        ICache::singleton()->clear(getSRVCookieName(name, service, protocol, flags));
+        ICache::clear(getSRVCookieName(name, service, protocol, flags));
       }
 
       //-----------------------------------------------------------------------
@@ -447,16 +452,18 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitorPtr DNSMonitor::singleton()
       {
-        AutoRecursiveLock lock(Helper::getGlobalLock());
-        static DNSMonitorPtr monitor = DNSMonitor::create(Helper::getServiceQueue());
-        return monitor;
+        static SingletonLazySharedPtr<DNSMonitor> singleton(DNSMonitor::create(Helper::getServiceQueue()));
+        DNSMonitorPtr result = singleton.singleton();
+        if (!result) {
+          ZS_LOG_WARNING(Detail, DNSMonitor::slog("singleton gone"))
+        }
+        return result;
       }
 
       //-----------------------------------------------------------------------
       Log::Params DNSMonitor::slog(const char *message)
       {
-        DNSMonitorPtr pThis = singleton();
-        return pThis->log(message);
+        return Log::Params(message, "DNSMonitor");
       }
 
       //-----------------------------------------------------------------------
@@ -844,7 +851,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::onReadReady(ISocketPtr socket)
+      void DNSMonitor::onReadReady(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
         if (!mCtx)
@@ -860,13 +867,13 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::onWriteReady(ISocketPtr socket)
+      void DNSMonitor::onWriteReady(SocketPtr socket)
       {
         // we can ignore the write ready, it only writes during a timeout event or during creation
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::onException(ISocketPtr socket)
+      void DNSMonitor::onException(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
         if (NULL == mCtx)

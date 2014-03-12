@@ -198,7 +198,7 @@ namespace openpeer
         pThis->mSocket->setDelegate(pThis);
         pThis->mSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
         pThis->mSocket->connect(remoteIP, &wouldBlock, &errorCode);
-        ZS_LOG_DEBUG(pThis->log("attempting to connect") + ZS_PARAM("server IP", remoteIP.string()))
+        ZS_LOG_DEBUG(pThis->log("attempting to connect") + ZS_PARAM("server IP", remoteIP.string()) + ZS_PARAM("handle", pThis->mSocket->getSocket()))
         if (0 != errorCode) {
           ZS_LOG_ERROR(Detail, pThis->log("failed to connect socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
@@ -249,8 +249,8 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("setting keep-alive") + ZS_PARAM("value", enable))
         try {
-          mSocket->setOptionFlag(ISocket::SetOptionFlag::KeepAlive, enable);
-        } catch(ISocket::Exceptions::Unspecified &error) {
+          mSocket->setOptionFlag(Socket::SetOptionFlag::KeepAlive, enable);
+        } catch(Socket::Exceptions::Unspecified &error) {
           ZS_LOG_WARNING(Detail, log("unable to change keep-alive value") + ZS_PARAM("reason", error.message()))
         }
       }
@@ -335,11 +335,11 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::onReadReady(ISocketPtr socket)
+      void TCPMessaging::onReadReady(SocketPtr socket)
       {
         AutoRecursiveLock lock(getLock());
 
-        ZS_LOG_TRACE(log("notified TCP read ready"))
+        ZS_LOG_TRACE(log("notified TCP read ready") + ZS_PARAM("handle", socket->getSocket()))
 
         if (socket != mSocket) {
           ZS_LOG_WARNING(Detail, log("notified about obsolete socket"))
@@ -377,7 +377,7 @@ namespace openpeer
 
           mReceivingQueue->Put(buffer.BytePtr(), bytesRead);
 
-        } catch(ISocket::Exceptions::Unspecified &error) {
+        } catch(Socket::Exceptions::Unspecified &error) {
           ZS_LOG_ERROR(Detail, log("receive error") + ZS_PARAM("error", error.errorCode()))
           setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.message()).c_str());
           cancel();
@@ -451,7 +451,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::onWriteReady(ISocketPtr socket)
+      void TCPMessaging::onWriteReady(SocketPtr socket)
       {
         AutoRecursiveLock lock(getLock());
 
@@ -476,7 +476,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::onException(ISocketPtr socket)
+      void TCPMessaging::onException(SocketPtr socket)
       {
         AutoRecursiveLock lock(getLock());
 
@@ -786,7 +786,7 @@ namespace openpeer
             ZS_LOG_DEBUG(log("still more data in the sending queue to be sent, wait for next write ready..."))
             return false;
           }
-        } catch (ISocket::Exceptions::Unspecified &error) {
+        } catch (Socket::Exceptions::Unspecified &error) {
           ZS_LOG_ERROR(Detail, log("send error") + ZS_PARAM("error", error.errorCode()))
           setError(IHTTP::HTTPStatusCode_Networkconnecttimeouterror, (String("network error: ") + error.message()).c_str());
           cancel();

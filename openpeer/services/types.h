@@ -35,6 +35,8 @@
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
 
+#include <zsLib/MessageQueueThread.h>
+
 // special case where CryptoPP extension class is needed
 #include <openpeer/services/internal/services_AllocatorWithNul.h>
 
@@ -67,8 +69,11 @@ namespace openpeer
     using zsLib::RecursiveLock;
     using zsLib::Log;
 
+    typedef zsLib::ThreadPriorities ThreadPriorities;
+
     using boost::dynamic_pointer_cast;
 
+    ZS_DECLARE_PTR(RecursiveLock)
     ZS_DECLARE_USING_PTR(zsLib, Socket)
     ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
     ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
@@ -95,6 +100,7 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PTR(IHTTP)
     ZS_DECLARE_INTERACTION_PTR(IHTTPQuery)
     ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel)
+    ZS_DECLARE_INTERACTION_PTR(IMessageQueueManager)
     ZS_DECLARE_INTERACTION_PTR(IRSAPrivateKey)
     ZS_DECLARE_INTERACTION_PTR(IRSAPublicKey)
     ZS_DECLARE_INTERACTION_PTR(IRUDPListener)

@@ -63,15 +63,14 @@ namespace openpeer
         static CachePtr convert(ICachePtr cache);
 
         static CachePtr create();
+        static CachePtr singleton();
 
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark Cache => ICache
         #pragma mark
 
-        static void setup(ICacheDelegatePtr delegate);
-
-        static CachePtr singleton();
+        virtual void setup(ICacheDelegatePtr delegate);
 
         virtual String fetch(const char *cookieNamePath) const;
         virtual void store(
@@ -88,6 +87,7 @@ namespace openpeer
         #pragma mark
 
         Log::Params log(const char *message) const;
+        static Log::Params slog(const char *message);
 
         void actualSetup(ICacheDelegatePtr delegate);
 

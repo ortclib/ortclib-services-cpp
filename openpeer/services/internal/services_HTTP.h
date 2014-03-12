@@ -117,6 +117,7 @@ namespace openpeer
         static HTTPPtr create();
 
         Log::Params log(const char *message) const;
+        static Log::Params slog(const char *message);
 
         void cancel();
 

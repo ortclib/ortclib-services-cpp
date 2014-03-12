@@ -141,7 +141,12 @@ namespace openpeer
       {
         HTTPPtr pThis = singleton();
         HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, false, userAgent, url, NULL, 0, NULL, timeout);
-        pThis->monitorBegin(query);
+        if (!pThis) {
+          query->notifyComplete(CURLE_FAILED_INIT); // singleton gone so cannot perform CURL operation at this time
+          return query;
+        } else {
+          pThis->monitorBegin(query);
+        }
         return query;
       }
 
@@ -158,7 +163,12 @@ namespace openpeer
       {
         HTTPPtr pThis = singleton();
         HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, true, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);
-        pThis->monitorBegin(query);
+        if (!pThis) {
+          query->notifyComplete(CURLE_FAILED_INIT); // singleton gone so cannot perform CURL operation at this time
+          return query;
+        } else {
+          pThis->monitorBegin(query);
+        }
         return query;
       }
 
@@ -187,9 +197,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       HTTPPtr HTTP::singleton()
       {
-        static HTTPPtr singleton = HTTP::create();
-        static HTTPGlobalSafeReference safe(singleton); // hold safe reference in global object
-        return singleton;
+        static SingletonLazySharedPtr<HTTP> singleton(HTTP::create());
+        HTTPPtr result = singleton.singleton();
+        if (!result) {
+          ZS_LOG_WARNING(Detail, slog("singleton gone"))
+        }
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -207,6 +220,12 @@ namespace openpeer
         ElementPtr objectEl = Element::create("HTTP");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params HTTP::slog(const char *message)
+      {
+        return Log::Params(message, "HTTP");
       }
 
       //-----------------------------------------------------------------------
@@ -422,7 +441,7 @@ namespace openpeer
           }
 
           if (!mThread) {
-            mThread = ThreadPtr(new boost::thread(boost::ref(*(HTTP::singleton().get()))));
+            mThread = ThreadPtr(new boost::thread(boost::ref(*this)));
           }
 
           mPendingAddQueries[query->getID()] = query;

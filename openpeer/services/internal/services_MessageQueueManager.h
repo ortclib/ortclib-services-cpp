@@ -32,7 +32,9 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services.h>
+#include <openpeer/services/IMessageQueueManager.h>
+
+#include <zsLib/String.h>
 
 namespace openpeer
 {
@@ -45,44 +47,75 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Factory
+      #pragma mark MessageQueueManager
       #pragma mark
 
-      class Factory : public IBackgroundingFactory,
-                      public IDHKeyDomainFactory,
-                      public IDHPrivateKeyFactory,
-                      public IDHPublicKeyFactory,
-                      public IDNSFactory,
-                      public IHTTPFactory,
-                      public IICESocketFactory,
-                      public IICESocketSessionFactory,
-                      public IMessageLayerSecurityChannelFactory,
-                      public IRSAPrivateKeyFactory,
-                      public IRSAPublicKeyFactory,
-                      public IRUDPChannelFactory,
-                      public IRUDPChannelStreamFactory,
-                      public IRUDPTransportFactory,
-                      public IRUDPListenerFactory,
-                      public IRUDPMessagingFactory,
-                      public ISTUNDiscoveryFactory,
-                      public ISTUNRequesterFactory,
-                      public ISTUNRequesterManagerFactory,
-                      public ITCPMessagingFactory,
-                      public ITransportStreamFactory,
-                      public ITURNSocketFactory
+      class MessageQueueManager : public IMessageQueueManager
       {
       public:
-        static void override(FactoryPtr override);
+        friend interaction IMessageQueueManager;
 
-        static Factory &singleton();
+        typedef std::map<MessageQueueName, ThreadPriorities> ThreadPriorityMap;
+
+      protected:
+        MessageQueueManager();
+
+        void init();
+
+        static MessageQueueManagerPtr create();
+
+      protected:
+        static MessageQueueManagerPtr singleton();
+
+      public:
+        ~MessageQueueManager();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark Factory => (data)
+        #pragma mark MessageQueueManager => IMessageQueueManager
         #pragma mark
 
-        FactoryPtr mOverride;
+        IMessageQueuePtr getMessageQueueForGUIThread();
+        IMessageQueuePtr getMessageQueue(const char *assignedThreadName);
+
+        void registerMessageQueueThreadPriority(
+                                                const char *assignedThreadName,
+                                                ThreadPriorities priority
+                                                );
+
+        MessageQueueMapPtr getRegisteredQueues();
+
+        size_t getTotalUnprocessedMessages() const;
+
+        void shutdownAllQueues();
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageQueueManager => (internal)
+        #pragma mark
+
+        Log::Params log(const char *message) const;
+        static Log::Params slog(const char *message);
+        Log::Params debug(const char *message) const;
+
+        virtual ElementPtr toDebug() const;
+
+        void cancel();
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageQueueManager => (data)
+        #pragma mark
+
+        AutoPUID mID;
+        mutable RecursiveLock mLock;
+        MessageQueueManagerWeakPtr mThisWeak;
+
+        MessageQueueMap mQueues;
+        ThreadPriorityMap mThreadPriorities;
       };
     }
   }

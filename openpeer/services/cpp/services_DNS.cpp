@@ -475,9 +475,6 @@ namespace openpeer
 
           mDelegate = IDNSDelegateProxy::createWeak(delegate);
           mMonitor = DNSMonitor::singleton();
-          if (!mMonitor) {
-            ZS_THROW_BAD_STATE_MSG_IF(!mMonitor, "The DNS monitor is not available")
-          }
         }
 
         //---------------------------------------------------------------------
@@ -492,6 +489,26 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
+        virtual void abortEarly()
+        {
+          AutoRecursiveLock lock(getLock());
+
+          cancel();
+
+          if (!mDelegate) return;
+
+          DNSQueryPtr pThis = mThisWeak.lock();
+          if (!pThis) return;
+
+          try {
+            mDelegate->onLookupCompleted(pThis);
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          }
+
+          mDelegate.reset();
+        }
+
+        //---------------------------------------------------------------------
         #pragma mark
         #pragma mark DNSQuery => IDNSQuery
         #pragma mark
@@ -503,7 +520,6 @@ namespace openpeer
         virtual void cancel()
         {
           AutoRecursiveLock lock(getLock());
-          ZS_THROW_BAD_STATE_IF(!mMonitor)
 
           if (mQuery) {
             mQuery->cancel();
@@ -535,6 +551,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         RecursiveLock &getLock() const
         {
+          if (!mMonitor) return mBogusLock;
           return mMonitor->getLock();
         }
 
@@ -550,6 +567,7 @@ namespace openpeer
         #pragma mark DNSQuery => (data)
         #pragma mark
 
+        mutable RecursiveLock mBogusLock;
         DNSMonitorPtr mMonitor;
         AutoPUID mID;
         DNSQueryWeakPtr mThisWeak;
@@ -590,7 +608,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitAQuery(name, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitAQuery(name, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
 
           return pThis;
         }
@@ -625,8 +648,7 @@ namespace openpeer
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
-          }
-          catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
 
@@ -665,7 +687,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitAAAAQuery(name, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitAAAAQuery(name, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
 
           return pThis;
         }
@@ -752,7 +779,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitSRVQuery(name, service, protocol, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitSRVQuery(name, service, protocol, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
           return pThis;
         }
 

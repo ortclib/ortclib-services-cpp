@@ -41,7 +41,7 @@
 #include <openpeer/services/IWakeDelegate.h>
 
 #include <zsLib/MessageQueueAssociator.h>
-#include <zsLib/ISocket.h>
+#include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
 
 #define OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
@@ -238,9 +238,9 @@ namespace openpeer
         #pragma mark TURNSocket => ISocketDelegate
         #pragma mark
 
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
         #pragma mark

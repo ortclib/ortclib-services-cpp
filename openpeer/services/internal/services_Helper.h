@@ -53,8 +53,6 @@ namespace openpeer
       class Helper : public IHelper
       {
       public:
-        static RecursiveLock &getGlobalLock();
-
         static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
         static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);
         static void debugAppendNumber(ElementPtr &parentEl, const char *name, const String &value);
@@ -73,8 +71,6 @@ namespace openpeer
         static ULONG random(ULONG minValue, ULONG maxValue);
 
         static SecureByteBlockPtr random(size_t lengthInBytes);
-
-        static IMessageQueuePtr getServiceQueue();
 
         static int compare(
                            const SecureByteBlock &left,
