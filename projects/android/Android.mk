@@ -30,7 +30,8 @@ $(LOCAL_PATH)/../build/android/boost/include/boost-1_53 \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.7/include \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.7/libs/armeabi/include \
 
-LOCAL_SRC_FILES := openpeer/services/cpp/services_Cache.cpp \
+LOCAL_SRC_FILES := openpeer/services/cpp/services_Backgrounding.cpp \
+openpeer/services/cpp/services_Cache.cpp \
 openpeer/services/cpp/services_CanonicalXML.cpp \
 openpeer/services/cpp/services_DHKeyDomain.cpp \
 openpeer/services/cpp/services_DHPrivateKey.cpp \
