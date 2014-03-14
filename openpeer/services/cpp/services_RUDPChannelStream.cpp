@@ -256,6 +256,8 @@ namespace openpeer
         mTotalSendingPeriodWithoutIssues(Milliseconds(0)),
         mForceACKOfSentPacketsRequestID(0)
       {
+        IHelper::setTimerThreadPriority();
+
         ZS_LOG_DETAIL(log("created"))
         if (mCalculatedRTT < mMinimumRTT)
           mCalculatedRTT = mMinimumRTT;

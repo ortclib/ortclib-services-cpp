@@ -221,6 +221,8 @@ namespace openpeer
         mLastReceivedDataOrSTUN(zsLib::now()),
         mKeepAliveDuration(Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS))
       {
+        IHelper::setTimerThreadPriority();
+
         ZS_LOG_BASIC(log("created"))
 
         mLocalUsernameFrag = getSocket()->getUsernameFrag();

@@ -64,7 +64,8 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      MessageQueueManager::MessageQueueManager()
+      MessageQueueManager::MessageQueueManager() :
+        mPending(0)
       {
         ZS_LOG_BASIC(log("created"))
       }
@@ -89,6 +90,20 @@ namespace openpeer
       {
         static SingletonLazySharedPtr<MessageQueueManager> singleton(create());
         MessageQueueManagerPtr result = singleton.singleton();
+
+        ZS_DECLARE_CLASS_PTR(GracefulAlert)
+
+        class GracefulAlert
+        {
+        public:
+          GracefulAlert(MessageQueueManagerPtr singleton) : mSingleton(singleton) {}
+          ~GracefulAlert() {mSingleton->shutdownAllQueues();}
+
+        protected:
+          MessageQueueManagerPtr mSingleton;
+        };
+
+        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(new GracefulAlert(result)));
 
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
@@ -166,6 +181,26 @@ namespace openpeer
 
         String name(assignedThreadName);
         mThreadPriorities[name] = priority;
+
+        MessageQueueMap::iterator found = mQueues.find(name);
+        if (found == mQueues.end()) {
+          ZS_LOG_DEBUG(log("message queue specified is not in use at yet") + ZS_PARAM("name", assignedThreadName) + ZS_PARAM("priority", zsLib::toString(priority)))
+          return;
+        }
+
+        ZS_LOG_DEBUG(log("updating message queue thread") + ZS_PARAM("name", assignedThreadName) + ZS_PARAM("priority", zsLib::toString(priority)))
+
+        ZS_DECLARE_TYPEDEF_PTR(zsLib::IMessageQueueThread, IMessageQueueThread)
+
+        IMessageQueuePtr queue = (*found).second;
+
+        IMessageQueueThreadPtr thread = dynamic_pointer_cast<IMessageQueueThread>(queue);
+        if (!thread) {
+          ZS_LOG_WARNING(Detail, log("found thread was not recognized as a message queue thread") + ZS_PARAM("name", assignedThreadName))
+          return;
+        }
+
+        thread->setThreadPriority(priority);
       }
 
       //-----------------------------------------------------------------------
@@ -196,6 +231,69 @@ namespace openpeer
       void MessageQueueManager::shutdownAllQueues()
       {
         ZS_LOG_DETAIL(log("shutdown all queues called"))
+
+        AutoRecursiveLock lock(mLock);
+        mGracefulShutdownReference = mThisWeak.lock();
+
+        onWake();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageQueueManager => IWakeDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void MessageQueueManager::onWake()
+      {
+        AutoRecursiveLock lock(mLock);
+
+        if (!mGracefulShutdownReference) return;
+
+        if (0 != mPending) {
+          --mPending;
+          return;
+        }
+
+        if (mQueues.size() < 1) {
+          mGracefulShutdownReference.reset();
+          return;
+        }
+
+        for (MessageQueueMap::iterator iter = mQueues.begin(); iter != mQueues.end(); ++iter)
+        {
+          IMessageQueuePtr queue = (*iter).second;
+
+          size_t remaining = queue->getTotalUnprocessedMessages();
+          if (0 != remaining) {
+            ++mPending;
+            IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
+          }
+          boost::thread::yield();
+        }
+
+        if (0 != mPending) {
+          get(mFinalCheck) = false;
+          return;
+        }
+
+        if (0 == mPending) {
+          if (!mFinalCheck) {
+            get(mFinalCheck) = true;
+
+            // perform one-time double check to truly make sure all queues are empty
+            IMessageQueuePtr queue = (*mQueues.begin()).second;
+
+            ++mPending;
+            IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
+            return;
+          }
+        }
+
+        // all queue are empty
         cancel();
       }
 
@@ -234,6 +332,8 @@ namespace openpeer
         ElementPtr resultEl = Element::create("services::MessageQueueManager");
 
         IHelper::debugAppend(resultEl, "id", mID);
+        IHelper::debugAppend(resultEl, "graceful reference", (bool)mGracefulShutdownReference);
+        IHelper::debugAppend(resultEl, "final check", mFinalCheck);
 
         IHelper::debugAppend(resultEl, "total queues", mQueues.size());
         IHelper::debugAppend(resultEl, "total priorities", mThreadPriorities.size());
@@ -279,6 +379,8 @@ namespace openpeer
             }
           }
         }
+
+        mGracefulShutdownReference.reset();
       }
 
       //-----------------------------------------------------------------------

@@ -71,6 +71,9 @@ namespace openpeer
 
       static RecursiveLockPtr getGlobalLock();
 
+      static void setSocketThreadPriority();
+      static void setTimerThreadPriority();
+
       static IMessageQueuePtr getServiceQueue();
       static IMessageQueuePtr getLoggerQueue();
 

@@ -33,11 +33,14 @@
 #include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/internal/services_Helper.h>
 
+#include <openpeer/services/ISettings.h>
+
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
 #include <zsLib/Event.h>
 #include <zsLib/XML.h>
+#include <zsLib/MessageQueueThread.h>
 
 #include <boost/thread.hpp>
 
@@ -105,6 +108,8 @@ namespace openpeer
         mShouldShutdown(false),
         mMultiCurl(NULL)
       {
+        IHelper::setSocketThreadPriority();
+
         ZS_LOG_DETAIL(log("created"))
       }
 
@@ -442,6 +447,7 @@ namespace openpeer
 
           if (!mThread) {
             mThread = ThreadPtr(new boost::thread(boost::ref(*this)));
+            zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
           }
 
           mPendingAddQueries[query->getID()] = query;

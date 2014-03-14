@@ -176,6 +176,9 @@ namespace openpeer
         mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN)),
         mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6))
       {
+        IHelper::setSocketThreadPriority();
+        IHelper::setTimerThreadPriority();
+
         ZS_LOG_BASIC(log("created"))
 
         String networkOrder = ISettings::getString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER);

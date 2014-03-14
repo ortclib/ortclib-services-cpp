@@ -40,6 +40,8 @@
 #include <cryptopp/queue.h>
 #include <curl/curl.h>
 
+#define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
+
 namespace openpeer
 {
   namespace services

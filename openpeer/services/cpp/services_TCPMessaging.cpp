@@ -88,6 +88,9 @@ namespace openpeer
         mSendingQueue(new ByteQueue),
         mReceivingQueue(new ByteQueue)
       {
+        IHelper::setSocketThreadPriority();
+        IHelper::setTimerThreadPriority();
+
         ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
         ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)

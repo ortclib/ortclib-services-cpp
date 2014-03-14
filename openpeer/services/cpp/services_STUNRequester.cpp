@@ -83,6 +83,7 @@ namespace openpeer
         mRequestStartTime(zsLib::now()),
         mMaxTimeout(Duration() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
       {
+        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------

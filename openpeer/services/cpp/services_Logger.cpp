@@ -1116,7 +1116,10 @@ namespace openpeer
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
           mStartListenTime(zsLib::now()),
           mBacklogDataUntil(zsLib::now() + Seconds(OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
-        {}
+        {
+          IHelper::setSocketThreadPriority();
+          IHelper::setTimerThreadPriority();
+        }
 
         //---------------------------------------------------------------------
         ~TelnetLogger()

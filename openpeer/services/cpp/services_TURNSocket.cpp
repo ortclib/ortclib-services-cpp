@@ -198,6 +198,9 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::init()
       {
+        IHelper::setSocketThreadPriority();
+        IHelper::setTimerThreadPriority();
+
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
 

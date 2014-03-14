@@ -30,8 +30,10 @@
  */
 
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IMessageQueueManager.h>
+#include <openpeer/services/ISettings.h>
 
 #include <cryptopp/osrng.h>
 
@@ -41,6 +43,8 @@
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 #include <zsLib/MessageQueueThread.h>
+#include <zsLib/Socket.h>
+#include <zsLib/Timer.h>
 #include <zsLib/RegEx.h>
 
 #include <iostream>
@@ -1338,15 +1342,36 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
+    void IHelper::setSocketThreadPriority()
+    {
+      zsLib::Socket::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setTimerThreadPriority()
+    {
+      zsLib::Timer::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY)));
+    }
+
+    //-------------------------------------------------------------------------
     IMessageQueuePtr IHelper::getServiceQueue()
     {
-      IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_NAME, zsLib::ThreadPriority_HighPriority);
+      class Once {
+      public:
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));}
+      };
+      static Once once;
       return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_SERVICE_THREAD_NAME);
     }
 
     //-------------------------------------------------------------------------
     IMessageQueuePtr IHelper::getLoggerQueue()
     {
+      class Once {
+      public:
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_LOGGER_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY)));}
+      };
+      static Once once;
       return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_LOGGER_THREAD_NAME);
     }
 

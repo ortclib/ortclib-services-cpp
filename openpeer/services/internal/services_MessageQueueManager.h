@@ -33,6 +33,7 @@
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IMessageQueueManager.h>
+#include <openpeer/services/IWakeDelegate.h>
 
 #include <zsLib/String.h>
 
@@ -50,7 +51,8 @@ namespace openpeer
       #pragma mark MessageQueueManager
       #pragma mark
 
-      class MessageQueueManager : public IMessageQueueManager
+      class MessageQueueManager : public IMessageQueueManager,
+                                  public IWakeDelegate
       {
       public:
         friend interaction IMessageQueueManager;
@@ -90,6 +92,13 @@ namespace openpeer
 
         void shutdownAllQueues();
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageQueueManager => IWakeDelegate
+        #pragma mark
+
+        virtual void onWake();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -113,6 +122,10 @@ namespace openpeer
         AutoPUID mID;
         mutable RecursiveLock mLock;
         MessageQueueManagerWeakPtr mThisWeak;
+
+        MessageQueueManagerPtr mGracefulShutdownReference;
+        AutoBool mFinalCheck;
+        size_t mPending;
 
         MessageQueueMap mQueues;
         ThreadPriorityMap mThreadPriorities;

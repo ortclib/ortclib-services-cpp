@@ -182,6 +182,7 @@ namespace openpeer
         mLastSentData(zsLib::now()),
         mLastReceivedData(zsLib::now())
       {
+        IHelper::setTimerThreadPriority();
         ZS_LOG_DETAIL(log("created"))
       }
 

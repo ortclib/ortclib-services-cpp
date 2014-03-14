@@ -410,6 +410,8 @@ namespace openpeer
         MessageQueueAssociator(queue),
         mCtx(NULL)
       {
+        IHelper::setSocketThreadPriority();
+        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------
