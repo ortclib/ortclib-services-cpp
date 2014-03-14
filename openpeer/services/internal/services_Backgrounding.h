@@ -58,6 +58,11 @@ namespace openpeer
         ZS_DECLARE_CLASS_PTR(ExchangedNotifier)
         ZS_DECLARE_CLASS_PTR(Query)
 
+        ZS_DECLARE_TYPEDEF_PTR(IBackgroundingDelegateSubscriptions, UseBackgroundingDelegateSubscriptions)
+
+        typedef ULONG Phase;
+        typedef std::map<Phase, UseBackgroundingDelegateSubscriptionsPtr> PhaseSubscriptionMap;
+
         friend class Notifier;
         friend class Query;
 
@@ -123,6 +128,10 @@ namespace openpeer
         Log::Params debug(const char *message) const;
 
         virtual ElementPtr toDebug() const;
+
+        size_t getPreviousPhase(Phase &ioPreviousPhase);
+        size_t getNextPhase(Phase &ioNextPhase);
+        void performGoingToBackground();
 
       public:
         //---------------------------------------------------------------------
@@ -257,9 +266,12 @@ namespace openpeer
         AutoPUID mID;
         BackgroundingWeakPtr mThisWeak;
 
-        IBackgroundingDelegateSubscriptions mSubscriptions;
+        Phase mLargestPhase;
+
+        PhaseSubscriptionMap mPhaseSubscriptions;
 
         PUID mCurrentBackgroundingID;
+        Phase mCurrentPhase;
         size_t mTotalWaiting;
         IBackgroundingCompletionDelegatePtr mNotifyWhenReady;
         QueryPtr mQuery;

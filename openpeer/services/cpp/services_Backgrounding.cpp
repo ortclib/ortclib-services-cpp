@@ -70,7 +70,9 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Backgrounding::Backgrounding() :
         mCurrentBackgroundingID(zsLib::createPUID()),
+        mLargestPhase(0),
         mTotalWaiting(0),
+        mCurrentPhase(0),
         mTotalNotifiersCreated(0)
       {
         ZS_LOG_DETAIL(log("created"))
@@ -151,7 +153,23 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
         if (!originalDelegate) return IBackgroundingSubscriptionPtr();
 
-        IBackgroundingSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
+        if (phase > mLargestPhase) {
+          mLargestPhase = phase;
+        }
+
+        UseBackgroundingDelegateSubscriptionsPtr subscriptions;
+
+        PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(phase);
+        if (found == mPhaseSubscriptions.end()) {
+          ZS_LOG_DEBUG(log("added new phase to backgrounding for background subscriber") + ZS_PARAM("phase", phase))
+          subscriptions = UseBackgroundingDelegateSubscriptionsPtr(new UseBackgroundingDelegateSubscriptions);
+          mPhaseSubscriptions[phase] = subscriptions;
+        } else {
+          ZS_LOG_DEBUG(log("adding background subscriber to existing phase") + ZS_PARAM("phase", phase))
+          subscriptions = (*found).second;
+        }
+
+        IBackgroundingSubscriptionPtr subscription = subscriptions->subscribe(originalDelegate);
 
         // IBackgroundingDelegatePtr delegate = mSubscriptions.delegate(subscription);
 
@@ -167,7 +185,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IBackgroundingQueryPtr Backgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
       {
-        ZS_LOG_DETAIL(log("going to background") + ZS_PARAM("delegate", (bool)readyDelegate))
+        ZS_LOG_DETAIL(log("system going to background") + ZS_PARAM("delegate", (bool)readyDelegate))
 
         AutoRecursiveLock lock(getLock());
 
@@ -183,36 +201,14 @@ namespace openpeer
         }
 
         mCurrentBackgroundingID = zsLib::createPUID();
-        mTotalWaiting = mSubscriptions.size();
+        mCurrentPhase = 0;
 
         QueryPtr query = mQuery = Query::create(
                                                 mThisWeak.lock(),
                                                 mCurrentBackgroundingID
                                                 );
 
-        mTotalNotifiersCreated = 0;
-
-        if (0 == mTotalWaiting) {
-          ZS_LOG_DETAIL(log("no subscribers to backgrounding thus backgrounding completed immediately") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID))
-
-          if (mNotifyWhenReady) {
-            mNotifyWhenReady->onBackgroundingReady(mQuery);
-            mNotifyWhenReady.reset();
-            mQuery.reset();
-          }
-        } else {
-          ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(
-                                                                            mThisWeak.lock(),
-                                                                            mCurrentBackgroundingID
-                                                                            );
-
-          mSubscriptions.delegate()->onBackgroundingGoingToBackground(IBackgroundingSubscriptionPtr(), exchangeNotifier);
-
-          // race condition where subscriber could cancel backgrounding subscription between time size was fetched and when notifications were sent
-          mTotalWaiting = mTotalNotifiersCreated;
-
-          ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("total", mTotalWaiting))
-        }
+        performGoingToBackground();
 
         return query;
       }
@@ -220,19 +216,72 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Backgrounding::notifyGoingToBackgroundNow()
       {
-        ZS_LOG_DETAIL(log("going to background now"))
+        ZS_LOG_DETAIL(log("system going to background now"))
 
         AutoRecursiveLock lock(getLock());
-        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr());
+
+        Phase current = 0;
+        size_t total = 0;
+
+        do
+        {
+          total = getNextPhase(current);
+          if (0 == total) break;
+
+          PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
+          ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+
+          ZS_LOG_DEBUG(log("notifying phase going to background") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
+
+          UseBackgroundingDelegateSubscriptionsPtr &subscriptions = (*found).second;
+          subscriptions->delegate()->onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr());
+
+          ++current;
+        } while (true);
+
+        ZS_LOG_DEBUG(log("all phases told to go to background now"))
       }
 
       //-----------------------------------------------------------------------
       void Backgrounding::notifyReturningFromBackground()
       {
-        ZS_LOG_DETAIL(log("returning from background"))
+        ZS_LOG_DETAIL(log("system returning from background"))
 
         AutoRecursiveLock lock(getLock());
-        mSubscriptions.delegate()->onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr());
+
+        mTotalWaiting = 0;
+        mTotalNotifiersCreated = 0;
+
+        if (mNotifyWhenReady) {
+          ZS_LOG_DETAIL(log("notifying obsolete backgrounding completion delegate that it is ready") + ZS_PARAM("obsolete backgrounding id", mCurrentBackgroundingID))
+          mNotifyWhenReady->onBackgroundingReady(mQuery);
+          mNotifyWhenReady.reset();
+          mQuery.reset();
+        }
+
+        Phase current = mLargestPhase;
+        size_t total = 0;
+
+        do
+        {
+          total = getPreviousPhase(current);
+          if (0 == total) break;
+
+          PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
+          ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+
+          ZS_LOG_DEBUG(log("notifying phase returning from background") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
+
+          UseBackgroundingDelegateSubscriptionsPtr &subscriptions = (*found).second;
+          subscriptions->delegate()->onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr());
+
+          if (current < 1) break;
+
+          --current;
+        } while (true);
+
+        ZS_LOG_DEBUG(log("all phases told to go to background now"))
+
       }
 
       //-----------------------------------------------------------------------
@@ -264,10 +313,11 @@ namespace openpeer
 
         if ((mNotifyWhenReady) &&
             (0 == mTotalWaiting)) {
-          ZS_LOG_DETAIL(log("notifying backgrounding completion delegate that it is ready"))
-          mNotifyWhenReady->onBackgroundingReady(mQuery);
-          mNotifyWhenReady.reset();
-          mQuery.reset();
+
+          ZS_LOG_DEBUG(log("current phase is now complete thus moving to next phase") + ZS_PARAM("phase", mCurrentPhase))
+
+          ++mCurrentPhase;
+          performGoingToBackground();
         }
       }
 
@@ -328,9 +378,12 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "id", mID);
 
-        IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
+        IHelper::debugAppend(resultEl, "largest phase", mLargestPhase);
+
+        IHelper::debugAppend(resultEl, "phases", mPhaseSubscriptions.size());
 
         IHelper::debugAppend(resultEl, "current backgrounding id", mCurrentBackgroundingID);
+        IHelper::debugAppend(resultEl, "current phase", mCurrentPhase);
         IHelper::debugAppend(resultEl, "total waiting", mTotalWaiting);
         IHelper::debugAppend(resultEl, "notification delegate", (bool)mNotifyWhenReady);
         IHelper::debugAppend(resultEl, "query", (bool)mQuery);
@@ -340,6 +393,123 @@ namespace openpeer
         return resultEl;
       }
 
+      //-----------------------------------------------------------------------
+      size_t Backgrounding::getPreviousPhase(Phase &ioPreviousPhase)
+      {
+        size_t totalFound = 0;
+        Phase greatestFoundEqualOrLess = ioPreviousPhase;
+
+        for (PhaseSubscriptionMap::iterator iter_doNotUse = mPhaseSubscriptions.begin(); iter_doNotUse != mPhaseSubscriptions.end();)
+        {
+          PhaseSubscriptionMap::iterator current = iter_doNotUse; ++iter_doNotUse;
+
+          Phase currentPhase = (*current).first;
+          const UseBackgroundingDelegateSubscriptionsPtr &subscriptions = (*current).second;
+
+          size_t total = subscriptions->size();
+          if (0 == total) {
+            ZS_LOG_WARNING(Detail, log("no subscriptions found for phase (thus pruning phase)") + ZS_PARAM("phase", currentPhase))
+            mPhaseSubscriptions.erase(current);
+            continue;
+          }
+
+          if (currentPhase <= ioPreviousPhase) {
+            if (0 == totalFound) {
+              greatestFoundEqualOrLess = currentPhase;
+            } else if (currentPhase > greatestFoundEqualOrLess) {
+              greatestFoundEqualOrLess = currentPhase;
+            }
+            totalFound = total;
+          }
+        }
+
+        if (0 != totalFound) {
+          ioPreviousPhase = greatestFoundEqualOrLess;
+        }
+        return totalFound;
+      }
+
+      //-----------------------------------------------------------------------
+      size_t Backgrounding::getNextPhase(Phase &ioNextPhase)
+      {
+        size_t totalFound = 0;
+        Phase lowestFoundEqualOrGreater = ioNextPhase;
+
+        for (PhaseSubscriptionMap::iterator iter_doNotUse = mPhaseSubscriptions.begin(); iter_doNotUse != mPhaseSubscriptions.end();)
+        {
+          PhaseSubscriptionMap::iterator current = iter_doNotUse; ++iter_doNotUse;
+
+          Phase currentPhase = (*current).first;
+          const UseBackgroundingDelegateSubscriptionsPtr &subscriptions = (*current).second;
+
+          size_t total = subscriptions->size();
+          if (0 == total) {
+            ZS_LOG_WARNING(Detail, log("no subscriptions found for phase (thus pruning phase)") + ZS_PARAM("phase", currentPhase))
+            mPhaseSubscriptions.erase(current);
+            continue;
+          }
+
+          if (currentPhase >= ioNextPhase) {
+            if (0 == totalFound) {
+              lowestFoundEqualOrGreater = currentPhase;
+            } else if (currentPhase < lowestFoundEqualOrGreater) {
+              lowestFoundEqualOrGreater = currentPhase;
+            }
+            totalFound = total;
+          }
+        }
+
+        if (0 != totalFound) {
+          ioNextPhase = lowestFoundEqualOrGreater;
+        }
+        return totalFound;
+      }
+
+      //-----------------------------------------------------------------------
+      void Backgrounding::performGoingToBackground()
+      {
+        mTotalWaiting = getNextPhase(mCurrentPhase);
+
+        mTotalNotifiersCreated = 0;
+
+        if (0 == mTotalWaiting) {
+          ZS_LOG_DETAIL(log("all backgrounding phases have completed thus notifying backgrounding completed immediately") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID))
+
+          if (mNotifyWhenReady) {
+            mNotifyWhenReady->onBackgroundingReady(mQuery);
+            mNotifyWhenReady.reset();
+            mQuery.reset();
+          }
+          return;
+        }
+
+        ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(
+                                                                          mThisWeak.lock(),
+                                                                          mCurrentBackgroundingID
+                                                                          );
+
+        PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(mCurrentPhase);
+        ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+
+        UseBackgroundingDelegateSubscriptionsPtr subscription = (*found).second;
+
+        subscription->delegate()->onBackgroundingGoingToBackground(IBackgroundingSubscriptionPtr(), exchangeNotifier);
+
+        // race condition where subscriber could cancel backgrounding subscription between time size was fetched and when notifications were sent
+        mTotalWaiting = mTotalNotifiersCreated;
+
+        if (0 == mTotalNotifiersCreated) {
+          ZS_LOG_WARNING(Detail, log("all delegates on subscriptions to current phase are gone") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("phase", mCurrentPhase))
+
+          // recurse to next phase to skip current phase
+          ++mCurrentPhase;  // no longer on current phase, go to next...
+          performGoingToBackground();
+          return;
+        }
+
+        ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("phase", mCurrentPhase) + ZS_PARAM("total", mTotalWaiting))
+      }
+      
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
