@@ -34,6 +34,10 @@
 #include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/internal/types.h>
 
+#include <zsLib/Timer.h>
+
+#define OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "openpeer/services/backgrounding-phase-$phase$-timeout-in-seconds"
+
 namespace openpeer
 {
   namespace services
@@ -48,7 +52,8 @@ namespace openpeer
       #pragma mark Backgrounding
       #pragma mark
 
-      class Backgrounding : public IBackgrounding
+      class Backgrounding : public IBackgrounding,
+                            public ITimerDelegate
       {
       public:
         friend interaction IBackgroundingFactory;
@@ -101,6 +106,13 @@ namespace openpeer
         virtual void notifyGoingToBackgroundNow();
 
         virtual void notifyReturningFromBackground();
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding => ITimerDelegate
+        #pragma mark
+
+        virtual void onTimer(TimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -277,6 +289,8 @@ namespace openpeer
         QueryPtr mQuery;
 
         size_t mTotalNotifiersCreated;
+
+        TimerPtr mTimer;
       };
 
       //-----------------------------------------------------------------------

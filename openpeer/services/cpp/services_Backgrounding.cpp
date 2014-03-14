@@ -32,6 +32,7 @@
 #include <openpeer/services/internal/services_Backgrounding.h>
 
 #include <openpeer/services/IHelper.h>
+#include <openpeer/services/ISettings.h>
 
 #include <zsLib/XML.h>
 
@@ -76,6 +77,7 @@ namespace openpeer
         mTotalNotifiersCreated(0)
       {
         ZS_LOG_DETAIL(log("created"))
+        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------
@@ -289,6 +291,60 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark Backgrounding => ITimerDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Backgrounding::onTimer(TimerPtr timer)
+      {
+        ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer", timer->getID()))
+
+        AutoRecursiveLock lock(mLock);
+
+        if (timer != mTimer) {
+          ZS_LOG_WARNING(Debug, log("notified about obsolete timer") + ZS_PARAM("timer", timer->getID()))
+          return;
+        }
+
+        mTimer->cancel();
+        mTimer.reset();
+
+        if (!mQuery) {
+          ZS_LOG_WARNING(Detail, log("phase timer is too late as there's no outstanding backgrounding query"))
+          return;
+        }
+
+        Phase current = mCurrentPhase;
+
+        size_t total = getNextPhase(current);
+
+        if ((0 == total) ||
+            (current != mCurrentPhase) ||
+            (0 == mTotalWaiting)) {
+          ZS_LOG_WARNING(Detail, log("phase timer does not need to notify the current phase that it's going to sleep now") + ZS_PARAM("total", total) + toDebug())
+          return;
+        }
+
+        PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
+        ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+
+        UseBackgroundingDelegateSubscriptionsPtr subscriptions = (*found).second;
+
+        ZS_LOG_DETAIL(log("phase did not complete before timeout thus going to background now") + toDebug())
+
+        subscriptions->delegate()->onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr());
+
+        // current phase is now too late and must continue to next phase
+        ++mCurrentPhase;
+
+        performGoingToBackground();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark Backgrounding => friend Notifier
       #pragma mark
 
@@ -389,6 +445,8 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "query", (bool)mQuery);
 
         IHelper::debugAppend(resultEl, "total notifiers created", mTotalNotifiersCreated);
+
+        IHelper::debugAppend(resultEl, "timer id", mTimer ? mTimer->getID() : 0);
 
         return resultEl;
       }
@@ -507,9 +565,25 @@ namespace openpeer
           return;
         }
 
-        ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("phase", mCurrentPhase) + ZS_PARAM("total", mTotalWaiting))
+        if (mTimer) {
+          mTimer->cancel();
+          mTimer.reset();
+        }
+
+        String timeoutSetting(OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT);
+
+        timeoutSetting.replaceAll("$phase$", string(mCurrentPhase));
+
+        ULONG secondsUntilTimeout = ISettings::getUInt(timeoutSetting);
+
+        ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("phase", mCurrentPhase) + ZS_PARAM("total", mTotalWaiting) + ZS_PARAM("timeout", secondsUntilTimeout))
+
+        if (0 != secondsUntilTimeout) {
+          mTimer = Timer::create(mThisWeak.lock(), Seconds(secondsUntilTimeout), false);  // fires only once
+          ZS_LOG_DEBUG(log("created timeout timer") + ZS_PARAM("id", mTimer->getID()))
+        }
       }
-      
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
