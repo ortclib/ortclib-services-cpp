@@ -39,6 +39,7 @@
 #include <openpeer/services/internal/services_wire.h>
 
 #include <openpeer/services/IICESocket.h>
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/ISTUNRequester.h>
 
 #include <zsLib/Exception.h>
@@ -240,7 +241,10 @@ namespace openpeer
 
         mSocketSubscription = getSocket()->subscribe(mThisWeak.lock());
 
-        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+        mBackgroundingSubscription = IBackgrounding::subscribe(
+                                                               mThisWeak.lock(),
+                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE)
+                                                               );
 
         step();
       }
@@ -1451,7 +1455,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      void ICESocketSession::onBackgroundingGoingToBackground(
+                                                              IBackgroundingSubscriptionPtr subscription,
+                                                              IBackgroundingNotifierPtr notifier
+                                                              )
       {
         AutoRecursiveLock lock(getLock());
 
@@ -1466,7 +1473,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::onBackgroundingGoingToBackgroundNow()
+      void ICESocketSession::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(getLock());
 
@@ -1476,7 +1483,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::onBackgroundingReturningFromBackground()
+      void ICESocketSession::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(getLock());
 

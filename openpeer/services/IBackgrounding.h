@@ -53,7 +53,15 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to the backgrounding state
-      static IBackgroundingSubscriptionPtr subscribe(IBackgroundingDelegatePtr delegate);
+      // PARAMS:  phase - Each subscription is assigned a phase number and
+      //                  more than one subscriber can share the same phase.
+      //                  Phases are done in order (lowest to highest) where
+      //                  every subscriber must complete backgrounding before
+      //                  the next phase of backgrounding is activiated.
+      static IBackgroundingSubscriptionPtr subscribe(
+                                                     IBackgroundingDelegatePtr delegate,
+                                                     ULONG phase
+                                                     );
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies the application is about to go into the background
@@ -102,11 +110,30 @@ namespace openpeer
 
     interaction IBackgroundingDelegate
     {
-      virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier) = 0;
+      //-----------------------------------------------------------------------
+      // PURPOSE: This is notification from the system that it's going into the
+      //          background. If the subscriber needs some time to do it's work
+      //          it can keep a reference to the "notifier" object and only
+      //          release the object when the backgrounding is ready.
+      virtual void onBackgroundingGoingToBackground(
+                                                    IBackgroundingSubscriptionPtr subscription,
+                                                    IBackgroundingNotifierPtr notifier
+                                                    ) = 0;
 
-      virtual void onBackgroundingGoingToBackgroundNow() = 0;
+      //-----------------------------------------------------------------------
+      // PURPOSE: This notification tells the subscriber it must abandon its
+      //          backgrounding efforts as it must go to the background
+      //          immediately.
+      virtual void onBackgroundingGoingToBackgroundNow(
+                                                       IBackgroundingSubscriptionPtr subscription
+                                                       ) = 0;
 
-      virtual void onBackgroundingReturningFromBackground() = 0;
+      //-----------------------------------------------------------------------
+      // PURPOSE: This notification tells the subscriber it is returning from
+      //          the background.
+      virtual void onBackgroundingReturningFromBackground(
+                                                          IBackgroundingSubscriptionPtr subscription
+                                                          ) = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -160,34 +187,43 @@ namespace openpeer
 }
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackgroundingGoingToBackground, IBackgroundingNotifierPtr)
-ZS_DECLARE_PROXY_METHOD_0(onBackgroundingGoingToBackgroundNow)
-ZS_DECLARE_PROXY_METHOD_0(onBackgroundingReturningFromBackground)
+ZS_DECLARE_PROXY_METHOD_2(onBackgroundingGoingToBackground, IBackgroundingSubscriptionPtr, IBackgroundingNotifierPtr)
+ZS_DECLARE_PROXY_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IBackgroundingDelegate, openpeer::services::IBackgroundingSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
 
   // notify each subscription of their backgrounding object
   virtual void onBackgroundingGoingToBackground(
+                                                IBackgroundingSubscriptionPtr ignoreSubscription, // will be bogus
                                                 IBackgroundingNotifierPtr notifier
                                                 )
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegateTypePtr, DelegateTypeProxy)
-    for (SubscriptionsMap::iterator iter = subscriptions.begin(); iter != subscriptions.end(); )
+    for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )
     {
-      SubscriptionsMap::iterator current = iter; ++iter;
+      SubscriptionsMap::iterator current = iter_doNotUse; ++iter_doNotUse;
+      ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ITERATOR_VALUES(current, key, subscriptionWeak, delegate)
       try {
-        (*current).second->onBackgroundingGoingToBackground(openpeer::services::internal::getBackgroundingNotifier(notifier));
+        IBackgroundingSubscriptionPtr subscription = subscriptionWeak.lock();
+        if (subscription) {
+          delegate->onBackgroundingGoingToBackground(subscription, openpeer::services::internal::getBackgroundingNotifier(notifier));
+        } else {
+          ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY(key)
+        }
       } catch(DelegateTypeProxy::Exceptions::DelegateGone &) {
-        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY((*current).first)
+        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY(key)
       }
     }
   }
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_0(onBackgroundingGoingToBackgroundNow)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_0(onBackgroundingReturningFromBackground)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingCompletionDelegate)

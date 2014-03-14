@@ -84,7 +84,10 @@ namespace openpeer
 
         static ElementPtr toDebug(BackgroundingPtr backgrounding);
 
-        virtual IBackgroundingSubscriptionPtr subscribe(IBackgroundingDelegatePtr delegate);
+        virtual IBackgroundingSubscriptionPtr subscribe(
+                                                        IBackgroundingDelegatePtr delegate,
+                                                        ULONG phase
+                                                        );
 
         virtual IBackgroundingQueryPtr notifyGoingToBackground(
                                                                IBackgroundingCompletionDelegatePtr readyDelegate = IBackgroundingCompletionDelegatePtr()

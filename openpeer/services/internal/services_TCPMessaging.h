@@ -41,6 +41,8 @@
 #include <list>
 #include <map>
 
+#define OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-tcp-messaging"
+
 namespace openpeer
 {
   namespace services
@@ -159,11 +161,14 @@ namespace openpeer
         #pragma mark TCPMessaging => IBackgroundingDelegate
         #pragma mark
 
-        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier) {}
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      ) {}
 
-        virtual void onBackgroundingGoingToBackgroundNow() {}
+        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription) {}
 
-        virtual void onBackgroundingReturningFromBackground();
+        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
 
       protected:
         //---------------------------------------------------------------------

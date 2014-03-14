@@ -46,6 +46,8 @@
 #include <list>
 #include <utility>
 
+#define OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-ice-socket-session"
+
 namespace openpeer
 {
   namespace services
@@ -304,11 +306,14 @@ namespace openpeer
         #pragma mark ICESocketSession => IBackgroundingDelegate
         #pragma mark
 
-        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      );
 
-        virtual void onBackgroundingGoingToBackgroundNow();
+        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription);
 
-        virtual void onBackgroundingReturningFromBackground();
+        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
 
       protected:
         //---------------------------------------------------------------------

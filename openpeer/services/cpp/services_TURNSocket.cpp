@@ -207,7 +207,10 @@ namespace openpeer
         String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
-        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+        mBackgroundingSubscription = IBackgrounding::subscribe(
+                                                               mThisWeak.lock(),
+                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE)
+                                                               );
 
         step();
       }
@@ -1217,7 +1220,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      void TURNSocket::onBackgroundingGoingToBackground(
+                                                        IBackgroundingSubscriptionPtr subscription,
+                                                        IBackgroundingNotifierPtr notifier
+                                                        )
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1235,7 +1241,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingGoingToBackgroundNow()
+      void TURNSocket::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1248,7 +1254,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingReturningFromBackground()
+      void TURNSocket::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(mLock);
 

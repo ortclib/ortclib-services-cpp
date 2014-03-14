@@ -50,6 +50,8 @@
 #include <map>
 #include <utility>
 
+#define OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-turn"
+
 #define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "openpeer/services/debug/force-turn-to-use-udp"
 #define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "openpeer/services/debug/force-turn-to-use-tcp"
 #define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "openpeer/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
@@ -254,11 +256,14 @@ namespace openpeer
         #pragma mark TURNSocket => IBackgroundingDelegate
         #pragma mark
 
-        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      );
 
-        virtual void onBackgroundingGoingToBackgroundNow();
+        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription);
 
-        virtual void onBackgroundingReturningFromBackground();
+        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
 
       protected:
         //---------------------------------------------------------------------

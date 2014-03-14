@@ -32,6 +32,7 @@
 #include <openpeer/services/internal/services_TCPMessaging.h>
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/IHTTP.h>
+#include <openpeer/services/ISettings.h>
 
 #include <cryptopp/queue.h>
 
@@ -102,7 +103,10 @@ namespace openpeer
         AutoRecursiveLock lock(getLock());
         mSendStreamSubscription = mSendStream->subscribe(mThisWeak.lock());
 
-        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+        mBackgroundingSubscription = IBackgrounding::subscribe(
+                                                               mThisWeak.lock(),
+                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE)
+                                                               );
       }
 
       //-----------------------------------------------------------------------
@@ -518,7 +522,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::onBackgroundingReturningFromBackground()
+      void TCPMessaging::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(getLock());
         if (!mSocket) return;

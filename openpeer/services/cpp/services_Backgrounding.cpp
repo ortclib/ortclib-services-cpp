@@ -141,7 +141,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IBackgroundingSubscriptionPtr Backgrounding::subscribe(IBackgroundingDelegatePtr originalDelegate)
+      IBackgroundingSubscriptionPtr Backgrounding::subscribe(
+                                                             IBackgroundingDelegatePtr originalDelegate,
+                                                             ULONG phase
+                                                             )
       {
         ZS_LOG_DETAIL(log("subscribing to backgrounding"))
 
@@ -203,7 +206,7 @@ namespace openpeer
                                                                             mCurrentBackgroundingID
                                                                             );
 
-          mSubscriptions.delegate()->onBackgroundingGoingToBackground(exchangeNotifier);
+          mSubscriptions.delegate()->onBackgroundingGoingToBackground(IBackgroundingSubscriptionPtr(), exchangeNotifier);
 
           // race condition where subscriber could cancel backgrounding subscription between time size was fetched and when notifications were sent
           mTotalWaiting = mTotalNotifiersCreated;
@@ -220,7 +223,7 @@ namespace openpeer
         ZS_LOG_DETAIL(log("going to background now"))
 
         AutoRecursiveLock lock(getLock());
-        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow();
+        mSubscriptions.delegate()->onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr());
       }
 
       //-----------------------------------------------------------------------
@@ -229,7 +232,7 @@ namespace openpeer
         ZS_LOG_DETAIL(log("returning from background"))
 
         AutoRecursiveLock lock(getLock());
-        mSubscriptions.delegate()->onBackgroundingReturningFromBackground();
+        mSubscriptions.delegate()->onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr());
       }
 
       //-----------------------------------------------------------------------
@@ -466,11 +469,14 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    IBackgroundingSubscriptionPtr IBackgrounding::subscribe(IBackgroundingDelegatePtr delegate)
+    IBackgroundingSubscriptionPtr IBackgrounding::subscribe(
+                                                            IBackgroundingDelegatePtr delegate,
+                                                            ULONG phase
+                                                            )
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) return IBackgroundingSubscriptionPtr();
-      return singleton->subscribe(delegate);
+      return singleton->subscribe(delegate, phase);
     }
 
     //-------------------------------------------------------------------------
