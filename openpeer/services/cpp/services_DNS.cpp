@@ -319,7 +319,8 @@ namespace openpeer
       #pragma mark DNSQuery
       #pragma mark
 
-      class DNSQuery : public IDNSQuery
+      class DNSQuery : public SharedRecursiveLock,
+                       public IDNSQuery
       {
       protected:
         //---------------------------------------------------------------------
@@ -464,7 +465,12 @@ namespace openpeer
         #pragma mark
 
         //---------------------------------------------------------------------
-        DNSQuery(IDNSDelegatePtr delegate) :
+        DNSQuery(
+                 DNSMonitorPtr monitor,
+                 IDNSDelegatePtr delegate
+                 ) :
+          mMonitor(monitor),
+          SharedRecursiveLock(monitor ? *monitor : SharedRecursiveLock::create()),
           mObjectName("DNSQuery")
         {
           ZS_THROW_INVALID_USAGE_IF(!delegate)
@@ -491,7 +497,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void abortEarly()
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
 
           cancel();
 
@@ -519,7 +525,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void cancel()
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
 
           if (mQuery) {
             mQuery->cancel();
@@ -549,13 +555,6 @@ namespace openpeer
         #pragma mark
 
         //---------------------------------------------------------------------
-        RecursiveLock &getLock() const
-        {
-          if (!mMonitor) return mBogusLock;
-          return mMonitor->getLock();
-        }
-
-        //---------------------------------------------------------------------
         void done()
         {
           mQuery.reset();
@@ -567,7 +566,6 @@ namespace openpeer
         #pragma mark DNSQuery => (data)
         #pragma mark
 
-        mutable RecursiveLock mBogusLock;
         DNSMonitorPtr mMonitor;
         AutoPUID mID;
         DNSQueryWeakPtr mThisWeak;
@@ -594,7 +592,7 @@ namespace openpeer
       {
       protected:
         DNSAQuery(IDNSDelegatePtr delegate, const char *name) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name)
         {
           mObjectName = "DNSAQuery";
@@ -627,7 +625,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onAResult(IDNS::AResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("A record lookup was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
@@ -673,7 +671,7 @@ namespace openpeer
       {
       protected:
         DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name)
         {
           mObjectName = "DNSAAAAQuery";
@@ -706,7 +704,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onAAAAResult(IDNS::AAAAResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("AAAA was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
@@ -758,7 +756,7 @@ namespace openpeer
                     const char *service,
                     const char *protocol
                     ) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mService(service),
           mProtocol(protocol)
@@ -797,7 +795,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onSRVResult(IDNS::SRVResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("SRV record lookup was cancelled before result arrived") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
             return;

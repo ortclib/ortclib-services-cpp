@@ -59,6 +59,7 @@ namespace openpeer
       #pragma mark
 
       class HTTP : public Noop,
+                   public SharedRecursiveLock,
                    public IHTTP
       {
       public:
@@ -71,7 +72,10 @@ namespace openpeer
 
       protected:
         HTTP();
-        HTTP(Noop) : Noop(true) {}
+        HTTP(Noop) :
+          Noop(true),
+          SharedRecursiveLock(SharedRecursiveLock::create())
+        {}
 
         void init();
 
@@ -106,7 +110,6 @@ namespace openpeer
         #pragma mark HTTP => friend HTTPQuery
         #pragma mark
 
-        RecursiveLock &getLock() const;
         // (duplicate) void monitorEnd(HTTPQueryPtr query);
 
       protected:
@@ -143,7 +146,8 @@ namespace openpeer
         #pragma mark HTTP => class HTTPQuery
         #pragma mark
 
-        class HTTPQuery : public IHTTPQuery
+        class HTTPQuery : public SharedRecursiveLock,
+                          public IHTTPQuery
         {
         protected:
           HTTPQuery(
@@ -227,7 +231,6 @@ namespace openpeer
           #pragma mark
 
           Log::Params log(const char *message) const;
-          RecursiveLock &getLock() const;
 
           static size_t writeHeader(
                                     void *ptr,
@@ -257,8 +260,7 @@ namespace openpeer
           #pragma mark HTTP::HTTPQuery => (data)
           #pragma mark
 
-          mutable RecursiveLock mBogusLock;
-          PUID mID;
+          AutoPUID mID;
           HTTPQueryWeakPtr mThisWeak;
 
           HTTPWeakPtr mOuter;
@@ -288,8 +290,7 @@ namespace openpeer
         #pragma mark HTTP => (data)
         #pragma mark
 
-        mutable RecursiveLock mLock;
-        PUID mID;
+        AutoPUID mID;
         HTTPWeakPtr mThisWeak;
         HTTPPtr mGracefulShutdownReference;
 

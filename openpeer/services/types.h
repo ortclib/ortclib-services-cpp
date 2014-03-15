@@ -44,6 +44,11 @@ namespace openpeer
 {
   namespace services
   {
+    namespace internal
+    {
+      void throwOnlySetOnce();
+    }
+
     using zsLib::PUID;
     using zsLib::CHAR;
     using zsLib::UCHAR;
@@ -73,7 +78,42 @@ namespace openpeer
 
     using boost::dynamic_pointer_cast;
 
-    ZS_DECLARE_PTR(RecursiveLock)
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock)
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock)
+
+    class SharedRecursiveLock
+    {
+    public:
+      static SharedRecursiveLock create() {return SharedRecursiveLock(RecursiveLockPtr(new RecursiveLock));}
+
+      SharedRecursiveLock(const SharedRecursiveLock &source) : mLock(source.mLock) {}
+      SharedRecursiveLock(RecursiveLockPtr shared) : mLock(shared) {}
+
+      RecursiveLock &lock() const {return *mLock;}
+
+      operator RecursiveLock & () const {return *mLock;}
+
+    private:
+      SharedRecursiveLock() {}  // illegal
+      mutable RecursiveLockPtr mLock;
+    };
+
+    template<typename T, bool setOnceOnly = false>
+    class LockedValue
+    {
+    public:
+      LockedValue() : mSet(false) {}
+      ~LockedValue() {}
+
+      T get() const {AutoRecursiveLock lock(mLock); return mValue;}
+      void set(T value) {AutoRecursiveLock lock(mLock); if ((setOnceOnly) && (mSet)) internal::throwOnlySetOnce(); mValue = value; mSet = true;}
+
+    protected:
+      mutable RecursiveLock mLock;
+      T mValue;
+      bool mSet;
+    };
+
     ZS_DECLARE_USING_PTR(zsLib, Socket)
     ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
     ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)

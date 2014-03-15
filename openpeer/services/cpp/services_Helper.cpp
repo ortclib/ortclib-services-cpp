@@ -103,6 +103,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      void throwOnlySetOnce()
+      {
+        ZS_THROW_INVALID_USAGE("services::LockValue object is only allowed to be set once")
+      }
+
+      //-----------------------------------------------------------------------
       static String getElementTextAndDecode(ElementPtr node)
       {
         if (!node) return String();

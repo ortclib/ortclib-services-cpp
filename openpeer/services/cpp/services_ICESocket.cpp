@@ -153,6 +153,8 @@ namespace openpeer
                            ) :
         MessageQueueAssociator(queue),
 
+        SharedRecursiveLock(SharedRecursiveLock::create()),
+
         mCurrentState(ICESocketState_Pending),
 
         mFoundation(ICESocket::convert(foundationSocket)),
@@ -207,7 +209,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::init()
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         ZS_LOG_DETAIL(log("init"))
 
         String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
@@ -284,7 +286,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("subscribing to socket state"))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         if (!originalDelegate) return mDefaultSubscription;
 
         IICESocketSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
@@ -315,7 +317,7 @@ namespace openpeer
                                                       String *outLastErrorReason
                                                       ) const
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
         if (outLastErrorReason) *outLastErrorReason = mLastErrorReason;
         return mCurrentState;
@@ -324,14 +326,14 @@ namespace openpeer
       //-----------------------------------------------------------------------
       String ICESocket::getUsernameFrag() const
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         return mUsernameFrag;
       }
 
       //-----------------------------------------------------------------------
       String ICESocket::getPassword() const
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         return mPassword;
       }
 
@@ -340,14 +342,14 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("shutdown requested"))
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         cancel();
       }
 
       //-----------------------------------------------------------------------
       void ICESocket::wakeup(Duration minimumTimeCandidatesMustRemainValidWhileNotUsed)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -369,7 +371,7 @@ namespace openpeer
                                          String *outLocalCandidateVersion
                                          )
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         outCandidates.clear();
 
@@ -416,7 +418,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       String ICESocket::getLocalCandidatesVersion() const
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         return string(mLastCandidateCRC);
       }
 
@@ -435,7 +437,7 @@ namespace openpeer
 
         ZS_THROW_INVALID_ARGUMENT_IF(!session)
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -469,7 +471,7 @@ namespace openpeer
 
         // get socket or turn socket value
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
 
           LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(getViaLocalIP(viaLocalCandidate));
           if (found == mSocketLocalIPs.end()) {
@@ -561,7 +563,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("notified ICE session closed") + ZS_PARAM("session id", sessionID))
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         ICESocketSessionMap::iterator found = mSessions.find(sessionID);
         if (found == mSessions.end()) {
           ZS_LOG_WARNING(Detail, log("session is not found (must have already been closed)") + ZS_PARAM("session id", + sessionID))
@@ -585,7 +587,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::monitorWriteReadyOnAllSessions(bool monitor)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         mMonitoringWriteReady = monitor;
 
@@ -612,7 +614,7 @@ namespace openpeer
 
         // scope: we are going to read the data while within the local but process it outside the lock
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           LocalSocketMap::iterator found = mSockets.find(socket);
           if (found == mSockets.end()) {
@@ -654,7 +656,7 @@ namespace openpeer
       void ICESocket::onWriteReady(SocketPtr socket)
       {
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("write ready"))
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         LocalSocketMap::iterator found = mSockets.find(socket);
         if (found == mSockets.end()) {
@@ -681,7 +683,7 @@ namespace openpeer
       void ICESocket::onException(SocketPtr socket)
       {
         ZS_LOG_DETAIL(log("on exception"))
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         {
           LocalSocketMap::iterator found = mSockets.find(socket);
@@ -760,7 +762,7 @@ namespace openpeer
                                                TURNSocketStates state
                                                )
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         ZS_LOG_DEBUG(log("turn socket state changed"))
         step();
       }
@@ -777,7 +779,7 @@ namespace openpeer
         CandidatePtr viaCandidate;
         CandidatePtr viaLocalCandidate;
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
           if (found == mSocketTURNs.end()) {
             OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN not associated with any local socket"))
@@ -803,7 +805,7 @@ namespace openpeer
                                                  size_t packetLengthInBytes
                                                  )
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet for TURN") + ZS_PARAM("TURN socket ID", socket->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
 
@@ -844,7 +846,7 @@ namespace openpeer
       {
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notified that TURN is write ready") + ZS_PARAM("TURN socket ID", socket->getID()))
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
         if (found == mSocketTURNs.end()) {
@@ -881,7 +883,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!packet)
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (isShutdown()) {
           ZS_LOG_TRACE(log("cannot send packet as already shutdown"))
           return;
@@ -914,7 +916,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         ZS_LOG_DETAIL(log("notified STUN discovery finished") + ZS_PARAM("id", discovery->getID()) + ZS_PARAM("reflected ip", discovery->getMappedAddress().string()))
         step();
       }
@@ -932,7 +934,7 @@ namespace openpeer
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer ID", timer->getID()))
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         if (timer == mRebindTimer) {
           get(mRebindCheckNow) = true;
@@ -990,7 +992,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr ICESocket::toDebug() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         ElementPtr resultEl = Element::create("ICESocket");
 
@@ -2215,7 +2217,7 @@ namespace openpeer
 
             // scope: going into a lock to obtain
             {
-              AutoRecursiveLock lock(getLock());
+              AutoRecursiveLock lock(*this);
               LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(getViaLocalIP(viaCandidate));
               if (found != mSocketLocalIPs.end()) {
                 LocalSocketPtr &localSocket = (*found).second;
@@ -2272,7 +2274,7 @@ namespace openpeer
           {
             // scope: find the next socket session to test in the list while in a lock
             {
-              AutoRecursiveLock lock(getLock());
+              AutoRecursiveLock lock(*this);
               if (mSessions.size() < 1) break;  // no sessions to check
 
               if (!next) {
@@ -2313,7 +2315,7 @@ namespace openpeer
 
           // scope: going into a lock to obtain
           {
-            AutoRecursiveLock lock(getLock());
+            AutoRecursiveLock lock(*this);
             LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(getViaLocalIP(viaCandidate));
             if (found != mSocketLocalIPs.end()) {
               LocalSocketPtr &localSocket = (*found).second;
@@ -2334,7 +2336,7 @@ namespace openpeer
 
         // try to find a quick route to the session
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           RouteTuple tuple(viaCandidate.mIPAddress, viaLocalCandidate.mIPAddress, source);
           QuickRouteMap::iterator found = mRoutes.find(tuple);
           if (found != mRoutes.end()) {
@@ -2357,7 +2359,7 @@ namespace openpeer
         {
           // scope: find the next socket session to test in the list while in a lock
           {
-            AutoRecursiveLock lock(getLock());
+            AutoRecursiveLock lock(*this);
             if (mSessions.size() < 1) break;  // no sessions to check
 
             if (!next) {
@@ -2384,7 +2386,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::getBuffer(RecycledPacketBuffer &outBuffer)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (mRecycledBuffers.size() < 1) {
           outBuffer = RecycledPacketBuffer(new BYTE[OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE]);
           return;
@@ -2397,7 +2399,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::recycleBuffer(RecycledPacketBuffer &buffer)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (!buffer) return;
 
         if (mRecycledBuffers.size() >= OPENPEER_SERVICES_ICESOCKET_MAX_RECYLCE_BUFFERS) {
