@@ -222,7 +222,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("system going to background now"))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         Phase current = 0;
         size_t total = 0;
