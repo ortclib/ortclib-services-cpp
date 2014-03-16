@@ -104,7 +104,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       HTTP::HTTP() :
-        mID(zsLib::createPUID()),
+        SharedRecursiveLock(SharedRecursiveLock::create()),
         mShouldShutdown(false),
         mMultiCurl(NULL)
       {
@@ -186,12 +186,6 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RecursiveLock &HTTP::getLock() const
-      {
-        return mLock;
-      }
-
-      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -238,7 +232,7 @@ namespace openpeer
       {
         ThreadPtr thread;
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           mGracefulShutdownReference = mThisWeak.lock();
           thread = mThread;
 
@@ -252,7 +246,7 @@ namespace openpeer
         thread->join();
 
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           mThread.reset();
         }
       }
@@ -263,7 +257,7 @@ namespace openpeer
         int errorCode = 0;
 
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (!mWakeUpSocket)               // is the wakeup socket created?
             return;
@@ -289,7 +283,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::createWakeUpSocket()
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         int tries = 0;
         bool useIPv6 = true;
@@ -438,7 +432,7 @@ namespace openpeer
         EventPtr event;
 
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (mShouldShutdown) {
             query->cancel();
@@ -470,7 +464,7 @@ namespace openpeer
       {
         EventPtr event;
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           mPendingRemoveQueries[query->getID()] = query;
 
@@ -517,7 +511,7 @@ namespace openpeer
           SOCKET highestSocket = zsLib::INVALID_SOCKET;
 
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             processWaiting();
 
             FD_ZERO(&fdread);
@@ -569,7 +563,7 @@ namespace openpeer
 
           // select completed, do notifications from select
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             shouldShutdown = mShouldShutdown;
 
             int handleCount = 0;
@@ -641,7 +635,7 @@ namespace openpeer
         HTTPPtr gracefulReference;
 
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           processWaiting();
           mWaitingForRebuildList.clear();
           mWakeUpSocket.reset();
@@ -679,7 +673,7 @@ namespace openpeer
                                  const char *postDataMimeType,
                                  Duration timeout
                                  ) :
-        mID(zsLib::createPUID()),
+        SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         mOuter(outer),
         mDelegate(IHTTPQueryDelegateProxy::create(Helper::getServiceQueue(), delegate)),
         mIsPost(isPost),
@@ -724,7 +718,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::cancel()
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         ZS_LOG_DEBUG(log("cancel called"))
 
@@ -762,7 +756,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool HTTP::HTTPQuery::isComplete() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         if (!mDelegate) return true;
         return false;
       }
@@ -770,7 +764,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool HTTP::HTTPQuery::wasSuccessful() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         if (mDelegate) return false;
 
         return ((CURLE_OK == mResultCode) &&
@@ -780,21 +774,21 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IHTTP::HTTPStatusCodes HTTP::HTTPQuery::getStatusCode() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return IHTTP::toStatusCode((WORD)mResponseCode);
       }
 
       //-----------------------------------------------------------------------
       long HTTP::HTTPQuery::getResponseCode() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return mResponseCode;
       }
 
       //-----------------------------------------------------------------------
       size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mHeader.MaxRetrievable());
       }
 
@@ -804,7 +798,7 @@ namespace openpeer
                                          size_t bytesToRead
                                          )
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return mHeader.Get(outResultData, bytesToRead);
       }
 
@@ -813,7 +807,7 @@ namespace openpeer
       {
         outHeader.clear();
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         CryptoPP::lword available = mHeader.MaxRetrievable();
         if (0 == available) return 0;
 
@@ -828,7 +822,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       size_t HTTP::HTTPQuery::getReadDataAvailableInBytes() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mBody.MaxRetrievable());
       }
 
@@ -838,7 +832,7 @@ namespace openpeer
                                        size_t bytesToRead
                                        )
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return mBody.Get(outResultData, bytesToRead);
       }
 
@@ -847,7 +841,7 @@ namespace openpeer
       {
         outResultData.clear();
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         CryptoPP::lword available = mBody.MaxRetrievable();
         if (0 == available) return 0;
 
@@ -867,6 +861,7 @@ namespace openpeer
       #pragma mark HTTP::HTTPQuery => friend HTTP
       #pragma mark
 
+      //-----------------------------------------------------------------------
       HTTP::HTTPQueryPtr HTTP::HTTPQuery::create(
                                                  HTTPPtr outer,
                                                  IHTTPQueryDelegatePtr delegate,
@@ -888,7 +883,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::prepareCurl()
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         ZS_THROW_BAD_STATE_IF(mCurl)
 
@@ -1006,7 +1001,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::cleanupCurl()
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         mOuter.reset();
 
         cancel();
@@ -1015,14 +1010,14 @@ namespace openpeer
       //-----------------------------------------------------------------------
       CURL *HTTP::HTTPQuery::getCURL() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         return mCurl;
       }
 
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::notifyComplete(CURLcode result)
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         if ((mCurl) &&
             (0 == mResponseCode)) {
@@ -1075,14 +1070,6 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      RecursiveLock &HTTP::HTTPQuery::getLock() const
-      {
-        HTTPPtr outer = mOuter.lock();
-        if (outer) return outer->getLock();
-        return mBogusLock;
-      }
-
-      //-----------------------------------------------------------------------
       size_t HTTP::HTTPQuery::writeHeader(
                                           void *ptr,
                                           size_t size,
@@ -1092,7 +1079,7 @@ namespace openpeer
       {
         HTTPQueryPtr pThis = ((HTTPQuery *)userdata)->mThisWeak.lock();
 
-        AutoRecursiveLock lock(pThis->getLock());
+        AutoRecursiveLock lock(*pThis);
 
         if (!pThis->mDelegate) {
           return 0;
@@ -1150,7 +1137,7 @@ namespace openpeer
       {
         HTTPQueryPtr pThis = ((HTTPQuery *)userdata)->mThisWeak.lock();
 
-        AutoRecursiveLock lock(pThis->getLock());
+        AutoRecursiveLock lock(*pThis);
 
         if (!pThis->mDelegate) {
           return 0;

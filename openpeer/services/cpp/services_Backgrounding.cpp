@@ -70,6 +70,8 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       Backgrounding::Backgrounding() :
+        MessageQueueAssociator(IHelper::getServiceQueue()),
+        SharedRecursiveLock(SharedRecursiveLock::create()),
         mCurrentBackgroundingID(zsLib::createPUID()),
         mLargestPhase(0),
         mTotalWaiting(0),
@@ -120,7 +122,7 @@ namespace openpeer
         BackgroundingPtr pThis = exchange->getOuter();
 
         {
-          AutoRecursiveLock lock(pThis->getLock());
+          AutoRecursiveLock lock(*pThis);
           ++(pThis->mTotalNotifiersCreated);
         }
 
@@ -152,7 +154,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("subscribing to backgrounding"))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         if (!originalDelegate) return IBackgroundingSubscriptionPtr();
 
         if (phase > mLargestPhase) {
@@ -189,7 +191,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("system going to background") + ZS_PARAM("delegate", (bool)readyDelegate))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         if (mNotifyWhenReady) {
           ZS_LOG_DETAIL(log("notifying obsolete backgrounding completion delegate that it is ready") + ZS_PARAM("obsolete backgrounding id", mCurrentBackgroundingID))
@@ -249,7 +251,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("system returning from background"))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         mTotalWaiting = 0;
         mTotalNotifiersCreated = 0;
@@ -299,7 +301,7 @@ namespace openpeer
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer", timer->getID()))
 
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         if (timer != mTimer) {
           ZS_LOG_WARNING(Debug, log("notified about obsolete timer") + ZS_PARAM("timer", timer->getID()))
@@ -353,7 +355,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("received notification that notifier is complete") + ZS_PARAM("backgrounding id", backgroundingID))
 
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         if (backgroundingID != mCurrentBackgroundingID) {
           ZS_LOG_WARNING(Debug, log("notification of backgrounding ready for obsolete backgrounding session"))
@@ -388,7 +390,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       size_t Backgrounding::totalPending(PUID backgroundingID) const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
         if (backgroundingID != mCurrentBackgroundingID) {
           ZS_LOG_WARNING(Debug, log("obsolete backgrounding query is always ready thus total waiting is always \"0\""))
           return 0;
@@ -428,7 +430,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr Backgrounding::toDebug() const
       {
-        AutoRecursiveLock lock(getLock());
+        AutoRecursiveLock lock(*this);
 
         ElementPtr resultEl = Element::create("services::Backgrounding");
 
@@ -594,9 +596,10 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       Backgrounding::Notifier::Notifier(ExchangedNotifierPtr notifier) :
-        mBackgroundingID(notifier->getID())
+        mBackgroundingID(notifier->getID()),
+        SharedRecursiveLock(*(notifier->getOuter())),
+        mOuter(notifier->getOuter())
       {
-        mOuter = notifier->getOuter();
       }
 
       //-----------------------------------------------------------------------
@@ -624,7 +627,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Backgrounding::Notifier::ready()
       {
-        AutoRecursiveLock lock(mOuter->getLock());
+        AutoRecursiveLock lock(*this);
 
         if (mNotified) return;
 
@@ -681,7 +684,7 @@ namespace openpeer
         BackgroundingPtr outer = mOuter.lock();
         if (!outer) return true;
 
-        AutoRecursiveLock lock(outer->getLock());
+        AutoRecursiveLock lock(*this);
 
         return 0 == outer->totalPending(mBackgroundingID);
       }
@@ -692,7 +695,7 @@ namespace openpeer
         BackgroundingPtr outer = mOuter.lock();
         if (!outer) return 0;
 
-        AutoRecursiveLock lock(outer->getLock());
+        AutoRecursiveLock lock(*this);
 
         return outer->totalPending(mBackgroundingID);
       }
@@ -727,7 +730,29 @@ namespace openpeer
     IBackgroundingQueryPtr IBackgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
-      if (!singleton) return IBackgroundingQueryPtr();
+      if (!singleton) {
+        ZS_DECLARE_CLASS_PTR(BogusQuery)
+
+        class BogusQuery : public IBackgroundingQuery
+        {
+          BogusQuery() {}
+        public:
+          static BogusQueryPtr create() {return BogusQueryPtr(new BogusQuery);}
+
+          virtual PUID getID() const {return mID;}
+          virtual bool isReady() const {return true;}
+          virtual size_t totalBackgroundingSubscribersStillPending() const {return 0;}
+
+        protected:
+          zsLib::AutoPUID mID;
+        };
+
+        BogusQueryPtr query = BogusQuery::create();
+        if (readyDelegate) {
+          IBackgroundingCompletionDelegateProxy::create(readyDelegate)->onBackgroundingReady(query);
+        }
+        return query;
+      }
       return singleton->notifyGoingToBackground(readyDelegate);
     }
 

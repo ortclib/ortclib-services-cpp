@@ -56,6 +56,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(DNSMonitor)
 
       class DNSMonitor : public MessageQueueAssociator,
+                         public SharedRecursiveLock,
                          public ISocketDelegate,
                          public ITimerDelegate
       {
@@ -152,8 +153,6 @@ namespace openpeer
         void createDNSContext();
         void cleanIfNoneOutstanding();
 
-        RecursiveLock &getLock() const {return mLock;}
-
         CacheInfoPtr done(QueryID queryID);
         void cancel(
                     QueryID queryID,
@@ -185,7 +184,6 @@ namespace openpeer
       private:
         AutoPUID mID;
 
-        mutable RecursiveLock mLock;
         DNSMonitorWeakPtr mThisWeak;
         SocketPtr mSocket;
         TimerPtr mTimer;

@@ -104,6 +104,7 @@ namespace openpeer
 
       class ICESocketSession : public Noop,
                                public MessageQueueAssociator,
+                               public SharedRecursiveLock,
                                public IICESocketSession,
                                public IICESocketSessionForICESocket,
                                public IWakeDelegate,
@@ -151,14 +152,18 @@ namespace openpeer
         ICESocketSession(
                          IMessageQueuePtr queue,
                          IICESocketSessionDelegatePtr delegate,
-                         UseICESocketPtr socket,
+                         ICESocketPtr inSocket,
                          const char *remoteUsernameFrag,
                          const char *remotePassword,
                          ICEControls control,
                          ICESocketSessionPtr foundation = ICESocketSessionPtr()
                          );
 
-        ICESocketSession(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        ICESocketSession(Noop) :
+          Noop(true),
+          MessageQueueAssociator(IMessageQueuePtr()),
+          SharedRecursiveLock(SharedRecursiveLock::create())
+        {}
 
         void init();
 
@@ -321,8 +326,6 @@ namespace openpeer
         #pragma mark ICESocketSession => (internal)
         #pragma mark
 
-        RecursiveLock &getLock() const;
-
         Log::Params log(const char *message) const;
         Log::Params debug(const char *message) const;
 
@@ -372,11 +375,9 @@ namespace openpeer
         #pragma mark ICESocketSession => (data)
         #pragma mark
 
-        mutable RecursiveLock mBogusLock;
-
         AutoPUID mID;
         ICESocketSessionWeakPtr mThisWeak;
-        UseICESocketWeakPtr mICESocketWeak;
+        UseICESocketWeakPtr mICESocket;
 
         ICESocketSessionStates mCurrentState;
         AutoWORD mLastError;

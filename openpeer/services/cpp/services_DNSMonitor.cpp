@@ -408,6 +408,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitor::DNSMonitor(IMessageQueuePtr queue) :
         MessageQueueAssociator(queue),
+        SharedRecursiveLock(SharedRecursiveLock::create()),
         mCtx(NULL)
       {
         IHelper::setSocketThreadPriority();
@@ -533,7 +534,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitor::CacheInfoPtr DNSMonitor::done(QueryID queryID)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         CacheInfoPtr result;
 
@@ -552,7 +553,7 @@ namespace openpeer
                               IResultPtr result
                               )
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
 
         PendingQueriesMap::iterator found = mPendingQueries.find(queryID);
         if (found == mPendingQueries.end()) {
@@ -611,7 +612,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void DNSMonitor::submitAOrAAAAQuery(bool aMode, const char *inName, int flags, IResultPtr result)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         createDNSContext();
         if (!mCtx) {
           result->onCancel(); // this result is now bogus
@@ -696,7 +697,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void DNSMonitor::submitSRVQuery(const char *inName, const char *inService, const char *inProtocol, int flags, IResultPtr result)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         createDNSContext();
         if (!mCtx) {
           result->onCancel(); // this result is now bogus
@@ -855,7 +856,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void DNSMonitor::onReadReady(SocketPtr socket)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (!mCtx)
           return;
 
@@ -877,7 +878,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void DNSMonitor::onException(SocketPtr socket)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (NULL == mCtx)
           return;
 
@@ -908,7 +909,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void DNSMonitor::onTimer(TimerPtr timer)
       {
-        AutoRecursiveLock lock(mLock);
+        AutoRecursiveLock lock(*this);
         if (NULL == mCtx)
           return;
 

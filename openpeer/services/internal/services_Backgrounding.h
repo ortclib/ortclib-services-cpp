@@ -52,7 +52,9 @@ namespace openpeer
       #pragma mark Backgrounding
       #pragma mark
 
-      class Backgrounding : public IBackgrounding,
+      class Backgrounding : public MessageQueueAssociator,
+                            public SharedRecursiveLock,
+                            public IBackgrounding,
                             public ITimerDelegate
       {
       public:
@@ -120,7 +122,6 @@ namespace openpeer
         #pragma mark
 
         void notifyReady(PUID backgroundingID);
-        RecursiveLock &getLock() const {return mLock;}
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -151,7 +152,8 @@ namespace openpeer
         #pragma mark Backgrounding::Notifier
         #pragma mark
 
-        class Notifier : public IBackgroundingNotifier
+        class Notifier : public SharedRecursiveLock,
+                         public IBackgroundingNotifier
         {
         protected:
           Notifier(ExchangedNotifierPtr notifier);
@@ -183,7 +185,8 @@ namespace openpeer
         #pragma mark Backgrounding::ExchangedNotifier
         #pragma mark
 
-        class ExchangedNotifier : public IBackgroundingNotifier
+        class ExchangedNotifier : public SharedRecursiveLock,
+                                  public IBackgroundingNotifier
         {
         public:
           friend class Backgrounding;
@@ -194,6 +197,7 @@ namespace openpeer
                             BackgroundingPtr outer,
                             PUID backgroundingID
                             ) :
+            SharedRecursiveLock(*outer),
             mOuter(outer),
             mBackgroundingID(backgroundingID)
           {}
@@ -232,13 +236,15 @@ namespace openpeer
         #pragma mark Backgrounding::Query
         #pragma mark
 
-        class Query : public IBackgroundingQuery
+        class Query : public SharedRecursiveLock,
+                      public IBackgroundingQuery
         {
         protected:
           Query(
                 BackgroundingPtr outer,
                 PUID backgroundingID
                 ) :
+          SharedRecursiveLock(*outer),
           mOuter(outer),
           mBackgroundingID(backgroundingID)
         {}
@@ -262,8 +268,6 @@ namespace openpeer
           virtual size_t totalBackgroundingSubscribersStillPending() const;
 
         protected:
-          mutable RecursiveLock mBogusLock;
-
           PUID mBackgroundingID;
           BackgroundingWeakPtr mOuter;
         };
@@ -274,7 +278,6 @@ namespace openpeer
         #pragma mark Backgrounding => (data)
         #pragma mark
 
-        mutable RecursiveLock mLock;
         AutoPUID mID;
         BackgroundingWeakPtr mThisWeak;
 
