@@ -284,8 +284,7 @@ namespace openpeer
           --current;
         } while (true);
 
-        ZS_LOG_DEBUG(log("all phases told to go to background now"))
-
+        ZS_LOG_DEBUG(log("all phases told that application is returning from background"))
       }
 
       //-----------------------------------------------------------------------
@@ -351,14 +350,22 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void Backgrounding::notifyReady(PUID backgroundingID)
+      void Backgrounding::notifyReady(
+                                      PUID backgroundingID,
+                                      Phase phase
+                                      )
       {
-        ZS_LOG_DETAIL(log("received notification that notifier is complete") + ZS_PARAM("backgrounding id", backgroundingID))
+        ZS_LOG_DETAIL(log("received notification that notifier is complete") + ZS_PARAM("backgrounding id", backgroundingID) + ZS_PARAM("phase", phase))
 
         AutoRecursiveLock lock(*this);
 
         if (backgroundingID != mCurrentBackgroundingID) {
           ZS_LOG_WARNING(Debug, log("notification of backgrounding ready for obsolete backgrounding session"))
+          return;
+        }
+
+        if (phase != mCurrentPhase) {
+          ZS_LOG_WARNING(Debug, log("notification of backgrounding ready for obsolete phase"))
           return;
         }
 
@@ -476,10 +483,11 @@ namespace openpeer
           if (currentPhase <= ioPreviousPhase) {
             if (0 == totalFound) {
               greatestFoundEqualOrLess = currentPhase;
+              totalFound = total;
             } else if (currentPhase > greatestFoundEqualOrLess) {
               greatestFoundEqualOrLess = currentPhase;
+              totalFound = total;
             }
-            totalFound = total;
           }
         }
 
@@ -512,10 +520,11 @@ namespace openpeer
           if (currentPhase >= ioNextPhase) {
             if (0 == totalFound) {
               lowestFoundEqualOrGreater = currentPhase;
+              totalFound = total;
             } else if (currentPhase < lowestFoundEqualOrGreater) {
               lowestFoundEqualOrGreater = currentPhase;
+              totalFound = total;
             }
-            totalFound = total;
           }
         }
 
@@ -545,7 +554,8 @@ namespace openpeer
 
         ExchangedNotifierPtr exchangeNotifier = ExchangedNotifier::create(
                                                                           mThisWeak.lock(),
-                                                                          mCurrentBackgroundingID
+                                                                          mCurrentBackgroundingID,
+                                                                          mCurrentPhase
                                                                           );
 
         PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(mCurrentPhase);
@@ -598,7 +608,8 @@ namespace openpeer
       Backgrounding::Notifier::Notifier(ExchangedNotifierPtr notifier) :
         mBackgroundingID(notifier->getID()),
         SharedRecursiveLock(*(notifier->getOuter())),
-        mOuter(notifier->getOuter())
+        mOuter(notifier->getOuter()),
+        mPhase(notifier->getPhase())
       {
       }
 
@@ -607,7 +618,7 @@ namespace openpeer
       {
         if (mNotified) return;
 
-        mOuter->notifyReady(mBackgroundingID);
+        mOuter->notifyReady(mBackgroundingID, mPhase);
       }
 
       //-----------------------------------------------------------------------
@@ -633,7 +644,7 @@ namespace openpeer
 
         get(mNotified) = true;
 
-        mOuter->notifyReady(mBackgroundingID);
+        mOuter->notifyReady(mBackgroundingID, mPhase);
       }
 
       //-----------------------------------------------------------------------
@@ -647,10 +658,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Backgrounding::ExchangedNotifierPtr Backgrounding::ExchangedNotifier::create(
                                                                                    BackgroundingPtr backgrounding,
-                                                                                   PUID backgroundingID
+                                                                                   PUID backgroundingID,
+                                                                                   Phase phase
                                                                                    )
       {
-        return ExchangedNotifierPtr(new ExchangedNotifier(backgrounding, backgroundingID));
+        return ExchangedNotifierPtr(new ExchangedNotifier(backgrounding, backgroundingID, phase));
       }
 
       //-----------------------------------------------------------------------

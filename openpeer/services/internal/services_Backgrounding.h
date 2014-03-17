@@ -121,7 +121,10 @@ namespace openpeer
         #pragma mark Backgrounding => friend Notifier
         #pragma mark
 
-        void notifyReady(PUID backgroundingID);
+        void notifyReady(
+                         PUID backgroundingID,
+                         Phase phase
+                         );
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -178,6 +181,7 @@ namespace openpeer
 
           AutoBool mNotified;
           PUID mBackgroundingID;
+          Phase mPhase;
         };
 
         //---------------------------------------------------------------------
@@ -195,17 +199,20 @@ namespace openpeer
         protected:
           ExchangedNotifier(
                             BackgroundingPtr outer,
-                            PUID backgroundingID
+                            PUID backgroundingID,
+                            Phase phase
                             ) :
             SharedRecursiveLock(*outer),
             mOuter(outer),
-            mBackgroundingID(backgroundingID)
+            mBackgroundingID(backgroundingID),
+            mPhase(phase)
           {}
 
         public:
           static ExchangedNotifierPtr create(
                                              BackgroundingPtr outer,
-                                             PUID backgroundingID
+                                             PUID backgroundingID,
+                                             Phase phase
                                              );
 
         protected:
@@ -224,11 +231,13 @@ namespace openpeer
           #pragma mark
 
           BackgroundingPtr getOuter() const {return mOuter;}
+          Phase getPhase() const {return mPhase;}
 
         protected:
           BackgroundingPtr mOuter;
 
           PUID mBackgroundingID;
+          Phase mPhase;
         };
 
         //---------------------------------------------------------------------
