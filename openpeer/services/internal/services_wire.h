@@ -35,35 +35,15 @@
 
 #include <zsLib/Log.h>
 
-#define OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE    __FUNCTION__, __FILE__, __LINE__
+namespace openpeer { namespace services { namespace wire { ZS_DECLARE_FORWARD_SUBSYSTEM(openpeer_services_wire) } } }
 
+#define OPENPEER_SERVICES_WIRE_IS_LOGGING(xLevel) ZS_IS_SUBSYSTEM_LOGGING(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xLevel)
 
-#define OPENPEER_SERVICES_WIRE_LOG_BASIC(xMsg)    if (openpeer::services::wire::isLogging(Log::Basic))  {openpeer::services::wire::log(Log::Informational, Log::Basic, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-#define OPENPEER_SERVICES_WIRE_LOG_DETAIL(xMsg)   if (openpeer::services::wire::isLogging(Log::Detail)) {openpeer::services::wire::log(Log::Informational, Log::Detail, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-#define OPENPEER_SERVICES_WIRE_LOG_DEBUG(xMsg)    if (openpeer::services::wire::isLogging(Log::Debug))  {openpeer::services::wire::log(Log::Informational, Log::Debug, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-#define OPENPEER_SERVICES_WIRE_LOG_TRACE(xMsg)    if (openpeer::services::wire::isLogging(Log::Trace))  {openpeer::services::wire::log(Log::Informational, Log::Trace, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-#define OPENPEER_SERVICES_WIRE_LOG_INSANE(xMsg)   if (openpeer::services::wire::isLogging(Log::Insane)) {openpeer::services::wire::log(Log::Informational, Log::Insane, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
+#define OPENPEER_SERVICES_WIRE_LOG_BASIC(xMsg)    ZS_LOG_SUBSYSTEM_BASIC(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xMsg)
+#define OPENPEER_SERVICES_WIRE_LOG_DETAIL(xMsg)   ZS_LOG_SUBSYSTEM_DETAIL(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xMsg)
+#define OPENPEER_SERVICES_WIRE_LOG_DEBUG(xMsg)    ZS_LOG_SUBSYSTEM_DEBUG(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xMsg)
+#define OPENPEER_SERVICES_WIRE_LOG_TRACE(xMsg)    ZS_LOG_SUBSYSTEM_TRACE(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xMsg)
+#define OPENPEER_SERVICES_WIRE_LOG_INSANE(xMsg)   ZS_LOG_SUBSYSTEM_INSANE(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xMsg)
 
-#define OPENPEER_SERVICES_WIRE_LOG_WARNING(xLevel, xMsg)  if (openpeer::services::wire::isLogging(Log::xLevel)) {openpeer::services::wire::log(Log::Warning, Log::xLevel, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-#define OPENPEER_SERVICES_WIRE_LOG_ERROR(xLevel, xMsg)    if (openpeer::services::wire::isLogging(Log::xLevel)) {openpeer::services::wire::log(Log::Error, Log::xLevel, ::zsLib::Log::Params(xMsg), OPENPEER_SERVICES_INTERNAL_WIRE_LOG_FUNCTION_FILE_LINE);}
-
-namespace openpeer
-{
-  namespace services
-  {
-    namespace wire
-    {
-      using zsLib::CSTR;
-
-      bool isLogging(Log::Level level);
-      void log(
-               Log::Severity severity,
-               Log::Level level,
-               const Log::Params &params,
-               CSTR function,
-               CSTR filePath,
-               ULONG lineNumber
-               );
-    }
-  }
-}
+#define OPENPEER_SERVICES_WIRE_LOG_WARNING(xLevel, xMsg)  ZS_LOG_SUBSYSTEM_WARNING(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xLevel, xMsg)
+#define OPENPEER_SERVICES_WIRE_LOG_ERROR(xLevel, xMsg)    ZS_LOG_SUBSYSTEM_ERROR(ZS_GET_OTHER_SUBSYSTEM(::openpeer::services::wire, openpeer_services_wire), xLevel, xMsg)
