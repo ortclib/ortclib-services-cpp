@@ -63,7 +63,7 @@ namespace openpeer
                                             );
 
       //-----------------------------------------------------------------------
-      // PURPOSE: If the STUN packet was a response to any of the STUNRequester
+      // PURPOSE: If the STUN object was a response to any of the STUNRequester
       //          objects, this obejct will deliver the response to the correct
       //          requester object.
       // RETURNS: Returns which STUNRequester object handled the STUN packet

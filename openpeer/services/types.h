@@ -71,7 +71,9 @@ namespace openpeer
     using zsLib::Duration;
     using zsLib::Seconds;
     using zsLib::IPAddress;
+    using zsLib::Lock;
     using zsLib::RecursiveLock;
+    using zsLib::AutoLock;
     using zsLib::Log;
 
     typedef zsLib::ThreadPriorities ThreadPriorities;
@@ -105,11 +107,11 @@ namespace openpeer
       LockedValue() : mSet(false) {}
       ~LockedValue() {}
 
-      T get() const {AutoRecursiveLock lock(mLock); return mValue;}
-      void set(T value) {AutoRecursiveLock lock(mLock); if ((setOnceOnly) && (mSet)) internal::throwOnlySetOnce(); mValue = value; mSet = true;}
+      T get() const {AutoLock lock(mLock); return mValue;}
+      void set(T value) {AutoLock lock(mLock); if ((setOnceOnly) && (mSet)) internal::throwOnlySetOnce(); mValue = value; mSet = true;}
 
     protected:
-      mutable RecursiveLock mLock;
+      mutable Lock mLock;
       T mValue;
       bool mSet;
     };
