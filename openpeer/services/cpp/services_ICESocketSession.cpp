@@ -1486,6 +1486,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocketSession::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
+        ZS_LOG_DEBUG(log("returning from background"))
+
         AutoRecursiveLock lock(*this);
 
         if (Time() != mWentToBackgroundAt) {
@@ -1504,6 +1506,12 @@ namespace openpeer
 
         // force an alive check requester
         sendAliveCheckRequest();
+      }
+
+      //-----------------------------------------------------------------------
+      void ICESocketSession::onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription)
+      {
+        ZS_LOG_DEBUG(log("application will quit"))
       }
 
       //-----------------------------------------------------------------------

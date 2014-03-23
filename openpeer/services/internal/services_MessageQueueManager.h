@@ -37,6 +37,8 @@
 
 #include <zsLib/String.h>
 
+#define OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "openpeer/services/process-application-message-queue-on-quit"
+
 namespace openpeer
 {
   namespace services
@@ -48,14 +50,31 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark IMessageQueueManagerForBackgrounding
+      #pragma mark
+
+      interaction IMessageQueueManagerForBackgrounding
+      {
+        static void blockUntilDone();
+
+        virtual ~IMessageQueueManagerForBackgrounding() {} // to make type polymorphic
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark MessageQueueManager
       #pragma mark
 
       class MessageQueueManager : public IMessageQueueManager,
-                                  public IWakeDelegate
+                                  public IWakeDelegate,
+                                  public IMessageQueueManagerForBackgrounding
       {
       public:
         friend interaction IMessageQueueManager;
+        friend interaction IMessageQueueManagerForBackgrounding;
 
         typedef std::map<MessageQueueName, ThreadPriorities> ThreadPriorityMap;
 
@@ -99,6 +118,13 @@ namespace openpeer
 
         virtual void onWake();
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageQueueManager => friend IMessageQueueManagerForBackgrounding
+        #pragma mark
+
+        virtual void blockUntilDone();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -129,6 +155,8 @@ namespace openpeer
 
         MessageQueueMap mQueues;
         ThreadPriorityMap mThreadPriorities;
+
+        bool mProcessApplicationQueueOnShutdown;
       };
     }
   }

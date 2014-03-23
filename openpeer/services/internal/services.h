@@ -45,6 +45,7 @@
 #include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/internal/services_ICESocket.h>
 #include <openpeer/services/internal/services_ICESocketSession.h>
+#include <openpeer/services/internal/services_Logger.h>
 #include <openpeer/services/internal/services_MessageLayerSecurityChannel.h>
 #include <openpeer/services/internal/services_MessageQueueManager.h>
 #include <openpeer/services/internal/services_RSAPrivateKey.h>

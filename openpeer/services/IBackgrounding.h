@@ -119,6 +119,13 @@ namespace openpeer
       virtual void onBackgroundingReturningFromBackground(
                                                           IBackgroundingSubscriptionPtr subscription
                                                           ) = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: This notification tells the subscriber the application wants
+      //          to quit.
+      virtual void onBackgroundingApplicationWillQuit(
+                                                      IBackgroundingSubscriptionPtr subscription
+                                                      ) = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -192,6 +199,7 @@ ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingNotifierPtr, IBackgro
 ZS_DECLARE_PROXY_METHOD_2(onBackgroundingGoingToBackground, IBackgroundingSubscriptionPtr, IBackgroundingNotifierPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IBackgroundingDelegate, openpeer::services::IBackgroundingSubscription)
@@ -224,6 +232,7 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingNotifie
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingCompletionDelegate)

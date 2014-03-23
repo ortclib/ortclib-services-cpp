@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_MessageQueueManager.h>
 #include <openpeer/services/IHelper.h>
+#include <openpeer/services/ISettings.h>
 
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
@@ -46,6 +47,7 @@ namespace openpeer
     namespace internal
     {
       ZS_DECLARE_USING_PTR(zsLib::XML, Element)
+      ZS_DECLARE_USING_PTR(zsLib, IMessageQueueThread)
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -64,8 +66,25 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      void IMessageQueueManagerForBackgrounding::blockUntilDone()
+      {
+        MessageQueueManagerPtr singleton = MessageQueueManager::singleton();
+        if (!singleton) return;
+        singleton->blockUntilDone();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageQueueManager
+      #pragma mark
+
+      //-----------------------------------------------------------------------
       MessageQueueManager::MessageQueueManager() :
-        mPending(0)
+        mPending(0),
+        mProcessApplicationQueueOnShutdown(ISettings::getBool(OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT))
       {
         ZS_LOG_BASIC(log("created"))
       }
@@ -295,6 +314,58 @@ namespace openpeer
 
         // all queue are empty
         cancel();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageQueueManager => IMessageQueueManagerForBackgrounding
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void MessageQueueManager::blockUntilDone()
+      {
+        bool processApplicationQueueOnShutdown = false;
+
+        MessageQueueMap queues;
+
+        {
+          AutoRecursiveLock lock(mLock);
+          processApplicationQueueOnShutdown = mProcessApplicationQueueOnShutdown;
+          queues = mQueues;
+        }
+
+        size_t totalRemaining = 0;
+
+        do
+        {
+
+          for (MessageQueueMap::iterator iter = queues.begin(); iter != queues.end(); ++iter)
+          {
+            const MessageQueueName &name = (*iter).first;
+            IMessageQueuePtr queue = (*iter).second;
+
+            if (name == OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME) {
+              if (!processApplicationQueueOnShutdown)
+                continue;
+
+              IMessageQueueThreadPtr thread = dynamic_pointer_cast<IMessageQueueThread>(queue);
+
+              thread->processMessagesFromThread();
+            }
+
+            totalRemaining += queue->getTotalUnprocessedMessages();
+          }
+
+          if (totalRemaining < 1) {
+            break;
+          }
+
+          boost::thread::yield();
+        } while (totalRemaining > 0);
+
       }
 
       //-----------------------------------------------------------------------

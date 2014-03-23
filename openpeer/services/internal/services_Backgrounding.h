@@ -133,6 +133,13 @@ namespace openpeer
 
         virtual size_t totalPending(PUID backgroundingID) const;
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Backgrounding => friend GracefulAlert
+        #pragma mark
+
+        virtual void notifyApplicationWillQuit();
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark

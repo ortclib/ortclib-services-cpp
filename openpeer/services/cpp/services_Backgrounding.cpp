@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_Backgrounding.h>
+#include <openpeer/services/internal/services_MessageQueueManager.h>
 
 #include <openpeer/services/IHelper.h>
 #include <openpeer/services/ISettings.h>
@@ -108,6 +109,24 @@ namespace openpeer
       {
         static SingletonLazySharedPtr<Backgrounding> singleton(IBackgroundingFactory::singleton().createForBackgrounding());
         BackgroundingPtr result = singleton.singleton();
+        if (!result) {
+          ZS_LOG_WARNING(Detail, slog("singleton gone"))
+        }
+
+        ZS_DECLARE_CLASS_PTR(GracefulAlert)
+
+        class GracefulAlert
+        {
+        public:
+          GracefulAlert(BackgroundingPtr singleton) : mSingleton(singleton) {}
+          ~GracefulAlert() {mSingleton->notifyApplicationWillQuit();}
+
+        protected:
+          BackgroundingPtr mSingleton;
+        };
+
+        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(new GracefulAlert(result)));
+
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
         }
@@ -253,6 +272,7 @@ namespace openpeer
 
         AutoRecursiveLock lock(*this);
 
+        mCurrentBackgroundingID = 0;
         mTotalWaiting = 0;
         mTotalNotifiersCreated = 0;
 
@@ -406,6 +426,49 @@ namespace openpeer
         return mTotalWaiting;
       }
       
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark Backgrounding => friend Query
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Backgrounding::notifyApplicationWillQuit()
+      {
+        ZS_LOG_DETAIL(log("application will quit notification"))
+
+        // scope: tell all phases that application will quit
+        {
+          AutoRecursiveLock lock(*this);
+
+          Phase current = 0;
+          size_t total = 0;
+
+          do
+          {
+            total = getNextPhase(current);
+            if (0 == total) break;
+
+            PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
+            ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+
+            ZS_LOG_DEBUG(log("notifying phase of application quit") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
+
+            UseBackgroundingDelegateSubscriptionsPtr &subscriptions = (*found).second;
+            subscriptions->delegate()->onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr());
+
+            ++current;
+          } while (true);
+
+          ZS_LOG_DEBUG(log("all phases told to go to background now"))
+        }
+
+        // block until all other non-application threads are done
+        IMessageQueueManagerForBackgrounding::blockUntilDone();
+      }
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

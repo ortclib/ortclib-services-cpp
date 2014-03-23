@@ -30,8 +30,10 @@
  */
 
 #include <openpeer/services/internal/services_Logger.h>
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IHelper.h>
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/IWakeDelegate.h>
 
 #include <cryptopp/osrng.h>
@@ -719,14 +721,13 @@ namespace openpeer
           StdOutLoggerPtr &logger = holder->mLogger;
 
           AutoRecursiveLock lock(*locker);
-          logger = (reset ? StdOutLoggerPtr() : StdOutLogger::create(colorizeOutput, prettyPrint));
           if ((reset) &&
               (logger)) {
             Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
+
+          if (!logger) {
             logger = StdOutLogger::create(colorizeOutput, prettyPrint);
           }
           return logger;
@@ -816,14 +817,12 @@ namespace openpeer
           FileLoggerPtr &logger = holder->mLogger;
 
           AutoRecursiveLock lock(*locker);
-          logger = (reset ? FileLoggerPtr() : FileLogger::create(fileName, colorizeOutput));
           if ((reset) &&
               (logger)) {
             Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
+          if (!logger) {
             logger = FileLogger::create(fileName, colorizeOutput);
           }
           return logger;
@@ -920,14 +919,12 @@ namespace openpeer
           DebuggerLoggerPtr &logger = holder->mLogger;
 
           AutoRecursiveLock lock(*locker);
-          logger = (reset ? DebuggerLoggerPtr() : DebuggerLogger::create(colorizeOutput));
           if ((reset) &&
               (logger)) {
             Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
+          if (!logger) {
             logger = DebuggerLogger::create(colorizeOutput);
           }
           return logger;
@@ -1000,7 +997,8 @@ namespace openpeer
                            public ISocketDelegate,
                            public IDNSDelegate,
                            public ITimerDelegate,
-                           public IWakeDelegate
+                           public IWakeDelegate,
+                           public IBackgroundingDelegate
       {
         //---------------------------------------------------------------------
         void init(
@@ -1010,6 +1008,8 @@ namespace openpeer
         {
           mListenPort = listenPort;
           mMaxWaitTimeForSocketToBeAvailable = Seconds(maxSecondsWaitForSocketToBeAvailable);
+
+          mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
           Log::addListener(mThisWeak.lock());
 
@@ -1040,6 +1040,8 @@ namespace openpeer
           if (0 == mListenPort) {
             mListenPort = OPENPEER_SERVICES_DEFAULT_OUTGOING_TELNET_PORT;
           }
+
+          mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
@@ -1416,7 +1418,14 @@ namespace openpeer
             int errorCode = 0;
             length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer)-sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
 
-            if (length < 1) return;
+            if (wouldBlock)
+              return;
+
+            if ((length < 1) ||
+                (0 != errorCode)) {
+              onException(inSocket);
+              return;
+            }
 
             mCommand += (CSTR)(&buffer[0]);
             if (mCommand.size() > (sizeof(buffer)*3)) {
@@ -1448,6 +1457,7 @@ namespace openpeer
             }
           }
         }
+
 
         //---------------------------------------------------------------------
         virtual void onWriteReady(SocketPtr socket)
@@ -1508,7 +1518,7 @@ namespace openpeer
           if (inSocket == mListenSocket) {
             mListenSocket->close();
             mListenSocket.reset();
-            if (!mClosed) {
+            if (!isClosed()) {
               mStartListenTime = zsLib::now();
               listen();
             }
@@ -1580,6 +1590,42 @@ namespace openpeer
           listen();
         }
 
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      ) {}
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingGoingToBackgroundNow(
+                                                         IBackgroundingSubscriptionPtr subscription
+                                                         ) {}
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingReturningFromBackground(
+                                                            IBackgroundingSubscriptionPtr subscription
+                                                            )
+        {
+          SocketPtr socket;
+          {
+            AutoRecursiveLock lock(mLock);
+            socket = mTelnetSocket;
+          }
+
+          if (!socket) return;
+
+          // fake a read ready to retest socket
+          onReadReady(mTelnetSocket);
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingApplicationWillQuit(
+                                                        IBackgroundingSubscriptionPtr subscription
+                                                        )
+        {
+          close();
+        }
+
       protected:
         //---------------------------------------------------------------------
         void connectOutgoingAgain()
@@ -1595,6 +1641,8 @@ namespace openpeer
           if (!mOutgoingMode) return;
 
           if (!mServers) return;
+
+          if (isClosed()) return;
 
           IPAddress result;
           if (!IDNS::extractNextIP(mServers, result)) {
@@ -1740,6 +1788,8 @@ namespace openpeer
         TelnetLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
         bool mPrettyPrint;
+
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
 
         SocketPtr mListenSocket;
         SocketPtr mTelnetSocket;

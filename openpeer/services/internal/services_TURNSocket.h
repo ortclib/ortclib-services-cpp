@@ -265,6 +265,8 @@ namespace openpeer
 
         virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
 
+        virtual void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription);
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
