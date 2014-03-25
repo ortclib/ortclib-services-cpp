@@ -718,38 +718,48 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::cancel()
       {
-        AutoRecursiveLock lock(*this);
+        HTTPPtr outer;
+        HTTPQueryPtr pThis;
 
-        ZS_LOG_DEBUG(log("cancel called"))
+        {
+          AutoRecursiveLock lock(*this);
 
-        HTTPQueryPtr pThis = mThisWeak.lock();
+          ZS_LOG_DEBUG(log("cancel called"))
 
-        HTTPPtr outer = mOuter.lock();
+          pThis = mThisWeak.lock();
+
+          outer = mOuter.lock();
+        }
+
         if ((outer) &&
             (pThis)) {
+          // cannot be called from within a lock
           outer->monitorEnd(pThis);
           return;
         }
 
-        if ((pThis) &&
-            (mDelegate)) {
-          try {
-            mDelegate->onHTTPCompleted(pThis);
-          } catch (IHTTPQueryDelegateProxy::Exceptions::DelegateGone &) {
-            ZS_LOG_WARNING(Detail, log("delegate gone"))
+        {
+          AutoRecursiveLock lock(*this);
+          if ((pThis) &&
+              (mDelegate)) {
+            try {
+              mDelegate->onHTTPCompleted(pThis);
+            } catch (IHTTPQueryDelegateProxy::Exceptions::DelegateGone &) {
+              ZS_LOG_WARNING(Detail, log("delegate gone"))
+            }
           }
-        }
 
-        mDelegate.reset();
+          mDelegate.reset();
 
-        if (mCurl) {
-          curl_easy_cleanup(mCurl);
-          mCurl = NULL;
-        }
+          if (mCurl) {
+            curl_easy_cleanup(mCurl);
+            mCurl = NULL;
+          }
 
-        if (mHeaders) {
-          curl_slist_free_all(mHeaders);
-          mHeaders = NULL;
+          if (mHeaders) {
+            curl_slist_free_all(mHeaders);
+            mHeaders = NULL;
+          }
         }
       }
 
