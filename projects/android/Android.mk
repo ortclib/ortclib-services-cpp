@@ -41,6 +41,7 @@ openpeer/services/cpp/services_DNSMonitor.cpp \
 openpeer/services/cpp/services_Factory.cpp \
 openpeer/services/cpp/services_HTTP.cpp \
 openpeer/services/cpp/services_Helper.cpp \
+openpeer/services/cpp/ifaddrs-android.cc \
 openpeer/services/cpp/services_ICESocket.cpp \
 openpeer/services/cpp/services_ICESocketSession.cpp \
 openpeer/services/cpp/services_Logger.cpp \

@@ -49,18 +49,14 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/crc.h>
 
-#ifdef _ANDROID
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#endif // _ANDROID
-
 #ifndef _WIN32
-#ifndef _ANDROID
 #include <sys/types.h>
+#ifdef _ANDROID
+#include <openpeer/services/internal/ifaddrs-android.h>
+#else
 #include <ifaddrs.h>
+#endif
 #endif //_WIN32
-#endif //_ANDROID
 
 #define OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
 #define OPENPEER_SERVICES_ICESOCKET_MAX_RECYLCE_BUFFERS  4
@@ -1986,25 +1982,6 @@ namespace openpeer
           }
         }
         ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
-#elif _ANDROID
-        int fd;
-        struct ifreq ifr;
-
-        fd = socket(AF_INET, SOCK_DGRAM, 0);
-
-        /* I want to get an IPv4 IP address */
-        ifr.ifr_addr.sa_family = AF_INET;
-
-        /* I want IP address attached to "eth0" */
-        strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
-
-        ioctl(fd, SIOCGIFADDR, &ifr);
-
-        close(fd);
-
-#define WARNING_THIS_IS_NOT_RIGHT 1
-#define WARNING_THIS_IS_NOT_RIGHT 2
-
 #else
         ifaddrs *ifAddrStruct = NULL;
         ifaddrs *ifa = NULL;
