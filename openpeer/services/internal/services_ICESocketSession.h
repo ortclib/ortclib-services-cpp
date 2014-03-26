@@ -46,6 +46,8 @@
 #include <list>
 #include <utility>
 
+#define OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-ice-socket-session"
+
 namespace openpeer
 {
   namespace services
@@ -102,6 +104,7 @@ namespace openpeer
 
       class ICESocketSession : public Noop,
                                public MessageQueueAssociator,
+                               public SharedRecursiveLock,
                                public IICESocketSession,
                                public IICESocketSessionForICESocket,
                                public IWakeDelegate,
@@ -149,14 +152,18 @@ namespace openpeer
         ICESocketSession(
                          IMessageQueuePtr queue,
                          IICESocketSessionDelegatePtr delegate,
-                         UseICESocketPtr socket,
+                         ICESocketPtr inSocket,
                          const char *remoteUsernameFrag,
                          const char *remotePassword,
                          ICEControls control,
                          ICESocketSessionPtr foundation = ICESocketSessionPtr()
                          );
 
-        ICESocketSession(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        ICESocketSession(Noop) :
+          Noop(true),
+          MessageQueueAssociator(IMessageQueuePtr()),
+          SharedRecursiveLock(SharedRecursiveLock::create())
+        {}
 
         void init();
 
@@ -304,19 +311,22 @@ namespace openpeer
         #pragma mark ICESocketSession => IBackgroundingDelegate
         #pragma mark
 
-        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      );
 
-        virtual void onBackgroundingGoingToBackgroundNow();
+        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription);
 
-        virtual void onBackgroundingReturningFromBackground();
+        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
+
+        virtual void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription);
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark ICESocketSession => (internal)
         #pragma mark
-
-        RecursiveLock &getLock() const;
 
         Log::Params log(const char *message) const;
         Log::Params debug(const char *message) const;
@@ -367,11 +377,9 @@ namespace openpeer
         #pragma mark ICESocketSession => (data)
         #pragma mark
 
-        mutable RecursiveLock mBogusLock;
-
         AutoPUID mID;
         ICESocketSessionWeakPtr mThisWeak;
-        UseICESocketWeakPtr mICESocketWeak;
+        UseICESocketWeakPtr mICESocket;
 
         ICESocketSessionStates mCurrentState;
         AutoWORD mLastError;

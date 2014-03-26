@@ -139,10 +139,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNRequesterManagerPtr STUNRequesterManager::singleton()
       {
-        AutoRecursiveLock lock(IHelper::getGlobalLock());
-
-        static STUNRequesterManagerPtr pThis = ISTUNRequesterManagerFactory::singleton().createSTUNRequesterManager();
-        return pThis;
+        static SingletonLazySharedPtr<STUNRequesterManager> singleton(ISTUNRequesterManagerFactory::singleton().createSTUNRequesterManager());
+        STUNRequesterManagerPtr result = singleton.singleton();
+        if (!result) {
+          ZS_LOG_WARNING(Detail, slog("singleton gone"))
+        }
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -256,9 +258,15 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Log::Params STUNRequesterManager::log(const char *message) const
       {
-        ElementPtr objectEl = Element::create("STUNRequesterManager");
+        ElementPtr objectEl = Element::create("services::STUNRequesterManager");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      Log::Params STUNRequesterManager::slog(const char *message)
+      {
+        return Log::Params(message, "services::STUNRequesterManager");
       }
     }
 
@@ -293,7 +301,9 @@ namespace openpeer
                                                               STUNPacketPtr stun
                                                               )
     {
-      return internal::STUNRequesterManager::singleton()->handleSTUNPacket(fromIPAddress, stun);
+      internal::STUNRequesterManagerPtr manager = internal::STUNRequesterManager::singleton();
+      if (!manager) return ISTUNRequesterPtr();
+      return manager->handleSTUNPacket(fromIPAddress, stun);
     }
   }
 }

@@ -126,8 +126,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SettingsPtr Settings::singleton()
       {
-        static SettingsPtr singleton = Settings::create();
-        return singleton;
+        static SingletonLazySharedPtr<Settings> singleton(Settings::create());
+        SettingsPtr result = singleton.singleton();
+        if (!result) {
+          ZS_LOG_WARNING(Detail, slog("singleton gone"))
+        }
+        return result;
       }
       
       //-----------------------------------------------------------------------
@@ -557,11 +561,24 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Settings::applyDefaults()
       {
+        setBool(OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP, false);
         setBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6, false);
+
+        setUInt(OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE, 1);
+        setUInt(OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE, 1);
+        setUInt(OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE, 1);
+        setUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE, 1);
+
         setUInt(OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS, 60*5);
+
+        setString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY, "high");
+        setString(OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY, "normal");
+        setString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY, "real-time");
+        setString(OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY, "normal");
+        setString(OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY, "normal");
         setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS, "");
         setString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS, "");
         setString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER, "lo;en;pdp_ip;stf;gif;bbptp;p2p");
@@ -583,6 +600,12 @@ namespace openpeer
         return Log::Params(message, objectEl);
       }
 
+      //-----------------------------------------------------------------------
+      Log::Params Settings::slog(const char *message)
+      {
+        return Log::Params(message, "services::Settings");
+      }
+
     }
 
     //-------------------------------------------------------------------------
@@ -596,43 +619,57 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ISettings::setup(ISettingsDelegatePtr delegate)
     {
-      internal::Settings::singleton()->setup(delegate);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setup(delegate);
     }
 
     //-------------------------------------------------------------------------
     String ISettings::getString(const char *key)
     {
-      return internal::Settings::singleton()->getString(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return String();
+      return singleton->getString(key);
     }
 
     //-------------------------------------------------------------------------
     LONG ISettings::getInt(const char *key)
     {
-      return internal::Settings::singleton()->getInt(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return 0;
+      return singleton->getInt(key);
     }
 
     //-------------------------------------------------------------------------
     ULONG ISettings::getUInt(const char *key)
     {
-      return internal::Settings::singleton()->getUInt(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return 0;
+      return singleton->getUInt(key);
     }
 
     //-------------------------------------------------------------------------
     bool ISettings::getBool(const char *key)
     {
-      return internal::Settings::singleton()->getBool(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return false;
+      return singleton->getBool(key);
     }
 
     //-------------------------------------------------------------------------
     float ISettings::getFloat(const char *key)
     {
-      return internal::Settings::singleton()->getFloat(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return 0.0f;
+      return singleton->getFloat(key);
     }
 
     //-------------------------------------------------------------------------
     double ISettings::getDouble(const char *key)
     {
-      return internal::Settings::singleton()->getDouble(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return 0.0;
+      return singleton->getDouble(key);
     }
 
     //-------------------------------------------------------------------------
@@ -641,7 +678,9 @@ namespace openpeer
                               const char *value
                               )
     {
-      internal::Settings::singleton()->setString(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setString(key, value);
     }
 
     //-------------------------------------------------------------------------
@@ -650,7 +689,9 @@ namespace openpeer
                            LONG value
                            )
     {
-      internal::Settings::singleton()->setInt(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setInt(key, value);
     }
 
     //-------------------------------------------------------------------------
@@ -659,7 +700,9 @@ namespace openpeer
                             ULONG value
                             )
     {
-      internal::Settings::singleton()->setUInt(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setUInt(key, value);
     }
 
     //-------------------------------------------------------------------------
@@ -668,7 +711,9 @@ namespace openpeer
                             bool value
                             )
     {
-      internal::Settings::singleton()->setBool(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setBool(key, value);
     }
 
     //-------------------------------------------------------------------------
@@ -677,7 +722,9 @@ namespace openpeer
                              float value
                              )
     {
-      internal::Settings::singleton()->setFloat(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setFloat(key, value);
     }
 
     //-------------------------------------------------------------------------
@@ -686,25 +733,33 @@ namespace openpeer
                               double value
                               )
     {
-      internal::Settings::singleton()->setDouble(key, value);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->setDouble(key, value);
     }
 
     //-------------------------------------------------------------------------
     void ISettings::clear(const char *key)
     {
-      internal::Settings::singleton()->clear(key);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->clear(key);
     }
 
     //-------------------------------------------------------------------------
     bool ISettings::apply(const char *jsonSettings)
     {
-      return internal::Settings::singleton()->apply(jsonSettings);
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return false;
+      return singleton->apply(jsonSettings);
     }
 
     //-------------------------------------------------------------------------
     void ISettings::applyDefaults()
     {
-      internal::Settings::singleton()->applyDefaults();
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->applyDefaults();
     }
   }
 }

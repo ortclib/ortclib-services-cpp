@@ -82,8 +82,6 @@ namespace openpeer
 
         virtual bool attach(ICESocketSessionPtr session) = 0;
 
-        virtual RecursiveLock &getLock() const = 0;
-
         virtual bool sendTo(
                             const IICESocket::Candidate &viaLocalCandidate,
                             const IPAddress &destination,
@@ -113,6 +111,7 @@ namespace openpeer
 
       class ICESocket : public Noop,
                         public MessageQueueAssociator,
+                        public SharedRecursiveLock,
                         public IICESocket,
                         public ISocketDelegate,
                         public ITURNSocketDelegate,
@@ -232,7 +231,7 @@ namespace openpeer
         typedef std::map<LocalIP, LocalSocketPtr> LocalSocketIPAddressMap;
         typedef std::map<ITURNSocketPtr, LocalSocketPtr> LocalSocketTURNSocketMap;
         typedef std::map<ISTUNDiscoveryPtr, LocalSocketPtr> LocalSocketSTUNDiscoveryMap;
-        typedef std::map<ISocketPtr, LocalSocketPtr> LocalSocketMap;
+        typedef std::map<SocketPtr, LocalSocketPtr> LocalSocketMap;
         typedef std::map<InterfaceName, OrderID> InterfaceNameToOrderMap;
 
       protected:
@@ -245,7 +244,12 @@ namespace openpeer
                   WORD port,
                   IICESocketPtr foundationSocket
                   );
-        ICESocket(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {}
+
+        ICESocket(Noop) :
+          Noop(true),
+          MessageQueueAssociator(IMessageQueuePtr()),
+          SharedRecursiveLock(SharedRecursiveLock::create())
+        {}
 
         void init();
 
@@ -308,8 +312,6 @@ namespace openpeer
 
         virtual bool attach(ICESocketSessionPtr session);
 
-        virtual RecursiveLock &getLock() const {return mLock;}
-
         virtual bool sendTo(
                             const Candidate &viaLocalCandidate,
                             const IPAddress &destination,
@@ -333,9 +335,9 @@ namespace openpeer
         #pragma mark ICESocket => ISocketDelegate
         #pragma mark
 
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -457,7 +459,6 @@ namespace openpeer
         #pragma mark
 
         AutoPUID              mID;
-        mutable RecursiveLock mLock;
         ICESocketWeakPtr      mThisWeak;
         ICESocketPtr          mGracefulShutdownReference;
 
@@ -542,7 +543,6 @@ ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocket, IICESocket)
 ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getMessageQueue, IMessageQueuePtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_1(attach, bool, ICESocketSessionPtr)
-ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getLock, RecursiveLock &)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_5(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionClosed, PUID)
 ZS_DECLARE_PROXY_METHOD_SYNC_4(addRoute, openpeer::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)

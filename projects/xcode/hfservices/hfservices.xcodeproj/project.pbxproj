@@ -13,6 +13,7 @@
 		003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */; };
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
 		003BEECE17A747510002EB47 /* services_TransportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEECD17A747510002EB47 /* services_TransportStream.cpp */; };
+		004C4B0918CE5B82009186EA /* services_MessageQueueManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */; };
 		007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */; };
 		00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */; };
 		0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */; };
@@ -61,6 +62,9 @@
 		003BEECB17A747270002EB47 /* ITransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ITransportStream.h; sourceTree = "<group>"; };
 		003BEECC17A7473B0002EB47 /* services_TransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_TransportStream.h; sourceTree = "<group>"; };
 		003BEECD17A747510002EB47 /* services_TransportStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_TransportStream.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		004C4B0618CE5770009186EA /* IMessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageQueueManager.h; sourceTree = "<group>"; };
+		004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_MessageQueueManager.cpp; sourceTree = "<group>"; };
+		004C4B0A18CE5B94009186EA /* services_MessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_MessageQueueManager.h; sourceTree = "<group>"; };
 		007E8F8F18C0DC3100364908 /* IBackgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackgrounding.h; sourceTree = "<group>"; };
 		007E8F9018C0DC4700364908 /* services_Backgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Backgrounding.h; sourceTree = "<group>"; };
 		007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Backgrounding.cpp; sourceTree = "<group>"; };
@@ -201,6 +205,7 @@
 				0095D93716CA83EA005F53D3 /* IICESocketSession.h */,
 				000CC03417A475B50075E86C /* ILogger.h */,
 				003BEDCD17A606E80002EB47 /* IMessageLayerSecurityChannel.h */,
+				004C4B0618CE5770009186EA /* IMessageQueueManager.h */,
 				003BEDCE17A606E80002EB47 /* IRSAPrivateKey.h */,
 				003BEDCF17A606E80002EB47 /* IRSAPublicKey.h */,
 				0095D94E16CA83EA005F53D3 /* IRUDPChannel.h */,
@@ -241,6 +246,7 @@
 				0095D92416CA83EA005F53D3 /* services_ICESocketSession.cpp */,
 				000CC03617A475F90075E86C /* services_Logger.cpp */,
 				003BEDD317A607190002EB47 /* services_MessageLayerSecurityChannel.cpp */,
+				004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */,
 				003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */,
 				003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */,
 				0095D92516CA83EA005F53D3 /* services_RUDPChannel.cpp */,
@@ -283,6 +289,7 @@
 				0095D94116CA83EA005F53D3 /* services_ICESocketSession.h */,
 				000CC03517A475E00075E86C /* services_Logger.h */,
 				003BEDD017A607030002EB47 /* services_MessageLayerSecurityChannel.h */,
+				004C4B0A18CE5B94009186EA /* services_MessageQueueManager.h */,
 				003BEDD117A607030002EB47 /* services_RSAPrivateKey.h */,
 				003BEDD217A607030002EB47 /* services_RSAPublicKey.h */,
 				0095D94216CA83EA005F53D3 /* services_IRUDPChannelStream.h */,
@@ -376,6 +383,7 @@
 				0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */,
 				007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */,
+				004C4B0918CE5B82009186EA /* services_MessageQueueManager.cpp in Sources */,
 				0095DAD516CA83EB005F53D3 /* services_RUDPChannelStream.cpp in Sources */,
 				0095DAD716CA83EB005F53D3 /* services_RUDPTransport.cpp in Sources */,
 				0095DAD816CA83EB005F53D3 /* services_RUDPListener.cpp in Sources */,

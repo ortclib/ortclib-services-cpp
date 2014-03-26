@@ -64,12 +64,14 @@ namespace openpeer
       using zsLib::Hours;
       using zsLib::MessageQueueAssociator;
       using zsLib::Subsystem;
+      using zsLib::PrivateGlobalLock;
+      using zsLib::Singleton;
+      using zsLib::SingletonLazySharedPtr;
 
       using zsLib::XML::WalkSink;
 
       ZS_DECLARE_USING_PTR(zsLib, Timer)
       ZS_DECLARE_USING_PTR(zsLib, ITimerDelegate)
-      ZS_DECLARE_USING_PTR(zsLib, ISocket)
       ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
       ZS_DECLARE_USING_PTR(zsLib, Socket)
       ZS_DECLARE_USING_PTR(zsLib, Thread)
@@ -108,6 +110,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(ICESocketSession)
       ZS_DECLARE_CLASS_PTR(HTTP)
       ZS_DECLARE_CLASS_PTR(MessageLayerSecurityChannel)
+      ZS_DECLARE_CLASS_PTR(MessageQueueManager)
       ZS_DECLARE_CLASS_PTR(RSAPrivateKey)
       ZS_DECLARE_CLASS_PTR(RSAPublicKey)
       ZS_DECLARE_CLASS_PTR(RUDPChannel)

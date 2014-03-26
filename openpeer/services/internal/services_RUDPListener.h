@@ -130,9 +130,9 @@ namespace openpeer
         #pragma mark RUDPListener => ISocketDelegate
         #pragma mark
 
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
         #pragma mark

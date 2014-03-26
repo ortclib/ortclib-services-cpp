@@ -32,10 +32,12 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/ISTUNRequesterManager.h>
+#include <openpeer/services/IMessageQueueManager.h>
+#include <openpeer/services/IWakeDelegate.h>
 
-#include <map>
-#include <utility>
+#include <zsLib/String.h>
+
+#define OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "openpeer/services/process-application-message-queue-on-quit"
 
 namespace openpeer
 {
@@ -43,27 +45,19 @@ namespace openpeer
   {
     namespace internal
     {
-      interaction ISTUNRequesterForSTUNRequesterManager;
-
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark ISTUNRequesterManagerForSTUNRequester
+      #pragma mark IMessageQueueManagerForBackgrounding
       #pragma mark
 
-      interaction ISTUNRequesterManagerForSTUNRequester
+      interaction IMessageQueueManagerForBackgrounding
       {
-        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, ForSTUNRequester)
+        static void blockUntilDone();
 
-        static ForSTUNRequesterPtr singleton();
-
-        virtual void monitorStart(
-                                  STUNRequesterPtr requester,
-                                  STUNPacketPtr stunRequest
-                                  ) = 0;
-        virtual void monitorStop(STUNRequester &requester) = 0;
+        virtual ~IMessageQueueManagerForBackgrounding() {} // to make type polymorphic
       };
 
       //-----------------------------------------------------------------------
@@ -71,103 +65,99 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark STUNRequesterManager
+      #pragma mark MessageQueueManager
       #pragma mark
 
-      class STUNRequesterManager : public Noop,
-                                   public ISTUNRequesterManager,
-                                   public ISTUNRequesterManagerForSTUNRequester
+      class MessageQueueManager : public IMessageQueueManager,
+                                  public IWakeDelegate,
+                                  public IMessageQueueManagerForBackgrounding
       {
       public:
-        friend interaction ISTUNRequesterManagerFactory;
-        friend interaction ISTUNRequesterManager;
-        friend interaction ISTUNRequesterManagerForSTUNRequester;
+        friend interaction IMessageQueueManager;
+        friend interaction IMessageQueueManagerForBackgrounding;
 
-        ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterForSTUNRequesterManager, UseSTUNRequester)
-
-        typedef std::pair<QWORD, QWORD> QWORDPair;
+        typedef std::map<MessageQueueName, ThreadPriorities> ThreadPriorityMap;
 
       protected:
-        STUNRequesterManager();
-        
-        STUNRequesterManager(Noop) : Noop(true) {};
+        MessageQueueManager();
+
+        void init();
+
+        static MessageQueueManagerPtr create();
+
+      protected:
+        static MessageQueueManagerPtr singleton();
 
       public:
-        ~STUNRequesterManager();
+        ~MessageQueueManager();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManagerFactory
+        #pragma mark MessageQueueManager => IMessageQueueManager
         #pragma mark
 
-        static STUNRequesterManagerPtr create();
+        IMessageQueuePtr getMessageQueueForGUIThread();
+        IMessageQueuePtr getMessageQueue(const char *assignedThreadName);
+
+        void registerMessageQueueThreadPriority(
+                                                const char *assignedThreadName,
+                                                ThreadPriorities priority
+                                                );
+
+        MessageQueueMapPtr getRegisteredQueues();
+
+        size_t getTotalUnprocessedMessages() const;
+
+        void shutdownAllQueues();
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManager
+        #pragma mark MessageQueueManager => IWakeDelegate
         #pragma mark
 
-        static STUNRequesterManagerPtr singleton();
-
-        virtual ISTUNRequesterPtr handleSTUNPacket(
-                                                   IPAddress fromIPAddress,
-                                                   STUNPacketPtr stun
-                                                   );
+        virtual void onWake();
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManagerForSTUNRequester
+        #pragma mark MessageQueueManager => friend IMessageQueueManagerForBackgrounding
         #pragma mark
 
-        // (duplicate) static STUNRequesterManagerPtr singleton();
-
-        virtual void monitorStart(
-                                  STUNRequesterPtr requester,
-                                  STUNPacketPtr stunRequest
-                                  );
-        virtual void monitorStop(STUNRequester &requester);
+        virtual void blockUntilDone();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark STUNRequesterManager => (internal)
+        #pragma mark MessageQueueManager => (internal)
         #pragma mark
 
         Log::Params log(const char *message) const;
         static Log::Params slog(const char *message);
+        Log::Params debug(const char *message) const;
+
+        virtual ElementPtr toDebug() const;
+
+        void cancel();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark STUNRequesterManager => (data)
+        #pragma mark MessageQueueManager => (data)
         #pragma mark
 
-        RecursiveLock mLock;
-        PUID mID;
-        STUNRequesterManagerWeakPtr mThisWeak;
+        AutoPUID mID;
+        mutable RecursiveLock mLock;
+        MessageQueueManagerWeakPtr mThisWeak;
 
-        typedef PUID STUNRequesterID;
-        typedef std::pair<UseSTUNRequesterWeakPtr, STUNRequesterID> STUNRequesterPair;
-        typedef std::map<QWORDPair, STUNRequesterPair> STUNRequesterMap;
-        STUNRequesterMap mRequesters;
+        MessageQueueManagerPtr mGracefulShutdownReference;
+        AutoBool mFinalCheck;
+        size_t mPending;
+
+        MessageQueueMap mQueues;
+        ThreadPriorityMap mThreadPriorities;
+
+        bool mProcessApplicationQueueOnShutdown;
       };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterManagerFactory
-      #pragma mark
-
-      interaction ISTUNRequesterManagerFactory
-      {
-        static ISTUNRequesterManagerFactory &singleton();
-
-        virtual STUNRequesterManagerPtr createSTUNRequesterManager();
-      };
-
     }
   }
 }

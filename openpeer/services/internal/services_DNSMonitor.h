@@ -35,7 +35,7 @@
 #include <openpeer/services/IDNS.h>
 
 #include <udns/udns.h>
-#include <zsLib/ISocket.h>
+#include <zsLib/Socket.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/Timer.h>
 
@@ -56,6 +56,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(DNSMonitor)
 
       class DNSMonitor : public MessageQueueAssociator,
+                         public SharedRecursiveLock,
                          public ISocketDelegate,
                          public ITimerDelegate
       {
@@ -152,8 +153,6 @@ namespace openpeer
         void createDNSContext();
         void cleanIfNoneOutstanding();
 
-        RecursiveLock &getLock() const {return mLock;}
-
         CacheInfoPtr done(QueryID queryID);
         void cancel(
                     QueryID queryID,
@@ -171,20 +170,20 @@ namespace openpeer
         static void dns_query_srv(struct dns_ctx *ctx, struct dns_rr_srv *result, void *data);
 
         // ISocketDelegate
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         // ITimerDelegate
         virtual void onTimer(TimerPtr timer);
 
         // other
+      public:
         Log::Params log(const char *message) const;
 
       private:
         AutoPUID mID;
 
-        mutable RecursiveLock mLock;
         DNSMonitorWeakPtr mThisWeak;
         SocketPtr mSocket;
         TimerPtr mTimer;

@@ -90,7 +90,6 @@ namespace openpeer
         typedef zsLib::IPAddress IPAddress;
         typedef zsLib::Socket Socket;
         typedef zsLib::SocketPtr SocketPtr;
-        typedef zsLib::ISocketPtr ISocketPtr;
         typedef zsLib::MessageQueueAssociator MessageQueueAssociator;
         typedef zsLib::IMessageQueuePtr IMessageQueuePtr;
         typedef zsLib::AutoRecursiveLock AutoRecursiveLock;
@@ -246,8 +245,7 @@ namespace openpeer
         virtual void onSTUNDiscoverySendPacket(
                                                ISTUNDiscoveryPtr discovery,
                                                IPAddress destination,
-                                               boost::shared_array<BYTE> packet,
-                                               size_t packetLengthInBytes
+                                               SecureByteBlockPtr packet
                                                )
         {
           AutoRecursiveLock lock(mLock);
@@ -255,11 +253,11 @@ namespace openpeer
           BOOST_CHECK(discovery);
           BOOST_CHECK(!destination.isAddressEmpty());
           BOOST_CHECK(!destination.isPortEmpty());
-          BOOST_CHECK(packet.get());
-          BOOST_CHECK(packetLengthInBytes > 0);
+          BOOST_CHECK(packet->BytePtr());
+          BOOST_CHECK(packet->SizeInBytes());
           BOOST_CHECK(mSocket);
 
-          mSocket->sendTo(destination, packet.get(), packetLengthInBytes);
+          mSocket->sendTo(destination, packet->BytePtr(), packet->SizeInBytes());
         }
 
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
@@ -354,7 +352,7 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
         }
 
-        virtual void onReadReady(ISocketPtr socket)
+        virtual void onReadReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
           BOOST_CHECK(socket);
@@ -376,14 +374,14 @@ namespace openpeer
           if (mTURNSocket->handleSTUNPacket(ip, stun)) return;
         }
 
-        virtual void onWriteReady(ISocketPtr socket)
+        virtual void onWriteReady(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
           //          BOOST_CHECK(socket);
           //          BOOST_CHECK(socket == mSocket);
         }
 
-        virtual void onException(ISocketPtr socket)
+        virtual void onException(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
           //          BOOST_CHECK(socket);

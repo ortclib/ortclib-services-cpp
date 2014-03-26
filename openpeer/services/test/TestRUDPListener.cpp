@@ -52,7 +52,6 @@ using zsLib::ULONG;
 using zsLib::CSTR;
 using zsLib::Socket;
 using zsLib::SocketPtr;
-using zsLib::ISocketPtr;
 using zsLib::IPAddress;
 using zsLib::IMessageQueue;
 using zsLib::AutoRecursiveLock;

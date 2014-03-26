@@ -30,8 +30,10 @@
  */
 
 #include <openpeer/services/internal/services_Logger.h>
+#include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IHelper.h>
+#include <openpeer/services/ISettings.h>
 #include <openpeer/services/IWakeDelegate.h>
 
 #include <cryptopp/osrng.h>
@@ -39,7 +41,6 @@
 #include <zsLib/Stringize.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
-#include <zsLib/ISocket.h>
 #include <zsLib/Socket.h>
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Timer.h>
@@ -117,7 +118,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      static String getMessageString(const Log::Params &params)
+      static String getMessageString(
+                                     const Log::Params &params,
+                                     bool prettyPrint
+                                     )
       {
         static const char *wires[] = {"wire in", "wire out", NULL};
         static const char *jsons[] = {"json in", "json out", "json", NULL};
@@ -176,7 +180,13 @@ namespace openpeer
             String json = childEl->getTextDecoded();
             if (json.isEmpty()) continue;
 
-            alt += "\n\n" + json + "\n\n";
+            if (prettyPrint) {
+              DocumentPtr doc = Document::createFromParsedJSON(json);
+              boost::shared_array<char> output = doc->writeAsJSON(true);
+              alt += "\n\n" + String((CSTR)output.get()) + "\n\n";
+            } else {
+              alt += "\n\n" + json + "\n\n";
+            }
           }
         }
 
@@ -226,6 +236,7 @@ namespace openpeer
                                   CSTR inFunction,
                                   CSTR inFilePath,
                                   ULONG inLineNumber,
+                                  bool prettyPrint,
                                   bool eol = true
                                   )
       {
@@ -275,7 +286,7 @@ namespace openpeer
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_THREAD + "<" + currentThreadIDAsString() + ">"
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
-                      + colorLevel + getMessageString(params)
+                      + colorLevel + getMessageString(params, prettyPrint)
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_RESET + " "
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_FILENAME + "@" + fileName
                       + OPENPEER_SERVICES_SEQUENCE_COLOUR_LINENUMBER + "(" + string(inLineNumber) + ")"
@@ -295,6 +306,7 @@ namespace openpeer
                                CSTR inFunction,
                                CSTR inFilePath,
                                ULONG inLineNumber,
+                               bool prettyPrint,
                                bool eol = true
                                )
       {
@@ -325,7 +337,7 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + getMessageString(params) + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
+        String result = current + " " + severity + " <"  + currentThreadIDAsString() + "> " + getMessageString(params, prettyPrint) + " " + "@" + fileName + "(" + string(inLineNumber) + ")" + " " + "[" + inFunction + "]" + (eol ? "\n" : "");
         return result;
       }
 
@@ -338,6 +350,7 @@ namespace openpeer
                                     CSTR inFunction,
                                     CSTR inFilePath,
                                     ULONG inLineNumber,
+                                    bool prettyPrint,
                                     bool eol = true
                                     )
       {
@@ -351,7 +364,7 @@ namespace openpeer
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + getMessageString(params) + (eol ? "\n" : "");
+        String result = String(inFilePath) +  "(" + string(inLineNumber) + ") " + severity + current + " : <" + currentThreadIDAsString() + "> " + getMessageString(params, prettyPrint) + (eol ? "\n" : "");
         return result;
       }
 
@@ -456,46 +469,87 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark LoggerThread
+      #pragma mark LoggerReferenceHolder<T>
       #pragma mark
 
-      ZS_DECLARE_CLASS_PTR(LoggerThread)
+      template <typename T>
+      struct LoggerReferenceHolder
+      {
+        ZS_DECLARE_TYPEDEF_PTR(T, Logger)
+        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, Holder)
+
+        LoggerPtr mLogger;
+      };
 
       //-----------------------------------------------------------------------
-      class LoggerThread
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark LoggerSingletonAndLockHolder<T>
+      #pragma mark
+
+      template <typename T>
+      class LoggerSingletonAndLockHolder
       {
       public:
-        //---------------------------------------------------------------------
-        virtual ~LoggerThread()
+        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, ReferenceHolder)
+        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonAndLockHolder<T>, Self)
+        ZS_DECLARE_TYPEDEF_PTR(SingletonLazySharedPtr< Self >, SingletonLazySelf)
+
+        LoggerSingletonAndLockHolder() :
+          mLock(RecursiveLockPtr(new RecursiveLock)),
+          mSingleton(ReferenceHolderPtr(new ReferenceHolder))
         {
-          mThread->waitForShutdown();
-          mThread.reset();
         }
 
-        //---------------------------------------------------------------------
-        static LoggerThreadPtr create()
-        {
-          LoggerThreadPtr pThis(new LoggerThread);
-          pThis->mThread = MessageQueueThread::createBasic("org.openpeer.services.loggerThread");
-          return pThis;
-        }
-
-        //---------------------------------------------------------------------
-        static LoggerThreadPtr singleton()
-        {
-          AutoRecursiveLock lock(IHelper::getGlobalLock());
-          static LoggerThreadPtr global = LoggerThread::create();
-          return global;
-        }
-
-        //---------------------------------------------------------------------
-        static MessageQueueThreadPtr getThread()
-        {
-          return singleton()->mThread;
-        }
+        RecursiveLockPtr lock() {return mLock;}
+        ReferenceHolderPtr reference() {return mSingleton;}
 
       protected:
-        MessageQueueThreadPtr mThread;
+        RecursiveLockPtr mLock;
+        ReferenceHolderPtr mSingleton;
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark LoggerSingletonLazySharedPtr<T>
+      #pragma mark
+
+      template <typename T>
+      class LoggerSingletonLazySharedPtr : SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >
+      {
+      public:
+        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, ReferenceHolder)
+        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonAndLockHolder<T>, Holder)
+        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonLazySharedPtr<T>, SingletonLazySelf)
+
+      public:
+        LoggerSingletonLazySharedPtr() :
+          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(HolderPtr(new Holder))
+        {
+        }
+
+        static RecursiveLockPtr lock(SingletonLazySelf &singleton)
+        {
+          HolderPtr result = singleton.singleton();
+          if (!result) {
+            return RecursiveLockPtr(new RecursiveLock);
+          }
+          return result->lock();
+        }
+
+        static ReferenceHolderPtr logger(SingletonLazySelf &singleton)
+        {
+          HolderPtr result = singleton.singleton();
+          if (!result) {
+            return ReferenceHolderPtr(new ReferenceHolder);
+          }
+          return result->reference();
+        }
       };
 
       //-----------------------------------------------------------------------
@@ -514,8 +568,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         void init()
         {
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          Log::addListener(mThisWeak.lock());
         }
 
       public:
@@ -536,9 +589,8 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         static LogLevelLoggerPtr singleton() {
-          AutoRecursiveLock lock(IHelper::getGlobalLock());
-          static LogLevelLoggerPtr logger = LogLevelLogger::create();
-          return logger;
+          static SingletonLazySharedPtr<LogLevelLogger> singleton(LogLevelLogger::create());
+          return singleton.singleton();
         }
 
         //---------------------------------------------------------------------
@@ -630,36 +682,53 @@ namespace openpeer
         //---------------------------------------------------------------------
         void init()
         {
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          Log::addListener(mThisWeak.lock());
         }
 
       public:
         //---------------------------------------------------------------------
-        StdOutLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        StdOutLogger(
+                     bool colorizeOutput,
+                     bool prettyPrint
+                     ) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(prettyPrint)
+          {}
 
         //---------------------------------------------------------------------
-        static StdOutLoggerPtr create(bool colorizeOutput)
+        static StdOutLoggerPtr create(
+                                      bool colorizeOutput,
+                                      bool prettyPrint
+                                      )
         {
-          StdOutLoggerPtr pThis(new StdOutLogger(colorizeOutput));
+          StdOutLoggerPtr pThis(new StdOutLogger(colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
         }
 
         //---------------------------------------------------------------------
-        static StdOutLoggerPtr singleton(bool colorizeOutput, bool reset = false) {
-          AutoRecursiveLock lock(IHelper::getGlobalLock());
-          static StdOutLoggerPtr logger = (reset ? StdOutLoggerPtr() : StdOutLogger::create(colorizeOutput));
+        static StdOutLoggerPtr singleton(
+                                         bool colorizeOutput,
+                                         bool prettyPrint,
+                                         bool reset = false
+                                         )
+        {
+          static LoggerSingletonLazySharedPtr< StdOutLogger > singleton;
+
+          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< StdOutLogger >::lock(singleton);
+          LoggerReferenceHolder<StdOutLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< StdOutLogger >::logger(singleton));
+          StdOutLoggerPtr &logger = holder->mLogger;
+
+          AutoRecursiveLock lock(*locker);
           if ((reset) &&
               (logger)) {
-            LogPtr log = Log::singleton();
-            log->removeListener(logger->mThisWeak.lock());
+            Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
-            logger = StdOutLogger::create(colorizeOutput);
+
+          if (!logger) {
+            logger = StdOutLogger::create(colorizeOutput, prettyPrint);
           }
           return logger;
         }
@@ -686,9 +755,9 @@ namespace openpeer
                            )
         {
           if (mColorizeOutput) {
-            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           } else {
-            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           }
         }
 
@@ -700,6 +769,7 @@ namespace openpeer
 
         StdOutLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
       };
 
       //-----------------------------------------------------------------------
@@ -718,13 +788,15 @@ namespace openpeer
         void init(const char *fileName)
         {
           mFile.open(fileName, std::ios::out | std::ios::binary);
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          Log::addListener(mThisWeak.lock());
         }
 
       public:
         //---------------------------------------------------------------------
-        FileLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        FileLogger(bool colorizeOutput) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput)
+          {}
 
         //---------------------------------------------------------------------
         static FileLoggerPtr create(const char *fileName, bool colorizeOutput)
@@ -736,17 +808,21 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        static FileLoggerPtr singleton(const char *fileName, bool colorizeOutput, bool reset = false) {
-          AutoRecursiveLock lock(IHelper::getGlobalLock());
-          static FileLoggerPtr logger = (reset ? FileLoggerPtr() : FileLogger::create(fileName, colorizeOutput));
+        static FileLoggerPtr singleton(const char *fileName, bool colorizeOutput, bool reset = false)
+        {
+          static LoggerSingletonLazySharedPtr< FileLogger > singleton;
+
+          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< FileLogger >::lock(singleton);
+          LoggerReferenceHolder<FileLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< FileLogger >::logger(singleton));
+          FileLoggerPtr &logger = holder->mLogger;
+
+          AutoRecursiveLock lock(*locker);
           if ((reset) &&
               (logger)) {
-            LogPtr log = Log::singleton();
-            log->removeListener(logger->mThisWeak.lock());
+            Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
+          if (!logger) {
             logger = FileLogger::create(fileName, colorizeOutput);
           }
           return logger;
@@ -776,9 +852,9 @@ namespace openpeer
           if (mFile.is_open()) {
             String output;
             if (mColorizeOutput) {
-              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+              output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
             } else {
-              output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+              output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
             }
             mFile << output;
             mFile.flush();
@@ -793,6 +869,7 @@ namespace openpeer
 
         FileLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
 
         std::ofstream mFile;
       };
@@ -812,13 +889,15 @@ namespace openpeer
         //---------------------------------------------------------------------
         void init()
         {
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          Log::addListener(mThisWeak.lock());
         }
 
       public:
         //---------------------------------------------------------------------
-        DebuggerLogger(bool colorizeOutput) : mColorizeOutput(colorizeOutput) {}
+        DebuggerLogger(bool colorizeOutput) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput)
+          {}
 
         //---------------------------------------------------------------------
         static DebuggerLoggerPtr create(bool colorizeOutput)
@@ -833,16 +912,19 @@ namespace openpeer
         static DebuggerLoggerPtr singleton(bool colorizeOutput, bool reset = false)
         {
 #if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
-          AutoRecursiveLock lock(Helper::getGlobalLock());
-          static DebuggerLoggerPtr logger = (reset ? DebuggerLoggerPtr() : DebuggerLogger::create(colorizeOutput));
+          static LoggerSingletonLazySharedPtr< DebuggerLogger > singleton;
+
+          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< DebuggerLogger >::lock(singleton);
+          LoggerReferenceHolder<DebuggerLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< DebuggerLogger >::logger(singleton));
+          DebuggerLoggerPtr &logger = holder->mLogger;
+
+          AutoRecursiveLock lock(*locker);
           if ((reset) &&
               (logger)) {
-            LogPtr log = Log::singleton();
-            log->removeListener(logger->mThisWeak.lock());
+            Log::removeListener(logger->mThisWeak.lock());
             logger.reset();
           }
-          if ((!reset) &&
-              (!logger)) {
+          if (!logger) {
             logger = DebuggerLogger::create(colorizeOutput);
           }
           return logger;
@@ -877,14 +959,14 @@ namespace openpeer
 #ifndef NDEBUG
           String output;
           if (mColorizeOutput)
-            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint, false);
           else
-            output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, false);
+            output = toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint, false);
           qDebug() << output.c_str();
 #endif //ndef NDEBUG
 #endif //__QNX__
 #ifdef _WIN32
-          String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+          String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
         }
@@ -897,6 +979,7 @@ namespace openpeer
 
         DebuggerLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
       };
 
       //-----------------------------------------------------------------------
@@ -914,7 +997,8 @@ namespace openpeer
                            public ISocketDelegate,
                            public IDNSDelegate,
                            public ITimerDelegate,
-                           public IWakeDelegate
+                           public IWakeDelegate,
+                           public IBackgroundingDelegate
       {
         //---------------------------------------------------------------------
         void init(
@@ -925,8 +1009,9 @@ namespace openpeer
           mListenPort = listenPort;
           mMaxWaitTimeForSocketToBeAvailable = Seconds(maxSecondsWaitForSocketToBeAvailable);
 
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE));
+
+          Log::addListener(mThisWeak.lock());
 
           listen();
         }
@@ -956,11 +1041,12 @@ namespace openpeer
             mListenPort = OPENPEER_SERVICES_DEFAULT_OUTGOING_TELNET_PORT;
           }
 
+          mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE));
+
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
 
-          LogPtr log = Log::singleton();
-          log->addListener(mThisWeak.lock());
+          Log::addListener(mThisWeak.lock());
         }
 
         //---------------------------------------------------------------------
@@ -970,9 +1056,9 @@ namespace openpeer
             mListenSocket = Socket::createTCP();
             try {
 #ifndef __QNX__
-              mListenSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+              mListenSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-            } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
+            } catch(Socket::Exceptions::UnsupportedSocketOption &) {
             }
             mListenSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
           }
@@ -1025,13 +1111,17 @@ namespace openpeer
                      ) :
           MessageQueueAssociator(queue),
           mColorizeOutput(colorizeOutput),
+          mPrettyPrint(colorizeOutput),
           mOutgoingMode(false),
           mConnected(false),
           mListenPort(0),
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
           mStartListenTime(zsLib::now()),
           mBacklogDataUntil(zsLib::now() + Seconds(OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
-        {}
+        {
+          IHelper::setSocketThreadPriority();
+          IHelper::setTimerThreadPriority();
+        }
 
         //---------------------------------------------------------------------
         ~TelnetLogger()
@@ -1078,8 +1168,7 @@ namespace openpeer
 
           TelnetLoggerPtr pThis = mThisWeak.lock();
           if (pThis) {
-            LogPtr log = Log::singleton();
-            log->removeListener(mThisWeak.lock());
+            Log::removeListener(mThisWeak.lock());
             mThisWeak.reset();
           }
 
@@ -1133,8 +1222,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static TelnetLoggerPtr create(USHORT listenPort, ULONG maxSecondsWaitForSocketToBeAvailable, bool colorizeOutput)
         {
-          IMessageQueuePtr queue = LoggerThread::getThread();
-          TelnetLoggerPtr pThis(new TelnetLogger(queue, colorizeOutput));
+          TelnetLoggerPtr pThis(new TelnetLogger(IHelper::getLoggerQueue(), colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(listenPort, maxSecondsWaitForSocketToBeAvailable);
           return pThis;
@@ -1147,25 +1235,50 @@ namespace openpeer
                                       const char *sendStringUponConnection
                                       )
         {
-          MessageQueueThreadPtr queue = LoggerThread::getThread();
-          TelnetLoggerPtr pThis(new TelnetLogger(queue, colorizeOutput));
+          TelnetLoggerPtr pThis(new TelnetLogger(IHelper::getLoggerQueue(), colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(serverHostWithPort, sendStringUponConnection);
           return pThis;
         }
 
         //---------------------------------------------------------------------
-        static TelnetLoggerPtr &singletonListener()
+        static LoggerSingletonLazySharedPtr< TelnetLogger > &privateSingletonListener()
         {
-          static TelnetLoggerPtr singleton;
+          static LoggerSingletonLazySharedPtr< TelnetLogger > singleton;
           return singleton;
         }
 
         //---------------------------------------------------------------------
-        static TelnetLoggerPtr &singletonOutgoing()
+        static LoggerSingletonLazySharedPtr< TelnetLogger > &privateSingletonOutgoing()
         {
-          static TelnetLoggerPtr singleton;
+          static LoggerSingletonLazySharedPtr< TelnetLogger > singleton;
           return singleton;
+        }
+        
+        //---------------------------------------------------------------------
+        static RecursiveLockPtr lockListener()
+        {
+          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< TelnetLogger >::lock(privateSingletonListener());
+          return locker;
+        }
+
+        //---------------------------------------------------------------------
+        static LoggerReferenceHolder<TelnetLogger>::HolderPtr singletonListener()
+        {
+          return (LoggerSingletonLazySharedPtr< TelnetLogger >::logger(privateSingletonListener()));
+        }
+
+        //---------------------------------------------------------------------
+        static RecursiveLockPtr lockOutgoing()
+        {
+          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< TelnetLogger >::lock(privateSingletonOutgoing());
+          return locker;
+        }
+
+        //---------------------------------------------------------------------
+        static LoggerReferenceHolder<TelnetLogger>::HolderPtr singletonOutgoing()
+        {
+          return (LoggerSingletonLazySharedPtr< TelnetLogger >::logger(privateSingletonOutgoing()));
         }
 
         //---------------------------------------------------------------------
@@ -1191,6 +1304,11 @@ namespace openpeer
         {
           bool okayToBacklog = false;
 
+          if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
+            // ignore events from the socket monitor to prevent recursion
+            return;
+          }
+
           // scope: quick exit is not logging
           {
             AutoRecursiveLock lock(mLock);
@@ -1211,7 +1329,7 @@ namespace openpeer
 
           String output;
           if (mColorizeOutput) {
-            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
+            output = toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
           } else {
             output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           }
@@ -1259,7 +1377,7 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void onReadReady(ISocketPtr inSocket)
+        virtual void onReadReady(SocketPtr inSocket)
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1282,9 +1400,9 @@ namespace openpeer
 
             try {
 #ifndef __QNX__
-              mTelnetSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+              mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-            } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
+            } catch(Socket::Exceptions::UnsupportedSocketOption &) {
             }
 
             mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
@@ -1300,7 +1418,14 @@ namespace openpeer
             int errorCode = 0;
             length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer)-sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
 
-            if (length < 1) return;
+            if (wouldBlock)
+              return;
+
+            if ((length < 1) ||
+                (0 != errorCode)) {
+              onException(inSocket);
+              return;
+            }
 
             mCommand += (CSTR)(&buffer[0]);
             if (mCommand.size() > (sizeof(buffer)*3)) {
@@ -1333,8 +1458,9 @@ namespace openpeer
           }
         }
 
+
         //---------------------------------------------------------------------
-        virtual void onWriteReady(ISocketPtr socket)
+        virtual void onWriteReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
           if (socket != mTelnetSocket) return;
@@ -1386,13 +1512,13 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void onException(ISocketPtr inSocket)
+        virtual void onException(SocketPtr inSocket)
         {
           AutoRecursiveLock lock(mLock);
           if (inSocket == mListenSocket) {
             mListenSocket->close();
             mListenSocket.reset();
-            if (!mClosed) {
+            if (!isClosed()) {
               mStartListenTime = zsLib::now();
               listen();
             }
@@ -1464,6 +1590,42 @@ namespace openpeer
           listen();
         }
 
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      ) {}
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingGoingToBackgroundNow(
+                                                         IBackgroundingSubscriptionPtr subscription
+                                                         ) {}
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingReturningFromBackground(
+                                                            IBackgroundingSubscriptionPtr subscription
+                                                            )
+        {
+          SocketPtr socket;
+          {
+            AutoRecursiveLock lock(mLock);
+            socket = mTelnetSocket;
+          }
+
+          if (!socket) return;
+
+          // fake a read ready to retest socket
+          onReadReady(mTelnetSocket);
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onBackgroundingApplicationWillQuit(
+                                                        IBackgroundingSubscriptionPtr subscription
+                                                        )
+        {
+          close();
+        }
+
       protected:
         //---------------------------------------------------------------------
         void connectOutgoingAgain()
@@ -1480,6 +1642,8 @@ namespace openpeer
 
           if (!mServers) return;
 
+          if (isClosed()) return;
+
           IPAddress result;
           if (!IDNS::extractNextIP(mServers, result)) {
             mServers.reset();
@@ -1491,9 +1655,9 @@ namespace openpeer
           mTelnetSocket = Socket::createTCP();
           try {
 #ifndef __QNX__
-            mTelnetSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+            mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-          } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
+          } catch(Socket::Exceptions::UnsupportedSocketOption &) {
           }
           mTelnetSocket->setBlocking(false);
           mTelnetSocket->setDelegate(mThisWeak.lock());
@@ -1554,6 +1718,15 @@ namespace openpeer
                   ILogger::setLogLevel(Log::Basic);
                 } else if (level == "none") {
                   ILogger::setLogLevel(Log::None);
+                } else if (level == "pretty") {
+                  String mode = split.front(); split.pop_front();
+                  if (mode == "on") {
+                    mPrettyPrint = true;
+                    echo = "==> Setting pretty print on\n";
+                  } else if (mode == "off") {
+                    mPrettyPrint = false;
+                    echo = "==> Setting pretty print off\n";
+                  }
                 } else if ((level == "color") || (level == "colour")) {
                   String mode = split.front(); split.pop_front();
                   if (mode == "on") {
@@ -1614,9 +1787,12 @@ namespace openpeer
 
         TelnetLoggerWeakPtr mThisWeak;
         bool mColorizeOutput;
+        bool mPrettyPrint;
+
+        IBackgroundingSubscriptionPtr mBackgroundingSubscription;
 
         SocketPtr mListenSocket;
-        ISocketPtr mTelnetSocket;
+        SocketPtr mTelnetSocket;
 
         Time mBacklogDataUntil;
 
@@ -1668,7 +1844,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ILogger::installStdOutLogger(bool colorizeOutput)
     {
-      internal::StdOutLogger::singleton(colorizeOutput);
+      internal::StdOutLogger::singleton(colorizeOutput, true);
     }
 
     //-------------------------------------------------------------------------
@@ -1680,8 +1856,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ILogger::installTelnetLogger(WORD listenPort, ULONG maxSecondsWaitForSocketToBeAvailable,  bool colorizeOutput)
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonListener();
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
+
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (singleton) {
         bool change = false;
 
@@ -1706,9 +1885,11 @@ namespace openpeer
                                               const char *sendStringUponConnection
                                               )
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
 
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonOutgoing();
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (singleton) {
         bool change = false;
 
@@ -1735,8 +1916,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     bool ILogger::isTelnetLoggerListening()
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonListener();
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
+
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (!singleton) return false;
 
       return singleton->isListening();
@@ -1745,8 +1929,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     bool ILogger::isTelnetLoggerConnected()
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonListener();
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
+
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (!singleton) return false;
 
       return singleton->isConnected();
@@ -1755,8 +1942,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     bool ILogger::isOutgoingTelnetLoggerConnected()
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonOutgoing();
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
+
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (!singleton) return false;
 
       return singleton->isConnected();
@@ -1765,7 +1955,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ILogger::uninstallStdOutLogger()
     {
-      internal::StdOutLogger::singleton(false, true);
+      internal::StdOutLogger::singleton(false, false, true);
     }
 
     //-------------------------------------------------------------------------
@@ -1777,9 +1967,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ILogger::uninstallTelnetLogger()
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
 
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonListener();
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (singleton) {
         singleton->close();
         singleton.reset();
@@ -1789,9 +1981,11 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void ILogger::uninstallOutgoingTelnetLogger()
     {
-      AutoRecursiveLock lock(IHelper::getGlobalLock());
+      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
 
-      internal::TelnetLoggerPtr &singleton = internal::TelnetLogger::singletonOutgoing();
+      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
+      internal::TelnetLoggerPtr &singleton = holder->mLogger;
+
       if (singleton) {
         singleton->close();
         singleton.reset();
@@ -1808,6 +2002,7 @@ namespace openpeer
     void ILogger::setLogLevel(Log::Level logLevel)
     {
       internal::LogLevelLoggerPtr logger = internal::LogLevelLogger::singleton();
+      if (!logger) return;
       logger->setLogLevel(logLevel);
     }
 
@@ -1815,6 +2010,7 @@ namespace openpeer
     void ILogger::setLogLevel(const char *component, Log::Level logLevel)
     {
       internal::LogLevelLoggerPtr logger = internal::LogLevelLogger::singleton();
+      if (!logger) return;
       logger->setLogLevel(component, logLevel);
     }
 

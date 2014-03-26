@@ -53,6 +53,8 @@ namespace openpeer
   {
     namespace internal
     {
+      ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, UseSTUNRequesterManager)
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -81,6 +83,7 @@ namespace openpeer
         mRequestStartTime(zsLib::now()),
         mMaxTimeout(Duration() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
       {
+        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------
@@ -96,8 +99,10 @@ namespace openpeer
       void STUNRequester::init()
       {
         AutoRecursiveLock lock(mLock);
-        UseSTUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
-        manager->monitorStart(mThisWeak.lock(), mSTUNRequest);
+        UseSTUNRequesterManagerPtr manager = UseSTUNRequesterManager::singleton();
+        if (manager) {
+          manager->monitorStart(mThisWeak.lock(), mSTUNRequest);
+        }
         step();
       }
 
@@ -347,8 +352,10 @@ namespace openpeer
           mDelegate.reset();
 
           // tie the lifetime of the monitoring to the delegate
-          UseSTUNRequesterManagerPtr manager = ISTUNRequesterManagerForSTUNRequester::singleton();
-          manager->monitorStop(*this);
+          UseSTUNRequesterManagerPtr manager = UseSTUNRequesterManager::singleton();
+          if (manager) {
+            manager->monitorStop(*this);
+          }
         }
 
         if (mTimer) {

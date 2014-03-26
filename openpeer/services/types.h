@@ -35,6 +35,8 @@
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
 
+#include <zsLib/MessageQueueThread.h>
+
 // special case where CryptoPP extension class is needed
 #include <openpeer/services/internal/services_AllocatorWithNul.h>
 
@@ -42,6 +44,11 @@ namespace openpeer
 {
   namespace services
   {
+    namespace internal
+    {
+      void throwOnlySetOnce();
+    }
+
     using zsLib::PUID;
     using zsLib::CHAR;
     using zsLib::UCHAR;
@@ -64,10 +71,50 @@ namespace openpeer
     using zsLib::Duration;
     using zsLib::Seconds;
     using zsLib::IPAddress;
+    using zsLib::Lock;
     using zsLib::RecursiveLock;
+    using zsLib::AutoLock;
     using zsLib::Log;
 
+    typedef zsLib::ThreadPriorities ThreadPriorities;
+
     using boost::dynamic_pointer_cast;
+
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock)
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock)
+
+    class SharedRecursiveLock
+    {
+    public:
+      static SharedRecursiveLock create() {return SharedRecursiveLock(RecursiveLockPtr(new RecursiveLock));}
+
+      SharedRecursiveLock(const SharedRecursiveLock &source) : mLock(source.mLock) {}
+      SharedRecursiveLock(RecursiveLockPtr shared) : mLock(shared) {}
+
+      RecursiveLock &lock() const {return *mLock;}
+
+      operator RecursiveLock & () const {return *mLock;}
+
+    private:
+      SharedRecursiveLock() {}  // illegal
+      mutable RecursiveLockPtr mLock;
+    };
+
+    template<typename T, bool setOnceOnly = false>
+    class LockedValue
+    {
+    public:
+      LockedValue() : mSet(false) {}
+      ~LockedValue() {}
+
+      T get() const {AutoLock lock(mLock); return mValue;}
+      void set(T value) {AutoLock lock(mLock); if ((setOnceOnly) && (mSet)) internal::throwOnlySetOnce(); mValue = value; mSet = true;}
+
+    protected:
+      mutable Lock mLock;
+      T mValue;
+      bool mSet;
+    };
 
     ZS_DECLARE_USING_PTR(zsLib, Socket)
     ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
@@ -95,6 +142,7 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PTR(IHTTP)
     ZS_DECLARE_INTERACTION_PTR(IHTTPQuery)
     ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel)
+    ZS_DECLARE_INTERACTION_PTR(IMessageQueueManager)
     ZS_DECLARE_INTERACTION_PTR(IRSAPrivateKey)
     ZS_DECLARE_INTERACTION_PTR(IRSAPublicKey)
     ZS_DECLARE_INTERACTION_PTR(IRUDPListener)

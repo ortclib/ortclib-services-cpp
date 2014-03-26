@@ -57,8 +57,6 @@ using zsLib::ULONG;
 using zsLib::string;
 using zsLib::String;
 using zsLib::Time;
-using zsLib::ISocket;
-using zsLib::ISocketPtr;
 using zsLib::AutoRecursiveLock;
 using zsLib::RecursiveLock;
 using zsLib::IMessageQueue;
@@ -117,7 +115,7 @@ namespace openpeer
           mClientSendStream = ITransportStream::create(mThisWeak.lock(), ITransportStreamReaderDelegatePtr())->getWriter();
           
           mListenSocket = Socket::createTCP();
-          mListenSocket->setOptionFlag(ISocket::SetOptionFlag::NonBlocking, true);
+          mListenSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
           mListenSocket->bind(serverIP);
           mListenSocket->listen();
           mListenSocket->setDelegate(mThisWeak.lock());
@@ -294,7 +292,7 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void onReadReady(ISocketPtr socket)
+        virtual void onReadReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
           BOOST_CHECK(Time() == mAcceptTime)
@@ -305,12 +303,12 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void onWriteReady(ISocketPtr socket)
+        virtual void onWriteReady(SocketPtr socket)
         {
         }
 
         //---------------------------------------------------------------------
-        virtual void onException(ISocketPtr socket)
+        virtual void onException(SocketPtr socket)
         {
         }
 

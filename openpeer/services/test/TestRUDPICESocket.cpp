@@ -36,7 +36,7 @@
 #include <zsLib/Timer.h>
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/IICESocketSession.h>
-#include <openpeer/services/IRUDPICESocketSession.h>
+#include <openpeer/services/IRUDPTransport.h>
 #include <openpeer/services/IRUDPMessaging.h>
 #include <openpeer/services/ITransportStream.h>
 #include <openpeer/services/IHelper.h>
@@ -53,7 +53,6 @@ using zsLib::ULONG;
 using zsLib::CSTR;
 using zsLib::Socket;
 using zsLib::SocketPtr;
-using zsLib::ISocketPtr;
 using zsLib::IPAddress;
 using zsLib::AutoRecursiveLock;
 using zsLib::IMessageQueue;
@@ -63,9 +62,6 @@ using openpeer::services::IICESocketDelegate;
 using openpeer::services::IICESocketSession;
 using openpeer::services::IICESocketSessionPtr;
 using openpeer::services::IICESocketSessionDelegate;
-using openpeer::services::IRUDPICESocketSession;
-using openpeer::services::IRUDPICESocketSessionPtr;
-using openpeer::services::IRUDPICESocketSessionDelegate;
 using openpeer::services::IRUDPMessaging;
 using openpeer::services::IRUDPMessagingPtr;
 using openpeer::services::IRUDPMessagingDelegate;
@@ -88,8 +84,8 @@ namespace openpeer
 
       class TestRUDPICESocketCallback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,
-                                        public IRUDPICESocketSessionDelegate,
                                         public IRUDPMessagingDelegate,
+                                        public IRUDPTransportDelegate,
                                         public ITransportStreamWriterDelegate,
                                         public ITransportStreamReaderDelegate
       {
@@ -202,7 +198,7 @@ namespace openpeer
                                                          );
               mSocketSession->endOfRemoteCandidates();
 
-              mRUDPSocketSession = IRUDPICESocketSession::listen(getAssociatedMessageQueue(), mSocketSession, mThisWeak.lock());
+              mRUDPTransport = IRUDPTransport::listen(getAssociatedMessageQueue(), mSocketSession, mThisWeak.lock());
 
               break;
             }
@@ -222,29 +218,29 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
-        virtual void onRUDPICESocketSessionStateChanged(
-                                                        IRUDPICESocketSessionPtr session,
-                                                        RUDPICESocketSessionStates state
-                                                        )
+        virtual void onRUDPTransportStateChanged(
+                                                 IRUDPTransportPtr session,
+                                                 RUDPTransportStates state
+                                                 )
         {
           zsLib::AutoRecursiveLock lock(mLock);
-          if (IRUDPICESocketSession::RUDPICESocketSessionState_Ready == state) {
+          if (IRUDPTransport::RUDPTransportState_Ready == state) {
             mMessaging = IRUDPMessaging::openChannel(
                                                      getAssociatedMessageQueue(),
-                                                     mRUDPSocketSession,
+                                                     mRUDPTransport,
                                                      mThisWeak.lock(),
                                                      "bogus/text-bogus",
                                                      mReceiveStream->getStream(),
                                                      mSendStream->getStream()
                                                      );
           }
-          if (IRUDPICESocketSession::RUDPICESocketSessionState_Shutdown == state) {
+          if (IRUDPTransport::RUDPTransportState_Ready == state) {
             mSessionShutdown = true;
           }
         }
 
         //---------------------------------------------------------------------
-        virtual void onRUDPICESocketSessionChannelWaiting(IRUDPICESocketSessionPtr session)
+        virtual void onRUDPTransportChannelWaiting(IRUDPTransportPtr session)
         {
         }
 
@@ -318,10 +314,10 @@ namespace openpeer
         bool mSessionShutdown;
         bool mMessagingShutdown;
 
-        IRUDPMessagingPtr mMessaging;
         IICESocketPtr mSocket;
         IICESocketSessionPtr mSocketSession;
-        IRUDPICESocketSessionPtr mRUDPSocketSession;
+        IRUDPTransportPtr mRUDPTransport;
+        IRUDPMessagingPtr mMessaging;
       };
     }
   }

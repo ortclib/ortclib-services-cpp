@@ -319,7 +319,8 @@ namespace openpeer
       #pragma mark DNSQuery
       #pragma mark
 
-      class DNSQuery : public IDNSQuery
+      class DNSQuery : public SharedRecursiveLock,
+                       public IDNSQuery
       {
       protected:
         //---------------------------------------------------------------------
@@ -464,7 +465,12 @@ namespace openpeer
         #pragma mark
 
         //---------------------------------------------------------------------
-        DNSQuery(IDNSDelegatePtr delegate) :
+        DNSQuery(
+                 DNSMonitorPtr monitor,
+                 IDNSDelegatePtr delegate
+                 ) :
+          mMonitor(monitor),
+          SharedRecursiveLock(monitor ? *monitor : SharedRecursiveLock::create()),
           mObjectName("DNSQuery")
         {
           ZS_THROW_INVALID_USAGE_IF(!delegate)
@@ -475,9 +481,6 @@ namespace openpeer
 
           mDelegate = IDNSDelegateProxy::createWeak(delegate);
           mMonitor = DNSMonitor::singleton();
-          if (!mMonitor) {
-            ZS_THROW_BAD_STATE_MSG_IF(!mMonitor, "The DNS monitor is not available")
-          }
         }
 
         //---------------------------------------------------------------------
@@ -492,6 +495,26 @@ namespace openpeer
         }
 
         //---------------------------------------------------------------------
+        virtual void abortEarly()
+        {
+          AutoRecursiveLock lock(*this);
+
+          cancel();
+
+          if (!mDelegate) return;
+
+          DNSQueryPtr pThis = mThisWeak.lock();
+          if (!pThis) return;
+
+          try {
+            mDelegate->onLookupCompleted(pThis);
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          }
+
+          mDelegate.reset();
+        }
+
+        //---------------------------------------------------------------------
         #pragma mark
         #pragma mark DNSQuery => IDNSQuery
         #pragma mark
@@ -502,8 +525,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void cancel()
         {
-          AutoRecursiveLock lock(getLock());
-          ZS_THROW_BAD_STATE_IF(!mMonitor)
+          AutoRecursiveLock lock(*this);
 
           if (mQuery) {
             mQuery->cancel();
@@ -531,12 +553,6 @@ namespace openpeer
         #pragma mark
         #pragma mark DNSQuery => (internal)
         #pragma mark
-
-        //---------------------------------------------------------------------
-        RecursiveLock &getLock() const
-        {
-          return mMonitor->getLock();
-        }
 
         //---------------------------------------------------------------------
         void done()
@@ -576,7 +592,7 @@ namespace openpeer
       {
       protected:
         DNSAQuery(IDNSDelegatePtr delegate, const char *name) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name)
         {
           mObjectName = "DNSAQuery";
@@ -590,7 +606,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitAQuery(name, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitAQuery(name, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
 
           return pThis;
         }
@@ -604,7 +625,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onAResult(IDNS::AResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("A record lookup was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
@@ -625,8 +646,7 @@ namespace openpeer
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
-          }
-          catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
 
@@ -651,7 +671,7 @@ namespace openpeer
       {
       protected:
         DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name)
         {
           mObjectName = "DNSAAAAQuery";
@@ -665,7 +685,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitAAAAQuery(name, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitAAAAQuery(name, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
 
           return pThis;
         }
@@ -679,7 +704,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onAAAAResult(IDNS::AAAAResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("AAAA was cancelled before result arrived") + ZS_PARAM("name", mName))
             return;
@@ -731,7 +756,7 @@ namespace openpeer
                     const char *service,
                     const char *protocol
                     ) :
-          DNSQuery(delegate),
+          DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mService(service),
           mProtocol(protocol)
@@ -752,7 +777,12 @@ namespace openpeer
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
-          pThis->mMonitor->submitSRVQuery(name, service, protocol, 0, pThis->mQuery);
+
+          if (pThis->mMonitor) {
+            pThis->mMonitor->submitSRVQuery(name, service, protocol, 0, pThis->mQuery);
+          } else {
+            pThis->abortEarly();
+          }
           return pThis;
         }
 
@@ -765,7 +795,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         virtual void onSRVResult(IDNS::SRVResultPtr result)
         {
-          AutoRecursiveLock lock(getLock());
+          AutoRecursiveLock lock(*this);
           if (!mQuery) {
             ZS_LOG_WARNING(Detail, log("SRV record lookup was cancelled before result arrived") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
             return;

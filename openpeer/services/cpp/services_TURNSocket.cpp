@@ -198,13 +198,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::init()
       {
+        IHelper::setSocketThreadPriority();
+        IHelper::setTimerThreadPriority();
+
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
 
         String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
-        mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock());
+        mBackgroundingSubscription = IBackgrounding::subscribe(
+                                                               mThisWeak.lock(),
+                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE)
+                                                               );
 
         step();
       }
@@ -801,7 +807,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onReadReady(ISocketPtr socket)
+      void TURNSocket::onReadReady(SocketPtr socket)
       {
         try
         {
@@ -869,7 +875,7 @@ namespace openpeer
                   break;
 
                 server->mReadBufferFilledSizeInBytes += bytesRead;
-              } catch(ISocket::Exceptions::Unspecified &) {
+              } catch(Socket::Exceptions::Unspecified &) {
                 ZS_LOG_WARNING(Detail, log("attempt to read TCP TURN socket failed") + ZS_PARAM("server ip", server->mServerIP.string()))
                 onException(socket);
                 return;
@@ -1036,7 +1042,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onWriteReady(ISocketPtr socket)
+      void TURNSocket::onWriteReady(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1074,7 +1080,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onException(ISocketPtr socket)
+      void TURNSocket::onException(SocketPtr socket)
       {
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
@@ -1214,7 +1220,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier)
+      void TURNSocket::onBackgroundingGoingToBackground(
+                                                        IBackgroundingSubscriptionPtr subscription,
+                                                        IBackgroundingNotifierPtr notifier
+                                                        )
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1232,7 +1241,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingGoingToBackgroundNow()
+      void TURNSocket::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1245,7 +1254,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onBackgroundingReturningFromBackground()
+      void TURNSocket::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
         AutoRecursiveLock lock(mLock);
 
@@ -1276,6 +1285,12 @@ namespace openpeer
 
         // perform routine maintanence
         step();
+      }
+
+      //-----------------------------------------------------------------------
+      void TURNSocket::onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription)
+      {
+        ZS_LOG_DEBUG("application will quit")
       }
 
       //-----------------------------------------------------------------------
@@ -1538,16 +1553,16 @@ namespace openpeer
                 server->mTCPSocket->setBlocking(false);
                 try {
 #ifndef __QNX__
-                  server->mTCPSocket->setOptionFlag(ISocket::SetOptionFlag::IgnoreSigPipe, true);
+                  server->mTCPSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-                } catch(ISocket::Exceptions::UnsupportedSocketOption &) {
+                } catch(Socket::Exceptions::UnsupportedSocketOption &) {
                 }
                 server->mTCPSocket->setDelegate(mThisWeak.lock());
 
                 try {
                   bool wouldBlock = false;
                   server->mTCPSocket->connect(server->mServerIP, &wouldBlock);
-                } catch(ISocket::Exceptions::Unspecified &) {
+                } catch(Socket::Exceptions::Unspecified &) {
                   mLastError = TURNSocketError_UnexpectedSocketFailure;
                   cancel();
                   return;
@@ -2349,7 +2364,7 @@ namespace openpeer
                   informWriteReady();
                 }
               }
-            } catch(ISocket::Exceptions::Unspecified &error) {
+            } catch(Socket::Exceptions::Unspecified &error) {
               OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
               cancel();
@@ -2408,7 +2423,7 @@ namespace openpeer
               }
             }
           }
-        } catch(ISocket::Exceptions::Unspecified &error) {
+        } catch(Socket::Exceptions::Unspecified &error) {
           OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
           cancel();

@@ -1375,14 +1375,14 @@ namespace openpeer
               String hashNonce = IHelper::convertToHex(*IHelper::hash(nonce));
               String nonceNamespace = OPENPEER_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE + hashNonce;
 
-              String result = ICache::singleton()->fetch(nonceNamespace);
+              String result = ICache::fetch(nonceNamespace);
               if (result.hasData()) {
                 ZS_LOG_ERROR(Detail, log("keying encoding seen previously") + ZS_PARAM("nonce", nonce) + ZS_PARAM("nonce namespace", nonceNamespace))
                 setError(IHTTP::HTTPStatusCode_Forbidden, "keyhing encoding information was seen previously");
                 goto receive_error_out;
               }
 
-              ICache::singleton()->store(nonceNamespace, expires, "1");
+              ICache::store(nonceNamespace, expires, "1");
             }
 
             // scope: santity check on algorithms receiving

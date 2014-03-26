@@ -246,13 +246,14 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IIC
                                                     )
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegateTypePtr, DelegateTypeProxy)
-    for (SubscriptionsMap::iterator iter = subscriptions.begin(); iter != subscriptions.end(); )
+    for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )
     {
-      SubscriptionsMap::iterator current = iter; ++iter;
+      SubscriptionsMap::iterator current = iter_doNotUse; ++iter_doNotUse;
+      ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ITERATOR_VALUES(current, key, subscriptionWeak, delegate)
       try {
-        (*current).second->handleICESocketSessionReceivedPacket(session, buffer, bufferLengthInBytes);
+        delegate->handleICESocketSessionReceivedPacket(session, buffer, bufferLengthInBytes);
       } catch(DelegateTypeProxy::Exceptions::DelegateGone &) {
-        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY((*current).first)
+        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY(key)
       }
     }
   }
@@ -266,14 +267,15 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IIC
                                                         )
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegatePtr, DelegateProxy)
-    for (SubscriptionsMap::iterator iter = subscriptions.begin(); iter != subscriptions.end(); )
+    for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )
     {
-      SubscriptionsMap::iterator current = iter; ++iter;
+      SubscriptionsMap::iterator current = iter_doNotUse; ++iter_doNotUse;
+      ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ITERATOR_VALUES(current, key, subscriptionWeak, delegate)
       try {
-        if ((*current).second->handleICESocketSessionReceivedSTUNPacket(session, stun, localUsernameFrag, remoteUsernameFrag))
+        if (delegate->handleICESocketSessionReceivedSTUNPacket(session, stun, localUsernameFrag, remoteUsernameFrag))
           return true;
       } catch(DelegateProxy::Exceptions::DelegateGone &) {
-        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY((*current).first)
+        ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY(key)
       }
     }
     return false;

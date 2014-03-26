@@ -36,6 +36,11 @@
 
 #include <zsLib/String.h>
 
+#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "openpeer/services/services-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "openpeer/services/logger-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "openpeer/services/socket-monitor-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY  "openpeer/services/timer-monitor-thread-priority"
+
 namespace openpeer
 {
   namespace services
@@ -53,8 +58,6 @@ namespace openpeer
       class Helper : public IHelper
       {
       public:
-        static RecursiveLock &getGlobalLock();
-
         static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
         static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);
         static void debugAppendNumber(ElementPtr &parentEl, const char *name, const String &value);
@@ -73,8 +76,6 @@ namespace openpeer
         static ULONG random(ULONG minValue, ULONG maxValue);
 
         static SecureByteBlockPtr random(size_t lengthInBytes);
-
-        static IMessageQueuePtr getServiceQueue();
 
         static int compare(
                            const SecureByteBlock &left,

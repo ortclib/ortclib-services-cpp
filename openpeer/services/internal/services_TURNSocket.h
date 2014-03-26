@@ -41,7 +41,7 @@
 #include <openpeer/services/IWakeDelegate.h>
 
 #include <zsLib/MessageQueueAssociator.h>
-#include <zsLib/ISocket.h>
+#include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
 
 #define OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
@@ -49,6 +49,8 @@
 #include <list>
 #include <map>
 #include <utility>
+
+#define OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-turn"
 
 #define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "openpeer/services/debug/force-turn-to-use-udp"
 #define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "openpeer/services/debug/force-turn-to-use-tcp"
@@ -238,9 +240,9 @@ namespace openpeer
         #pragma mark TURNSocket => ISocketDelegate
         #pragma mark
 
-        virtual void onReadReady(ISocketPtr socket);
-        virtual void onWriteReady(ISocketPtr socket);
-        virtual void onException(ISocketPtr socket);
+        virtual void onReadReady(SocketPtr socket);
+        virtual void onWriteReady(SocketPtr socket);
+        virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -254,11 +256,16 @@ namespace openpeer
         #pragma mark TURNSocket => IBackgroundingDelegate
         #pragma mark
 
-        virtual void onBackgroundingGoingToBackground(IBackgroundingNotifierPtr notifier);
+        virtual void onBackgroundingGoingToBackground(
+                                                      IBackgroundingSubscriptionPtr subscription,
+                                                      IBackgroundingNotifierPtr notifier
+                                                      );
 
-        virtual void onBackgroundingGoingToBackgroundNow();
+        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription);
 
-        virtual void onBackgroundingReturningFromBackground();
+        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
+
+        virtual void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription);
 
       protected:
         //---------------------------------------------------------------------

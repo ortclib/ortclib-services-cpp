@@ -30,7 +30,11 @@
  */
 
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/IDNS.h>
+#include <openpeer/services/IMessageQueueManager.h>
+#include <openpeer/services/ISettings.h>
+
 #include <cryptopp/osrng.h>
 
 #include <zsLib/Stringize.h>
@@ -39,6 +43,8 @@
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 #include <zsLib/MessageQueueThread.h>
+#include <zsLib/Socket.h>
+#include <zsLib/Timer.h>
 #include <zsLib/RegEx.h>
 
 #include <iostream>
@@ -58,6 +64,9 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/hmac.h>
 
+
+#define OPENPEER_SERVICES_SERVICE_THREAD_NAME "org.openpeer.services.serviceThread"
+#define OPENPEER_SERVICES_LOGGER_THREAD_NAME "org.openpeer.services.loggerThread"
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -94,6 +103,12 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      void throwOnlySetOnce()
+      {
+        ZS_THROW_INVALID_USAGE("services::LockValue object is only allowed to be set once")
+      }
+
+      //-----------------------------------------------------------------------
       static String getElementTextAndDecode(ElementPtr node)
       {
         if (!node) return String();
@@ -105,137 +120,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark GlobalLock
-      #pragma mark
-
-      //-----------------------------------------------------------------------
-      class GlobalLock
-      {
-      public:
-        GlobalLock() {}
-        ~GlobalLock() {}
-
-        //---------------------------------------------------------------------
-        static GlobalLock &singleton()
-        {
-          static GlobalLock lock;
-          return lock;
-        }
-
-        //---------------------------------------------------------------------
-        RecursiveLock &getLock() const
-        {
-          return mLock;
-        }
-
-      private:
-        mutable RecursiveLock mLock;
-      };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark GlobalLockInit
-      #pragma mark
-
-      //-----------------------------------------------------------------------
-      class GlobalLockInit
-      {
-      public:
-        //---------------------------------------------------------------------
-        GlobalLockInit()
-        {
-          singleton();
-        }
-
-        //---------------------------------------------------------------------
-        RecursiveLock &singleton()
-        {
-          return (GlobalLock::singleton()).getLock();
-        }
-      };
-
-      static GlobalLockInit gGlobalLockInit;
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ServiceThread
-      #pragma mark
-
-      //-----------------------------------------------------------------------
-      ZS_DECLARE_CLASS_PTR(ServiceThread)
-
-      class ServiceThread
-      {
-        //---------------------------------------------------------------------
-        ServiceThread() {}
-
-        //---------------------------------------------------------------------
-        void init()
-        {
-          mThread = MessageQueueThread::createBasic("org.openpeer.services.serviceThread");
-        }
-
-      public:
-        //---------------------------------------------------------------------
-        ~ServiceThread()
-        {
-          if (!mThread) return;
-          mThread->waitForShutdown();
-        }
-
-        //---------------------------------------------------------------------
-        static ServiceThreadPtr create()
-        {
-          ServiceThreadPtr pThis(new ServiceThread);
-          pThis->mThisWeak = pThis;
-          pThis->init();
-          return pThis;
-        }
-
-        //---------------------------------------------------------------------
-        static ServiceThreadPtr singleton()
-        {
-          AutoRecursiveLock lock(Helper::getGlobalLock());
-          static ServiceThreadPtr thread = ServiceThread::create();
-          return thread;
-        }
-
-        //---------------------------------------------------------------------
-        MessageQueueThreadPtr getThread() const
-        {
-          return mThread;
-        }
-
-      private:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ServiceThread => (data)
-        #pragma mark
-
-        ServiceThreadWeakPtr mThisWeak;
-
-        MessageQueueThreadPtr mThread;
-      };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
       #pragma mark Helper
       #pragma mark
-
-      //-----------------------------------------------------------------------
-      RecursiveLock &Helper::getGlobalLock()
-      {
-        return gGlobalLockInit.singleton();
-      }
 
       //-----------------------------------------------------------------------
       void Helper::debugAppend(ElementPtr &parentEl, const char *name, const char *value)
@@ -444,14 +330,6 @@ namespace openpeer
 
         return value;
       }
-
-      //-----------------------------------------------------------------------
-      IMessageQueuePtr Helper::getServiceQueue()
-      {
-        ServiceThreadPtr thread = ServiceThread::singleton();
-        return thread->getThread();
-      }
-
 
       //-----------------------------------------------------------------------
       int Helper::compare(
@@ -1463,15 +1341,44 @@ namespace openpeer
     #pragma mark
 
     //-------------------------------------------------------------------------
-    RecursiveLock &IHelper::getGlobalLock()
+    RecursiveLockPtr IHelper::getGlobalLock()
     {
-      return internal::Helper::getGlobalLock();
+      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(new RecursiveLock));
+      return singleton.singleton();
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setSocketThreadPriority()
+    {
+      zsLib::Socket::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setTimerThreadPriority()
+    {
+      zsLib::Timer::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY)));
     }
 
     //-------------------------------------------------------------------------
     IMessageQueuePtr IHelper::getServiceQueue()
     {
-      return internal::Helper::getServiceQueue();
+      class Once {
+      public:
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));}
+      };
+      static Once once;
+      return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_SERVICE_THREAD_NAME);
+    }
+
+    //-------------------------------------------------------------------------
+    IMessageQueuePtr IHelper::getLoggerQueue()
+    {
+      class Once {
+      public:
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_LOGGER_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY)));}
+      };
+      static Once once;
+      return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_LOGGER_THREAD_NAME);
     }
 
     //-------------------------------------------------------------------------
