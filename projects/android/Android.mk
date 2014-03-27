@@ -46,6 +46,7 @@ openpeer/services/cpp/services_ICESocket.cpp \
 openpeer/services/cpp/services_ICESocketSession.cpp \
 openpeer/services/cpp/services_Logger.cpp \
 openpeer/services/cpp/services_MessageLayerSecurityChannel.cpp \
+openpeer/services/cpp/services_MessageQueueManager.cpp \
 openpeer/services/cpp/services_RSAPrivateKey.cpp \
 openpeer/services/cpp/services_RSAPublicKey.cpp \
 openpeer/services/cpp/services_RUDPChannel.cpp \
