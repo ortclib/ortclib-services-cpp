@@ -66,8 +66,6 @@
 #define OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS (500)
 #define OPENPEER_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS (60*60)
 
-#define OPENPEER_SERVICES_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS (10)
-
 #define OPENPEER_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS (2)
 #define OPENPEER_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS (30)
 
@@ -172,7 +170,9 @@ namespace openpeer
         mLastCandidateCRC(0),
 
         mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN)),
-        mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6))
+        mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6)),
+
+        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_MAX_REBUILD_ATTEMPT_DURATION_IN_SECONDS)))
       {
         IHelper::setSocketThreadPriority();
         IHelper::setTimerThreadPriority();
@@ -1349,7 +1349,7 @@ namespace openpeer
 
           Time tick = zsLib::now();
 
-          if (mRebindAttemptStartTime + Seconds(OPENPEER_SERVICES_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS) < tick) {
+          if (mRebindAttemptStartTime + mMaxRebindAttemptDuration < tick) {
             ZS_LOG_ERROR(Detail, log("unable to bind IP thus cancelling") + ZS_PARAM("bind port", mBindPort))
             setError(IHTTP::HTTPStatusCode_RequestTimeout, "unable to bind to local UDP port");
             cancel();

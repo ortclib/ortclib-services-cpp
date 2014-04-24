@@ -58,6 +58,8 @@
 #define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                      "openpeer/services/interface-name-order"
 #define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                    "openpeer/services/support-ipv6"
 
+#define OPENPEER_SERVICES_SETTING_MAX_REBUILD_ATTEMPT_DURATION_IN_SECONDS   "openpeer/services/max-ice-socket-rebind-attempt-duration-in-seconds"
+
 namespace openpeer
 {
   namespace services
@@ -508,6 +510,8 @@ namespace openpeer
         InterfaceNameToOrderMap mInterfaceOrders;
 
         bool                mSupportIPv6;
+
+        Duration            mMaxRebindAttemptDuration;
       };
 
       //-----------------------------------------------------------------------
