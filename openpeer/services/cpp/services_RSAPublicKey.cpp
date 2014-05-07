@@ -149,6 +149,8 @@ namespace openpeer
 
         RSAPublicKeyPtr pThis(new RSAPublicKey());
 
+        ZS_LOG_INSANE(pThis->log("loading public key") + ZS_PARAM("public key", IHelper::convertToBase64(buffer)))
+
         try
         {
           pThis->mPublicKey.Load(byteQueue);
@@ -177,6 +179,9 @@ namespace openpeer
         output->CleanNew(outputLengthInBytes);
 
         byteQueue.Get(*output, outputLengthInBytes);
+
+        ZS_LOG_INSANE(log("saving public key") + ZS_PARAM("public key", IHelper::convertToBase64(*output)))
+
         return output;
       }
 

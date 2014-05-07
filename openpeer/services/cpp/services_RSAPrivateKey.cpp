@@ -201,7 +201,8 @@ namespace openpeer
 
         RSAPrivateKeyPtr pThis(new RSAPrivateKey);
 
-        ZS_LOG_DEBUG(pThis->log("loading public key"))
+        ZS_LOG_DEBUG(pThis->log("loading private key"))
+        ZS_LOG_INSANE(pThis->log("loading private key") + ZS_PARAM("private key", IHelper::convertToBase64(buffer)))
 
         try {
           pThis->mPrivateKey.Load(byteQueue);
@@ -239,6 +240,8 @@ namespace openpeer
         output->CleanNew(outputLengthInBytes);
 
         byteQueue.Get(*output, outputLengthInBytes);
+
+        ZS_LOG_INSANE(log("saving private key") + ZS_PARAM("private key", IHelper::convertToBase64(*output)))
 
         if (mDidGenerate) {
           String cookieName = getCookieName(*output);
