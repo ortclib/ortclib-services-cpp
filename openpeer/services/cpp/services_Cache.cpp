@@ -129,6 +129,26 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      SecureByteBlockPtr Cache::fetchBinary(const char *cookieNamePath) const
+      {
+        if (!cookieNamePath) return SecureByteBlockPtr();
+
+        ICacheDelegatePtr delegate;
+
+        {
+          AutoRecursiveLock lock(mLock);
+          delegate = mDelegate;
+        }
+
+        if (!delegate) {
+          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath))
+          return SecureByteBlockPtr();
+        }
+
+        return delegate->fetchBinary(cookieNamePath);
+      }
+      
+      //-----------------------------------------------------------------------
       void Cache::store(
                         const char *cookieNamePath,
                         Time expires,
@@ -136,8 +156,14 @@ namespace openpeer
                         )
       {
         if (!cookieNamePath) return;
-        if (!str) clear(cookieNamePath);
-        if (!(*str)) clear(cookieNamePath);
+        if (!str) {
+          clear(cookieNamePath);
+          return;
+        }
+        if (!(*str)) {
+          clear(cookieNamePath);
+          return;
+        }
 
         ICacheDelegatePtr delegate;
 
@@ -154,6 +180,38 @@ namespace openpeer
         delegate->store(cookieNamePath, expires, str);
       }
 
+      //-----------------------------------------------------------------------
+      void Cache::storeBinary(
+                              const char *cookieNamePath,
+                              Time expires,
+                              const SecureByteBlock &buffer
+                              )
+      {
+        if (!cookieNamePath) return;
+        if (buffer.SizeInBytes() < 1) {
+          clear(cookieNamePath);
+          return;
+        }
+        if (!(*buffer)) {
+          clear(cookieNamePath);
+          return;
+        }
+
+        ICacheDelegatePtr delegate;
+
+        {
+          AutoRecursiveLock lock(mLock);
+          delegate = mDelegate;
+        }
+
+        if (!delegate) {
+          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot store cookie)") + ZS_PARAM("cookie name", cookieNamePath) + ZS_PARAM("expires", expires) + ZS_PARAM("size", buffer.SizeInBytes()))
+          return;
+        }
+
+        delegate->storeBinary(cookieNamePath, expires, buffer);
+      }
+      
       //-----------------------------------------------------------------------
       void Cache::clear(const char *cookieNamePath)
       {
@@ -222,6 +280,14 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
+    SecureByteBlockPtr ICache::fetchBinary(const char *cookieNamePath)
+    {
+      internal::CachePtr singleton = internal::Cache::singleton();
+      if (!singleton) return SecureByteBlockPtr();
+      return singleton->fetchBinary(cookieNamePath);
+    }
+
+    //-------------------------------------------------------------------------
     void ICache::store(
                       const char *cookieNamePath,
                       Time expires,
@@ -233,6 +299,18 @@ namespace openpeer
       singleton->store(cookieNamePath, expires, str);
     }
 
+    //-------------------------------------------------------------------------
+    void ICache::storeBinary(
+                             const char *cookieNamePath,
+                             Time expires,
+                             const SecureByteBlock &buffer
+                             )
+    {
+      internal::CachePtr singleton = internal::Cache::singleton();
+      if (!singleton) return;
+      singleton->storeBinary(cookieNamePath, expires, buffer);
+    }
+    
     //-------------------------------------------------------------------------
     void ICache::clear(const char *cookieNamePath)
     {

@@ -73,11 +73,19 @@ namespace openpeer
         virtual void setup(ICacheDelegatePtr delegate);
 
         virtual String fetch(const char *cookieNamePath) const;
+        virtual SecureByteBlockPtr fetchBinary(const char *cookieNamePath) const;
+
         virtual void store(
                            const char *cookieNamePath,
                            Time expires,
                            const char *str
                            );
+        virtual void storeBinary(
+                                 const char *cookieNamePath,
+                                 Time expires,
+                                 const SecureByteBlock &buffer
+                                 );
+
         virtual void clear(const char *cookieNamePath);
 
       protected:
