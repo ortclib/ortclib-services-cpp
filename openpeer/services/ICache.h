@@ -50,19 +50,11 @@ namespace openpeer
       static void setup(ICacheDelegatePtr delegate);
 
       static String fetch(const char *cookieNamePath);
-      static SecureByteBlockPtr fetchBinary(const char *cookieNamePath);
-
       static void store(
                         const char *cookieNamePath,
                         Time expires,
                         const char *str
                         );
-      static void storeBinary(
-                              const char *cookieNamePath,
-                              Time expires,
-                              const SecureByteBlock &buffer
-                              );
-
       static void clear(const char *cookieNamePath);
       
       virtual ~ICache() {}  // needed to make type polymorphic
@@ -83,19 +75,11 @@ namespace openpeer
       //          blocked calling inside to the SDK (directly or indirectly).
 
       virtual String fetch(const char *cookieNamePath) const = 0;
-      virtual SecureByteBlockPtr fetchBinary(const char *cookieNamePath) const = 0;
-
       virtual void store(
                          const char *cookieNamePath,
                          Time expires,
                          const char *str
                          ) = 0;
-      virtual void storeBinary(
-                               const char *cookieNamePath,
-                               Time expires,
-                               const SecureByteBlock &buffer
-                               ) = 0;
-
       virtual void clear(const char *cookieNamePath) = 0;
     };
   }
