@@ -550,7 +550,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!stun)
 
-        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag))
+        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("stun packet", stun->toDebug()))
 
         if (mSubscriptions.size() < 1) {
           OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
