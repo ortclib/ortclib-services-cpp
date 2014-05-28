@@ -365,8 +365,7 @@ namespace openpeer
           return false;  // illegal to be so large
         }
 
-        boost::shared_array<BYTE> packet;
-        size_t packetLengthInBytes = 0;
+        SecureByteBlockPtr packet;
         ServerPtr server;
 
         do
@@ -392,17 +391,15 @@ namespace openpeer
               ChannelInfoPtr info = (*found).second;
               if (info->mBound) {
                 // yes, it is active, so we can packetize this in a special way to send to the remote peer
-                packet = boost::shared_array<BYTE>(new BYTE[sizeof(DWORD)+dwordBoundary(bufferLengthInBytes)]);
-                memset(packet.get(), 0, sizeof(DWORD)+dwordBoundary(bufferLengthInBytes));  // to ensure the buffer is blanked at start
-                packetLengthInBytes = sizeof(DWORD)+dwordBoundary(bufferLengthInBytes);
+                packet = SecureByteBlockPtr(new SecureByteBlock(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes)));
 
-                ((WORD *)(packet.get()))[0] = htons(info->mChannelNumber);
-                ((WORD *)(packet.get()))[1] = htons((WORD)bufferLengthInBytes);
+                ((WORD *)(packet->BytePtr()))[0] = htons(info->mChannelNumber);
+                ((WORD *)(packet->BytePtr()))[1] = htons((WORD)bufferLengthInBytes);
 
                 info->mLastSentDataAt = zsLib::now();
 
                 // copy the entire buffer into the packet
-                memcpy(&((packet.get())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
+                memcpy(&((packet->BytePtr())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
                 OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
@@ -436,7 +433,7 @@ namespace openpeer
           sendData->mData = buffer;
           sendData->mDataLength = bufferLengthInBytes;
 
-          SecureByteBlockPtr packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
+          packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
 
           // scope: we need to check if there is a permission set to be able to even contact this address
           {
@@ -468,8 +465,10 @@ namespace openpeer
           }
         } while(false);
 
+        ZS_THROW_BAD_STATE_IF(!packet)  // how is this possible?
+
         // we are free to send the data now since there is a permission installed...
-        return sendPacketOrDopPacketIfBufferFull(server, packet.get(), packetLengthInBytes);
+        return sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }
 
       //-----------------------------------------------------------------------

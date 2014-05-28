@@ -550,7 +550,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!stun)
 
-        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag))
+        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("stun packet", stun->toDebug()))
 
         if (mSubscriptions.size() < 1) {
           OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
@@ -645,7 +645,7 @@ namespace openpeer
           goto send_response;
         }
 
-        // scope: found an existing canddiate
+        // scope: found an existing candidate
         {
           found->mReceivedRequest = true;
           found->mFailed = false;                   // even if this previously failed, we are now going to try this request to see if it works
@@ -839,7 +839,7 @@ namespace openpeer
           }
 
           if (!isCandidateMatch(mNominated, viaLocalCandidate, source)) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated canddiate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated candidate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
             return false;
           }
 
@@ -1854,8 +1854,8 @@ namespace openpeer
             for (CandidateList::const_iterator inner = newLocalCandidates.begin(); inner != newLocalCandidates.end(); ++inner) {
               CandidatePairPtr pairing = CandidatePair::create();
 
-              pairing->mLocal = (*outer);
-              pairing->mRemote = (*inner);
+              pairing->mLocal = (*inner);
+              pairing->mRemote = (*outer);
 
               mCandidatePairs.push_back(pairing);
             }
