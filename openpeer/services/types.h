@@ -95,6 +95,9 @@ namespace openpeer
 
       operator RecursiveLock & () const {return *mLock;}
 
+      void setLock(const SharedRecursiveLock &replacement) {mLock = replacement.mLock;}
+      void setLock(RecursiveLockPtr replacement) {mLock = replacement;}
+
     private:
       SharedRecursiveLock() {}  // illegal
       mutable RecursiveLockPtr mLock;
