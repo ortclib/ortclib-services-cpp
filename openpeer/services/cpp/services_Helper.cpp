@@ -244,6 +244,20 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      SecureByteBlockPtr Helper::writeAsJSON(
+                                             DocumentPtr doc,
+                                             bool prettyPrint
+                                             )
+      {
+        if (!doc) return SecureByteBlockPtr(new SecureByteBlock);
+
+        size_t length = 0;
+        boost::shared_array<char> output = doc->writeAsJSON(prettyPrint, &length);
+
+        return Helper::convertToBuffer(output, length);
+      }
+
+      //-----------------------------------------------------------------------
       String Helper::timeToString(const Time &value)
       {
         return string(value);
@@ -1543,6 +1557,15 @@ namespace openpeer
     ElementPtr IHelper::toJSON(const char *str)
     {
       return internal::Helper::toJSON(str);
+    }
+
+    //-------------------------------------------------------------------------
+    SecureByteBlockPtr IHelper::writeAsJSON(
+                                            DocumentPtr doc,
+                                            bool prettyPrint
+                                            )
+    {
+      return writeAsJSON(doc);
     }
 
     //-------------------------------------------------------------------------
