@@ -1303,6 +1303,7 @@ namespace openpeer
                            )
         {
           bool okayToBacklog = false;
+          bool connected = false;
 
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
@@ -1313,7 +1314,13 @@ namespace openpeer
           {
             AutoRecursiveLock lock(mLock);
 
-            if (!mTelnetSocket) {
+            connected = (bool)mTelnetSocket;
+
+            if (mOutgoingMode) {
+              if (!mConnected) connected = false;
+            }
+
+            if (!connected) {
               Time tick = zsLib::now();
 
               if (tick > mBacklogDataUntil) {
@@ -1335,12 +1342,6 @@ namespace openpeer
           }
 
           AutoRecursiveLock lock(mLock);
-
-          bool connected = (bool)mTelnetSocket;
-
-          if (mOutgoingMode) {
-            if (!mConnected) connected = false;
-          }
 
           if ((!connected) &&
               (!okayToBacklog)) {
