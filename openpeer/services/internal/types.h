@@ -111,6 +111,7 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(HTTP)
       ZS_DECLARE_CLASS_PTR(MessageLayerSecurityChannel)
       ZS_DECLARE_CLASS_PTR(MessageQueueManager)
+      ZS_DECLARE_CLASS_PTR(Reachability)
       ZS_DECLARE_CLASS_PTR(RSAPrivateKey)
       ZS_DECLARE_CLASS_PTR(RSAPublicKey)
       ZS_DECLARE_CLASS_PTR(RUDPChannel)

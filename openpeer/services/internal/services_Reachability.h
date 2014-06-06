@@ -31,8 +31,8 @@
 
 #pragma once
 
+#include <openpeer/services/IReachability.h>
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services.h>
 
 namespace openpeer
 {
@@ -45,46 +45,83 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Factory
+      #pragma mark Reachability
       #pragma mark
 
-      class Factory : public IBackgroundingFactory,
-                      public IDHKeyDomainFactory,
-                      public IDHPrivateKeyFactory,
-                      public IDHPublicKeyFactory,
-                      public IDNSFactory,
-                      public IHTTPFactory,
-                      public IICESocketFactory,
-                      public IICESocketSessionFactory,
-                      public IMessageLayerSecurityChannelFactory,
-                      public IReachabilityFactory,
-                      public IRSAPrivateKeyFactory,
-                      public IRSAPublicKeyFactory,
-                      public IRUDPChannelFactory,
-                      public IRUDPChannelStreamFactory,
-                      public IRUDPTransportFactory,
-                      public IRUDPListenerFactory,
-                      public IRUDPMessagingFactory,
-                      public ISTUNDiscoveryFactory,
-                      public ISTUNRequesterFactory,
-                      public ISTUNRequesterManagerFactory,
-                      public ITCPMessagingFactory,
-                      public ITransportStreamFactory,
-                      public ITURNSocketFactory
+      class Reachability : public MessageQueueAssociator,
+                           public SharedRecursiveLock,
+                           public IReachability
       {
       public:
-        static void override(FactoryPtr override);
+        friend interaction IReachabilityFactory;
+        friend interaction IReachability;
 
-        static Factory &singleton();
+      protected:
+        Reachability();
+
+        static ReachabilityPtr create();
+
+      public:
+        ~Reachability();
+
+      public:
+        static ReachabilityPtr convert(IReachabilityPtr backgrounding);
+
+        static ReachabilityPtr singleton();
 
       protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark Factory => (data)
+        #pragma mark Reachability => IReachability
         #pragma mark
 
-        FactoryPtr mOverride;
+        static ElementPtr toDebug(ReachabilityPtr backgrounding);
+
+        virtual IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate);
+
+        virtual void notifyReachability(InterfaceTypes interfaceTypes);
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Reachability => (internal)
+        #pragma mark
+
+        Log::Params log(const char *message) const;
+        static Log::Params slog(const char *message);
+        Log::Params debug(const char *message) const;
+
+        virtual ElementPtr toDebug() const;
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark Reachability => (data)
+        #pragma mark
+
+        AutoPUID mID;
+        ReachabilityWeakPtr mThisWeak;
+
+        IReachabilityDelegateSubscriptions mSubscriptions;
+
+        InterfaceTypes mLastState;
       };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IReachabilityFactory
+      #pragma mark
+
+      interaction IReachabilityFactory
+      {
+        static IReachabilityFactory &singleton();
+
+        virtual ReachabilityPtr createForReachability();
+      };
+
     }
   }
 }

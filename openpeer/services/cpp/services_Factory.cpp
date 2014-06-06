@@ -68,7 +68,7 @@ namespace openpeer
       Factory &Factory::singleton()
       {
         static Singleton<Factory, false> factory;
-        Factory singleton = factory.singleton();
+        Factory &singleton = factory.singleton();
         if (singleton.mOverride) return (*singleton.mOverride);
         return singleton;
       }
@@ -418,6 +418,27 @@ namespace openpeer
       {
         if (this) {}
         return MessageLayerSecurityChannel::create(delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IReachabilityFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IReachabilityFactory &IReachabilityFactory::singleton()
+      {
+        return Factory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      ReachabilityPtr IReachabilityFactory::createForReachability()
+      {
+        if (this) {}
+        return Reachability::create();
       }
 
       //-----------------------------------------------------------------------

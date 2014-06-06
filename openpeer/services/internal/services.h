@@ -48,6 +48,7 @@
 #include <openpeer/services/internal/services_Logger.h>
 #include <openpeer/services/internal/services_MessageLayerSecurityChannel.h>
 #include <openpeer/services/internal/services_MessageQueueManager.h>
+#include <openpeer/services/internal/services_Reachability.h>
 #include <openpeer/services/internal/services_RSAPrivateKey.h>
 #include <openpeer/services/internal/services_RSAPublicKey.h>
 #include <openpeer/services/internal/services_RUDPChannel.h>

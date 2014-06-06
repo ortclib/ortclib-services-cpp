@@ -46,6 +46,7 @@
 #include <openpeer/services/ILogger.h>
 #include <openpeer/services/IMessageLayerSecurityChannel.h>
 #include <openpeer/services/IMessageQueueManager.h>
+#include <openpeer/services/IReachability.h>
 #include <openpeer/services/IRSAPrivateKey.h>
 #include <openpeer/services/IRSAPublicKey.h>
 #include <openpeer/services/IRUDPChannel.h>
