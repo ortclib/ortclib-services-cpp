@@ -157,8 +157,6 @@ namespace openpeer
         mUsernameFrag(IHelper::randomString(20)),
         mPassword(IHelper::randomString(20)),
 
-        mRebindAttemptStartTime(zsLib::now()),
-
         mMonitoringWriteReady(true),
 
         mTURNServers(turnServers),
@@ -172,7 +170,7 @@ namespace openpeer
         mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN)),
         mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6)),
 
-        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_MAX_REBUILD_ATTEMPT_DURATION_IN_SECONDS)))
+        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS)))
       {
         IHelper::setSocketThreadPriority();
         IHelper::setTimerThreadPriority();
@@ -740,7 +738,6 @@ namespace openpeer
 
         // attempt to rebind immediately
         get(mRebindCheckNow) = true;
-        mRebindAttemptStartTime = zsLib::now();
         step();
       }
 
@@ -1345,22 +1342,38 @@ namespace openpeer
           monitorWriteReadyOnAllSessions(false);
         }
 
-        if (mSockets.size() < 1) {
+        if (mSockets.size() > 0) {
+          mRebindAttemptStartTime = Time();
 
-          Time tick = zsLib::now();
-
-          if (mRebindAttemptStartTime + mMaxRebindAttemptDuration < tick) {
-            ZS_LOG_ERROR(Detail, log("unable to bind IP thus cancelling") + ZS_PARAM("bind port", mBindPort))
-            setError(IHTTP::HTTPStatusCode_RequestTimeout, "unable to bind to local UDP port");
-            cancel();
-            return false;
-          }
-
-          ZS_LOG_WARNING(Detail, log("unable to bind to local UDP port but will try again") + ZS_PARAM("bind port", mBindPort))
+          ZS_LOG_DEBUG(log("UDP port is bound"))
+          return true;
         }
 
-        ZS_LOG_DEBUG(log("UDP port is bound"))
-        return true;
+        if (!ISettings::getBool(OPENPEER_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE)) {
+          if (localIPs.size() < 1) {
+            mRebindAttemptStartTime = Time();
+
+            ZS_LOG_WARNING(Detail, log("no interfaces found - waiting for internet connectivity to return"))
+            return false;
+          }
+        }
+
+        Time tick = zsLib::now();
+
+        if (Time() == mRebindAttemptStartTime) {
+          mRebindAttemptStartTime = tick;
+        }
+
+        if ((mRebindAttemptStartTime + mMaxRebindAttemptDuration < tick) ||
+            (Seconds(0) == mMaxRebindAttemptDuration)) {
+          ZS_LOG_ERROR(Detail, log("unable to bind IP thus cancelling") + ZS_PARAM("bind port", mBindPort))
+          setError(IHTTP::HTTPStatusCode_RequestTimeout, "unable to bind to local UDP port");
+          cancel();
+          return false;
+        }
+
+        ZS_LOG_WARNING(Detail, log("unable to bind to local UDP port but will try again") + ZS_PARAM("bind port", mBindPort))
+        return false;
       }
 
       //-----------------------------------------------------------------------

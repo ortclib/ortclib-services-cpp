@@ -1246,9 +1246,6 @@ namespace openpeer
                            const Log::Params &params
                            )
         {
-          bool okayToBacklog = false;
-          bool connected = false;
-
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
             return;
@@ -1258,9 +1255,7 @@ namespace openpeer
           {
             AutoRecursiveLock lock(mLock);
 
-            connected = isConnected();
-
-            if (!connected) {
+            if (!isConnected()) {
               Time tick = zsLib::now();
 
               if (tick > mBacklogDataUntil) {
@@ -1268,11 +1263,8 @@ namespace openpeer
                 mBufferedList.clear();
                 return;
               }
-
-              okayToBacklog = true;
             }
           }
-
 
           String output;
           if (mColorizeOutput) {
@@ -1283,12 +1275,7 @@ namespace openpeer
 
           AutoRecursiveLock lock(mLock);
 
-          if ((!connected) &&
-              (!okayToBacklog)) {
-            return;
-          }
-
-          bool okayToSend = (connected) && (mBufferedList.size() < 1);
+          bool okayToSend = (isConnected()) && (mBufferedList.size() < 1);
           size_t sent = 0;
 
           if (okayToSend) {
