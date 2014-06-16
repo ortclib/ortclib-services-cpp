@@ -52,13 +52,16 @@
 
 #define OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "openpeer/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
 
-#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                            "openpeer/services/debug/force-packets-over-turn"
-#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS      "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
+#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                                "openpeer/services/debug/force-packets-over-turn"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS          "openpeer/services/debug/only-allow-data-sent-to-specific-ips"
 
-#define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                      "openpeer/services/interface-name-order"
-#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                    "openpeer/services/support-ipv6"
+#define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                          "openpeer/services/interface-name-order"
+#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "openpeer/services/support-ipv6"
 
-#define OPENPEER_SERVICES_SETTING_MAX_REBUILD_ATTEMPT_DURATION_IN_SECONDS   "openpeer/services/max-ice-socket-rebind-attempt-duration-in-seconds"
+#define OPENPEER_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS        "openpeer/services/max-ice-socket-rebind-attempt-duration-in-seconds"
+#define OPENPEER_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE "openpeer/services/ice-socket-fail-when-no-local-ips"
+
+#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "openpeer/services/support-ipv6"
 
 namespace openpeer
 {

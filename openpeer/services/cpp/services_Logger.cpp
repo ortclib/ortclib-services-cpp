@@ -1013,7 +1013,8 @@ namespace openpeer
 
           Log::addListener(mThisWeak.lock());
 
-          listen();
+          // do this from outside the stack to prevent this from happening during any kind of lock
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
         }
 
         //---------------------------------------------------------------------
@@ -1022,7 +1023,6 @@ namespace openpeer
                   const char *sendStringUponConnection
                   )
         {
-          mOutgoingMode = true;
           mOriginalStringToSendUponConnection = String(sendStringUponConnection);
           mOriginalServer = mServerLookupName = String(serverHostWithPort);
 
@@ -1043,64 +1043,10 @@ namespace openpeer
 
           mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
+          Log::addListener(mThisWeak.lock());
+
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
-
-          Log::addListener(mThisWeak.lock());
-        }
-
-        //---------------------------------------------------------------------
-        void listen()
-        {
-          if (!mListenSocket) {
-            mListenSocket = Socket::createTCP();
-            try {
-#ifndef __QNX__
-              mListenSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
-#endif //ndef __QNX__
-            } catch(Socket::Exceptions::UnsupportedSocketOption &) {
-            }
-            mListenSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
-          }
-
-          IPAddress any = IPAddress::anyV4();
-          any.setPort(mListenPort);
-
-          int error = 0;
-
-          std::cout << "TELNET LOGGER: Attempting to listen for client connections on port: " << mListenPort << " (start time=" << string(mStartListenTime) << ")...\n";
-          mListenSocket->bind(any, &error);
-
-          Time tick = zsLib::now();
-
-          if (0 != error) {
-            mListenSocket->close();
-            mListenSocket.reset();
-
-            if (mStartListenTime + mMaxWaitTimeForSocketToBeAvailable < tick) {
-              std::cout << "TELNET LOGGER: ***ABANDONED***\n";
-              if (mListenTimer) {
-                mListenTimer->cancel();
-                mListenTimer.reset();
-              }
-              return;
-            }
-            if (!mListenTimer) {
-              mListenTimer = Timer::create(mThisWeak.lock(), Seconds(1));
-            }
-            std::cout << "TELNET LOGGER: Failed to listen...\n";
-            return;
-          } else {
-            std::cout << "TELNET LOGGER: Succeeded.\n\n";
-          }
-
-          if (mListenTimer) {
-            mListenTimer->cancel();
-            mListenTimer.reset();
-          }
-
-          mListenSocket->setDelegate(mThisWeak.lock());
-          mListenSocket->listen();
         }
 
       public:
@@ -1112,11 +1058,9 @@ namespace openpeer
           MessageQueueAssociator(queue),
           mColorizeOutput(colorizeOutput),
           mPrettyPrint(colorizeOutput),
-          mOutgoingMode(false),
           mConnected(false),
           mListenPort(0),
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
-          mStartListenTime(zsLib::now()),
           mBacklogDataUntil(zsLib::now() + Seconds(OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
         {
           IHelper::setSocketThreadPriority();
@@ -1190,9 +1134,9 @@ namespace openpeer
             mListenSocket->close();
             mListenSocket.reset();
           }
-          if (mListenTimer) {
-            mListenTimer->cancel();
-            mListenTimer.reset();
+          if (mRetryTimer) {
+            mRetryTimer->cancel();
+            mRetryTimer.reset();
           }
         }
 
@@ -1215,7 +1159,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
           if (!mTelnetSocket) return false;
-          if (mOutgoingMode) return mConnected;
+          if (isOutgoing()) return mConnected;
           return true;
         }
 
@@ -1302,9 +1246,6 @@ namespace openpeer
                            const Log::Params &params
                            )
         {
-          bool okayToBacklog = false;
-          bool connected = false;
-
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
             return;
@@ -1314,13 +1255,7 @@ namespace openpeer
           {
             AutoRecursiveLock lock(mLock);
 
-            connected = (bool)mTelnetSocket;
-
-            if (mOutgoingMode) {
-              if (!mConnected) connected = false;
-            }
-
-            if (!connected) {
+            if (!isConnected()) {
               Time tick = zsLib::now();
 
               if (tick > mBacklogDataUntil) {
@@ -1328,11 +1263,8 @@ namespace openpeer
                 mBufferedList.clear();
                 return;
               }
-
-              okayToBacklog = true;
             }
           }
-
 
           String output;
           if (mColorizeOutput) {
@@ -1343,12 +1275,7 @@ namespace openpeer
 
           AutoRecursiveLock lock(mLock);
 
-          if ((!connected) &&
-              (!okayToBacklog)) {
-            return;
-          }
-
-          bool okayToSend = (connected) && (mBufferedList.size() < 1);
+          bool okayToSend = (isConnected()) && (mBufferedList.size() < 1);
           size_t sent = 0;
 
           if (okayToSend) {
@@ -1357,7 +1284,7 @@ namespace openpeer
             sent = mTelnetSocket->send((const BYTE *)(output.c_str()), output.length(), &wouldBlock, 0, &errorCode);
             if (!wouldBlock) {
               if (0 != errorCode) {
-                connectOutgoingAgain();
+                onException(mTelnetSocket);
                 return;
               }
             }
@@ -1382,13 +1309,8 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
 
-          if (mOutgoingMode) {
-            if (!mConnected) return;
-          }
-
           if (inSocket == mListenSocket) {
-            if (mTelnetSocket)
-            {
+            if (mTelnetSocket) {
               mTelnetSocket->close();
               mTelnetSocket.reset();
             }
@@ -1466,8 +1388,11 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
           if (socket != mTelnetSocket) return;
 
-          if (mOutgoingMode) {
-            mConnected = true;
+          if (isOutgoing()) {
+            if (!mConnected) {
+              mConnected = true;
+              IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            }
           }
 
           if (!mStringToSendUponConnection.isEmpty()) {
@@ -1495,7 +1420,7 @@ namespace openpeer
             sent = mTelnetSocket->send(data.first.get(), data.second, &wouldBlock, 0, &errorCode);
             if (!wouldBlock) {
               if (0 != errorCode) {
-                connectOutgoingAgain();
+                onException(socket);
                 return;
               }
             }
@@ -1519,20 +1444,32 @@ namespace openpeer
           if (inSocket == mListenSocket) {
             mListenSocket->close();
             mListenSocket.reset();
-            if (!isClosed()) {
-              mStartListenTime = zsLib::now();
-              listen();
-            }
+
+            handleConnectionFailure();
           }
+
           if (inSocket == mTelnetSocket) {
-            connectOutgoingAgain();
+            mBufferedList.clear();
+            mConnected = false;
+
+            if (mTelnetSocket) {
+              mTelnetSocket->close();
+              mTelnetSocket.reset();
+            }
+
+            handleConnectionFailure();
           }
+
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
         }
 
         //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
           AutoRecursiveLock lock(mLock);
+
+          if (query != mOutgoingServerQuery) return;
+
           IDNS::AResult::IPAddressList list;
           IDNS::AResultPtr resultA = query->getA();
           if (resultA) {
@@ -1549,46 +1486,25 @@ namespace openpeer
 
           mOutgoingServerQuery.reset();
 
-          if (list.size() < 1) return;
+          if (list.size() > 0) {
+            mServers = IDNS::convertIPAddressesToSRVResult("logger", "tcp", list, mListenPort);
+          } else {
+            handleConnectionFailure();
+          }
 
-          mServers = IDNS::convertIPAddressesToSRVResult("logger", "tcp", list, mListenPort);
-
-          connectOutgoingAgain();
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
         }
 
         //---------------------------------------------------------------------
         virtual void onWake()
         {
-          String serverName;
-
-          {
-            AutoRecursiveLock lock(mLock);
-            if (mServerLookupName) {
-              serverName = mServerLookupName;
-              mServerLookupName.clear();
-            }
-          }
-
-          if (serverName.isEmpty()) return;
-
-          // DNS is not created during any kind of lock at all...
-          IDNSQueryPtr query = IDNS::lookupAorAAAA(mThisWeak.lock(), serverName);
-
-          {
-            AutoRecursiveLock lock(mLock);
-            // we can guarentee result will not happen until after "onWake"
-            // exits because both occupy the same thread queue...
-            mOutgoingServerQuery = query;
-          }
+          step();
         }
 
         //---------------------------------------------------------------------
         virtual void onTimer(TimerPtr timer)
         {
-          if (timer != mListenTimer) {
-            return;
-          }
-          listen();
+          step();
         }
 
         //---------------------------------------------------------------------
@@ -1628,46 +1544,17 @@ namespace openpeer
         }
 
       protected:
+
         //---------------------------------------------------------------------
-        void connectOutgoingAgain()
+        bool isOutgoing() const
         {
-          mConnected = false;
-          mBufferedList.clear();
+          return mOriginalServer.hasData();
+        }
 
-          if (mTelnetSocket) {
-            mTelnetSocket->close();
-            mTelnetSocket.reset();
-          }
-
-          if (!mOutgoingMode) return;
-
-          if (!mServers) return;
-
-          if (isClosed()) return;
-
-          IPAddress result;
-          if (!IDNS::extractNextIP(mServers, result)) {
-            mServers.reset();
-            return;
-          }
-
-          mStringToSendUponConnection = mOriginalStringToSendUponConnection;
-
-          mTelnetSocket = Socket::createTCP();
-          try {
-#ifndef __QNX__
-            mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
-#endif //ndef __QNX__
-          } catch(Socket::Exceptions::UnsupportedSocketOption &) {
-          }
-          mTelnetSocket->setBlocking(false);
-          mTelnetSocket->setDelegate(mThisWeak.lock());
-
-          bool wouldBlock = false;
-          int errorCode = 0;
-          mTelnetSocket->connect(result, &wouldBlock, &errorCode);
-          if (0 != errorCode) {
-          }
+        //---------------------------------------------------------------------
+        bool isIncoming() const
+        {
+          return mOriginalServer.isEmpty();
         }
 
         //---------------------------------------------------------------------
@@ -1778,6 +1665,191 @@ namespace openpeer
           mTelnetSocket->send((const BYTE *)(echo.c_str()), echo.length(), &wouldBlock, 0, &errorCode);
         }
 
+        //---------------------------------------------------------------------
+        void handleConnectionFailure()
+        {
+          AutoRecursiveLock lock(mLock);
+
+          if (!mRetryTimer) {
+            // offer a bit of buffering
+            mBacklogDataUntil = zsLib::now() + Seconds(OPENPEER_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS);
+
+            mRetryWaitTime = Seconds(1);
+            mNextRetryTime = zsLib::now();
+            mRetryTimer = Timer::create(mThisWeak.lock(), Seconds(1));
+            return;
+          }
+
+          mNextRetryTime = zsLib::now() + mRetryWaitTime;
+          mRetryWaitTime = mRetryWaitTime + mRetryWaitTime;
+          if (mRetryWaitTime > Seconds(60)) {
+            mRetryWaitTime = Seconds(60);
+          }
+        }
+
+        //---------------------------------------------------------------------
+        void step()
+        {
+          if (isClosed()) return;
+
+          {
+            AutoRecursiveLock lock(mLock);
+
+            if (Time() != mNextRetryTime) {
+              if (zsLib::now() < mNextRetryTime) return;
+            }
+          }
+
+          if (!isOutgoing()) {
+            if (!stepListen()) goto step_cleanup;
+
+          } else {
+            if (!stepDNS()) goto step_cleanup;
+            if (!stepConnect()) goto step_cleanup;
+
+          }
+
+        step_complete:
+          {
+            AutoRecursiveLock lock(mLock);
+            if (mRetryTimer) {
+              mRetryTimer->cancel();
+              mRetryTimer.reset();
+            }
+            mNextRetryTime = Time();
+            mRetryWaitTime = Duration();
+          }
+
+        step_cleanup:
+          {
+          }
+        }
+
+        //---------------------------------------------------------------------
+        bool stepDNS()
+        {
+          String serverName;
+          IDNSQueryPtr query;
+
+          {
+            AutoRecursiveLock lock(mLock);
+            if (mOutgoingServerQuery) return false;
+
+            if (mServers) return true;
+
+            if (mServerLookupName.isEmpty()) return false;
+            serverName = mServerLookupName;
+          }
+
+          // not safe to call services level method from within lock...
+          query = IDNS::lookupAorAAAA(mThisWeak.lock(), serverName);
+
+          // DNS is not created during any kind of lock at all...
+          {
+            AutoRecursiveLock lock(mLock);
+            mOutgoingServerQuery = query;
+          }
+
+          return false;
+        }
+
+        //---------------------------------------------------------------------
+        bool stepConnect()
+        {
+          AutoRecursiveLock lock(mLock);
+
+          if (mTelnetSocket) {
+            return isConnected();
+          }
+
+          IPAddress result;
+          if (!IDNS::extractNextIP(mServers, result)) {
+            mServers.reset();
+
+            handleConnectionFailure();
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            return false;
+          }
+
+          mStringToSendUponConnection = mOriginalStringToSendUponConnection;
+
+          mTelnetSocket = Socket::createTCP();
+          try {
+#ifndef __QNX__
+            mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
+#endif //ndef __QNX__
+          } catch(Socket::Exceptions::UnsupportedSocketOption &) {
+          }
+          mTelnetSocket->setBlocking(false);
+          mTelnetSocket->setDelegate(mThisWeak.lock());
+
+          bool wouldBlock = false;
+          int errorCode = 0;
+          mTelnetSocket->connect(result, &wouldBlock, &errorCode);
+          if (0 != errorCode) {
+            handleConnectionFailure();
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            return false;
+          }
+
+          return false;
+        }
+
+        //---------------------------------------------------------------------
+        bool stepListen()
+        {
+          AutoRecursiveLock lock(mLock);
+
+          if (mListenSocket) return true;
+
+          if (Time() == mStartListenTime)
+            mStartListenTime = zsLib::now();
+
+          mListenSocket = Socket::createTCP();
+          try {
+#ifndef __QNX__
+            mListenSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
+#endif //ndef __QNX__
+          } catch(Socket::Exceptions::UnsupportedSocketOption &) {
+          }
+          mListenSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
+
+          IPAddress any = IPAddress::anyV4();
+          any.setPort(mListenPort);
+
+          int error = 0;
+
+          std::cout << "TELNET LOGGER: Attempting to listen for client connections on port: " << mListenPort << " (start time=" << string(mStartListenTime) << ")...\n";
+          mListenSocket->bind(any, &error);
+
+          Time tick = zsLib::now();
+
+          if (0 != error) {
+            mListenSocket->close();
+            mListenSocket.reset();
+
+            if (mStartListenTime + mMaxWaitTimeForSocketToBeAvailable < tick) {
+              std::cout << "TELNET LOGGER: ***ABANDONED***\n";
+              close();
+              return false;
+            }
+
+            handleConnectionFailure();
+
+            std::cout << "TELNET LOGGER: Failed to listen...\n";
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            return false;
+          }
+
+          std::cout << "TELNET LOGGER: Succeeded.\n\n";
+
+          mListenSocket->setDelegate(mThisWeak.lock());
+          mListenSocket->listen();
+
+          mStartListenTime = Time();
+          return true;
+        }
+        
       private:
         //---------------------------------------------------------------------
         #pragma mark
@@ -1807,11 +1879,13 @@ namespace openpeer
         BufferedDataList mBufferedList;
 
         WORD mListenPort;
-        Duration mMaxWaitTimeForSocketToBeAvailable;
         Time mStartListenTime;
-        TimerPtr mListenTimer;
+        Duration mMaxWaitTimeForSocketToBeAvailable;
 
-        bool mOutgoingMode;
+        TimerPtr mRetryTimer;
+        Time mNextRetryTime;
+        Duration mRetryWaitTime;
+
         bool mConnected;
         IDNSQueryPtr mOutgoingServerQuery;
         String mStringToSendUponConnection;
