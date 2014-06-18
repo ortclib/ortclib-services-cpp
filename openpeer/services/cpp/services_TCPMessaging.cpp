@@ -222,7 +222,7 @@ namespace openpeer
 
         ITCPMessagingSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        ITCPMessagingDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        ITCPMessagingDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           TCPMessagingPtr pThis = mThisWeak.lock();

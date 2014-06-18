@@ -142,7 +142,7 @@ namespace openpeer
 
         IReachabilitySubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IReachabilityDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IReachabilityDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           ReachabilityPtr pThis = mThisWeak.lock();

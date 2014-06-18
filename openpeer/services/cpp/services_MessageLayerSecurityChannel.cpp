@@ -288,7 +288,7 @@ namespace openpeer
 
         IMessageLayerSecurityChannelSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IMessageLayerSecurityChannelDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IMessageLayerSecurityChannelDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           MessageLayerSecurityChannelPtr pThis = mThisWeak.lock();

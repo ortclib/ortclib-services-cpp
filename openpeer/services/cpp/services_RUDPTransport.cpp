@@ -143,7 +143,7 @@ namespace openpeer
 
         IRUDPTransportSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IRUDPTransportDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IRUDPTransportDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           RUDPTransportPtr pThis = mThisWeak.lock();
@@ -154,7 +154,7 @@ namespace openpeer
 
           if (mPendingSessions.size() > 0) {
             // inform the delegate of the new session waiting...
-            mSubscriptions.delegate()->onRUDPTransportChannelWaiting(mThisWeak.lock());
+            delegate->onRUDPTransportChannelWaiting(mThisWeak.lock());
           }
         }
 

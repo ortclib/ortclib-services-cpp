@@ -332,7 +332,7 @@ namespace openpeer
 
         IICESocketSessionSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IICESocketSessionDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IICESocketSessionDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           ICESocketSessionPtr pThis = mThisWeak.lock();

@@ -194,7 +194,7 @@ namespace openpeer
 
         IBackgroundingSubscriptionPtr subscription = subscriptions->subscribe(originalDelegate);
 
-        // IBackgroundingDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        // IBackgroundingDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         //if (delegate) {
           // BackgroundingPtr pThis = mThisWeak.lock();

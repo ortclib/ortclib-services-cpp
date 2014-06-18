@@ -285,7 +285,7 @@ namespace openpeer
 
         IICESocketSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        IICESocketDelegatePtr delegate = mSubscriptions.delegate(subscription);
+        IICESocketDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
 
         if (delegate) {
           ICESocketPtr pThis = mThisWeak.lock();
