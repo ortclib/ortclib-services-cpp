@@ -672,7 +672,7 @@ namespace openpeer
                            ZS_PARAM("batons available", mAvailableBurstBatons))
             }
 
-            packet->flagForResending(mTotalPacketsToResend);  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
+            packet->flagForResending(get(mTotalPacketsToResend));  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
             packet->releaseBaton(mAvailableBurstBatons);      // reclaim the baton if holding since this packet needs to be resent and never arrived
           }
 
@@ -2111,7 +2111,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
 
-      void RUDPChannelStream::BufferedPacket::flagForResending(size_t &ioTotalPacketsToResend)
+      void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend)
       {
         if (!mPacket) return;
         if (mFlagForResendingInNextBurst) return;
