@@ -1411,7 +1411,7 @@ namespace openpeer
       {
         ULONG writeBuffers = mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0;
 
-        ZS_LOG_TRACE(log("starting send now cleaup routine") +
+        ZS_LOG_TRACE(log("starting send now cleanup routine") +
                      ZS_PARAM("packets to resend", mTotalPacketsToResend) +
                      ZS_PARAM("available batons", mAvailableBurstBatons) +
                      ZS_PARAM("packets per burst", mPacketsPerBurst) +
@@ -2111,15 +2111,6 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
 
-#ifdef _ANDROID
-      void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend)
-      {
-        if (!mPacket) return;
-        if (mFlagForResendingInNextBurst) return;
-        mFlagForResendingInNextBurst = true;
-        ++ioTotalPacketsToResend;
-      }
-#else
       void RUDPChannelStream::BufferedPacket::flagForResending(size_t &ioTotalPacketsToResend)
       {
         if (!mPacket) return;
@@ -2127,7 +2118,7 @@ namespace openpeer
         mFlagForResendingInNextBurst = true;
         ++ioTotalPacketsToResend;
       }
-#endif
+
       //-----------------------------------------------------------------------
       void RUDPChannelStream::BufferedPacket::doNotResend(ULONG &ioTotalPacketsToResend)
       {

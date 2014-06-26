@@ -199,7 +199,6 @@ namespace openpeer
 
     interaction ITransportStreamReader
     {
-      typedef ULONG size_type;
       typedef ITransportStream::StreamHeader StreamHeader;
       typedef ITransportStream::StreamHeaderPtr StreamHeaderPtr;
       typedef ITransportStream::StreamHeaderWeakPtr StreamHeaderWeakPtr;
@@ -261,11 +260,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the total number of the buffers "written" to the
       //          FIFO write stream that are still available to read.
-#ifdef _ANDROID
       virtual size_t getTotalReadBuffersAvailable() const = 0;
-#else
-      virtual size_type getTotalReadBuffersAvailable() const = 0;
-#endif
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the size of all data "written" buffer available to
