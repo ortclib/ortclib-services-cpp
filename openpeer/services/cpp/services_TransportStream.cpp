@@ -621,11 +621,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::read(
-                                   WORD &outResult,
-                                   StreamHeaderPtr *outHeader,
-                                   Endians endian
-                                   )
+      size_t TransportStream::readWORD(
+                                       WORD &outResult,
+                                       StreamHeaderPtr *outHeader,
+                                       Endians endian
+                                       )
       {
         outResult = 0;
 
@@ -641,11 +641,11 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::read(
-                                   DWORD &outResult,
-                                   StreamHeaderPtr *outHeader,
-                                   Endians endian
-                                   )
+      size_t TransportStream::readDWORD(
+                                        DWORD &outResult,
+                                        StreamHeaderPtr *outHeader,
+                                        Endians endian
+                                        )
       {
         outResult = 0;
 
@@ -797,12 +797,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::peek(
-                                   WORD &outResult,
-                                   StreamHeaderPtr *outHeader,
-                                   size_t offsetInBytes,
-                                   Endians endian
-                                   )
+      size_t TransportStream::peekWORD(
+                                       WORD &outResult,
+                                       StreamHeaderPtr *outHeader,
+                                       size_t offsetInBytes,
+                                       Endians endian
+                                       )
       {
         outResult = 0;
 
@@ -818,12 +818,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::peek(
-                                   DWORD &outResult,
-                                   StreamHeaderPtr *outHeader,
-                                   size_t offsetInBytes,
-                                   Endians endian
-                                   )
+      size_t TransportStream::peekDWORD(
+                                        DWORD &outResult,
+                                        StreamHeaderPtr *outHeader,
+                                        size_t offsetInBytes,
+                                        Endians endian
+                                        )
       {
         outResult = 0;
 

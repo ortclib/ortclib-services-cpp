@@ -479,7 +479,7 @@ namespace openpeer
 
           DWORD bufferSize = 0;
 
-          size_t read = mWireReceiveStream->peek((DWORD &)bufferSize);
+          size_t read = mWireReceiveStream->peekDWORD(bufferSize);
           if (read != sizeof(bufferSize)) {
             ZS_LOG_TRACE(log("not enough data available to read"))
             break;
