@@ -182,17 +182,17 @@ namespace openpeer
 
         virtual SecureByteBlockPtr read(StreamHeaderPtr *outHeader = NULL);
 
-        virtual size_t read(
-                            WORD &outResult,
-                            StreamHeaderPtr *outHeader = NULL,
-                            Endians endian = ITransportStream::Endian_Big
-                            );
+        virtual size_t readWORD(
+                                WORD &outResult,
+                                StreamHeaderPtr *outHeader = NULL,
+                                Endians endian = ITransportStream::Endian_Big
+                                );
 
-        virtual size_t read(
-                            DWORD &outResult,
-                            StreamHeaderPtr *outHeader = NULL,
-                            Endians endian = ITransportStream::Endian_Big
-                            );
+        virtual size_t readDWORD(
+                                 DWORD &outResult,
+                                 StreamHeaderPtr *outHeader = NULL,
+                                 Endians endian = ITransportStream::Endian_Big
+                                 );
 
         virtual size_t peek(
                             BYTE *outBuffer,
@@ -207,19 +207,19 @@ namespace openpeer
                                         size_t offsetInBytes = 0
                                         );
 
-        virtual size_t peek(
-                            WORD &outResult,
-                            StreamHeaderPtr *outHeader = NULL,
-                            size_t offsetInBytes = 0,
-                            Endians endian = ITransportStream::Endian_Big
-                            );
+        virtual size_t peekWORD(
+                                WORD &outResult,
+                                StreamHeaderPtr *outHeader = NULL,
+                                size_t offsetInBytes = 0,
+                                Endians endian = ITransportStream::Endian_Big
+                                );
 
-        virtual size_t peek(
-                            DWORD &outResult,
-                            StreamHeaderPtr *outHeader = NULL,
-                            size_t offsetInBytes = 0,
-                            Endians endian = ITransportStream::Endian_Big
-                            );
+        virtual size_t peekDWORD(
+                                 DWORD &outResult,
+                                 StreamHeaderPtr *outHeader = NULL,
+                                 size_t offsetInBytes = 0,
+                                 Endians endian = ITransportStream::Endian_Big
+                                 );
 
         virtual size_t skip(size_t offsetInBytes);
 

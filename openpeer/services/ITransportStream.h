@@ -199,7 +199,6 @@ namespace openpeer
 
     interaction ITransportStreamReader
     {
-      typedef ULONG size_type;
       typedef ITransportStream::StreamHeader StreamHeader;
       typedef ITransportStream::StreamHeaderPtr StreamHeaderPtr;
       typedef ITransportStream::StreamHeaderWeakPtr StreamHeaderWeakPtr;
@@ -261,11 +260,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the total number of the buffers "written" to the
       //          FIFO write stream that are still available to read.
-#ifdef _ANDROID
       virtual size_t getTotalReadBuffersAvailable() const = 0;
-#else
-      virtual size_type getTotalReadBuffersAvailable() const = 0;
-#endif
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the size of all data "written" buffer available to
@@ -302,20 +297,20 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Reads a WORD of buffered data written to the stream.
       // NOTE:    returns sizeof(WORD) if successful
-      virtual size_t read(
-                          WORD &outResult,
-                          StreamHeaderPtr *outHeader = NULL,
-                          Endians endian = ITransportStream::Endian_Big
-                          ) = 0;
+      virtual size_t readWORD(
+                              WORD &outResult,
+                              StreamHeaderPtr *outHeader = NULL,
+                              Endians endian = ITransportStream::Endian_Big
+                              ) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Reads buffered data written to the stream.
       // NOTE:    returns sizeof(DWORD) if successful
-      virtual size_t read(
-                          DWORD &outResult,
-                          StreamHeaderPtr *outHeader = NULL,
-                          Endians endian = ITransportStream::Endian_Big
-                          ) = 0;
+      virtual size_t readDWORD(
+                               DWORD &outResult,
+                               StreamHeaderPtr *outHeader = NULL,
+                               Endians endian = ITransportStream::Endian_Big
+                               ) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks ahead at the buffered data written to the stream
@@ -339,22 +334,22 @@ namespace openpeer
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks a WORD of buffered data written to the stream.
       // NOTE:    returns sizeof(WORD) if successful
-      virtual size_t peek(
-                          WORD &outResult,
-                          StreamHeaderPtr *outHeader = NULL,
-                          size_t offsetInBytes = 0,
-                          Endians endian = ITransportStream::Endian_Big
-                          ) = 0;
+      virtual size_t peekWORD(
+                              WORD &outResult,
+                              StreamHeaderPtr *outHeader = NULL,
+                              size_t offsetInBytes = 0,
+                              Endians endian = ITransportStream::Endian_Big
+                              ) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks buffered data written to the stream.
       // NOTE:    returns sizeof(DWORD) if successful
-      virtual size_t peek(
-                          DWORD &outResult,
-                          StreamHeaderPtr *outHeader = NULL,
-                          size_t offsetInBytes = 0,
-                          Endians endian = ITransportStream::Endian_Big
-                          ) = 0;
+      virtual size_t peekDWORD(
+                               DWORD &outResult,
+                               StreamHeaderPtr *outHeader = NULL,
+                               size_t offsetInBytes = 0,
+                               Endians endian = ITransportStream::Endian_Big
+                               ) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Flushes the FIFO by the data offset specified.

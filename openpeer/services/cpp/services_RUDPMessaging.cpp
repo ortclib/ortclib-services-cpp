@@ -479,19 +479,12 @@ namespace openpeer
 
           DWORD bufferSize = 0;
 
-#ifdef _ANDROID
-          /*size_t read = mWireReceiveStream->peek(bufferSize);
-          if (read != sizeof(bufferSize)) {
-            ZS_LOG_TRACE(log("not enough data available to read"))
-            break;
-          }*/
-#else
-          size_t read = mWireReceiveStream->peek(bufferSize);
+          size_t read = mWireReceiveStream->peekDWORD(bufferSize);
           if (read != sizeof(bufferSize)) {
             ZS_LOG_TRACE(log("not enough data available to read"))
             break;
           }
-#endif
+
           size_t available = mWireReceiveStream->getTotalReadSizeAvailableInBytes();
 
           if (available < sizeof(DWORD) + bufferSize) {

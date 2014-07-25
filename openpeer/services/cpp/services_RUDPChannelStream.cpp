@@ -672,7 +672,7 @@ namespace openpeer
                            ZS_PARAM("batons available", mAvailableBurstBatons))
             }
 
-            packet->flagForResending(mTotalPacketsToResend);  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
+            packet->flagForResending(get(mTotalPacketsToResend));  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
             packet->releaseBaton(mAvailableBurstBatons);      // reclaim the baton if holding since this packet needs to be resent and never arrived
           }
 
@@ -1411,7 +1411,7 @@ namespace openpeer
       {
         ULONG writeBuffers = mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0;
 
-        ZS_LOG_TRACE(log("starting send now cleaup routine") +
+        ZS_LOG_TRACE(log("starting send now cleanup routine") +
                      ZS_PARAM("packets to resend", mTotalPacketsToResend) +
                      ZS_PARAM("available batons", mAvailableBurstBatons) +
                      ZS_PARAM("packets per burst", mPacketsPerBurst) +
@@ -2111,7 +2111,6 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
 
-#ifdef _ANDROID
       void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend)
       {
         if (!mPacket) return;
@@ -2119,15 +2118,7 @@ namespace openpeer
         mFlagForResendingInNextBurst = true;
         ++ioTotalPacketsToResend;
       }
-#else
-      void RUDPChannelStream::BufferedPacket::flagForResending(size_t &ioTotalPacketsToResend)
-      {
-        if (!mPacket) return;
-        if (mFlagForResendingInNextBurst) return;
-        mFlagForResendingInNextBurst = true;
-        ++ioTotalPacketsToResend;
-      }
-#endif
+
       //-----------------------------------------------------------------------
       void RUDPChannelStream::BufferedPacket::doNotResend(ULONG &ioTotalPacketsToResend)
       {

@@ -2278,7 +2278,7 @@ namespace openpeer
                 continue;
               }
               if (pairing == mNominated) {
-                ZS_LOG_TRACE(log("already nominated and no high prioriy unfailed candidates found (thus must be complete state)"))
+                ZS_LOG_TRACE(log("already nominated and no higher priority unfailed candidates found (thus must be complete state)"))
                 return true;
               }
               // higher priority unfailed candidate found thus norminated but not possibly complete yet
