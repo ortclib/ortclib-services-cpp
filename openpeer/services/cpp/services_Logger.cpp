@@ -1781,12 +1781,16 @@ namespace openpeer
           } catch(Socket::Exceptions::UnsupportedSocketOption &) {
           }
           mTelnetSocket->setBlocking(false);
-          mTelnetSocket->setDelegate(mThisWeak.lock());
 
           bool wouldBlock = false;
           int errorCode = 0;
           mTelnetSocket->connect(result, &wouldBlock, &errorCode);
+          mTelnetSocket->setDelegate(mThisWeak.lock()); // set delegate must happen after connect is issued
+
           if (0 != errorCode) {
+            mTelnetSocket->close();
+            mTelnetSocket.reset();
+
             handleConnectionFailure();
             IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
             return false;
@@ -1843,8 +1847,8 @@ namespace openpeer
 
           std::cout << "TELNET LOGGER: Succeeded.\n\n";
 
-          mListenSocket->setDelegate(mThisWeak.lock());
           mListenSocket->listen();
+          mListenSocket->setDelegate(mThisWeak.lock()); // set delegate must happen after the listen
 
           mStartListenTime = Time();
           return true;

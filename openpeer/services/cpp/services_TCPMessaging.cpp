@@ -161,7 +161,7 @@ namespace openpeer
         AutoRecursiveLock lock(pThis->getLock());
 
         int errorCode = 0;
-        pThis->mSocket = dynamic_pointer_cast<Socket>(socket->accept(pThis->mRemoteIP, &errorCode));
+        pThis->mSocket = socket->accept(pThis->mRemoteIP, &errorCode);
         if (!pThis->mSocket) {
           ZS_LOG_ERROR(Detail, pThis->log("failed to accept socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
@@ -202,9 +202,9 @@ namespace openpeer
         bool wouldBlock = false;
         int errorCode = 0;
         pThis->mSocket = Socket::createTCP();
-        pThis->mSocket->setDelegate(pThis);
         pThis->mSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
         pThis->mSocket->connect(remoteIP, &wouldBlock, &errorCode);
+        pThis->mSocket->setDelegate(pThis);   // set delegate must happen after the connect()
         ZS_LOG_DEBUG(pThis->log("attempting to connect") + ZS_PARAM("server IP", remoteIP.string()) + ZS_PARAM("handle", pThis->mSocket->getSocket()))
         if (0 != errorCode) {
           ZS_LOG_ERROR(Detail, pThis->log("failed to connect socket") + ZS_PARAM("error code", errorCode))

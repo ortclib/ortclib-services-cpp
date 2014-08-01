@@ -1556,7 +1556,6 @@ namespace openpeer
 #endif //ndef __QNX__
                 } catch(Socket::Exceptions::UnsupportedSocketOption &) {
                 }
-                server->mTCPSocket->setDelegate(mThisWeak.lock());
 
                 try {
                   bool wouldBlock = false;
@@ -1566,6 +1565,7 @@ namespace openpeer
                   cancel();
                   return;
                 }
+                server->mTCPSocket->setDelegate(mThisWeak.lock());  // set delegate must happen after the connect request
               }
 
               if (!server->mIsConnected) {
