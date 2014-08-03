@@ -507,6 +507,7 @@ namespace openpeer
         }
 
         mSocket->adopt((SOCKET)result);
+        mSocket->setBlocking(false);
         mSocket->setDelegate(mThisWeak.lock());
 
         mTimer = Timer::create(mThisWeak.lock(), Seconds(1), true);
