@@ -55,6 +55,7 @@ openpeer/services/cpp/services_RUDPListener.cpp \
 openpeer/services/cpp/services_RUDPMessaging.cpp \
 openpeer/services/cpp/services_RUDPPacket.cpp \
 openpeer/services/cpp/services_RUDPTransport.cpp \
+openpeer/services/cpp/services_Reachability.cpp \
 openpeer/services/cpp/services_STUNDiscovery.cpp \
 openpeer/services/cpp/services_STUNPacket.cpp \
 openpeer/services/cpp/services_STUNRequester.cpp \
