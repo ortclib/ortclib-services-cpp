@@ -32,6 +32,7 @@
 #pragma once
 
 #include <openpeer/services/types.h>
+#include <openpeer/services/IFactory.h>
 
 namespace CryptoPP
 {
@@ -100,11 +101,13 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(Backgrounding)
       ZS_DECLARE_CLASS_PTR(Cache)
       ZS_DECLARE_CLASS_PTR(DNS)
+      ZS_DECLARE_CLASS_PTR(Decryptor)
       ZS_DECLARE_CLASS_PTR(DHKeyDomain)
       ZS_DECLARE_CLASS_PTR(DHPrivateKey)
       ZS_DECLARE_CLASS_PTR(DHPublicKey)
       ZS_DECLARE_CLASS_PTR(DNSMonitor)
       ZS_DECLARE_CLASS_PTR(DNSQuery)
+      ZS_DECLARE_CLASS_PTR(Encryptor)
       ZS_DECLARE_CLASS_PTR(Factory)
       ZS_DECLARE_CLASS_PTR(ICESocket)
       ZS_DECLARE_CLASS_PTR(ICESocketSession)

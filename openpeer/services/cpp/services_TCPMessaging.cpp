@@ -807,6 +807,48 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ITCPMessagingFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      ITCPMessagingFactory &ITCPMessagingFactory::singleton()
+      {
+        return TCPMessagingFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      TCPMessagingPtr ITCPMessagingFactory::accept(
+                                                   ITCPMessagingDelegatePtr delegate,
+                                                   ITransportStreamPtr receiveStream,
+                                                   ITransportStreamPtr sendStream,
+                                                   bool framesHaveChannelNumber,
+                                                   SocketPtr socket,
+                                                   size_t maxMessageSizeInBytes
+                                                   )
+      {
+        if (this) {}
+        return internal::TCPMessaging::accept(delegate, receiveStream, sendStream, framesHaveChannelNumber, socket, maxMessageSizeInBytes);
+      }
+
+      //-----------------------------------------------------------------------
+      TCPMessagingPtr ITCPMessagingFactory::connect(
+                                                    ITCPMessagingDelegatePtr delegate,
+                                                    ITransportStreamPtr receiveStream,
+                                                    ITransportStreamPtr sendStream,
+                                                    bool framesHaveChannelNumber,
+                                                    IPAddress remoteIP,
+                                                    size_t maxMessageSizeInBytes
+                                                    )
+      {
+        if (this) {}
+        return internal::TCPMessaging::connect(delegate, receiveStream, sendStream, framesHaveChannelNumber, remoteIP, maxMessageSizeInBytes);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
     }
 
     //-----------------------------------------------------------------------

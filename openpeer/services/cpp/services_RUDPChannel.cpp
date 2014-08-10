@@ -1726,6 +1726,72 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRUDPChannelFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRUDPChannelFactory &IRUDPChannelFactory::singleton()
+      {
+        return RUDPChannelFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPChannelPtr IRUDPChannelFactory::createForRUDPTransportIncoming(
+                                                                         IMessageQueuePtr queue,
+                                                                         IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                         const IPAddress &remoteIP,
+                                                                         WORD incomingChannelNumber,
+                                                                         const char *localUserFrag,
+                                                                         const char *localPassword,
+                                                                         const char *remoteUserFrag,
+                                                                         const char *remotePassword,
+                                                                         STUNPacketPtr channelOpenPacket,
+                                                                         STUNPacketPtr &outResponse
+                                                                         )
+      {
+        if (this) {}
+        return RUDPChannel::createForRUDPTransportIncoming(queue, master, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, channelOpenPacket, outResponse);
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPChannelPtr IRUDPChannelFactory::createForRUDPTransportOutgoing(
+                                                                         IMessageQueuePtr queue,
+                                                                         IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                                         IRUDPChannelDelegatePtr delegate,
+                                                                         const IPAddress &remoteIP,
+                                                                         WORD incomingChannelNumber,
+                                                                         const char *localUserFrag,
+                                                                         const char *localPassword,
+                                                                         const char *remoteUserFrag,
+                                                                         const char *remotePassword,
+                                                                         const char *connectionInfo,
+                                                                         ITransportStreamPtr receiveStream,
+                                                                         ITransportStreamPtr sendStream
+                                                                         )
+      {
+        if (this) {}
+        return RUDPChannel::createForRUDPTransportOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, connectionInfo, receiveStream, sendStream);
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPChannelPtr IRUDPChannelFactory::createForListener(
+                                                            IMessageQueuePtr queue,
+                                                            IRUDPChannelDelegateForSessionAndListenerPtr master,
+                                                            const IPAddress &remoteIP,
+                                                            WORD incomingChannelNumber,
+                                                            STUNPacketPtr channelOpenPacket,
+                                                            STUNPacketPtr &outResponse
+                                                            )
+      {
+        if (this) {}
+        return RUDPChannel::createForListener(queue, master, remoteIP, incomingChannelNumber, channelOpenPacket, outResponse);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
     }
 
     //-------------------------------------------------------------------------
@@ -1756,6 +1822,8 @@ namespace openpeer
       switch (reason)
       {
         case RUDPChannelShutdownReason_None:                return "None";
+
+        case RUDPChannelShutdownReason_RemoteClosed:        return "Remote closed";
         case RUDPChannelShutdownReason_OpenFailure:         return "Open failure";
         case RUDPChannelShutdownReason_DelegateGone:        return "Delegate gone";
         case RUDPChannelShutdownReason_Timeout:             return "Timeout";

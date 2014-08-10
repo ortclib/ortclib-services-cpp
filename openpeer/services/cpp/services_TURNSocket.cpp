@@ -2655,6 +2655,52 @@ namespace openpeer
         return pThis;
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ITURNSocketFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      ITURNSocketFactory &ITURNSocketFactory::singleton()
+      {
+        return TURNSocketFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      TURNSocketPtr ITURNSocketFactory::create(
+                                               IMessageQueuePtr queue,
+                                               ITURNSocketDelegatePtr delegate,
+                                               const char *turnServer,
+                                               const char *turnServerUsername,
+                                               const char *turnServerPassword,
+                                               bool useChannelBinding,
+                                               WORD limitChannelToRangeStart,
+                                               WORD limitChannelRoRangeEnd
+                                               )
+      {
+        if (this) {}
+        return TURNSocket::create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+      }
+
+      //-----------------------------------------------------------------------
+      TURNSocketPtr ITURNSocketFactory::create(
+                                               IMessageQueuePtr queue,
+                                               ITURNSocketDelegatePtr delegate,
+                                               IDNS::SRVResultPtr srvTURNUDP,
+                                               IDNS::SRVResultPtr srvTURNTCP,
+                                               const char *turnServerUsername,
+                                               const char *turnServerPassword,
+                                               bool useChannelBinding,
+                                               WORD limitChannelToRangeStart,
+                                               WORD limitChannelRoRangeEnd
+                                               )
+      {
+        if (this) {}
+        return TURNSocket::create(queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+      }
     }
 
     //-------------------------------------------------------------------------

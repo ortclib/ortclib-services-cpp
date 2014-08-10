@@ -378,6 +378,42 @@ namespace openpeer
         return mPreviouslyContactedServers.end() != find(mPreviouslyContactedServers.begin(), mPreviouslyContactedServers.end(), server);
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ISTUNDiscoveryFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      ISTUNDiscoveryFactory &ISTUNDiscoveryFactory::singleton()
+      {
+        return STUNDiscoveryFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
+                                                     IMessageQueuePtr queue,
+                                                     ISTUNDiscoveryDelegatePtr delegate,
+                                                     IDNS::SRVResultPtr service
+                                                     )
+      {
+        if (this) {}
+        return STUNDiscovery::create(queue, delegate, service);
+      }
+
+      //-----------------------------------------------------------------------
+      STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
+                                                     IMessageQueuePtr queue,
+                                                     ISTUNDiscoveryDelegatePtr delegate,
+                                                     const char *srvName
+                                                     )
+      {
+        if (this) {}
+        return STUNDiscovery::create(queue, delegate, srvName);
+      }
+      
     }
 
     //-------------------------------------------------------------------------

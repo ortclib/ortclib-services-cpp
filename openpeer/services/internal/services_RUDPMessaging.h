@@ -263,6 +263,8 @@ namespace openpeer
                                              size_t maxMessageSizeInBytes
                                              );
       };
+
+      class RUDPMessagingFactory : public IFactory<IRUDPMessagingFactory> {};
       
     }
   }

@@ -2062,6 +2062,66 @@ namespace openpeer
         return Log::Params(message, "DNS");
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDNSFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDNSFactory &IDNSFactory::singleton()
+      {
+        return DNSFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      IDNSQueryPtr IDNSFactory::lookupA(
+                                        IDNSDelegatePtr delegate,
+                                        const char *name
+                                        )
+      {
+        if (this) {}
+        return DNS::lookupA(delegate, name);
+      }
+
+      //-----------------------------------------------------------------------
+      IDNSQueryPtr IDNSFactory::lookupAAAA(
+                                           IDNSDelegatePtr delegate,
+                                           const char *name
+                                           )
+      {
+        if (this) {}
+        return DNS::lookupAAAA(delegate, name);
+      }
+
+      //-----------------------------------------------------------------------
+      IDNSQueryPtr IDNSFactory::lookupAorAAAA(
+                                              IDNSDelegatePtr delegate,
+                                              const char *name
+                                              )
+      {
+        if (this) {}
+        return DNS::lookupAorAAAA(delegate, name);
+      }
+
+      //-----------------------------------------------------------------------
+      IDNSQueryPtr IDNSFactory::lookupSRV(
+                                          IDNSDelegatePtr delegate,
+                                          const char *name,
+                                          const char *service,
+                                          const char *protocol,
+                                          WORD defaultPort,
+                                          WORD defaultPriority,
+                                          WORD defaultWeight,
+                                          SRVLookupTypes lookupType
+                                          )
+      {
+        if (this) {}
+        return DNS::lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+      }
+
     }
 
     //-------------------------------------------------------------------------

@@ -539,6 +539,8 @@ namespace openpeer
                                     IICESocketPtr foundationSocket = IICESocketPtr()
                                     );
       };
+
+      class ICESocketFactory : public IFactory<IICESocketFactory> {};
     }
   }
 }

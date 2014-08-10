@@ -462,6 +462,8 @@ namespace openpeer
                                            );
       };
 
+      class ICESocketSessionFactory : public IFactory<IICESocketSessionFactory> {};
+
     }
   }
 }

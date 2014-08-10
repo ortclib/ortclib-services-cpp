@@ -2422,6 +2422,36 @@ namespace openpeer
 
         mBackgroundingNotifier.reset();
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IICESocketSessionFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IICESocketSessionFactory &IICESocketSessionFactory::singleton()
+      {
+        return ICESocketSessionFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocketSessionPtr IICESocketSessionFactory::create(
+                                                           IICESocketSessionDelegatePtr delegate,
+                                                           IICESocketPtr socket,
+                                                           const char *remoteUsernameFrag,
+                                                           const char *remotePassword,
+                                                           const CandidateList &remoteCandidates,
+                                                           ICEControls control,
+                                                           IICESocketSessionPtr foundation
+                                                           )
+      {
+        if (this) {}
+        return internal::ICESocketSession::create(delegate, socket, remoteUsernameFrag, remotePassword, remoteCandidates, control, foundation);
+      }
+
     }
 
     //-------------------------------------------------------------------------

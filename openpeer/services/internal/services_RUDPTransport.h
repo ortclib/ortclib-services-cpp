@@ -257,6 +257,8 @@ namespace openpeer
                                         IRUDPTransportDelegatePtr delegate
                                                );
       };
+
+      class RUDPTransportFactory : public IFactory<IRUDPTransportFactory> {};
       
     }
   }

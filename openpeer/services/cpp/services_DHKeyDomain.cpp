@@ -739,6 +739,49 @@ namespace openpeer
         return true;
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDHKeyDomainFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHKeyDomainFactory &IDHKeyDomainFactory::singleton()
+      {
+        return DHKeyDomainFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::generate(size_t keySizeInBits)
+      {
+        if (this) {}
+        return DHKeyDomain::generate(keySizeInBits);
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::loadPrecompiled(
+                                                          IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
+                                                          bool validate
+                                                          )
+      {
+        if (this) {}
+        return DHKeyDomain::loadPrecompiled(precompiledKey, validate);
+      }
+
+      //-----------------------------------------------------------------------
+      DHKeyDomainPtr IDHKeyDomainFactory::load(
+                                               const SecureByteBlock &p,
+                                               const SecureByteBlock &q,
+                                               const SecureByteBlock &g,
+                                               bool validate
+                                               )
+      {
+        if (this) {}
+        return DHKeyDomain::load(p, q, g, validate);
+      }
+
     }
 
     //-------------------------------------------------------------------------

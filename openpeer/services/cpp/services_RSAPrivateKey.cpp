@@ -58,8 +58,8 @@ namespace openpeer
       typedef CryptoPP::RSA::PublicKey PublicKey;
       typedef CryptoPP::RSASSA_PKCS1v15_SHA_Signer Signer;
 
-      typedef CryptoPP::RSAES_OAEP_SHA_Decryptor Decryptor;
-      typedef CryptoPP::RSAES_OAEP_SHA_Encryptor Encryptor;
+      typedef CryptoPP::RSAES_OAEP_SHA_Decryptor RsaDecryptor;
+      typedef CryptoPP::RSAES_OAEP_SHA_Encryptor RsaEncryptor;
 
       using CryptoPP::PK_DecryptorFilter;
 
@@ -268,7 +268,7 @@ namespace openpeer
       SecureByteBlockPtr RSAPrivateKey::decrypt(const SecureByteBlock &buffer) const
       {
         AutoSeededRandomPool rng;
-        Decryptor decryptor(mPrivateKey);
+        RsaDecryptor decryptor(mPrivateKey);
 
         SecureByteBlockPtr output(new SecureByteBlock);
 
@@ -352,6 +352,38 @@ namespace openpeer
 
         return output;
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRSAPrivateKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRSAPrivateKeyFactory &IRSAPrivateKeyFactory::singleton()
+      {
+        return RSAPrivateKeyFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RSAPrivateKeyPtr IRSAPrivateKeyFactory::generate(
+                                                       RSAPublicKeyPtr &outPublicKey,
+                                                       size_t keySizeInBits
+                                                       )
+      {
+        if (this) {}
+        return RSAPrivateKey::generate(outPublicKey, keySizeInBits);
+      }
+
+      //-----------------------------------------------------------------------
+      RSAPrivateKeyPtr IRSAPrivateKeyFactory::loadPrivateKey(const SecureByteBlock &buffer)
+      {
+        if (this) {}
+        return RSAPrivateKey::load(buffer);
+      }
+
     }
 
     //-------------------------------------------------------------------------

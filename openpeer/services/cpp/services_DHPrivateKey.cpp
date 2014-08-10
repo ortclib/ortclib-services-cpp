@@ -343,6 +343,78 @@ namespace openpeer
         return resultEl;
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDHPrivateKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHPrivateKeyFactory &IDHPrivateKeyFactory::singleton()
+      {
+        return DHPrivateKeyFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::generate(
+                                                     IDHKeyDomainPtr keyDomain,
+                                                     IDHPublicKeyPtr &outPublicKey
+                                                     )
+      {
+        if (this) {}
+        return DHPrivateKey::generate(keyDomain, outPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::load(
+                                                 IDHKeyDomainPtr keyDomain,
+                                                 const SecureByteBlock &staticPrivateKey,
+                                                 const SecureByteBlock &ephemeralPrivateKey
+                                                 )
+      {
+        if (this) {}
+        return DHPrivateKey::load(keyDomain, staticPrivateKey, ephemeralPrivateKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::load(
+                                                 IDHKeyDomainPtr keyDomain,
+                                                 IDHPublicKeyPtr &outPublicKey,
+                                                 const SecureByteBlock &staticPrivateKey,
+                                                 const SecureByteBlock &ephemeralPrivateKey,
+                                                 const SecureByteBlock &staticPublicKey,
+                                                 const SecureByteBlock &ephemeralPublicKey
+                                                 )
+      {
+        if (this) {}
+        return DHPrivateKey::load(keyDomain, outPublicKey, staticPrivateKey, ephemeralPrivateKey, staticPublicKey, ephemeralPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::loadAndGenerateNewEphemeral(
+                                                                        IDHKeyDomainPtr keyDomain,
+                                                                        const SecureByteBlock &staticPrivateKey,
+                                                                        const SecureByteBlock &staticPublicKey,
+                                                                        IDHPublicKeyPtr &outNewPublicKey
+                                                                        )
+      {
+        if (this) {}
+        return DHPrivateKey::loadAndGenerateNewEphemeral(keyDomain, staticPrivateKey, staticPublicKey, outNewPublicKey);
+      }
+
+      //-----------------------------------------------------------------------
+      DHPrivateKeyPtr IDHPrivateKeyFactory::loadAndGenerateNewEphemeral(
+                                                                        IDHPrivateKeyPtr templatePrivateKey,
+                                                                        IDHPublicKeyPtr templatePublicKey,
+                                                                        IDHPublicKeyPtr &outNewPublicKey
+                                                                        )
+      {
+        if (this) {}
+        return DHPrivateKey::loadAndGenerateNewEphemeral(templatePrivateKey, templatePublicKey, outNewPublicKey);
+      }
+
     }
 
     //-------------------------------------------------------------------------

@@ -198,6 +198,30 @@ namespace openpeer
         return resultEl;
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IDHPublicKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IDHPublicKeyFactory &IDHPublicKeyFactory::singleton()
+      {
+        return DHPublicKeyFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      DHPublicKeyPtr IDHPublicKeyFactory::load(
+                                               const SecureByteBlock &staticPublicKey,
+                                               const SecureByteBlock &ephemeralPublicKey
+                                               )
+      {
+        if (this) {}
+        return DHPublicKey::load(staticPublicKey, ephemeralPublicKey);
+      }
+
     }
 
     //-------------------------------------------------------------------------

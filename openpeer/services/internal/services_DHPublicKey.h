@@ -151,6 +151,8 @@ namespace openpeer
                                     const SecureByteBlock &ephemeralPublicKey
                                     );
       };
+
+      class DHPublicKeyFactory : public IFactory<IDHPublicKeyFactory> {};
       
     }
   }

@@ -32,7 +32,7 @@
 #pragma once
 
 #include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services.h>
+#include <openpeer/services/IDecryptor.h>
 
 namespace openpeer
 {
@@ -40,50 +40,51 @@ namespace openpeer
   {
     namespace internal
     {
+      struct DecryptorData;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Factory
+      #pragma mark Encryptor
       #pragma mark
 
-      class Factory : public IBackgroundingFactory,
-                      public IDHKeyDomainFactory,
-                      public IDHPrivateKeyFactory,
-                      public IDHPublicKeyFactory,
-                      public IDNSFactory,
-                      public IHTTPFactory,
-                      public IICESocketFactory,
-                      public IICESocketSessionFactory,
-                      public IMessageLayerSecurityChannelFactory,
-                      public IReachabilityFactory,
-                      public IRSAPrivateKeyFactory,
-                      public IRSAPublicKeyFactory,
-                      public IRUDPChannelFactory,
-                      public IRUDPChannelStreamFactory,
-                      public IRUDPTransportFactory,
-                      public IRUDPListenerFactory,
-                      public IRUDPMessagingFactory,
-                      public ISTUNDiscoveryFactory,
-                      public ISTUNRequesterFactory,
-                      public ISTUNRequesterManagerFactory,
-                      public ITCPMessagingFactory,
-                      public ITransportStreamFactory,
-                      public ITURNSocketFactory
+      class Decryptor : public IDecryptor
       {
+      protected:
+        Decryptor(
+                  const SecureByteBlock &key,
+                  const SecureByteBlock &iv,
+                  EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
+                  );
       public:
-        static void override(FactoryPtr override);
+        ~Decryptor();
 
-        static Factory &singleton();
+        static DecryptorPtr create(
+                                   const SecureByteBlock &key,
+                                   const SecureByteBlock &iv,
+                                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
+                                   );
+
+        virtual size_t getOptimalBlockSize() const;
+
+        virtual SecureByteBlockPtr decrypt(
+                                           const BYTE *inBuffer,
+                                           size_t inBufferSizeInBytes
+                                           );
+        virtual SecureByteBlockPtr decrypt(const SecureByteBlock &input);
+        virtual SecureByteBlockPtr finalize(bool *outWasSuccessful = NULL);
 
       protected:
+
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark Factory => (data)
+        #pragma mark (internal)
         #pragma mark
 
-        FactoryPtr mOverride;
+      protected:
+        DecryptorData *mData;
       };
     }
   }

@@ -180,6 +180,8 @@ namespace openpeer
                                     bool validate
                                     );
       };
+
+      class DHKeyDomainFactory : public IFactory<IDHKeyDomainFactory> {};
       
     }
   }

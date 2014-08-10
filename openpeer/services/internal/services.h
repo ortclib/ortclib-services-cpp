@@ -36,11 +36,13 @@
 #include <openpeer/services/internal/services_Backgrounding.h>
 #include <openpeer/services/internal/services_Cache.h>
 #include <openpeer/services/internal/services_CanonicalXML.h>
+#include <openpeer/services/internal/services_Decryptor.h>
 #include <openpeer/services/internal/services_DHKeyDomain.h>
 #include <openpeer/services/internal/services_DHPrivateKey.h>
 #include <openpeer/services/internal/services_DHPublicKey.h>
 #include <openpeer/services/internal/services_DNS.h>
 #include <openpeer/services/internal/services_DNSMonitor.h>
+#include <openpeer/services/internal/services_Encryptor.h>
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/internal/services_ICESocket.h>

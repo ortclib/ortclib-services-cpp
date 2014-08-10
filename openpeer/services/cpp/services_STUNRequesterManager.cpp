@@ -268,6 +268,28 @@ namespace openpeer
       {
         return Log::Params(message, "services::STUNRequesterManager");
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ISTUNRequesterManagerFactory
+      #pragma mark
+      
+      //-----------------------------------------------------------------------
+      ISTUNRequesterManagerFactory &ISTUNRequesterManagerFactory::singleton()
+      {
+        return STUNRequesterManagerFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      STUNRequesterManagerPtr ISTUNRequesterManagerFactory::createSTUNRequesterManager()
+      {
+        if (this) {}
+        return STUNRequesterManager::create();
+      }
+
     }
 
     //-------------------------------------------------------------------------

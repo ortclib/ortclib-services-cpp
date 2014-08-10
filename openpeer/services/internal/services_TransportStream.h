@@ -287,7 +287,8 @@ namespace openpeer
                                           ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
                                           );
       };
-      
+
+      class TransportStreamFactory : public IFactory<ITransportStreamFactory> {};
     }
   }
 }

@@ -2505,6 +2505,36 @@ namespace openpeer
 
         mTURNSockets.erase(found);
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IICESocketFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IICESocketFactory &IICESocketFactory::singleton()
+      {
+        return ICESocketFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocketPtr IICESocketFactory::create(
+                                             IMessageQueuePtr queue,
+                                             IICESocketDelegatePtr delegate,
+                                             const IICESocket::TURNServerInfoList &turnServers,
+                                             const IICESocket::STUNServerInfoList &stunServers,
+                                             WORD port,
+                                             bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
+                                             IICESocketPtr foundationSocket
+                                             )
+      {
+        if (this) {}
+        return internal::ICESocket::create(queue, delegate, turnServers, stunServers, port, firstWORDInAnyPacketWillNotConflictWithTURNChannels, foundationSocket);
+      }
+
     }
 
     //-------------------------------------------------------------------------

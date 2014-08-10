@@ -132,6 +132,8 @@ namespace openpeer
                                        SRVLookupTypes lookupType
                                        );
       };
+
+      class DNSFactory : public IFactory<IDNSFactory> {};
       
     }
   }

@@ -75,6 +75,7 @@ namespace openpeer
     using zsLib::RecursiveLock;
     using zsLib::AutoLock;
     using zsLib::Log;
+    using zsLib::Singleton;
 
     typedef zsLib::ThreadPriorities ThreadPriorities;
 
@@ -138,8 +139,11 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PTR(IDHKeyDomain)
     ZS_DECLARE_INTERACTION_PTR(IDHPrivateKey)
     ZS_DECLARE_INTERACTION_PTR(IDHPublicKey)
+    ZS_DECLARE_INTERACTION_PTR(IDecryptor)
     ZS_DECLARE_INTERACTION_PTR(IDNS)
     ZS_DECLARE_INTERACTION_PTR(IDNSQuery)
+    ZS_DECLARE_INTERACTION_PTR(IEncryptor)
+    ZS_DECLARE_INTERACTION_PTR(IHelper)
     ZS_DECLARE_INTERACTION_PTR(IICESocket)
     ZS_DECLARE_INTERACTION_PTR(IICESocketSession)
     ZS_DECLARE_INTERACTION_PTR(IHTTP)

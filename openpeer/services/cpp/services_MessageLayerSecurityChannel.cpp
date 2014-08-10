@@ -1836,6 +1836,34 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "last integrity", mLastIntegrity ? IHelper::convertToHex(*mLastIntegrity) : String());
         return resultEl;
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IMessageLayerSecurityChannelFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IMessageLayerSecurityChannelFactory &IMessageLayerSecurityChannelFactory::singleton()
+      {
+        return MessageLayerSecurityChannelFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      MessageLayerSecurityChannelPtr IMessageLayerSecurityChannelFactory::create(
+                                                                                 IMessageLayerSecurityChannelDelegatePtr delegate,
+                                                                                 ITransportStreamPtr receiveStreamEncoded,
+                                                                                 ITransportStreamPtr receiveStreamDecoded,
+                                                                                 ITransportStreamPtr sendStreamDecoded,
+                                                                                 ITransportStreamPtr sendStreamEncoded,
+                                                                                 const char *contextID
+                                                                                 )
+      {
+        if (this) {}
+        return MessageLayerSecurityChannel::create(delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID);
+      }
     }
 
     //-----------------------------------------------------------------------

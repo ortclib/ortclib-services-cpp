@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/IReachability.h>
 #include <openpeer/services/internal/types.h>
+#include <openpeer/services/IEncryptor.h>
 
 namespace openpeer
 {
@@ -40,90 +40,52 @@ namespace openpeer
   {
     namespace internal
     {
+      struct EncryptorData;
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Reachability
+      #pragma mark Encryptor
       #pragma mark
 
-      class Reachability : public MessageQueueAssociator,
-                           public SharedRecursiveLock,
-                           public IReachability
+      class Encryptor : public IEncryptor
       {
+      protected:
+        Encryptor(
+                  const SecureByteBlock &key,
+                  const SecureByteBlock &iv,
+                  EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
+                  );
       public:
-        friend interaction IReachabilityFactory;
-        friend interaction IReachability;
+        ~Encryptor();
+
+        static EncryptorPtr create(
+                                   const SecureByteBlock &key,
+                                   const SecureByteBlock &iv,
+                                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
+                                   );
+
+        virtual size_t getOptimalBlockSize() const;
+
+        virtual SecureByteBlockPtr encrypt(
+                                           const BYTE *inBuffer,
+                                           size_t inBufferSizeInBytes
+                                           );
+        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &input);
+        virtual SecureByteBlockPtr finalize();
 
       protected:
-        Reachability();
 
-        static ReachabilityPtr create();
-
-      public:
-        ~Reachability();
-
-      public:
-        static ReachabilityPtr convert(IReachabilityPtr backgrounding);
-
-        static ReachabilityPtr singleton();
-
-      protected:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark Reachability => IReachability
+        #pragma mark (internal)
         #pragma mark
-
-        static ElementPtr toDebug(ReachabilityPtr backgrounding);
-
-        virtual IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate);
-
-        virtual void notifyReachability(InterfaceTypes interfaceTypes);
 
       protected:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Reachability => (internal)
-        #pragma mark
-
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
-        Log::Params debug(const char *message) const;
-
-        virtual ElementPtr toDebug() const;
-
-      protected:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Reachability => (data)
-        #pragma mark
-
-        AutoPUID mID;
-        ReachabilityWeakPtr mThisWeak;
-
-        IReachabilityDelegateSubscriptions mSubscriptions;
-
-        InterfaceTypes mLastState;
+        EncryptorData *mData;
       };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IReachabilityFactory
-      #pragma mark
-
-      interaction IReachabilityFactory
-      {
-        static IReachabilityFactory &singleton();
-
-        virtual ReachabilityPtr createForReachability();
-      };
-
-      class ReachabilityFactory : public IFactory<IReachabilityFactory> {};
-
     }
   }
 }

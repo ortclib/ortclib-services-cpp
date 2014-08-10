@@ -262,6 +262,8 @@ namespace openpeer
                                         size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                         );
       };
+
+      class TCPMessagingFactory : public IFactory<ITCPMessagingFactory> {};
       
     }
   }

@@ -164,6 +164,8 @@ namespace openpeer
 
         virtual RSAPublicKeyPtr loadPublicKey(const SecureByteBlock &buffer);
       };
+
+      class RSAPublicKeyFactory : public IFactory<IRSAPublicKeyFactory> {};
     }
   }
 }

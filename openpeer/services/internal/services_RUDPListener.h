@@ -270,6 +270,7 @@ namespace openpeer
                                        );
       };
 
+      class RUDPListenerFactory : public IFactory<IRUDPListenerFactory> {};
     }
   }
 }

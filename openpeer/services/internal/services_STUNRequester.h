@@ -212,6 +212,8 @@ namespace openpeer
                                         );
       };
 
+      class STUNRequesterFactory : public IFactory<ISTUNRequesterFactory> {};
+
     }
   }
 }

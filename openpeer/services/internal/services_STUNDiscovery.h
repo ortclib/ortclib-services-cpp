@@ -191,6 +191,8 @@ namespace openpeer
                                         );
 
       };
+
+      class STUNDiscoveryFactory : public IFactory<ISTUNDiscoveryFactory> {};
       
     }
   }

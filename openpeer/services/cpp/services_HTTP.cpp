@@ -1224,6 +1224,48 @@ namespace openpeer
 
         return 0;
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IHTTPFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IHTTPFactory &IHTTPFactory::singleton()
+      {
+        return HTTPFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      IHTTPQueryPtr IHTTPFactory::get(
+                                      IHTTPQueryDelegatePtr delegate,
+                                      const char *userAgent,
+                                      const char *url,
+                                      Duration timeout
+                                      )
+      {
+        if (this) {}
+        return HTTP::get(delegate, userAgent, url, timeout);
+      }
+
+      //-----------------------------------------------------------------------
+      IHTTPQueryPtr IHTTPFactory::post(
+                                       IHTTPQueryDelegatePtr delegate,
+                                       const char *userAgent,
+                                       const char *url,
+                                       const BYTE *postData,
+                                       size_t postDataLengthInBytes,
+                                       const char *postDataMimeType,
+                                       Duration timeout
+                                       )
+      {
+        if (this) {}
+        return HTTP::post(delegate, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);
+      }
+
     }
 
     //-------------------------------------------------------------------------

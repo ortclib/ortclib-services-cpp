@@ -341,7 +341,8 @@ namespace openpeer
                                                       const char *contextID = NULL
                                                       );
       };
-      
+
+      class MessageLayerSecurityChannelFactory : public IFactory<IMessageLayerSecurityChannelFactory> {};
     }
   }
 }

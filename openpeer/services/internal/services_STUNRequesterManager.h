@@ -168,6 +168,8 @@ namespace openpeer
         virtual STUNRequesterManagerPtr createSTUNRequesterManager();
       };
 
+      class STUNRequesterManagerFactory : public IFactory<ISTUNRequesterManagerFactory> {};
+
     }
   }
 }

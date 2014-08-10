@@ -163,6 +163,8 @@ namespace openpeer
 
         virtual RSAPrivateKeyPtr loadPrivateKey(const SecureByteBlock &buffer);
       };
+
+      class RSAPrivateKeyFactory : public IFactory<IRSAPrivateKeyFactory> {};
       
     }
   }

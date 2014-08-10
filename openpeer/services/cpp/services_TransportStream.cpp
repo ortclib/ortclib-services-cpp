@@ -984,6 +984,30 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ITransportStreamFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      ITransportStreamFactory &ITransportStreamFactory::singleton()
+      {
+        return TransportStreamFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      TransportStreamPtr ITransportStreamFactory::create(
+                                                         ITransportStreamWriterDelegatePtr writerDelegate,
+                                                         ITransportStreamReaderDelegatePtr readerDelegate
+                                                         )
+      {
+        if (this) {}
+        return internal::TransportStream::create(writerDelegate, readerDelegate);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
     }
     
     //-----------------------------------------------------------------------

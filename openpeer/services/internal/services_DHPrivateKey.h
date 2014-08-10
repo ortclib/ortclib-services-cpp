@@ -193,6 +193,8 @@ namespace openpeer
                                                             IDHPublicKeyPtr &outNewPublicKey
                                                             );
       };
+
+      class DHPrivateKeyFactory : public IFactory<IDHPrivateKeyFactory> {};
       
     }
   }

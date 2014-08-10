@@ -2149,6 +2149,35 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRUDPChannelStreamFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRUDPChannelStreamFactory &IRUDPChannelStreamFactory::singleton()
+      {
+        return RUDPChannelStreamFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPChannelStreamPtr IRUDPChannelStreamFactory::create(
+                                                             IMessageQueuePtr queue,
+                                                             IRUDPChannelStreamDelegatePtr delegate,
+                                                             QWORD nextSequenceNumberToUseForSending,
+                                                             QWORD nextSequenberNumberExpectingToReceive,
+                                                             WORD sendingChannelNumber,
+                                                             WORD receivingChannelNumber,
+                                                             DWORD minimumNegotiatedRTTInMilliseconds
+                                                             )
+      {
+        if (this) {}
+        return RUDPChannelStream::create(queue, delegate, nextSequenceNumberToUseForSending, nextSequenberNumberExpectingToReceive, sendingChannelNumber, receivingChannelNumber, minimumNegotiatedRTTInMilliseconds);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
 
     }
   }

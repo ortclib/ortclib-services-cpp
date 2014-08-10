@@ -553,6 +553,8 @@ namespace openpeer
                                      WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
                                      );
       };
+
+      class TURNSocketFactory : public IFactory<ITURNSocketFactory> {};
       
     }
   }

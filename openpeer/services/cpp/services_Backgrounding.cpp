@@ -774,6 +774,28 @@ namespace openpeer
 
         return outer->totalPending(mBackgroundingID);
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IBackgroundingFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IBackgroundingFactory &IBackgroundingFactory::singleton()
+      {
+        return BackgroundingFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      BackgroundingPtr IBackgroundingFactory::createForBackgrounding()
+      {
+        if (this) {}
+        return Backgrounding::create();
+      }
+
     }
 
     //-------------------------------------------------------------------------

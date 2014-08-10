@@ -851,6 +851,32 @@ namespace openpeer
           }
         }
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRUDPTransportFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRUDPTransportFactory &IRUDPTransportFactory::singleton()
+      {
+        return RUDPTransportFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPTransportPtr IRUDPTransportFactory::listen(
+                                                            IMessageQueuePtr queue,
+                                                            IICESocketSessionPtr iceSession,
+                                                            IRUDPTransportDelegatePtr delegate
+                                                            )
+      {
+        if (this) {}
+        return RUDPTransport::listen(queue, iceSession, delegate);
+      }
+
     }
     
     //-------------------------------------------------------------------------

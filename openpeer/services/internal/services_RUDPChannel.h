@@ -564,6 +564,8 @@ namespace openpeer
                                                  );
       };
 
+      class RUDPChannelFactory : public IFactory<IRUDPChannelFactory> {};
+
     }
   }
 }

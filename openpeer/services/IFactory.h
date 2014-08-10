@@ -32,38 +32,47 @@
 #pragma once
 
 #include <openpeer/services/types.h>
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/ICache.h>
-#include <openpeer/services/ICanonicalXML.h>
-#include <openpeer/services/IDecryptor.h>
-#include <openpeer/services/IDHKeyDomain.h>
-#include <openpeer/services/IDHPrivateKey.h>
-#include <openpeer/services/IDHPublicKey.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/IEncryptor.h>
-#include <openpeer/services/IHelper.h>
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/IICESocket.h>
-#include <openpeer/services/IICESocketSession.h>
-#include <openpeer/services/ILogger.h>
-#include <openpeer/services/IMessageLayerSecurityChannel.h>
-#include <openpeer/services/IMessageQueueManager.h>
-#include <openpeer/services/IReachability.h>
-#include <openpeer/services/IRSAPrivateKey.h>
-#include <openpeer/services/IRSAPublicKey.h>
-#include <openpeer/services/IRUDPChannel.h>
-#include <openpeer/services/IRUDPListener.h>
-#include <openpeer/services/IRUDPMessaging.h>
-#include <openpeer/services/IRUDPTransport.h>
-#include <openpeer/services/ISettings.h>
-#include <openpeer/services/ISTUNDiscovery.h>
-#include <openpeer/services/ISTUNRequester.h>
-#include <openpeer/services/ISTUNRequesterManager.h>
-#include <openpeer/services/ITCPMessaging.h>
-#include <openpeer/services/ITransportStream.h>
-#include <openpeer/services/ITURNSocket.h>
-#include <openpeer/services/IWakeDelegate.h>
-#include <openpeer/services/STUNPacket.h>
-#include <openpeer/services/RUDPPacket.h>
-#include <openpeer/services/RUDPProtocol.h>
-#include <openpeer/services/RUDPProtocol.h>
+
+namespace openpeer
+{
+  namespace services
+  {
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
+    #pragma mark IFactory<XFACTORYINTERFACE>
+    #pragma mark
+
+    template<typename XFACTORYINTERFACE>
+    interaction IFactory : public XFACTORYINTERFACE
+    {
+    public:
+      ZS_DECLARE_TYPEDEF_PTR(XFACTORYINTERFACE, UseFactoryInterface)
+      ZS_DECLARE_TYPEDEF_PTR(IFactory, UseFactory)
+
+    public:
+      static void override(UseFactoryInterfacePtr override)
+      {
+        singletonFactory().mOverride = override;
+      }
+
+      static UseFactoryInterface &singleton()
+      {
+        UseFactory &factory = singletonFactory();
+        if (factory.mOverride) return (*factory.mOverride);
+        return factory;
+      }
+
+    private:
+      static UseFactory &singletonFactory()
+      {
+        static Singleton<UseFactory, false> factory;
+        return factory.singleton();
+      }
+
+      UseFactoryInterfacePtr mOverride;
+    };
+  }
+}

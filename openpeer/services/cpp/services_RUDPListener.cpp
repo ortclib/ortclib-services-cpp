@@ -891,6 +891,33 @@ namespace openpeer
           return true;
         return false;
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRUDPListenerFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRUDPListenerFactory &IRUDPListenerFactory::singleton()
+      {
+        return RUDPListenerFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPListenerPtr IRUDPListenerFactory::create(
+                                                   IMessageQueuePtr queue,
+                                                   IRUDPListenerDelegatePtr delegate,
+                                                   WORD port,
+                                                   const char *realm
+                                                   )
+      {
+        if (this) {}
+        return RUDPListener::create(queue, delegate, port, realm);
+      }
+
     }
 
     //-------------------------------------------------------------------------

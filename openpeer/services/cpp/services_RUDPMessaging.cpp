@@ -599,6 +599,63 @@ namespace openpeer
         return mChannel;
       }
 
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRUDPMessagingFactory
+      #pragma mark
+
+      //-------------------------------------------------------------------------
+      IRUDPMessagingFactory &IRUDPMessagingFactory::singleton()
+      {
+        return RUDPMessagingFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPMessagingPtr IRUDPMessagingFactory::acceptChannel(
+                                                            IMessageQueuePtr queue,
+                                                            IRUDPListenerPtr listener,
+                                                            IRUDPMessagingDelegatePtr delegate,
+                                                            ITransportStreamPtr receiveStream,
+                                                            ITransportStreamPtr sendStream,
+                                                            size_t maxMessageSizeInBytes
+                                                            )
+      {
+        if (this) {}
+        return RUDPMessaging::acceptChannel(queue, listener, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPMessagingPtr IRUDPMessagingFactory::acceptChannel(
+                                                            IMessageQueuePtr queue,
+                                                            IRUDPTransportPtr session,
+                                                            IRUDPMessagingDelegatePtr delegate,
+                                                            ITransportStreamPtr receiveStream,
+                                                            ITransportStreamPtr sendStream,
+                                                            size_t maxMessageSizeInBytes
+                                                            )
+      {
+        if (this) {}
+        return RUDPMessaging::acceptChannel(queue, session, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
+      }
+
+      //-----------------------------------------------------------------------
+      RUDPMessagingPtr IRUDPMessagingFactory::openChannel(
+                                                          IMessageQueuePtr queue,
+                                                          IRUDPTransportPtr session,
+                                                          IRUDPMessagingDelegatePtr delegate,
+                                                          const char *connectionInfo,
+                                                          ITransportStreamPtr receiveStream,
+                                                          ITransportStreamPtr sendStream,
+                                                          size_t maxMessageSizeInBytes
+                                                          )
+      {
+        if (this) {}
+        return RUDPMessaging::openChannel(queue, session, delegate, connectionInfo, receiveStream, sendStream, maxMessageSizeInBytes);
+      }
+
     }
 
     //-------------------------------------------------------------------------

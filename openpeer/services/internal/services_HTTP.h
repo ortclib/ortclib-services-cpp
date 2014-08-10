@@ -344,7 +344,8 @@ namespace openpeer
                                    Duration timeout
                                    );
       };
-      
+
+      class HTTPFactory : public IFactory<IHTTPFactory> {};
     }
   }
 }

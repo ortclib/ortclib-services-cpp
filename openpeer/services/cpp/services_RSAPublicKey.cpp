@@ -58,8 +58,8 @@ namespace openpeer
       typedef CryptoPP::AutoSeededRandomPool AutoSeededRandomPool;
       typedef CryptoPP::RSASSA_PKCS1v15_SHA_Verifier Verifier;
 
-      typedef CryptoPP::RSAES_OAEP_SHA_Decryptor Decryptor;
-      typedef CryptoPP::RSAES_OAEP_SHA_Encryptor Encryptor;
+      typedef CryptoPP::RSAES_OAEP_SHA_Decryptor RsaDecryptor;
+      typedef CryptoPP::RSAES_OAEP_SHA_Encryptor RsaEncryptor;
 
       using CryptoPP::PK_EncryptorFilter;
 
@@ -262,7 +262,7 @@ namespace openpeer
       SecureByteBlockPtr RSAPublicKey::encrypt(const SecureByteBlock &buffer) const
       {
         AutoSeededRandomPool rng;
-        Encryptor encryptor(mPublicKey);
+        RsaEncryptor encryptor(mPublicKey);
 
         SecureByteBlockPtr output(new SecureByteBlock);
 
@@ -343,6 +343,28 @@ namespace openpeer
         }
         return true;
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IRSAPublicKeyFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      IRSAPublicKeyFactory &IRSAPublicKeyFactory::singleton()
+      {
+        return RSAPublicKeyFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      RSAPublicKeyPtr IRSAPublicKeyFactory::loadPublicKey(const SecureByteBlock &buffer)
+      {
+        if (this) {}
+        return RSAPublicKey::load(buffer);
+      }
+
     }
 
     //-------------------------------------------------------------------------

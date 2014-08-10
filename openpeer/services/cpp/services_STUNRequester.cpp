@@ -403,6 +403,35 @@ namespace openpeer
 
         // nothing more to do... sit back, relax and enjoy the ride!
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ISTUNRequesterFactory
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      ISTUNRequesterFactory &ISTUNRequesterFactory::singleton()
+      {
+        return STUNRequesterFactory::singleton();
+      }
+
+      //-----------------------------------------------------------------------
+      STUNRequesterPtr ISTUNRequesterFactory::create(
+                                                     IMessageQueuePtr queue,
+                                                     ISTUNRequesterDelegatePtr delegate,
+                                                     IPAddress serverIP,
+                                                     STUNPacketPtr stun,
+                                                     STUNPacket::RFCs usingRFC,
+                                                     Duration maxTimeout
+                                                     )
+      {
+        if (this) {}
+        return STUNRequester::create(queue, delegate, serverIP, stun, usingRFC, maxTimeout);
+      }
+
     }
 
     //-------------------------------------------------------------------------
