@@ -38,7 +38,8 @@ openpeer/services/cpp/services_DHPrivateKey.cpp \
 openpeer/services/cpp/services_DHPublicKey.cpp \
 openpeer/services/cpp/services_DNS.cpp \
 openpeer/services/cpp/services_DNSMonitor.cpp \
-openpeer/services/cpp/services_Factory.cpp \
+openpeer/services/cpp/services_Decryptor.cpp \
+openpeer/services/cpp/services_Encryptor.cpp \
 openpeer/services/cpp/services_HTTP.cpp \
 openpeer/services/cpp/services_Helper.cpp \
 openpeer/services/cpp/ifaddrs-android.cc \
