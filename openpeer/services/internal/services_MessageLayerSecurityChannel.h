@@ -37,10 +37,16 @@
 #include <openpeer/services/ITransportStream.h>
 #include <openpeer/services/IWakeDelegate.h>
 
+#include <zsLib/Timer.h>
+
 #include <list>
 #include <map>
 
+#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_SIGNATURE_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
+
 #define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
+
+#define OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER "openpeer/services/mls-change-sending-key-after-in-seconds"
 
 namespace openpeer
 {
@@ -58,8 +64,10 @@ namespace openpeer
 
       class MessageLayerSecurityChannel : public Noop,
                                           public zsLib::MessageQueueAssociator,
+                                          public SharedRecursiveLock,
                                           public IMessageLayerSecurityChannel,
                                           public IWakeDelegate,
+                                          public zsLib::ITimerDelegate,
                                           public ITransportStreamReaderDelegate,
                                           public ITransportStreamWriterDelegate
       {
@@ -69,16 +77,6 @@ namespace openpeer
 
         typedef ITransportStream::StreamHeaderPtr StreamHeaderPtr;
         typedef std::list<SecureByteBlockPtr> BufferList;
-
-        enum DecodingTypes
-        {
-          DecodingType_Unknown,
-          DecodingType_PrivateKey,
-          DecodingType_Agreement,
-          DecodingType_Passphrase,
-        };
-
-        static const char *toString(DecodingTypes decodingType);
 
         typedef ULONG AlgorithmIndex;
 
@@ -94,6 +92,9 @@ namespace openpeer
         };
         
         typedef std::map<AlgorithmIndex, KeyInfo> KeyMap;
+        typedef std::pair<IDHPrivateKeyPtr, IDHPublicKeyPtr> DHPrivatePublicKeyPair;
+
+        typedef std::list<DHPrivatePublicKeyPair> DHKeyList;
 
       protected:
         MessageLayerSecurityChannel(
@@ -108,7 +109,8 @@ namespace openpeer
 
         MessageLayerSecurityChannel(Noop) :
           Noop(true),
-          zsLib::MessageQueueAssociator(IMessageQueuePtr()) {}
+          zsLib::MessageQueueAssociator(IMessageQueuePtr()),
+          SharedRecursiveLock(SharedRecursiveLock::create()) {}
 
         void init();
 
@@ -146,63 +148,47 @@ namespace openpeer
                                        ) const;
 
         virtual bool needsLocalContextID() const;
-
-        virtual bool needsReceiveKeyingDecodingPrivateKey(
-                                                          String *outFingerprint = NULL
-                                                          ) const;
-
-        virtual bool needsReceiveKeyingDecodingPassphrase() const;
-
-        virtual bool needsReceiveKeyingMaterialSigningPublicKey() const;
-
-        virtual bool needsSendKeyingEncodingMaterial() const;
-
-        virtual bool needsSendKeyingMaterialToeBeSigned() const;
+        virtual bool needsReceiveKeying(KeyingTypes *outDecodingType = NULL) const;
+        virtual bool needsSendKeying(KeyingTypes *outEncodingType = NULL) const;
+        virtual bool needsReceiveKeyingSigningPublicKey() const;
+        virtual bool needsSendKeyingToeBeSigned() const;
 
         virtual String getLocalContextID() const;
-
+        virtual String getRemoteContextID() const;
         virtual void setLocalContextID(const char *contextID);
 
-        virtual String getRemoteContextID() const;
+        virtual void setReceiveKeying(const char *passphrase);
+        virtual void setSendKeying(const char *passphrase);
 
-        virtual IDHKeyDomainPtr getDHRemoteKeyDomain() const;
+        virtual String getReceivePublicKeyFingerprint() const;
+        virtual void setReceiveKeying(
+                                      IRSAPrivateKeyPtr localPrivateKey,
+                                      IRSAPublicKeyPtr localPublicKey
+                                      );
+        virtual void setSendKeying(IRSAPublicKeyPtr remotePublicKey);
 
-        virtual IDHPublicKeyPtr getDHRemotePublicKey() const;
+        virtual IDHKeyDomainPtr getKeyAgreementDomain() const;
+        virtual String getRemoteKeyAgreementFingerprint() const;
+        virtual void setLocalKeyAgreement(
+                                          IDHPrivateKeyPtr localPrivateKey,
+                                          IDHPublicKeyPtr localPublicKey,
+                                          bool remoteSideAlreadyKnowsThisPublicKey
+                                          );
+        virtual void setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey);
+        virtual IDHPublicKeyPtr getOriginalRemoteKeyAgreement();
 
-        virtual void setReceiveKeyingDecoding(
-                                              IRSAPrivateKeyPtr decodingPrivateKey,
-                                              IRSAPublicKeyPtr decodingPublicKey
-                                              );
+        virtual ElementPtr getSignedReceiveKeying() const;
+        virtual void setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey);
 
-        virtual void setReceiveKeyingDecoding(
-                                              IDHPrivateKeyPtr localPrivateKey,
-                                              IDHPublicKeyPtr localPublicKey,
-                                              IDHPublicKeyPtr remotePublicKey = IDHPublicKeyPtr()
-                                              );
+        virtual void getSendKeyingNeedingToBeSigned(
+                                                    DocumentPtr &outDocumentContainedElementToSign,
+                                                    ElementPtr &outElementToSign
+                                                    ) const;
+        virtual void notifySendKeyingSigned(
+                                            IRSAPrivateKeyPtr signingKey,
+                                            IRSAPublicKeyPtr signingPublicKey
+                                            );
 
-        virtual void setReceiveKeyingDecoding(const char *passphrase);
-
-        virtual ElementPtr getSignedReceivingKeyingMaterial() const;
-
-        virtual void setReceiveKeyingMaterialSigningPublicKey(IRSAPublicKeyPtr remotePublicKey);
-
-        virtual void setSendKeyingEncoding(IRSAPublicKeyPtr remotePublicKey);
-
-        virtual void setSendKeyingEncoding(
-                                           IDHPrivateKeyPtr localPrivateKey,
-                                           IDHPublicKeyPtr remotePublicKey,
-                                           IDHPublicKeyPtr includeFullLocalPublicKey = IDHPublicKeyPtr()
-                                           );
-
-        virtual void setSendKeyingEncoding(const char *passphrase);
-
-        virtual void getSendKeyingMaterialNeedingToBeSigned(
-                                                            DocumentPtr &outDocumentContainedElementToSign,
-                                                            ElementPtr &outElementToSign
-                                                            ) const;
-
-        virtual void notifySendKeyingMaterialSigned();
-        
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark MessageLayerSecurityChannel => ITransportStreamReaderDelegate
@@ -224,6 +210,13 @@ namespace openpeer
 
         virtual void onWake();
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageLayerSecurityChannel => ITimerDelegate
+        #pragma mark
+
+        virtual void onTimer(TimerPtr timer);
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -232,7 +225,6 @@ namespace openpeer
 
         bool isShutdown() const {return SessionState_Shutdown == mCurrentState;}
 
-        RecursiveLock &getLock() const;
         Log::Params log(const char *message) const;
         Log::Params debug(const char *message) const;
 
@@ -260,47 +252,63 @@ namespace openpeer
         #pragma mark MessageLayerSecurityChannel => (data)
         #pragma mark
 
-        PUID mID;
-        mutable RecursiveLock mLock;
         MessageLayerSecurityChannelWeakPtr mThisWeak;
+
+        AutoPUID mID;
 
         IMessageLayerSecurityChannelDelegateSubscriptions mSubscriptions;
         IMessageLayerSecurityChannelSubscriptionPtr mDefaultSubscription;
 
         SessionStates mCurrentState;
 
-        WORD mLastError;
+        AutoWORD mLastError;
         String mLastErrorReason;
 
         String mLocalContextID;
         String mRemoteContextID;
 
-        IRSAPublicKeyPtr mSendingEncodingRemotePublicKey;
-        String mSendingEncodingPassphrase;
+        // types of keying in use
+        KeyingTypes mReceiveKeyingType;
+        KeyingTypes mSendKeyingType;
+
+        // passphrase based receiving/sending
+        String mReceivePassphrase;
+        String mSendPassphrase;
+
+        // diffie hellman based receiving/sending
+        IDHKeyDomainPtr mDHKeyDomain;
 
         IDHPrivateKeyPtr mDHLocalPrivateKey;
         IDHPublicKeyPtr mDHLocalPublicKey;
+        AutoBool mDHRemoteSideKnowsLocalPublicKey;
+        AutoBool mDHSentRemoteSideLocalPublicKey;   // used before remote keying material is obtained to determine if the local public key was sent to the remote party
 
-        IDHKeyDomainPtr mDHRemoteKeyDomain;
         IDHPublicKeyPtr mDHRemotePublicKey;
-        IDHPublicKeyPtr mDHEncodingFullLocalPublicKey;
+        IDHPublicKeyPtr mDHOriginalRemotePublicKey;
+        String mDHRemotePublicKeyFingerprint;
 
-        SecureByteBlockPtr mDHAgreedKey;
+        DHKeyList mDHPreviousLocalKeys;             // keep around the previous keying material during a key changes (until a received keying refers to the latest DH keying material)
 
-        DocumentPtr mSendKeyingNeedingToSignDoc;  // temporary document containing the send keying material needing to be signed
-        ElementPtr mSendKeyingNeedToSignEl;       // temporary element containing the send keying material needing to be signed (once notified it is signed, this element get set to EleemntPtr())
+        // RSA based keying
+        IRSAPrivateKeyPtr mReceiveLocalPrivateKey;
+        IRSAPublicKeyPtr mReceiveLocalPublicKey;
+        String mReceiveLocalPublicKeyFingerprint;
+
+        IRSAPublicKeyPtr mSendRemotePublicKey;
+
+        // signing
+        IRSAPublicKeyPtr mReceiveSigningPublicKey;
+        DocumentPtr mReceiveKeyingSignedDoc;        // temporary document needed to resolve receive signing public key
+        ElementPtr mReceiveKeyingSignedEl;          // temporary eleemnt needed to resolve receive signing public key
+
+        IRSAPrivateKeyPtr mSendSigningPrivateKey;
+        IRSAPublicKeyPtr mSendSigningPublicKey;
+        DocumentPtr mSendKeyingNeedingToSignDoc;    // temporary document containing the send keying material needing to be signed
+        ElementPtr mSendKeyingNeedToSignEl;         // temporary element containing the send keying material needing to be signed (once notified it is signed, this element get set to EleemntPtr())
+
 
         ULONG mNextReceiveSequenceNumber;
-
-        DecodingTypes mReceiveDecodingType;
-        String mReceiveDecodingPublicKeyFingerprint;
-        IRSAPrivateKeyPtr mReceiveDecodingPrivateKey;
-        IRSAPublicKeyPtr mReceiveDecodingPublicKey;
-        String mReceivingDecodingPassphrase;
-
-        IRSAPublicKeyPtr mReceiveSigningPublicKey;
-        DocumentPtr mReceiveKeyingSignedDoc;      // temporary document needed to resolve receive signing public key
-        ElementPtr mReceiveKeyingSignedEl;        // temporary eleemnt needed to resolve receive signing public key
+        ULONG mNextSendSequenceNumber;
 
         ITransportStreamReaderPtr mReceiveStreamEncoded;  // typically connected to incoming on-the-wire transport
         ITransportStreamWriterPtr mReceiveStreamDecoded;  // typically connected to "outer" layer for "outer" to receive decoded on-the-wire data
@@ -318,6 +326,9 @@ namespace openpeer
 
         KeyMap mReceiveKeys;
         KeyMap mSendKeys;
+
+        AutoBool mChangeKey;
+        TimerPtr mChangeSendingKeyTimer;
       };
 
       //-----------------------------------------------------------------------

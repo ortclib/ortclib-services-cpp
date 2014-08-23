@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		000CC03717A475F90075E86C /* services_Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC03617A475F90075E86C /* services_Logger.cpp */; };
 		001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 001AEF591853DE9300029ABC /* services_Cache.cpp */; };
+		002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4819A915B500F360CE /* services_Decryptor.cpp */; };
+		002FCF4B19A915B500F360CE /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4919A915B500F360CE /* services_Encryptor.cpp */; };
 		003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD317A607190002EB47 /* services_MessageLayerSecurityChannel.cpp */; };
 		003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */; };
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
@@ -22,7 +24,6 @@
 		0095DACC16CA83EB005F53D3 /* services_CanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */; };
 		0095DACD16CA83EB005F53D3 /* services_DNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91E16CA83EA005F53D3 /* services_DNS.cpp */; };
 		0095DACE16CA83EB005F53D3 /* services_DNSMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D91F16CA83EA005F53D3 /* services_DNSMonitor.cpp */; };
-		0095DACF16CA83EB005F53D3 /* services_Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92016CA83EA005F53D3 /* services_Factory.cpp */; };
 		0095DAD016CA83EB005F53D3 /* services_Helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92116CA83EA005F53D3 /* services_Helper.cpp */; };
 		0095DAD116CA83EB005F53D3 /* services_HTTP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92216CA83EA005F53D3 /* services_HTTP.cpp */; };
 		0095DAD216CA83EB005F53D3 /* services_ICESocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0095D92316CA83EA005F53D3 /* services_ICESocket.cpp */; };
@@ -51,6 +52,13 @@
 		001AEF571853DDDD00029ABC /* ICache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICache.h; sourceTree = "<group>"; };
 		001AEF581853DE6600029ABC /* services_Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Cache.h; sourceTree = "<group>"; };
 		001AEF591853DE9300029ABC /* services_Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Cache.cpp; sourceTree = "<group>"; };
+		002FCF4319A9158400F360CE /* IDecryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDecryptor.h; sourceTree = "<group>"; };
+		002FCF4419A9158400F360CE /* IEncryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IEncryptor.h; sourceTree = "<group>"; };
+		002FCF4519A9158400F360CE /* IFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IFactory.h; sourceTree = "<group>"; };
+		002FCF4619A9159E00F360CE /* services_Decryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Decryptor.h; sourceTree = "<group>"; };
+		002FCF4719A9159E00F360CE /* services_Encryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Encryptor.h; sourceTree = "<group>"; };
+		002FCF4819A915B500F360CE /* services_Decryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Decryptor.cpp; sourceTree = "<group>"; };
+		002FCF4919A915B500F360CE /* services_Encryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Encryptor.cpp; sourceTree = "<group>"; };
 		003BEDCD17A606E80002EB47 /* IMessageLayerSecurityChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageLayerSecurityChannel.h; sourceTree = "<group>"; };
 		003BEDCE17A606E80002EB47 /* IRSAPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPrivateKey.h; sourceTree = "<group>"; };
 		003BEDCF17A606E80002EB47 /* IRSAPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPublicKey.h; sourceTree = "<group>"; };
@@ -84,7 +92,6 @@
 		0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_CanonicalXML.cpp; sourceTree = "<group>"; };
 		0095D91E16CA83EA005F53D3 /* services_DNS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_DNS.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		0095D91F16CA83EA005F53D3 /* services_DNSMonitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_DNSMonitor.cpp; sourceTree = "<group>"; };
-		0095D92016CA83EA005F53D3 /* services_Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Factory.cpp; sourceTree = "<group>"; };
 		0095D92116CA83EA005F53D3 /* services_Helper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Helper.cpp; sourceTree = "<group>"; };
 		0095D92216CA83EA005F53D3 /* services_HTTP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_HTTP.cpp; sourceTree = "<group>"; };
 		0095D92316CA83EA005F53D3 /* services_ICESocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_ICESocket.cpp; sourceTree = "<group>"; };
@@ -111,7 +118,6 @@
 		0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_CanonicalXML.h; sourceTree = "<group>"; };
 		0095D93B16CA83EA005F53D3 /* services_DNS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_DNS.h; sourceTree = "<group>"; };
 		0095D93C16CA83EA005F53D3 /* services_DNSMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_DNSMonitor.h; sourceTree = "<group>"; };
-		0095D93D16CA83EA005F53D3 /* services_Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_Factory.h; sourceTree = "<group>"; };
 		0095D93E16CA83EA005F53D3 /* services_Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_Helper.h; sourceTree = "<group>"; };
 		0095D93F16CA83EA005F53D3 /* services_HTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_HTTP.h; sourceTree = "<group>"; };
 		0095D94016CA83EA005F53D3 /* services_ICESocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_ICESocket.h; sourceTree = "<group>"; };
@@ -199,10 +205,13 @@
 				007E8F8F18C0DC3100364908 /* IBackgrounding.h */,
 				001AEF571853DDDD00029ABC /* ICache.h */,
 				0095D93216CA83EA005F53D3 /* ICanonicalXML.h */,
+				002FCF4319A9158400F360CE /* IDecryptor.h */,
 				0084FFF5184FA171009F6934 /* IDHKeyDomain.h */,
 				0084FFF6184FA171009F6934 /* IDHPrivateKey.h */,
 				0084FFF7184FA171009F6934 /* IDHPublicKey.h */,
 				0095D93316CA83EA005F53D3 /* IDNS.h */,
+				002FCF4419A9158400F360CE /* IEncryptor.h */,
+				002FCF4519A9158400F360CE /* IFactory.h */,
 				0095D93416CA83EA005F53D3 /* IHelper.h */,
 				0095D93516CA83EA005F53D3 /* IHTTP.h */,
 				0095D93616CA83EA005F53D3 /* IICESocket.h */,
@@ -239,12 +248,13 @@
 				007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */,
 				001AEF591853DE9300029ABC /* services_Cache.cpp */,
 				0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */,
+				002FCF4819A915B500F360CE /* services_Decryptor.cpp */,
 				0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */,
 				0084FFFB184FD5E6009F6934 /* services_DHPrivateKey.cpp */,
 				0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */,
 				0095D91E16CA83EA005F53D3 /* services_DNS.cpp */,
 				0095D91F16CA83EA005F53D3 /* services_DNSMonitor.cpp */,
-				0095D92016CA83EA005F53D3 /* services_Factory.cpp */,
+				002FCF4919A915B500F360CE /* services_Encryptor.cpp */,
 				0095D92116CA83EA005F53D3 /* services_Helper.cpp */,
 				0095D92216CA83EA005F53D3 /* services_HTTP.cpp */,
 				0095D92316CA83EA005F53D3 /* services_ICESocket.cpp */,
@@ -283,12 +293,13 @@
 				007E8F9018C0DC4700364908 /* services_Backgrounding.h */,
 				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
+				002FCF4619A9159E00F360CE /* services_Decryptor.h */,
 				0084FFFA184FA5DA009F6934 /* services_DHKeyDomain.h */,
 				0084FFFD184FD5FD009F6934 /* services_DHPrivateKey.h */,
 				0084FFFE184FF5F5009F6934 /* services_DHPublicKey.h */,
 				0095D93B16CA83EA005F53D3 /* services_DNS.h */,
 				0095D93C16CA83EA005F53D3 /* services_DNSMonitor.h */,
-				0095D93D16CA83EA005F53D3 /* services_Factory.h */,
+				002FCF4719A9159E00F360CE /* services_Encryptor.h */,
 				0095D93E16CA83EA005F53D3 /* services_Helper.h */,
 				0095D93F16CA83EA005F53D3 /* services_HTTP.h */,
 				0095D94016CA83EA005F53D3 /* services_ICESocket.h */,
@@ -382,7 +393,6 @@
 				0095DACD16CA83EB005F53D3 /* services_DNS.cpp in Sources */,
 				0095DACE16CA83EB005F53D3 /* services_DNSMonitor.cpp in Sources */,
 				00D560C81948A70E00CA65A6 /* services_Reachability.cpp in Sources */,
-				0095DACF16CA83EB005F53D3 /* services_Factory.cpp in Sources */,
 				0095DAD016CA83EB005F53D3 /* services_Helper.cpp in Sources */,
 				0095DAD116CA83EB005F53D3 /* services_HTTP.cpp in Sources */,
 				0095DAD216CA83EB005F53D3 /* services_ICESocket.cpp in Sources */,
@@ -402,8 +412,10 @@
 				008C0EBF18629F360034958B /* services_wire.cpp in Sources */,
 				0095DADD16CA83EB005F53D3 /* services_STUNPacket.cpp in Sources */,
 				0095DADE16CA83EB005F53D3 /* services_STUNRequester.cpp in Sources */,
+				002FCF4B19A915B500F360CE /* services_Encryptor.cpp in Sources */,
 				0095DADF16CA83EB005F53D3 /* services_STUNRequesterManager.cpp in Sources */,
 				0095DAE016CA83EB005F53D3 /* services_TURNSocket.cpp in Sources */,
+				002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */,
 				000CC03717A475F90075E86C /* services_Logger.cpp in Sources */,
 				003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */,
 				003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */,
