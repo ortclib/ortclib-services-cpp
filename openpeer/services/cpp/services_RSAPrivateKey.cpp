@@ -122,13 +122,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RSAPrivateKeyPtr RSAPrivateKey::convert(IRSAPrivateKeyPtr privateKey)
       {
-        return dynamic_pointer_cast<RSAPrivateKey>(privateKey);
+        return ZS_DYNAMIC_PTR_CAST(RSAPrivateKey, privateKey);
       }
 
       //-----------------------------------------------------------------------
       RSAPrivateKeyPtr RSAPrivateKey::convert(ForPublicKeyPtr privateKey)
       {
-        return dynamic_pointer_cast<RSAPrivateKey>(privateKey);
+        return ZS_DYNAMIC_PTR_CAST(RSAPrivateKey, privateKey);
       }
 
       //-----------------------------------------------------------------------
@@ -183,7 +183,7 @@ namespace openpeer
 
         ZS_LOG_DEBUG(pThis->debug("generated private key") + IRSAPublicKey::toDebug(outPublicKey))
 
-        get(pThis->mDidGenerate) = true;
+        pThis->mDidGenerate = true;
 
         return pThis;
       }

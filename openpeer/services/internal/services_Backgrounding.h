@@ -186,7 +186,7 @@ namespace openpeer
         protected:
           BackgroundingPtr mOuter;
 
-          AutoBool mNotified;
+          bool mNotified {};
           PUID mBackgroundingID;
           Phase mPhase;
         };

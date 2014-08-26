@@ -284,7 +284,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPChannelStreamPtr RUDPChannelStream::convert(IRUDPChannelStreamPtr stream)
       {
-        return dynamic_pointer_cast<RUDPChannelStream>(stream);
+        return ZS_DYNAMIC_PTR_CAST(RUDPChannelStream, stream);
       }
 
       //-----------------------------------------------------------------------
@@ -427,7 +427,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(log("hold sending until receive sequence number") + ZS_PARAM("sequence number", sequenceToString(sequenceNumber)))
-        get(mWaitToSendUntilReceivedRemoteSequenceNumber) = sequenceNumber;
+        mWaitToSendUntilReceivedRemoteSequenceNumber = sequenceNumber;
 
         if (0 == mWaitToSendUntilReceivedRemoteSequenceNumber) {
           // the hold was manually removed, try to deliver data now...
@@ -456,17 +456,17 @@ namespace openpeer
             return false;
           }
 
-          get(mECNReceived) = (mECNReceived || ecnMarked);
+          mECNReceived = (mECNReceived || ecnMarked);
 
           QWORD sequenceNumber = packet->getSequenceNumber(mGSNR);
 
           // we no longer have to wait on a send once we find the correct sequence number
           if (sequenceNumber >= mWaitToSendUntilReceivedRemoteSequenceNumber)
-            get(mWaitToSendUntilReceivedRemoteSequenceNumber) = 0;
+            mWaitToSendUntilReceivedRemoteSequenceNumber = 0;
 
           if (sequenceNumber <= mGSNFR) {
             ZS_LOG_WARNING(Debug, log("received duplicate packet") + ZS_PARAM("GSNFR", sequenceToString(mGSNFR)) + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
-            get(mDuplicateReceived) = true;
+            mDuplicateReceived = true;
             return true;
           }
 
@@ -502,7 +502,7 @@ namespace openpeer
           if (findIter != mReceivedPackets.end()) {
             ZS_LOG_WARNING(Debug, log("received packet is duplicated and already exist in pending buffers thus dropping packet") + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             // we have already received and processed this packet
-            get(mDuplicateReceived) = true;
+            mDuplicateReceived = true;
             return true;
           }
 
@@ -541,7 +541,7 @@ namespace openpeer
           mReceivedPackets[sequenceNumber] = bufferedPacket;
           if (sequenceNumber > mGSNR) {
             mGSNR = sequenceNumber;
-            get(mGSNRParity) = packet->isFlagSet(RUDPPacket::Flag_PS_ParitySending);
+            mGSNRParity = packet->isFlagSet(RUDPPacket::Flag_PS_ParitySending);
           }
 
           // if set then remote wants an ACK right away - if we are able to send data packets then we will be able to ACK the packet right now without an external ACK
@@ -620,7 +620,7 @@ namespace openpeer
         }
 
         if (nextSequenceNumber >= mWaitToSendUntilReceivedRemoteSequenceNumber)
-          get(mWaitToSendUntilReceivedRemoteSequenceNumber) = 0;
+          mWaitToSendUntilReceivedRemoteSequenceNumber = 0;
 
         try {
           handleAck(
@@ -651,7 +651,7 @@ namespace openpeer
           // resend get delivered.
 
           mForceACKOfSentPacketsRequestID = 0;
-          get(mForceACKNextTimePossible) = false;
+          mForceACKNextTimePossible = false;
 
           bool firstTime = true;
 
@@ -672,7 +672,7 @@ namespace openpeer
                            ZS_PARAM("batons available", mAvailableBurstBatons))
             }
 
-            packet->flagForResending(get(mTotalPacketsToResend));  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
+            packet->flagForResending(mTotalPacketsToResend);  // if this packet was not ACKed but should be resent because it never arrived after the current forced ACK replied
             packet->releaseBaton(mAvailableBurstBatons);      // reclaim the baton if holding since this packet needs to be resent and never arrived
           }
 
@@ -780,8 +780,8 @@ namespace openpeer
       {
         ZS_LOG_TRACE(log("external ACK sent"))
         AutoRecursiveLock lock(mLock);
-        get(mDuplicateReceived) = false;
-        get(mECNReceived) = false;
+        mDuplicateReceived = false;
+        mECNReceived = false;
       }
 
       //-----------------------------------------------------------------------
@@ -822,7 +822,7 @@ namespace openpeer
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer.reset();
 
             // we will use the "force" ACK mechanism to ensure that data has arrived
-            get(mForceACKNextTimePossible) = true;
+            mForceACKNextTimePossible = true;
             goto quickExitToSendNow;
           }
 
@@ -1064,7 +1064,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
@@ -1222,9 +1222,9 @@ namespace openpeer
               newPacket->setFlag(RUDPPacket::Flag_PG_ParityGSNR, mGSNRParity);
               newPacket->setFlag(RUDPPacket::Flag_XP_XORedParityToGSNFR, mXORedParityToGSNFR);
               newPacket->setFlag(RUDPPacket::Flag_DP_DuplicatePacket, mDuplicateReceived);
-              get(mDuplicateReceived) = false;
+              mDuplicateReceived = false;
               newPacket->setFlag(RUDPPacket::Flag_EC_ECNPacket, mECNReceived);
-              get(mECNReceived) = false;
+              mECNReceived = false;
 
               if (!firstPacketCreated) {
                 String vectorParityField; // for debugging
@@ -1314,7 +1314,7 @@ namespace openpeer
 
               BufferedPacketPtr bufferedPacket = BufferedPacket::create();
               bufferedPacket->mSequenceNumber = mNextSequenceNumber;
-              get(mXORedParityToNow) = internal::logicalXOR(mXORedParityToNow, newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending));   // have to keep track of the current parity of all packets sent until this point
+              mXORedParityToNow = internal::logicalXOR(mXORedParityToNow, newPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending));   // have to keep track of the current parity of all packets sent until this point
               bufferedPacket->mXORedParityToNow = mXORedParityToNow;          // when the remore party reports their GSNFR parity in an ACK, this value is required to verify it is accurate
               bufferedPacket->mRUDPPacket = newPacket;
               bufferedPacket->mPacket = packetizedBuffer;
@@ -1377,7 +1377,7 @@ namespace openpeer
             if (attemptToDeliver->mFlagForResendingInNextBurst) {
               ZS_LOG_TRACE(log("flag for resending in next burst is set this will force an ACK next time possible"))
 
-              get(mForceACKNextTimePossible) = true;                // we need to force an ACK when there is resent data to ensure it has arrived
+              mForceACKNextTimePossible = true;                     // we need to force an ACK when there is resent data to ensure it has arrived
               attemptToDeliver->doNotResend(mTotalPacketsToResend); // if this was marked for resending, then clear it now since it is resent
             }
           }
@@ -1547,8 +1547,8 @@ namespace openpeer
 
         if (forceACKOfSentPacketsRequired) {
           mForceACKOfSentPacketsRequestID = zsLib::createPUID();
-          get(mForceACKOfSentPacketsAtSendingSequnceNumber) = mNextSequenceNumber - 1;
-          get(mForceACKNextTimePossible) = false;
+          mForceACKOfSentPacketsAtSendingSequnceNumber = mNextSequenceNumber - 1;
+          mForceACKNextTimePossible = false;
 
           ZS_LOG_TRACE(log("forcing an ACK immediately") + ZS_PARAM("ack ID", mForceACKOfSentPacketsRequestID) + ZS_PARAM("forced sequence number", sequenceToString(mForceACKOfSentPacketsAtSendingSequnceNumber)) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
 
@@ -1861,7 +1861,7 @@ namespace openpeer
         bool wasFrozen = mBandwidthIncreaseFrozen;
 
         // freeze the increase to prevent an increase in the socket sending
-        get(mBandwidthIncreaseFrozen) = true;
+        mBandwidthIncreaseFrozen = true;
         mStartedSendingAtTime = zsLib::now();
         mTotalSendingPeriodWithoutIssues = Milliseconds(0);
 
@@ -1917,7 +1917,7 @@ namespace openpeer
       void RUDPChannelStream::handleUnfreezing()
       {
         if (mTotalSendingPeriodWithoutIssues > Seconds(OPENPEER_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION)) {
-          get(mBandwidthIncreaseFrozen) = false;
+          mBandwidthIncreaseFrozen = false;
           mTotalSendingPeriodWithoutIssues = Milliseconds(0);
 
           // decrease the time between adding new batons
@@ -1984,7 +1984,7 @@ namespace openpeer
 
           // recalculate the GSNFR information
           mGSNFR = bufferedPacket->mSequenceNumber;
-          get(mXORedParityToGSNFR) = internal::logicalXOR(mXORedParityToGSNFR, bufferedPacket->mRUDPPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending));
+          mXORedParityToGSNFR = internal::logicalXOR(mXORedParityToGSNFR, bufferedPacket->mRUDPPacket->isFlagSet(RUDPPacket::Flag_PS_ParitySending));
 
           // the front packet can now be removed
           mReceivedPackets.erase(iter);
@@ -2050,7 +2050,7 @@ namespace openpeer
       {
         ++mRandomPoolPos;
         if (mRandomPoolPos > (sizeof(mRandomPool)*8)) {
-          get(mRandomPoolPos) = 0;
+          mRandomPoolPos = 0;
 
           CryptoPP::AutoSeededRandomPool rng;
           rng.GenerateBlock(&(mRandomPool[0]), sizeof(mRandomPool));

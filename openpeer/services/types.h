@@ -79,8 +79,6 @@ namespace openpeer
 
     typedef zsLib::ThreadPriorities ThreadPriorities;
 
-    using boost::dynamic_pointer_cast;
-
     ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock)
     ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock)
 

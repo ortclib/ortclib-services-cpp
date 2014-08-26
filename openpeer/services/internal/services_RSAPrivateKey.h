@@ -141,7 +141,7 @@ namespace openpeer
         AutoPUID mID;
 
         PrivateKey mPrivateKey;
-        AutoBool mDidGenerate;
+        bool mDidGenerate {};
       };
 
       //-----------------------------------------------------------------------

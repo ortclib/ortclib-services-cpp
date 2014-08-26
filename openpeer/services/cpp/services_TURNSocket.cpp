@@ -228,7 +228,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TURNSocketPtr TURNSocket::convert(ITURNSocketPtr socket)
       {
-        return dynamic_pointer_cast<TURNSocket>(socket);
+        return ZS_DYNAMIC_PTR_CAST(TURNSocket, socket);
       }
 
       //-----------------------------------------------------------------------

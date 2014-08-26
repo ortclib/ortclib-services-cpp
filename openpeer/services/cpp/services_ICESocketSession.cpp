@@ -263,13 +263,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocketSessionPtr ICESocketSession::convert(IICESocketSessionPtr session)
       {
-        return dynamic_pointer_cast<ICESocketSession>(session);
+        return ZS_DYNAMIC_PTR_CAST(ICESocketSession, session);
       }
 
       //-----------------------------------------------------------------------
       ICESocketSessionPtr ICESocketSession::convert(ForICESocketPtr session)
       {
-        return dynamic_pointer_cast<ICESocketSession>(session);
+        return ZS_DYNAMIC_PTR_CAST(ICESocketSession, session);
       }
 
       //-----------------------------------------------------------------------
@@ -425,7 +425,7 @@ namespace openpeer
         ZS_LOG_DEBUG(log("end of remote candidates"))
 
         AutoRecursiveLock lock(*this);
-        get(mEndOfRemoteCandidatesFlag) = true;
+        mEndOfRemoteCandidatesFlag = true;
         step();
       }
 
@@ -487,7 +487,7 @@ namespace openpeer
           return false;
         }
 
-        get(mInformedWriteReady) = false;  // if this method was called in response to a write-ready event, be sure to clear the write-ready informed flag so future events will fire
+        mInformedWriteReady = false;  // if this method was called in response to a write-ready event, be sure to clear the write-ready informed flag so future events will fire
 
         if (!mNominated) {
           ZS_LOG_WARNING(Detail, log("not allowed to send data as ICE nomination process is not complete"))
@@ -746,7 +746,7 @@ namespace openpeer
                 mPendingNominatation.reset();
                 clearNominateRequester();
 
-                get(mInformedWriteReady) = false;
+                mInformedWriteReady = false;
 
                 notifyLocalWriteReady(viaLocalCandidate);
                 notifyRelayWriteReady(viaLocalCandidate);
@@ -873,12 +873,12 @@ namespace openpeer
           return;
         }
 
-        get(mInformedWriteReady) = false;
+        mInformedWriteReady = false;
 
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify local write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
-        get(mInformedWriteReady) = true;
+        mInformedWriteReady = true;
       }
 
       //-----------------------------------------------------------------------
@@ -898,12 +898,12 @@ namespace openpeer
           return;
         }
 
-        get(mInformedWriteReady) = false;
+        mInformedWriteReady = false;
 
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
-        get(mInformedWriteReady) = true;
+        mInformedWriteReady = true;
       }
 
       //-----------------------------------------------------------------------
@@ -1090,7 +1090,7 @@ namespace openpeer
             socket->addRoute(mThisWeak.lock(), mNominated->mLocal.mIPAddress, mNominated->mLocal.mRelatedIP, mNominated->mRemote.mIPAddress);
           }
 
-          get(mInformedWriteReady) = false;
+          mInformedWriteReady = false;
 
           notifyLocalWriteReady(usePair->mLocal);
           notifyRelayWriteReady(usePair->mLocal);
@@ -1730,7 +1730,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))

@@ -109,13 +109,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNRequesterPtr STUNRequester::convert(ISTUNRequesterPtr object)
       {
-        return dynamic_pointer_cast<STUNRequester>(object);
+        return ZS_DYNAMIC_PTR_CAST(STUNRequester, object);
       }
 
       //-----------------------------------------------------------------------
       STUNRequesterPtr STUNRequester::convert(ForSTUNRequesterManagerPtr object)
       {
-        return dynamic_pointer_cast<STUNRequester>(object);
+        return ZS_DYNAMIC_PTR_CAST(STUNRequester, object);
       }
 
       //-----------------------------------------------------------------------

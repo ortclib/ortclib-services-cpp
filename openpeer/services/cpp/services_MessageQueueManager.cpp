@@ -213,7 +213,7 @@ namespace openpeer
 
         IMessageQueuePtr queue = (*found).second;
 
-        IMessageQueueThreadPtr thread = dynamic_pointer_cast<IMessageQueueThread>(queue);
+        IMessageQueueThreadPtr thread = ZS_DYNAMIC_PTR_CAST(IMessageQueueThread, queue);
         if (!thread) {
           ZS_LOG_WARNING(Detail, log("found thread was not recognized as a message queue thread") + ZS_PARAM("name", assignedThreadName))
           return;
@@ -295,13 +295,13 @@ namespace openpeer
         }
 
         if (0 != mPending) {
-          get(mFinalCheck) = false;
+          mFinalCheck = false;
           return;
         }
 
         if (0 == mPending) {
           if (!mFinalCheck) {
-            get(mFinalCheck) = true;
+            mFinalCheck = true;
 
             // perform one-time double check to truly make sure all queues are empty
             IMessageQueuePtr queue = (*mQueues.begin()).second;
@@ -351,7 +351,7 @@ namespace openpeer
               if (!processApplicationQueueOnShutdown)
                 continue;
 
-              IMessageQueueThreadPtr thread = dynamic_pointer_cast<IMessageQueueThread>(queue);
+              IMessageQueueThreadPtr thread = ZS_DYNAMIC_PTR_CAST(IMessageQueueThread, queue);
 
               thread->processMessagesFromThread();
             }
@@ -435,7 +435,7 @@ namespace openpeer
               ZS_LOG_WARNING(Basic, log("unprocessed messages are still in the queue - did you check getTotalUnprocessedMessages() to make sure all queues are empty before quiting?"))
             }
 
-            MessageQueueThreadPtr threadQueue = boost::dynamic_pointer_cast<MessageQueueThread>(queue);
+            MessageQueueThreadPtr threadQueue = ZS_DYNAMIC_PTR_CAST(MessageQueueThread, queue);
             threadQueue->waitForShutdown();
 
             // scope: remove the queue from the list of managed queues

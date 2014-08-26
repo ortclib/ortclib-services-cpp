@@ -190,9 +190,9 @@ namespace openpeer
         mDefaultSubscription = mSubscriptions.subscribe(delegate, queue);
 
         if (mFoundation) {
-          get(mComponentID) = get(mFoundation->mComponentID) + 1;
+          mComponentID = mFoundation->mComponentID + 1;
         } else {
-          get(mComponentID) = 1;
+          mComponentID = 1;
         }
 
         // calculate the empty list CRC value
@@ -225,13 +225,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocketPtr ICESocket::convert(IICESocketPtr socket)
       {
-        return dynamic_pointer_cast<ICESocket>(socket);
+        return ZS_DYNAMIC_PTR_CAST(ICESocket, socket);
       }
 
       //-----------------------------------------------------------------------
       ICESocketPtr ICESocket::convert(ForICESocketSessionPtr socket)
       {
-        return dynamic_pointer_cast<ICESocket>(socket);
+        return ZS_DYNAMIC_PTR_CAST(ICESocket, socket);
       }
 
       //-----------------------------------------------------------------------
@@ -737,7 +737,7 @@ namespace openpeer
         }
 
         // attempt to rebind immediately
-        get(mRebindCheckNow) = true;
+        mRebindCheckNow = true;
         step();
       }
 
@@ -930,7 +930,7 @@ namespace openpeer
         AutoRecursiveLock lock(*this);
 
         if (timer == mRebindTimer) {
-          get(mRebindCheckNow) = true;
+          mRebindCheckNow = true;
           step();
           return;
         }
@@ -1153,7 +1153,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
@@ -1199,7 +1199,7 @@ namespace openpeer
             return true;
           }
           ZS_LOG_TRACE(log("rechecking binding now"))
-          get(mRebindCheckNow) = false;
+          mRebindCheckNow = false;
         }
 
         ZS_LOG_TRACE(log("step bind") + ZS_PARAM("total sockets", mSockets.size()))
@@ -1858,7 +1858,7 @@ namespace openpeer
         mLastCandidateCRC = crcValue;
 
         mSubscriptions.delegate()->onICESocketCandidatesChanged(mThisWeak.lock());
-        get(mNotifiedCandidateChanged) = true;
+        mNotifiedCandidateChanged = true;
         return true;
       }
 

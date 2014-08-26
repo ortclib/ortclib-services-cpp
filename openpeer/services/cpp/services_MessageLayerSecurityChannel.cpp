@@ -237,7 +237,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageLayerSecurityChannelPtr MessageLayerSecurityChannel::convert(IMessageLayerSecurityChannelPtr channel)
       {
-        return dynamic_pointer_cast<MessageLayerSecurityChannel>(channel);
+        return ZS_DYNAMIC_PTR_CAST(MessageLayerSecurityChannel, channel);
       }
 
       //-----------------------------------------------------------------------
@@ -684,7 +684,7 @@ namespace openpeer
         mSendKeyingType = KeyingType_KeyAgreement;
         mDHLocalPrivateKey = localPrivateKey;
         mDHLocalPublicKey = localPublicKey;
-        get(mDHRemoteSideKnowsLocalPublicKey) = remoteSideAlreadyKnowsThisPublicKey;
+        mDHRemoteSideKnowsLocalPublicKey = remoteSideAlreadyKnowsThisPublicKey;
 
         if (mDHLocalPrivateKey) {
           if (!((bool)mDHKeyDomain)) {
@@ -849,13 +849,13 @@ namespace openpeer
         ZS_LOG_DEBUG(log("transport stream writer ready"))
 
         if (writer == mReceiveStreamDecoded) {
-          get(mReceiveStreamDecodedWriteReady) = true;
+          mReceiveStreamDecodedWriteReady = true;
 
           // event typically fires when "outer" notifies it's ready to send data thus need to inform the wire that it can send data now
           mReceiveStreamEncoded->notifyReaderReadyToRead();
         }
         if (writer == mSendStreamEncoded) {
-          get(mSendStreamEncodedWriteReady) = true;
+          mSendStreamEncodedWriteReady = true;
         }
         step();
       }
@@ -891,9 +891,9 @@ namespace openpeer
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer id", timer->getID()))
 
         if (timer == mChangeSendingKeyTimer) {
-          get(mChangeKey) = true;
+          mChangeKey = true;
           mSendKeys.clear();
-          get(mDHSentRemoteSideLocalPublicKey) = false;
+          mDHSentRemoteSideLocalPublicKey = false;
         }
 
         step();
@@ -1034,7 +1034,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
@@ -1473,7 +1473,7 @@ namespace openpeer
               }
 
               decodingPassphrase = IHelper::convertToHex(*agreedKey);
-              get(mDHSentRemoteSideLocalPublicKey) = false; // no longer need this variable to determine if the keying material was sent as keys can now be generated
+              mDHSentRemoteSideLocalPublicKey = false; // no longer need this variable to determine if the keying material was sent as keys can now be generated
             } else if ("passphrase" == type) {
               mReceiveKeyingType = KeyingType_Passphrase;
               if (KeyingType_Unknown == mSendKeyingType) mSendKeyingType = KeyingType_Passphrase;
@@ -1644,7 +1644,7 @@ namespace openpeer
 
         // notify the "outer" that it can now send data over the wire
         if (!mNotifySendStreamDecodedReadyToReady) {
-          get(mNotifySendStreamDecodedReadyToReady) = true;
+          mNotifySendStreamDecodedReadyToReady = true;
           mSendStreamDecoded->notifyReaderReadyToRead();
         }
 
@@ -1751,14 +1751,14 @@ namespace openpeer
           }
           case KeyingType_KeyAgreement: {
             encodingEl->adoptAsLastChild(createElementWithText("type", "agreement"));
-            get(mDHSentRemoteSideLocalPublicKey) = true;
+            mDHSentRemoteSideLocalPublicKey = true;
 
             bool includeFullKey = true;
 
             if (mChangeKey) {
               if (mDHRemoteSideKnowsLocalPublicKey) {
                 ZS_LOG_TRACE(log("cannot change key is haven't given fingerprint of local public key expected to remote party"))
-                get(mChangeKey) = false;  // cannot change key in this state
+                mChangeKey = false;  // cannot change key in this state
               }
             }
 
@@ -1768,12 +1768,12 @@ namespace openpeer
 
               mDHLocalPrivateKey = IDHPrivateKey::loadAndGenerateNewEphemeral(mDHLocalPrivateKey, mDHLocalPublicKey, mDHLocalPublicKey);
 
-              get(mChangeKey) = false;
+              mChangeKey = false;
             }
 
             if (mDHRemoteSideKnowsLocalPublicKey) {
               includeFullKey = false;
-              get(mDHRemoteSideKnowsLocalPublicKey) = false;
+              mDHRemoteSideKnowsLocalPublicKey = false;
               encodingEl->adoptAsLastChild(createElementWithText("fingerprint", mDHLocalPublicKey->getFingerprint()));
             } else {
               if (mDHRemotePublicKey) {
@@ -1797,7 +1797,7 @@ namespace openpeer
               encodingEl->adoptAsLastChild(createElementWithText("key", fullKey));
             }
 
-            get(mDHSentRemoteSideLocalPublicKey) = true;
+            mDHSentRemoteSideLocalPublicKey = true;
 
             if (mDHRemotePublicKey) {
               SecureByteBlockPtr agreement = mDHLocalPrivateKey->getSharedSecret(mDHRemotePublicKey);

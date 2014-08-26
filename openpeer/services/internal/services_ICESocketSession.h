@@ -382,7 +382,7 @@ namespace openpeer
         UseICESocketWeakPtr mICESocket;
 
         ICESocketSessionStates mCurrentState;
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         IICESocketSessionDelegateSubscriptions mSubscriptions;
@@ -391,7 +391,7 @@ namespace openpeer
         IBackgroundingSubscriptionPtr mBackgroundingSubscription;
         IBackgroundingNotifierPtr mBackgroundingNotifier;
 
-        AutoBool mInformedWriteReady;
+        bool mInformedWriteReady {};
 
         IICESocketSubscriptionPtr mSocketSubscription;
 
@@ -433,7 +433,7 @@ namespace openpeer
 
         CandidateList mLocalCandidates;
         CandidateList mRemoteCandidates;
-        AutoBool mEndOfRemoteCandidatesFlag;
+        bool mEndOfRemoteCandidatesFlag {};
       };
 
       //-----------------------------------------------------------------------

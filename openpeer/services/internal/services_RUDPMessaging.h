@@ -194,7 +194,7 @@ namespace openpeer
         RUDPMessagingWeakPtr mThisWeak;
 
         RUDPMessagingStates mCurrentState;
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         IRUDPMessagingDelegatePtr mDelegate;
@@ -211,14 +211,12 @@ namespace openpeer
         ITransportStreamReaderSubscriptionPtr mWireReceiveStreamSubscription;
         ITransportStreamWriterSubscriptionPtr mWireSendStreamSubscription;
 
-        AutoBool mInformedOuterReceiveReady;
-        AutoBool mInformedWireSendReady;
+        bool mInformedOuterReceiveReady {};
+        bool mInformedWireSendReady {};
 
         RUDPMessagingPtr mGracefulShutdownReference;
 
         IRUDPChannelPtr mChannel;
-
-        AutoDWORD mNextMessageSizeInBytes;
 
         size_t mMaxMessageSizeInBytes;
       };

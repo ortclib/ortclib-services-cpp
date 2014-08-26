@@ -206,19 +206,19 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(IRUDPChannelPtr channel)
       {
-        return dynamic_pointer_cast<RUDPChannel>(channel);
+        return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(ForRUDPTransportPtr channel)
       {
-        return dynamic_pointer_cast<RUDPChannel>(channel);
+        return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::convert(ForRUDPListenerPtr channel)
       {
-        return dynamic_pointer_cast<RUDPChannel>(channel);
+        return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
 
       //-----------------------------------------------------------------------
@@ -345,7 +345,7 @@ namespace openpeer
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->mLock);
-        get(pThis->mIncoming) = true;
+        pThis->mIncoming = true;
         pThis->init();
         // do not allow sending to the remote party until we receive an ACK or data
         pThis->mStream = IRUDPChannelStream::create(queue, pThis, pThis->mLocalSequenceNumber, pThis->mRemoteSequenceNumber, pThis->mOutgoingChannelNumber, pThis->mIncomingChannelNumber, pThis->mMinimumRTT);
@@ -805,7 +805,7 @@ namespace openpeer
       {
         ZS_LOG_DEBUG(log("shutdown from timeout called"))
         AutoRecursiveLock lock(mLock);
-        get(mSTUNRequestPreviouslyTimedOut) = true;
+        mSTUNRequestPreviouslyTimedOut = true;
         setError(RUDPChannelShutdownReason_Timeout, "Timeout failure");
         cancel(false);
       }
@@ -879,7 +879,7 @@ namespace openpeer
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->mLock);
-        get(pThis->mIncoming) = true;
+        pThis->mIncoming = true;
         pThis->mRealm = stun->mRealm;
         pThis->mNonce = stun->mNonce;
         pThis->init();
@@ -1291,7 +1291,7 @@ namespace openpeer
           mStream->shutdown(false);
         }
 
-        get(mSTUNRequestPreviouslyTimedOut) = true;
+        mSTUNRequestPreviouslyTimedOut = true;
         setError(RUDPChannelShutdownReason_Timeout, "channel timeout");
         cancel(false);
       }
@@ -1586,7 +1586,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))

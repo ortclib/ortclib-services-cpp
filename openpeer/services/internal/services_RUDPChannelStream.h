@@ -323,7 +323,7 @@ namespace openpeer
         IRUDPChannelStreamDelegatePtr mDelegate;
 
         RUDPChannelStreamStates mCurrentState;
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         ITransportStreamWriterPtr mReceiveStream;
@@ -341,33 +341,33 @@ namespace openpeer
         Duration mMinimumRTT;
         Duration mCalculatedRTT;
         QWORD mNextSequenceNumber;        // next sequence number to use for sending
-        AutoBool mXORedParityToNow;       // the current parity of all packets sent to this point
+        bool mXORedParityToNow {};        // the current parity of all packets sent to this point
 
         QWORD mGSNR;                      // Greatest Sequence Number Received (this is the remote party's sequence number)
         QWORD mGSNFR;                     // Greatest Sequence Number Fully Received (this is the remote party's sequence number)
-        AutoBool mGSNRParity;             // This is the parity bit from the remote party
-        AutoBool mXORedParityToGSNFR;     // what is the combined parity of packets received up to the GSNFR from the remote party
+        bool mGSNRParity {};              // This is the parity bit from the remote party
+        bool mXORedParityToGSNFR {};      // what is the combined parity of packets received up to the GSNFR from the remote party
 
-        AutoQWORD mWaitToSendUntilReceivedRemoteSequenceNumber;
+        QWORD mWaitToSendUntilReceivedRemoteSequenceNumber {};
 
         Shutdown mShutdownState;
 
-        AutoBool mDuplicateReceived;
-        AutoBool mECNReceived;
+        bool mDuplicateReceived {};
+        bool mECNReceived {};
 
         Time mLastDeliveredReadData;
 
-        AutoBool mAttemptingSendNow;
+        bool mAttemptingSendNow {};
 
         BufferedPacketMap mSendingPackets;
         BufferedPacketMap mReceivedPackets;
 
         RecycleBufferList mRecycleBuffers;
 
-        AutoSizeT mRandomPoolPos;
+        size_t mRandomPoolPos {};
         BYTE mRandomPool[256];
 
-        AutoULONG mTotalPacketsToResend;
+        ULONG mTotalPacketsToResend {};
 
         // congestion control parameters
         ULONG mAvailableBurstBatons;                            // how many "batons" (aka relay style batons) are available for sending new bursts right now
@@ -384,13 +384,13 @@ namespace openpeer
 
         ULONG mPacketsPerBurst;                                 // how many packets to deliver in a single burst
 
-        AutoBool mBandwidthIncreaseFrozen;                      // the bandwidth increase routine is currently frozen because an insufficient time without issues has not occurerd
+        bool mBandwidthIncreaseFrozen {};                       // the bandwidth increase routine is currently frozen because an insufficient time without issues has not occurerd
         Time mStartedSendingAtTime;                             // when did the sending activate again (so when the final ACK comes in the total duration can be calculated)
         Duration mTotalSendingPeriodWithoutIssues;              // how long has there been a successful period of sending without and sending difficulties
 
-        AutoQWORD mForceACKOfSentPacketsAtSendingSequnceNumber; // when the ACK reply comes back we can be sure of the state of lost packets up to this sequence number
+        QWORD mForceACKOfSentPacketsAtSendingSequnceNumber {};  // when the ACK reply comes back we can be sure of the state of lost packets up to this sequence number
         PUID mForceACKOfSentPacketsRequestID;                   // the identification of the request that is causing the force
-        AutoBool mForceACKNextTimePossible;                     // force an ACK at the next possibel interval
+        bool mForceACKNextTimePossible {};                      // force an ACK at the next possibel interval
       };
 
       //-----------------------------------------------------------------------

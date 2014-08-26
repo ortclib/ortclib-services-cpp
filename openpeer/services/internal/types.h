@@ -50,13 +50,7 @@ namespace openpeer
     {
       using zsLib::string;
       using zsLib::CSTR;
-      using zsLib::AutoBool;
       using zsLib::AutoPUID;
-      using zsLib::AutoWORD;
-      using zsLib::AutoDWORD;
-      using zsLib::AutoQWORD;
-      using zsLib::AutoULONG;
-      using zsLib::AutoSizeT;
       using zsLib::Noop;
       using zsLib::AutoRecursiveLock;
       using zsLib::CSTR;
@@ -90,8 +84,6 @@ namespace openpeer
       ZS_DECLARE_USING_PTR(zsLib::XML, Declaration)
       ZS_DECLARE_USING_PTR(zsLib::XML, Generator)
 
-      using boost::dynamic_pointer_cast;
-
       using CryptoPP::AutoSeededRandomPool;
       using CryptoPP::HexEncoder;
       using CryptoPP::HexDecoder;
@@ -108,7 +100,6 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(DNSMonitor)
       ZS_DECLARE_CLASS_PTR(DNSQuery)
       ZS_DECLARE_CLASS_PTR(Encryptor)
-      ZS_DECLARE_CLASS_PTR(Factory)
       ZS_DECLARE_CLASS_PTR(ICESocket)
       ZS_DECLARE_CLASS_PTR(ICESocketSession)
       ZS_DECLARE_CLASS_PTR(HTTP)

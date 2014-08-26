@@ -471,11 +471,11 @@ namespace openpeer
         IICESocketSubscriptionPtr mDefaultSubscription;
 
         ICESocketStates     mCurrentState;
-        AutoWORD            mLastError;
+        WORD                mLastError {};
         String              mLastErrorReason;
 
         ICESocketPtr        mFoundation;
-        AutoWORD            mComponentID;
+        WORD                mComponentID {};
 
         WORD                mBindPort;
         String              mUsernameFrag;
@@ -488,7 +488,7 @@ namespace openpeer
 
         TimerPtr            mRebindTimer;
         Time                mRebindAttemptStartTime;
-        AutoBool            mRebindCheckNow;
+        bool                mRebindCheckNow {};
 
         bool                mMonitoringWriteReady;
 
@@ -504,7 +504,7 @@ namespace openpeer
 
         RecycledPacketBufferList mRecycledBuffers;
 
-        AutoBool            mNotifiedCandidateChanged;
+        bool                mNotifiedCandidateChanged {};
         DWORD               mLastCandidateCRC;
 
         bool                mForceUseTURN;

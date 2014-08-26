@@ -212,7 +212,7 @@ namespace openpeer
 
         SessionStates mCurrentState;
 
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         ITransportStreamWriterPtr mReceiveStream;
@@ -222,8 +222,8 @@ namespace openpeer
         bool mFramesHaveChannelNumber;
         size_t mMaxMessageSizeInBytes;
 
-        AutoBool mConnectIssued;
-        AutoBool mTCPWriteReady;
+        bool mConnectIssued {};
+        bool mTCPWriteReady {};
         IPAddress mRemoteIP;
         SocketPtr mSocket;
         TimerPtr mLingerTimer;

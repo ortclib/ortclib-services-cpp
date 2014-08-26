@@ -93,7 +93,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ReachabilityPtr Reachability::convert(IReachabilityPtr backgrounding)
       {
-        return dynamic_pointer_cast<Reachability>(backgrounding);
+        return ZS_DYNAMIC_PTR_CAST(Reachability, backgrounding);
       }
 
       //-----------------------------------------------------------------------

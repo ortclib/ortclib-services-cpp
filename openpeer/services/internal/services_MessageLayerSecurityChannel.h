@@ -261,7 +261,7 @@ namespace openpeer
 
         SessionStates mCurrentState;
 
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         String mLocalContextID;
@@ -280,8 +280,8 @@ namespace openpeer
 
         IDHPrivateKeyPtr mDHLocalPrivateKey;
         IDHPublicKeyPtr mDHLocalPublicKey;
-        AutoBool mDHRemoteSideKnowsLocalPublicKey;
-        AutoBool mDHSentRemoteSideLocalPublicKey;   // used before remote keying material is obtained to determine if the local public key was sent to the remote party
+        bool mDHRemoteSideKnowsLocalPublicKey {};
+        bool mDHSentRemoteSideLocalPublicKey {};    // used before remote keying material is obtained to determine if the local public key was sent to the remote party
 
         IDHPublicKeyPtr mDHRemotePublicKey;
         IDHPublicKeyPtr mDHOriginalRemotePublicKey;
@@ -320,14 +320,14 @@ namespace openpeer
         ITransportStreamReaderSubscriptionPtr mSendStreamDecodedSubscription;
         ITransportStreamWriterSubscriptionPtr mSendStreamEncodedSubscription;
 
-        AutoBool mReceiveStreamDecodedWriteReady;
-        AutoBool mSendStreamEncodedWriteReady;
-        AutoBool mNotifySendStreamDecodedReadyToReady;
+        bool mReceiveStreamDecodedWriteReady {};
+        bool mSendStreamEncodedWriteReady {};
+        bool mNotifySendStreamDecodedReadyToReady {};
 
         KeyMap mReceiveKeys;
         KeyMap mSendKeys;
 
-        AutoBool mChangeKey;
+        bool mChangeKey {};
         TimerPtr mChangeSendingKeyTimer;
       };
 

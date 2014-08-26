@@ -473,13 +473,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DHKeyDomainPtr DHKeyDomain::convert(IDHKeyDomainPtr publicKey)
       {
-        return dynamic_pointer_cast<DHKeyDomain>(publicKey);
+        return ZS_DYNAMIC_PTR_CAST(DHKeyDomain, publicKey);
       }
 
       //-----------------------------------------------------------------------
       DHKeyDomainPtr DHKeyDomain::convert(ForDHPrivateKeyPtr object)
       {
-        return dynamic_pointer_cast<DHKeyDomain>(object);
+        return ZS_DYNAMIC_PTR_CAST(DHKeyDomain, object);
       }
 
       //-----------------------------------------------------------------------

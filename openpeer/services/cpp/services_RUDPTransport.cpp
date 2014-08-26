@@ -102,7 +102,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPTransportPtr RUDPTransport::convert(IRUDPTransportPtr session)
       {
-        return dynamic_pointer_cast<RUDPTransport>(session);
+        return ZS_DYNAMIC_PTR_CAST(RUDPTransport, session);
       }
 
       //-----------------------------------------------------------------------
@@ -632,7 +632,7 @@ namespace openpeer
 
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
 
-          switch (get(mLastError)) {
+          switch (mLastError) {
             case IICESocketSession::ICESocketSessionShutdownReason_None:    (*iter).second->shutdown(); break;
             default:                                                        (*iter).second->shutdownFromTimeout(); break;
           }
@@ -716,7 +716,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))

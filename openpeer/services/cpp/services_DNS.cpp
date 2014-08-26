@@ -1164,7 +1164,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
 
-          get(mDidComplete) = true;
+          mDidComplete = true;
 
           if (mSRVLookup)
             mSRVLookup->cancel();
@@ -1210,7 +1210,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("step complete") + toDebug())
 
-          get(mDidComplete) = true;
+          mDidComplete = true;
 
           report();
         }
@@ -1438,7 +1438,7 @@ namespace openpeer
         DNSSRVResolverQueryWeakPtr mThisWeak;
         IDNSDelegatePtr mDelegate;
 
-        AutoBool mDidComplete;
+        bool mDidComplete {};
 
         String mOriginalName;
         String mOriginalService;

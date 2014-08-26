@@ -120,7 +120,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TCPMessagingPtr TCPMessaging::convert(ITCPMessagingPtr channel)
       {
-        return dynamic_pointer_cast<TCPMessaging>(channel);
+        return ZS_DYNAMIC_PTR_CAST(TCPMessaging, channel);
       }
 
       //-----------------------------------------------------------------------
@@ -197,7 +197,7 @@ namespace openpeer
         AutoRecursiveLock lock(pThis->getLock());
 
         pThis->mRemoteIP = remoteIP;
-        get(pThis->mConnectIssued) = true;
+        pThis->mConnectIssued = true;
 
         bool wouldBlock = false;
         int errorCode = 0;
@@ -472,12 +472,12 @@ namespace openpeer
         if (mConnectIssued) {
           if (!isShuttingdown()) {
             ZS_LOG_TRACE(log("connected"))
-            get(mConnectIssued) = false;
+            mConnectIssued = false;
             setState(SessionState_Connected);
           }
         }
 
-        get(mTCPWriteReady) = true;
+        mTCPWriteReady = true;
 
         sendDataNow();
       }
@@ -632,7 +632,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))
@@ -702,7 +702,7 @@ namespace openpeer
           return;
         }
 
-        get(mTCPWriteReady) = false;
+        mTCPWriteReady = false;
 
         size_t sent = 0;
 
@@ -715,7 +715,7 @@ namespace openpeer
           // nothing to send?
           if (mSendStream->getTotalReadBuffersAvailable() < 1) {
             ZS_LOG_TRACE(log("no data was sent because there was nothing to send (try again when data added to send)"))
-            get(mTCPWriteReady) = true;
+            mTCPWriteReady = true;
             return;
           }
         }
@@ -914,7 +914,7 @@ namespace openpeer
     //-----------------------------------------------------------------------
     ITCPMessaging::ChannelHeaderPtr ITCPMessaging::ChannelHeader::convert(ITransportStream::StreamHeaderPtr header)
     {
-      return dynamic_pointer_cast<ChannelHeader>(header);
+      return ZS_DYNAMIC_PTR_CAST(ChannelHeader, header);
     }
 
   }

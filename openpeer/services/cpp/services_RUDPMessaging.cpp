@@ -106,7 +106,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPMessagingPtr RUDPMessaging::convert(IRUDPMessagingPtr messaging)
       {
-        return dynamic_pointer_cast<RUDPMessaging>(messaging);
+        return ZS_DYNAMIC_PTR_CAST(RUDPMessaging, messaging);
       }
 
       //-----------------------------------------------------------------------
@@ -336,11 +336,11 @@ namespace openpeer
         if (writer == mOuterReceiveStream) {
           ZS_LOG_TRACE(log("on transport stream outer receive ready"))
           mWireReceiveStream->notifyReaderReadyToRead();
-          get(mInformedOuterReceiveReady) = true;
+          mInformedOuterReceiveReady = true;
         } else if (writer == mWireSendStream) {
           ZS_LOG_TRACE(log("on transport stream wire send ready"))
           mOuterSendStream->notifyReaderReadyToRead();
-          get(mInformedWireSendReady) = true;
+          mInformedWireSendReady = true;
         }
         step();
       }
@@ -416,8 +416,6 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "graceful shutdown reference", (bool)mGracefulShutdownReference);
 
         IHelper::debugAppend(resultEl, "channel", mChannel ? mChannel->getID() : 0);
-
-        IHelper::debugAppend(resultEl, "next message size (bytes)", mNextMessageSizeInBytes);
 
         IHelper::debugAppend(resultEl, "max message size (bytes)", mMaxMessageSizeInBytes);
 
@@ -543,8 +541,6 @@ namespace openpeer
         mGracefulShutdownReference.reset();
 
         mChannel.reset();
-
-        get(mNextMessageSizeInBytes) = 0;
       }
 
       //-----------------------------------------------------------------------
@@ -586,7 +582,7 @@ namespace openpeer
           return;
         }
 
-        get(mLastError) = errorCode;
+        mLastError = errorCode;
         mLastErrorReason = reason;
 
         ZS_LOG_WARNING(Detail, debug("error set") + ZS_PARAM("code", mLastError) + ZS_PARAM("reason", mLastErrorReason))

@@ -224,7 +224,7 @@ namespace openpeer
         IRUDPTransportSubscriptionPtr mDefaultSubscription;
 
         RUDPTransportStates mCurrentState;
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         IICESocketSessionPtr mICESession;

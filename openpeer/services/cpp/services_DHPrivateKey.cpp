@@ -85,7 +85,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DHPrivateKeyPtr DHPrivateKey::convert(IDHPrivateKeyPtr publicKey)
       {
-        return dynamic_pointer_cast<DHPrivateKey>(publicKey);
+        return ZS_DYNAMIC_PTR_CAST(DHPrivateKey, publicKey);
       }
 
       //-----------------------------------------------------------------------

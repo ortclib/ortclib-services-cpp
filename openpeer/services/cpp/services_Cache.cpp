@@ -69,7 +69,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       CachePtr Cache::convert(ICachePtr cache)
       {
-        return dynamic_pointer_cast<Cache>(cache);
+        return ZS_DYNAMIC_PTR_CAST(Cache, cache);
       }
 
       //-----------------------------------------------------------------------

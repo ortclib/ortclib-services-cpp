@@ -93,7 +93,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       BackgroundingPtr Backgrounding::convert(IBackgroundingPtr backgrounding)
       {
-        return dynamic_pointer_cast<Backgrounding>(backgrounding);
+        return ZS_DYNAMIC_PTR_CAST(Backgrounding, backgrounding);
       }
 
       //-----------------------------------------------------------------------
@@ -136,7 +136,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IBackgroundingNotifierPtr Backgrounding::getBackgroundingNotifier(IBackgroundingNotifierPtr inNotifier)
       {
-        ExchangedNotifierPtr exchange = dynamic_pointer_cast<ExchangedNotifier>(inNotifier);
+        ExchangedNotifierPtr exchange = ZS_DYNAMIC_PTR_CAST(ExchangedNotifier, inNotifier);
 
         BackgroundingPtr pThis = exchange->getOuter();
 
@@ -705,7 +705,7 @@ namespace openpeer
 
         if (mNotified) return;
 
-        get(mNotified) = true;
+        mNotified = true;
 
         mOuter->notifyReady(mBackgroundingID, mPhase);
       }

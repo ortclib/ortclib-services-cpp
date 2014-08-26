@@ -1108,7 +1108,7 @@ namespace openpeer
             return;
           }
 
-          get(mClosed) = true;
+          mClosed = true;
 
           TelnetLoggerPtr pThis = mThisWeak.lock();
           if (pThis) {
@@ -1873,7 +1873,7 @@ namespace openpeer
 
         Time mBacklogDataUntil;
 
-        AutoBool mClosed;
+        bool mClosed {};
 
         String mCommand;
 

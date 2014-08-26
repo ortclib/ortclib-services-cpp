@@ -252,11 +252,11 @@ namespace openpeer
         mutable RecursiveLock mLock;
         TransportStreamWeakPtr mThisWeak;
 
-        AutoBool mShutdown;
-        AutoBool mReaderReady;
+        bool mShutdown {};
+        bool mReaderReady {};
 
-        AutoBool mReadReadyNotified;
-        AutoBool mWriteReadyNotified;
+        bool mReadReadyNotified {};
+        bool mWriteReadyNotified {};
 
         ITransportStreamWriterDelegateSubscriptions mWriterSubscriptions;
         ITransportStreamWriterSubscriptionPtr mDefaultWriterSubscription;

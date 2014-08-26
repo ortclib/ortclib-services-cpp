@@ -150,7 +150,7 @@ namespace openpeer
         MessageQueueManagerWeakPtr mThisWeak;
 
         MessageQueueManagerPtr mGracefulShutdownReference;
-        AutoBool mFinalCheck;
+        bool mFinalCheck {};
         size_t mPending;
 
         MessageQueueMap mQueues;

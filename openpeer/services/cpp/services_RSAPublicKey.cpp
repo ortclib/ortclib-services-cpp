@@ -104,13 +104,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::convert(IRSAPublicKeyPtr publicKey)
       {
-        return dynamic_pointer_cast<RSAPublicKey>(publicKey);
+        return ZS_DYNAMIC_PTR_CAST(RSAPublicKey, publicKey);
       }
 
       //-----------------------------------------------------------------------
       RSAPublicKeyPtr RSAPublicKey::convert(ForPrivateKeyPtr publicKey)
       {
-        return dynamic_pointer_cast<RSAPublicKey>(publicKey);
+        return ZS_DYNAMIC_PTR_CAST(RSAPublicKey, publicKey);
       }
 
       //-----------------------------------------------------------------------

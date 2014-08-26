@@ -151,7 +151,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SettingsPtr Settings::convert(ISettingsPtr settings)
       {
-        return dynamic_pointer_cast<Settings>(settings);
+        return ZS_DYNAMIC_PTR_CAST(Settings, settings);
       }
 
       //-----------------------------------------------------------------------

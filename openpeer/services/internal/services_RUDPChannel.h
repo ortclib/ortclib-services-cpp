@@ -441,10 +441,10 @@ namespace openpeer
         RUDPChannelWeakPtr mThisWeak;
         RUDPChannelPtr mGracefulShutdownReference;
 
-        AutoBool mIncoming;
+        bool mIncoming {};
 
         RUDPChannelStates mCurrentState;
-        AutoWORD mLastError;
+        WORD mLastError {};
         String mLastErrorReason;
 
         IRUDPChannelDelegatePtr mDelegate;
@@ -456,7 +456,7 @@ namespace openpeer
         IRUDPChannelStreamPtr mStream;
         ISTUNRequesterPtr mOpenRequest;
         ISTUNRequesterPtr mShutdownRequest;
-        AutoBool mSTUNRequestPreviouslyTimedOut;    // if true then no need issue a "close" STUN request if a STUN request has previously timed out
+        bool mSTUNRequestPreviouslyTimedOut {};    // if true then no need issue a "close" STUN request if a STUN request has previously timed out
 
         TimerPtr mTimer;
 
