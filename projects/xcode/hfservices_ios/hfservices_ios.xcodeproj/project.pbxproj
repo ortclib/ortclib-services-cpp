@@ -11,6 +11,7 @@
 		000CC05C17A569AE0075E86C /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC05A17A569AE0075E86C /* services_RSAPrivateKey.cpp */; };
 		000CC05D17A569AE0075E86C /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC05B17A569AE0075E86C /* services_RSAPublicKey.cpp */; };
 		000CC06117A570640075E86C /* services_MessageLayerSecurityChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC06017A570640075E86C /* services_MessageLayerSecurityChannel.cpp */; };
+		000DA78C19ACEDD100DAFCA9 /* punycode.c in Sources */ = {isa = PBXBuildFile; fileRef = 000DA78819ACEDD100DAFCA9 /* punycode.c */; };
 		001AEF5D1853E7A000029ABC /* services_Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 001AEF5C1853E7A000029ABC /* services_Cache.cpp */; };
 		003BEE0717A6F4F80002EB47 /* services_TransportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEE0517A6F4F80002EB47 /* services_TransportStream.cpp */; };
 		00485CF118BEF9E200444E06 /* services_Backgrounding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00485CF018BEF9E200444E06 /* services_Backgrounding.cpp */; };
@@ -70,6 +71,12 @@
 		000CC05E17A570100075E86C /* IMessageLayerSecurityChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageLayerSecurityChannel.h; sourceTree = "<group>"; };
 		000CC05F17A570510075E86C /* services_MessageLayerSecurityChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_MessageLayerSecurityChannel.h; sourceTree = "<group>"; };
 		000CC06017A570640075E86C /* services_MessageLayerSecurityChannel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_MessageLayerSecurityChannel.cpp; sourceTree = "<group>"; };
+		000DA78519ACEDD100DAFCA9 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		000DA78619ACEDD100DAFCA9 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		000DA78719ACEDD100DAFCA9 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		000DA78819ACEDD100DAFCA9 /* punycode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = punycode.c; sourceTree = "<group>"; };
+		000DA78919ACEDD100DAFCA9 /* punycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = punycode.h; sourceTree = "<group>"; };
+		000DA78A19ACEDD100DAFCA9 /* test-punycode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "test-punycode.c"; sourceTree = "<group>"; };
 		001AEF5B1853E78D00029ABC /* ICache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICache.h; sourceTree = "<group>"; };
 		001AEF5C1853E7A000029ABC /* services_Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Cache.cpp; sourceTree = "<group>"; };
 		001AEF5E1853E7AD00029ABC /* services_Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Cache.h; sourceTree = "<group>"; };
@@ -182,10 +189,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		000DA78419ACEDD100DAFCA9 /* punycode */ = {
+			isa = PBXGroup;
+			children = (
+				000DA78519ACEDD100DAFCA9 /* .gitignore */,
+				000DA78619ACEDD100DAFCA9 /* LICENSE */,
+				000DA78719ACEDD100DAFCA9 /* Makefile */,
+				000DA78819ACEDD100DAFCA9 /* punycode.c */,
+				000DA78919ACEDD100DAFCA9 /* punycode.h */,
+				000DA78A19ACEDD100DAFCA9 /* test-punycode.c */,
+			);
+			name = punycode;
+			path = ../../../../punycode;
+			sourceTree = "<group>";
+		};
 		0095DC0C16CA8802005F53D3 = {
 			isa = PBXGroup;
 			children = (
 				0095DC2616CA8A16005F53D3 /* openpeer */,
+				000DA78419ACEDD100DAFCA9 /* punycode */,
 				0095DC1616CA8802005F53D3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -400,6 +422,7 @@
 				0095DE1C16CA8A17005F53D3 /* services_HTTP.cpp in Sources */,
 				0095DE1D16CA8A17005F53D3 /* services_ICESocket.cpp in Sources */,
 				0095DE1E16CA8A17005F53D3 /* services_ICESocketSession.cpp in Sources */,
+				000DA78C19ACEDD100DAFCA9 /* punycode.c in Sources */,
 				00840006185005BD009F6934 /* services_DHPublicKey.cpp in Sources */,
 				0095DE1F16CA8A17005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				00840005185005BD009F6934 /* services_DHPrivateKey.cpp in Sources */,
