@@ -26,6 +26,7 @@ $(LOCAL_PATH)/../build/android/cryptopp/include \
 $(LOCAL_PATH)/.. \
 $(LOCAL_PATH)/../build/android/curl/include \
 $(LOCAL_PATH)/../udns \
+$(LOCAL_PATH)/../punycode \
 $(LOCAL_PATH)/../build/android/boost/include/boost-1_53 \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.7/include \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.7/libs/armeabi/include \
