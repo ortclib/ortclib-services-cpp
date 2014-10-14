@@ -49,15 +49,15 @@ echo "------ Building op-services-cpp for ANDROID platform -------"
 pushd `pwd`
 mkdir -p ./../../../build/android/op-services-cpp
 
-rm -rf ./obj/*
+#rm -rf ./obj/*
 export ANDROIDNDK_PATH=$Input
 export NDK_PROJECT_PATH=`pwd`
-ndk-build APP_PLATFORM=android-9
+ndk-build NDK_DEBUG=1 APP_PLATFORM=android-9
 popd
 
 echo "-------- Installing op-services-cpp libs -----"
 cp -r ./obj/local/armeabi/lib* ./../../../build/android/op-services-cpp/
 
 #clean
-rm -rf ./obj
+#rm -rf ./obj
 
