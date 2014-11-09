@@ -485,7 +485,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
-					../../../../curl/include,
+					"../../../../curl-build-scripts/curl",
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
@@ -522,7 +522,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
-					../../../../curl/include,
+					"../../../../curl-build-scripts/curl",
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
