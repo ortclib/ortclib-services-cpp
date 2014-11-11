@@ -35,7 +35,7 @@
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ISTUNDiscovery.h>
 
-#include <openpeer/services/internal/services_Factory.h>
+#include <openpeer/services/internal/services_DNS.h>
 
 #include <zsLib/Socket.h>
 
@@ -67,7 +67,7 @@ namespace openpeer
       typedef boost::shared_ptr<TestDNSFactory> TestDNSFactoryPtr;
       typedef boost::weak_ptr<TestDNSFactory> TestDNSFactoryWeakPtr;
 
-      class TestDNSFactory : public services::internal::Factory
+      class TestDNSFactory : public services::internal::IDNSFactory
       {
       public:
         TestDNSFactory() :
@@ -279,7 +279,7 @@ void doTestDNS()
 
   TestDNSFactoryPtr overrideFactory(new TestDNSFactory);
 
-  openpeer::services::internal::Factory::override(overrideFactory);
+  openpeer::services::internal::DNSFactory::override(overrideFactory);
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
