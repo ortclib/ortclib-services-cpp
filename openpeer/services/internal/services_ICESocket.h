@@ -134,9 +134,6 @@ namespace openpeer
         ZS_DECLARE_STRUCT_PTR(STUNInfo)
         ZS_DECLARE_STRUCT_PTR(LocalSocket)
 
-        typedef boost::shared_array<BYTE> RecycledPacketBuffer;
-        typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
-
         typedef std::list<IPAddress> IPAddressList;
 
         typedef std::map<PUID, UseICESocketSessionPtr> ICESocketSessionMap;
@@ -436,26 +433,7 @@ namespace openpeer
                                   size_t bufferLengthInBytes
                                   );
 
-        void getBuffer(RecycledPacketBuffer &outBuffer);
-        void recycleBuffer(RecycledPacketBuffer &buffer);
-
         void clearRebindTimer() { if (mRebindTimer) {mRebindTimer->cancel(); mRebindTimer.reset();} }
-
-      public:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket::AutoRecycleBuffer
-        #pragma mark
-
-        class AutoRecycleBuffer
-        {
-        public:
-          AutoRecycleBuffer(ICESocket &outer, RecycledPacketBuffer &buffer) : mOuter(outer), mBuffer(buffer) {}
-          ~AutoRecycleBuffer() {mOuter.recycleBuffer(mBuffer);}
-        private:
-          ICESocket &mOuter;
-          RecycledPacketBuffer &mBuffer;
-        };
 
       protected:
         //---------------------------------------------------------------------
@@ -501,8 +479,6 @@ namespace openpeer
         ICESocketSessionMap mSessions;
 
         QuickRouteMap       mRoutes;
-
-        RecycledPacketBufferList mRecycledBuffers;
 
         bool                mNotifiedCandidateChanged {};
         DWORD               mLastCandidateCRC;

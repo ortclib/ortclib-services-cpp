@@ -58,8 +58,7 @@
 #endif
 #endif //_WIN32
 
-#define OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
-#define OPENPEER_SERVICES_ICESOCKET_MAX_RECYLCE_BUFFERS  4
+#define OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
 
 #define OPENPEER_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS  OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS
 
@@ -600,11 +599,11 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onReadReady(SocketPtr socket)
       {
-        boost::shared_array<BYTE> buffer;
+        std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE]);
+
         CandidatePtr viaLocalCandidate;
         IPAddress source;
         size_t bytesRead = 0;
-        AutoRecycleBuffer recycle(*this, buffer);
 
         // scope: we are going to read the data while within the local but process it outside the lock
         {
@@ -622,9 +621,7 @@ namespace openpeer
           try {
             bool wouldBlock = false;
 
-            getBuffer(buffer);
-
-            bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE, &wouldBlock);
+            bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE, &wouldBlock);
             if (0 == bytesRead) return;
 
             OPENPEER_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()) + ZS_PARAM("handle", socket->getSocket()))
@@ -1026,8 +1023,6 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "sessions", mSessions.size());
 
         IHelper::debugAppend(resultEl, "routes", mRoutes.size());
-
-        IHelper::debugAppend(resultEl, "recyle buffers", mRecycledBuffers.size());
 
         IHelper::debugAppend(resultEl, "notified candidates changed", mNotifiedCandidateChanged);
         IHelper::debugAppend(resultEl, "candidate crc", mLastCandidateCRC);
@@ -2371,32 +2366,6 @@ namespace openpeer
         }
 
         OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("did not find any socket session to handle data packet"))
-      }
-
-      //-----------------------------------------------------------------------
-      void ICESocket::getBuffer(RecycledPacketBuffer &outBuffer)
-      {
-        AutoRecursiveLock lock(*this);
-        if (mRecycledBuffers.size() < 1) {
-          outBuffer = RecycledPacketBuffer(new BYTE[OPENPEER_SERVICES_ICESOCKET_RECYCLE_BUFFER_SIZE]);
-          return;
-        }
-
-        outBuffer = mRecycledBuffers.front();
-        mRecycledBuffers.pop_front();
-      }
-
-      //-----------------------------------------------------------------------
-      void ICESocket::recycleBuffer(RecycledPacketBuffer &buffer)
-      {
-        AutoRecursiveLock lock(*this);
-        if (!buffer) return;
-
-        if (mRecycledBuffers.size() >= OPENPEER_SERVICES_ICESOCKET_MAX_RECYLCE_BUFFERS) {
-          buffer.reset();
-          return;
-        }
-        mRecycledBuffers.push_back(buffer);
       }
 
       //-----------------------------------------------------------------------

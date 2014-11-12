@@ -51,9 +51,6 @@
 #define OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS (20)
 #define OPENPEER_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS (200)
 
-#define OPENPEER_SERVICES_MINIMUM_DATA_BUFFER_LENGTH_ALLOCATED_IN_BYTES (16*1024)
-#define OPENPEER_SERVICES_MAX_RECYCLE_BUFFERS 16
-
 #define OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER (256)
 
 #define OPENPEER_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS (10)
@@ -952,8 +949,6 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "sending packets", mSendingPackets.size());
         IHelper::debugAppend(resultEl, "received packets", mReceivedPackets.size());
 
-        IHelper::debugAppend(resultEl, "recycled buffers", mRecycleBuffers.size());
-
         IHelper::debugAppend(resultEl, "random pool pos", mRandomPoolPos);
 
         IHelper::debugAppend(resultEl, "total packets to resend", mTotalPacketsToResend);
@@ -1006,8 +1001,6 @@ namespace openpeer
         if (mSendStream) {
           mSendStream->cancel();
         }
-
-        mRecycleBuffers.clear();
 
         if (mBurstTimer) {
           mBurstTimer->cancel();
@@ -2009,40 +2002,6 @@ namespace openpeer
 
         ZS_LOG_TRACE(log("get from write buffer") + ZS_PARAM("max size", maxFillSize) + ZS_PARAM("read size", read))
         return read;
-      }
-
-      //-----------------------------------------------------------------------
-      void RUDPChannelStream::getBuffer(
-                                        RecycleBuffer &outBuffer,
-                                        size_t &ioBufferAllocLengthInBytes
-                                        )
-      {
-        if (ioBufferAllocLengthInBytes < OPENPEER_SERVICES_MINIMUM_DATA_BUFFER_LENGTH_ALLOCATED_IN_BYTES)
-          ioBufferAllocLengthInBytes = OPENPEER_SERVICES_MINIMUM_DATA_BUFFER_LENGTH_ALLOCATED_IN_BYTES;
-
-        if ((OPENPEER_SERVICES_MINIMUM_DATA_BUFFER_LENGTH_ALLOCATED_IN_BYTES != ioBufferAllocLengthInBytes) ||
-            (mRecycleBuffers.size() < 1)) {
-          outBuffer = RecycleBuffer(new BYTE[ioBufferAllocLengthInBytes]);
-          return;
-        }
-
-        outBuffer = mRecycleBuffers.front();
-        mRecycleBuffers.pop_front();
-      }
-
-      //-----------------------------------------------------------------------
-      void RUDPChannelStream::freeBuffer(
-                                         RecycleBuffer &ioBuffer,
-                                         size_t bufferAllocLengthInBytes
-                                         )
-      {
-        if ((OPENPEER_SERVICES_MINIMUM_DATA_BUFFER_LENGTH_ALLOCATED_IN_BYTES != bufferAllocLengthInBytes) ||
-            (mRecycleBuffers.size() > OPENPEER_SERVICES_MAX_RECYCLE_BUFFERS)){
-          ioBuffer.reset();
-          return;
-        }
-
-        mRecycleBuffers.push_back(ioBuffer);
       }
 
       //-----------------------------------------------------------------------

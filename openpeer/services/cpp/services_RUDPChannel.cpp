@@ -1651,9 +1651,9 @@ namespace openpeer
 
         size_t available = outSTUN->getTotalRoomAvailableForData(OPENPEER_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN, STUNPacket::RFC_draft_RUDP);
 
-        boost::shared_array<BYTE> vector;
+        std::unique_ptr<BYTE[]> vector;
         if (available > 0) {
-          vector = boost::shared_array<BYTE>(new BYTE[available]);
+          vector = std::unique_ptr<BYTE[]>(new BYTE[available]);
         }
 
         QWORD nextSequenceNumber = 0;
@@ -1684,7 +1684,11 @@ namespace openpeer
         outSTUN->mNextSequenceNumber = nextSequenceNumber;
         outSTUN->mGSNR = gsnr;
         outSTUN->mGSNFR = gsnfr;
-        outSTUN->mACKVector = (0 != vectorOutputSize ? vector : boost::shared_array<BYTE>());
+        if (0 != vectorOutputSize) {
+          outSTUN->mACKVector = std::move(vector);
+        } else {
+          outSTUN->mACKVector.reset();
+        }
         outSTUN->mACKVectorLength = vectorOutputSize;
         outSTUN->mReliabilityFlagsIncluded = true;
         outSTUN->mReliabilityFlags = ((vpFlag ? RUDPPacket::Flag_VP_VectorParity : 0) |

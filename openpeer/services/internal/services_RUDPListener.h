@@ -71,9 +71,6 @@ namespace openpeer
 
         ZS_DECLARE_TYPEDEF_PTR(IRUDPChannelForRUDPListener, UseRUDPChannel)
 
-        typedef boost::shared_array<BYTE> RecycledPacketBuffer;
-        typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
-
         class CompareChannelPair;
 
         typedef IPAddress RemoteIP;
@@ -191,25 +188,7 @@ namespace openpeer
                                   STUNPacketPtr &outResponse
                                   );
 
-        void getBuffer(RecycledPacketBuffer &outBuffer);
-        void recycleBuffer(RecycledPacketBuffer &buffer);
-
       public:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener::AutoRecycleBuffer
-        #pragma mark
-
-        class AutoRecycleBuffer
-        {
-        public:
-          AutoRecycleBuffer(RUDPListener &outer, RecycledPacketBuffer &buffer) : mOuter(outer), mBuffer(buffer) {}
-          ~AutoRecycleBuffer() {mOuter.recycleBuffer(mBuffer);}
-        private:
-          RUDPListener &mOuter;
-          RecycledPacketBuffer &mBuffer;
-        };
-
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark RUDPListener::CompareChannelPair
@@ -243,8 +222,6 @@ namespace openpeer
         SessionMap mRemoteChannelNumberSessions;  // remote channel numbers are the channel numbers we expect to send to the remote party
 
         PendingSessionList mPendingSessions;
-
-        RecycledPacketBufferList mRecycledBuffers;
 
         BYTE mMagic[16];
         String mRealm;

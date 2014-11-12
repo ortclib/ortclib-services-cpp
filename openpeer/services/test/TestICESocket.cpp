@@ -37,8 +37,6 @@
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/IICESocketSession.h>
 
-#include <boost/shared_array.hpp>
-
 //#include <boost/test/unit_test_suite.hpp>
 //#include <boost/test/unit_test.hpp>
 //#include <boost/test/test_tools.hpp>
@@ -81,9 +79,7 @@ namespace openpeer
       static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
       static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
 
-      class TestICESocketCallback;
-      typedef boost::shared_ptr<TestICESocketCallback> TestICESocketCallbackPtr;
-      typedef boost::weak_ptr<TestICESocketCallback> TestICESocketCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestICESocketCallback)
 
       class TestICESocketCallback : public zsLib::MessageQueueAssociator,
                                     public IICESocketDelegate,

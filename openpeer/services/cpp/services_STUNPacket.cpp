@@ -1129,51 +1129,6 @@ namespace openpeer
         memcpy(pos, buffer, length);
       }
 
-      // for message integrity
-//      static const char *gHexstream = "000300a42112a442f2fd4b12308af95c4c23c06300060004746f746f0014000c79616b6f6c616b6f2e636f6d001500303465333639623936303030303030303039303561346535373734636666353530353030643566616262613963626537348022002c72655455524e204173796e6320436c69656e7420302e33202d20524643353338392f7475726e2d31322020200018000180000000001900041100000000080014cd35cfedec575a0b2515cf0a5bd7c1379ab1f3ea";
-      // compare fingerprint
-//      static const char *gHexstream = "000100582112a442b7e7a701bc34d686fa87dfae802200105354554e207465737420636c69656e74002400046e0001ff80290008932ff9b151263b36000600096576746a3a68367659202020000800149aeaa70cbfd8cb56781ef2b5b2d3f249c1b571a2";
-      // should be CRC32 value: e57a3bcf
-
-      /*
-
-      static void convertHexStream(BYTE *dest)
-      {
-        bool high = true;
-        BYTE current = 0;
-        for (const char *pos = &(gHexstream[0]); *pos; ++pos, high = !high)
-        {
-          BYTE value = 0;
-          switch (*pos)
-          {
-            case '0': value = 0; break;
-            case '1': value = 1; break;
-            case '2': value = 2; break;
-            case '3': value = 3; break;
-            case '4': value = 4; break;
-            case '5': value = 5; break;
-            case '6': value = 6; break;
-            case '7': value = 7; break;
-            case '8': value = 8; break;
-            case '9': value = 9; break;
-            case 'a': value = 10; break;
-            case 'b': value = 11; break;
-            case 'c': value = 12; break;
-            case 'd': value = 13; break;
-            case 'e': value = 14; break;
-            case 'f': value = 15; break;
-          }
-          if (high) {
-            current = value << 4;
-          } else {
-            current |= value;
-            *dest = current;
-            ++dest;
-          }
-        }
-      }
-       */
-
       //-----------------------------------------------------------------------
       static void packetizeMessageIntegrity(
                                             BYTE *pos,
@@ -1187,20 +1142,8 @@ namespace openpeer
           case STUNPacket::CredentialMechanisms_LongTerm:   {
             CryptoPP::Weak::MD5 md5;
 
-            /*
-            size_t len = strlen(gHexstream)/2;
-            boost::shared_array<BYTE> blob(new BYTE[len*2]);
-            BYTE *compare = blob.get();
-            memset(compare, 0, len*2);
-            convertHexStream(compare);
-            */
-
             BYTE key[16];
             memset(&(key[0]), 0, sizeof(key));
-
-//            String user = "bogus";
-//            String pass = "bogus";
-//            String realm = "yakolako.com";
 
             const String &user = stun.mUsername;
             const String &pass = stun.mPassword;
@@ -1230,7 +1173,6 @@ namespace openpeer
 
             CryptoPP::HMAC<CryptoPP::SHA1> hmac(&(key[0]), sizeof(key));
             hmac.Update(stun.mOriginalPacket, messageIntegrityMessageLengthInBytes);
-//            hmac.Update(compare, len - 24);
             ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
 
             // put back the original length
@@ -1270,18 +1212,9 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void packetizeFingerprint(BYTE *pos, const STUNPacket &stun, const BYTE *startPos)
       {
-        /*
-         size_t len = strlen(gHexstream)/2;
-         boost::shared_array<BYTE> blob(new BYTE[len*2]);
-         BYTE *compare = blob.get();
-         memset(compare, 0, len*2);
-         convertHexStream(compare);
-         */
-
         CryptoPP::CRC32 crc;
         PTRNUMBER size = ((PTRNUMBER)startPos) - ((PTRNUMBER)stun.mOriginalPacket);
         crc.Update(stun.mOriginalPacket, (size_t)size);
-//        crc.Update(compare, len);
 
         ZS_THROW_INVALID_ASSUMPTION_IF(crc.DigestSize() != sizeof(DWORD))
         DWORD crcValue = 0;
@@ -1746,7 +1679,12 @@ namespace openpeer
       dest->mGSNFR = mGSNFR;
       dest->mReliabilityFlagsIncluded = mReliabilityFlagsIncluded;
       dest->mReliabilityFlags = mReliabilityFlags;
-      dest->mACKVector = mACKVector;
+      if ((mACKVector) &&
+          (mACKVectorLength > 0)) {
+        std::unique_ptr<BYTE[]> buffer(new BYTE[mACKVectorLength]);
+        memcpy(buffer.get(), mACKVector.get(), mACKVectorLength);
+        dest->mACKVector = std::move(buffer);
+      }
       dest->mACKVectorLength = mACKVectorLength;
       dest->mLocalCongestionControl = mLocalCongestionControl;
       dest->mRemoteCongestionControl = mRemoteCongestionControl;
@@ -2071,9 +2009,9 @@ namespace openpeer
             }
             case STUNPacket::Attribute_ACKVector:           {
               if (attributeLength < sizeof(BYTE)) return STUNPacketPtr();
-              boost::shared_array<BYTE> buffer(new BYTE[attributeLength]);
+              std::unique_ptr<BYTE[]> buffer(new BYTE[attributeLength]);
               memcpy(buffer.get(), dataPos, attributeLength);
-              stun->mACKVector = buffer;
+              stun->mACKVector = std::move(buffer);
               stun->mACKVectorLength = attributeLength;
               break;
             }

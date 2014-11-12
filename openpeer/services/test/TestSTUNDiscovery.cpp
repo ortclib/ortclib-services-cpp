@@ -66,9 +66,7 @@ namespace openpeer
   {
     namespace test
     {
-      class TestSTUNDiscoveryCallback;
-      typedef boost::shared_ptr<TestSTUNDiscoveryCallback> TestSTUNDiscoveryCallbackPtr;
-      typedef boost::weak_ptr<TestSTUNDiscoveryCallback> TestSTUNDiscoveryCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestSTUNDiscoveryCallback)
 
       class TestSTUNDiscoveryCallback : public zsLib::MessageQueueAssociator,
                                         public ISTUNDiscoveryDelegate,

@@ -35,7 +35,6 @@
 #include <zsLib/Proxy.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/STUNPacket.h>
-#include <boost/shared_array.hpp>
 
 namespace openpeer
 {

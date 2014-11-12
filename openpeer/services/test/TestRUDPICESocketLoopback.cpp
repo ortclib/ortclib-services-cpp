@@ -40,8 +40,6 @@
 #include <openpeer/services/IRUDPMessaging.h>
 #include <openpeer/services/ITransportStream.h>
 
-#include <boost/shared_array.hpp>
-
 //#include <boost/test/unit_test_suite.hpp>
 //#include <boost/test/unit_test.hpp>
 //#include <boost/test/test_tools.hpp>
@@ -93,9 +91,7 @@ namespace openpeer
       static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
       static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
 
-      class TestRUDPICESocketLoopback;
-      typedef boost::shared_ptr<TestRUDPICESocketLoopback> TestRUDPICESocketLoopbackPtr;
-      typedef boost::weak_ptr<TestRUDPICESocketLoopback> TestRUDPICESocketLoopbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketLoopback)
 
       class TestRUDPICESocketLoopback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,

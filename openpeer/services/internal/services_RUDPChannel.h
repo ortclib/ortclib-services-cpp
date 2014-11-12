@@ -188,9 +188,6 @@ namespace openpeer
         typedef PUID ACKRequestID;
         typedef std::map<ACKRequestID, ISTUNRequesterPtr> ACKRequestMap;
 
-        typedef std::pair<boost::shared_array<BYTE>, size_t> PendingSendBuffer;
-        typedef std::list<PendingSendBuffer> PendingSendBufferList;
-
       protected:
         RUDPChannel(
                     IMessageQueuePtr queue,

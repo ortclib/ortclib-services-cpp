@@ -53,8 +53,6 @@
 #include <pthread.h>
 #endif //ndef _WIN32
 
-#include <boost/shared_array.hpp>
-
 #include <cryptopp/modes.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/base64.h>
@@ -224,7 +222,7 @@ namespace openpeer
         if (!element) return String();
 
         GeneratorPtr generator = Generator::createJSONGenerator();
-        boost::shared_array<char> output = generator->write(element);
+        std::unique_ptr<char[]> output = generator->write(element);
 
         return output.get();
       }
@@ -252,7 +250,7 @@ namespace openpeer
         if (!doc) return SecureByteBlockPtr(new SecureByteBlock);
 
         size_t length = 0;
-        boost::shared_array<char> output = doc->writeAsJSON(prettyPrint, &length);
+        std::unique_ptr<char[]> output = doc->writeAsJSON(prettyPrint, &length);
 
         return Helper::convertToBuffer(output, length);
       }
@@ -293,15 +291,15 @@ namespace openpeer
         BYTE staticBuffer[256];
         char staticOutputBuffer[sizeof(staticBuffer)+1];
 
-        boost::shared_array<BYTE> allocatedBuffer;
-        boost::shared_array<char> allocatedOutputBuffer;
+        std::unique_ptr<BYTE[]> allocatedBuffer;
+        std::unique_ptr<char[]> allocatedOutputBuffer;
 
         BYTE *buffer = &(staticBuffer[0]);
         char *output = &(staticOutputBuffer[0]);
         if (lengthInChars > sizeof(staticBuffer)) {
           // use the allocated buffer instead
-          allocatedBuffer = boost::shared_array<BYTE>(new BYTE[lengthInChars]);
-          allocatedOutputBuffer = boost::shared_array<char>(new char[lengthInChars+1]);
+          allocatedBuffer = std::unique_ptr<BYTE[]>(new BYTE[lengthInChars]);
+          allocatedOutputBuffer = std::unique_ptr<char[]>(new char[lengthInChars+1]);
           buffer = allocatedBuffer.get();
           output = allocatedOutputBuffer.get();
         }
@@ -458,7 +456,7 @@ namespace openpeer
 
       //-------------------------------------------------------------------------
       SecureByteBlockPtr Helper::convertToBuffer(
-                                                 boost::shared_array<char> arrayStr,
+                                                 const std::unique_ptr<char[]> &arrayStr,
                                                  size_t lengthInChars,
                                                  bool wipeOriginal
                                                  )
@@ -1089,7 +1087,7 @@ namespace openpeer
           ZS_LOG_BASIC(log("vvvvvvvvvvvv -- PRE-SORT  -- vvvvvvvvvvvv"))
           {
             GeneratorPtr generator = Generator::createJSONGenerator();
-            boost::shared_array<char> output = generator->write(element);
+            std::unique_ptr<char[]> output = generator->write(element);
             ZS_LOG_BASIC( ((CSTR)output.get()) )
           }
           ZS_LOG_BASIC(log("^^^^^^^^^^^^ -- PRE-SORT  -- ^^^^^^^^^^^^"))
@@ -1106,7 +1104,7 @@ namespace openpeer
           ZS_LOG_BASIC(log("vvvvvvvvvvvv -- POST-SORT -- vvvvvvvvvvvv"))
           {
             GeneratorPtr generator = Generator::createJSONGenerator();
-            boost::shared_array<char> output = generator->write(convertEl);
+            std::unique_ptr<char[]> output = generator->write(convertEl);
             ZS_LOG_BASIC( ((CSTR)output.get()) )
           }
           ZS_LOG_BASIC(log("^^^^^^^^^^^^ -- POST-SORT -- ^^^^^^^^^^^^"))
@@ -1207,9 +1205,9 @@ namespace openpeer
 
         char *fillLine = &(bufferFillLine[0]);
 
-        boost::shared_array<char> temp;
+        std::unique_ptr<char[]> temp;
         if (maxLineLength > 255) {
-          temp = boost::shared_array<char>(new char[maxLineLength+2]);
+          temp = std::unique_ptr<char[]>(new char[maxLineLength+2]);
           memset(temp.get(), 0, sizeof(char)*(maxLineLength+2));
           fillLine = temp.get();
         }
@@ -1672,7 +1670,7 @@ namespace openpeer
 
     //-------------------------------------------------------------------------
     SecureByteBlockPtr IHelper::convertToBuffer(
-                                                boost::shared_array<char> arrayStr,
+                                                const std::unique_ptr<char[]> arrayStr,
                                                 size_t lengthInChars,
                                                 bool wipeOriginal
                                                 )

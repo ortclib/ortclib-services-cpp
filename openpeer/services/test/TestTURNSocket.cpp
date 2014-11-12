@@ -38,8 +38,6 @@
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNDiscovery.h>
 
-#include <boost/shared_array.hpp>
-
 //#include <boost/test/unit_test_suite.hpp>
 //#include <boost/test/unit_test.hpp>
 //#include <boost/test/test_tools.hpp>
@@ -70,9 +68,7 @@ namespace openpeer
       static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
       static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
 
-      class TestTURNSocketCallback;
-      typedef boost::shared_ptr<TestTURNSocketCallback> TestTURNSocketCallbackPtr;
-      typedef boost::weak_ptr<TestTURNSocketCallback> TestTURNSocketCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestTURNSocketCallback)
 
       class TestTURNSocketCallback : public MessageQueueAssociator,
                                      public ISTUNDiscoveryDelegate,
@@ -397,7 +393,7 @@ namespace openpeer
           if (mShutdownCalled) return;
 
           size_t length = (rand()%500)+1;
-          boost::shared_array<BYTE> buffer(new BYTE[length]);
+          std::shared_ptr<BYTE> buffer(new BYTE[length], std::default_delete<BYTE[]>());
 
           // fill the buffer with random data
           for (size_t loop = 0; loop < length; ++loop) {
@@ -525,7 +521,7 @@ namespace openpeer
 
         ULONG mTotalReceived;
 
-        typedef std::pair< boost::shared_array<BYTE>, size_t> DataPair;
+        typedef std::pair< std::shared_ptr<BYTE>, size_t> DataPair;
         typedef std::list<DataPair> DataList;
         DataList mSentData;
       };

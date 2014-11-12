@@ -182,7 +182,7 @@ namespace openpeer
 
             if (prettyPrint) {
               DocumentPtr doc = Document::createFromParsedJSON(json);
-              boost::shared_array<char> output = doc->writeAsJSON(true);
+              std::unique_ptr<char[]> output = doc->writeAsJSON(true);
               alt += "\n\n" + String((CSTR)output.get()) + "\n\n";
             } else {
               alt += "\n\n" + json + "\n\n";
@@ -447,7 +447,7 @@ namespace openpeer
         appendToDoc(message, params.params());
 
         GeneratorPtr generator = Generator::createJSONGenerator();
-        boost::shared_array<char> output = generator->write(message);
+        std::unique_ptr<char[]> output = generator->write(message);
 
         String result = (CSTR)output.get();
         if (eol) {
@@ -1294,8 +1294,8 @@ namespace openpeer
             // we need to buffer the data for later...
             size_t length = (output.length() - sent);
             BufferedData data;
-            boost::shared_array<BYTE> buffer(new BYTE[length]);
-            memcpy(&(buffer[0]), output.c_str() + sent, length);
+            std::shared_ptr<BYTE> buffer(new BYTE[length], std::default_delete<BYTE[]>() );
+            memcpy(buffer.get(), output.c_str() + sent, length);
 
             data.first = buffer;
             data.second = length;
@@ -1400,8 +1400,8 @@ namespace openpeer
             size_t length = mStringToSendUponConnection.length();
 
             BufferedData data;
-            boost::shared_array<BYTE> buffer(new BYTE[length]);
-            memcpy(&(buffer[0]), mStringToSendUponConnection.c_str(), length);
+            std::shared_ptr<BYTE> buffer(new BYTE[length], std::default_delete<BYTE[]>());
+            memcpy(buffer.get(), mStringToSendUponConnection.c_str(), length);
 
             data.first = buffer;
             data.second = length;
@@ -1877,7 +1877,7 @@ namespace openpeer
 
         String mCommand;
 
-        typedef std::pair< boost::shared_array<BYTE>, size_t> BufferedData;
+        typedef std::pair< std::shared_ptr<BYTE>, size_t> BufferedData;
         typedef std::list<BufferedData> BufferedDataList;
 
         BufferedDataList mBufferedList;

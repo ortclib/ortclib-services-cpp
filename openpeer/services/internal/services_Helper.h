@@ -102,7 +102,7 @@ namespace openpeer
                                                   size_t bufferLengthInBytes
                                                   );
         static SecureByteBlockPtr convertToBuffer(
-                                                  boost::shared_array<char> arrayStr,
+                                                  const std::unique_ptr<char[]> &arrayStr,
                                                   size_t lengthInChars = SIZE_T_MAX,
                                                   bool wipeOriginal = true
                                                   );

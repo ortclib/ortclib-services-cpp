@@ -63,9 +63,7 @@ namespace openpeer
   {
     namespace test
     {
-      class TestDNSFactory;
-      typedef boost::shared_ptr<TestDNSFactory> TestDNSFactoryPtr;
-      typedef boost::weak_ptr<TestDNSFactory> TestDNSFactoryWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestDNSFactory)
 
       class TestDNSFactory : public services::internal::IDNSFactory
       {
@@ -131,9 +129,7 @@ namespace openpeer
         ULONG mSRVCount;
       };
 
-      class TestDNSCallback;
-      typedef boost::shared_ptr<TestDNSCallback> TestDNSCallbackPtr;
-      typedef boost::weak_ptr<TestDNSCallback> TestDNSCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestDNSCallback)
 
       class TestDNSCallback : public zsLib::MessageQueueAssociator,
                               public IDNSDelegate

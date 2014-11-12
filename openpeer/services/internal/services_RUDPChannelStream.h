@@ -39,8 +39,6 @@
 #include <zsLib/Timer.h>
 #include <zsLib/Exception.h>
 
-#include <boost/shared_array.hpp>
-
 #include <map>
 #include <list>
 
@@ -83,9 +81,6 @@ namespace openpeer
       {
       public:
         friend interaction IRUDPChannelStreamFactory;
-
-        typedef boost::shared_array<BYTE> RecycleBuffer;
-        typedef std::list<RecycleBuffer> RecycleBufferList;
 
         ZS_DECLARE_STRUCT_PTR(BufferedPacket)
 
@@ -260,15 +255,6 @@ namespace openpeer
                                   size_t maxFillSize
                                   );
 
-        void getBuffer(
-                       RecycleBuffer &outBuffer,
-                       size_t &ioBufferAllocLengthInBytes
-                       );
-        void freeBuffer(
-                        RecycleBuffer &ioBuffer,
-                        size_t bufferAllocLengthInBytes
-                        );
-
         bool getRandomFlag();
 
         void closeOnAllDataSent();
@@ -361,8 +347,6 @@ namespace openpeer
 
         BufferedPacketMap mSendingPackets;
         BufferedPacketMap mReceivedPackets;
-
-        RecycleBufferList mRecycleBuffers;
 
         size_t mRandomPoolPos {};
         BYTE mRandomPool[256];

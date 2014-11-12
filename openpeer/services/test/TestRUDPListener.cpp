@@ -70,9 +70,7 @@ namespace openpeer
   {
     namespace test
     {
-      class TestRUDPListenerCallback;
-      typedef boost::shared_ptr<TestRUDPListenerCallback> TestRUDPListenerCallbackPtr;
-      typedef boost::weak_ptr<TestRUDPListenerCallback> TestRUDPListenerCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestRUDPListenerCallback)
 
       class TestRUDPListenerCallback : public zsLib::MessageQueueAssociator,
                                        public IRUDPListenerDelegate,

@@ -37,8 +37,6 @@
 #include <openpeer/services/IRUDPChannel.h>
 #include <openpeer/services/ITransportStream.h>
 
-#include <boost/shared_array.hpp>
-
 namespace openpeer
 {
   namespace services

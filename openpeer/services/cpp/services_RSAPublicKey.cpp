@@ -235,7 +235,7 @@ namespace openpeer
           ElementPtr canonicalSigned = Helper::cloneAsCanonicalJSON(signedEl);
 
           GeneratorPtr generator = Generator::createJSONGenerator();
-          boost::shared_array<char> signedElAsJSON = generator->write(canonicalSigned);
+          std::unique_ptr<char[]> signedElAsJSON = generator->write(canonicalSigned);
 
           SecureByteBlockPtr actualDigest = IHelper::hash((const char *)(signedElAsJSON.get()), IHelper::HashAlgorthm_SHA1);
 

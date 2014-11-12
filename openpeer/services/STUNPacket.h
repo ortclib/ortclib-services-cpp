@@ -38,8 +38,6 @@
 #include <zsLib/Log.h>
 #include <zsLib/String.h>
 
-#include <boost/shared_array.hpp>
-
 #define OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES (20)
 #define OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION "openpeer STUN 1.0"
 
@@ -365,7 +363,7 @@ namespace openpeer
       bool mReliabilityFlagsIncluded;
       BYTE mReliabilityFlags;
 
-      boost::shared_array<BYTE> mACKVector;                     // if set, points to the buffer containing the RLE ACK vector
+      std::unique_ptr<BYTE[]> mACKVector;                       // if set, points to the buffer containing the RLE ACK vector
       size_t mACKVectorLength;                                  // how long is the ACK vector (if non-zero then mACKVector must be set)
 
       typedef std::list<IRUDPChannel::CongestionAlgorithms> CongestionControlList;

@@ -84,8 +84,6 @@ namespace openpeer
         friend interaction ITURNSocket;
         friend interaction ITURNSocketFactory;
 
-        typedef boost::shared_array<BYTE> RecycledPacketBuffer;
-        typedef std::list<RecycledPacketBuffer> RecycledPacketBufferList;
         typedef std::list<IPAddress> IPAddressList;
         typedef IDNS::SRVResultPtr SRVResultPtr;
 
@@ -353,25 +351,7 @@ namespace openpeer
         void clearPermissionRequester()   {if (mPermissionRequester) { mPermissionRequester->cancel(); mPermissionRequester.reset(); } clearBackgroundingNotifierIfPossible();}
         void clearDeallocateRequester()   {if (mDeallocateRequester) { mDeallocateRequester->cancel(); mDeallocateRequester.reset(); } clearBackgroundingNotifierIfPossible();}
 
-        void getBuffer(RecycledPacketBuffer &outBuffer);
-        void recycleBuffer(RecycledPacketBuffer &buffer);
-
       public:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket::AutoRecycleBuffer
-        #pragma mark
-
-        class AutoRecycleBuffer
-        {
-        public:
-          AutoRecycleBuffer(TURNSocket &outer, RecycledPacketBuffer &buffer) : mOuter(outer), mBuffer(buffer) {}
-          ~AutoRecycleBuffer() {mOuter.recycleBuffer(mBuffer);}
-        private:
-          TURNSocket &mOuter;
-          RecycledPacketBuffer &mBuffer;
-        };
-
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark TURNSocket::Server
@@ -510,8 +490,6 @@ namespace openpeer
 
         ChannelIPMap mChannelIPMap;
         ChannelNumberMap mChannelNumberMap;
-
-        RecycledPacketBufferList mRecycledBuffers;
 
         bool          mForceTURNUseTCP;
         bool          mForceTURNUseUDP;

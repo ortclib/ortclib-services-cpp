@@ -37,8 +37,6 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 
-#include <boost/shared_array.hpp>
-
 #define OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START (0x4000)                    // the actual range is 0x4000 -> 0x7FFF but to prevent collision with RUDP this is a recommended range to use
 #define OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END   (0x5FFF)
 

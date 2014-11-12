@@ -78,9 +78,7 @@ namespace openpeer
   {
     namespace test
     {
-      class TestRUDPICESocketCallback;
-      typedef boost::shared_ptr<TestRUDPICESocketCallback> TestRUDPICESocketCallbackPtr;
-      typedef boost::weak_ptr<TestRUDPICESocketCallback> TestRUDPICESocketCallbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketCallback)
 
       class TestRUDPICESocketCallback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,

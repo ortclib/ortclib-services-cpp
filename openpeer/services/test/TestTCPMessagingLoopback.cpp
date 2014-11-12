@@ -41,8 +41,6 @@
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 
-#include <boost/shared_array.hpp>
-
 //#include <boost/test/unit_test_suite.hpp>
 //#include <boost/test/unit_test.hpp>
 //#include <boost/test/test_tools.hpp>
@@ -70,9 +68,7 @@ namespace openpeer
   {
     namespace test
     {
-      class TestTCPMessagingLoopback;
-      typedef boost::shared_ptr<TestTCPMessagingLoopback> TestTCPMessagingLoopbackPtr;
-      typedef boost::weak_ptr<TestTCPMessagingLoopback> TestTCPMessagingLoopbackWeakPtr;
+      ZS_DECLARE_CLASS_PTR(TestTCPMessagingLoopback)
 
       class TestTCPMessagingLoopback : public zsLib::MessageQueueAssociator,
                                        public ITCPMessagingDelegate,
@@ -242,7 +238,7 @@ namespace openpeer
           ITransportStream::StreamHeaderPtr header;
 
           SecureByteBlockPtr buffer = reader->read(&header);
-          ITCPMessaging::ChannelHeaderPtr channelHeader = boost::dynamic_pointer_cast<ITCPMessaging::ChannelHeader>(header);
+          ITCPMessaging::ChannelHeaderPtr channelHeader = std::dynamic_pointer_cast<ITCPMessaging::ChannelHeader>(header);
 
           if (!buffer) {
             return;

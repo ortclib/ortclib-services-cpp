@@ -55,8 +55,7 @@
 
 #include <algorithm>
 
-#define OPENPEER_SERVICES_RUDPLISTENER_RECYCLE_BUFFER_SIZE (1 << (sizeof(WORD)*8))
-#define OPENPEER_SERVICES_RUDPLISTENER_MAX_RECYLCE_BUFFERS (100)
+#define OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE (1 << (sizeof(WORD)*8))
 
 #define OPENPEER_SERVICES_RUDPLISTENER_MAX_NONCE_LIFETIME_IN_SECONDS (5*60)
 
@@ -321,8 +320,9 @@ namespace openpeer
       {
         IPAddress remote;
         STUNPacketPtr stun;
-        RecycledPacketBuffer buffer;
-        AutoRecycleBuffer autoRecycle(*this, buffer);
+
+        std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE]);
+
         size_t bytesRead = 0;
 
         // scope: read from the socket
@@ -330,10 +330,8 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
           if (!mDelegate) return;
 
-          getBuffer(buffer);
-
           try {
-            bytesRead = mUDPSocket->receiveFrom(remote, buffer.get(), OPENPEER_SERVICES_RUDPLISTENER_RECYCLE_BUFFER_SIZE);
+            bytesRead = mUDPSocket->receiveFrom(remote, buffer.get(), OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE);
           } catch(Socket::Exceptions::Unspecified &) {
             cancel();
             return;
@@ -612,8 +610,6 @@ namespace openpeer
         mLocalChannelNumberSessions.clear();
         mRemoteChannelNumberSessions.clear();
         mPendingSessions.clear();
-
-        mRecycledBuffers.clear();
       }
 
       //-----------------------------------------------------------------------
@@ -842,33 +838,6 @@ namespace openpeer
         } while (false);  // using as a scope rather than as a loop
 
         return (bool)response;
-      }
-
-      //-----------------------------------------------------------------------
-      void RUDPListener::getBuffer(RecycledPacketBuffer &outBuffer)
-      {
-        AutoRecursiveLock lock(mLock);
-        if (mRecycledBuffers.size() < 1) {
-          outBuffer = RecycledPacketBuffer(new BYTE[OPENPEER_SERVICES_RUDPLISTENER_RECYCLE_BUFFER_SIZE]);
-          return;
-        }
-
-        outBuffer = mRecycledBuffers.front();
-        mRecycledBuffers.pop_front();
-      }
-
-      //-----------------------------------------------------------------------
-      void RUDPListener::recycleBuffer(RecycledPacketBuffer &buffer)
-      {
-        AutoRecursiveLock lock(mLock);
-        if (!buffer) return;
-
-        if (mRecycledBuffers.size() >= OPENPEER_SERVICES_RUDPLISTENER_MAX_RECYLCE_BUFFERS) {
-          buffer.reset();
-          return;
-        }
-        mRecycledBuffers.push_back(buffer);
-        buffer.reset();
       }
 
       //-----------------------------------------------------------------------

@@ -1672,7 +1672,7 @@ namespace openpeer
           // signature has been applied
           size_t outputLength = 0;
           GeneratorPtr generator = Generator::createJSONGenerator();
-          boost::shared_array<char> output = generator->write(mSendKeyingNeedingToSignDoc, &outputLength);
+          std::unique_ptr<char[]> output = generator->write(mSendKeyingNeedingToSignDoc, &outputLength);
 
           SecureByteBlockPtr buffer(new SecureByteBlock(sizeof(DWORD) + (outputLength * sizeof(char))));
 
@@ -1893,7 +1893,7 @@ namespace openpeer
           GeneratorPtr generator = Generator::createJSONGenerator();
 
           ElementPtr canonicalJSONEl = IHelper::cloneAsCanonicalJSON(elementToSign);
-          boost::shared_array<char> elementAsJSON = generator->write(canonicalJSONEl);
+          std::unique_ptr<char[]> elementAsJSON = generator->write(canonicalJSONEl);
 
           SecureByteBlockPtr elementHash = IHelper::hash(elementAsJSON.get(), IHelper::HashAlgorthm_SHA1);
 

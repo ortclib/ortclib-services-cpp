@@ -47,8 +47,7 @@
 
 #include <algorithm>
 
-#define OPENPEER_SERVICES_TURNSOCKET_RECYCLE_BUFFER_SIZE (1 << (sizeof(WORD)*8))
-#define OPENPEER_SERVICES_TURNSOCKET_MAX_RECYLCE_BUFFERS 4
+#define OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE (1 << (sizeof(WORD)*8))
 
 #define OPENPEER_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS (20)             // keep alive should be 20 because ICE sends its keep alives every 15 seconds
 #define OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS (15)               // do not allow server to dictate a LIFETIME lower than 15 seconds
@@ -888,8 +887,7 @@ namespace openpeer
               parseAgain = false;
 
               STUNPacketPtr stun;
-              boost::shared_array<BYTE> buffer;
-              AutoRecycleBuffer autoRecycle(*this, buffer);
+              std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE]);
               STUNPacket::ParseLookAheadStates ahead = STUNPacket::ParseLookAheadState_InsufficientDataToDeterimine;
 
               // scope: parse out the buffer
@@ -901,9 +899,7 @@ namespace openpeer
                 if (0 != consumedBytes) {
                   // the STUN packet is going to have it's parsed pointing into the read buffer which is about to be consumed, fix the pointers now...
                   ZS_THROW_INVALID_ASSUMPTION_IF(!stun)
-                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > OPENPEER_SERVICES_TURNSOCKET_RECYCLE_BUFFER_SIZE)
-
-                  getBuffer(buffer);
+                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE)
 
                   // make a duplicate of the data buffer
                   memcpy(buffer.get(), &(server->mReadBuffer[0]), consumedBytes);
@@ -966,8 +962,6 @@ namespace openpeer
                     }
 
                     peer = (*iter).second->mPeerAddress;
-
-                    getBuffer(buffer);
 
                     // we now have channel data, parse it out by making a copy to the temporary buffer
                     memcpy(buffer.get(), &(((WORD *)&(server->mReadBuffer[0]))[2]), length);
@@ -1379,7 +1373,6 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "permission max capacity", mPermissionRequesterMaxCapacity);
         IHelper::debugAppend(resultEl, "channel IP map", mChannelIPMap.size());
         IHelper::debugAppend(resultEl, "channel number map", mChannelNumberMap.size());
-        IHelper::debugAppend(resultEl, "recycle buffers", mRecycledBuffers.size());
 
         return resultEl;
       }
@@ -2540,32 +2533,6 @@ namespace openpeer
         mBackgroundingNotifier.reset();
       }
       
-      //-------------------------------------------------------------------------
-      void TURNSocket::getBuffer(RecycledPacketBuffer &outBuffer)
-      {
-        AutoRecursiveLock lock(mLock);
-        if (mRecycledBuffers.size() < 1) {
-          outBuffer = RecycledPacketBuffer(new BYTE[OPENPEER_SERVICES_TURNSOCKET_RECYCLE_BUFFER_SIZE]);
-          return;
-        }
-
-        outBuffer = mRecycledBuffers.front();
-        mRecycledBuffers.pop_front();
-      }
-
-      //-------------------------------------------------------------------------
-      void TURNSocket::recycleBuffer(RecycledPacketBuffer &buffer)
-      {
-        AutoRecursiveLock lock(mLock);
-        if (!buffer) return;
-
-        if (mRecycledBuffers.size() >= OPENPEER_SERVICES_TURNSOCKET_MAX_RECYLCE_BUFFERS) {
-          buffer.reset();
-          return;
-        }
-        mRecycledBuffers.push_back(buffer);
-      }
-
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

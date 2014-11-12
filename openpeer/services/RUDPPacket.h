@@ -32,7 +32,6 @@
 #pragma once
 
 #include <openpeer/services/types.h>
-#include <boost/shared_array.hpp>
 
 #include <zsLib/Log.h>
 

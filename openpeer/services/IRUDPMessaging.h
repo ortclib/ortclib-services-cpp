@@ -36,7 +36,6 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/String.h>
-#include <boost/shared_array.hpp>
 
 #define OPENPEER_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
 

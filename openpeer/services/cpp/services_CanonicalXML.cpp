@@ -364,7 +364,7 @@ namespace openpeer
 
         GeneratorPtr generator = Generator::createXMLGenerator(static_cast<Generator::XMLWriteFlags>(Generator::XMLWriteFlag_ForceElementEndTag | Generator::XMLWriteFlag_NormalizeCDATA | Generator::XMLWriteFlag_EntityEncode0xDInText | Generator::XMLWriteFlag_NormizeAttributeValue));
 
-        boost::shared_array<char> output = generator->write(doc);
+        std::unique_ptr<char[]> output = generator->write(doc);
         return (CSTR)output.get();
       }
     }
