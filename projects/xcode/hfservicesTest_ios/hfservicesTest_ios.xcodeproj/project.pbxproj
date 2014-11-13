@@ -37,6 +37,7 @@
 		00AD9019177BF981009590EB /* libudns_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD900D177BF5CC009590EB /* libudns_ios.a */; };
 		00AD901D177BFB78009590EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD901C177BFB78009590EB /* libz.dylib */; };
 		00C82BE61830DCEE005B87E0 /* boost.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C82BE51830DCED005B87E0 /* boost.framework */; };
+		00CBC68C1A13A88800643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC68B1A13A88800643BA7 /* TestHelper.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,6 +138,7 @@
 		00ABD4A017A8BB8E00178078 /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
 		00AD901C177BFB78009590EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		00C82BE51830DCED005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../../boost/ios/framework/boost.framework; sourceTree = "<group>"; };
+		00CBC68B1A13A88800643BA7 /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +223,7 @@
 				0063C58316CAA62600E6DB4D /* TestCanonicalXML.cpp */,
 				00579B8B185133C400CB4951 /* TestDH.cpp */,
 				0063C58416CAA62600E6DB4D /* TestDNS.cpp */,
+				00CBC68B1A13A88800643BA7 /* TestHelper.cpp */,
 				0063C58516CAA62600E6DB4D /* TestICESocket.cpp */,
 				0063C58616CAA62600E6DB4D /* TestRUDPICESocket.cpp */,
 				0063C58716CAA62600E6DB4D /* TestRUDPICESocketLoopback.cpp */,
@@ -451,6 +454,7 @@
 				0063C77616CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate_iPhone.m in Sources */,
 				0063C77716CAA7F000E6DB4D /* main.m in Sources */,
 				00ABD4A117A8BB8E00178078 /* TestTCPMessagingLoopback.cpp in Sources */,
+				00CBC68C1A13A88800643BA7 /* TestHelper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

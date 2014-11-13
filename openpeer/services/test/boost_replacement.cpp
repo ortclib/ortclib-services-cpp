@@ -48,6 +48,7 @@ typedef openpeer::services::ILogger ILogger;
 void doTestCanonicalXML();
 void doTestDH();
 void doTestDNS();
+void doTestHelper();
 void doTestICESocket();
 void doTestSTUNDiscovery();
 void doTestTURNSocket();
@@ -150,6 +151,7 @@ namespace BoostReplacement
     BOOST_RUN_TEST_FUNC(doTestCanonicalXML)
     BOOST_RUN_TEST_FUNC(doTestDH)
     BOOST_RUN_TEST_FUNC(doTestDNS)
+    BOOST_RUN_TEST_FUNC(doTestHelper)
     BOOST_RUN_TEST_FUNC(doTestICESocket)
     BOOST_RUN_TEST_FUNC(doTestSTUNDiscovery)
     BOOST_RUN_TEST_FUNC(doTestTURNSocket)

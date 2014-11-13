@@ -213,6 +213,9 @@ namespace openpeer
 
         static ElementPtr cloneAsCanonicalJSON(ElementPtr element);
 
+        static String convertIDNToUTF8(const char *idnStr);
+        static String convertUTF8ToIDN(const char *utf8Str);
+
         static bool isValidDomain(const char *domain);
 
         static void split(

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		000CC03717A475F90075E86C /* services_Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC03617A475F90075E86C /* services_Logger.cpp */; };
-		000DA7D619AE093400DAFCA9 /* punycode.c in Sources */ = {isa = PBXBuildFile; fileRef = 000DA7D219AE093400DAFCA9 /* punycode.c */; };
 		001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 001AEF591853DE9300029ABC /* services_Cache.cpp */; };
 		002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4819A915B500F360CE /* services_Decryptor.cpp */; };
 		002FCF4B19A915B500F360CE /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4919A915B500F360CE /* services_Encryptor.cpp */; };
@@ -50,12 +49,6 @@
 		000CC03417A475B50075E86C /* ILogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ILogger.h; sourceTree = "<group>"; };
 		000CC03517A475E00075E86C /* services_Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Logger.h; sourceTree = "<group>"; };
 		000CC03617A475F90075E86C /* services_Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Logger.cpp; sourceTree = "<group>"; };
-		000DA7CF19AE093400DAFCA9 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		000DA7D019AE093400DAFCA9 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		000DA7D119AE093400DAFCA9 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		000DA7D219AE093400DAFCA9 /* punycode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = punycode.c; sourceTree = "<group>"; };
-		000DA7D319AE093400DAFCA9 /* punycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = punycode.h; sourceTree = "<group>"; };
-		000DA7D419AE093400DAFCA9 /* test-punycode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "test-punycode.c"; sourceTree = "<group>"; };
 		001AEF571853DDDD00029ABC /* ICache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICache.h; sourceTree = "<group>"; };
 		001AEF581853DE6600029ABC /* services_Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Cache.h; sourceTree = "<group>"; };
 		001AEF591853DE9300029ABC /* services_Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Cache.cpp; sourceTree = "<group>"; };
@@ -177,25 +170,10 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		000DA7CE19AE093400DAFCA9 /* punycode */ = {
-			isa = PBXGroup;
-			children = (
-				000DA7CF19AE093400DAFCA9 /* .gitignore */,
-				000DA7D019AE093400DAFCA9 /* LICENSE */,
-				000DA7D119AE093400DAFCA9 /* Makefile */,
-				000DA7D219AE093400DAFCA9 /* punycode.c */,
-				000DA7D319AE093400DAFCA9 /* punycode.h */,
-				000DA7D419AE093400DAFCA9 /* test-punycode.c */,
-			);
-			name = punycode;
-			path = ../../../../punycode;
-			sourceTree = "<group>";
-		};
 		0095D8A816CA83CB005F53D3 = {
 			isa = PBXGroup;
 			children = (
 				0095D8B816CA83EA005F53D3 /* openpeer */,
-				000DA7CE19AE093400DAFCA9 /* punycode */,
 				0095D8B216CA83CB005F53D3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -420,7 +398,6 @@
 				0095DAD216CA83EB005F53D3 /* services_ICESocket.cpp in Sources */,
 				0095DAD316CA83EB005F53D3 /* services_ICESocketSession.cpp in Sources */,
 				00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */,
-				000DA7D619AE093400DAFCA9 /* punycode.c in Sources */,
 				0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */,
 				007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */,
@@ -484,6 +461,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
+					../../../../punycode,
 					../../../..,
 					../../../../zsLib,
 					../../../../boost/osx/framework/boost.framework/Headers,
@@ -522,6 +500,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
+					../../../../punycode,
 					../../../..,
 					../../../../zsLib,
 					../../../../boost/osx/framework/boost.framework/Headers,

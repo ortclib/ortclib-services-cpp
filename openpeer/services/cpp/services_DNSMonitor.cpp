@@ -39,14 +39,9 @@
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 
-extern "C" {
-#include <punycode/punycode.h>
-}
-
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
 #define OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.openpeer.org/caching/dns/"
-#define OPENPEER_SERVICES_DNS_MONITOR_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO (6)
 
 namespace openpeer
 {
@@ -63,74 +58,6 @@ namespace openpeer
       #pragma mark
       #pragma mark (helpers)
       #pragma mark
-
-      //-----------------------------------------------------------------------
-      static String convertPunyToUTF8(const char *punyStr)
-      {
-        if (!punyStr) return String();
-
-        size_t length = strlen(punyStr);
-
-        uint32_t unicodeBuffer[256] {};
-        uint32_t *overflowBuffer = NULL;
-
-        uint32_t *destStr = &(unicodeBuffer[0]);
-        size_t destLength = (sizeof(unicodeBuffer) / sizeof(uint32_t)) - 1;
-
-        if (length >= destLength) {
-          overflowBuffer = new uint32_t[length+1] {};
-          destStr = overflowBuffer;
-          destLength = length;
-        }
-
-
-        size_t convertedLength = punycode_decode(punyStr, strlen(punyStr), destStr, &destLength);
-        ZS_THROW_INVALID_ASSUMPTION_IF(destLength > convertedLength)
-
-        std::wstring unicodeStr((wchar_t *)destStr);
-        static_assert(sizeof(wchar_t) == sizeof(uint32_t), "assumption about wchar_t and uint32_t are not valid");
-
-        if (overflowBuffer) {
-          delete [] overflowBuffer;
-          overflowBuffer = NULL;
-        }
-
-        return String(unicodeStr);
-      }
-
-      //-----------------------------------------------------------------------
-      static String convertUTF8ToPuny(const char *utf8Str)
-      {
-        if (!utf8Str) return String();
-
-        std::wstring unicodeStr = String(utf8Str).wstring();
-
-        size_t length = unicodeStr.length();
-
-        char outputBuffer[1024] {};
-        char *overflowBuffer = NULL;
-
-        char *destStr = &(outputBuffer[0]);
-        size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
-
-        if (length * OPENPEER_SERVICES_DNS_MONITOR_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
-          overflowBuffer = new char[(length*OPENPEER_SERVICES_DNS_MONITOR_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {};
-          destStr = overflowBuffer;
-          destLength = (length*OPENPEER_SERVICES_DNS_MONITOR_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
-        }
-
-        size_t convertedLength = punycode_encode((uint32_t *) (unicodeStr.data()), length, destStr, &destLength);
-        ZS_THROW_INVALID_ASSUMPTION_IF(destLength > convertedLength)
-
-        String result(destStr);
-
-        if (overflowBuffer) {
-          delete [] overflowBuffer;
-          overflowBuffer = NULL;
-        }
-
-        return result;
-      }
 
       //-----------------------------------------------------------------------
       static Log::Params slog(const char *message)
@@ -751,9 +678,9 @@ namespace openpeer
 
         struct dns_query *query = NULL;
         if (aMode) {
-          query = dns_submit_a4(mCtx, convertUTF8ToPuny(name), flags, DNSMonitor::dns_query_a4, (void *)((PTRNUMBER)queryID));
+          query = dns_submit_a4(mCtx, IHelper::convertUTF8ToIDN(name), flags, DNSMonitor::dns_query_a4, (void *)((PTRNUMBER)queryID));
         } else {
-          query = dns_submit_a6(mCtx, convertUTF8ToPuny(name), flags, DNSMonitor::dns_query_a6, (void *)((PTRNUMBER)queryID));
+          query = dns_submit_a6(mCtx, IHelper::convertUTF8ToIDN(name), flags, DNSMonitor::dns_query_a6, (void *)((PTRNUMBER)queryID));
         }
         if (NULL != query) {
           useInfo->mPendingQuery = query;
@@ -833,7 +760,7 @@ namespace openpeer
 
         QueryID queryID = zsLib::createPUID();
 
-        struct dns_query *query = dns_submit_srv(mCtx, convertUTF8ToPuny(name), convertUTF8ToPuny(service), convertUTF8ToPuny(protocol), flags, DNSMonitor::dns_query_srv, (void *)((PTRNUMBER)queryID));
+        struct dns_query *query = dns_submit_srv(mCtx, IHelper::convertUTF8ToIDN(name), IHelper::convertUTF8ToIDN(service), IHelper::convertUTF8ToIDN(protocol), flags, DNSMonitor::dns_query_srv, (void *)((PTRNUMBER)queryID));
         if (NULL != query) {
           useInfo->mPendingQuery = query;
           mPendingQueries[queryID] = useInfo;
@@ -1096,7 +1023,7 @@ namespace openpeer
             srvRecord.mPriority = srv.priority;
             srvRecord.mWeight = srv.weight;
             srvRecord.mPort = srv.port;
-            srvRecord.mName = convertPunyToUTF8(srv.name);
+            srvRecord.mName = IHelper::convertIDNToUTF8(srv.name);
 
             data->mRecords.push_back(srvRecord);
           }

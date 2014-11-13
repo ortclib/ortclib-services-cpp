@@ -26,6 +26,7 @@
 		00AD9017177BF8FE009590EB /* libzsLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90618177BF4F50090BD8B /* libzsLib.a */; };
 		00AD9018177BF90D009590EB /* libudns.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90620177BF5140090BD8B /* libudns.a */; };
 		00C82BE41830DA1C005B87E0 /* boost.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C82BE31830DA1B005B87E0 /* boost.framework */; };
+		00CBC68A1A13A29500643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC6891A13A29500643BA7 /* TestHelper.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +123,7 @@
 		00C90613177BF4F50090BD8B /* zsLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib.xcodeproj; path = ../../../../zsLib/projects/xcode/zsLib/zsLib.xcodeproj; sourceTree = "<group>"; };
 		00C9061B177BF5130090BD8B /* udns.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns.xcodeproj; path = ../../../../udns/projects/xcode/udns/udns.xcodeproj; sourceTree = "<group>"; };
 		00C90623177BF5380090BD8B /* cryptopp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp/cryptopp.xcodeproj; sourceTree = "<group>"; };
+		00CBC6891A13A29500643BA7 /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +190,7 @@
 				0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */,
 				00579B89185133B300CB4951 /* TestDH.cpp */,
 				0063C28C16CAA03800E6DB4D /* TestDNS.cpp */,
+				00CBC6891A13A29500643BA7 /* TestHelper.cpp */,
 				0063C28D16CAA03800E6DB4D /* TestICESocket.cpp */,
 				0063C28E16CAA03800E6DB4D /* TestRUDPICESocket.cpp */,
 				0063C28F16CAA03800E6DB4D /* TestRUDPICESocketLoopback.cpp */,
@@ -364,6 +367,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0063C3E916CAA03800E6DB4D /* boost_replacement.cpp in Sources */,
+				00CBC68A1A13A29500643BA7 /* TestHelper.cpp in Sources */,
 				0063C3EA16CAA03800E6DB4D /* main.cpp in Sources */,
 				0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */,
 				0063C3EC16CAA03800E6DB4D /* TestDNS.cpp in Sources */,

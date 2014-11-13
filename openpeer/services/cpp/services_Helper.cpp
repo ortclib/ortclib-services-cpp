@@ -45,8 +45,8 @@
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
-#include <zsLib/RegEx.h>
 
+#include <regex>
 #include <iostream>
 #include <fstream>
 #ifndef _WIN32
@@ -62,9 +62,13 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/hmac.h>
 
+extern "C" {
+}
 
 #define OPENPEER_SERVICES_SERVICE_THREAD_NAME "org.openpeer.services.serviceThread"
 #define OPENPEER_SERVICES_LOGGER_THREAD_NAME "org.openpeer.services.loggerThread"
+
+#define OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO (6)
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -1113,12 +1117,113 @@ namespace openpeer
         return convertEl;
       }
 
+//      typedef enum punycode_status {
+//        punycode_success,
+//        punycode_bad_input,           /* Input is invalid.                       */
+//        punycode_big_output,          /* Output would exceed the space provided. */
+//        punycode_overflow             /* Input needs wider integers to process.  */
+//      } punycode_status;
+
+//      enum punycode_status punycode_encode(punycode_uint input_length,
+//                                           const punycode_uint input[],
+//                                           const unsigned char case_flags[],
+//                                           punycode_uint * output_length,
+//                                           char output[]);
+//
+//      enum punycode_status punycode_decode(punycode_uint input_length,
+//                                           const char input[],
+//                                           punycode_uint * output_length,
+//                                           punycode_uint output[],
+//                                           unsigned char case_flags[]);
+
+      //-----------------------------------------------------------------------
+      String Helper::convertIDNToUTF8(const char *idnStr)
+      {
+        return String(idnStr);
+
+#if 0
+
+        if (!punyStr) return String();
+
+        size_t length = static_cast<size_t>(strlen(punyStr));
+
+        punycode_wchar punyOutputBuffer[256] {};
+        std::unique_ptr<punycode_wchar[]> punyOverflowBuffer;
+
+        punycode_wchar *destPunyBuffer = &(punyOutputBuffer[0]);
+        size_t destPunyBufferLength = (sizeof(punyOutputBuffer) / sizeof(punycode_uint)) - 1;
+
+        if (length >= destPunyBufferLength) {
+          punyOverflowBuffer = std::unique_ptr<punycode_wchar[]>(new punycode_wchar[length+1] {});
+          destPunyBuffer = punyOverflowBuffer.get();
+          destPunyBufferLength = length;
+        }
+
+        punycode_uint punyOutputLength = destPunyBufferLength;
+
+        punycode_status status = punycode_decode(length, punyStr, &punyOutputLength, destPunyBuffer, NULL);
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(punycode_big_output == status)
+
+        if (punycode_success != status) {
+          ZS_LOG_ERROR(Detail, log("punycode convert failed") + ZS_PARAM("input punycode", punyStr) + ZS_PARAM("status", status))
+          return String();
+        }
+
+        static_assert(sizeof(wchar_t) == sizeof(punycode_wchar), "assumptions about wchar_t and puny_wchar are not valid");
+
+        std::wstring unicodeStr((wchar_t *)(destPunyBuffer));
+        return String(unicodeStr);
+#endif //0
+      }
+
+      //-----------------------------------------------------------------------
+      String Helper::convertUTF8ToIDN(const char *utf8Str)
+      {
+        return String(utf8Str);
+
+#if 0
+        if (!utf8Str) return String();
+
+        std::wstring unicodeStr = String(utf8Str).wstring();
+
+        size_t length = unicodeStr.length();
+
+        char outputBuffer[1024] {};
+        std::unique_ptr<char[]> overflowBuffer;
+
+        char *destStr = &(outputBuffer[0]);
+        punycode_uint destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
+
+        if (length * OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
+          overflowBuffer = std::unique_ptr<char[]>(new char[(length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
+          destStr = overflowBuffer.get();
+          destLength = (length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
+        }
+
+        static_assert(sizeof(wchar_t) == sizeof(punycode_wchar), "assumptions about wchar_t and puny_wchar are not valid");
+
+        punycode_status status = punycode_encode(length, (punycode_wchar *) (unicodeStr.data()), NULL, &destLength, destStr);
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(punycode_big_output == status)
+
+        if (punycode_success != status) {
+          ZS_LOG_ERROR(Detail, log("punycode convert failed") + ZS_PARAM("input utf8", utf8Str) + ZS_PARAM("status", status))
+          return String();
+        }
+
+        String result(destStr);
+        return result;
+#endif //0
+      }
+
       //-----------------------------------------------------------------------
       bool Helper::isValidDomain(const char *inDomain)
       {
-        String domain(inDomain ? String(inDomain) : String());
-        zsLib::RegEx regex("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
-        if (!regex.hasMatch(inDomain)) {
+        String domain(inDomain ? convertUTF8ToIDN(inDomain) : String());
+//        std::regex exp("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
+        std::regex exp("((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}$");
+        if (! std::regex_match(domain, exp)) {
           ZS_LOG_WARNING(Detail, log("domain name is not valid") + ZS_PARAM("domain", domain))
           return false;
         }
@@ -1912,6 +2017,18 @@ namespace openpeer
     ElementPtr IHelper::cloneAsCanonicalJSON(ElementPtr element)
     {
       return internal::Helper::cloneAsCanonicalJSON(element);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::convertIDNToUTF8(const char *idnStr)
+    {
+      return internal::Helper::convertIDNToUTF8(idnStr);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::convertUTF8ToIDN(const char *utf8Str)
+    {
+      return internal::Helper::convertUTF8ToIDN(utf8Str);
     }
 
     //-------------------------------------------------------------------------
