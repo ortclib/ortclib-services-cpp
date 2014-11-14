@@ -1023,7 +1023,7 @@ namespace openpeer
             srvRecord.mPriority = srv.priority;
             srvRecord.mWeight = srv.weight;
             srvRecord.mPort = srv.port;
-            srvRecord.mName = IHelper::convertIDNToUTF8(srv.name);
+            srvRecord.mName = IHelper::convertIDNToUTF8(String(srv.name));
 
             data->mRecords.push_back(srvRecord);
           }

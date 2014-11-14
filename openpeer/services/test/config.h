@@ -45,9 +45,9 @@
 #define OPENPEER_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT  (51999)
 
 #define OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST                    (false)
-#define OPENPEER_SERVICE_TEST_DO_DH_TEST                               (true)
+#define OPENPEER_SERVICE_TEST_DO_DH_TEST                               (false)
 #define OPENPEER_SERVICE_TEST_DO_DNS_TEST                              (false)
-#define OPENPEER_SERVICE_TEST_DO_HELPER_TEST                           (false)
+#define OPENPEER_SERVICE_TEST_DO_HELPER_TEST                           (true)
 #define OPENPEER_SERVICE_TEST_DO_ICE_SOCKET_TEST                       (false)
 #define OPENPEER_SERVICE_TEST_DO_STUN_TEST                             (false)
 #define OPENPEER_SERVICE_TEST_DO_TURN_TEST                             (false)

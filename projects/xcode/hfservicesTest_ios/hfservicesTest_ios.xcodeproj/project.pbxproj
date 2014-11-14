@@ -38,6 +38,7 @@
 		00AD901D177BFB78009590EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD901C177BFB78009590EB /* libz.dylib */; };
 		00C82BE61830DCEE005B87E0 /* boost.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C82BE51830DCED005B87E0 /* boost.framework */; };
 		00CBC68C1A13A88800643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC68B1A13A88800643BA7 /* TestHelper.cpp */; };
+		00CF4B981A15545F00573A34 /* libidnkit_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CF4B971A1553E700573A34 /* libidnkit_ios.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,20 @@
 			remoteGlobalIDString = 0066863916C9F58000259F81;
 			remoteInfo = cryptopp_ios;
 		};
+		00CF4B961A1553E700573A34 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00AA6DB11A15220000815878;
+			remoteInfo = idnkit_ios;
+		};
+		00CF4C091A15C49A00573A34 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 00AA6DB01A15220000815878;
+			remoteInfo = idnkit_ios;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -139,6 +154,7 @@
 		00AD901C177BFB78009590EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		00C82BE51830DCED005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../../boost/ios/framework/boost.framework; sourceTree = "<group>"; };
 		00CBC68B1A13A88800643BA7 /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
+		00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit_ios.xcodeproj; path = ../../../../idnkit/projects/xcode/idnkit_ios.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +167,7 @@
 				00AD901D177BFB78009590EB /* libz.dylib in Frameworks */,
 				00AD9019177BF981009590EB /* libudns_ios.a in Frameworks */,
 				00AD9014177BF871009590EB /* libcryptopp_ios.a in Frameworks */,
+				00CF4B981A15545F00573A34 /* libidnkit_ios.a in Frameworks */,
 				0063D30916CB0CE800E6DB4D /* libhfservices_ios.a in Frameworks */,
 				0063D30616CB0CCC00E6DB4D /* libzsLib_ios.a in Frameworks */,
 				0063C4AD16CAA54300E6DB4D /* UIKit.framework in Frameworks */,
@@ -283,6 +300,7 @@
 			children = (
 				0063D2F816CB0C8600E6DB4D /* hfservices_ios.xcodeproj */,
 				0063D2F216CB0C7F00E6DB4D /* cryptopp_ios.xcodeproj */,
+				00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */,
 				0063D2EC16CB0C7900E6DB4D /* udns_ios.xcodeproj */,
 				0063D2E616CB0C6F00E6DB4D /* zsLib_ios.xcodeproj */,
 			);
@@ -321,6 +339,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		00CF4B931A1553E600573A34 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00CF4B971A1553E700573A34 /* libidnkit_ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -336,6 +362,7 @@
 			);
 			dependencies = (
 				00AD9013177BF85F009590EB /* PBXTargetDependency */,
+				00CF4C0A1A15C49A00573A34 /* PBXTargetDependency */,
 				00AD9011177BF61F009590EB /* PBXTargetDependency */,
 				0063D2FF16CB0C9900E6DB4D /* PBXTargetDependency */,
 				0063D30116CB0C9900E6DB4D /* PBXTargetDependency */,
@@ -372,6 +399,10 @@
 				{
 					ProductGroup = 0063D2F916CB0C8600E6DB4D /* Products */;
 					ProjectRef = 0063D2F816CB0C8600E6DB4D /* hfservices_ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 00CF4B931A1553E600573A34 /* Products */;
+					ProjectRef = 00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */;
 				},
 				{
 					ProductGroup = 00AD9009177BF5CC009590EB /* Products */;
@@ -416,6 +447,13 @@
 			fileType = archive.ar;
 			path = libudns_ios.a;
 			remoteRef = 00AD900C177BF5CC009590EB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00CF4B971A1553E700573A34 /* libidnkit_ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libidnkit_ios.a;
+			remoteRef = 00CF4B961A1553E700573A34 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -480,6 +518,11 @@
 			isa = PBXTargetDependency;
 			name = cryptopp_ios;
 			targetProxy = 00AD9012177BF85F009590EB /* PBXContainerItemProxy */;
+		};
+		00CF4C0A1A15C49A00573A34 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = idnkit_ios;
+			targetProxy = 00CF4C091A15C49A00573A34 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

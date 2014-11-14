@@ -461,9 +461,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../../punycode,
 					../../../..,
 					../../../../zsLib,
+					../../../../idnkit/idnkit/include,
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
@@ -500,9 +500,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../..,
-					../../../../punycode,
 					../../../..,
 					../../../../zsLib,
+					../../../../idnkit/idnkit/include,
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;

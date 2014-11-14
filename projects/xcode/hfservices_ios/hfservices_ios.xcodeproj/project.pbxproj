@@ -462,6 +462,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
+					../../../../idnkit/idnkit/include,
 					"../../../../curl-build-scripts/curl",
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);
@@ -499,6 +500,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
+					../../../../idnkit/idnkit/include,
 					"../../../../curl-build-scripts/curl",
 					../../../../boost/osx/framework/boost.framework/Headers,
 				);

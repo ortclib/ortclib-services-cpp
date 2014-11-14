@@ -62,8 +62,7 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/hmac.h>
 
-extern "C" {
-}
+#include <idn/api.h>
 
 #define OPENPEER_SERVICES_SERVICE_THREAD_NAME "org.openpeer.services.serviceThread"
 #define OPENPEER_SERVICES_LOGGER_THREAD_NAME "org.openpeer.services.loggerThread"
@@ -116,6 +115,37 @@ namespace openpeer
         if (!node) return String();
         return node->getTextDecoded();
       }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+
+      class IDNHelper
+      {
+      public:
+        static IDNHelper &singleton()
+        {
+          static Singleton<IDNHelper> singleton;
+          return singleton.singleton();
+        }
+
+        IDNHelper()
+        {
+          idn_result_t r = idn_nameinit(0);
+
+          if (r != idn_success) {
+            ZS_LOG_ERROR(Detail, log("unable to load IDN"))
+          }
+        }
+
+      protected:
+        //-----------------------------------------------------------------------
+        Log::Params log(const char *message)
+        {
+          return Log::Params(message, "services::IDNHelper");
+        }
+      };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -1137,63 +1167,18 @@ namespace openpeer
 //                                           unsigned char case_flags[]);
 
       //-----------------------------------------------------------------------
-      String Helper::convertIDNToUTF8(const char *idnStr)
+      String Helper::convertIDNToUTF8(const String &idnStr)
       {
-        return String(idnStr);
+        IDNHelper::singleton();
+        if (idnStr.isEmpty()) return String();
 
-#if 0
-
-        if (!punyStr) return String();
-
-        size_t length = static_cast<size_t>(strlen(punyStr));
-
-        punycode_wchar punyOutputBuffer[256] {};
-        std::unique_ptr<punycode_wchar[]> punyOverflowBuffer;
-
-        punycode_wchar *destPunyBuffer = &(punyOutputBuffer[0]);
-        size_t destPunyBufferLength = (sizeof(punyOutputBuffer) / sizeof(punycode_uint)) - 1;
-
-        if (length >= destPunyBufferLength) {
-          punyOverflowBuffer = std::unique_ptr<punycode_wchar[]>(new punycode_wchar[length+1] {});
-          destPunyBuffer = punyOverflowBuffer.get();
-          destPunyBufferLength = length;
-        }
-
-        punycode_uint punyOutputLength = destPunyBufferLength;
-
-        punycode_status status = punycode_decode(length, punyStr, &punyOutputLength, destPunyBuffer, NULL);
-
-        ZS_THROW_INVALID_ASSUMPTION_IF(punycode_big_output == status)
-
-        if (punycode_success != status) {
-          ZS_LOG_ERROR(Detail, log("punycode convert failed") + ZS_PARAM("input punycode", punyStr) + ZS_PARAM("status", status))
-          return String();
-        }
-
-        static_assert(sizeof(wchar_t) == sizeof(punycode_wchar), "assumptions about wchar_t and puny_wchar are not valid");
-
-        std::wstring unicodeStr((wchar_t *)(destPunyBuffer));
-        return String(unicodeStr);
-#endif //0
-      }
-
-      //-----------------------------------------------------------------------
-      String Helper::convertUTF8ToIDN(const char *utf8Str)
-      {
-        return String(utf8Str);
-
-#if 0
-        if (!utf8Str) return String();
-
-        std::wstring unicodeStr = String(utf8Str).wstring();
-
-        size_t length = unicodeStr.length();
+        size_t length = idnStr.length();
 
         char outputBuffer[1024] {};
         std::unique_ptr<char[]> overflowBuffer;
 
         char *destStr = &(outputBuffer[0]);
-        punycode_uint destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
+        size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
 
         if (length * OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
           overflowBuffer = std::unique_ptr<char[]>(new char[(length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
@@ -1201,25 +1186,62 @@ namespace openpeer
           destLength = (length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
         }
 
-        static_assert(sizeof(wchar_t) == sizeof(punycode_wchar), "assumptions about wchar_t and puny_wchar are not valid");
+        idn_result_t status = idn_decodename(IDN_DECODE_LOOKUP & (~IDN_UNICODECONV), idnStr.c_str(), destStr, destLength);
 
-        punycode_status status = punycode_encode(length, (punycode_wchar *) (unicodeStr.data()), NULL, &destLength, destStr);
-
-        ZS_THROW_INVALID_ASSUMPTION_IF(punycode_big_output == status)
-
-        if (punycode_success != status) {
-          ZS_LOG_ERROR(Detail, log("punycode convert failed") + ZS_PARAM("input utf8", utf8Str) + ZS_PARAM("status", status))
+        if (idn_success != status) {
+          ZS_LOG_ERROR(Detail, log("idn to utf8 convert failed") + ZS_PARAM("input idn", idnStr) + ZS_PARAM("status", status))
           return String();
         }
 
-        String result(destStr);
-        return result;
-#endif //0
+        return String((CSTR)destStr);
       }
 
       //-----------------------------------------------------------------------
-      bool Helper::isValidDomain(const char *inDomain)
+      String Helper::convertUTF8ToIDN(const String &utf8Str)
       {
+        IDNHelper::singleton();
+
+        if (utf8Str.isEmpty()) return String();
+
+        size_t length = utf8Str.length();
+
+        char outputBuffer[1024] {};
+        std::unique_ptr<char[]> overflowBuffer;
+
+        char *destStr = &(outputBuffer[0]);
+        size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
+
+        if (length * OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
+          overflowBuffer = std::unique_ptr<char[]>(new char[(length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
+          destStr = overflowBuffer.get();
+          destLength = (length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
+        }
+
+        idn_result_t status = idn_encodename(IDN_ENCODE_LOOKUP & (~IDN_UNICODECONV), utf8Str.c_str(), destStr, destLength);
+
+        if (idn_success != status) {
+          ZS_LOG_ERROR(Detail, log("utf 8 to idn convert failed") + ZS_PARAM("input utf8", utf8Str) + ZS_PARAM("status", status))
+          return String();
+        }
+
+        String result((CSTR)destStr);
+        return result;
+      }
+
+      //-----------------------------------------------------------------------
+      bool Helper::isValidDomain(const String &inDomain)
+      {
+        IDNHelper::singleton();
+
+        if (inDomain.isEmpty()) return false;
+
+        idn_result_t status = idn_checkname(IDN_CHECK_LOOKUP & (~IDN_UNICODECONV), inDomain.c_str());
+
+        if (idn_success != status) {
+          ZS_LOG_ERROR(Detail, log("idn convert failed") + ZS_PARAM("input utf8", inDomain) + ZS_PARAM("status", status))
+          return false;
+        }
+
         String domain(inDomain ? convertUTF8ToIDN(inDomain) : String());
 //        std::regex exp("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
         std::regex exp("((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}$");
@@ -2020,19 +2042,19 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String IHelper::convertIDNToUTF8(const char *idnStr)
+    String IHelper::convertIDNToUTF8(const String &idnStr)
     {
       return internal::Helper::convertIDNToUTF8(idnStr);
     }
 
     //-------------------------------------------------------------------------
-    String IHelper::convertUTF8ToIDN(const char *utf8Str)
+    String IHelper::convertUTF8ToIDN(const String &utf8Str)
     {
       return internal::Helper::convertUTF8ToIDN(utf8Str);
     }
 
     //-------------------------------------------------------------------------
-    bool IHelper::isValidDomain(const char *domain)
+    bool IHelper::isValidDomain(const String &domain)
     {
       return internal::Helper::isValidDomain(domain);
     }
