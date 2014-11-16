@@ -43,7 +43,7 @@
 
 
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
 
@@ -330,7 +330,7 @@ void doTestRUDPICESocket()
   if (!OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
   if (!OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
@@ -345,7 +345,7 @@ void doTestRUDPICESocket()
     ULONG totalWait = 0;
     do
     {
-      boost::this_thread::sleep(zsLib::Seconds(1));
+      std::this_thread::sleep_for(zsLib::Seconds(1));
       ++totalWait;
       if (totalWait >= (10*60))
         break;
@@ -361,14 +361,14 @@ void doTestRUDPICESocket()
         break;
 
     } while(true);
-    BOOST_CHECK(found == expecting)
+    TESTING_CHECK(found == expecting)
   }
 
   testObject1.reset();
 
   ZS_LOG_BASIC("WAITING:      All RUDP sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
 
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
   // wait for shutdown
   {
@@ -378,13 +378,13 @@ void doTestRUDPICESocket()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
 
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

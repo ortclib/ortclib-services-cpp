@@ -39,12 +39,8 @@
 
 #include <zsLib/Socket.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 #include <list>
 
@@ -149,7 +145,7 @@ namespace openpeer
         {
           zsLib::AutoLock lock(mLock);
           ++mCount;
-          BOOST_CHECK(((bool)query));
+          TESTING_CHECK(((bool)query));
 
           if (!query->hasResult()) {
             mFailedResults.push_back(query);
@@ -269,9 +265,9 @@ void doTestDNS()
 {
   if (!OPENPEER_SERVICE_TEST_DO_DNS_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
-  boost::this_thread::sleep(zsLib::Seconds(1));
+  std::this_thread::sleep_for(zsLib::Seconds(1));
 
   TestDNSFactoryPtr overrideFactory(new TestDNSFactory);
 
@@ -293,7 +289,7 @@ void doTestDNS()
   IDNSQueryPtr query10 = IDNS::lookupSRV(testObject, OPENPEER_SERVICE_TEST_DNS_ZONE, "sip", "udp");
   IDNSQueryPtr query11 = IDNS::lookupSRV(testObject, OPENPEER_SERVICE_TEST_DNS_ZONE, "stun", "udp");
 
-  BOOST_STDOUT() << "WAITING:      Waiting for DNS lookup to resolve (max wait is 60 seconds).\n";
+  TESTING_STDOUT() << "WAITING:      Waiting for DNS lookup to resolve (max wait is 60 seconds).\n";
 
   ULONG expectingTotal = 0;
   expectingTotal += (query ? 1 : 0);
@@ -319,28 +315,28 @@ void doTestDNS()
       ULONG totalProcessed = matchingTotal = testObject->getTotalProcessed();
       if (totalProcessed != lastResolved) {
         lastResolved = totalProcessed;
-        BOOST_STDOUT() << "WAITING:      [" << totalProcessed << "] Resolved ->  A [" << testObject->getTotalAProcessed() << "]  AAAA [" << testObject->getTotalAAAAProcessed() << "]   SRV [" << testObject->getTotalSRVProcessed() << "]  FAILED[" << testObject->getTotalFailed() << "]\n";
+        TESTING_STDOUT() << "WAITING:      [" << totalProcessed << "] Resolved ->  A [" << testObject->getTotalAProcessed() << "]  AAAA [" << testObject->getTotalAAAAProcessed() << "]   SRV [" << testObject->getTotalSRVProcessed() << "]  FAILED[" << testObject->getTotalFailed() << "]\n";
       }
       if (totalProcessed < expectingTotal) {
         ++totalWait;
-        boost::this_thread::sleep(zsLib::Seconds(1));
+        std::this_thread::sleep_for(zsLib::Seconds(1));
       }
       else
         break;
     } while (totalWait < (60)); // max three minutes
-    BOOST_EQUAL(matchingTotal, expectingTotal);
-    BOOST_CHECK(totalWait < (60));
+    TESTING_EQUAL(matchingTotal, expectingTotal);
+    TESTING_CHECK(totalWait < (60));
   }
 
-  BOOST_STDOUT() << "WAITING:      All DNS queries have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  TESTING_STDOUT() << "WAITING:      All DNS queries have finished. Waiting for 'bogus' events to process (10 second wait).\n";
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
-  BOOST_EQUAL(matchingTotal, testObject->getTotalProcessed());
+  TESTING_EQUAL(matchingTotal, testObject->getTotalProcessed());
 
-  BOOST_EQUAL(8, overrideFactory->getACount())
-  BOOST_EQUAL(8, overrideFactory->getAAAACount())
-  BOOST_EQUAL(5, overrideFactory->getAorAAAACount())
-  BOOST_EQUAL(6, overrideFactory->getSRVCount())
+  TESTING_EQUAL(8, overrideFactory->getACount())
+  TESTING_EQUAL(8, overrideFactory->getAAAACount())
+  TESTING_EQUAL(5, overrideFactory->getAorAAAACount())
+  TESTING_EQUAL(6, overrideFactory->getSRVCount())
 
   IDNS::AResultPtr a1 = testObject->getA(query);
   IDNS::AResultPtr a2 = testObject->getA(query2);
@@ -353,15 +349,15 @@ void doTestDNS()
   IDNS::SRVResultPtr srv3 = testObject->getSRV(query11);
 
   // these should be valid
-  BOOST_CHECK(a1)
-  BOOST_CHECK(a2)
-  BOOST_CHECK(aaaa1)
-  BOOST_CHECK(aaaa2)
-  BOOST_CHECK(srv1)
-  BOOST_CHECK(a3)
-  BOOST_CHECK(aaaa3)
-  BOOST_CHECK(srv2)
-  BOOST_CHECK(srv3)
+  TESTING_CHECK(a1)
+  TESTING_CHECK(a2)
+  TESTING_CHECK(aaaa1)
+  TESTING_CHECK(aaaa2)
+  TESTING_CHECK(srv1)
+  TESTING_CHECK(a3)
+  TESTING_CHECK(aaaa3)
+  TESTING_CHECK(srv2)
+  TESTING_CHECK(srv3)
 
   // these should be empty
   IDNS::AResultPtr a4 = testObject->getA(query8);
@@ -371,71 +367,71 @@ void doTestDNS()
   IDNS::AResultPtr a6 = testObject->getA(query6);
   IDNS::AResultPtr aaaa6 = testObject->getAAAA(query6);
 
-  BOOST_CHECK(!a4)
-  BOOST_CHECK(!aaaa4)
+  TESTING_CHECK(!a4)
+  TESTING_CHECK(!aaaa4)
 
-  BOOST_CHECK(!a5)
-  BOOST_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? ((bool)aaaa5) : (!aaaa5))
-  BOOST_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? ((bool)a6) : (!a6))
-  BOOST_CHECK(!aaaa6)
+  TESTING_CHECK(!a5)
+  TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? ((bool)aaaa5) : (!aaaa5))
+  TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? ((bool)a6) : (!a6))
+  TESTING_CHECK(!aaaa6)
 
   if (a1) {
     // www.domain.com, 1800 TTL and IP = 199.204.138.90
-    BOOST_CHECK(a1->mTTL <= 1800);
-    BOOST_EQUAL(a1->mIPAddresses.front().string(), "199.204.138.90");
+    TESTING_CHECK(a1->mTTL <= 1800);
+    TESTING_EQUAL(a1->mIPAddresses.front().string(), "199.204.138.90");
   }
 
   if (a2) {
     // sip.domain.com, 900, IP = 173.239.150.198
-    BOOST_CHECK(a2->mTTL <= 900);
-    BOOST_EQUAL(a2->mIPAddresses.front().string(), "173.239.150.198");
+    TESTING_CHECK(a2->mTTL <= 900);
+    TESTING_EQUAL(a2->mIPAddresses.front().string(), "173.239.150.198");
   }
 
   if (aaaa1) {
     // unittest.domain.com, 900, [2001:0:5ef5:79fb:8:fcb:a142:26ed]
-    BOOST_CHECK(aaaa1->mTTL <= 900);
-    BOOST_EQUAL(aaaa1->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
+    TESTING_CHECK(aaaa1->mTTL <= 900);
+    TESTING_EQUAL(aaaa1->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
   }
 
   if (aaaa2) {
     // unittest2.domain.com, 900, fe80::2c71:60ff:fe00:1c54
-    BOOST_CHECK(aaaa2->mTTL <= 900);
-    BOOST_EQUAL(aaaa2->mIPAddresses.front().string(), zsLib::IPAddress("fe80::2c71:60ff:fe00:1c54").string());
+    TESTING_CHECK(aaaa2->mTTL <= 900);
+    TESTING_EQUAL(aaaa2->mIPAddresses.front().string(), zsLib::IPAddress("fe80::2c71:60ff:fe00:1c54").string());
   }
 
   if (srv1) {
     // _sip._udp.domain.com, 900, 10 0 5060 sip.
-    BOOST_CHECK(srv1->mTTL <= 900);
-    BOOST_EQUAL(srv1->mRecords.front().mPriority, 10);
-    BOOST_EQUAL(srv1->mRecords.front().mWeight, 0);
-    BOOST_EQUAL(srv1->mRecords.front().mPort, 5060);
-    BOOST_EQUAL(srv1->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
-    BOOST_EQUAL(srv1->mRecords.front().mAResult->mIPAddresses.front().string(), zsLib::IPAddress("173.239.150.198:5060").string());
-    BOOST_CHECK(!(srv1->mRecords.front().mAAAAResult));
+    TESTING_CHECK(srv1->mTTL <= 900);
+    TESTING_EQUAL(srv1->mRecords.front().mPriority, 10);
+    TESTING_EQUAL(srv1->mRecords.front().mWeight, 0);
+    TESTING_EQUAL(srv1->mRecords.front().mPort, 5060);
+    TESTING_EQUAL(srv1->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+    TESTING_EQUAL(srv1->mRecords.front().mAResult->mIPAddresses.front().string(), zsLib::IPAddress("173.239.150.198:5060").string());
+    TESTING_CHECK(!(srv1->mRecords.front().mAAAAResult));
   }
 
   if (a3) {
     // sip.domain.com 900, IP = 173.239.150.198
-    BOOST_CHECK(a3->mTTL <= 900);
-    BOOST_EQUAL(a3->mIPAddresses.front().string(), "173.239.150.198");
+    TESTING_CHECK(a3->mTTL <= 900);
+    TESTING_EQUAL(a3->mIPAddresses.front().string(), "173.239.150.198");
   }
 
   if (aaaa3) {
     // unittest.domain.com, 900, [2001:0:5ef5:79fb:8:fcb:a142:26ed]
-    BOOST_CHECK(aaaa3->mTTL <= 900);
-    BOOST_EQUAL(aaaa3->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
+    TESTING_CHECK(aaaa3->mTTL <= 900);
+    TESTING_EQUAL(aaaa3->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
   }
 
   if (srv2) {
     // _sip._udp.domain.com, 900, 10 0 5060 sip.
-    BOOST_CHECK(srv2->mTTL <= 900);
-    BOOST_EQUAL(srv2->mRecords.front().mPriority, 10);
-    BOOST_EQUAL(srv2->mRecords.front().mWeight, 0);
-    BOOST_EQUAL(srv2->mRecords.front().mPort, 5060);
-    BOOST_EQUAL(srv2->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
-    BOOST_CHECK(srv2->mRecords.front().mAResult->mTTL <= 900);
-    BOOST_EQUAL(srv2->mRecords.front().mAResult->mIPAddresses.front().string(), "173.239.150.198:5060");
-    BOOST_CHECK(!(srv2->mRecords.front().mAAAAResult));
+    TESTING_CHECK(srv2->mTTL <= 900);
+    TESTING_EQUAL(srv2->mRecords.front().mPriority, 10);
+    TESTING_EQUAL(srv2->mRecords.front().mWeight, 0);
+    TESTING_EQUAL(srv2->mRecords.front().mPort, 5060);
+    TESTING_EQUAL(srv2->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+    TESTING_CHECK(srv2->mRecords.front().mAResult->mTTL <= 900);
+    TESTING_EQUAL(srv2->mRecords.front().mAResult->mIPAddresses.front().string(), "173.239.150.198:5060");
+    TESTING_CHECK(!(srv2->mRecords.front().mAAAAResult));
   }
 
   const char *first = "stun." OPENPEER_SERVICE_TEST_DNS_ZONE;
@@ -462,59 +458,59 @@ void doTestDNS()
   IDNS::SRVResultPtr clone = IDNS::cloneSRV(srv3);  // keep a cloned copy
   IDNS::SRVResultPtr clone2 = IDNS::cloneSRV(srv3);  // keep a second cloned copy
   
-  BOOST_CHECK(clone)
-  BOOST_CHECK(clone2)
+  TESTING_CHECK(clone)
+  TESTING_CHECK(clone2)
 
   if (srv3) {
-    BOOST_CHECK(srv3->mTTL <= 900)
-    BOOST_EQUAL(clone->mTTL, srv3->mTTL)
+    TESTING_CHECK(srv3->mTTL <= 900)
+    TESTING_EQUAL(clone->mTTL, srv3->mTTL)
 
-    BOOST_EQUAL(srv3->mRecords.size(), 1)
-    BOOST_EQUAL(clone->mRecords.size(), srv3->mRecords.size())
+    TESTING_EQUAL(srv3->mRecords.size(), 1)
+    TESTING_EQUAL(clone->mRecords.size(), srv3->mRecords.size())
 
     if (srv3->mRecords.size() > 0) {
       // _stun._udp.domain.com, 900, 10 0 3478 216.93.246.14 // order is unknown, could be either order
       // _stun._udp.domain.com, 900, 10 0 3478 216.93.246.16
-      BOOST_EQUAL(srv3->mRecords.front().mPriority, 10);
-      BOOST_EQUAL(srv3->mRecords.front().mWeight, 0);
-      BOOST_EQUAL(srv3->mRecords.front().mPort, 3478);
-      BOOST_EQUAL(srv3->mRecords.front().mName, first);
+      TESTING_EQUAL(srv3->mRecords.front().mPriority, 10);
+      TESTING_EQUAL(srv3->mRecords.front().mWeight, 0);
+      TESTING_EQUAL(srv3->mRecords.front().mPort, 3478);
+      TESTING_EQUAL(srv3->mRecords.front().mName, first);
 
-      BOOST_CHECK(srv3->mRecords.front().mAResult)
+      TESTING_CHECK(srv3->mRecords.front().mAResult)
 
       if (srv3->mRecords.front().mAResult) {
-        BOOST_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
-        BOOST_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 2)
+        TESTING_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
+        TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 2)
         if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-          BOOST_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
+          TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
           srv3->mRecords.front().mAResult->mIPAddresses.pop_front();  // check the next record now
         }
-        BOOST_CHECK(!(srv3->mRecords.front().mAAAAResult));
+        TESTING_CHECK(!(srv3->mRecords.front().mAAAAResult));
 
         if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-          BOOST_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+          TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
         }
       }
 
       // test cloning of SRV record
-      BOOST_EQUAL(clone->mRecords.front().mPriority, 10);
-      BOOST_EQUAL(clone->mRecords.front().mWeight, 0);
-      BOOST_EQUAL(clone->mRecords.front().mPort, 3478);
-      BOOST_EQUAL(clone->mRecords.front().mName, first);
+      TESTING_EQUAL(clone->mRecords.front().mPriority, 10);
+      TESTING_EQUAL(clone->mRecords.front().mWeight, 0);
+      TESTING_EQUAL(clone->mRecords.front().mPort, 3478);
+      TESTING_EQUAL(clone->mRecords.front().mName, first);
 
-      BOOST_CHECK(clone->mRecords.front().mAResult)
+      TESTING_CHECK(clone->mRecords.front().mAResult)
 
       if (clone->mRecords.front().mAResult) {
-        BOOST_CHECK(clone->mRecords.front().mAResult->mTTL <= 900);
-        BOOST_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 2)
+        TESTING_CHECK(clone->mRecords.front().mAResult->mTTL <= 900);
+        TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 2)
 
         if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-          BOOST_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
+          TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
           clone->mRecords.front().mAResult->mIPAddresses.pop_front();  // check the next record now
         }
-        BOOST_CHECK(!(clone->mRecords.front().mAAAAResult));
+        TESTING_CHECK(!(clone->mRecords.front().mAAAAResult));
         if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-          BOOST_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+          TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
         }
       }
     }
@@ -528,49 +524,49 @@ void doTestDNS()
 
   if (clone2) {
     extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
-    BOOST_CHECK(extract);
+    TESTING_CHECK(extract);
 
-    BOOST_EQUAL(extractedIP.string(), firstWIP);
-    BOOST_CHECK(extractedA);
-    BOOST_CHECK(!extractedAAAA);
-    BOOST_EQUAL(extractedA->mName, first);
-
-    extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
-    BOOST_CHECK(extract);
-
-    BOOST_EQUAL(extractedIP.string(), secondWIP);
-    BOOST_CHECK(extractedA);
-    BOOST_CHECK(!extractedAAAA);
-    BOOST_EQUAL(extractedA->mName, second);
+    TESTING_EQUAL(extractedIP.string(), firstWIP);
+    TESTING_CHECK(extractedA);
+    TESTING_CHECK(!extractedAAAA);
+    TESTING_EQUAL(extractedA->mName, first);
 
     extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
-    BOOST_CHECK(!extract)
-    BOOST_CHECK(!extractedA)
-    BOOST_CHECK(!extractedAAAA)
+    TESTING_CHECK(extract);
+
+    TESTING_EQUAL(extractedIP.string(), secondWIP);
+    TESTING_CHECK(extractedA);
+    TESTING_CHECK(!extractedAAAA);
+    TESTING_EQUAL(extractedA->mName, second);
+
+    extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
+    TESTING_CHECK(!extract)
+    TESTING_CHECK(!extractedA)
+    TESTING_CHECK(!extractedAAAA)
   }
 
   if (!OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS) {
     if (!testObject->isFailed(query6)) {
-      BOOST_CHECK("This next DNS A lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
+      TESTING_CHECK("This next DNS A lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
     }
   }
-  BOOST_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? !testObject->isFailed(query6) : testObject->isFailed(query6));
+  TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? !testObject->isFailed(query6) : testObject->isFailed(query6));
 
   if (!OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS) {
     if (!testObject->isFailed(query9)) {
-      BOOST_CHECK("This next DNS A or AAAA lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A or AAAA lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
+      TESTING_CHECK("This next DNS A or AAAA lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A or AAAA lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
     }
   }
-  BOOST_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? !testObject->isFailed(query9) : testObject->isFailed(query9));
+  TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? !testObject->isFailed(query9) : testObject->isFailed(query9));
 
   // these tests should not have failed
-  BOOST_CHECK(!testObject->isFailed(query));
-  BOOST_CHECK(!testObject->isFailed(query2));
-  BOOST_CHECK(!testObject->isFailed(query3));
-  BOOST_CHECK(!testObject->isFailed(query4));
-  BOOST_CHECK(!testObject->isFailed(query5));
-  BOOST_CHECK(!testObject->isFailed(query7));
-  BOOST_CHECK(!testObject->isFailed(query8));
+  TESTING_CHECK(!testObject->isFailed(query));
+  TESTING_CHECK(!testObject->isFailed(query2));
+  TESTING_CHECK(!testObject->isFailed(query3));
+  TESTING_CHECK(!testObject->isFailed(query4));
+  TESTING_CHECK(!testObject->isFailed(query5));
+  TESTING_CHECK(!testObject->isFailed(query7));
+  TESTING_CHECK(!testObject->isFailed(query8));
 
   query.reset();
   query2.reset();
@@ -592,12 +588,12 @@ void doTestDNS()
     {
       count = thread->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER()
+  TESTING_UNINSTALL_LOGGER()
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

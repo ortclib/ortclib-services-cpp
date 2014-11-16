@@ -1510,7 +1510,7 @@ namespace openpeer
               burstDuration = Milliseconds(OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS);
             }
 
-            ZS_LOG_TRACE(log("creating a burst timer since there is data to send and available batons to send it") + ZS_PARAM("timer ID", mBurstTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("burst duration", burstDuration.total_milliseconds()) + ZS_PARAM("calculated RTT", mCalculatedRTT.total_milliseconds()))
+            ZS_LOG_TRACE(log("creating a burst timer since there is data to send and available batons to send it") + ZS_PARAM("timer ID", mBurstTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("burst duration (ms)", burstDuration) + ZS_PARAM("calculated RTT (ms)", mCalculatedRTT))
           }
         } else {
           if (mBurstTimer) {
@@ -1528,7 +1528,7 @@ namespace openpeer
             // The timer is set to fire at 1.5 x calculated RTT
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer = Timer::create(mThisWeak.lock(), ensureDuration, false);
 
-            ZS_LOG_TRACE(log("starting ensure timer to make sure packets get acked") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("ensure duration", ensureDuration.total_milliseconds()) + ZS_PARAM("calculated RTT", mCalculatedRTT.total_milliseconds()))
+            ZS_LOG_TRACE(log("starting ensure timer to make sure packets get acked") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("ensure duration (ms)", ensureDuration) + ZS_PARAM("calculated RTT (ms)", mCalculatedRTT))
           }
         } else {
           if (mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
@@ -1659,7 +1659,7 @@ namespace openpeer
                 if (mCalculatedRTT < mMinimumRTT)
                   mCalculatedRTT = mMinimumRTT;
 
-                ZS_LOG_TRACE(log("calculating RTT") + ZS_PARAM("RTT milliseconds", mCalculatedRTT.total_milliseconds()))
+                ZS_LOG_TRACE(log("calculating RTT") + ZS_PARAM("RTT milliseconds (ms)", mCalculatedRTT))
 
                 if (mCalculatedRTT > mAddToAvailableBurstBatonsDuation) {
                   mAddToAvailableBurstBatonsDuation = (mCalculatedRTT * 2);
@@ -1671,7 +1671,7 @@ namespace openpeer
                     mAddToAvailableBurstBatonsTimer.reset();
 
                     mAddToAvailableBurstBatonsTimer = Timer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
-                    ZS_LOG_TRACE(log("add to available batons timer is set too small based on calculated RTT") + ZS_PARAM("old timer ID", oldTimerID) + ZS_PARAM("new timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+                    ZS_LOG_TRACE(log("add to available batons timer is set too small based on calculated RTT") + ZS_PARAM("old timer ID", oldTimerID) + ZS_PARAM("new timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("duration milliseconds (ms)", mAddToAvailableBurstBatonsDuation))
                   }
                 }
               }
@@ -1867,7 +1867,7 @@ namespace openpeer
         // double the time until more batons get added
         if (!wasFrozen) {
           mAddToAvailableBurstBatonsDuation = mAddToAvailableBurstBatonsDuation * 2;
-          ZS_LOG_TRACE(log("increasing add to available burst batons duration") + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+          ZS_LOG_TRACE(log("increasing add to available burst batons duration") + ZS_PARAM("duration milliseconds (ms)", mAddToAvailableBurstBatonsDuation))
         }
 
         if (mPacketsPerBurst > 1) {
@@ -1930,7 +1930,7 @@ namespace openpeer
             mAddToAvailableBurstBatonsTimer.reset();
           }
 
-          ZS_LOG_TRACE(log("good period of transmission without issue thus unfreezing/increasing baton adding frequency") + ZS_PARAM("old add to batons timer ID", oldTimerID) + ZS_PARAM("duration milliseconds", mAddToAvailableBurstBatonsDuation.total_milliseconds()))
+          ZS_LOG_TRACE(log("good period of transmission without issue thus unfreezing/increasing baton adding frequency") + ZS_PARAM("old add to batons timer ID", oldTimerID) + ZS_PARAM("duration milliseconds (ms)", mAddToAvailableBurstBatonsDuation))
         }
       }
 

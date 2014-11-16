@@ -40,12 +40,8 @@
 #include <openpeer/services/IRUDPMessaging.h>
 #include <openpeer/services/ITransportStream.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 #include <list>
 #include <iostream>
@@ -221,17 +217,17 @@ namespace openpeer
           switch (state) {
             case IICESocket::ICESocketState_Ready:
             {
-              BOOST_CHECK(mExpectConnected);
+              TESTING_CHECK(mExpectConnected);
               mConnected = true;
               break;
             }
             case IICESocket::ICESocketState_Shutdown:
             {
               if (mShutdownCalled) {
-                BOOST_CHECK(mExpectGracefulShutdown);
+                TESTING_CHECK(mExpectGracefulShutdown);
                 mGracefulShutdown = true;
               } else {
-                BOOST_CHECK(mExpectErrorShutdown);
+                TESTING_CHECK(mExpectErrorShutdown);
                 mErrorShutdown = true;
               }
               mRUDPSocket.reset();
@@ -267,7 +263,7 @@ namespace openpeer
           switch(state) {
             case IRUDPTransport::RUDPTransportState_Ready:
             {
-              BOOST_CHECK(mExpectSessionConnected);
+              TESTING_CHECK(mExpectSessionConnected);
               mSessionConnected = true;
 
               if (IRUDPTransport::RUDPTransportState_Ready == state) {
@@ -285,22 +281,22 @@ namespace openpeer
               }
 
               RUDPSessionList::iterator found = find(mRUDPSessions.begin(), mRUDPSessions.end(), session);
-              BOOST_CHECK(found != mRUDPSessions.end())
+              TESTING_CHECK(found != mRUDPSessions.end())
               break;
             }
             case IRUDPTransport::RUDPTransportState_Shutdown:
             {
-              BOOST_CHECK(mExpectSessionClosed);
+              TESTING_CHECK(mExpectSessionClosed);
               mSessionClosed = true;
 
               RUDPSessionList::iterator found = find(mRUDPSessions.begin(), mRUDPSessions.end(), session);
-              BOOST_CHECK(found != mRUDPSessions.end())
+              TESTING_CHECK(found != mRUDPSessions.end())
 
               IICESocketSessionPtr iceSession = (*found)->getICESession();
               mRUDPSessions.erase(found);
 
               ICESessionList::iterator iceFound = find(mICESessions.begin(), mICESessions.end(), iceSession);
-              BOOST_CHECK(iceFound != mICESessions.end())
+              TESTING_CHECK(iceFound != mICESessions.end())
               mICESessions.erase(iceFound);
             }
             default: break;
@@ -311,7 +307,7 @@ namespace openpeer
         virtual void onRUDPTransportChannelWaiting(IRUDPTransportPtr session)
         {
           zsLib::AutoRecursiveLock lock(getLock());
-          BOOST_CHECK(mSessionConnected)
+          TESTING_CHECK(mSessionConnected)
 
           IRUDPMessagingPtr messaging = IRUDPMessaging::acceptChannel(
                                                                       getAssociatedMessageQueue(),
@@ -323,7 +319,7 @@ namespace openpeer
           mMessaging.push_back(messaging);
 
           RUDPSessionList::iterator found = find(mRUDPSessions.begin(), mRUDPSessions.end(), session);
-          BOOST_CHECK(found != mRUDPSessions.end())
+          TESTING_CHECK(found != mRUDPSessions.end())
         }
 
         //---------------------------------------------------------------------
@@ -334,10 +330,10 @@ namespace openpeer
         {
           zsLib::AutoRecursiveLock lock(getLock());
           MessagingList::iterator found = find(mMessaging.begin(), mMessaging.end(), messaging);
-          BOOST_CHECK(found != mMessaging.end())
+          TESTING_CHECK(found != mMessaging.end())
           if (IRUDPMessaging::RUDPMessagingState_Connected == state)
           {
-            BOOST_CHECK(mExpectMessagingConnected)
+            TESTING_CHECK(mExpectMessagingConnected)
             mMessagingConnected = true;
             if (mIssueConnect) {
               static const char *message = "(*CONTROLLING**1234567890->tuTu8afutA6HatabASPeC9epHE2aHa3efew2xEc3acRANeVamUbrUsteh9C24e5h<-0987654321)";
@@ -349,7 +345,7 @@ namespace openpeer
           }
           if (IRUDPMessaging::RUDPMessagingState_Shutdown == state)
           {
-            BOOST_CHECK(mExpectMessagingShutdown)
+            TESTING_CHECK(mExpectMessagingShutdown)
             mMessagingShutdown = true;
             mMessaging.erase(found);
           }
@@ -440,43 +436,43 @@ namespace openpeer
         void expectationsOkay() {
           zsLib::AutoRecursiveLock lock(getLock());
           if (mExpectConnected) {
-            BOOST_CHECK(mConnected);
+            TESTING_CHECK(mConnected);
           } else {
-            BOOST_CHECK(!mConnected);
+            TESTING_CHECK(!mConnected);
           }
 
           if (mExpectGracefulShutdown) {
-            BOOST_CHECK(mGracefulShutdown);
+            TESTING_CHECK(mGracefulShutdown);
           } else {
-            BOOST_CHECK(!mGracefulShutdown);
+            TESTING_CHECK(!mGracefulShutdown);
           }
 
           if (mExpectErrorShutdown) {
-            BOOST_CHECK(mErrorShutdown);
+            TESTING_CHECK(mErrorShutdown);
           } else {
-            BOOST_CHECK(!mErrorShutdown);
+            TESTING_CHECK(!mErrorShutdown);
           }
 
           if (mExpectSessionConnected) {
-            BOOST_CHECK(mSessionConnected);
+            TESTING_CHECK(mSessionConnected);
           } else {
-            BOOST_CHECK(!mSessionConnected);
+            TESTING_CHECK(!mSessionConnected);
           }
 
           if (mExpectSessionClosed) {
-            BOOST_CHECK(mSessionClosed);
+            TESTING_CHECK(mSessionClosed);
           } else {
-            BOOST_CHECK(!mSessionClosed);
+            TESTING_CHECK(!mSessionClosed);
           }
           if (mExpectMessagingConnected) {
-            BOOST_CHECK(mMessagingConnected);
+            TESTING_CHECK(mMessagingConnected);
           } else {
-            BOOST_CHECK(!mMessagingConnected);
+            TESTING_CHECK(!mMessagingConnected);
           }
           if (mExpectMessagingShutdown) {
-            BOOST_CHECK(mMessagingShutdown);
+            TESTING_CHECK(mMessagingShutdown);
           } else {
-            BOOST_CHECK(!mMessagingShutdown);
+            TESTING_CHECK(!mMessagingShutdown);
           }
         }
 
@@ -611,7 +607,7 @@ void doTestRUDPICESocketLoopback()
 {
   if (!OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
@@ -666,7 +662,7 @@ void doTestRUDPICESocketLoopback()
 
       while (found < expecting)
       {
-        boost::this_thread::sleep(zsLib::Seconds(1));
+        std::this_thread::sleep_for(zsLib::Seconds(1));
         ++totalWait;
         if (totalWait >= 70)
           break;
@@ -718,10 +714,10 @@ void doTestRUDPICESocketLoopback()
 
         if (lastFound != found) {
           lastFound = found;
-          BOOST_STDOUT() << "FOUND:        [" << found << "].\n";
+          TESTING_STDOUT() << "FOUND:        [" << found << "].\n";
         }
       }
-      BOOST_EQUAL(found, expecting);
+      TESTING_EQUAL(found, expecting);
 
       switch (step) {
         case 0: {
@@ -746,7 +742,7 @@ void doTestRUDPICESocketLoopback()
   }
 
   ZS_LOG_BASIC("WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
   // wait for shutdown
   {
@@ -756,12 +752,12 @@ void doTestRUDPICESocketLoopback()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

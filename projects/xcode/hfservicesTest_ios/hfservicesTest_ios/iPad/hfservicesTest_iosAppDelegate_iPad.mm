@@ -31,14 +31,14 @@
 
 
 #import "hfservicesTest_iosAppDelegate_iPad.h"
-#import "boost_replacement.h"
+#import "testing.h"
 
 @implementation hfservicesTest_iosAppDelegate_iPad
 
 - (IBAction) btnTest_action: (id)sender
 {
-  BoostReplacement::runAllTests();
-  BoostReplacement::output();
+  Testing::runAllTests();
+  Testing::output();
 }
 
 - (void)dealloc

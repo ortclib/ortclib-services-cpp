@@ -29,7 +29,7 @@
  
  */
 
-#include "boost_replacement.h"
+#include "testing.h"
 #include "config.h"
 
 #include <zsLib/types.h>
@@ -57,32 +57,32 @@ void doTestRUDPICESocket();
 void doTestRUDPICESocketLoopback();
 void doTestTCPMessagingLoopback();
 
-namespace BoostReplacement
+namespace Testing
 {
-  zsLib::ULONG &getGlobalPassedVar()
+  std::atomic_uint &getGlobalPassedVar()
   {
-    static zsLib::ULONG value = 0;
+    static std::atomic_uint value {};
     return value;
   }
   
-  zsLib::ULONG &getGlobalFailedVar()
+  std::atomic_uint &getGlobalFailedVar()
   {
-    static zsLib::ULONG value = 0;
+    static std::atomic_uint value {};
     return value;
   }
-  
+
   void passed()
   {
-    zsLib::atomicIncrement(getGlobalPassedVar());
+    ++getGlobalPassedVar();
   }
   void failed()
   {
-    zsLib::atomicIncrement(getGlobalFailedVar());
+    ++getGlobalFailedVar();
   }
   
   void installLogger()
   {
-    BOOST_STDOUT() << "INSTALLING LOGGER...\n\n";
+    TESTING_STDOUT() << "INSTALLING LOGGER...\n\n";
     ILogger::setLogLevel(zsLib::Log::Trace);
     ILogger::setLogLevel("zsLib", zsLib::Log::Trace);
     ILogger::setLogLevel("openpeer_services", zsLib::Log::Trace);
@@ -105,7 +105,7 @@ namespace BoostReplacement
         if (ILogger::isTelnetLoggerListening()) {
           break;
         }
-        boost::this_thread::sleep(zsLib::Seconds(1));
+        std::this_thread::sleep_for(zsLib::Seconds(1));
       }
     }
 
@@ -113,12 +113,12 @@ namespace BoostReplacement
       ILogger::installDebuggerLogger();
     }
 
-    BOOST_STDOUT() << "INSTALLED LOGGER...\n\n";
+    TESTING_STDOUT() << "INSTALLED LOGGER...\n\n";
   }
   
   void uninstallLogger()
   {
-    BOOST_STDOUT() << "REMOVING LOGGER...\n\n";
+    TESTING_STDOUT() << "REMOVING LOGGER...\n\n";
 
     if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
       ILogger::uninstallStdOutLogger();
@@ -133,33 +133,33 @@ namespace BoostReplacement
       ILogger::uninstallDebuggerLogger();
     }
 
-    BOOST_STDOUT() << "REMOVED LOGGER...\n\n";
+    TESTING_STDOUT() << "REMOVED LOGGER...\n\n";
   }
   
   void output()
   {
-    BOOST_STDOUT() << "PASSED:       [" << BoostReplacement::getGlobalPassedVar() << "]\n";
-    if (0 != BoostReplacement::getGlobalFailedVar()) {
-      BOOST_STDOUT() << "***FAILED***: [" << BoostReplacement::getGlobalFailedVar() << "]\n";
+    TESTING_STDOUT() << "PASSED:       [" << Testing::getGlobalPassedVar() << "]\n";
+    if (0 != Testing::getGlobalFailedVar()) {
+      TESTING_STDOUT() << "***FAILED***: [" << Testing::getGlobalFailedVar() << "]\n";
     }
   }
   
   void runAllTests()
   {
-    BOOST_INSTALL_LOGGER()
+    TESTING_INSTALL_LOGGER()
 
-    BOOST_RUN_TEST_FUNC(doTestCanonicalXML)
-    BOOST_RUN_TEST_FUNC(doTestDH)
-    BOOST_RUN_TEST_FUNC(doTestDNS)
-    BOOST_RUN_TEST_FUNC(doTestHelper)
-    BOOST_RUN_TEST_FUNC(doTestICESocket)
-    BOOST_RUN_TEST_FUNC(doTestSTUNDiscovery)
-    BOOST_RUN_TEST_FUNC(doTestTURNSocket)
-    BOOST_RUN_TEST_FUNC(doTestRUDPICESocketLoopback)
-    BOOST_RUN_TEST_FUNC(doTestRUDPListener)
-    BOOST_RUN_TEST_FUNC(doTestRUDPICESocket)
-    BOOST_RUN_TEST_FUNC(doTestTCPMessagingLoopback)
+    TESTING_RUN_TEST_FUNC(doTestCanonicalXML)
+    TESTING_RUN_TEST_FUNC(doTestDH)
+    TESTING_RUN_TEST_FUNC(doTestDNS)
+    TESTING_RUN_TEST_FUNC(doTestHelper)
+    TESTING_RUN_TEST_FUNC(doTestICESocket)
+    TESTING_RUN_TEST_FUNC(doTestSTUNDiscovery)
+    TESTING_RUN_TEST_FUNC(doTestTURNSocket)
+    TESTING_RUN_TEST_FUNC(doTestRUDPICESocketLoopback)
+    TESTING_RUN_TEST_FUNC(doTestRUDPListener)
+    TESTING_RUN_TEST_FUNC(doTestRUDPICESocket)
+    TESTING_RUN_TEST_FUNC(doTestTCPMessagingLoopback)
 
-    BOOST_UNINSTALL_LOGGER()
+    TESTING_UNINSTALL_LOGGER()
   }
 }

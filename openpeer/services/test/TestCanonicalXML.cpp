@@ -34,12 +34,8 @@
 #include <zsLib/XML.h>
 #include <iostream>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 using openpeer::services::ICanonicalXML;
 
@@ -47,7 +43,7 @@ void doTestCanonicalXML()
 {
   if (!OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   {
     const char *input =
@@ -91,7 +87,7 @@ void doTestCanonicalXML()
     zsLib::XML::ElementPtr e1 = elementDoc->getFirstChildElementChecked();
 
     zsLib::String output = ICanonicalXML::convert(e1);
-    BOOST_EQUAL(output, finalized)
+    TESTING_EQUAL(output, finalized)
   }
 
   {
@@ -135,8 +131,8 @@ void doTestCanonicalXML()
     zsLib::XML::ElementPtr elementDoc = doc->getFirstChildElementChecked();
 
     zsLib::String output = ICanonicalXML::convert(elementDoc);
-    BOOST_EQUAL(output, finalized)
-    BOOST_STDOUT() << output.c_str() << "\n";
+    TESTING_EQUAL(output, finalized)
+    TESTING_STDOUT() << output.c_str() << "\n";
   }
 
 }

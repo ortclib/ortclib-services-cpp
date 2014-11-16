@@ -440,8 +440,8 @@ namespace openpeer
         AutoRecursiveLock lock(*this);
 
         ZS_LOG_DEBUG(log("adjusting keep alive propertiess") +
-                     ZS_PARAM("send keep alive (ms)", sendKeepAliveIndications.total_milliseconds()) +
-                     ZS_PARAM("expecting data within (ms)", expectSTUNOrDataWithinWithinOrSendAliveCheck.total_milliseconds()))
+                     ZS_PARAM("send keep alive (ms)", sendKeepAliveIndications) +
+                     ZS_PARAM("expecting data within (ms)", expectSTUNOrDataWithinWithinOrSendAliveCheck))
 
         if (mKeepAliveTimer) {
           ZS_LOG_DEBUG(log("cancelling current keep alive timer"))
@@ -1497,7 +1497,7 @@ namespace openpeer
           mWentToBackgroundAt = Time();
 
           if (diff > mBackgroundingTimeout) {
-            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("now", tick) + ZS_PARAM("time diff (ms)", diff.total_milliseconds()))
+            ZS_LOG_WARNING(Detail, log("backgrounding timeout forced this session to close") + ZS_PARAM("now", tick) + ZS_PARAM("time diff (ms)", diff))
             setError(ICESocketSessionShutdownReason_BackgroundingTimeout, "backgrounding timeout");
             cancel();
             return;

@@ -38,12 +38,8 @@
 #include <openpeer/services/STUNPacket.h>
 #include <openpeer/services/ISTUNDiscovery.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 #include <list>
 #include <iostream>
@@ -175,8 +171,8 @@ namespace openpeer
 
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
-          BOOST_CHECK(query)
-          BOOST_CHECK(query->hasResult())
+          TESTING_CHECK(query)
+          TESTING_CHECK(query->hasResult())
           AutoRecursiveLock lock(mLock);
 
           if (query == mUDPSRVQuery) {
@@ -198,8 +194,8 @@ namespace openpeer
               (!mTCPSRVResult))
             return;
 
-          BOOST_CHECK(!mUDPSRVQuery)
-          BOOST_CHECK(!mTCPSRVQuery)
+          TESTING_CHECK(!mUDPSRVQuery)
+          TESTING_CHECK(!mTCPSRVQuery)
 
           mTURNSocket = ITURNSocket::create(
                                             getAssociatedMessageQueue(),
@@ -235,7 +231,7 @@ namespace openpeer
             }
           }
 
-          BOOST_CHECK(false); // received unknown data from the socket
+          TESTING_CHECK(false); // received unknown data from the socket
         }
 
         virtual void onSTUNDiscoverySendPacket(
@@ -246,12 +242,12 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
           if (!mSocket) return;
-          BOOST_CHECK(discovery);
-          BOOST_CHECK(!destination.isAddressEmpty());
-          BOOST_CHECK(!destination.isPortEmpty());
-          BOOST_CHECK(packet->BytePtr());
-          BOOST_CHECK(packet->SizeInBytes());
-          BOOST_CHECK(mSocket);
+          TESTING_CHECK(discovery);
+          TESTING_CHECK(!destination.isAddressEmpty());
+          TESTING_CHECK(!destination.isPortEmpty());
+          TESTING_CHECK(packet->BytePtr());
+          TESTING_CHECK(packet->SizeInBytes());
+          TESTING_CHECK(mSocket);
 
           mSocket->sendTo(destination, packet->BytePtr(), packet->SizeInBytes());
         }
@@ -259,11 +255,11 @@ namespace openpeer
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(discovery);
+          TESTING_CHECK(discovery);
           if (!mDiscovery) return;
-          BOOST_CHECK(discovery == mDiscovery);
-          BOOST_CHECK(mDiscovery);
-          BOOST_CHECK(mSocket)
+          TESTING_CHECK(discovery == mDiscovery);
+          TESTING_CHECK(mDiscovery);
+          TESTING_CHECK(mSocket)
 
           mSTUNDiscoveredIP = discovery->getMappedAddress();
           mDiscovery.reset();
@@ -286,7 +282,7 @@ namespace openpeer
                                               )
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(socket == mTURNSocket)
+          TESTING_CHECK(socket == mTURNSocket)
 
           switch (state)
           {
@@ -310,18 +306,18 @@ namespace openpeer
         void onTURNSocketConnected(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(socket == mTURNSocket)
-          BOOST_CHECK(mExpectConnected)
+          TESTING_CHECK(socket == mTURNSocket)
+          TESTING_CHECK(mExpectConnected)
 
           mConnected = true;
           mDiscoveredIP = socket->getReflectedIP();
-          BOOST_CHECK(!mDiscoveredIP.isAddressEmpty())
+          TESTING_CHECK(!mDiscoveredIP.isAddressEmpty())
         }
 
         void onTURNSocketFailedToConnect(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(mExpectFailedToConnect)
+          TESTING_CHECK(mExpectFailedToConnect)
           mFailedToConnect = true;
           mTURNSocket.reset();
         }
@@ -329,16 +325,16 @@ namespace openpeer
         void onTURNSocketShutdown(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(socket == mTURNSocket);
+          TESTING_CHECK(socket == mTURNSocket);
 
           if (mShutdownCalled) {
-            BOOST_CHECK(mExpectGracefulShutdown);
+            TESTING_CHECK(mExpectGracefulShutdown);
             mGracefulShutdown = true;
             mTURNSocket.reset();
             return;
           }
 
-          BOOST_CHECK(mExpectErrorShutdown);
+          TESTING_CHECK(mExpectErrorShutdown);
           mErrorShutdown = true;
           mTURNSocket.reset();
         }
@@ -351,9 +347,9 @@ namespace openpeer
         virtual void onReadReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(socket);
+          TESTING_CHECK(socket);
           if (!mSocket) return;
-          BOOST_CHECK(socket == mSocket);
+          TESTING_CHECK(socket == mSocket);
           if (!mTURNSocket) return;
 
           IPAddress ip;
@@ -361,7 +357,7 @@ namespace openpeer
           size_t bufferLengthInBytes = sizeof(buffer);
 
           size_t readBytes = mSocket->receiveFrom(ip, &(buffer[0]), bufferLengthInBytes);
-          BOOST_CHECK(readBytes > 0);
+          TESTING_CHECK(readBytes > 0);
 
           if (mTURNSocket->handleChannelData(ip, &(buffer[0]), readBytes)) return;
 
@@ -373,15 +369,15 @@ namespace openpeer
         virtual void onWriteReady(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
-          //          BOOST_CHECK(socket);
-          //          BOOST_CHECK(socket == mSocket);
+          //          TESTING_CHECK(socket);
+          //          TESTING_CHECK(socket == mSocket);
         }
 
         virtual void onException(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
-          //          BOOST_CHECK(socket);
-          //          BOOST_CHECK(socket == mSocket);
+          //          TESTING_CHECK(socket);
+          //          TESTING_CHECK(socket == mSocket);
         }
 
         virtual void onTimer(TimerPtr timer)
@@ -420,7 +416,7 @@ namespace openpeer
         void shutdown()
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(mTURNSocket);
+          TESTING_CHECK(mTURNSocket);
 
           mTURNSocket->shutdown();
 
@@ -453,27 +449,27 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
 
           if (mExpectConnected) {
-            BOOST_CHECK(mConnected);
+            TESTING_CHECK(mConnected);
           } else {
-            BOOST_CHECK(!mConnected);
+            TESTING_CHECK(!mConnected);
           }
 
           if (mExpectFailedToConnect) {
-            BOOST_CHECK(mFailedToConnect);
+            TESTING_CHECK(mFailedToConnect);
           } else {
-            BOOST_CHECK(!mFailedToConnect);
+            TESTING_CHECK(!mFailedToConnect);
           }
 
           if (mExpectGracefulShutdown) {
-            BOOST_CHECK(mGracefulShutdown);
+            TESTING_CHECK(mGracefulShutdown);
           } else {
-            BOOST_CHECK(!mGracefulShutdown);
+            TESTING_CHECK(!mGracefulShutdown);
           }
 
           if (mExpectErrorShutdown) {
-            BOOST_CHECK(mErrorShutdown);
+            TESTING_CHECK(mErrorShutdown);
           } else {
-            BOOST_CHECK(!mErrorShutdown);
+            TESTING_CHECK(!mErrorShutdown);
           }
         }
         ULONG getTotalReceived() {
@@ -536,9 +532,9 @@ void doTestTURNSocket()
 {
   if (!OPENPEER_SERVICE_TEST_DO_TURN_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
-  boost::this_thread::sleep(Seconds(1));
+  std::this_thread::sleep_for(Seconds(1));
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
@@ -548,7 +544,7 @@ void doTestTURNSocket()
   TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
   TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
 
-  BOOST_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
+  TESTING_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
 
   // check to see if all DNS routines have resolved
   {
@@ -565,7 +561,7 @@ void doTestTURNSocket()
 
     do
     {
-      boost::this_thread::sleep(Seconds(1));
+      std::this_thread::sleep_for(Seconds(1));
       ++totalWait;
       if (totalWait >= 180)
         break;
@@ -590,16 +586,16 @@ void doTestTURNSocket()
       if (testObject5) found += (testObject5->isComplete() ? 1 : 0);
       if (lastFound != found) {
         lastFound = found;
-        BOOST_STDOUT() << "FOUND:        [" << found << "].\n";
+        TESTING_STDOUT() << "FOUND:        [" << found << "].\n";
       }
 
     } while(found < expecting);
 
-    BOOST_EQUAL(found, expecting);
+    TESTING_EQUAL(found, expecting);
   }
 
-  BOOST_STDOUT() << "WAITING:      All TURN sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  boost::this_thread::sleep(Seconds(10));
+  TESTING_STDOUT() << "WAITING:      All TURN sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
+  std::this_thread::sleep_for(Seconds(10));
 
   if (testObject1) {std::cout << "object1: [" << testObject1->getID() << "]\n";}
   if (testObject2) {std::cout << "object2: [" << testObject2->getID() << "]\n";}
@@ -608,24 +604,24 @@ void doTestTURNSocket()
   if (testObject5) {std::cout << "object5: [" << testObject5->getID() << "]\n";}
 
   if (testObject1) {
-    BOOST_CHECK(!testObject1->getIP().isAddressEmpty());
-    BOOST_CHECK(!testObject1->getIP().isPortEmpty());
+    TESTING_CHECK(!testObject1->getIP().isAddressEmpty());
+    TESTING_CHECK(!testObject1->getIP().isPortEmpty());
   }
   if (testObject2) {
-    BOOST_CHECK(!testObject2->getIP().isAddressEmpty());
-    BOOST_CHECK(!testObject2->getIP().isPortEmpty());
+    TESTING_CHECK(!testObject2->getIP().isAddressEmpty());
+    TESTING_CHECK(!testObject2->getIP().isPortEmpty());
   }
   if (testObject3) {
-    BOOST_CHECK(testObject3->getIP().isAddressEmpty());
-    BOOST_CHECK(testObject3->getIP().isPortEmpty());
+    TESTING_CHECK(testObject3->getIP().isAddressEmpty());
+    TESTING_CHECK(testObject3->getIP().isPortEmpty());
   }
   if (testObject4) {
-    BOOST_CHECK(!testObject4->getIP().isAddressEmpty());
-    BOOST_CHECK(!testObject4->getIP().isPortEmpty());
+    TESTING_CHECK(!testObject4->getIP().isAddressEmpty());
+    TESTING_CHECK(!testObject4->getIP().isPortEmpty());
   }
   if (testObject5) {
-    BOOST_CHECK(!testObject5->getIP().isAddressEmpty());
-    BOOST_CHECK(!testObject5->getIP().isPortEmpty());
+    TESTING_CHECK(!testObject5->getIP().isAddressEmpty());
+    TESTING_CHECK(!testObject5->getIP().isPortEmpty());
   }
 
   if (testObject1) testObject1->expectationsOkay();
@@ -635,32 +631,32 @@ void doTestTURNSocket()
   if (testObject5) testObject5->expectationsOkay();
 
   if (testObject1) {
-    BOOST_CHECK(testObject1->getTotalReceived() > 10)
-    BOOST_CHECK(testObject1->getTotalUnreceived() < 10)
+    TESTING_CHECK(testObject1->getTotalReceived() > 10)
+    TESTING_CHECK(testObject1->getTotalUnreceived() < 10)
   }
   if (testObject2) {
-    BOOST_CHECK(testObject2->getTotalReceived() > 10)
-    BOOST_CHECK(testObject2->getTotalUnreceived() < 10)
+    TESTING_CHECK(testObject2->getTotalReceived() > 10)
+    TESTING_CHECK(testObject2->getTotalUnreceived() < 10)
   }
   if (testObject3) {
-    BOOST_EQUAL(testObject3->getTotalReceived(), 0)
-    BOOST_EQUAL(testObject3->getTotalUnreceived(), 0)
+    TESTING_EQUAL(testObject3->getTotalReceived(), 0)
+    TESTING_EQUAL(testObject3->getTotalUnreceived(), 0)
   }
   if (testObject4) {
-    BOOST_CHECK(testObject4->getTotalReceived() > 10)
-    BOOST_CHECK(testObject4->getTotalUnreceived() < 10)
+    TESTING_CHECK(testObject4->getTotalReceived() > 10)
+    TESTING_CHECK(testObject4->getTotalUnreceived() < 10)
   }
   if (testObject5) {
-    BOOST_CHECK(testObject5->getTotalReceived() > 10)
-    BOOST_CHECK(testObject5->getTotalUnreceived() < 10)
+    TESTING_CHECK(testObject5->getTotalReceived() > 10)
+    TESTING_CHECK(testObject5->getTotalUnreceived() < 10)
   }
 
 #ifdef OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
   if (testObject1) {
-    BOOST_EQUAL(testObject1->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+    TESTING_EQUAL(testObject1->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
   }
   if (testObject2) {
-    BOOST_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+    TESTING_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
   }
 #endif //OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
 
@@ -678,12 +674,12 @@ void doTestTURNSocket()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

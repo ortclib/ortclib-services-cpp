@@ -49,6 +49,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
+
 #ifndef _WIN32
 #include <pthread.h>
 #endif //ndef _WIN32
@@ -58,8 +60,6 @@
 #include <QDebug>
 #endif //ndef NDEBUG
 #endif //__QNX__
-
-#include <boost/shared_array.hpp>
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -91,6 +91,9 @@ namespace openpeer
   {
     using zsLib::Numeric;
     using zsLib::AutoRecursiveLock;
+    using zsLib::Seconds;
+    using zsLib::Milliseconds;
+    using zsLib::Microseconds;
 
     namespace internal
     {
@@ -109,10 +112,10 @@ namespace openpeer
 #ifdef _WIN32
         return string(GetCurrentThreadId());
 #else
-#ifdef APPLE
-        return string(pthread_mach_thread_np(pthread_self()));
+#ifdef __APPLE__
+        return string(((PTRNUMBER)pthread_mach_thread_np(pthread_self())));
 #else
-        return string(pthread_self());
+        return string(((PTRNUMBER)pthread_self()));
 #endif //APPLE
 #endif //_WIN32
       }
@@ -227,6 +230,26 @@ namespace openpeer
         return message;
       }
 
+      static std::string getNowTime()
+      {
+        Time now = zsLib::now();
+
+        time_t tt = std::chrono::system_clock::to_time_t(now);
+        Time secOnly = std::chrono::system_clock::from_time_t(tt);
+
+        Microseconds remainder = std::chrono::duration_cast<Microseconds>(now - secOnly);
+
+        std::tm ttm {};
+        gmtime_r(&tt, &ttm);
+
+        //HH:MM:SS.123456
+        char buffer[100] {};
+
+        snprintf(buffer, sizeof(buffer), "%02u:%02u:%02u:%06u", ((UINT)ttm.tm_hour), ((UINT)ttm.tm_min), ((UINT)ttm.tm_sec), static_cast<UINT>(remainder.count()));
+
+        return buffer;
+      }
+
       //-----------------------------------------------------------------------
       static String toColorString(
                                   const Subsystem &inSubsystem,
@@ -257,7 +280,7 @@ namespace openpeer
           fileName = posSlash + 1;
         }
 
-        std::string current = to_simple_string(zsLib::now()).substr(12);
+        std::string current = getNowTime();
 
         const char *colorSeverity = OPENPEER_SERVICES_SEQUENCE_COLOUR_SEVERITY_INFO;
         const char *severity = "NONE";
@@ -327,7 +350,7 @@ namespace openpeer
           fileName = posSlash + 1;
         }
 
-        std::string current = to_simple_string(zsLib::now()).substr(12);
+        std::string current = getNowTime();
 
         const char *severity = "NONE";
         switch (inSeverity) {
@@ -354,7 +377,7 @@ namespace openpeer
                                     bool eol = true
                                     )
       {
-        std::string current = to_simple_string(zsLib::now()).substr(12);
+        std::string current = getNowTime();
 
         const char *severity = "NONE";
         switch (inSeverity) {
@@ -425,7 +448,7 @@ namespace openpeer
         ElementPtr timeEl = Element::create("time");
         TextPtr timeText = Text::create();
 
-        std::string current = to_simple_string(zsLib::now()).substr(12);
+        std::string current = getNowTime();
 
         timeText->setValue(current);
         timeEl->adoptAsLastChild(timeText);

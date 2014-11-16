@@ -291,7 +291,7 @@ namespace openpeer
             ++mPending;
             IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
           }
-          boost::thread::yield();
+          std::this_thread::yield();
         }
 
         if (0 != mPending) {
@@ -363,7 +363,7 @@ namespace openpeer
             break;
           }
 
-          boost::thread::yield();
+          std::this_thread::yield();
         } while (totalRemaining > 0);
 
       }

@@ -76,6 +76,8 @@ namespace openpeer
 {
   namespace services
   {
+    using zsLib::Milliseconds;
+
     namespace internal
     {
       using zsLib::Numeric;
@@ -301,18 +303,11 @@ namespace openpeer
         if (str.isEmpty()) return Time();
 
         try {
-          Duration::sec_type timestamp = Numeric<Duration::sec_type>(str);
-          return zsLib::timeSinceEpoch(Seconds(timestamp));
-        } catch (Numeric<Duration::sec_type>::ValueOutOfRange &) {
-          ZS_LOG_WARNING(Detail, log("unable to convert value to Duration::sec_type") + ZS_PARAM("value", str))
-          try {
-            QWORD timestamp = Numeric<QWORD>(str);
-            ZS_LOG_WARNING(Debug, log("date exceeds maximum Duration::sec_type") + ZS_PARAM("value", timestamp))
-            return Time(boost::date_time::max_date_time);
-          } catch (Numeric<QWORD>::ValueOutOfRange &) {
-            ZS_LOG_WARNING(Detail, log("even QWORD failed to convert value to max_date_time") + ZS_PARAM("value", str))
-          }
+          return Numeric<Time>(str);
+        } catch(Numeric<Time>::ValueOutOfRange &) {
+          ZS_LOG_WARNING(Detail, log("unable to convert value to time") + ZS_PARAM("value", str))
         }
+
         return Time();
       }
 
@@ -1637,21 +1632,21 @@ namespace openpeer
       ZS_THROW_INVALID_ARGUMENT_IF(!name)
 
       if (strstr(name, "(ms)")) {
-        IHelper::debugAppend(parentEl, name, value.total_milliseconds());
+        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Milliseconds>(value).count());
         return;
       }
 
       if (strstr(name, "(s)")) {
-        IHelper::debugAppend(parentEl, name, value.total_seconds());
+        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Seconds>(value).count());
         return;
       }
 
       if (strstr(name, "(seconds)")) {
-        IHelper::debugAppend(parentEl, name, value.total_seconds());
+        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Seconds>(value).count());
         return;
       }
 
-      IHelper::debugAppend(parentEl, name, boost::posix_time::to_simple_string(value).c_str());
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
     }
 
     //-------------------------------------------------------------------------

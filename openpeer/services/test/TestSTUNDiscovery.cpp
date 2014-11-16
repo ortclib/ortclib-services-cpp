@@ -35,12 +35,8 @@
 #include <zsLib/Socket.h>
 #include <openpeer/services/ISTUNDiscovery.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 #include <list>
 #include <iostream>
@@ -119,11 +115,11 @@ namespace openpeer
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
           zsLib::AutoLock lock(mLock);
-          BOOST_CHECK(((bool)query))
-          BOOST_CHECK(query->hasResult())
+          TESTING_CHECK(((bool)query))
+          TESTING_CHECK(query->hasResult())
 
-          BOOST_CHECK(query == mSRVQuery);
-          BOOST_CHECK(mSRVQuery);
+          TESTING_CHECK(query == mSRVQuery);
+          TESTING_CHECK(mSRVQuery);
 
           mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), query->getSRV());
           mSRVQuery.reset();
@@ -141,12 +137,12 @@ namespace openpeer
         {
           zsLib::AutoLock lock(mLock);
           if (!mSocket) return;
-          BOOST_CHECK(discovery);
-          BOOST_CHECK(!destination.isAddressEmpty());
-          BOOST_CHECK(!destination.isPortEmpty());
-          BOOST_CHECK(packet->BytePtr());
-          BOOST_CHECK(packet->SizeInBytes());
-          BOOST_CHECK(mSocket);
+          TESTING_CHECK(discovery);
+          TESTING_CHECK(!destination.isAddressEmpty());
+          TESTING_CHECK(!destination.isPortEmpty());
+          TESTING_CHECK(packet->BytePtr());
+          TESTING_CHECK(packet->SizeInBytes());
+          TESTING_CHECK(mSocket);
 
           mSocket->sendTo(destination, packet->BytePtr(), packet->SizeInBytes());
         }
@@ -154,11 +150,11 @@ namespace openpeer
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
         {
           zsLib::AutoLock lock(mLock);
-          BOOST_CHECK(discovery);
+          TESTING_CHECK(discovery);
           if (!mDiscovery) return;
-          BOOST_CHECK(discovery == mDiscovery);
-          BOOST_CHECK(mDiscovery);
-          BOOST_CHECK(mSocket)
+          TESTING_CHECK(discovery == mDiscovery);
+          TESTING_CHECK(mDiscovery);
+          TESTING_CHECK(mSocket)
 
           mDiscoveredIP = discovery->getMappedAddress();
           mDiscovery.reset();
@@ -169,17 +165,17 @@ namespace openpeer
         virtual void onReadReady(SocketPtr socket)
         {
           zsLib::AutoLock lock(mLock);
-          BOOST_CHECK(socket);
+          TESTING_CHECK(socket);
           if (!mSocket) return;
-          BOOST_CHECK(socket == mSocket);
-          BOOST_CHECK(mDiscovery);
+          TESTING_CHECK(socket == mSocket);
+          TESTING_CHECK(mDiscovery);
 
           IPAddress ip;
           BYTE buffer[1500];
           size_t bufferLengthInBytes = sizeof(buffer);
 
           size_t readBytes = mSocket->receiveFrom(ip, &(buffer[0]), bufferLengthInBytes);
-          BOOST_CHECK(readBytes > 0)
+          TESTING_CHECK(readBytes > 0)
 
           ISTUNDiscovery::handlePacket(ip, &(buffer[0]), readBytes);
         }
@@ -187,15 +183,15 @@ namespace openpeer
         virtual void onWriteReady(SocketPtr socket)
         {
 //          zsLib::AutoLock lock(mLock);
-//          BOOST_CHECK(socket);
-//          BOOST_CHECK(socket == mSocket);
+//          TESTING_CHECK(socket);
+//          TESTING_CHECK(socket == mSocket);
         }
 
         virtual void onException(SocketPtr socket)
         {
 //          zsLib::AutoLock lock(mLock);
-//          BOOST_CHECK(socket);
-//          BOOST_CHECK(socket == mSocket);
+//          TESTING_CHECK(socket);
+//          TESTING_CHECK(socket == mSocket);
         }
 
         bool isComplete()
@@ -232,14 +228,14 @@ void doTestSTUNDiscovery()
 {
   if (!OPENPEER_SERVICE_TEST_DO_STUN_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
   TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, OPENPEER_SERVICE_TEST_STUN_SERVER, true);
   TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, OPENPEER_SERVICE_TEST_STUN_SERVER, false);
 
-  BOOST_STDOUT() << "WAITING:      Waiting for STUN discovery to complete (max wait is 180 seconds).\n";
+  TESTING_STDOUT() << "WAITING:      Waiting for STUN discovery to complete (max wait is 180 seconds).\n";
 
   // check to see if all DNS routines have resolved
   {
@@ -251,7 +247,7 @@ void doTestSTUNDiscovery()
 
     do
     {
-      boost::this_thread::sleep(zsLib::Seconds(1));
+      std::this_thread::sleep_for(zsLib::Seconds(1));
       ++totalWait;
       if (totalWait >= 180)
         break;
@@ -268,24 +264,24 @@ void doTestSTUNDiscovery()
 
     } while(found < expecting);
 
-    BOOST_EQUAL(found, expecting);
+    TESTING_EQUAL(found, expecting);
   }
 
-  BOOST_STDOUT() << "WAITING:      All STUN discoveries have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  TESTING_STDOUT() << "WAITING:      All STUN discoveries have finished. Waiting for 'bogus' events to process (10 second wait).\n";
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
-  BOOST_CHECK(!testObject->getIP().isAddressEmpty());
-  BOOST_CHECK(!testObject->getIP().isPortEmpty());
+  TESTING_CHECK(!testObject->getIP().isAddressEmpty());
+  TESTING_CHECK(!testObject->getIP().isPortEmpty());
 
-  BOOST_CHECK(!testObject2->getIP().isAddressEmpty());
-  BOOST_CHECK(!testObject2->getIP().isPortEmpty());
+  TESTING_CHECK(!testObject2->getIP().isAddressEmpty());
+  TESTING_CHECK(!testObject2->getIP().isPortEmpty());
 
-  BOOST_CHECK(testObject->getIP().isAddressEqual(testObject2->getIP()));
-  BOOST_CHECK(testObject->getIP().getPort() != testObject2->getIP().getPort());
+  TESTING_CHECK(testObject->getIP().isAddressEqual(testObject2->getIP()));
+  TESTING_CHECK(testObject->getIP().getPort() != testObject2->getIP().getPort());
 
 #ifdef OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
-  BOOST_EQUAL(testObject->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
-  BOOST_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+  TESTING_EQUAL(testObject->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+  TESTING_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
 #endif //OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
 
   testObject.reset();
@@ -299,12 +295,12 @@ void doTestSTUNDiscovery()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

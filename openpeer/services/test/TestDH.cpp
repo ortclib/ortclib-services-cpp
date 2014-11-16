@@ -38,7 +38,7 @@
 #include <iostream>
 
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 using openpeer::services::IHelper;
 using openpeer::services::IDHKeyDomain;
@@ -54,7 +54,7 @@ void doTestDH()
 {
   if (!OPENPEER_SERVICE_TEST_DO_DH_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   {
     static IDHKeyDomain::KeyDomainPrecompiledTypes precompiled[] =
@@ -90,7 +90,7 @@ void doTestDH()
       SecureByteBlockPtr checkAgain;
 
       {
-        BOOST_EQUAL(1, 1)
+        TESTING_EQUAL(1, 1)
         IDHKeyDomainPtr keyDomain = IDHKeyDomain::generate(1024);
 
         keyDomain->save(p, q, g);
@@ -101,10 +101,10 @@ void doTestDH()
         IDHPublicKeyPtr bobPublicKey;
         IDHPrivateKeyPtr bobPrivateKey = IDHPrivateKey::generate(keyDomain, bobPublicKey);
 
-        BOOST_CHECK((bool)alicePublicKey)
-        BOOST_CHECK((bool)alicePrivateKey)
-        BOOST_CHECK((bool)bobPublicKey)
-        BOOST_CHECK((bool)bobPrivateKey)
+        TESTING_CHECK((bool)alicePublicKey)
+        TESTING_CHECK((bool)alicePrivateKey)
+        TESTING_CHECK((bool)bobPublicKey)
+        TESTING_CHECK((bool)bobPrivateKey)
 
         alicePrivateKey->save(&aliceStaticPrivate, &aliceEmpheralPrivate);
         alicePublicKey->save(&aliceStaticPublic, &aliceEmpheralPublic);
@@ -115,16 +115,16 @@ void doTestDH()
         SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
         SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
-        BOOST_CHECK(IHelper::hasData(aliceSecret))
-        BOOST_CHECK(IHelper::hasData(bobSecret))
+        TESTING_CHECK(IHelper::hasData(aliceSecret))
+        TESTING_CHECK(IHelper::hasData(bobSecret))
 
-        BOOST_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
+        TESTING_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
 
         checkAgain = aliceSecret;
       }
 
       {
-        BOOST_EQUAL(2, 2)
+        TESTING_EQUAL(2, 2)
         IDHKeyDomainPtr keyDomain = IDHKeyDomain::load(p, q, g, true);
 
         IDHPublicKeyPtr alicePublicKey = IDHPublicKey::load(aliceStaticPublic, aliceEmpheralPublic);
@@ -133,23 +133,23 @@ void doTestDH()
         IDHPublicKeyPtr bobPublicKey = IDHPublicKey::load(bobStaticPublic, bobEmpheralPublic);
         IDHPrivateKeyPtr bobPrivateKey = IDHPrivateKey::load(keyDomain, bobStaticPrivate, bobEmpheralPrivate);
 
-        BOOST_CHECK((bool)alicePublicKey)
-        BOOST_CHECK((bool)alicePrivateKey)
-        BOOST_CHECK((bool)bobPublicKey)
-        BOOST_CHECK((bool)bobPrivateKey)
+        TESTING_CHECK((bool)alicePublicKey)
+        TESTING_CHECK((bool)alicePrivateKey)
+        TESTING_CHECK((bool)bobPublicKey)
+        TESTING_CHECK((bool)bobPrivateKey)
 
         SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
         SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
-        BOOST_CHECK(IHelper::hasData(aliceSecret))
-        BOOST_CHECK(IHelper::hasData(bobSecret))
+        TESTING_CHECK(IHelper::hasData(aliceSecret))
+        TESTING_CHECK(IHelper::hasData(bobSecret))
 
-        BOOST_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
-        BOOST_CHECK(0 == IHelper::compare(*aliceSecret, *checkAgain))
+        TESTING_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
+        TESTING_CHECK(0 == IHelper::compare(*aliceSecret, *checkAgain))
       }
 
       {
-        BOOST_EQUAL(3, 3)
+        TESTING_EQUAL(3, 3)
         IDHKeyDomainPtr keyDomain = IDHKeyDomain::load(p, q, g, true);
         IDHKeyDomainPtr altKeyDomain = IDHKeyDomain::loadPrecompiled(IDHKeyDomain::KeyDomainPrecompiledType_1024, true);
 
@@ -159,24 +159,24 @@ void doTestDH()
         IDHPublicKeyPtr bobPublicKey = IDHPublicKey::load(bobStaticPublic, bobEmpheralPublic);
         IDHPrivateKeyPtr bobPrivateKey = IDHPrivateKey::load(altKeyDomain, bobStaticPrivate, bobEmpheralPrivate);
 
-        BOOST_CHECK((bool)alicePublicKey)
-        BOOST_CHECK((bool)alicePrivateKey)
-        BOOST_CHECK((bool)bobPublicKey)
-        BOOST_CHECK((bool)bobPrivateKey)
+        TESTING_CHECK((bool)alicePublicKey)
+        TESTING_CHECK((bool)alicePrivateKey)
+        TESTING_CHECK((bool)bobPublicKey)
+        TESTING_CHECK((bool)bobPrivateKey)
 
         SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
         SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
-        BOOST_CHECK(IHelper::hasData(aliceSecret))  // alice will pass because bob's public key was created using the original key domain
+        TESTING_CHECK(IHelper::hasData(aliceSecret))  // alice will pass because bob's public key was created using the original key domain
         if (bobSecret) {
-          BOOST_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
+          TESTING_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
         }
 
-        BOOST_CHECK(0 == IHelper::compare(*aliceSecret, *checkAgain)) // must still match since it's valid
+        TESTING_CHECK(0 == IHelper::compare(*aliceSecret, *checkAgain)) // must still match since it's valid
       }
 
       {
-        BOOST_EQUAL(4, 4)
+        TESTING_EQUAL(4, 4)
         IDHKeyDomainPtr keyDomain = IDHKeyDomain::load(p, q, g, true);
         IDHKeyDomainPtr altKeyDomain = IDHKeyDomain::loadPrecompiled(IDHKeyDomain::KeyDomainPrecompiledType_1024, true);
 
@@ -187,22 +187,22 @@ void doTestDH()
         IDHPublicKeyPtr bobPublicKey;
         IDHPrivateKeyPtr bobPrivateKey = IDHPrivateKey::generate(altKeyDomain, bobPublicKey);
 
-        BOOST_CHECK((bool)alicePublicKey)
-        BOOST_CHECK((bool)alicePrivateKey)
-        BOOST_CHECK((bool)bobPublicKey)
-        BOOST_CHECK((bool)bobPrivateKey)
+        TESTING_CHECK((bool)alicePublicKey)
+        TESTING_CHECK((bool)alicePrivateKey)
+        TESTING_CHECK((bool)bobPublicKey)
+        TESTING_CHECK((bool)bobPrivateKey)
 
         SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
         SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
         if ((aliceSecret) &&
             (bobSecret)) {
-          BOOST_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
+          TESTING_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
         }
       }
 
       {
-        BOOST_EQUAL(5, 5)
+        TESTING_EQUAL(5, 5)
         IDHKeyDomainPtr keyDomain = IDHKeyDomain::load(p, q, g, true);
 
         // generate a whole new set of keys
@@ -216,22 +216,22 @@ void doTestDH()
         IDHPublicKeyPtr bobPublicKey;
         IDHPrivateKeyPtr bogusPrivateKey = IDHPrivateKey::generate(keyDomain, bobPublicKey);
 
-        BOOST_CHECK((bool)alicePublicKey)
-        BOOST_CHECK((bool)alicePrivateKey)
-        BOOST_CHECK((bool)bobPublicKeyOfficial)
-        BOOST_CHECK((bool)bobPrivateKey)
+        TESTING_CHECK((bool)alicePublicKey)
+        TESTING_CHECK((bool)alicePrivateKey)
+        TESTING_CHECK((bool)bobPublicKeyOfficial)
+        TESTING_CHECK((bool)bobPrivateKey)
 
         SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
         SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
         if ((aliceSecret) &&
             (bobSecret)) {
-          BOOST_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
+          TESTING_CHECK(0 != IHelper::compare(*aliceSecret, *bobSecret)) // must not match if it exists (hopefully should fail validation)
         }
       }
     }
 
-    BOOST_EQUAL(6, 6)
+    TESTING_EQUAL(6, 6)
 
     for (int index = 0; precompiled[index] != IDHKeyDomain::KeyDomainPrecompiledType_Unknown; ++index)
     {
@@ -242,7 +242,7 @@ void doTestDH()
         keyDomain = IDHKeyDomain::generate(precompiled[index]);
         found = false;
       }
-      BOOST_CHECK((bool)keyDomain)
+      TESTING_CHECK((bool)keyDomain)
 
       IDHPublicKeyPtr alicePublicKey;
       IDHPrivateKeyPtr alicePrivateKey = IDHPrivateKey::generate(keyDomain, alicePublicKey);
@@ -250,21 +250,21 @@ void doTestDH()
       IDHPublicKeyPtr bobPublicKey;
       IDHPrivateKeyPtr bobPrivateKey = IDHPrivateKey::generate(keyDomain, bobPublicKey);
 
-      BOOST_CHECK((bool)alicePublicKey)
-      BOOST_CHECK((bool)alicePrivateKey)
-      BOOST_CHECK((bool)bobPublicKey)
-      BOOST_CHECK((bool)bobPrivateKey)
+      TESTING_CHECK((bool)alicePublicKey)
+      TESTING_CHECK((bool)alicePrivateKey)
+      TESTING_CHECK((bool)bobPublicKey)
+      TESTING_CHECK((bool)bobPrivateKey)
 
       SecureByteBlockPtr aliceSecret = alicePrivateKey->getSharedSecret(bobPublicKey);
       SecureByteBlockPtr bobSecret = bobPrivateKey->getSharedSecret(alicePublicKey);
 
-      BOOST_CHECK(IHelper::hasData(aliceSecret))
-      BOOST_CHECK(IHelper::hasData(bobSecret))
+      TESTING_CHECK(IHelper::hasData(aliceSecret))
+      TESTING_CHECK(IHelper::hasData(bobSecret))
 
-      BOOST_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
+      TESTING_CHECK(0 == IHelper::compare(*aliceSecret, *bobSecret))
 
       if (found) {
-        BOOST_CHECK(precompiled[index] == keyDomain->getPrecompiledType())
+        TESTING_CHECK(precompiled[index] == keyDomain->getPrecompiledType())
       }
     }
   }

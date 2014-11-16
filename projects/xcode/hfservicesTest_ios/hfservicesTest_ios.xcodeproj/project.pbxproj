@@ -12,7 +12,6 @@
 		0063C4AD16CAA54300E6DB4D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4AC16CAA54300E6DB4D /* UIKit.framework */; };
 		0063C4AF16CAA54300E6DB4D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4AE16CAA54300E6DB4D /* Foundation.framework */; };
 		0063C4B116CAA54300E6DB4D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C4B016CAA54300E6DB4D /* CoreGraphics.framework */; };
-		0063C6E916CAA62600E6DB4D /* boost_replacement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C57F16CAA62600E6DB4D /* boost_replacement.cpp */; };
 		0063C6EB16CAA62600E6DB4D /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C58316CAA62600E6DB4D /* TestCanonicalXML.cpp */; };
 		0063C6EC16CAA62600E6DB4D /* TestDNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C58416CAA62600E6DB4D /* TestDNS.cpp */; };
 		0063C6ED16CAA62600E6DB4D /* TestICESocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C58516CAA62600E6DB4D /* TestICESocket.cpp */; };
@@ -22,7 +21,6 @@
 		0063C6F116CAA62600E6DB4D /* TestSTUNDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C58916CAA62600E6DB4D /* TestSTUNDiscovery.cpp */; };
 		0063C6F216CAA62600E6DB4D /* TestTURNSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C58A16CAA62600E6DB4D /* TestTURNSocket.cpp */; };
 		0063C77016CAA7F000E6DB4D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0063C75F16CAA7F000E6DB4D /* InfoPlist.strings */; };
-		0063C77116CAA7F000E6DB4D /* hfservicesTest_ios-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0063C76116CAA7F000E6DB4D /* hfservicesTest_ios-Info.plist */; };
 		0063C77216CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0063C76416CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate.m */; };
 		0063C77316CAA7F000E6DB4D /* MainWindow_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0063C76616CAA7F000E6DB4D /* MainWindow_iPad.xib */; };
 		0063C77416CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate_iPad.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0063C76916CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate_iPad.mm */; };
@@ -36,7 +34,7 @@
 		00AD9014177BF871009590EB /* libcryptopp_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD9008177BF5CC009590EB /* libcryptopp_ios.a */; };
 		00AD9019177BF981009590EB /* libudns_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD900D177BF5CC009590EB /* libudns_ios.a */; };
 		00AD901D177BFB78009590EB /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 00AD901C177BFB78009590EB /* libz.dylib */; };
-		00C82BE61830DCEE005B87E0 /* boost.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C82BE51830DCED005B87E0 /* boost.framework */; };
+		00C610301A1846B300E0139B /* testing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00C6102E1A1846B300E0139B /* testing.cpp */; };
 		00CBC68C1A13A88800643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC68B1A13A88800643BA7 /* TestHelper.cpp */; };
 		00CF4B981A15545F00573A34 /* libidnkit_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CF4B971A1553E700573A34 /* libidnkit_ios.a */; };
 /* End PBXBuildFile section */
@@ -116,13 +114,11 @@
 
 /* Begin PBXFileReference section */
 		0024391B178F438C00B79368 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		00579B8B185133C400CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
+		00579B8B185133C400CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = TestDH.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		0063C4A916CAA54300E6DB4D /* hfservicesTest_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hfservicesTest_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0063C4AC16CAA54300E6DB4D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0063C4AE16CAA54300E6DB4D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0063C4B016CAA54300E6DB4D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		0063C57F16CAA62600E6DB4D /* boost_replacement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boost_replacement.cpp; sourceTree = "<group>"; };
-		0063C58016CAA62600E6DB4D /* boost_replacement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boost_replacement.h; sourceTree = "<group>"; };
 		0063C58116CAA62600E6DB4D /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		0063C58216CAA62600E6DB4D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		0063C58316CAA62600E6DB4D /* TestCanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCanonicalXML.cpp; sourceTree = "<group>"; };
@@ -152,7 +148,8 @@
 		0063D2F816CB0C8600E6DB4D /* hfservices_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices_ios.xcodeproj; path = ../hfservices_ios/hfservices_ios.xcodeproj; sourceTree = "<group>"; };
 		00ABD4A017A8BB8E00178078 /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
 		00AD901C177BFB78009590EB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		00C82BE51830DCED005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../../boost/ios/framework/boost.framework; sourceTree = "<group>"; };
+		00C6102E1A1846B300E0139B /* testing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testing.cpp; sourceTree = "<group>"; };
+		00C6102F1A1846B300E0139B /* testing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testing.h; sourceTree = "<group>"; };
 		00CBC68B1A13A88800643BA7 /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
 		00CF4B921A1553E600573A34 /* idnkit_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit_ios.xcodeproj; path = ../../../../idnkit/projects/xcode/idnkit_ios.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -162,7 +159,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00C82BE61830DCEE005B87E0 /* boost.framework in Frameworks */,
 				0024391C178F438C00B79368 /* Security.framework in Frameworks */,
 				00AD901D177BFB78009590EB /* libz.dylib in Frameworks */,
 				00AD9019177BF981009590EB /* libudns_ios.a in Frameworks */,
@@ -204,7 +200,6 @@
 			isa = PBXGroup;
 			children = (
 				00AD901C177BFB78009590EB /* libz.dylib */,
-				00C82BE51830DCED005B87E0 /* boost.framework */,
 				0063C4B016CAA54300E6DB4D /* CoreGraphics.framework */,
 				0063C4AE16CAA54300E6DB4D /* Foundation.framework */,
 				0024391B178F438C00B79368 /* Security.framework */,
@@ -234,8 +229,8 @@
 			isa = PBXGroup;
 			children = (
 				0063C58116CAA62600E6DB4D /* config.h */,
-				0063C57F16CAA62600E6DB4D /* boost_replacement.cpp */,
-				0063C58016CAA62600E6DB4D /* boost_replacement.h */,
+				00C6102E1A1846B300E0139B /* testing.cpp */,
+				00C6102F1A1846B300E0139B /* testing.h */,
 				0063C58216CAA62600E6DB4D /* main.cpp */,
 				0063C58316CAA62600E6DB4D /* TestCanonicalXML.cpp */,
 				00579B8B185133C400CB4951 /* TestDH.cpp */,
@@ -464,7 +459,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0063C77016CAA7F000E6DB4D /* InfoPlist.strings in Resources */,
-				0063C77116CAA7F000E6DB4D /* hfservicesTest_ios-Info.plist in Resources */,
 				0063C77316CAA7F000E6DB4D /* MainWindow_iPad.xib in Resources */,
 				0063C77516CAA7F000E6DB4D /* MainWindow_iPhone.xib in Resources */,
 			);
@@ -477,7 +471,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0063C6E916CAA62600E6DB4D /* boost_replacement.cpp in Sources */,
 				0063C6EB16CAA62600E6DB4D /* TestCanonicalXML.cpp in Sources */,
 				00579B8C185133C400CB4951 /* TestDH.cpp in Sources */,
 				0063C6EC16CAA62600E6DB4D /* TestDNS.cpp in Sources */,
@@ -488,6 +481,7 @@
 				0063C6F116CAA62600E6DB4D /* TestSTUNDiscovery.cpp in Sources */,
 				0063C6F216CAA62600E6DB4D /* TestTURNSocket.cpp in Sources */,
 				0063C77216CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate.m in Sources */,
+				00C610301A1846B300E0139B /* testing.cpp in Sources */,
 				0063C77416CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate_iPad.mm in Sources */,
 				0063C77616CAA7F000E6DB4D /* hfservicesTest_iosAppDelegate_iPhone.m in Sources */,
 				0063C77716CAA7F000E6DB4D /* main.m in Sources */,
@@ -567,16 +561,14 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = ../../../../boost/ios/framework;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					CRYPTOPP_DISABLE_ASM,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -585,7 +577,6 @@
 					../../../..,
 					../../../../zsLib,
 					"../../../../curl-build-scripts",
-					../../../../boost/ios/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = "../../../../curl-build-scripts/curl/lib";
@@ -608,14 +599,12 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = ../../../../boost/ios/framework;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					CRYPTOPP_DISABLE_ASM,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -624,7 +613,6 @@
 					../../../..,
 					../../../../zsLib,
 					"../../../../curl-build-scripts",
-					../../../../boost/ios/framework/boost.framework/Headers,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = "../../../../curl-build-scripts/curl/lib";
@@ -645,6 +633,7 @@
 					"$(inherited)",
 					"DEBUG=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "hfservicesTest_ios/hfservicesTest_ios-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;

@@ -41,12 +41,8 @@
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
 
@@ -247,7 +243,7 @@ namespace openpeer
           const char *type = NULL;
 
           if (reader == mServerReceiveStream) {
-            BOOST_CHECK(mServerBuffers.size() > 0)
+            TESTING_CHECK(mServerBuffers.size() > 0)
 
             info = mServerBuffers.front();
             mServerBuffers.pop_front();
@@ -255,7 +251,7 @@ namespace openpeer
             ++mServerBuffersReceived;
           }
           if (reader == mClientReceiveStream) {
-            BOOST_CHECK(mClientBuffers.size() > 0)
+            TESTING_CHECK(mClientBuffers.size() > 0)
 
             info = mClientBuffers.front();
             mClientBuffers.pop_front();
@@ -266,18 +262,18 @@ namespace openpeer
           if (!type) return;
 
           if (mHasChannelNumbers) {
-            BOOST_CHECK(((bool)header))
-            BOOST_CHECK(((bool)channelHeader))
+            TESTING_CHECK(((bool)header))
+            TESTING_CHECK(((bool)channelHeader))
 
-            BOOST_EQUAL(channelHeader->mChannelID, info.mChannelNumber)
+            TESTING_EQUAL(channelHeader->mChannelID, info.mChannelNumber)
           }
 
           ZS_LOG_DEBUG(log("buffer read") + ZS_PARAM("to", type) + ZS_PARAM("size", buffer->SizeInBytes()) + ZS_PARAM("reader", ITransportStream::toDebug(reader->getStream())))
 
-          BOOST_CHECK(info.mBuffer)
-          BOOST_CHECK(buffer)
+          TESTING_CHECK(info.mBuffer)
+          TESTING_CHECK(buffer)
 
-          BOOST_CHECK(0 == IHelper::compare(*buffer, *info.mBuffer))
+          TESTING_CHECK(0 == IHelper::compare(*buffer, *info.mBuffer))
         }
 
         //---------------------------------------------------------------------
@@ -291,7 +287,7 @@ namespace openpeer
         virtual void onReadReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
-          BOOST_CHECK(Time() == mAcceptTime)
+          TESTING_CHECK(Time() == mAcceptTime)
 
           mAcceptTime = zsLib::now();
 
@@ -399,7 +395,7 @@ void doTestTCPMessagingLoopback()
 {
   if (!OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
@@ -408,7 +404,7 @@ void doTestTCPMessagingLoopback()
   TestTCPMessagingLoopbackPtr testObject3;
   TestTCPMessagingLoopbackPtr testObject4;
 
-  boost::this_thread::sleep(zsLib::Seconds(1));
+  std::this_thread::sleep_for(zsLib::Seconds(1));
 
   ZS_LOG_BASIC("WAITING:      Waiting for TCP messaging testing to complete (max wait is 180 seconds).");
 
@@ -454,7 +450,7 @@ void doTestTCPMessagingLoopback()
 
       while (found < expecting)
       {
-        boost::this_thread::sleep(zsLib::Seconds(1));
+        std::this_thread::sleep_for(zsLib::Seconds(1));
         ++totalWait;
         if (totalWait >= 70)
           break;
@@ -504,10 +500,10 @@ void doTestTCPMessagingLoopback()
 
         if (lastFound != found) {
           lastFound = found;
-          BOOST_STDOUT() << "FOUND:        [" << found << "].\n";
+          TESTING_STDOUT() << "FOUND:        [" << found << "].\n";
         }
       }
-      BOOST_EQUAL(found, expecting);
+      TESTING_EQUAL(found, expecting);
 
       switch (step) {
         case 0: {
@@ -536,7 +532,7 @@ void doTestTCPMessagingLoopback()
   }
 
   ZS_LOG_BASIC("WAITING:      All TCP messaging have finished. Waiting for 'bogus' events to process (10 second wait).");
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
   // wait for shutdown
   {
@@ -546,12 +542,12 @@ void doTestTCPMessagingLoopback()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
     
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

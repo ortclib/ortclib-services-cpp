@@ -36,7 +36,7 @@
 #include <iostream>
 
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 using zsLib::String;
 
@@ -85,15 +85,15 @@ static void testI18NIDN()
 
     String output = UseHelper::convertUTF8ToIDN(input);
 
-    BOOST_EQUAL(expecting, output)
+    TESTING_EQUAL(expecting, output)
 
     String backToOriginal = UseHelper::convertIDNToUTF8(output);
 
-    BOOST_EQUAL(input, backToOriginal)
+    TESTING_EQUAL(input, backToOriginal)
 
     bool validated = UseHelper::isValidDomain(input);
 
-    BOOST_CHECK(validated)
+    TESTING_CHECK(validated)
     
   }
 }
@@ -136,9 +136,9 @@ static void testDomainValidation()
     const char *domain = validateDomains[loop].mDomain;
     bool validated = UseHelper::isValidDomain(domain);
 
-    BOOST_EQUAL(validated, validateDomains[loop].mWillValidate)
+    TESTING_EQUAL(validated, validateDomains[loop].mWillValidate)
     if (validated != validateDomains[loop].mWillValidate) {
-      BOOST_EQUAL(domain, "failed")
+      TESTING_EQUAL(domain, "failed")
     }
   }
   
@@ -148,7 +148,7 @@ void doTestHelper()
 {
   if (!OPENPEER_SERVICE_TEST_DO_HELPER_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
   testI18NIDN();
   testDomainValidation();

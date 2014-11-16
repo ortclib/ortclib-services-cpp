@@ -48,7 +48,7 @@
 #include <zsLib/Log.h>
 
 #include <list>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #define OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "openpeer/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
 
@@ -141,18 +141,18 @@ namespace openpeer
         typedef IPAddress ViaIP;
         typedef IPAddress ViaLocalIP;
         typedef IPAddress SourceIP;
-        typedef boost::tuple<ViaIP, ViaLocalIP, SourceIP> RouteTuple;
+        typedef std::tuple<ViaIP, ViaLocalIP, SourceIP> RouteTuple;
 
         struct RouteLess : public std::binary_function<RouteTuple, RouteTuple, bool>
         {
           bool operator() (const RouteTuple& __x, const RouteTuple& __y) const
           {
-            if (boost::get<2>(__x) < boost::get<2>(__y)) return true;   // compare source IP first
-            if (boost::get<2>(__x) > boost::get<2>(__y)) return false;
-            if (boost::get<0>(__x) < boost::get<0>(__y)) return true;   // compare ViaIP next
-            if (boost::get<0>(__x) > boost::get<0>(__y)) return false;
-            if (boost::get<1>(__x) < boost::get<1>(__y)) return true;   // compare ViaLocalIP next
-            if (boost::get<1>(__x) > boost::get<1>(__y)) return false;
+            if (std::get<2>(__x) < std::get<2>(__y)) return true;   // compare source IP first
+            if (std::get<2>(__x) > std::get<2>(__y)) return false;
+            if (std::get<0>(__x) < std::get<0>(__y)) return true;   // compare ViaIP next
+            if (std::get<0>(__x) > std::get<0>(__y)) return false;
+            if (std::get<1>(__x) < std::get<1>(__y)) return true;   // compare ViaLocalIP next
+            if (std::get<1>(__x) > std::get<1>(__y)) return false;
 
             return false; // they are equal, so not less than
           }

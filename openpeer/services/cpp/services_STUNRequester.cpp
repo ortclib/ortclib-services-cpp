@@ -310,7 +310,7 @@ namespace openpeer
       timed_out:
         {
           AutoRecursiveLock lock(mLock);
-          ZS_LOG_WARNING(Detail, log("request timed out") + ZS_PARAM("on try number", mTryNumber) + ZS_PARAM("timeout duration", totalTime.total_milliseconds()))
+          ZS_LOG_WARNING(Detail, log("request timed out") + ZS_PARAM("on try number", mTryNumber) + ZS_PARAM("timeout duration (ms)", totalTime))
           if (mSTUNRequest) {
             ZS_LOG_TRACE(log("timed-out") + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
           }
@@ -385,7 +385,7 @@ namespace openpeer
           // we have a stun request but not a timer, setup the timer now...
           mTimer = Timer::create(mThisWeak.lock(), mCurrentTimeout, false);
 
-          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration", mCurrentTimeout.total_milliseconds()) + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
+          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration (ms)", mCurrentTimeout) + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
 
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);

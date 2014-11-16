@@ -33,8 +33,6 @@
 
 #include <openpeer/services/types.h>
 
-#include <boost/shared_array.hpp>
-
 #include <zsLib/Log.h>
 
 // FOR COMPATIBILITY WITH ENCYPRTION ALGORITHMS, SEE:

@@ -37,12 +37,8 @@
 #include <openpeer/services/IICESocket.h>
 #include <openpeer/services/IICESocketSession.h>
 
-//#include <boost/test/unit_test_suite.hpp>
-//#include <boost/test/unit_test.hpp>
-//#include <boost/test/test_tools.hpp>
-
 #include "config.h"
-#include "boost_replacement.h"
+#include "testing.h"
 
 #include <list>
 #include <iostream>
@@ -182,7 +178,7 @@ namespace openpeer
           switch (state) {
             case IICESocket::ICESocketState_Ready:
             {
-              BOOST_CHECK(mExpectConnected);
+              TESTING_CHECK(mExpectConnected);
               mConnected = true;
 
               IICESocket::CandidateList candidates;
@@ -199,10 +195,10 @@ namespace openpeer
             case IICESocket::ICESocketState_Shutdown:
             {
               if (mShutdownCalled) {
-                BOOST_CHECK(mExpectGracefulShutdown);
+                TESTING_CHECK(mExpectGracefulShutdown);
                 mGracefulShutdown = true;
               } else {
-                BOOST_CHECK(mExpectErrorShutdown);
+                TESTING_CHECK(mExpectErrorShutdown);
                 mErrorShutdown = true;
               }
               mICESocket.reset();
@@ -237,20 +233,20 @@ namespace openpeer
           switch(state) {
             case IICESocketSession::ICESocketSessionState_Nominated:
             {
-              BOOST_CHECK(mExpectedSessionConnected);
+              TESTING_CHECK(mExpectedSessionConnected);
               mSessionConnected = true;
 
               SessionList::iterator found = find(mSessions.begin(), mSessions.end(), session);
-              BOOST_CHECK(found != mSessions.end())
+              TESTING_CHECK(found != mSessions.end())
               break;
             }
             case IICESocketSession::ICESocketSessionState_Shutdown:
             {
-              BOOST_CHECK(mExpectedSessionClosed);
+              TESTING_CHECK(mExpectedSessionClosed);
               mSessionClosed = true;
 
               SessionList::iterator found = find(mSessions.begin(), mSessions.end(), session);
-              BOOST_CHECK(found != mSessions.end())
+              TESTING_CHECK(found != mSessions.end())
               mSessions.erase(found);
             }
             default: break;
@@ -325,33 +321,33 @@ namespace openpeer
         void expectationsOkay() {
           zsLib::AutoRecursiveLock lock(getLock());
           if (mExpectConnected) {
-            BOOST_CHECK(mConnected);
+            TESTING_CHECK(mConnected);
           } else {
-            BOOST_CHECK(!mConnected);
+            TESTING_CHECK(!mConnected);
           }
 
           if (mExpectGracefulShutdown) {
-            BOOST_CHECK(mGracefulShutdown);
+            TESTING_CHECK(mGracefulShutdown);
           } else {
-            BOOST_CHECK(!mGracefulShutdown);
+            TESTING_CHECK(!mGracefulShutdown);
           }
 
           if (mExpectErrorShutdown) {
-            BOOST_CHECK(mErrorShutdown);
+            TESTING_CHECK(mErrorShutdown);
           } else {
-            BOOST_CHECK(!mErrorShutdown);
+            TESTING_CHECK(!mErrorShutdown);
           }
 
           if (mExpectedSessionConnected) {
-            BOOST_CHECK(mSessionConnected);
+            TESTING_CHECK(mSessionConnected);
           } else {
-            BOOST_CHECK(!mSessionConnected);
+            TESTING_CHECK(!mSessionConnected);
           }
 
           if (mExpectedSessionClosed) {
-            BOOST_CHECK(mSessionClosed);
+            TESTING_CHECK(mSessionClosed);
           } else {
-            BOOST_CHECK(!mSessionClosed);
+            TESTING_CHECK(!mSessionClosed);
           }
         }
 
@@ -462,9 +458,9 @@ void doTestICESocket()
 {
   if (!OPENPEER_SERVICE_TEST_DO_ICE_SOCKET_TEST) return;
 
-  BOOST_INSTALL_LOGGER();
+  TESTING_INSTALL_LOGGER();
 
-  boost::this_thread::sleep(zsLib::Seconds(1));
+  std::this_thread::sleep_for(zsLib::Seconds(1));
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
@@ -473,7 +469,7 @@ void doTestICESocket()
   TestICESocketCallbackPtr testObject3;
   TestICESocketCallbackPtr testObject4;
 
-  BOOST_STDOUT() << "WAITING:      Waiting for ICE testing to complete (max wait is 180 seconds).\n";
+  TESTING_STDOUT() << "WAITING:      Waiting for ICE testing to complete (max wait is 180 seconds).\n";
 
   // check to see if all DNS routines have resolved
   {
@@ -481,7 +477,7 @@ void doTestICESocket()
 
     do
     {
-      BOOST_STDOUT() << "STEP:         ---------->>>>>>>>>> " << step << " <<<<<<<<<<----------\n";
+      TESTING_STDOUT() << "STEP:         ---------->>>>>>>>>> " << step << " <<<<<<<<<<----------\n";
 
       bool quit = false;
       ULONG expecting = 0;
@@ -518,7 +514,7 @@ void doTestICESocket()
 
       while (found < expecting)
       {
-        boost::this_thread::sleep(zsLib::Seconds(1));
+        std::this_thread::sleep_for(zsLib::Seconds(1));
         ++totalWait;
         if (totalWait >= 30)
           break;
@@ -561,10 +557,10 @@ void doTestICESocket()
 
         if (lastFound != found) {
           lastFound = found;
-          BOOST_STDOUT() << "FOUND:        [" << found << "].\n";
+          TESTING_STDOUT() << "FOUND:        [" << found << "].\n";
         }
       }
-      BOOST_EQUAL(found, expecting);
+      TESTING_EQUAL(found, expecting);
 
       switch (step) {
         case 0: {
@@ -588,8 +584,8 @@ void doTestICESocket()
     } while (true);
   }
 
-  BOOST_STDOUT() << "WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  boost::this_thread::sleep(zsLib::Seconds(10));
+  TESTING_STDOUT() << "WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
+  std::this_thread::sleep_for(zsLib::Seconds(10));
 
   // wait for shutdown
   {
@@ -599,12 +595,12 @@ void doTestICESocket()
       count = thread->getTotalUnprocessedMessages();
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
-        boost::this_thread::yield();
+        std::this_thread::yield();
     } while (count > 0);
 
     thread->waitForShutdown();
   }
-  BOOST_UNINSTALL_LOGGER();
+  TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
-  BOOST_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
+  TESTING_EQUAL(zsLib::proxyGetTotalConstructed(), 0);
 }

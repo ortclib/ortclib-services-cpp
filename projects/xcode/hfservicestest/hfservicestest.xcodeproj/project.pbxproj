@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00579B8A185133B300CB4951 /* TestDH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00579B89185133B300CB4951 /* TestDH.cpp */; };
-		0063C3E916CAA03800E6DB4D /* boost_replacement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28716CAA03800E6DB4D /* boost_replacement.cpp */; };
+		0063C3E916CAA03800E6DB4D /* testing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28716CAA03800E6DB4D /* testing.cpp */; };
 		0063C3EA16CAA03800E6DB4D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28A16CAA03800E6DB4D /* main.cpp */; };
 		0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */; };
 		0063C3EC16CAA03800E6DB4D /* TestDNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28C16CAA03800E6DB4D /* TestDNS.cpp */; };
@@ -25,7 +25,6 @@
 		00AD9016177BF8EF009590EB /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90628177BF5390090BD8B /* libcryptopp.a */; };
 		00AD9017177BF8FE009590EB /* libzsLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90618177BF4F50090BD8B /* libzsLib.a */; };
 		00AD9018177BF90D009590EB /* libudns.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90620177BF5140090BD8B /* libudns.a */; };
-		00C82BE41830DA1C005B87E0 /* boost.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C82BE31830DA1B005B87E0 /* boost.framework */; };
 		00CBC68A1A13A29500643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC6891A13A29500643BA7 /* TestHelper.cpp */; };
 		00CF4B991A15547D00573A34 /* libidnkit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CF4B911A15531800573A34 /* libidnkit.a */; };
 /* End PBXBuildFile section */
@@ -116,10 +115,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		00579B89185133B300CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
+		00579B89185133B300CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = TestDH.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		0063C1D716CA9F8500E6DB4D /* hfservicesTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hfservicesTest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0063C28716CAA03800E6DB4D /* boost_replacement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boost_replacement.cpp; sourceTree = "<group>"; };
-		0063C28816CAA03800E6DB4D /* boost_replacement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boost_replacement.h; sourceTree = "<group>"; };
+		0063C28716CAA03800E6DB4D /* testing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testing.cpp; sourceTree = "<group>"; };
+		0063C28816CAA03800E6DB4D /* testing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = testing.h; sourceTree = "<group>"; };
 		0063C28916CAA03800E6DB4D /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		0063C28A16CAA03800E6DB4D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCanonicalXML.cpp; sourceTree = "<group>"; };
@@ -134,7 +133,6 @@
 		0063C47216CAA28600E6DB4D /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
 		0063D2D416CB0A9300E6DB4D /* hfservices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices.xcodeproj; path = ../hfservices/hfservices.xcodeproj; sourceTree = "<group>"; };
 		00ABD44C17A8431D00178078 /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
-		00C82BE31830DA1B005B87E0 /* boost.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = boost.framework; path = ../../../../boost/osx/framework/boost.framework; sourceTree = "<group>"; };
 		00C90613177BF4F50090BD8B /* zsLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib.xcodeproj; path = ../../../../zsLib/projects/xcode/zsLib/zsLib.xcodeproj; sourceTree = "<group>"; };
 		00C9061B177BF5130090BD8B /* udns.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns.xcodeproj; path = ../../../../udns/projects/xcode/udns/udns.xcodeproj; sourceTree = "<group>"; };
 		00C90623177BF5380090BD8B /* cryptopp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp/cryptopp.xcodeproj; sourceTree = "<group>"; };
@@ -153,7 +151,6 @@
 				00CF4B991A15547D00573A34 /* libidnkit.a in Frameworks */,
 				00AD9015177BF88D009590EB /* libhfservices.a in Frameworks */,
 				0063C47316CAA28600E6DB4D /* libcurl.dylib in Frameworks */,
-				00C82BE41830DA1C005B87E0 /* boost.framework in Frameworks */,
 				0063C47116CAA27000E6DB4D /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -201,8 +198,8 @@
 			isa = PBXGroup;
 			children = (
 				0063C28916CAA03800E6DB4D /* config.h */,
-				0063C28716CAA03800E6DB4D /* boost_replacement.cpp */,
-				0063C28816CAA03800E6DB4D /* boost_replacement.h */,
+				0063C28716CAA03800E6DB4D /* testing.cpp */,
+				0063C28816CAA03800E6DB4D /* testing.h */,
 				0063C28A16CAA03800E6DB4D /* main.cpp */,
 				0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */,
 				00579B89185133B300CB4951 /* TestDH.cpp */,
@@ -230,7 +227,6 @@
 			isa = PBXGroup;
 			children = (
 				0063C47216CAA28600E6DB4D /* libcurl.dylib */,
-				00C82BE31830DA1B005B87E0 /* boost.framework */,
 				0063C47016CAA27000E6DB4D /* CoreFoundation.framework */,
 			);
 			name = Frameworks;
@@ -404,7 +400,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0063C3E916CAA03800E6DB4D /* boost_replacement.cpp in Sources */,
+				0063C3E916CAA03800E6DB4D /* testing.cpp in Sources */,
 				00CBC68A1A13A29500643BA7 /* TestHelper.cpp in Sources */,
 				0063C3EA16CAA03800E6DB4D /* main.cpp in Sources */,
 				0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */,
@@ -465,17 +461,15 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = ../../../../boost/osx/framework;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					CRYPTOPP_DISABLE_ASM,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -484,7 +478,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
-					../../../../boost/osx/framework/boost.framework/Headers,
+					"$(inherited)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -507,15 +501,13 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = ../../../../boost/osx/framework;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					CRYPTOPP_DISABLE_ASM,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -524,7 +516,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
-					../../../../boost/osx/framework/boost.framework/Headers,
+					"$(inherited)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
@@ -539,6 +531,7 @@
 					"$(inherited)",
 					"DEBUG=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

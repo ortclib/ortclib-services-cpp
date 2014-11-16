@@ -1572,7 +1572,7 @@ namespace openpeer
 
                   turnInfo->mTURNRetryAfter = tick + turnInfo->mTURNRetryDuration;
 
-                  ZS_LOG_WARNING(Detail, log("turn socket shutdown") + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration.total_milliseconds()) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
+                  ZS_LOG_WARNING(Detail, log("turn socket shutdown") + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
 
                   turnInfo->mTURNRetryDuration = turnInfo->mTURNRetryDuration + turnInfo->mTURNRetryDuration;
                   if (turnInfo->mTURNRetryDuration > Seconds(OPENPEER_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS)) {
@@ -1778,7 +1778,7 @@ namespace openpeer
                     waitTime = Milliseconds(1);
                   }
 
-                  ZS_LOG_DEBUG(log("must wait to retry logging into TURN server") + ZS_PARAM("wait time (ms)", waitTime.total_milliseconds()) + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration.total_milliseconds()) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
+                  ZS_LOG_DEBUG(log("must wait to retry logging into TURN server") + ZS_PARAM("wait time (ms)", waitTime) + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
                   turnInfo->mTURNRetryTimer = Timer::create(mThisWeak.lock(), waitTime, false);
                 }
               }
@@ -2154,8 +2154,8 @@ namespace openpeer
 
           const RouteTuple &tuple = (*current).first;
 
-          const IPAddress &viaLocalIP = boost::get<1>(tuple);
-          
+          const IPAddress &viaLocalIP = std::get<1>(tuple);
+
           if (!viaLocalIP.isEqualIgnoringIPv4Format(localSocket->mLocal->mIPAddress)) continue;
           
           mRoutes.erase(current);

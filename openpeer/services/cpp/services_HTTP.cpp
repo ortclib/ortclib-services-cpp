@@ -42,7 +42,7 @@
 #include <zsLib/XML.h>
 #include <zsLib/MessageQueueThread.h>
 
-#include <boost/thread.hpp>
+#include <thread>
 
 //-----------------------------------------------------------------------------
 // NOTE: Uncomment only ONE of these options to force the TLS version
@@ -322,7 +322,7 @@ namespace openpeer
             break;
           }
 
-          boost::thread::yield();       // do not hammer CPU
+          std::this_thread::yield();       // do not hammer CPU
 
           if (tries > 10)
             useIPv6 = (tries%2 == 0);   // after 10 tries, start trying to bind using IPv4
@@ -440,7 +440,7 @@ namespace openpeer
           }
 
           if (!mThread) {
-            mThread = ThreadPtr(new boost::thread(boost::ref(*this)));
+            mThread = ThreadPtr(new std::thread(std::ref(*this)));
             zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
           }
 
@@ -482,15 +482,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::operator()()
       {
-#ifndef _LINUX
-#ifdef __QNX__
-          pthread_setname_np(pthread_self(), "org.openpeer.services.http");
-#else
-#ifndef _ANDROID
-        pthread_setname_np("org.openpeer.services.http");
-#endif //_ANDROID
-#endif // __QNX__
-#endif //_LINUX
+        zsLib::debugSetCurrentThreadName("org.openpeer.services.http");
+
         ZS_LOG_BASIC(log("http thread started"))
 
         mMultiCurl = curl_multi_init();
@@ -953,7 +946,7 @@ namespace openpeer
         curl_easy_setopt(mCurl, CURLOPT_WRITEDATA, this);
 
         if (Duration() != mTimeout) {
-          curl_easy_setopt(mCurl, CURLOPT_TIMEOUT_MS, mTimeout.total_milliseconds());
+          curl_easy_setopt(mCurl, CURLOPT_TIMEOUT_MS, std::chrono::duration_cast<Milliseconds>(mTimeout).count());
         }
 
 #ifdef OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
@@ -993,7 +986,7 @@ namespace openpeer
             ZS_LOG_BASIC(log("INFO") + ZS_PARAM("posted length", mPostData.size()))
           }
           if (Duration() != mTimeout) {
-            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout.total_milliseconds()))
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout))
           }
 
           if (ZS_IS_LOGGING(Trace)) {
