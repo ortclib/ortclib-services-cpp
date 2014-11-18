@@ -70,7 +70,7 @@ namespace openpeer
                                    IPAddress serverIP,
                                    STUNPacketPtr stun,
                                    STUNPacket::RFCs usingRFC,
-                                   Duration maxTimeout
+                                   Milliseconds maxTimeout
                                    ) :
         MessageQueueAssociator(queue),
         mID(zsLib::createPUID()),
@@ -81,7 +81,7 @@ namespace openpeer
         mCurrentTimeout(Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS)),
         mTryNumber(0),
         mRequestStartTime(zsLib::now()),
-        mMaxTimeout(Duration() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
+        mMaxTimeout(Milliseconds() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
       {
         IHelper::setTimerThreadPriority();
       }
@@ -133,7 +133,7 @@ namespace openpeer
                                              IPAddress serverIP,
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
-                                             Duration maxTimeout
+                                             Milliseconds maxTimeout
                                              )
       {
         ZS_THROW_INVALID_USAGE_IF(!delegate)
@@ -207,7 +207,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      Duration STUNRequester::getMaxTimeout() const
+      Milliseconds STUNRequester::getMaxTimeout() const
       {
         AutoRecursiveLock lock(mLock);
         return mMaxTimeout;
@@ -277,7 +277,7 @@ namespace openpeer
       void STUNRequester::onTimer(TimerPtr timer)
       {
         Time tick = zsLib::now();
-        Duration totalTime = tick - mRequestStartTime;
+        Milliseconds totalTime = zsLib::toMilliseconds(tick - mRequestStartTime);
 
         {
           AutoRecursiveLock lock(mLock);
@@ -425,7 +425,7 @@ namespace openpeer
                                                      IPAddress serverIP,
                                                      STUNPacketPtr stun,
                                                      STUNPacket::RFCs usingRFC,
-                                                     Duration maxTimeout
+                                                     Milliseconds maxTimeout
                                                      )
       {
         if (this) {}
@@ -449,7 +449,7 @@ namespace openpeer
                                              IPAddress serverIP,
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
-                                             Duration maxTimeout
+                                             Milliseconds maxTimeout
                                              )
     {
       return internal::ISTUNRequesterFactory::singleton().create(queue, delegate, serverIP, stun, usingRFC, maxTimeout);

@@ -141,7 +141,7 @@ namespace openpeer
                                    IHTTPQueryDelegatePtr delegate,
                                    const char *userAgent,
                                    const char *url,
-                                   Duration timeout
+                                   Milliseconds timeout
                                    )
       {
         HTTPPtr pThis = singleton();
@@ -163,7 +163,7 @@ namespace openpeer
                                     const BYTE *postData,
                                     size_t postDataLengthInBytes,
                                     const char *postDataMimeType,
-                                    Duration timeout
+                                    Milliseconds timeout
                                     )
       {
         HTTPPtr pThis = singleton();
@@ -664,7 +664,7 @@ namespace openpeer
                                  const BYTE *postData,
                                  size_t postDataLengthInBytes,
                                  const char *postDataMimeType,
-                                 Duration timeout
+                                 Milliseconds timeout
                                  ) :
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         mOuter(outer),
@@ -874,7 +874,7 @@ namespace openpeer
                                                  const BYTE *postData,
                                                  size_t postDataLengthInBytes,
                                                  const char *postDataMimeType,
-                                                 Duration timeout
+                                                 Milliseconds timeout
                                                  )
       {
         HTTPQueryPtr pThis(new HTTPQuery(outer, delegate, isPost, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout));
@@ -945,8 +945,8 @@ namespace openpeer
         curl_easy_setopt(mCurl, CURLOPT_WRITEFUNCTION, HTTPQuery::writeData);
         curl_easy_setopt(mCurl, CURLOPT_WRITEDATA, this);
 
-        if (Duration() != mTimeout) {
-          curl_easy_setopt(mCurl, CURLOPT_TIMEOUT_MS, std::chrono::duration_cast<Milliseconds>(mTimeout).count());
+        if (Milliseconds() != mTimeout) {
+          curl_easy_setopt(mCurl, CURLOPT_TIMEOUT_MS, zsLib::toMilliseconds(mTimeout));
         }
 
 #ifdef OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
@@ -985,7 +985,7 @@ namespace openpeer
             ZS_LOG_BASIC(log("INFO") + ZS_PARAM("content type", mMimeType))
             ZS_LOG_BASIC(log("INFO") + ZS_PARAM("posted length", mPostData.size()))
           }
-          if (Duration() != mTimeout) {
+          if (Milliseconds() != mTimeout) {
             ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout))
           }
 
@@ -1237,7 +1237,7 @@ namespace openpeer
                                       IHTTPQueryDelegatePtr delegate,
                                       const char *userAgent,
                                       const char *url,
-                                      Duration timeout
+                                      Milliseconds timeout
                                       )
       {
         if (this) {}
@@ -1252,7 +1252,7 @@ namespace openpeer
                                        const BYTE *postData,
                                        size_t postDataLengthInBytes,
                                        const char *postDataMimeType,
-                                       Duration timeout
+                                       Milliseconds timeout
                                        )
       {
         if (this) {}
@@ -1418,7 +1418,7 @@ namespace openpeer
                              IHTTPQueryDelegatePtr delegate,
                              const char *userAgent,
                              const char *url,
-                             Duration timeout
+                             Milliseconds timeout
                              )
     {
       return internal::IHTTPFactory::singleton().get(delegate, userAgent, url, timeout);
@@ -1431,7 +1431,7 @@ namespace openpeer
                               const char *url,
                               const char *postData,
                               const char *postDataMimeType,
-                              Duration timeout
+                              Milliseconds timeout
                               )
     {
       return internal::IHTTPFactory::singleton().post(delegate, userAgent, url, (const BYTE *)postData, (postData ? strlen(postData) : 0), postDataMimeType, timeout);
@@ -1445,7 +1445,7 @@ namespace openpeer
                               const BYTE *postData,
                               size_t postDataLengthInBytes,
                               const char *postDataMimeType,
-                              Duration timeout
+                              Milliseconds timeout
                               )
     {
       return internal::IHTTPFactory::singleton().post(delegate, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);

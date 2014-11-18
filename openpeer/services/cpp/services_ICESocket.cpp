@@ -340,7 +340,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::wakeup(Duration minimumTimeCandidatesMustRemainValidWhileNotUsed)
+      void ICESocket::wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed)
       {
         AutoRecursiveLock lock(*this);
 
@@ -1457,10 +1457,10 @@ namespace openpeer
 
         bool shouldSleep = false;
 
-        if (Duration() != mTURNShutdownIfNotUsedBy) {
+        if (Milliseconds() != mTURNShutdownIfNotUsedBy) {
           if (mTURNLastUsed + mTURNShutdownIfNotUsedBy < tick) {
             // the socket can be put to sleep...
-            mTURNShutdownIfNotUsedBy = Duration();  // reset no need to wake up...
+            mTURNShutdownIfNotUsedBy = Milliseconds();  // reset no need to wake up...
             shouldSleep = true;
           }
         } else {
@@ -1771,9 +1771,9 @@ namespace openpeer
                 ZS_LOG_DEBUG(log("TURN socket created") + ZS_PARAM("base IP", string(localSocket->mLocal->mIPAddress)) + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
               } else {
                 if (!turnInfo->mTURNRetryTimer) {
-                  Duration waitTime;
+                  Milliseconds waitTime;
                   if (tick < turnInfo->mTURNRetryAfter) {
-                    waitTime = turnInfo->mTURNRetryAfter - tick;
+                    waitTime = zsLib::toMilliseconds(turnInfo->mTURNRetryAfter - tick);
                   } else {
                     waitTime = Milliseconds(1);
                   }

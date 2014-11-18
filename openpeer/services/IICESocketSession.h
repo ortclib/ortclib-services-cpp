@@ -122,10 +122,10 @@ namespace openpeer
       virtual void endOfRemoteCandidates() = 0;
 
       virtual void setKeepAliveProperties(
-                                          Duration sendKeepAliveIndications,
-                                          Duration expectSTUNOrDataWithinWithinOrSendAliveCheck = Duration(),
-                                          Duration keepAliveSTUNRequestTimeout = Duration(),
-                                          Duration backgroundingTimeout = Duration()
+                                          Milliseconds sendKeepAliveIndications,
+                                          Milliseconds expectSTUNOrDataWithinWithinOrSendAliveCheck = Milliseconds(),
+                                          Milliseconds keepAliveSTUNRequestTimeout = Milliseconds(),
+                                          Milliseconds backgroundingTimeout = Milliseconds()
                                           ) = 0;
 
       virtual bool sendPacket(

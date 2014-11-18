@@ -91,7 +91,12 @@ namespace openpeer
       static void debugAppend(ElementPtr &parentEl, const char *name, FLOAT value, bool ignoreIfZero = true);
       static void debugAppend(ElementPtr &parentEl, const char *name, DOUBLE value, bool ignoreIfZero = true);
       static void debugAppend(ElementPtr &parentEl, const char *name, const Time &value);
-      static void debugAppend(ElementPtr &parentEl, const char *name, const Duration &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Hours &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Minutes &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Seconds &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Milliseconds &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Microseconds &value);
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Nanoseconds &value);
       static void debugAppend(ElementPtr &parentEl, const Log::Param &param);
       static void debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl);
       static void debugAppend(ElementPtr &parentEl, ElementPtr childEl);
@@ -106,11 +111,11 @@ namespace openpeer
       static String timeToString(const Time &value);
       static Time stringToTime(const String &str);
 
-      static String randomString(UINT lengthInChars);
+      static String randomString(size_t lengthInChars);
 
       static SecureByteBlockPtr random(size_t lengthInBytes);
 
-      static ULONG random(ULONG minValue, ULONG maxValue);
+      static size_t random(size_t minValue, size_t maxValue);
 
       static int compare(
                          const SecureByteBlock &left,

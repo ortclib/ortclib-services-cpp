@@ -509,7 +509,7 @@ namespace openpeer
             if (sequenceNumber > mGSNR) {
               Time current = zsLib::now();
 
-              Duration maxDuration = (mCalculatedRTT * 3);
+              Milliseconds maxDuration = (mCalculatedRTT * 3);
               if (maxDuration > Seconds(OPENPEER_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS)) {
                 // The remote party could have intentionally caused a really large
                 // RTT in order to open a very large buffer window in the receiver
@@ -1502,7 +1502,7 @@ namespace openpeer
 
         if (burstTimerRequired) {
           if (!mBurstTimer) {
-            Duration burstDuration = mCalculatedRTT / ((int)mAvailableBurstBatons);
+            Milliseconds burstDuration = mCalculatedRTT / ((int)mAvailableBurstBatons);
 
             // all available bursts should happen in one RTT
             mBurstTimer = Timer::create(mThisWeak.lock(), burstDuration);
@@ -1523,7 +1523,7 @@ namespace openpeer
 
         if (ensureDataHasArrivedTimer) {
           if (!mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer) {
-            Duration ensureDuration = (mCalculatedRTT*3)/2;
+            Milliseconds ensureDuration = (mCalculatedRTT*3)/2;
 
             // The timer is set to fire at 1.5 x calculated RTT
             mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer = Timer::create(mThisWeak.lock(), ensureDuration, false);
@@ -1646,9 +1646,9 @@ namespace openpeer
 
               // it might be possible to measure the RTT now, but only if this ACK was received from the first send attempt
               if (!(gsnrPacket->mFlaggedAsFailedToReceive)) {
-                Duration oldRTT = mCalculatedRTT;
+                Milliseconds oldRTT = mCalculatedRTT;
 
-                mCalculatedRTT = zsLib::now() - gsnrPacket->mTimeSentOrReceived;
+                mCalculatedRTT = zsLib::toMilliseconds(zsLib::now() - gsnrPacket->mTimeSentOrReceived);
 
                 // we have the new calculated time but we will only move halfway between the old calculation and the new one
                 if (mCalculatedRTT > oldRTT) {
@@ -1701,7 +1701,7 @@ namespace openpeer
           if ((mSendingPackets.size() == 0) &&
               (hadPackets) &&
               (!ecFlag)) {
-            mTotalSendingPeriodWithoutIssues = mTotalSendingPeriodWithoutIssues + (zsLib::now() - mStartedSendingAtTime);
+            mTotalSendingPeriodWithoutIssues = zsLib::toMilliseconds(mTotalSendingPeriodWithoutIssues + (zsLib::now() - mStartedSendingAtTime));
             hadPackets = false;
           }
 
@@ -1789,7 +1789,7 @@ namespace openpeer
           if ((mSendingPackets.size() == 0) &&
               (hadPackets) &&
               (!ecFlag)) {
-            mTotalSendingPeriodWithoutIssues = mTotalSendingPeriodWithoutIssues + (zsLib::now() - mStartedSendingAtTime);
+            mTotalSendingPeriodWithoutIssues = zsLib::toMilliseconds(mTotalSendingPeriodWithoutIssues + (zsLib::now() - mStartedSendingAtTime));
             hadPackets = false;
           }
 

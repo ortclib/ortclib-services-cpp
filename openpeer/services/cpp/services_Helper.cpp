@@ -312,7 +312,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      String Helper::randomString(UINT lengthInChars)
+      String Helper::randomString(size_t lengthInChars)
       {
         static const char *randomCharArray = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         static size_t randomSize = strlen(randomCharArray);
@@ -338,7 +338,7 @@ namespace openpeer
 
         memset(&(output[0]), 0, sizeof(char)*(lengthInChars+1));
 
-        for (UINT loop = 0; loop < lengthInChars; ++loop) {
+        for (size_t loop = 0; loop < lengthInChars; ++loop) {
           output[loop] = randomCharArray[((buffer[loop])%randomSize)];
         }
         return String((CSTR)(&(output[0])));
@@ -355,17 +355,17 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      ULONG Helper::random(ULONG minValue, ULONG maxValue)
+      size_t Helper::random(size_t minValue, size_t maxValue)
       {
         ZS_THROW_INVALID_ARGUMENT_IF(minValue > maxValue)
         if (minValue == maxValue) return minValue;
 
-        ULONG range = maxValue - minValue;
+        auto range = maxValue - minValue;
 
-        ULONG value = 0;
-        
+        decltype(range) value = 0;
+
         AutoSeededRandomPool rng;
-        rng.GenerateBlock((BYTE *) &value, sizeof(ULONG));
+        rng.GenerateBlock((BYTE *) &value, sizeof(value));
 
         value = minValue + (value % range);
 
@@ -1625,27 +1625,44 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Duration &value)
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Hours &value)
     {
-      if (Duration() == value) return;
+      if (Hours() == value) return;
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
+    }
 
-      ZS_THROW_INVALID_ARGUMENT_IF(!name)
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Minutes &value)
+    {
+      if (Hours() == value) return;
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
+    }
 
-      if (strstr(name, "(ms)")) {
-        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Milliseconds>(value).count());
-        return;
-      }
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Seconds &value)
+    {
+      if (Hours() == value) return;
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
+    }
 
-      if (strstr(name, "(s)")) {
-        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Seconds>(value).count());
-        return;
-      }
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Milliseconds &value)
+    {
+      if (Hours() == value) return;
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
+    }
 
-      if (strstr(name, "(seconds)")) {
-        IHelper::debugAppend(parentEl, name, std::chrono::duration_cast<Seconds>(value).count());
-        return;
-      }
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Microseconds &value)
+    {
+      if (Hours() == value) return;
+      IHelper::debugAppend(parentEl, name, zsLib::string(value));
+    }
 
+    //-------------------------------------------------------------------------
+    void IHelper::debugAppend(ElementPtr &parentEl, const char *name, const Nanoseconds &value)
+    {
+      if (Hours() == value) return;
       IHelper::debugAppend(parentEl, name, zsLib::string(value));
     }
 
@@ -1701,7 +1718,7 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    String IHelper::randomString(UINT lengthInChars)
+    String IHelper::randomString(size_t lengthInChars)
     {
       return internal::Helper::randomString(lengthInChars);
     }
@@ -1713,7 +1730,7 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    ULONG IHelper::random(ULONG minValue, ULONG maxValue)
+    size_t IHelper::random(size_t minValue, size_t maxValue)
     {
       return internal::Helper::random(minValue, maxValue);
     }

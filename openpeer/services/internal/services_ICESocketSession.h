@@ -215,10 +215,10 @@ namespace openpeer
         virtual void endOfRemoteCandidates();
 
         virtual void setKeepAliveProperties(
-                                            Duration sendKeepAliveIndications,
-                                            Duration expectSTUNOrDataWithinWithinOrSendAliveCheck = Duration(),
-                                            Duration keepAliveSTUNRequestTimeout = Duration(),
-                                            Duration backgroundingTimeout = Duration()
+                                            Milliseconds sendKeepAliveIndications,
+                                            Milliseconds expectSTUNOrDataWithinWithinOrSendAliveCheck = Milliseconds(),
+                                            Milliseconds keepAliveSTUNRequestTimeout = Milliseconds(),
+                                            Milliseconds backgroundingTimeout = Milliseconds()
                                             );
 
         virtual bool sendPacket(
@@ -421,10 +421,10 @@ namespace openpeer
 
         ISTUNRequesterPtr mAliveCheckRequester;
         Time mLastReceivedDataOrSTUN;
-        Duration mKeepAliveDuration;
-        Duration mExpectSTUNOrDataWithinDuration;
-        Duration mKeepAliveSTUNRequestTimeout;
-        Duration mBackgroundingTimeout;
+        Milliseconds mKeepAliveDuration;
+        Milliseconds mExpectSTUNOrDataWithinDuration;
+        Milliseconds mKeepAliveSTUNRequestTimeout;
+        Milliseconds mBackgroundingTimeout;
 
         CandidatePairList mCandidatePairs;
 

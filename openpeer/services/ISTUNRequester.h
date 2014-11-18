@@ -55,7 +55,7 @@ namespace openpeer
                                       IPAddress serverIP,
                                       STUNPacketPtr stun,
                                       STUNPacket::RFCs usingRFC,
-                                      Duration maxTimeout = Duration()
+                                      Milliseconds maxTimeout = Milliseconds()
                                       );
 
       //-----------------------------------------------------------------------
@@ -89,7 +89,7 @@ namespace openpeer
       virtual IPAddress getServerIP() const = 0;
       virtual STUNPacketPtr getRequest() const = 0;
 
-      virtual Duration getMaxTimeout() const = 0;
+      virtual Milliseconds getMaxTimeout() const = 0;
     };
 
     //-------------------------------------------------------------------------

@@ -76,8 +76,8 @@ namespace openpeer
         static String timeToString(const Time &value);
         static Time stringToTime(const String &str);
 
-        static String randomString(UINT lengthInChars);
-        static ULONG random(ULONG minValue, ULONG maxValue);
+        static String randomString(size_t lengthInChars);
+        static size_t random(size_t minValue, size_t maxValue);
 
         static SecureByteBlockPtr random(size_t lengthInBytes);
 

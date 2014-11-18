@@ -92,7 +92,7 @@ namespace openpeer
                       IPAddress serverIP,
                       STUNPacketPtr stun,
                       STUNPacket::RFCs usingRFC,
-                      Duration maxTimeout
+                      Milliseconds maxTimeout
                       );
         
         STUNRequester(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
@@ -117,7 +117,7 @@ namespace openpeer
                                        IPAddress serverIP,
                                        STUNPacketPtr stun,
                                        STUNPacket::RFCs usingRFC,
-                                       Duration maxTimeout = Duration()
+                                       Milliseconds maxTimeout = Milliseconds()
                                        );
 
         virtual PUID getID() const {return mID;}
@@ -131,7 +131,7 @@ namespace openpeer
         virtual IPAddress getServerIP() const;
         virtual STUNPacketPtr getRequest() const;
 
-        virtual Duration getMaxTimeout() const;
+        virtual Milliseconds getMaxTimeout() const;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -181,13 +181,13 @@ namespace openpeer
         TimerPtr mTimer;
         TimerPtr mMaxTimeTimer;
 
-        Duration mCurrentTimeout;
+        Milliseconds mCurrentTimeout;
         ULONG mTryNumber;
 
         STUNPacket::RFCs mUsingRFC;
 
         Time mRequestStartTime;
-        Duration mMaxTimeout;
+        Milliseconds mMaxTimeout;
       };
 
       //-----------------------------------------------------------------------
@@ -208,7 +208,7 @@ namespace openpeer
                                         IPAddress serverIP,
                                         STUNPacketPtr stun,
                                         STUNPacket::RFCs usingRFC,
-                                        Duration maxTimeout = Duration()
+                                        Milliseconds maxTimeout = Milliseconds()
                                         );
       };
 

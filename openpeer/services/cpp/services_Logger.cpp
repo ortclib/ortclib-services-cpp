@@ -1740,7 +1740,7 @@ namespace openpeer
               mRetryTimer.reset();
             }
             mNextRetryTime = Time();
-            mRetryWaitTime = Duration();
+            mRetryWaitTime = Milliseconds();
           }
 
         step_cleanup:
@@ -1907,11 +1907,11 @@ namespace openpeer
 
         WORD mListenPort;
         Time mStartListenTime;
-        Duration mMaxWaitTimeForSocketToBeAvailable;
+        Milliseconds mMaxWaitTimeForSocketToBeAvailable;
 
         TimerPtr mRetryTimer;
         Time mNextRetryTime;
-        Duration mRetryWaitTime;
+        Milliseconds mRetryWaitTime;
 
         bool mConnected;
         IDNSQueryPtr mOutgoingServerQuery;

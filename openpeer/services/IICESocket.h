@@ -192,7 +192,7 @@ namespace openpeer
       //          are ready. For example, TURN is shutdown while not in use
       //          and it must become active otherwise the TURN candidates will
       //          not be available.
-      virtual void wakeup(Duration minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) = 0;
+      virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets a local list of offered candidates

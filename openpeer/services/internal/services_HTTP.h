@@ -92,7 +92,7 @@ namespace openpeer
                                 IHTTPQueryDelegatePtr delegate,
                                 const char *userAgent,
                                 const char *url,
-                                Duration timeout
+                                Milliseconds timeout
                                 );
 
         static HTTPQueryPtr post(
@@ -102,7 +102,7 @@ namespace openpeer
                                  const BYTE *postData,
                                  size_t postDataLengthInBytes,
                                  const char *postDataMimeType,
-                                 Duration timeout
+                                 Milliseconds timeout
                                  );
 
         //---------------------------------------------------------------------
@@ -159,7 +159,7 @@ namespace openpeer
                     const BYTE *postData,
                     size_t postDataLengthInBytes,
                     const char *postDataMimeType,
-                    Duration timeout
+                    Milliseconds timeout
                     );
 
           void init();
@@ -212,7 +212,7 @@ namespace openpeer
                                      const BYTE *postData,
                                      size_t postDataLengthInBytes,
                                      const char *postDataMimeType,
-                                     Duration timeout
+                                     Milliseconds timeout
                                      );
 
           // (duplicate) PUID getID() const;
@@ -270,7 +270,7 @@ namespace openpeer
           String mUserAgent;
           String mURL;
           String mMimeType;
-          Duration mTimeout;
+          Milliseconds mTimeout;
 
           SecureByteBlock mPostData;
           SecureByteBlock mErrorBuffer;
@@ -331,7 +331,7 @@ namespace openpeer
                                   IHTTPQueryDelegatePtr delegate,
                                   const char *userAgent,
                                   const char *url,
-                                  Duration timeout
+                                  Milliseconds timeout
                                   );
 
         virtual IHTTPQueryPtr post(
@@ -341,7 +341,7 @@ namespace openpeer
                                    const BYTE *postData,
                                    size_t postDataLengthInBytes,
                                    const char *postDataMimeType,
-                                   Duration timeout
+                                   Milliseconds timeout
                                    );
       };
 

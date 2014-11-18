@@ -170,7 +170,7 @@ namespace openpeer
           IPAddress         mServerIP;
 
           Time              mTURNRetryAfter;
-          Duration          mTURNRetryDuration;
+          Milliseconds      mTURNRetryDuration;
           TimerPtr          mTURNRetryTimer;
 
           CandidatePtr      mRelay;
@@ -294,7 +294,7 @@ namespace openpeer
 
         virtual void shutdown();
 
-        virtual void wakeup(Duration minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10));
+        virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10));
 
         virtual void getLocalCandidates(
                                         CandidateList &outCandidates,
@@ -474,7 +474,7 @@ namespace openpeer
         STUNServerInfoList  mSTUNServers;
         bool                mFirstWORDInAnyPacketWillNotConflictWithTURNChannels;
         Time                mTURNLastUsed;                    // when was the TURN server last used to transport any data
-        Duration            mTURNShutdownIfNotUsedBy;         // when will TURN be shutdown if it is not used by this time
+        Milliseconds        mTURNShutdownIfNotUsedBy;         // when will TURN be shutdown if it is not used by this time
 
         ICESocketSessionMap mSessions;
 
@@ -490,7 +490,7 @@ namespace openpeer
 
         bool                mSupportIPv6;
 
-        Duration            mMaxRebindAttemptDuration;
+        Milliseconds        mMaxRebindAttemptDuration;
       };
 
       //-----------------------------------------------------------------------

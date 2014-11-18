@@ -263,7 +263,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::shutdown(Duration lingerTime)
+      void TCPMessaging::shutdown(Seconds lingerTime)
       {
         AutoRecursiveLock lock(getLock());
 

@@ -68,8 +68,12 @@ namespace openpeer
     using zsLib::QWORD;
     using zsLib::String;
     using zsLib::Time;
-    using zsLib::Duration;
+    using zsLib::Hours;
+    using zsLib::Minutes;
     using zsLib::Seconds;
+    using zsLib::Milliseconds;
+    using zsLib::Microseconds;
+    using zsLib::Nanoseconds;
     using zsLib::IPAddress;
     using zsLib::Lock;
     using zsLib::RecursiveLock;

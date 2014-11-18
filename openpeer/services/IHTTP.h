@@ -159,7 +159,7 @@ namespace openpeer
                                IHTTPQueryDelegatePtr delegate,
                                const char *userAgent,
                                const char *url,
-                               Duration timeout = Duration()
+                               Milliseconds timeout = Milliseconds()
                                );
 
       static IHTTPQueryPtr post(
@@ -168,7 +168,7 @@ namespace openpeer
                                 const char *url,
                                 const char *postData,
                                 const char *postDataMimeType = NULL,
-                                Duration timeout = Duration()
+                                Milliseconds timeout = Milliseconds()
                                 );
 
       static IHTTPQueryPtr post(
@@ -178,7 +178,7 @@ namespace openpeer
                                 const BYTE *postData,
                                 size_t postDataLengthInBytes,
                                 const char *postDataMimeType = NULL,
-                                Duration timeout = Duration()
+                                Milliseconds timeout = Milliseconds()
                                 );
     };
 

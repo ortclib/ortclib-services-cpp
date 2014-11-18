@@ -199,7 +199,7 @@ namespace openpeer
           info.mBuffer = random;
 
           if (mHasChannelNumbers) {
-            info.mChannelNumber = IHelper::random(0, 100000);
+            info.mChannelNumber = static_cast<decltype(info.mChannelNumber)>(IHelper::random(0, 100000));
           }
 
           const char *type = NULL;

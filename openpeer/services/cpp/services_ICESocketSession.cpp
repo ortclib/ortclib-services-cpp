@@ -431,10 +431,10 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       void ICESocketSession::setKeepAliveProperties(
-                                                    Duration sendKeepAliveIndications,
-                                                    Duration expectSTUNOrDataWithinWithinOrSendAliveCheck,
-                                                    Duration keepAliveSTUNRequestTimeout,
-                                                    Duration backgroundingTimeout
+                                                    Milliseconds sendKeepAliveIndications,
+                                                    Milliseconds expectSTUNOrDataWithinWithinOrSendAliveCheck,
+                                                    Milliseconds keepAliveSTUNRequestTimeout,
+                                                    Milliseconds backgroundingTimeout
                                                     )
       {
         AutoRecursiveLock lock(*this);
@@ -467,7 +467,7 @@ namespace openpeer
         mKeepAliveSTUNRequestTimeout = keepAliveSTUNRequestTimeout;
         mBackgroundingTimeout = backgroundingTimeout;
 
-        if (Duration() != mBackgroundingTimeout) {
+        if (Milliseconds() != mBackgroundingTimeout) {
           ZS_THROW_INVALID_USAGE_IF(mBackgroundingTimeout < Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS))
         }
 
@@ -1493,7 +1493,7 @@ namespace openpeer
         if (Time() != mWentToBackgroundAt) {
           Time tick = zsLib::now();
 
-          Duration diff = tick - mWentToBackgroundAt;
+          Milliseconds diff = zsLib::toMilliseconds(tick - mWentToBackgroundAt);
           mWentToBackgroundAt = Time();
 
           if (diff > mBackgroundingTimeout) {
@@ -2103,7 +2103,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool ICESocketSession::stepExpectingDataTimer()
       {
-        bool needed =  ((mNominated) && (Duration() != mExpectSTUNOrDataWithinDuration));
+        bool needed =  ((mNominated) && (Milliseconds() != mExpectSTUNOrDataWithinDuration));
         ZS_LOG_TRACE(log("expecting data timer") + ZS_PARAM("needs timer", needed))
 
         if (needed) {
@@ -2124,7 +2124,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool ICESocketSession::stepKeepAliveTimer()
       {
-        bool needed =  ((mNominated) && (Duration() != mKeepAliveDuration));
+        bool needed =  ((mNominated) && (Milliseconds() != mKeepAliveDuration));
         ZS_LOG_TRACE(log("keep alive timer") + ZS_PARAM("needs timer", needed))
 
         if (needed) {
