@@ -454,15 +454,34 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool Settings::apply(const char *jsonSettings)
       {
+        typedef std::list<ElementPtr> NestedList;
+
         if (!jsonSettings) return false;
 
         ElementPtr rootEl = IHelper::toJSON(jsonSettings);
         if (!rootEl) return false;
 
+        bool nestedValues = false;
+        if (OPENPEER_SERVICES_SETTINGS_ROOT_JSON_IS_NESTED_NODE == rootEl->getValue()) {
+          nestedValues = true;
+        }
+
         bool found = false;
+
+        NestedList parents;
 
         ElementPtr childEl = rootEl->getFirstChildElement();
         while (childEl) {
+
+          if (nestedValues) {
+            ElementPtr firstChildEl = childEl->getFirstChildElement();
+            if (firstChildEl) {
+              parents.push_back(childEl);
+              childEl = firstChildEl;
+              continue;
+            }
+          }
+
 
           String key = childEl->getValue();
           String value = childEl->getTextDecoded();
@@ -470,6 +489,15 @@ namespace openpeer
 
           if (key.isEmpty()) continue;
           if (value.isEmpty()) continue;
+
+          if (parents.size() > 0) {
+            String path;
+            for (auto iter = parents.begin(); iter != parents.end(); ++iter) {
+              String name = (*iter)->getValue();
+              path += name + "/";
+            }
+            key = path + key;
+          }
 
           bool handled = true;
           bool wasEmpty = attribute.isEmpty();
@@ -553,6 +581,16 @@ namespace openpeer
           found = handled;
 
           childEl = childEl->getNextSiblingElement();
+
+          if (!childEl) {
+            while ((parents.size() > 0) &&
+                   (!childEl)) {
+              childEl = parents.back();
+              parents.pop_back();
+
+              childEl = childEl->getNextSiblingElement();
+            }
+          }
         }
 
         return found;
@@ -586,6 +624,71 @@ namespace openpeer
         setString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER, "lo;en;pdp_ip;stf;gif;bbptp;p2p");
 
         setUInt(OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER, 60*60);
+
+        {
+          AutoRecursiveLock lock(mLock);
+          mAppliedDefaults = true;
+        }
+      }
+
+      //-----------------------------------------------------------------------
+      void Settings::clearAll()
+      {
+        ISettingsDelegatePtr delegate;
+
+        {
+          AutoRecursiveLock lock(mLock);
+          delegate = mDelegate;
+
+          mStored->clear();
+
+          if (!delegate) return;
+        }
+
+        delegate->clearAll();
+      }
+
+      //-----------------------------------------------------------------------
+      void Settings::verifySettingExists(const char *key) throw (InvalidUsage)
+      {
+        ZS_THROW_INVALID_ARGUMENT_IF(!key)
+
+        ISettingsDelegatePtr delegate;
+
+        {
+          {
+            AutoRecursiveLock lock(mLock);
+            delegate = mDelegate;
+
+            if (!delegate) {
+              StoredSettingsMap::iterator found = mStored->find(key);
+              if (found == mStored->end()) goto not_found;
+
+              auto value = (*found).second.second;
+              if (value.isEmpty()) goto not_found;
+              return;
+            }
+          }
+
+          String result = delegate->getString(key);
+          if (result.isEmpty()) goto not_found;
+          return;
+        }
+
+      not_found:
+        {
+          ZS_LOG_WARNING(Basic, log("setting was not set") + ZS_PARAM("setting name", key))
+
+          ZS_THROW_INVALID_USAGE(String("setting is missing a value: ") + key)
+        }
+      }
+
+      //-----------------------------------------------------------------------
+      void Settings::verifyRequiredSettings() throw (InvalidUsage)
+      {
+        applyDefaultsIfNoDelegatePresent();
+
+        // check any required settings here:
       }
 
       //-----------------------------------------------------------------------
@@ -610,6 +713,21 @@ namespace openpeer
         return Log::Params(message, "services::Settings");
       }
 
+      //-----------------------------------------------------------------------
+      void Settings::applyDefaultsIfNoDelegatePresent()
+      {
+        {
+          AutoRecursiveLock lock(mLock);
+          if (mDelegate) return;
+
+          if (mAppliedDefaults) return;
+        }
+
+        ZS_LOG_WARNING(Detail, log("To prevent issues with missing settings, the default settings are being applied. Recommend installing a settings delegate to fetch settings required from a externally."))
+
+        applyDefaults();
+      }
+      
     }
 
     //-------------------------------------------------------------------------
@@ -764,6 +882,30 @@ namespace openpeer
       internal::SettingsPtr singleton = internal::Settings::singleton();
       if (!singleton) return;
       singleton->applyDefaults();
+    }
+
+    //-------------------------------------------------------------------------
+    void ISettings::clearAll()
+    {
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->clearAll();
+    }
+
+    //-------------------------------------------------------------------------
+    void ISettings::verifySettingExists(const char *key) throw (InvalidUsage)
+    {
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->verifySettingExists(key);
+    }
+
+    //-------------------------------------------------------------------------
+    void ISettings::verifyRequiredSettings() throw (InvalidUsage)
+    {
+      internal::SettingsPtr singleton = internal::Settings::singleton();
+      if (!singleton) return;
+      singleton->verifyRequiredSettings();
     }
   }
 }

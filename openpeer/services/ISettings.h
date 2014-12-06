@@ -32,6 +32,7 @@
 #pragma once
 
 #include <openpeer/services/types.h>
+#include <zsLib/Exception.h>
 
 namespace openpeer
 {
@@ -47,6 +48,8 @@ namespace openpeer
 
     interaction ISettings
     {
+      typedef zsLib::Exceptions::InvalidUsage InvalidUsage;
+
       static void setup(ISettingsDelegatePtr delegate);
 
       static String getString(const char *key);
@@ -86,6 +89,12 @@ namespace openpeer
       static bool apply(const char *jsonSettings);
 
       static void applyDefaults();
+
+      static void clearAll();
+
+      static void verifySettingExists(const char *key) throw (InvalidUsage);
+
+      static void verifyRequiredSettings() throw (InvalidUsage);
 
       virtual ~ISettings() {} // to make settings polymorphic
     };
@@ -137,6 +146,8 @@ namespace openpeer
                              ) = 0;
 
       virtual void clear(const char *key) = 0;
+
+      virtual void clearAll() = 0;
     };
   }
 }

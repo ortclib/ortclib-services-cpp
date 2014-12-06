@@ -34,6 +34,8 @@
 #include <openpeer/services/ISettings.h>
 #include <openpeer/services/internal/types.h>
 
+#define OPENPEER_SERVICES_SETTINGS_ROOT_JSON_IS_NESTED_NODE "openpeer"
+
 namespace openpeer
 {
   namespace services
@@ -129,6 +131,12 @@ namespace openpeer
 
         virtual void applyDefaults();
 
+        virtual void clearAll();
+
+        virtual void verifySettingExists(const char *key) throw (InvalidUsage);
+
+        virtual void verifyRequiredSettings() throw (InvalidUsage);
+
       protected:
         //---------------------------------------------------------------------
         #pragma mark
@@ -137,6 +145,8 @@ namespace openpeer
 
         Log::Params log(const char *message) const;
         static Log::Params slog(const char *message);
+
+        void applyDefaultsIfNoDelegatePresent();
 
       protected:
         //---------------------------------------------------------------------
@@ -151,6 +161,7 @@ namespace openpeer
         ISettingsDelegatePtr mDelegate;
 
         StoredSettingsMapPtr mStored;
+        bool mAppliedDefaults {};
       };
     }
   }
