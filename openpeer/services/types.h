@@ -135,6 +135,7 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PTR(IBackgrounding)
     ZS_DECLARE_INTERACTION_PTR(IBackgroundingNotifier)
     ZS_DECLARE_INTERACTION_PTR(IBackgroundingQuery)
+    ZS_DECLARE_INTERACTION_PTR(IBackOffTimer)
     ZS_DECLARE_INTERACTION_PTR(ICache)
     ZS_DECLARE_INTERACTION_PTR(ICacheDelegate)
     ZS_DECLARE_INTERACTION_PTR(ICanonicalXML)
@@ -171,6 +172,7 @@ namespace openpeer
 
     ZS_DECLARE_INTERACTION_PROXY(IBackgroundingDelegate)
     ZS_DECLARE_INTERACTION_PROXY(IBackgroundingCompletionDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IBackOffTimerDelegate)
     ZS_DECLARE_INTERACTION_PROXY(IDNSDelegate)
     ZS_DECLARE_INTERACTION_PROXY(IICESocketDelegate)
     ZS_DECLARE_INTERACTION_PROXY(IICESocketSessionDelegate)
@@ -190,6 +192,7 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PROXY(IWakeDelegate)
 
     ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackgroundingSubscription, IBackgroundingDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackOffTimerSubscription, IBackOffTimerDelegate)
     ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSubscription, IICESocketDelegate)
     ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSessionSubscription, IICESocketSessionDelegate)
     ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IMessageLayerSecurityChannelSubscription, IMessageLayerSecurityChannelDelegate)

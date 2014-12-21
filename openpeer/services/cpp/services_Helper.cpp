@@ -1286,8 +1286,11 @@ namespace openpeer
           if (end != start+1) {
             outResult[index] = input.substr(start+1, end-(start+1));
             ++index;
+          } else {
+            outResult[index] = String();
+            ++index;
           }
-          
+
           // the next starting point will be the current end point
           start = end;
         } while (true);

@@ -62,6 +62,7 @@ namespace openpeer
       using zsLib::PrivateGlobalLock;
       using zsLib::Singleton;
       using zsLib::SingletonLazySharedPtr;
+      using zsLib::ULONGEST;
 
       using zsLib::XML::WalkSink;
 
@@ -91,6 +92,7 @@ namespace openpeer
       ZS_DECLARE_TYPEDEF_PTR(CryptoPP::ByteQueue, ByteQueue)
 
       ZS_DECLARE_CLASS_PTR(Backgrounding)
+      ZS_DECLARE_CLASS_PTR(BackOffTimer)
       ZS_DECLARE_CLASS_PTR(Cache)
       ZS_DECLARE_CLASS_PTR(DNS)
       ZS_DECLARE_CLASS_PTR(Decryptor)

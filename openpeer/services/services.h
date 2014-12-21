@@ -33,6 +33,7 @@
 
 #include <openpeer/services/types.h>
 #include <openpeer/services/IBackgrounding.h>
+#include <openpeer/services/IBackOffTimer.h>
 #include <openpeer/services/ICache.h>
 #include <openpeer/services/ICanonicalXML.h>
 #include <openpeer/services/IDecryptor.h>

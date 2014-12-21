@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		007328881A472B1400331796 /* TestBackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007328871A472B1400331796 /* TestBackOffTimer.cpp */; };
 		00BDBF071A1A6B7A00F0DA1C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF061A1A6B7A00F0DA1C /* main.m */; };
 		00BDBF0A1A1A6B7A00F0DA1C /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF091A1A6B7A00F0DA1C /* AppDelegate.mm */; };
 		00BDBF0D1A1A6B7A00F0DA1C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF0C1A1A6B7A00F0DA1C /* ViewController.m */; };
@@ -106,6 +107,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		007328871A472B1400331796 /* TestBackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestBackOffTimer.cpp; sourceTree = "<group>"; };
 		00BDBF011A1A6B7A00F0DA1C /* hfservicesTest_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hfservicesTest_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00BDBF051A1A6B7A00F0DA1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00BDBF061A1A6B7A00F0DA1C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 			children = (
 				00BDBF9E1A1A6D3400F0DA1C /* config.h */,
 				00BDBF9F1A1A6D3400F0DA1C /* main.cpp */,
+				007328871A472B1400331796 /* TestBackOffTimer.cpp */,
 				00BDBFA01A1A6D3400F0DA1C /* TestCanonicalXML.cpp */,
 				00BDBFA11A1A6D3400F0DA1C /* TestDH.cpp */,
 				00BDBFA21A1A6D3400F0DA1C /* TestDNS.cpp */,
@@ -429,6 +432,7 @@
 				00BDBFD91A1A6D3400F0DA1C /* testing.cpp in Sources */,
 				00BDBFD41A1A6D3400F0DA1C /* TestCanonicalXML.cpp in Sources */,
 				00BDBFDF1A1A6D3400F0DA1C /* TestTURNSocket.cpp in Sources */,
+				007328881A472B1400331796 /* TestBackOffTimer.cpp in Sources */,
 				00BDBF071A1A6B7A00F0DA1C /* main.m in Sources */,
 				00BDBFDE1A1A6D3400F0DA1C /* TestTCPMessagingLoopback.cpp in Sources */,
 				00BDBFD51A1A6D3400F0DA1C /* TestDH.cpp in Sources */,

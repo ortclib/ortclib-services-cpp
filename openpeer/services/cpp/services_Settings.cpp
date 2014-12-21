@@ -625,6 +625,8 @@ namespace openpeer
 
         setUInt(OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER, 60*60);
 
+        setUInt(OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES, 100);
+
         {
           AutoRecursiveLock lock(mLock);
           mAppliedDefaults = true;

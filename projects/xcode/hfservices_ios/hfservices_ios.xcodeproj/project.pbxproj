@@ -17,6 +17,7 @@
 		004C4B0D18CE5BC2009186EA /* services_MessageQueueManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 004C4B0C18CE5BC2009186EA /* services_MessageQueueManager.cpp */; };
 		0059DFB219415620007CF1D0 /* services_Reachability.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0059DFB119415620007CF1D0 /* services_Reachability.cpp */; };
 		0070443A185EB73600D35F27 /* services_RUDPTransport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00704439185EB73600D35F27 /* services_RUDPTransport.cpp */; };
+		007328841A472A9D00331796 /* services_BackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007328831A472A9D00331796 /* services_BackOffTimer.cpp */; };
 		00840004185005BD009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840001185005BD009F6934 /* services_DHKeyDomain.cpp */; };
 		00840005185005BD009F6934 /* services_DHPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840002185005BD009F6934 /* services_DHPrivateKey.cpp */; };
 		00840006185005BD009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00840003185005BD009F6934 /* services_DHPublicKey.cpp */; };
@@ -89,6 +90,9 @@
 		00704437185EB70500D35F27 /* IRUDPTransport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRUDPTransport.h; sourceTree = "<group>"; };
 		00704438185EB71F00D35F27 /* services_RUDPTransport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_RUDPTransport.h; sourceTree = "<group>"; };
 		00704439185EB73600D35F27 /* services_RUDPTransport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_RUDPTransport.cpp; sourceTree = "<group>"; };
+		007328811A472A8000331796 /* IBackOffTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackOffTimer.h; sourceTree = "<group>"; };
+		007328821A472A9000331796 /* services_BackOffTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_BackOffTimer.h; sourceTree = "<group>"; };
+		007328831A472A9D00331796 /* services_BackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_BackOffTimer.cpp; sourceTree = "<group>"; };
 		00840001185005BD009F6934 /* services_DHKeyDomain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_DHKeyDomain.cpp; sourceTree = "<group>"; };
 		00840002185005BD009F6934 /* services_DHPrivateKey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_DHPrivateKey.cpp; sourceTree = "<group>"; };
 		00840003185005BD009F6934 /* services_DHPublicKey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_DHPublicKey.cpp; sourceTree = "<group>"; };
@@ -215,6 +219,7 @@
 				0095DCD616CA8A16005F53D3 /* types.h */,
 				0095DCC716CA8A16005F53D3 /* services.h */,
 				00485CEF18BEF06900444E06 /* IBackgrounding.h */,
+				007328811A472A8000331796 /* IBackOffTimer.h */,
 				001AEF5B1853E78D00029ABC /* ICache.h */,
 				0095DCA016CA8A16005F53D3 /* ICanonicalXML.h */,
 				00E493A31996805300335BB5 /* IDecryptor.h */,
@@ -258,6 +263,7 @@
 			children = (
 				0095DC9A16CA8A16005F53D3 /* services_services.cpp */,
 				00485CF018BEF9E200444E06 /* services_Backgrounding.cpp */,
+				007328831A472A9D00331796 /* services_BackOffTimer.cpp */,
 				001AEF5C1853E7A000029ABC /* services_Cache.cpp */,
 				0095DC8B16CA8A16005F53D3 /* services_CanonicalXML.cpp */,
 				00E493A5199681DB00335BB5 /* services_Decryptor.cpp */,
@@ -303,6 +309,7 @@
 				0095DCA716CA8A16005F53D3 /* services.h */,
 				00C063BD185D646700AB1438 /* services_AllocatorWithNul.h */,
 				00485CF218BEF9F400444E06 /* services_Backgrounding.h */,
+				007328821A472A9000331796 /* services_BackOffTimer.h */,
 				001AEF5E1853E7AD00029ABC /* services_Cache.h */,
 				0095DCA816CA8A16005F53D3 /* services_CanonicalXML.h */,
 				00E493A7199681EA00335BB5 /* services_Decryptor.h */,
@@ -401,6 +408,7 @@
 				0095DE1D16CA8A17005F53D3 /* services_ICESocket.cpp in Sources */,
 				0095DE1E16CA8A17005F53D3 /* services_ICESocketSession.cpp in Sources */,
 				00840006185005BD009F6934 /* services_DHPublicKey.cpp in Sources */,
+				007328841A472A9D00331796 /* services_BackOffTimer.cpp in Sources */,
 				0095DE1F16CA8A17005F53D3 /* services_RUDPChannel.cpp in Sources */,
 				00840005185005BD009F6934 /* services_DHPrivateKey.cpp in Sources */,
 				00485CF118BEF9E200444E06 /* services_Backgrounding.cpp in Sources */,

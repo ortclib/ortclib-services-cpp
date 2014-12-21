@@ -16,6 +16,8 @@
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
 		003BEECE17A747510002EB47 /* services_TransportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEECD17A747510002EB47 /* services_TransportStream.cpp */; };
 		004C4B0918CE5B82009186EA /* services_MessageQueueManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */; };
+		0073287D1A46EB3700331796 /* IBackOffTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0073287C1A46EB3700331796 /* IBackOffTimer.h */; };
+		0073287F1A46F4D400331796 /* services_BackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0073287E1A46F4D400331796 /* services_BackOffTimer.cpp */; };
 		007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */; };
 		00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFFF184FF605009F6934 /* services_DHPublicKey.cpp */; };
 		0084FFF9184FA503009F6934 /* services_DHKeyDomain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0084FFF8184FA503009F6934 /* services_DHKeyDomain.cpp */; };
@@ -74,6 +76,9 @@
 		004C4B0618CE5770009186EA /* IMessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageQueueManager.h; sourceTree = "<group>"; };
 		004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_MessageQueueManager.cpp; sourceTree = "<group>"; };
 		004C4B0A18CE5B94009186EA /* services_MessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_MessageQueueManager.h; sourceTree = "<group>"; };
+		0073287C1A46EB3700331796 /* IBackOffTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IBackOffTimer.h; sourceTree = "<group>"; };
+		0073287E1A46F4D400331796 /* services_BackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_BackOffTimer.cpp; sourceTree = "<group>"; };
+		007328801A46F4E100331796 /* services_BackOffTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_BackOffTimer.h; sourceTree = "<group>"; };
 		007E8F8F18C0DC3100364908 /* IBackgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackgrounding.h; sourceTree = "<group>"; };
 		007E8F9018C0DC4700364908 /* services_Backgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Backgrounding.h; sourceTree = "<group>"; };
 		007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Backgrounding.cpp; sourceTree = "<group>"; };
@@ -203,6 +208,7 @@
 				0095D96816CA83EA005F53D3 /* types.h */,
 				0095D95916CA83EA005F53D3 /* services.h */,
 				007E8F8F18C0DC3100364908 /* IBackgrounding.h */,
+				0073287C1A46EB3700331796 /* IBackOffTimer.h */,
 				001AEF571853DDDD00029ABC /* ICache.h */,
 				0095D93216CA83EA005F53D3 /* ICanonicalXML.h */,
 				002FCF4319A9158400F360CE /* IDecryptor.h */,
@@ -246,6 +252,7 @@
 			children = (
 				0095D92C16CA83EA005F53D3 /* services_services.cpp */,
 				007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */,
+				0073287E1A46F4D400331796 /* services_BackOffTimer.cpp */,
 				001AEF591853DE9300029ABC /* services_Cache.cpp */,
 				0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */,
 				002FCF4819A915B500F360CE /* services_Decryptor.cpp */,
@@ -291,6 +298,7 @@
 				0095D93916CA83EA005F53D3 /* services.h */,
 				00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */,
 				007E8F9018C0DC4700364908 /* services_Backgrounding.h */,
+				007328801A46F4E100331796 /* services_BackOffTimer.h */,
 				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
 				002FCF4619A9159E00F360CE /* services_Decryptor.h */,
@@ -335,6 +343,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0073287D1A46EB3700331796 /* IBackOffTimer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +408,7 @@
 				0095DAD316CA83EB005F53D3 /* services_ICESocketSession.cpp in Sources */,
 				00840000184FF605009F6934 /* services_DHPublicKey.cpp in Sources */,
 				0095DAD416CA83EB005F53D3 /* services_RUDPChannel.cpp in Sources */,
+				0073287F1A46F4D400331796 /* services_BackOffTimer.cpp in Sources */,
 				0084FFFC184FD5E6009F6934 /* services_DHPrivateKey.cpp in Sources */,
 				007E8F9218C0DC5600364908 /* services_Backgrounding.cpp in Sources */,
 				004C4B0918CE5B82009186EA /* services_MessageQueueManager.cpp in Sources */,

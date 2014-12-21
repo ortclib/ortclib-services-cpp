@@ -20,6 +20,7 @@
 		0063C3F216CAA03800E6DB4D /* TestTURNSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C29216CAA03800E6DB4D /* TestTURNSocket.cpp */; };
 		0063C47116CAA27000E6DB4D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C47016CAA27000E6DB4D /* CoreFoundation.framework */; };
 		0063C47316CAA28600E6DB4D /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063C47216CAA28600E6DB4D /* libcurl.dylib */; };
+		007328861A472B0300331796 /* TestBackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007328851A472B0300331796 /* TestBackOffTimer.cpp */; };
 		00ABD44E17A8431D00178078 /* TestTCPMessagingLoopback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00ABD44C17A8431D00178078 /* TestTCPMessagingLoopback.cpp */; };
 		00AD9015177BF88D009590EB /* libhfservices.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0063D2D916CB0A9400E6DB4D /* libhfservices.a */; };
 		00AD9016177BF8EF009590EB /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90628177BF5390090BD8B /* libcryptopp.a */; };
@@ -132,6 +133,7 @@
 		0063C47016CAA27000E6DB4D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		0063C47216CAA28600E6DB4D /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
 		0063D2D416CB0A9300E6DB4D /* hfservices.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices.xcodeproj; path = ../hfservices/hfservices.xcodeproj; sourceTree = "<group>"; };
+		007328851A472B0300331796 /* TestBackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestBackOffTimer.cpp; sourceTree = "<group>"; };
 		00ABD44C17A8431D00178078 /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
 		00C90613177BF4F50090BD8B /* zsLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib.xcodeproj; path = ../../../../zsLib/projects/xcode/zsLib/zsLib.xcodeproj; sourceTree = "<group>"; };
 		00C9061B177BF5130090BD8B /* udns.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns.xcodeproj; path = ../../../../udns/projects/xcode/udns/udns.xcodeproj; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 				0063C28716CAA03800E6DB4D /* testing.cpp */,
 				0063C28816CAA03800E6DB4D /* testing.h */,
 				0063C28A16CAA03800E6DB4D /* main.cpp */,
+				007328851A472B0300331796 /* TestBackOffTimer.cpp */,
 				0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */,
 				00579B89185133B300CB4951 /* TestDH.cpp */,
 				0063C28C16CAA03800E6DB4D /* TestDNS.cpp */,
@@ -411,6 +414,7 @@
 				0063C3F016CAA03800E6DB4D /* TestRUDPListener.cpp in Sources */,
 				0063C3F116CAA03800E6DB4D /* TestSTUNDiscovery.cpp in Sources */,
 				0063C3F216CAA03800E6DB4D /* TestTURNSocket.cpp in Sources */,
+				007328861A472B0300331796 /* TestBackOffTimer.cpp in Sources */,
 				00ABD44E17A8431D00178078 /* TestTCPMessagingLoopback.cpp in Sources */,
 				00579B8A185133B300CB4951 /* TestDH.cpp in Sources */,
 			);

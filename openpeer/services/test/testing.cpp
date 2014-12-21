@@ -45,6 +45,7 @@ namespace openpeer { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTE
 
 typedef openpeer::services::ILogger ILogger;
 
+void doTestBackoffRetry();
 void doTestCanonicalXML();
 void doTestDH();
 void doTestDNS();
@@ -148,6 +149,7 @@ namespace Testing
   {
     TESTING_INSTALL_LOGGER()
 
+    TESTING_RUN_TEST_FUNC(doTestBackoffRetry)
     TESTING_RUN_TEST_FUNC(doTestCanonicalXML)
     TESTING_RUN_TEST_FUNC(doTestDH)
     TESTING_RUN_TEST_FUNC(doTestDNS)
