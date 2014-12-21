@@ -179,7 +179,7 @@ namespace openpeer
           return DHPrivateKeyPtr();
         }
 
-        ZS_LOG_DEBUG(pThis->log("successsfully loaded public / private key pair"))
+        ZS_LOG_DEBUG(pThis->log("successfully loaded public / private key pair"))
 
         outPublicKey = publicKey;
         return pThis;

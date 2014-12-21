@@ -178,7 +178,7 @@ namespace openpeer
                                                           );
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Creates an SRV result type from a list of IP addressses.
+      // PURPOSE: Creates an SRV result type from a list of IP addresses.
       static SRVResultPtr convertIPAddressesToSRVResult(
                                                         const char *service,
                                                         const char *protocol,
