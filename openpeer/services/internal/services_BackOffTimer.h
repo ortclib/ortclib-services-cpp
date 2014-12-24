@@ -95,9 +95,11 @@ namespace openpeer
 
         virtual void cancel();
 
-        virtual size_t getTotalFailures();
+        virtual size_t getTotalFailures() const;
 
-        virtual Time getNextRetryAfterTime();
+        virtual size_t getMaxFailures() const;
+
+        virtual Time getNextRetryAfterTime() const;
 
         virtual void notifyFailure();
 

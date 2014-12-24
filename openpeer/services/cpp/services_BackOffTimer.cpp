@@ -192,14 +192,21 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t BackOffTimer::getTotalFailures()
+      size_t BackOffTimer::getTotalFailures() const
       {
         AutoRecursiveLock lock(*this);
         return mTotalFailures;
       }
 
       //-----------------------------------------------------------------------
-      Time BackOffTimer::getNextRetryAfterTime()
+      size_t BackOffTimer::getMaxFailures() const
+      {
+        AutoRecursiveLock lock(*this);
+        return mMaximumRetries;
+      }
+
+      //-----------------------------------------------------------------------
+      Time BackOffTimer::getNextRetryAfterTime() const
       {
         AutoRecursiveLock lock(*this);
         return mNextRetryAfter;

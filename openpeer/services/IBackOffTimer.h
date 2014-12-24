@@ -109,7 +109,11 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: Get the total failures thus far
-      virtual size_t getTotalFailures() = 0;
+      virtual size_t getTotalFailures() const = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Get the total failures thus far
+      virtual size_t getMaxFailures() const = 0;
 
       template <class TimeUnit>
       TimeUnit getNextRetryAfterWaitPeriod() {
@@ -120,7 +124,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: Get the time when the next retry after is supposed to occur
-      virtual Time getNextRetryAfterTime() = 0;
+      virtual Time getNextRetryAfterTime() const = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: After a retry attempt has occured has failed notify the
