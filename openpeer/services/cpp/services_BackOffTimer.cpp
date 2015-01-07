@@ -76,7 +76,7 @@ namespace openpeer
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mPattern(pattern),
         mUnit(unit),
-        mTotalFailures(totalFailuresThusFar)
+        mTotalFailures(0)
       {
         ZS_LOG_DETAIL(log("created"))
 
