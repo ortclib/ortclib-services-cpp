@@ -431,7 +431,7 @@ namespace openpeer
           String valueStr = IHelper::get(split, loop);
           if (valueStr.isEmpty()) break;
 
-          if ('*' == valueStr[0]) {
+          if ('*' == valueStr[(size_t)0]) {
             SplitMap finalSplit;
             IHelper::split(valueStr, finalSplit, ':');
             valueStr = IHelper::get(finalSplit, 0).substr(1);

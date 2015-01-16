@@ -34,7 +34,8 @@ $(ANDROIDNDK_PATH)/sources/android/support/include \
 $(ANDROIDNDK_PATH)/sources/cxx-stl/llvm-libc++/libcxx/include \
 $(ANDROIDNDK_PATH)/platforms/android-19/arch-arm/usr/include \
 
-LOCAL_SRC_FILES := openpeer/services/cpp/services_Backgrounding.cpp \
+LOCAL_SRC_FILES := openpeer/services/cpp/services_BackOffTimer.cpp \
+openpeer/services/cpp/services_Backgrounding.cpp \
 openpeer/services/cpp/services_Cache.cpp \
 openpeer/services/cpp/services_CanonicalXML.cpp \
 openpeer/services/cpp/services_DHKeyDomain.cpp \
