@@ -38,7 +38,13 @@
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
-#include <curl/curl.h>
+
+#if defined(__LP64__) && __LP64__
+#include <ios64-dev/include/curl.h>
+#else
+#include <ios-dev/include/curl.h>
+//#include <curl/curl.h>
+#endif
 
 #define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
 
