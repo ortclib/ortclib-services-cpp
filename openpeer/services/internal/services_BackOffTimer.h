@@ -93,6 +93,8 @@ namespace openpeer
 
         virtual IBackOffTimerSubscriptionPtr subscribe(IBackOffTimerDelegatePtr delegate);
 
+        virtual PUID getID() const {return mID;}
+
         virtual void cancel();
 
         virtual size_t getTotalFailures() const;

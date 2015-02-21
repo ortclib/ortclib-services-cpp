@@ -103,6 +103,9 @@ namespace openpeer
       virtual IBackOffTimerSubscriptionPtr subscribe(IBackOffTimerDelegatePtr delegate) = 0;
 
       //-----------------------------------------------------------------------
+      virtual PUID getID() const = 0;
+
+      //-----------------------------------------------------------------------
       // PURPOSE: Stop the timer when it is no longer needed so events stop
       //          firing after this point
       virtual void cancel() = 0;
