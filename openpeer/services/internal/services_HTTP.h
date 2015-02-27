@@ -30,6 +30,7 @@
  */
 
 #pragma once
+#include <TargetConditionals.h>
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IHTTP.h>
@@ -39,11 +40,22 @@
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
-#if defined(__LP64__) && __LP64__
-#include <ios64-dev/include/curl.h>
+#ifdef __APPLE__
+    #if TARGET_OS_IPHONE
+//#ifdef DEBUG
+            #if defined(__LP64__) && __LP64__
+                #include <ios64-dev/include/curl.h>
+            #else
+                #include <ios-dev/include/curl.h>
+            #endif
+//#else
+//#include <ios-appstore/include/curl.h>
+//#endif
+    #elif TARGET_OS_MAC
+        #include <osx/include/curl.h>
+    #endif
 #else
-#include <ios-dev/include/curl.h>
-//#include <curl/curl.h>
+    #include <curl/curl.h>
 #endif
 
 #define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
