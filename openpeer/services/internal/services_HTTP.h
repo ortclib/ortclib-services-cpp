@@ -30,7 +30,6 @@
  */
 
 #pragma once
-#include <TargetConditionals.h>
 
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IHTTP.h>
@@ -41,6 +40,7 @@
 #include <cryptopp/queue.h>
 
 #ifdef __APPLE__
+#include <TargetConditionals.h>
     #if TARGET_OS_IPHONE
 //#ifdef DEBUG
             #if defined(__LP64__) && __LP64__
