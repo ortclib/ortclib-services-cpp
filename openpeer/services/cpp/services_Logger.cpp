@@ -778,9 +778,11 @@ namespace openpeer
                            )
         {
           if (mColorizeOutput) {
-            std:: cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
+            std::cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
+            std::cout.flush();
           } else {
-            std:: cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
+            std::cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
+            std::cout.flush();
           }
         }
 

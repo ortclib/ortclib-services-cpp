@@ -294,6 +294,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       String Helper::timeToString(const Time &value)
       {
+        if (Time() == value) return String();
         return string(value);
       }
 
@@ -301,6 +302,7 @@ namespace openpeer
       Time Helper::stringToTime(const String &str)
       {
         if (str.isEmpty()) return Time();
+        if ("0" == str) return Time();
 
         try {
           return Numeric<Time>(str);
