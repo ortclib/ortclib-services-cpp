@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00579B8A185133B300CB4951 /* TestDH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00579B89185133B300CB4951 /* TestDH.cpp */; };
+		005F55161AAB408900F62208 /* libresolv.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F55151AAB408900F62208 /* libresolv.9.dylib */; };
 		0063C3E916CAA03800E6DB4D /* testing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28716CAA03800E6DB4D /* testing.cpp */; };
 		0063C3EA16CAA03800E6DB4D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28A16CAA03800E6DB4D /* main.cpp */; };
 		0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0063C28B16CAA03800E6DB4D /* TestCanonicalXML.cpp */; };
@@ -117,6 +118,7 @@
 
 /* Begin PBXFileReference section */
 		00579B89185133B300CB4951 /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = TestDH.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		005F55151AAB408900F62208 /* libresolv.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.9.dylib; path = usr/lib/libresolv.9.dylib; sourceTree = SDKROOT; };
 		0063C1D716CA9F8500E6DB4D /* hfservicesTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hfservicesTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0063C28716CAA03800E6DB4D /* testing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testing.cpp; sourceTree = "<group>"; };
 		0063C28816CAA03800E6DB4D /* testing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = testing.h; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				005F55161AAB408900F62208 /* libresolv.9.dylib in Frameworks */,
 				00AD9018177BF90D009590EB /* libudns.a in Frameworks */,
 				00AD9017177BF8FE009590EB /* libzsLib.a in Frameworks */,
 				00AD9016177BF8EF009590EB /* libcryptopp.a in Frameworks */,
@@ -229,6 +232,7 @@
 		0063C45F16CAA1BA00E6DB4D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				005F55151AAB408900F62208 /* libresolv.9.dylib */,
 				0063C47216CAA28600E6DB4D /* libcurl.dylib */,
 				0063C47016CAA27000E6DB4D /* CoreFoundation.framework */,
 			);
