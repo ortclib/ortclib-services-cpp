@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		005F558A1AAB41D200F62208 /* libzsLib_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F55671AAB418800F62208 /* libzsLib_ios.a */; };
-		005F558B1AAB41D800F62208 /* libudns_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F556D1AAB41A500F62208 /* libudns_ios.a */; };
-		005F558C1AAB41DE00F62208 /* libidnkit_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F55731AAB41AD00F62208 /* libidnkit_ios.a */; };
-		005F558D1AAB41E500F62208 /* libcryptopp_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F55791AAB41B200F62208 /* libcryptopp_ios.a */; };
-		005F558E1AAB41EE00F62208 /* libhfservices_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 005F557F1AAB41B900F62208 /* libhfservices_ios.a */; };
 		007328881A472B1400331796 /* TestBackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007328871A472B1400331796 /* TestBackOffTimer.cpp */; };
+		00A06E801AAD5B3500878B94 /* libcryptopp_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 006A1FD41AAD58D800A32C09 /* libcryptopp_ios.a */; };
+		00A06E811AAD5B3500878B94 /* libhfservices_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00A06E731AAD5AEE00878B94 /* libhfservices_ios.a */; };
+		00A06E821AAD5B3500878B94 /* libidnkit_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 006A1FCA1AAD58D700A32C09 /* libidnkit_ios.a */; };
+		00A06E831AAD5B3500878B94 /* libudns_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00A06E761AAD5AEE00878B94 /* libudns_ios.a */; };
+		00A06E841AAD5B3500878B94 /* libzsLib_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00A06E791AAD5AEE00878B94 /* libzsLib_ios.a */; };
 		00BDBF071A1A6B7A00F0DA1C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF061A1A6B7A00F0DA1C /* main.m */; };
 		00BDBF0A1A1A6B7A00F0DA1C /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF091A1A6B7A00F0DA1C /* AppDelegate.mm */; };
 		00BDBF0D1A1A6B7A00F0DA1C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBF0C1A1A6B7A00F0DA1C /* ViewController.m */; };
@@ -35,72 +35,72 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		005F55661AAB418800F62208 /* PBXContainerItemProxy */ = {
+		006A1FC91AAD58D700A32C09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0066818216C9D64000259F81;
-			remoteInfo = zsLib_ios;
-		};
-		005F556C1AAB41A500F62208 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 005F55681AAB41A400F62208 /* udns_ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0066824F16C9DA9200259F81;
-			remoteInfo = udns_ios;
-		};
-		005F55721AAB41AD00F62208 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 005F556E1AAB41AC00F62208 /* idnkit_ios.xcodeproj */;
+			containerPortal = 00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 00AA6DB11A15220000815878;
 			remoteInfo = idnkit_ios;
 		};
-		005F55781AAB41B200F62208 /* PBXContainerItemProxy */ = {
+		006A1FD31AAD58D800A32C09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F55741AAB41B200F62208 /* cryptopp_ios.xcodeproj */;
+			containerPortal = 00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 0066863A16C9F58000259F81;
 			remoteInfo = cryptopp_ios;
 		};
-		005F557E1AAB41B900F62208 /* PBXContainerItemProxy */ = {
+		006A1FD51AAD58FE00A32C09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F557A1AAB41B800F62208 /* hfservices_ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0095DC1516CA8802005F53D3;
-			remoteInfo = hfservices_ios;
-		};
-		005F55801AAB41C800F62208 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 005F557A1AAB41B800F62208 /* hfservices_ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0095DC1416CA8802005F53D3;
-			remoteInfo = hfservices_ios;
-		};
-		005F55821AAB41C800F62208 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 005F55741AAB41B200F62208 /* cryptopp_ios.xcodeproj */;
+			containerPortal = 00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0066863916C9F58000259F81;
 			remoteInfo = cryptopp_ios;
 		};
-		005F55841AAB41C800F62208 /* PBXContainerItemProxy */ = {
+		006A1FD71AAD58FE00A32C09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F556E1AAB41AC00F62208 /* idnkit_ios.xcodeproj */;
+			containerPortal = 00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 00AA6DB01A15220000815878;
 			remoteInfo = idnkit_ios;
 		};
-		005F55861AAB41C800F62208 /* PBXContainerItemProxy */ = {
+		00A06E721AAD5AEE00878B94 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F55681AAB41A400F62208 /* udns_ios.xcodeproj */;
+			containerPortal = 00A06E681AAD5AEE00878B94 /* hfservices_ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0095DC1516CA8802005F53D3;
+			remoteInfo = hfservices_ios;
+		};
+		00A06E751AAD5AEE00878B94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00A06E6B1AAD5AEE00878B94 /* udns_ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0066824F16C9DA9200259F81;
+			remoteInfo = udns_ios;
+		};
+		00A06E781AAD5AEE00878B94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00A06E6E1AAD5AEE00878B94 /* zsLib_ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0066818216C9D64000259F81;
+			remoteInfo = zsLib_ios;
+		};
+		00A06E7A1AAD5B1300878B94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00A06E681AAD5AEE00878B94 /* hfservices_ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0095DC1416CA8802005F53D3;
+			remoteInfo = hfservices_ios;
+		};
+		00A06E7C1AAD5B1300878B94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00A06E6B1AAD5AEE00878B94 /* udns_ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0066824E16C9DA9200259F81;
 			remoteInfo = udns_ios;
 		};
-		005F55881AAB41C800F62208 /* PBXContainerItemProxy */ = {
+		00A06E7E1AAD5B1300878B94 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */;
+			containerPortal = 00A06E6E1AAD5AEE00878B94 /* zsLib_ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0066818116C9D64000259F81;
 			remoteInfo = zsLib_ios;
@@ -108,12 +108,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib_ios.xcodeproj; path = "/Users/robin/Documents/Hookflash/Repos/op/push-database/opios/libs/op/projects/xcode/../../libs/ortc-lib/libs/zsLib/projects/xcode/zsLib_ios/zsLib_ios.xcodeproj"; sourceTree = "<absolute>"; };
-		005F55681AAB41A400F62208 /* udns_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns_ios.xcodeproj; path = "/Users/robin/Documents/Hookflash/Repos/op/push-database/opios/libs/op/projects/xcode/../../libs/ortc-lib/libs/udns/projects/xcode/udns_ios/udns_ios.xcodeproj"; sourceTree = "<absolute>"; };
-		005F556E1AAB41AC00F62208 /* idnkit_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit_ios.xcodeproj; path = "/Users/robin/Documents/Hookflash/Repos/op/push-database/opios/libs/op/projects/xcode/../../libs/ortc-lib/libs/idnkit/projects/xcode/idnkit_ios.xcodeproj"; sourceTree = "<absolute>"; };
-		005F55741AAB41B200F62208 /* cryptopp_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp_ios.xcodeproj; path = "/Users/robin/Documents/Hookflash/Repos/op/push-database/opios/libs/op/projects/xcode/../../libs/ortc-lib/libs/cryptopp/projects/xcode/cryptopp_ios/cryptopp_ios.xcodeproj"; sourceTree = "<absolute>"; };
-		005F557A1AAB41B800F62208 /* hfservices_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices_ios.xcodeproj; path = "/Users/robin/Documents/Hookflash/Repos/op/push-database/opios/libs/op/projects/xcode/../../libs/ortc-lib/libs/op-services-cpp/projects/xcode/hfservices_ios/hfservices_ios.xcodeproj"; sourceTree = "<absolute>"; };
 		007328871A472B1400331796 /* TestBackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestBackOffTimer.cpp; sourceTree = "<group>"; };
+		00A06E681AAD5AEE00878B94 /* hfservices_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = hfservices_ios.xcodeproj; path = ../hfservices_ios/hfservices_ios.xcodeproj; sourceTree = "<group>"; };
+		00A06E6B1AAD5AEE00878B94 /* udns_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = udns_ios.xcodeproj; path = ../../../../udns/projects/xcode/udns_ios/udns_ios.xcodeproj; sourceTree = "<group>"; };
+		00A06E6E1AAD5AEE00878B94 /* zsLib_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = zsLib_ios.xcodeproj; path = ../../../../zsLib/projects/xcode/zsLib_ios/zsLib_ios.xcodeproj; sourceTree = "<group>"; };
 		00BDBF011A1A6B7A00F0DA1C /* hfservicesTest_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hfservicesTest_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00BDBF051A1A6B7A00F0DA1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00BDBF061A1A6B7A00F0DA1C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -139,6 +137,8 @@
 		00BDBFAA1A1A6D3400F0DA1C /* TestSTUNDiscovery.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSTUNDiscovery.cpp; sourceTree = "<group>"; };
 		00BDBFAB1A1A6D3400F0DA1C /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
 		00BDBFAC1A1A6D3400F0DA1C /* TestTURNSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTURNSocket.cpp; sourceTree = "<group>"; };
+		00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit_ios.xcodeproj; path = ../../../../idnkit/projects/xcode/idnkit_ios.xcodeproj; sourceTree = "<group>"; };
+		00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp_ios.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp_ios/cryptopp_ios.xcodeproj; sourceTree = "<group>"; };
 		00FF8DAC1AAB4E390011B082 /* libresolv.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.9.dylib; path = usr/lib/libresolv.9.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -147,54 +147,54 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00A06E801AAD5B3500878B94 /* libcryptopp_ios.a in Frameworks */,
+				00A06E811AAD5B3500878B94 /* libhfservices_ios.a in Frameworks */,
+				00A06E821AAD5B3500878B94 /* libidnkit_ios.a in Frameworks */,
+				00A06E831AAD5B3500878B94 /* libudns_ios.a in Frameworks */,
+				00A06E841AAD5B3500878B94 /* libzsLib_ios.a in Frameworks */,
 				00FF8DAD1AAB4E390011B082 /* libresolv.9.dylib in Frameworks */,
-				005F558E1AAB41EE00F62208 /* libhfservices_ios.a in Frameworks */,
-				005F558D1AAB41E500F62208 /* libcryptopp_ios.a in Frameworks */,
-				005F558C1AAB41DE00F62208 /* libidnkit_ios.a in Frameworks */,
-				005F558B1AAB41D800F62208 /* libudns_ios.a in Frameworks */,
-				005F558A1AAB41D200F62208 /* libzsLib_ios.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		005F55631AAB418800F62208 /* Products */ = {
+		006A1FBE1AAD58D700A32C09 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				005F55671AAB418800F62208 /* libzsLib_ios.a */,
+				006A1FCA1AAD58D700A32C09 /* libidnkit_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		005F55691AAB41A400F62208 /* Products */ = {
+		006A1FCB1AAD58D700A32C09 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				005F556D1AAB41A500F62208 /* libudns_ios.a */,
+				006A1FD41AAD58D800A32C09 /* libcryptopp_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		005F556F1AAB41AC00F62208 /* Products */ = {
+		00A06E691AAD5AEE00878B94 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				005F55731AAB41AD00F62208 /* libidnkit_ios.a */,
+				00A06E731AAD5AEE00878B94 /* libhfservices_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		005F55751AAB41B200F62208 /* Products */ = {
+		00A06E6C1AAD5AEE00878B94 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				005F55791AAB41B200F62208 /* libcryptopp_ios.a */,
+				00A06E761AAD5AEE00878B94 /* libudns_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		005F557B1AAB41B800F62208 /* Products */ = {
+		00A06E6F1AAD5AEE00878B94 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				005F557F1AAB41B900F62208 /* libhfservices_ios.a */,
+				00A06E791AAD5AEE00878B94 /* libzsLib_ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -285,11 +285,11 @@
 		00BDBFE01A1A750F00F0DA1C /* Projects */ = {
 			isa = PBXGroup;
 			children = (
-				005F557A1AAB41B800F62208 /* hfservices_ios.xcodeproj */,
-				005F55741AAB41B200F62208 /* cryptopp_ios.xcodeproj */,
-				005F556E1AAB41AC00F62208 /* idnkit_ios.xcodeproj */,
-				005F55681AAB41A400F62208 /* udns_ios.xcodeproj */,
-				005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */,
+				00A06E681AAD5AEE00878B94 /* hfservices_ios.xcodeproj */,
+				00A06E6B1AAD5AEE00878B94 /* udns_ios.xcodeproj */,
+				00A06E6E1AAD5AEE00878B94 /* zsLib_ios.xcodeproj */,
+				00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */,
+				00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */,
 			);
 			name = Projects;
 			sourceTree = "<group>";
@@ -316,11 +316,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				005F55811AAB41C800F62208 /* PBXTargetDependency */,
-				005F55831AAB41C800F62208 /* PBXTargetDependency */,
-				005F55851AAB41C800F62208 /* PBXTargetDependency */,
-				005F55871AAB41C800F62208 /* PBXTargetDependency */,
-				005F55891AAB41C800F62208 /* PBXTargetDependency */,
+				00A06E7B1AAD5B1300878B94 /* PBXTargetDependency */,
+				00A06E7D1AAD5B1300878B94 /* PBXTargetDependency */,
+				00A06E7F1AAD5B1300878B94 /* PBXTargetDependency */,
+				006A1FD61AAD58FE00A32C09 /* PBXTargetDependency */,
+				006A1FD81AAD58FE00A32C09 /* PBXTargetDependency */,
 			);
 			name = hfservicesTest_ios;
 			productName = hfservicesTest_ios;
@@ -354,24 +354,24 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 005F55751AAB41B200F62208 /* Products */;
-					ProjectRef = 005F55741AAB41B200F62208 /* cryptopp_ios.xcodeproj */;
+					ProductGroup = 006A1FCB1AAD58D700A32C09 /* Products */;
+					ProjectRef = 00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 005F557B1AAB41B800F62208 /* Products */;
-					ProjectRef = 005F557A1AAB41B800F62208 /* hfservices_ios.xcodeproj */;
+					ProductGroup = 00A06E691AAD5AEE00878B94 /* Products */;
+					ProjectRef = 00A06E681AAD5AEE00878B94 /* hfservices_ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 005F556F1AAB41AC00F62208 /* Products */;
-					ProjectRef = 005F556E1AAB41AC00F62208 /* idnkit_ios.xcodeproj */;
+					ProductGroup = 006A1FBE1AAD58D700A32C09 /* Products */;
+					ProjectRef = 00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 005F55691AAB41A400F62208 /* Products */;
-					ProjectRef = 005F55681AAB41A400F62208 /* udns_ios.xcodeproj */;
+					ProductGroup = 00A06E6C1AAD5AEE00878B94 /* Products */;
+					ProjectRef = 00A06E6B1AAD5AEE00878B94 /* udns_ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 005F55631AAB418800F62208 /* Products */;
-					ProjectRef = 005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */;
+					ProductGroup = 00A06E6F1AAD5AEE00878B94 /* Products */;
+					ProjectRef = 00A06E6E1AAD5AEE00878B94 /* zsLib_ios.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -382,39 +382,39 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		005F55671AAB418800F62208 /* libzsLib_ios.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libzsLib_ios.a;
-			remoteRef = 005F55661AAB418800F62208 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		005F556D1AAB41A500F62208 /* libudns_ios.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libudns_ios.a;
-			remoteRef = 005F556C1AAB41A500F62208 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		005F55731AAB41AD00F62208 /* libidnkit_ios.a */ = {
+		006A1FCA1AAD58D700A32C09 /* libidnkit_ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libidnkit_ios.a;
-			remoteRef = 005F55721AAB41AD00F62208 /* PBXContainerItemProxy */;
+			remoteRef = 006A1FC91AAD58D700A32C09 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		005F55791AAB41B200F62208 /* libcryptopp_ios.a */ = {
+		006A1FD41AAD58D800A32C09 /* libcryptopp_ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libcryptopp_ios.a;
-			remoteRef = 005F55781AAB41B200F62208 /* PBXContainerItemProxy */;
+			remoteRef = 006A1FD31AAD58D800A32C09 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		005F557F1AAB41B900F62208 /* libhfservices_ios.a */ = {
+		00A06E731AAD5AEE00878B94 /* libhfservices_ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libhfservices_ios.a;
-			remoteRef = 005F557E1AAB41B900F62208 /* PBXContainerItemProxy */;
+			remoteRef = 00A06E721AAD5AEE00878B94 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00A06E761AAD5AEE00878B94 /* libudns_ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libudns_ios.a;
+			remoteRef = 00A06E751AAD5AEE00878B94 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00A06E791AAD5AEE00878B94 /* libzsLib_ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libzsLib_ios.a;
+			remoteRef = 00A06E781AAD5AEE00878B94 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -459,30 +459,30 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		005F55811AAB41C800F62208 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = hfservices_ios;
-			targetProxy = 005F55801AAB41C800F62208 /* PBXContainerItemProxy */;
-		};
-		005F55831AAB41C800F62208 /* PBXTargetDependency */ = {
+		006A1FD61AAD58FE00A32C09 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = cryptopp_ios;
-			targetProxy = 005F55821AAB41C800F62208 /* PBXContainerItemProxy */;
+			targetProxy = 006A1FD51AAD58FE00A32C09 /* PBXContainerItemProxy */;
 		};
-		005F55851AAB41C800F62208 /* PBXTargetDependency */ = {
+		006A1FD81AAD58FE00A32C09 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = idnkit_ios;
-			targetProxy = 005F55841AAB41C800F62208 /* PBXContainerItemProxy */;
+			targetProxy = 006A1FD71AAD58FE00A32C09 /* PBXContainerItemProxy */;
 		};
-		005F55871AAB41C800F62208 /* PBXTargetDependency */ = {
+		00A06E7B1AAD5B1300878B94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = hfservices_ios;
+			targetProxy = 00A06E7A1AAD5B1300878B94 /* PBXContainerItemProxy */;
+		};
+		00A06E7D1AAD5B1300878B94 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = udns_ios;
-			targetProxy = 005F55861AAB41C800F62208 /* PBXContainerItemProxy */;
+			targetProxy = 00A06E7C1AAD5B1300878B94 /* PBXContainerItemProxy */;
 		};
-		005F55891AAB41C800F62208 /* PBXTargetDependency */ = {
+		00A06E7F1AAD5B1300878B94 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = zsLib_ios;
-			targetProxy = 005F55881AAB41C800F62208 /* PBXContainerItemProxy */;
+			targetProxy = 00A06E7E1AAD5B1300878B94 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -608,6 +608,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = hfservicesTest_ios/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/robin/Documents/Hookflash/Repos/op/reorg/op-client-sdk/libs/zsLib/projects/xcode/zsLib_ios/build/Debug-iphoneos",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = iphoneos;
 				VALID_ARCHS = "armv7 armv7s";
@@ -620,6 +624,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = hfservicesTest_ios/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/robin/Documents/Hookflash/Repos/op/reorg/op-client-sdk/libs/zsLib/projects/xcode/zsLib_ios/build/Debug-iphoneos",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = iphoneos;
 				VALID_ARCHS = "armv7 armv7s";

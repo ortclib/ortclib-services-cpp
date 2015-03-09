@@ -374,7 +374,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0610;
-				ORGANIZATIONNAME = "SMB Phone Inc.";
+				ORGANIZATIONNAME = "Hookflash Inc.";
 			};
 			buildConfigurationList = 0095D8AC16CA83CB005F53D3 /* Build configuration list for PBXProject "hfservices" */;
 			compatibilityVersion = "Xcode 3.2";
