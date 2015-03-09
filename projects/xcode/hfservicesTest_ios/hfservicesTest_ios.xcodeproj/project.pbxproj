@@ -202,10 +202,10 @@
 		00BDBEF81A1A6B7A00F0DA1C = {
 			isa = PBXGroup;
 			children = (
-				00FF8DAC1AAB4E390011B082 /* libresolv.9.dylib */,
 				00BDBFE01A1A750F00F0DA1C /* Projects */,
 				00BDBF2A1A1A6D3400F0DA1C /* openpeer */,
 				00BDBF031A1A6B7A00F0DA1C /* hfservicesTest_ios */,
+				00E5AD001AAD18EA008E4F71 /* Libraries */,
 				00BDBF021A1A6B7A00F0DA1C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -292,6 +292,14 @@
 				005F55621AAB418800F62208 /* zsLib_ios.xcodeproj */,
 			);
 			name = Projects;
+			sourceTree = "<group>";
+		};
+		00E5AD001AAD18EA008E4F71 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				00FF8DAC1AAB4E390011B082 /* libresolv.9.dylib */,
+			);
+			name = Libraries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

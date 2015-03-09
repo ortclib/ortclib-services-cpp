@@ -469,7 +469,7 @@
 					../../../..,
 					../../../../zsLib,
 					../../../../idnkit/idnkit/include,
-					"../../../../curl-build-scripts/curl",
+					../../../../curl/curl,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
@@ -505,7 +505,7 @@
 					../../../..,
 					../../../../zsLib,
 					../../../../idnkit/idnkit/include,
-					"../../../../curl-build-scripts/curl",
+					../../../../curl/curl,
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
