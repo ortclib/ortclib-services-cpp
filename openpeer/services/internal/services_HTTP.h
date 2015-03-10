@@ -39,24 +39,7 @@
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-    #if TARGET_OS_IPHONE
-//#ifdef DEBUG
-            #if defined(__LP64__) && __LP64__
-                #include <ios64-dev/include/curl.h>
-            #else
-                #include <ios-dev/include/curl.h>
-            #endif
-//#else
-//#include <ios-appstore/include/curl.h>
-//#endif
-    #elif TARGET_OS_MAC
-        #include <osx/include/curl.h>
-    #endif
-#else
-    #include <curl/curl.h>
-#endif
+#include <curl/curl.h>
 
 #define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
 
