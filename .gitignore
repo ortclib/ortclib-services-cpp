@@ -2,3 +2,5 @@ xcuserdata
 xcshareddata
 projects/android/libs
 projects/android/obj
+[Dd]ebug/
+[Rr]elease/
