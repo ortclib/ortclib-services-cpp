@@ -31,6 +31,10 @@
 
 #pragma once
 
+#ifdef _WIN32
+#include <intsafe.h>
+#endif //_WIN32
+
 #include <zsLib/types.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>

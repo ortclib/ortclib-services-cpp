@@ -683,10 +683,10 @@ namespace openpeer
         try {
           bool wouldBlock = false;
           size_t bytesSent = mUDPSocket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
-          ZS_LOG_TRACE(log("sendTo called") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
+          ZS_LOG_TRACE(log("sendTo called") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", buffer ? true: false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           return (bytesSent == bufferLengthInBytes);
         } catch(Socket::Exceptions::Unspecified &) {
-          ZS_LOG_ERROR(Detail, log("sendTo exception") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes))
+          ZS_LOG_ERROR(Detail, log("sendTo exception") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes))
           return false;
         }
         return false;

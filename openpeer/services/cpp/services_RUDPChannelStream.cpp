@@ -187,7 +187,7 @@ namespace openpeer
       //-------------------------------------------------------------------------
       ElementPtr IRUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream)
       {
-        return IRUDPChannelStream::toDebug(stream);
+        return RUDPChannelStream::toDebug(stream);
       }
 
       //-----------------------------------------------------------------------

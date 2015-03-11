@@ -49,6 +49,8 @@ namespace openpeer
 
     interaction IHTTP
     {
+      typedef WORD StatusCodeType;
+
       // as from: http://en.wikipedia.org/wiki/List_of_HTTP_status_codes (2013/01/22)
       enum HTTPStatusCodes
       {
@@ -147,7 +149,7 @@ namespace openpeer
         HTTPStatusCode_ServerErrorEnd                   = 599,
       };
 
-      static HTTPStatusCodes toStatusCode(WORD statusCode);
+      static HTTPStatusCodes toStatusCode(StatusCodeType statusCode);
       static const char *toString(HTTPStatusCodes httpStatusCode);
       static bool isPending(HTTPStatusCodes httpStatusCode, bool noneIsPending = true);
       static bool isInformational(HTTPStatusCodes httpStatusCode);

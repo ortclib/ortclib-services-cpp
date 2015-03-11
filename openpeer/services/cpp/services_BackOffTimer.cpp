@@ -85,7 +85,7 @@ namespace openpeer
 
         initialzePattern();
 
-        for (int loop = 0; (loop < totalFailuresThusFar) && (loop < maximumFailures); ++loop) {
+        for (ULONG loop = 0; (loop < totalFailuresThusFar) && (loop < maximumFailures); ++loop) {
           notifyFailure();
         }
 
@@ -215,6 +215,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyFailure()
       {
+        typedef decltype(mLastRetryTimer) CronoType;
+        typedef decltype(mLastRetryTimer)::rep ClockRepType;
         AutoRecursiveLock lock(*this);
 
         if (mTimer) {
@@ -229,7 +231,10 @@ namespace openpeer
         if (mTotalFailures >= mRetryTimerVector.size()) {
           // this could be the final attempt
           if (mMultiplier > 0.0) {
-            mLastRetryTimer *= mMultiplier;
+            ClockRepType value = mLastRetryTimer.count();
+            double converted = (double)value;
+            converted *= mMultiplier;
+            mLastRetryTimer = CronoType((ClockRepType)converted);
           } else {
             mFinalFailure = true;
           }

@@ -2291,7 +2291,7 @@ namespace openpeer
       }
       if (hasAttribute(STUNPacket::Attribute_Data)) {
         IHelper::debugAppend(resultEl, "data length", mDataLength);
-        IHelper::debugAppend(resultEl, "data", mData);
+        IHelper::debugAppend(resultEl, "data", mData ? true : false);
       }
       if (hasAttribute(STUNPacket::Attribute_EvenPort)) {
         IHelper::debugAppend(resultEl, "even port", mEvenPort);

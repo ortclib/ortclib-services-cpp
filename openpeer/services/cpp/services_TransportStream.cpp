@@ -308,15 +308,15 @@ namespace openpeer
         BYTE buffer[sizeof(DWORD)] = {0,0,0,0};
         if (endian == Endian_Big)
         {
-          buffer[0] = ((value & 0xFF000000) >> 24);
-          buffer[1] = ((value & 0xFF0000) >> 16);
-          buffer[2] = ((value & 0xFF00) >> 8);
-          buffer[3] = (value & 0xFF);
+          buffer[0] = (BYTE)((value & 0xFF000000) >> 24);
+          buffer[1] = (BYTE)((value & 0xFF0000) >> 16);
+          buffer[2] = (BYTE)((value & 0xFF00) >> 8);
+          buffer[3] = (BYTE)(value & 0xFF);
         } else {
-          buffer[3] = ((value & 0xFF000000) >> 24);
-          buffer[2] = ((value & 0xFF0000) >> 16);
-          buffer[1] = ((value & 0xFF00) >> 8);
-          buffer[0] = (value & 0xFF);
+          buffer[3] = (BYTE)((value & 0xFF000000) >> 24);
+          buffer[2] = (BYTE)((value & 0xFF0000) >> 16);
+          buffer[1] = (BYTE)((value & 0xFF00) >> 8);
+          buffer[0] = (BYTE)(value & 0xFF);
         }
         write(&(buffer[0]), sizeof(buffer), header);
       }
@@ -424,7 +424,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::TransportStream::getNextReadSizeInBytes() const
+      size_t TransportStream::getNextReadSizeInBytes() const
       {
         AutoRecursiveLock lock(getLock());
 

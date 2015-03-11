@@ -68,10 +68,10 @@ namespace openpeer
 
         static String toString(ElementPtr el);
         static ElementPtr toJSON(const char *str);
-        SecureByteBlockPtr writeAsJSON(
-                                       DocumentPtr doc,
-                                       bool prettyPrint
-                                       );
+        static SecureByteBlockPtr writeAsJSON(
+                                              DocumentPtr doc,
+                                              bool prettyPrint
+                                              );
 
         static String timeToString(const Time &value);
         static Time stringToTime(const String &str);

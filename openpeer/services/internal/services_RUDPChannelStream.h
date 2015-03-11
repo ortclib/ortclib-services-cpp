@@ -81,6 +81,7 @@ namespace openpeer
       {
       public:
         friend interaction IRUDPChannelStreamFactory;
+        friend interaction IRUDPChannelStream;
 
         ZS_DECLARE_STRUCT_PTR(BufferedPacket)
 

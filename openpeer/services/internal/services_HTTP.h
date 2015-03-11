@@ -39,6 +39,10 @@
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
+#ifdef _WIN32
+#define CURL_STATICLIB
+#endif //_WIN32
+
 #include <curl/curl.h>
 
 #define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"

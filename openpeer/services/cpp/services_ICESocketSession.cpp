@@ -2368,16 +2368,16 @@ namespace openpeer
                                     )
       {
         if (isShutdown()) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true: false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
         UseICESocketPtr socket = mICESocket.lock();
         if (!socket) {
-          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE socket is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+          ZS_LOG_WARNING(Debug, log("cannot send packet as ICE socket is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
-        OPENPEER_SERVICES_WIRE_LOG_TRACE((log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData)))
+        OPENPEER_SERVICES_WIRE_LOG_TRACE((log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData)))
         return socket->sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
       }
 

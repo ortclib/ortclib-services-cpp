@@ -408,16 +408,21 @@ namespace openpeer
             break;
           }
 
+          CryptoPP::word32 tmp{};
+
           DWORD bufferedChannel = 0;
           DWORD channel = 0;
 
           if (mFramesHaveChannelNumber) {
-            mReceivingQueue->PeekWord32(channel);
+            mReceivingQueue->PeekWord32(tmp);
+            channel = tmp;
             mReceivingQueue->Get((BYTE *)(&bufferedChannel), sizeof(bufferedChannel));
           }
 
+          tmp = 0;
           DWORD bufferSize = 0;
-          mReceivingQueue->PeekWord32(bufferSize);
+          mReceivingQueue->PeekWord32(tmp);
+          bufferSize = tmp;
 
           needingSize += bufferSize;
 

@@ -56,6 +56,8 @@
 #else
 #include <ifaddrs.h>
 #endif
+#else //_WIN32
+#include <Iphlpapi.h>
 #endif //_WIN32
 
 #define OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
@@ -180,7 +182,7 @@ namespace openpeer
         if (networkOrder.hasData()) {
           IHelper::SplitMap split;
           IHelper::split(networkOrder, split, ';');
-          for (int index = 0; index < split.size(); ++index)
+          for (size_t index = 0; index < split.size(); ++index)
           {
             mInterfaceOrders[(*split.find(index)).second] = index;
           }
@@ -455,7 +457,7 @@ namespace openpeer
                              )
       {
         if (isShutdown()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -485,7 +487,7 @@ namespace openpeer
 
         if (viaLocalCandidate.mType == Type_Relayed) {
           if (!turnSocket) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
             return false;
           }
 
@@ -494,7 +496,7 @@ namespace openpeer
         }
 
         if (!socket) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -513,7 +515,7 @@ namespace openpeer
           }
 
           size_t bytesSent = socket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", (bool)buffer) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
+          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           if (ZS_IS_LOGGING(Insane)) {
             String base64 = IHelper::convertToBase64(buffer, bytesSent);
             OPENPEER_SERVICES_WIRE_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
@@ -1638,6 +1640,8 @@ namespace openpeer
                   if (turnInfo->mTURNSocket) goto found_turn_connection;
                 }
 
+                goto did_not_find_turn_connection;
+
               did_not_find_turn_connection:
                 ZS_LOG_TRACE(log("since a TURN connection does not exist for the alternative local socket there's no need to check if it's duplicate or not") + checkSocket->mLocal->toDebug())
                 continue;
@@ -2384,7 +2388,7 @@ namespace openpeer
         mTURNRetryDuration(Milliseconds(OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS))
       {
         mRelay = CandidatePtr(new Candidate);
-        mRelay->mLocalPreference = nextLocalPreference;
+        mRelay->mLocalPreference = (decltype(mRelay->mLocalPreference))nextLocalPreference;
         mRelay->mType = ICESocket::Type_Relayed;
         mRelay->mComponentID = componentID;
         mRelay->mPriority = ((1 << 24)*(static_cast<DWORD>(mRelay->mType))) + ((1 << 8)*(static_cast<DWORD>(mRelay->mLocalPreference))) + (256 - mRelay->mComponentID);
@@ -2405,7 +2409,7 @@ namespace openpeer
                                     )
       {
         mReflexive = CandidatePtr(new Candidate);
-        mReflexive->mLocalPreference = nextLocalPreference;
+        mReflexive->mLocalPreference = (decltype(mReflexive->mLocalPreference))nextLocalPreference;
         mReflexive->mType = ICESocket::Type_ServerReflexive;
         mReflexive->mComponentID = componentID;
         mReflexive->mPriority = ((1 << 24)*(static_cast<DWORD>(mReflexive->mType))) + ((1 << 8)*(static_cast<DWORD>(mReflexive->mLocalPreference))) + (256 - mReflexive->mComponentID);
@@ -2450,7 +2454,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::LocalSocket::updateLocalPreference(ULONG localPreference)
       {
-        mLocal->mLocalPreference = localPreference;
+        mLocal->mLocalPreference = (decltype(mLocal->mLocalPreference)) localPreference;
         mLocal->mPriority = ((1 << 24)*(static_cast<DWORD>(mLocal->mType))) + ((1 << 8)*(static_cast<DWORD>(mLocal->mLocalPreference))) + (256 - mLocal->mComponentID);
       }
 

@@ -501,7 +501,7 @@ namespace openpeer
 
         do
         {
-          SOCKET highestSocket = zsLib::INVALID_SOCKET;
+          SOCKET highestSocket = INVALID_SOCKET;
 
           {
             AutoRecursiveLock lock(*this);
@@ -550,7 +550,7 @@ namespace openpeer
           timeout.tv_sec = 1;
           timeout.tv_usec = 0;
 
-          int result = select(zsLib::INVALID_SOCKET == highestSocket ? 0 : (highestSocket+1), &fdread, &fdwrite, &fdexcep, &timeout);
+          int result = select(INVALID_SOCKET == highestSocket ? 0 : (highestSocket+1), &fdread, &fdwrite, &fdexcep, &timeout);
 
           ZS_LOG_INSANE(log("curl multi select") + ZS_PARAM("result", result))
 
@@ -564,7 +564,7 @@ namespace openpeer
 
             switch (result) {
 
-              case zsLib::INVALID_SOCKET:  break;
+              case INVALID_SOCKET:  break;
               case 0:
               default: {
                 ULONG totalToProcess = result;
@@ -1038,7 +1038,7 @@ namespace openpeer
             } else {
               mResponseCode = HTTPStatusCode_ClientClosedRequest;
             }
-            ZS_LOG_DEBUG(log("manually result error") + ZS_PARAM("error", toString(toStatusCode(mResponseCode))))
+            ZS_LOG_DEBUG(log("manually result error") + ZS_PARAM("error", toString(toStatusCode((IHTTP::StatusCodeType) mResponseCode))))
           }
         }
 

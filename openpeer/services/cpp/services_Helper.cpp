@@ -1433,7 +1433,7 @@ namespace openpeer
 
         split(ipList, splits, ',');
 
-        for (int i = 0; i < splits.size(); ++i) {
+        for (size_t i = 0; i < splits.size(); ++i) {
           String value = (*(splits.find(i))).second;
 
           value.trim();
@@ -1707,7 +1707,7 @@ namespace openpeer
                                             bool prettyPrint
                                             )
     {
-      return writeAsJSON(doc);
+      return internal::Helper::writeAsJSON(doc, prettyPrint);
     }
 
     //-------------------------------------------------------------------------
@@ -1847,12 +1847,6 @@ namespace openpeer
     SecureByteBlockPtr IHelper::convertFromBase64(const String &input)
     {
       return internal::Helper::convertFromBase64(input);
-    }
-
-    //-------------------------------------------------------------------------
-    String IHelper::convertStringFromBase64(const String &input)
-    {
-      return internal::Helper::convertStringFromBase64(input);
     }
 
     //-------------------------------------------------------------------------

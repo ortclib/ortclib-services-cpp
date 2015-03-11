@@ -155,8 +155,6 @@ namespace openpeer
 
       static SecureByteBlockPtr convertFromBase64(const String &input);
 
-      static String convertStringFromBase64(const String &input);
-
       static String convertToHex(
                                  const BYTE *buffer,
                                  size_t bufferLengthInBytes,
