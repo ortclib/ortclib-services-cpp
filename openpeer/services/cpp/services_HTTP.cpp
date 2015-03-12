@@ -66,6 +66,10 @@ namespace openpeer
 {
   namespace services
   {
+#ifndef _WIN32
+    using zsLib::INVALID_SOCKET;
+#endif //ndef _WIN32
+
     namespace internal
     {
 #ifndef _WIN32
