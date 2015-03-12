@@ -34,6 +34,7 @@
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IHTTP.h>
 
+#ifndef WINRT
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
@@ -320,6 +321,15 @@ namespace openpeer
         HTTPCurlMap mCurlMap;
       };
 
+#else
+namespace openpeer
+{
+  namespace services
+  {
+    namespace internal
+    {
+#endif //ndef WINRT
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -354,3 +364,4 @@ namespace openpeer
     }
   }
 }
+

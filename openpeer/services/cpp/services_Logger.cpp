@@ -51,6 +51,10 @@
 #include <fstream>
 #include <ctime>
 
+#ifdef HAVE_GMTIME_S
+#include <time.h>
+#endif //HAVE_GMTIME_S
+
 #ifndef _WIN32
 #include <pthread.h>
 #endif //ndef _WIN32
@@ -240,12 +244,25 @@ namespace openpeer
         Microseconds remainder = std::chrono::duration_cast<Microseconds>(now - secOnly);
 
         std::tm ttm {};
+#ifdef HAVE_GMTIME_S
+        auto error = gmtime_s(&ttm, &tt);
+        ZS_THROW_BAD_STATE_IF(0 != error)
+#else
         gmtime_r(&tt, &ttm);
+#endif //_WIN32
 
         //HH:MM:SS.123456
         char buffer[100] {};
 
-        snprintf(buffer, sizeof(buffer), "%02u:%02u:%02u:%06u", ((UINT)ttm.tm_hour), ((UINT)ttm.tm_min), ((UINT)ttm.tm_sec), static_cast<UINT>(remainder.count()));
+#ifdef HAVE_SPRINTF_S
+        sprintf_s(
+#else
+        snprintf(
+#endif //HAVE_SPRINTF_S
+          &(buffer[0]),
+          sizeof(buffer),
+          "%02u:%02u:%02u:%06u", ((UINT)ttm.tm_hour), ((UINT)ttm.tm_min), ((UINT)ttm.tm_sec), static_cast<UINT>(remainder.count())
+        );
 
         return buffer;
       }
@@ -1731,8 +1748,9 @@ namespace openpeer
           } else {
             if (!stepDNS()) goto step_cleanup;
             if (!stepConnect()) goto step_cleanup;
-
           }
+
+          goto step_complete;
 
         step_complete:
           {

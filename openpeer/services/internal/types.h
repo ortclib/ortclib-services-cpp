@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <openpeer/services/internal/platform.h>
 #include <openpeer/services/types.h>
 #include <openpeer/services/IFactory.h>
 

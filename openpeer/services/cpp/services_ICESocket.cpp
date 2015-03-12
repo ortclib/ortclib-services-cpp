@@ -50,14 +50,22 @@
 #include <cryptopp/crc.h>
 
 #ifndef _WIN32
+
 #include <sys/types.h>
 #ifdef _ANDROID
 #include <openpeer/services/internal/ifaddrs-android.h>
 #else
 #include <ifaddrs.h>
 #endif
+
 #else //_WIN32
+
+#ifdef WINRT
+using namespace Windows::Networking::Connectivity;
+#else //WINRT
 #include <Iphlpapi.h>
+#endif //WINRT
+
 #endif //_WIN32
 
 #define OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
@@ -1868,13 +1876,13 @@ namespace openpeer
         {
         public:
           //-------------------------------------------------------------------
-          struct Data
-          {
+          struct Data {
             IPAddress mIP;
             OrderID mOrderIndex;
+            ULONG mAdapterMetric;
             ULONG mIndex;
 
-            Data() : mOrderIndex(0), mIndex(0) {}
+            Data() : mOrderIndex(0), mAdapterMetric(0), mIndex(0) {}
           };
 
           //-------------------------------------------------------------------
@@ -1882,6 +1890,8 @@ namespace openpeer
           {
             if (data1.mOrderIndex < data2.mOrderIndex) return true;
             if (data1.mOrderIndex > data2.mOrderIndex) return false;
+            if (data1.mAdapterMetric < data2.mAdapterMetric) return true;
+            if (data1.mAdapterMetric > data2.mAdapterMetric) return false;
             if (data1.mIndex < data2.mIndex) return true;
             if (data1.mIndex > data2.mIndex) return false;
 
@@ -1913,9 +1923,21 @@ namespace openpeer
                               const InterfaceNameToOrderMap &prefs
                               )
           {
+            return prepare(ip, name, 0, prefs);
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(
+                              const IPAddress &ip,
+                              const char *name,
+                              ULONG metric,
+                              const InterfaceNameToOrderMap &prefs
+                              )
+          {
             Data data;
 
             data.mIP = ip;
+            data.mAdapterMetric = metric;
 
             if (prefs.size() > 0) {
               const char *numStr = name + strlen(name);
@@ -1929,6 +1951,7 @@ namespace openpeer
               }
 
               String namePart;
+              ULONG parsedIndex = 0;
 
               if (numStr != name) {
 
@@ -1939,7 +1962,7 @@ namespace openpeer
                 namePart = namePart.substr(0, length);
 
                 try {
-                  data.mIndex = Numeric<decltype(data.mIndex)>(numStr);
+                  parsedIndex = Numeric<decltype(data.mIndex)>(numStr);
                 } catch(Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
                   ZS_LOG_WARNING(Detail, Log::Params("number failed to convert", "ICESocket") + ZS_PARAM("name", name))
                 }
@@ -1947,11 +1970,23 @@ namespace openpeer
                 namePart = name;
               }
 
+              data.mIndex = parsedIndex;
+              namePart.trim();
+
               InterfaceNameToOrderMap::const_iterator found = prefs.find(namePart);
               if (found != prefs.end()) {
                 data.mOrderIndex = (*found).second;
               } else {
                 data.mOrderIndex = prefs.size();  // last
+                // search for partial name inside adapter name
+                for (auto iter = prefs.begin(); iter != prefs.end(); ++iter) {
+                  const String &prefName = (*iter).first;
+                  auto pos = namePart.find(prefName);
+                  if (pos != String::npos) {
+                    data.mOrderIndex = (*iter).second;
+                    break;
+                  }
+                }
               }
             }
 
@@ -1963,11 +1998,229 @@ namespace openpeer
 
         DataList data;
 
+        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: START ---"))
+
 #ifdef _WIN32
+
+#ifdef WINRT
+        // http://stackoverflow.com/questions/10336521/query-local-ip-address
+
+        // search for IP addresses
+        {
+          typedef std::map<String, bool> HostNameMap;
+          typedef std::list<ConnectionProfile ^> ConnectionProfileList;
+
+          HostNameMap previousFound;
+          ConnectionProfileList profiles;
+
+          // discover connection profiles
+          {
+            auto connectionProfiles = NetworkInformation::GetConnectionProfiles();
+            for (auto iter = connectionProfiles->First(); iter->HasCurrent; iter->MoveNext()) {
+              auto profile = iter->Current;
+              if (nullptr == profile) {
+                ZS_LOG_WARNING(Trace, log("found null profile"))
+                continue;
+              }
+              profiles.push_back(profile);
+            }
+
+            ConnectionProfile ^current = NetworkInformation::GetInternetConnectionProfile();
+            if (current) {
+              ZS_LOG_INSANE("found current profile")
+              profiles.push_back(current);
+            }
+          }
+
+          // search connection profiles with host names found
+          {
+            auto hostnames = NetworkInformation::GetHostNames();
+            for (auto iter = hostnames->First(); iter->HasCurrent; iter->MoveNext()) {
+              auto hostname = iter->Current;
+              if (nullptr == hostname) continue;
+
+              auto canonicalName = hostname->CanonicalName;
+              if (nullptr == canonicalName) continue;
+
+              String converted(canonicalName->Data());
+
+              auto found = previousFound.find(converted);
+              if (found != previousFound.end()) {
+                ZS_LOG_INSANE(log("already found IP") + ZS_PARAMIZE(converted))
+                continue;
+              }
+
+              ConnectionProfile ^hostProfile = nullptr;
+              if (hostname->IPInformation) {
+                if (hostname->IPInformation->NetworkAdapter) {
+                  auto hostNetworkAdapter = hostname->IPInformation->NetworkAdapter;
+                  for (auto profileIter = profiles.begin(); profileIter != profiles.end(); ++profileIter) {
+                    auto profile = (*profileIter);
+                    auto adapter = profile->NetworkAdapter;
+                    if (nullptr == adapter) {
+                      ZS_LOG_WARNING(Insane, log("found null adapter"))
+                      continue;
+                    }
+                    if (adapter->NetworkAdapterId != hostNetworkAdapter->NetworkAdapterId) {
+                      ZS_LOG_INSANE(log("adapter does not match host adapter"))
+                      continue;
+                    }
+                    // match found
+                    hostProfile = profile;
+                    break;
+                  }
+                }
+              }
+
+              previousFound[converted] = true;
+
+              IPAddress ip(converted);
+
+              if (ip.isAddressEmpty()) continue;
+              if (ip.isLoopback()) continue;
+              if (ip.isAddrAny()) continue;
+
+              ip.setPort(mBindPort);
+
+              String profileName;
+
+              if (hostProfile) {
+                if (hostProfile->ProfileName) {
+                  profileName = String(hostProfile->ProfileName->Data());
+                }
+              }
+              if (profileName.hasData()) {
+                data.push_back(Sorter::prepare(ip, profileName, mInterfaceOrders));
+              } else {
+                data.push_back(Sorter::prepare(ip));
+              }
+            }
+          }
+        }
+
+#else //WINRT
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365915(v=vs.85).aspx
+
+#undef MALLOC
+#undef FREE
+
+#define WORKING_BUFFER_SIZE 15000
+#define MAX_TRIES 3
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+
+        {
+          ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_FRIENDLY_NAME;
+
+          DWORD dwSize = 0;
+          DWORD dwRetVal = 0;        
+
+          ULONG family = AF_UNSPEC;
+
+          LPVOID lpMsgBuf = NULL;
+
+          PIP_ADAPTER_ADDRESSES pAddresses = NULL;
+
+          // Allocate a 15 KB buffer to start with.
+          ULONG outBufLen = WORKING_BUFFER_SIZE;
+          ULONG Iterations = 0;
+
+          PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
+          PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
+          //PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
+          //PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
+          //IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
+          //IP_ADAPTER_PREFIX *pPrefix = NULL;
+
+          outBufLen = WORKING_BUFFER_SIZE;
+
+          do {
+
+            pAddresses = (IP_ADAPTER_ADDRESSES *) MALLOC(outBufLen);
+            ZS_THROW_BAD_STATE_IF(NULL == pAddresses)
+
+            dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
+
+            if (dwRetVal != ERROR_BUFFER_OVERFLOW) break;
+
+            FREE(pAddresses);
+            pAddresses = NULL;
+
+            Iterations++;
+          } while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (Iterations < MAX_TRIES));
+
+          if (NO_ERROR == dwRetVal) {
+            pCurrAddresses = pAddresses;
+            while (pCurrAddresses) {
+
+              // discover information about the adapter
+              {
+                switch (pCurrAddresses->OperStatus) {
+                  case IfOperStatusDown:           goto next_address;
+                  case IfOperStatusNotPresent:     goto next_address;
+                  case IfOperStatusLowerLayerDown: goto next_address;
+                }
+
+                IPAddress ip;
+
+                ULONG adapterMetric = ULONG_MAX;
+
+                pUnicast = pCurrAddresses->FirstUnicastAddress;
+                while (pUnicast) {
+                  // scan unicast addresses
+                  {
+                    if (pUnicast->Address.lpSockaddr) {
+                      switch (pUnicast->Address.lpSockaddr->sa_family) {
+                        case AF_INET: {
+                          ip = IPAddress(*((sockaddr_in *)pUnicast->Address.lpSockaddr));
+                          adapterMetric = pCurrAddresses->Ipv4Metric;
+                          break;
+                        }
+                        case AF_INET6: {
+                          ip = IPAddress(*((sockaddr_in6 *)pUnicast->Address.lpSockaddr));
+                          adapterMetric = pCurrAddresses->Ipv6Metric;
+                          break;
+                        }
+                      }
+                    }
+
+                    if (ip.isAddressEmpty()) goto next_unicast;
+                    if (ip.isLoopback()) goto next_unicast;
+                    if (ip.isAddrAny()) goto next_unicast;
+
+                    ip.setPort(mBindPort);
+
+                    ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("ip", ip.string()))
+
+                    String name(pCurrAddresses->AdapterName);
+
+                    data.push_back(Sorter::prepare(ip, name, adapterMetric, mInterfaceOrders));
+                  }
+
+                next_unicast:
+                  {
+                    pUnicast = pUnicast->Next;
+                  }
+                }
+              }
+
+            next_address:
+              {
+                pCurrAddresses = pCurrAddresses->Next;
+              }
+            }
+          } else {
+            ZS_LOG_WARNING(Detail, log("failed to obtain IP address information") + ZS_PARAMIZE(dwRetVal))
+          }
+
+          FREE(pAddresses);
+        }
+
+#if 0
         // http://tangentsoft.net/wskfaq/examples/ipaddr.html
 
-        // OR
-        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: START ---"))
+        // OLD CODE USED FOR IPv4 ONLY
 
         ULONG size = 0;
 
@@ -1998,14 +2251,15 @@ namespace openpeer
             }
           }
         }
-        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
-#else
+#endif //0
+#endif //WINRT
+
+#else //_WIN32
         ifaddrs *ifAddrStruct = NULL;
         ifaddrs *ifa = NULL;
 
         getifaddrs(&ifAddrStruct);
 
-        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: START ---"))
         for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
         {
           IPAddress ip;
@@ -2028,13 +2282,14 @@ namespace openpeer
 
           data.push_back(Sorter::prepare(ip, ifa->ifa_name, mInterfaceOrders));
         }
-        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
 
         if (ifAddrStruct) {
           freeifaddrs(ifAddrStruct);
           ifAddrStruct = NULL;
         }
 #endif //_WIN32
+
+        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
 
         data.sort(Sorter::compareLocalIPs);
 

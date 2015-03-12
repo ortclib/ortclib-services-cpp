@@ -54,6 +54,7 @@ using zsLib::Time;
 using zsLib::AutoRecursiveLock;
 using zsLib::RecursiveLock;
 using zsLib::IMessageQueue;
+using zsLib::ULONG;
 
 using namespace openpeer::services;
 using namespace openpeer::services::test;
@@ -393,6 +394,8 @@ using openpeer::services::test::TestTCPMessagingLoopbackPtr;
 
 void doTestTCPMessagingLoopback()
 {
+  typedef zsLib::ULONG ULONG;
+
   if (!OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST) return;
 
   TESTING_INSTALL_LOGGER();

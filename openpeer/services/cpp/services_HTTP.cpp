@@ -31,6 +31,9 @@
 
 #include <openpeer/services/IHTTP.h>
 #include <openpeer/services/internal/services_HTTP.h>
+
+#ifndef WINRT
+
 #include <openpeer/services/internal/services_Helper.h>
 
 #include <openpeer/services/ISettings.h>
@@ -441,7 +444,7 @@ namespace openpeer
 
           if (!mThread) {
             mThread = ThreadPtr(new std::thread(std::ref(*this)));
-            zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
+            zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY)));
           }
 
           mPendingAddQueries[query->getID()] = query;
@@ -1260,6 +1263,12 @@ namespace openpeer
       }
 
     }
+#else
+namespace openpeer
+{
+  namespace services
+  {
+#endif //ndef WINRT
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
