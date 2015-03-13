@@ -203,7 +203,6 @@ namespace openpeer
       virtual bool isComplete() const = 0;
       virtual bool wasSuccessful() const = 0;
       virtual HTTPStatusCodes getStatusCode() const = 0;
-      virtual long getResponseCode() const = 0;
 
       virtual size_t getHeaderReadSizeAvailableInBytes() const = 0;
       virtual size_t readHeader(

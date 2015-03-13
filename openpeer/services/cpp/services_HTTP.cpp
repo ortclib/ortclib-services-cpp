@@ -31,6 +31,7 @@
 
 #include <openpeer/services/IHTTP.h>
 #include <openpeer/services/internal/services_HTTP.h>
+#include <openpeer/services/internal/services_HTTP_WinRT.h>
 
 #ifndef WINRT
 
@@ -789,13 +790,6 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      long HTTP::HTTPQuery::getResponseCode() const
-      {
-        AutoRecursiveLock lock(*this);
-        return mResponseCode;
-      }
-
-      //-----------------------------------------------------------------------
       size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const
       {
         AutoRecursiveLock lock(*this);
@@ -1224,6 +1218,14 @@ namespace openpeer
 
         return 0;
       }
+#else
+namespace openpeer
+{
+  namespace services
+  {
+    namespace internal
+    {
+#endif //ndef WINRT
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -1267,12 +1269,6 @@ namespace openpeer
       }
 
     }
-#else
-namespace openpeer
-{
-  namespace services
-  {
-#endif //ndef WINRT
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------

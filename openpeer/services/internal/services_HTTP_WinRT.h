@@ -34,19 +34,15 @@
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/IHTTP.h>
 
-#ifndef WINRT
+#ifdef WINRT
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
-#ifdef _WIN32
-#define CURL_STATICLIB
-#endif //_WIN32
+#include <zsLib/Timer.h>
 
-#include <curl/curl.h>
-
-#define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
+#include <ppltasks.h>
 
 namespace openpeer
 {
@@ -54,8 +50,6 @@ namespace openpeer
   {
     namespace internal
     {
-      class HTTPGlobalSafeReference;
-
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -69,7 +63,6 @@ namespace openpeer
                    public IHTTP
       {
       public:
-        friend class HTTPGlobalSafeReference;
         friend interaction IHTTPFactory;
 
         ZS_DECLARE_CLASS_PTR(HTTPQuery)
@@ -132,13 +125,8 @@ namespace openpeer
 
         void cancel();
 
-        void wakeUp();
-        void createWakeUpSocket();
-
-        void processWaiting();
-
         void monitorBegin(HTTPQueryPtr query);
-        void monitorEnd(HTTPQueryPtr query);
+        void monitorEnd(HTTPQuery &query);
 
       public:
         void operator()();
@@ -153,7 +141,9 @@ namespace openpeer
         #pragma mark
 
         class HTTPQuery : public SharedRecursiveLock,
-                          public IHTTPQuery
+                          public MessageQueueAssociator,
+                          public IHTTPQuery,
+                          public ITimerDelegate
         {
         protected:
           HTTPQuery(
@@ -205,6 +195,13 @@ namespace openpeer
 
           //-------------------------------------------------------------------
           #pragma mark
+          #pragma mark HTTP::HTTPQuery => friend ITimerDelegate
+          #pragma mark
+
+          void onTimer(TimerPtr onTimer);
+
+          //-------------------------------------------------------------------
+          #pragma mark
           #pragma mark HTTP::HTTPQuery => friend HTTP
           #pragma mark
 
@@ -222,12 +219,8 @@ namespace openpeer
 
           // (duplicate) PUID getID() const;
 
-          void prepareCurl();
-          void cleanupCurl();
-
-          CURL *getCURL() const;
-
-          void notifyComplete(CURLcode result);
+          void go(Windows::Web::Http::HttpClient ^client);
+          void notifyComplete(Windows::Web::Http::HttpStatusCode result);
 
         protected:
           //-------------------------------------------------------------------
@@ -236,28 +229,8 @@ namespace openpeer
           #pragma mark
 
           Log::Params log(const char *message) const;
-
-          static size_t writeHeader(
-                                    void *ptr,
-                                    size_t size,
-                                    size_t nmemb,
-                                    void *userdata
-                                    );
-
-          static size_t writeData(
-                                  char *ptr,
-                                  size_t size,
-                                  size_t nmemb,
-                                  void *userdata
-                                  );
-
-          static int debug(
-                           CURL *handle,
-                           curl_infotype type,
-                           char *data,
-                           size_t size,
-                           void *userdata
-                           );
+          static Log::Params slogQuery(PUID id, const char *message);
+          void notifyComplete(Windows::Web::Http::HttpResponseMessage ^response);
 
         protected:
           //-------------------------------------------------------------------
@@ -278,15 +251,13 @@ namespace openpeer
           Milliseconds mTimeout;
 
           SecureByteBlock mPostData;
-          SecureByteBlock mErrorBuffer;
-
-          CURL *mCurl;
-          long mResponseCode;
-          CURLcode mResultCode;
-          struct curl_slist *mHeaders;
 
           ByteQueue mHeader;
           ByteQueue mBody;
+
+          concurrency::cancellation_token_source mCancellationTokenSource;
+          Windows::Web::Http::HttpStatusCode mStatusCode;
+          TimerPtr mTimer;
         };
 
       protected:
@@ -297,70 +268,17 @@ namespace openpeer
 
         AutoPUID mID;
         HTTPWeakPtr mThisWeak;
-        HTTPPtr mGracefulShutdownReference;
-
-        ThreadPtr mThread;
-        bool mShouldShutdown;
-
-        IPAddress mWakeUpAddress;
-        SocketPtr mWakeUpSocket;
-
-        CURLM *mMultiCurl;
-
-        typedef std::list<EventPtr> EventList;
-        EventList mWaitingForRebuildList;
 
         typedef PUID QueryID;
-        typedef std::map<QueryID, HTTPQueryPtr> HTTPQueryMap;
+        typedef std::map<QueryID, HTTPQueryWeakPtr> HTTPQueryMap;
         HTTPQueryMap mQueries;
-        HTTPQueryMap mPendingAddQueries;
-        HTTPQueryMap mPendingRemoveQueries;
 
-        typedef std::map<CURL *, HTTPQueryPtr> HTTPCurlMap;
-        HTTPCurlMap mCurlMap;
+        Windows::Web::Http::HttpClient ^mHTTPClient;
       };
 
-#else
-namespace openpeer
-{
-  namespace services
-  {
-    namespace internal
-    {
-#endif //ndef WINRT
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IHTTPFactory
-      #pragma mark
-
-      interaction IHTTPFactory
-      {
-        static IHTTPFactory &singleton();
-
-        virtual IHTTPQueryPtr get(
-                                  IHTTPQueryDelegatePtr delegate,
-                                  const char *userAgent,
-                                  const char *url,
-                                  Milliseconds timeout
-                                  );
-
-        virtual IHTTPQueryPtr post(
-                                   IHTTPQueryDelegatePtr delegate,
-                                   const char *userAgent,
-                                   const char *url,
-                                   const BYTE *postData,
-                                   size_t postDataLengthInBytes,
-                                   const char *postDataMimeType,
-                                   Milliseconds timeout
-                                   );
-      };
-
-      class HTTPFactory : public IFactory<IHTTPFactory> {};
     }
   }
 }
+
+#endif //WINRT
 

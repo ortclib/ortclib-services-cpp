@@ -52,6 +52,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Encryptor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_HTTP.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_HTTP_WinRT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ICESocket.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ICESocketSession.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_IRUDPChannelStream.h" />
@@ -113,6 +114,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Encryptor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Helper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_HTTP.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_HTTP_WinRT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_ICESocket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_ICESocketSession.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Logger.cpp" />
