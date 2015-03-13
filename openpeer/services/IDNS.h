@@ -62,7 +62,7 @@ namespace openpeer
         typedef std::list<IPAddress> IPAddressList;
 
         String mName;
-        UINT   mTTL;
+        UINT   mTTL {};
         IPAddressList mIPAddresses;
       };
 
@@ -77,9 +77,9 @@ namespace openpeer
         struct SRVRecord
         {
           String mName;
-          WORD mPriority;
-          WORD mWeight;
-          WORD mPort;
+          WORD mPriority {};
+          WORD mWeight {};
+          WORD mPort {};
 
           AResultPtr mAResult;
           AAAAResultPtr mAAAAResult;
@@ -88,7 +88,7 @@ namespace openpeer
         String mName;
         String mService;
         String mProtocol;
-        UINT   mTTL;
+        UINT   mTTL {};
         SRVRecordList mRecords;
       };
 

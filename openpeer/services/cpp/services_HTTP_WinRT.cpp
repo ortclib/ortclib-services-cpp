@@ -572,12 +572,10 @@ namespace openpeer
             if (pThis) {
               pThis->cancel();
             }
-          }
-          catch (Platform::Exception ^ex) {
+          } catch (Platform::Exception ^ex) {
+            ZS_LOG_WARNING(Detail, slogQuery(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())))
             if (pThis) {
-              ZS_LOG_WARNING(Detail, slogQuery(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())))
               pThis->notifyComplete(HttpStatusCode::InternalServerError);
-            } else {
             }
           }
         });

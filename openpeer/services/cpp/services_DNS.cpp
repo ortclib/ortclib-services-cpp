@@ -40,6 +40,11 @@
 #include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
+#include <zsLib/Numeric.h>
+
+#ifdef WINRT
+#include <ppltasks.h>
+#endif //WINRT
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
 
@@ -47,6 +52,7 @@ namespace openpeer
 {
   namespace services
   {
+    using zsLib::Numeric;
     using CryptoPP::AutoSeededRandomPool;
 
     typedef std::list<String> StringList;
@@ -63,6 +69,11 @@ namespace openpeer
       ZS_DECLARE_CLASS_PTR(DNSInstantResultQuery)
       ZS_DECLARE_CLASS_PTR(DNSListQuery)
 
+#ifdef WINRT
+      ZS_DECLARE_CLASS_PTR(DNSWinRT)
+#endif //WINRT
+      
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -70,6 +81,12 @@ namespace openpeer
       #pragma mark
       #pragma mark helpers
       #pragma mark
+
+      //-----------------------------------------------------------------------
+      static Log::Params slog(const char *message)
+      {
+        return Log::Params(message, "DNS");
+      }
 
       //-----------------------------------------------------------------------
       static bool srvCompare(const IDNS::SRVResult::SRVRecord &first, const IDNS::SRVResult::SRVRecord &second)
@@ -309,6 +326,24 @@ namespace openpeer
           const SRVRecord &record = (*iter);
           ioResult->mRecords.push_back(record);
         }
+      }
+
+      //-----------------------------------------------------------------------
+      static String extractPort(const char *name, WORD &port)
+      {
+        String str(name);
+        auto pos = str.find(':');
+        if (String::npos == pos) return str;
+
+        String strPort = str.substr(pos+1);
+        try {
+          port = Numeric<WORD>(strPort);
+        } catch (Numeric<WORD>::ValueOutOfRange &) {
+          ZS_LOG_WARNING(Detail, slog("failed to extract port") + ZS_PARAMIZE(strPort))
+          return str;
+        }
+        str = str.substr(0, pos);
+        return str;
       }
 
       //-----------------------------------------------------------------------
@@ -591,18 +626,19 @@ namespace openpeer
       class DNSAQuery : public DNSQuery
       {
       protected:
-        DNSAQuery(IDNSDelegatePtr delegate, const char *name) :
+        DNSAQuery(IDNSDelegatePtr delegate, const char *name, WORD port) :
           DNSQuery(DNSMonitor::singleton(), delegate),
-          mName(name)
+          mName(name),
+          mPort(port)
         {
           mObjectName = "DNSAQuery";
         }
 
       public:
         //---------------------------------------------------------------------
-        static DNSAQueryPtr create(IDNSDelegatePtr delegate, const char *name)
+        static DNSAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
         {
-          DNSAQueryPtr pThis(new DNSAQuery(delegate, name));
+          DNSAQueryPtr pThis(new DNSAQuery(delegate, name, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -638,6 +674,9 @@ namespace openpeer
             for (IDNS::AResult::IPAddressList::iterator iter = mA->mIPAddresses.begin(); iter != mA->mIPAddresses.end(); ++iter)
             {
               IPAddress &ipAddress = (*iter);
+              if (0 != mPort) {
+                ipAddress.setPort(mPort);
+              }
               ZS_LOG_DEBUG(log("A record found") + ZS_PARAM("ip", ipAddress.string()))
             }
           } else {
@@ -657,6 +696,7 @@ namespace openpeer
         #pragma mark
 
         String mName;
+        WORD mPort;
       };
 
       //-----------------------------------------------------------------------
@@ -670,18 +710,19 @@ namespace openpeer
       class DNSAAAAQuery : public DNSQuery
       {
       protected:
-        DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name) :
+        DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name, WORD port) :
           DNSQuery(DNSMonitor::singleton(), delegate),
-          mName(name)
+          mName(name),
+          mPort(port)
         {
           mObjectName = "DNSAAAAQuery";
         }
 
       public:
         //---------------------------------------------------------------------
-        static DNSAAAAQueryPtr create(IDNSDelegatePtr delegate, const char *name)
+        static DNSAAAAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
         {
-          DNSAAAAQueryPtr pThis(new DNSAAAAQuery(delegate, name));
+          DNSAAAAQueryPtr pThis(new DNSAAAAQuery(delegate, name, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -717,6 +758,9 @@ namespace openpeer
             for (IDNS::AResult::IPAddressList::iterator iter = mAAAA->mIPAddresses.begin(); iter != mAAAA->mIPAddresses.end(); ++iter)
             {
               IPAddress &ipAddress = (*iter);
+              if (0 != mPort) {
+                ipAddress.setPort(mPort);
+              }
               ZS_LOG_DEBUG(log("AAAA record found") + ZS_PARAM("ip", ipAddress.string()))
             }
           } else {
@@ -737,6 +781,7 @@ namespace openpeer
         #pragma mark
 
         String mName;
+        WORD mPort;
       };
 
       //-----------------------------------------------------------------------
@@ -754,12 +799,14 @@ namespace openpeer
                     IDNSDelegatePtr delegate,
                     const char *name,
                     const char *service,
-                    const char *protocol
+                    const char *protocol,
+                    WORD port
                     ) :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mService(service),
-          mProtocol(protocol)
+          mProtocol(protocol),
+          mPort(port)
         {
           mObjectName = "DNSSRVQuery";
         }
@@ -770,10 +817,11 @@ namespace openpeer
                                      IDNSDelegatePtr delegate,
                                      const char *name,
                                      const char *service,
-                                     const char *protocol
+                                     const char *protocol,
+                                     WORD port
                                      )
         {
-          DNSSRVQueryPtr pThis(new DNSSRVQuery(delegate, name, service, protocol));
+          DNSSRVQueryPtr pThis(new DNSSRVQuery(delegate, name, service, protocol, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -808,7 +856,34 @@ namespace openpeer
             for (IDNS::SRVResult::SRVRecordList::iterator iter = mSRV->mRecords.begin(); iter != mSRV->mRecords.end(); ++iter)
             {
               SRVResult::SRVRecord &srvRecord = (*iter);
-              ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
+              WORD port = srvRecord.mPort;
+              if (0 == port) port = mPort;
+
+              bool output = false;
+
+              if (srvRecord.mAResult) {
+                for (auto iterIPs = srvRecord.mAResult->mIPAddresses.begin(); iterIPs != srvRecord.mAResult->mIPAddresses.end(); ++iterIPs) {
+                  IPAddress &ip = (*iterIPs);
+                  if (0 == ip.getPort()) {
+                    ip.setPort(port);
+                  }
+                  output = true;
+                  ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight) + ZS_PARAM("ip", ip.string()))
+                }
+              }
+              if (srvRecord.mAAAAResult) {
+                for (auto iterIPs = srvRecord.mAAAAResult->mIPAddresses.begin(); iterIPs != srvRecord.mAAAAResult->mIPAddresses.end(); ++iterIPs) {
+                  IPAddress &ip = (*iterIPs);
+                  if (0 == ip.getPort()) {
+                    ip.setPort(port);
+                  }
+                  output = true;
+                  ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight) + ZS_PARAM("ip", ip.string()))
+                }
+              }
+              if (!output) {
+                ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
+              }
             }
           } else {
             ZS_LOG_DEBUG(log("SRV record lookup failed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
@@ -830,6 +905,7 @@ namespace openpeer
         String mName;
         String mService;
         String mProtocol;
+        WORD mPort;
       };
 
 
@@ -1832,6 +1908,367 @@ namespace openpeer
         DNSQueryList mQueries;
       };
 
+#ifdef WINRT
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark DNSWinRT
+      #pragma mark
+
+      using Windows::Foundation::Collections::IVectorView;
+      using namespace concurrency;
+      using Windows::Networking::HostNameType;
+
+      class DNSWinRT : public SharedRecursiveLock,
+        public IDNSQuery
+      {
+      public:
+        typedef Windows::Networking::Sockets::DatagramSocket DatagramSocket;
+        typedef Windows::Networking::HostName HostName;
+        typedef Windows::Networking::EndpointPair EndpointPair;
+
+      protected:
+        //--------------------------------------------------------------------
+        DNSWinRT(
+                 IDNSDelegatePtr delegate,
+                 const char *name,
+                 WORD port,
+                 bool includeIPv4,
+                 bool includeIPv6,
+                 const char *serviceName,
+                 WORD defaultPort,
+                 WORD defaultPriority,
+                 WORD defaultWeight
+                 ) :
+          SharedRecursiveLock(SharedRecursiveLock::create()),
+          mDelegate(IDNSDelegateProxy::createWeak(IHelper::getServiceQueue(), delegate)),
+          mName(name),
+          mPort(0 == port ? defaultPort : port),
+          mIncludeIPv4(includeIPv4),
+          mIncludeIPv6(includeIPv6),
+          mServiceName(serviceName),
+          mDefaultPriority(defaultPriority),
+          mDefaultWeight(defaultWeight)
+        {
+          ZS_LOG_TRACE(log("created"))
+        }
+
+        //--------------------------------------------------------------------
+        void init()
+        {
+          AutoRecursiveLock lock(*this);
+
+          PUID id = mID;
+          auto thisWeak = mThisWeak;
+
+          Platform::String ^hostname = ref new Platform::String(mName.wstring().c_str());
+          Platform::String ^serviceName = mServiceName.hasData() ? ref new Platform::String(mServiceName.wstring().c_str()) : ref new Platform::String(L"0");
+
+          create_task(DatagramSocket::GetEndpointPairsAsync(ref new HostName(hostname), serviceName), mCancellationTokenSource.get_token())
+            .then([id, thisWeak](task<IVectorView<EndpointPair^>^> previousTask)
+          {
+            auto pThis = thisWeak.lock();
+
+            try
+            {
+              ZS_LOG_TRACE(slog(id, "request completed"))
+
+                // Check if any previous task threw an exception.
+                IVectorView<EndpointPair ^> ^response = previousTask.get();
+
+              bool isSRV = pThis->mServiceName.hasData();
+
+              if (!pThis) {
+                ZS_LOG_WARNING(Detail, slog(id, "query was abandoned"))
+                return;
+              }
+
+              if (nullptr != response) {
+                AutoRecursiveLock lock(*pThis);
+
+                for (size_t index = 0; index != response->Size; ++index) {
+                  EndpointPair ^pair = response->GetAt(index);
+                  if (!pair) {
+                    ZS_LOG_WARNING(Detail, slog(id, "endpoint pair is null"))
+                    continue;
+                  }
+
+                  if (nullptr == pair->RemoteHostName) {
+                    ZS_LOG_WARNING(Detail, slog(id, "remote host name is null"))
+                    continue;
+                  }
+
+                  if (nullptr == pair->RemoteHostName->RawName) {
+                    ZS_LOG_WARNING(Detail, slog(id, "remote host raw name is null"))
+                    continue;
+                  }
+
+                  String host = String(pair->RemoteHostName->RawName->Data());
+                  String canonical;
+                  if (pair->RemoteHostName->CanonicalName) {
+                    canonical = String(pair->RemoteHostName->CanonicalName->Data());
+                  }
+
+                  HostNameType type = pair->RemoteHostName->Type;
+                  bool isIPv4 = (HostNameType::Ipv4 == type);
+                  bool isIPv6 = (HostNameType::Ipv6 == type);
+                  if ((isIPv4) &&
+                    (!pThis->mIncludeIPv4)) {
+                    ZS_LOG_TRACE(slog(id, "filtered out v4 address (since not desired)") + ZS_PARAMIZE(host))
+                    continue;
+                  }
+                  if ((isIPv6) &&
+                    (!pThis->mIncludeIPv6)) {
+                    ZS_LOG_TRACE(slog(id, "filtered out v6 address (since not desired)") + ZS_PARAMIZE(host))
+                    continue;
+                  }
+
+                  IPAddress ip(host);
+
+                  String service;
+                  if (pair->RemoteServiceName) {
+                    service = String(pair->RemoteServiceName->Data());
+                    try {
+                      WORD port = Numeric<WORD>(service);
+                      if (0 != port) {
+                        ip.setPort(port);
+                      }
+                    } catch (Numeric<WORD>::ValueOutOfRange &) {
+                      // ignorred
+                    }
+                  }
+
+                  if (0 == ip.getPort()) {
+                    ip.setPort(pThis->mPort);
+                  }
+
+                  ZS_LOG_TRACE(slog(id, "found result") + ZS_PARAM("host", host) + ZS_PARAM("canonical", canonical) + ZS_PARAM("service", service) + ZS_PARAM("ip", ip.string()))
+
+                  if (isSRV) {
+                    SRVResultPtr srv = pThis->mSRV;
+                    if (!pThis->mSRV) {
+                      pThis->mSRV = SRVResultPtr(new SRVResult);
+                      srv = pThis->mSRV;
+
+                      srv->mName = pThis->mName;
+                      srv->mProtocol = "udp"; // WinRT only support UDP at this time!
+                      srv->mService = pThis->mServiceName;
+                      srv->mTTL = 3600;       // no default TTL
+                    }
+
+                    SRVResult::SRVRecord *useRecord = NULL;
+                    for (auto iter = srv->mRecords.begin(); iter != srv->mRecords.end(); ++iter) {
+                      SRVResult::SRVRecord &record = (*iter);
+                      if (record.mName == canonical) {
+                        // add to existing record
+                        useRecord = &record;
+                        break;
+                      }
+                    }
+
+                    SRVResult::SRVRecord newRecord;
+
+                    if (!useRecord) {
+                      useRecord = &newRecord;
+                    }
+
+                    if (isIPv4) {
+                      if (!useRecord->mAResult) {
+                        useRecord->mAResult = AResultPtr(new AResult);
+                        useRecord->mAResult->mName = canonical;
+                        useRecord->mAResult->mTTL = 3600;
+                      }
+                      useRecord->mAResult->mIPAddresses.push_back(ip);
+                    }
+
+                    if (isIPv6) {
+                      if (!useRecord->mAAAAResult) {
+                        useRecord->mAAAAResult = AAAAResultPtr(new AAAAResult);
+                        useRecord->mAAAAResult->mName = canonical;
+                        useRecord->mAAAAResult->mTTL = 3600;
+                      }
+                      useRecord->mAAAAResult->mIPAddresses.push_back(ip);
+                    }
+                    if (isIPv4) {
+                      useRecord->mAResult = AResultPtr(new AResult);
+                      useRecord->mAResult->mName = host;
+                      useRecord->mPort = ip.getPort();
+                    }
+                    if (useRecord == (&newRecord)) {
+                      srv->mRecords.push_back(newRecord);
+                    }
+                  } else {
+                    if (isIPv4) {
+                      if (!pThis->mA) {
+                        pThis->mA = AResultPtr(new AResult);
+                        pThis->mA->mName = canonical;
+                        pThis->mA->mTTL = 3600;
+                      }
+                      pThis->mA->mIPAddresses.push_back(ip);
+                    }
+                    if (isIPv6) {
+                      if (!pThis->mAAAA) {
+                        pThis->mAAAA = AAAAResultPtr(new AAAAResult);
+                        pThis->mAAAA->mName = canonical;
+                        pThis->mAAAA->mTTL = 3600;
+                      }
+                      pThis->mAAAA->mIPAddresses.push_back(ip);
+                    }
+                  }
+                }
+              }
+
+              if (pThis) {
+                pThis->cancel();
+              }
+
+            } catch (const task_canceled&) {
+              ZS_LOG_WARNING(Detail, slog(id, "task cancelled"))
+              if (pThis) {
+                pThis->cancel();
+              }
+            } catch (Platform::Exception ^ex) {
+              if (pThis) {
+                ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())))
+                pThis->cancel();
+              }
+            }
+          });
+        }
+
+      public:
+        //--------------------------------------------------------------------
+        ~DNSWinRT()
+        {
+          mThisWeak.reset();
+          ZS_LOG_TRACE(log("destroyed"))
+            cancel();
+        }
+
+        //--------------------------------------------------------------------
+        static DNSWinRTPtr create(
+          IDNSDelegatePtr delegate,
+          const char *name,
+          WORD port,
+          bool includeIPv4,
+          bool includeIPv6,
+          const char *serviceName,
+          WORD defaultPort,
+          WORD defaultPriority,
+          WORD defaultWeight
+          )
+        {
+          DNSWinRTPtr pThis(new DNSWinRT(delegate, name, port, includeIPv4, includeIPv6, serviceName, defaultPort, defaultPriority, defaultWeight));
+          pThis->mThisWeak = pThis;
+          pThis->init();
+          return pThis;
+        }
+
+        //--------------------------------------------------------------------
+        virtual PUID getID() const { return mID; }
+
+        //--------------------------------------------------------------------
+        virtual void cancel()
+        {
+          IDNSDelegatePtr delegate;
+
+          {
+            AutoRecursiveLock lock(*this);
+
+            delegate = mDelegate;
+            mDelegate.reset();
+          }
+
+          if (delegate) {
+            ZS_LOG_TRACE(log("query completed"))
+
+            auto pThis = mThisWeak.lock();
+            if (pThis) {
+              try {
+                delegate->onLookupCompleted(pThis);
+              } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+                ZS_LOG_WARNING(Detail, log("delegate gone"))
+              }
+            }
+          }
+        }
+
+        //--------------------------------------------------------------------
+        virtual bool hasResult() const
+        {
+          AutoRecursiveLock lock(*this);
+          if (!isComplete()) return false;
+          return ((bool)mA) || ((bool)mAAAA) || ((bool)mSRV);
+        }
+
+        //--------------------------------------------------------------------
+        virtual bool isComplete() const
+        {
+          AutoRecursiveLock lock(*this);
+          return (bool)mDelegate;
+        }
+
+        //--------------------------------------------------------------------
+        virtual AResultPtr getA() const
+        {
+          AutoRecursiveLock lock(*this);
+          return mA;
+        }
+
+        //--------------------------------------------------------------------
+        virtual AAAAResultPtr getAAAA() const
+        {
+          AutoRecursiveLock lock(*this);
+          return mAAAA;
+        }
+
+        //--------------------------------------------------------------------
+        virtual SRVResultPtr getSRV() const
+        {
+          AutoRecursiveLock lock(*this);
+          return mSRV;
+        }
+
+      protected:
+        //--------------------------------------------------------------------
+        Log::Params log(const char *message) const
+        {
+          ElementPtr objectEl = Element::create("services::DNSWinRT");
+          IHelper::debugAppend(objectEl, "id", mID);
+          return Log::Params(message, objectEl);
+        }
+
+        //--------------------------------------------------------------------
+        static Log::Params slog(PUID id, const char *message)
+        {
+          ElementPtr objectEl = Element::create("services::DNSWinRT");
+          IHelper::debugAppend(objectEl, "id", id);
+          return Log::Params(message, objectEl);
+        }
+
+      protected:
+        AutoPUID mID;
+        DNSWinRTWeakPtr mThisWeak;
+
+        IDNSDelegatePtr mDelegate;
+
+        String mName;
+        WORD mPort;
+        bool mIncludeIPv4;
+        bool mIncludeIPv6;
+        String mServiceName;
+        WORD mDefaultPriority;
+        WORD mDefaultWeight;
+
+        AResultPtr mA;
+        AAAAResultPtr mAAAA;
+        SRVResultPtr mSRV;
+
+        concurrency::cancellation_token_source mCancellationTokenSource;
+      };
+#endif //WINRT
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -1887,7 +2324,14 @@ namespace openpeer
           return internal::DNSListQuery::createA(delegate, dnsList);
         }
 
-        return internal::DNSAQuery::create(delegate, name);
+        WORD port = 0;
+        String strName = extractPort(name, port);
+
+#ifdef WINRT
+        return internal::DNSWinRT::create(delegate, strName, port, true, false, NULL, 0, 0, 0);
+#else
+        return internal::DNSAQuery::create(delegate, strName, port);
+#endif //WINRT
       }
 
       //-----------------------------------------------------------------------
@@ -1927,7 +2371,14 @@ namespace openpeer
           return internal::DNSListQuery::createAAAA(delegate, dnsList);
         }
 
-        return internal::DNSAAAAQuery::create(delegate, name);
+        WORD port = 0;
+        String strName = extractPort(name, port);
+
+#ifdef WINRT
+        return internal::DNSWinRT::create(delegate, strName, port, false, true, NULL, 0, 0, 0);
+#else
+        return internal::DNSAAAAQuery::create(delegate, strName, port);
+#endif //WINRT
       }
 
       //-----------------------------------------------------------------------
@@ -1976,7 +2427,14 @@ namespace openpeer
           return internal::DNSListQuery::createAorAAAA(delegate, dnsList);
         }
 
+#ifdef WINRT
+        WORD port = 0;
+        String strName = extractPort(name, port);
+
+        return internal::DNSWinRT::create(delegate, strName, port, true, true, NULL, 0, 0, 0);
+#else
         return internal::DNSAorAAAAQuery::create(delegate, name);
+#endif //WINRT
       }
 
       //-----------------------------------------------------------------------
@@ -2049,11 +2507,26 @@ namespace openpeer
         if (internal::isDNSsList(name, dnsList)) {
           return internal::DNSListQuery::createSRV(delegate, dnsList, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
         }
-        
-        if (SRVLookupType_LookupOnly != lookupType) {
-          return internal::DNSSRVResolverQuery::create(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+
+        WORD port = 0;
+        String strName = extractPort(name, port);
+        if (0 != port) {
+          defaultPort = port;
         }
-        return internal::DNSSRVQuery::create(delegate, name, service, protocol);
+
+#ifdef WINRT
+        String protocolStr(protocol);
+        if (protocolStr == "udp") {
+          return internal::DNSWinRT::create(delegate, strName, port, true, true, "udp", defaultPort, defaultPriority, defaultWeight);
+        }
+        ZS_LOG_WARNING(Trace, log("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
+#endif //WINRT
+
+        if (SRVLookupType_LookupOnly != lookupType) {
+          return internal::DNSSRVResolverQuery::create(delegate, strName, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+        }
+
+        return internal::DNSSRVQuery::create(delegate, name, service, protocol, defaultPort);
       }
       
       //-----------------------------------------------------------------------
