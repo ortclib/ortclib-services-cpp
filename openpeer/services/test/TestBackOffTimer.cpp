@@ -159,7 +159,7 @@ static void testRetry3()
 
 static void testRetry4()
 {
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:60//15/", 15);
+  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:60//15/", 16);
   TESTING_CHECK(backoff)
 
   TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
@@ -248,7 +248,7 @@ static void testRetry5(MessageQueueThreadPtr queue)
   Seconds maxWaitTime = Seconds(200);
 
   while (true) {
-    std::this_thread::sleep_for(zsLib::Seconds(1));
+    TESTING_SLEEP(1000)
     if (delegate->mFiredFailed) break;
     Time now = zsLib::now();
     TESTING_CHECK(start + maxWaitTime > now)

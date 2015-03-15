@@ -267,7 +267,7 @@ void doTestDNS()
 
   TESTING_INSTALL_LOGGER();
 
-  std::this_thread::sleep_for(zsLib::Seconds(1));
+  TESTING_SLEEP(1000)
 
   TestDNSFactoryPtr overrideFactory(new TestDNSFactory);
 
@@ -319,7 +319,7 @@ void doTestDNS()
       }
       if (totalProcessed < expectingTotal) {
         ++totalWait;
-        std::this_thread::sleep_for(zsLib::Seconds(1));
+        TESTING_SLEEP(1000)
       }
       else
         break;
@@ -329,7 +329,7 @@ void doTestDNS()
   }
 
   TESTING_STDOUT() << "WAITING:      All DNS queries have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  std::this_thread::sleep_for(zsLib::Seconds(10));
+  TESTING_SLEEP(10000)
 
   TESTING_EQUAL(matchingTotal, testObject->getTotalProcessed());
 

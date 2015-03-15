@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "App.h"
 
+#include <openpeer\services\test\testing.h>
+
 #include <ppltasks.h>
 
 using namespace hfservicesTest;
@@ -90,6 +92,16 @@ void App::Load(Platform::String^ entryPoint)
 // This method is called after the window becomes active.
 void App::Run()
 {
+
+  TESTING_STDOUT() << "TEST NOW STARTING...\n\n";
+
+  Testing::runAllTests();
+  Testing::output();
+
+  if (0 != Testing::getGlobalFailedVar()) {
+    TESTING_STDOUT() << "FAILED!\n\n";
+  }
+
   while (!m_windowClosed)
   {
     CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);

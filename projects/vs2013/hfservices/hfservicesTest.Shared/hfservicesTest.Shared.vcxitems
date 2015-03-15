@@ -14,6 +14,24 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\main.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestBackOffTimer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestCanonicalXML.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestDH.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestDNS.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestHelper.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestICESocket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\testing.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestRUDPICESocket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestRUDPICESocketLoopback.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestRUDPListener.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestSTUNDiscovery.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestTCPMessagingLoopback.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestTURNSocket.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\config.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)app.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)app.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />

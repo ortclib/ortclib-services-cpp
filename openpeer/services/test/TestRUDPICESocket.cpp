@@ -345,7 +345,7 @@ void doTestRUDPICESocket()
     ULONG totalWait = 0;
     do
     {
-      std::this_thread::sleep_for(zsLib::Seconds(1));
+      TESTING_SLEEP(1000)
       ++totalWait;
       if (totalWait >= (10*60))
         break;
@@ -368,7 +368,7 @@ void doTestRUDPICESocket()
 
   ZS_LOG_BASIC("WAITING:      All RUDP sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
 
-  std::this_thread::sleep_for(zsLib::Seconds(10));
+  TESTING_SLEEP(10000)
 
   // wait for shutdown
   {

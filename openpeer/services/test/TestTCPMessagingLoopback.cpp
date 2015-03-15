@@ -407,7 +407,7 @@ void doTestTCPMessagingLoopback()
   TestTCPMessagingLoopbackPtr testObject3;
   TestTCPMessagingLoopbackPtr testObject4;
 
-  std::this_thread::sleep_for(zsLib::Seconds(1));
+  TESTING_SLEEP(1000)
 
   ZS_LOG_BASIC("WAITING:      Waiting for TCP messaging testing to complete (max wait is 180 seconds).");
 
@@ -453,7 +453,7 @@ void doTestTCPMessagingLoopback()
 
       while (found < expecting)
       {
-        std::this_thread::sleep_for(zsLib::Seconds(1));
+        TESTING_SLEEP(1000)
         ++totalWait;
         if (totalWait >= 70)
           break;
@@ -535,7 +535,8 @@ void doTestTCPMessagingLoopback()
   }
 
   ZS_LOG_BASIC("WAITING:      All TCP messaging have finished. Waiting for 'bogus' events to process (10 second wait).");
-  std::this_thread::sleep_for(zsLib::Seconds(10));
+
+  TESTING_SLEEP(10000)
 
   // wait for shutdown
   {

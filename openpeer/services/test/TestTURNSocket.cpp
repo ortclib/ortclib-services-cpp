@@ -534,7 +534,7 @@ void doTestTURNSocket()
 
   TESTING_INSTALL_LOGGER();
 
-  std::this_thread::sleep_for(Seconds(1));
+  TESTING_SLEEP(1000)
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
@@ -561,7 +561,7 @@ void doTestTURNSocket()
 
     do
     {
-      std::this_thread::sleep_for(Seconds(1));
+      TESTING_SLEEP(1000)
       ++totalWait;
       if (totalWait >= 180)
         break;
@@ -595,7 +595,8 @@ void doTestTURNSocket()
   }
 
   TESTING_STDOUT() << "WAITING:      All TURN sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  std::this_thread::sleep_for(Seconds(10));
+
+  TESTING_SLEEP(10000)
 
   if (testObject1) {std::cout << "object1: [" << testObject1->getID() << "]\n";}
   if (testObject2) {std::cout << "object2: [" << testObject2->getID() << "]\n";}

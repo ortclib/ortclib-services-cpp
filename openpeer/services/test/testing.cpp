@@ -42,6 +42,14 @@
 namespace openpeer { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_test) } } }
 
 
+#ifdef _WIN32
+debugostream &getDebugCout()
+{
+  static debugostream gdebug;
+  return gdebug;
+}
+#endif //_WIN32
+
 
 typedef openpeer::services::ILogger ILogger;
 
@@ -106,7 +114,7 @@ namespace Testing
         if (ILogger::isTelnetLoggerListening()) {
           break;
         }
-        std::this_thread::sleep_for(zsLib::Seconds(1));
+        TESTING_SLEEP(1000)
       }
     }
 
