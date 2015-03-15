@@ -38,8 +38,8 @@
 #include <zsLib/types.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
-
 #include <zsLib/MessageQueueThread.h>
+#include <zsLib/Singleton.h>
 
 // special case where CryptoPP extension class is needed
 #include <openpeer/services/internal/services_AllocatorWithNul.h>
