@@ -2038,6 +2038,7 @@ namespace openpeer
             auto query = (*iter).second;
             data.push_back(query.mData);
           }
+          goto sort_now;
         }
 
 #ifdef _WIN32
