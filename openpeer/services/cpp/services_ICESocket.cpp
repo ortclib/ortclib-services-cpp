@@ -1877,6 +1877,7 @@ namespace openpeer
         public:
           //-------------------------------------------------------------------
           struct Data {
+            String mHostName;
             IPAddress mIP;
             OrderID mOrderIndex;
             ULONG mAdapterMetric;
@@ -1884,6 +1885,8 @@ namespace openpeer
 
             Data() : mOrderIndex(0), mAdapterMetric(0), mIndex(0) {}
           };
+          
+          typedef std::list<Data> DataList;
 
           //-------------------------------------------------------------------
           static bool compareLocalIPs(const Data &data1, const Data &data2)
@@ -1918,6 +1921,29 @@ namespace openpeer
 
           //-------------------------------------------------------------------
           static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip
+                              )
+          {
+            Data data;
+            data.mHostName = String(hostName);
+            data.mIP = ip;
+            return data;
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip,
+                              const char *name,
+                              const InterfaceNameToOrderMap &prefs
+                              )
+          {
+            return prepare(hostName, ip, name, 0, prefs);
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(
                               const IPAddress &ip,
                               const char *name,
                               const InterfaceNameToOrderMap &prefs
@@ -1934,8 +1960,21 @@ namespace openpeer
                               const InterfaceNameToOrderMap &prefs
                               )
           {
+            return prepare(NULL, ip, name, metric, prefs);
+          }
+
+          //-------------------------------------------------------------------
+          static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip,
+                              const char *name,
+                              ULONG metric,
+                              const InterfaceNameToOrderMap &prefs
+                              )
+          {
             Data data;
 
+            data.mHostName = String(hostName);
             data.mIP = ip;
             data.mAdapterMetric = metric;
 
@@ -1992,9 +2031,22 @@ namespace openpeer
 
             return data;
           }
+
+          //------------------------------------------------------------------
+          static void sort(
+                           DataList &ioDataList,
+                           IPAddressList &outIPs
+                           )
+          {
+            ioDataList.sort(Sorter::compareLocalIPs);
+            for (DataList::iterator iter = ioDataList.begin(); iter != ioDataList.end(); ++iter) {
+              Sorter::Data &value = (*iter);
+              outIPs.push_back(value.mIP);
+            }
+          }
         };
 
-        typedef std::list<Sorter::Data> DataList;
+        typedef Sorter::DataList DataList;
 
         DataList data;
 
@@ -2004,6 +2056,8 @@ namespace openpeer
 
 #ifdef WINRT
         // http://stackoverflow.com/questions/10336521/query-local-ip-address
+
+        bool resolveLater = false;
 
         // search for IP addresses
         {
@@ -2039,14 +2093,26 @@ namespace openpeer
               auto hostname = iter->Current;
               if (nullptr == hostname) continue;
 
-              auto canonicalName = hostname->CanonicalName;
-              if (nullptr == canonicalName) continue;
+              String canonicalName;
+              if (hostname->CanonicalName) {
+                canonicalName = String(hostname->CanonicalName->Data());
+              }
 
-              String converted(canonicalName->Data());
+              String displayName;
+              if (hostname->DisplayName) {
+                displayName = String(hostname->DisplayName->Data());
+              }
 
-              auto found = previousFound.find(converted);
+              String rawName;
+              if (hostname->RawName) {
+                rawName = String(hostname->RawName->Data());
+              }
+
+              String useName = rawName;
+
+              auto found = previousFound.find(useName);
               if (found != previousFound.end()) {
-                ZS_LOG_INSANE(log("already found IP") + ZS_PARAMIZE(converted))
+                ZS_LOG_INSANE(log("already found IP") + ZS_PARAMIZE(useName))
                 continue;
               }
 
@@ -2072,15 +2138,26 @@ namespace openpeer
                 }
               }
 
-              previousFound[converted] = true;
+              previousFound[useName] = true;
 
-              IPAddress ip(converted);
+              IPAddress ip;
+              bool resolved = true;
 
-              if (ip.isAddressEmpty()) continue;
-              if (ip.isLoopback()) continue;
-              if (ip.isAddrAny()) continue;
+              try {
+                IPAddress temp(useName);
+                temp.setPort(mBindPort);
+                ip = temp;
+              } catch(IPAddress::Exceptions::ParseError &) {
+                ZS_LOG_TRACE(log("name failed to resolve as IP") + ZS_PARAM("name", useName))                
+                resolved = false;
+                resolveLater = true;
+              }
 
-              ip.setPort(mBindPort);
+              if (resolved) {
+                if (ip.isAddressEmpty()) continue;
+                if (ip.isLoopback()) continue;
+                if (ip.isAddrAny()) continue;
+              }
 
               String profileName;
 
@@ -2089,13 +2166,19 @@ namespace openpeer
                   profileName = String(hostProfile->ProfileName->Data());
                 }
               }
+
               if (profileName.hasData()) {
-                data.push_back(Sorter::prepare(ip, profileName, mInterfaceOrders));
+                data.push_back(Sorter::prepare(useName, ip, profileName, mInterfaceOrders));
               } else {
                 data.push_back(Sorter::prepare(ip));
               }
             }
           }
+        }
+
+        if (resolveLater) {
+          ZS_LOG_DEBUG(log("cannot obtain IP address information at this time (will need to resolve later)"))
+          return false;
         }
 
 #else //WINRT
@@ -2291,16 +2374,10 @@ namespace openpeer
 
         ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
 
-        data.sort(Sorter::compareLocalIPs);
-
-        for (DataList::iterator iter = data.begin(); iter != data.end(); ++iter)
-        {
-          Sorter::Data &value = (*iter);
-          outIPs.push_back(value.mIP);
-        }
+        Sorter::sort(data, outIPs);
 
         if (outIPs.empty()) {
-          ZS_LOG_DEBUG(log("failed to read any local IPs"))
+          ZS_LOG_DEBUG(log("failed to read any local IPs (at this time)"))
           return false;
         }
 

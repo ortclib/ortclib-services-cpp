@@ -578,7 +578,7 @@ namespace openpeer
               pThis->notifyComplete(HttpStatusCode::InternalServerError);
             }
           }
-        });
+        }, task_continuation_context::use_arbitrary());
       }
 
       //-----------------------------------------------------------------------
@@ -684,7 +684,7 @@ namespace openpeer
                 ZS_LOG_WARNING(Detail, pThis->log("exception caught") + ZS_PARAM("error", String(ex->Message->Data())))
                 pThis->notifyComplete(HttpStatusCode::InternalServerError);
               }
-          });
+          }, task_continuation_context::use_arbitrary());
         } else {
           AutoRecursiveLock lock(*this);
           serializeHeaderCollection(mHeader, response->Headers);

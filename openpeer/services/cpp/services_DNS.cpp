@@ -263,7 +263,7 @@ namespace openpeer
                              )
       {
         StringList tokenizedList;
-        tokenize(String(name ? name : ""), tokenizedList, ",");
+        tokenize(String(name), tokenizedList, ",");
 
         if (tokenizedList.size() > 1) {
           outList = tokenizedList;
@@ -1938,6 +1938,7 @@ namespace openpeer
                  bool includeIPv4,
                  bool includeIPv6,
                  const char *serviceName,
+                 const char *protocol,
                  WORD defaultPort,
                  WORD defaultPriority,
                  WORD defaultWeight
@@ -1949,6 +1950,7 @@ namespace openpeer
           mIncludeIPv4(includeIPv4),
           mIncludeIPv6(includeIPv6),
           mServiceName(serviceName),
+          mProtocol(protocol),
           mDefaultPriority(defaultPriority),
           mDefaultWeight(defaultWeight)
         {
@@ -1963,27 +1965,29 @@ namespace openpeer
           PUID id = mID;
           auto thisWeak = mThisWeak;
 
-          Platform::String ^hostname = ref new Platform::String(mName.wstring().c_str());
-          Platform::String ^serviceName = mServiceName.hasData() ? ref new Platform::String(mServiceName.wstring().c_str()) : ref new Platform::String(L"0");
+          Platform::String ^hostnameStr = ref new Platform::String(mName.wstring().c_str());
+          Platform::String ^serviceNameStr = mServiceName.hasData() ? ref new Platform::String(mServiceName.wstring().c_str()) : ref new Platform::String(L"0");
 
-          create_task(DatagramSocket::GetEndpointPairsAsync(ref new HostName(hostname), serviceName), mCancellationTokenSource.get_token())
+          HostName ^hostname = ref new HostName(hostnameStr);
+          HostNameType debugtype = hostname->Type;
+
+          create_task(DatagramSocket::GetEndpointPairsAsync(hostname, serviceNameStr), mCancellationTokenSource.get_token())
             .then([id, thisWeak](task<IVectorView<EndpointPair^>^> previousTask)
           {
             auto pThis = thisWeak.lock();
+            if (!pThis) {
+              ZS_LOG_WARNING(Detail, slog(id, "query was abandoned"))
+              return;
+            }
 
             try
             {
-              ZS_LOG_TRACE(slog(id, "request completed"))
+              ZS_LOG_TRACE(slog(id, "request completed") + pThis->toDebug())
 
-                // Check if any previous task threw an exception.
-                IVectorView<EndpointPair ^> ^response = previousTask.get();
+              // Check if any previous task threw an exception.
+              IVectorView<EndpointPair ^> ^response = previousTask.get();
 
               bool isSRV = pThis->mServiceName.hasData();
-
-              if (!pThis) {
-                ZS_LOG_WARNING(Detail, slog(id, "query was abandoned"))
-                return;
-              }
 
               if (nullptr != response) {
                 AutoRecursiveLock lock(*pThis);
@@ -2010,6 +2014,14 @@ namespace openpeer
                   if (pair->RemoteHostName->CanonicalName) {
                     canonical = String(pair->RemoteHostName->CanonicalName->Data());
                   }
+                  String displayName;
+                  if (pair->RemoteHostName->DisplayName) {
+                    displayName = String(pair->RemoteHostName->DisplayName->Data());
+                  }
+                  String service;
+                  if (pair->RemoteServiceName) {
+                    service = String(pair->RemoteServiceName->Data());
+                  }
 
                   HostNameType type = pair->RemoteHostName->Type;
                   bool isIPv4 = (HostNameType::Ipv4 == type);
@@ -2027,9 +2039,7 @@ namespace openpeer
 
                   IPAddress ip(host);
 
-                  String service;
-                  if (pair->RemoteServiceName) {
-                    service = String(pair->RemoteServiceName->Data());
+                  if (service.hasData()) {
                     try {
                       WORD port = Numeric<WORD>(service);
                       if (0 != port) {
@@ -2044,7 +2054,7 @@ namespace openpeer
                     ip.setPort(pThis->mPort);
                   }
 
-                  ZS_LOG_TRACE(slog(id, "found result") + ZS_PARAM("host", host) + ZS_PARAM("canonical", canonical) + ZS_PARAM("service", service) + ZS_PARAM("ip", ip.string()))
+                  ZS_LOG_TRACE(slog(id, "found result") + ZS_PARAM("host", host) + ZS_PARAM("canonical", canonical) + ZS_PARAM("display name", displayName) + ZS_PARAM("service", service) + ZS_PARAM("ip", ip.string()))
 
                   if (isSRV) {
                     SRVResultPtr srv = pThis->mSRV;
@@ -2053,7 +2063,7 @@ namespace openpeer
                       srv = pThis->mSRV;
 
                       srv->mName = pThis->mName;
-                      srv->mProtocol = "udp"; // WinRT only support UDP at this time!
+                      srv->mProtocol = pThis->mProtocol; // WinRT only support UDP at this time!
                       srv->mService = pThis->mServiceName;
                       srv->mTTL = 3600;       // no default TTL
                     }
@@ -2061,17 +2071,21 @@ namespace openpeer
                     SRVResult::SRVRecord *useRecord = NULL;
                     for (auto iter = srv->mRecords.begin(); iter != srv->mRecords.end(); ++iter) {
                       SRVResult::SRVRecord &record = (*iter);
-                      if (record.mName == canonical) {
-                        // add to existing record
-                        useRecord = &record;
-                        break;
-                      }
+                      // add to existing record
+                      useRecord = &record;
+                      break;
                     }
 
                     SRVResult::SRVRecord newRecord;
 
                     if (!useRecord) {
                       useRecord = &newRecord;
+                      useRecord->mName = pThis->mName;
+                      useRecord->mPort = ip.getPort();
+                    }
+
+                    if (0 == ip.getPort()) {
+                      ip.setPort(useRecord->mPort);
                     }
 
                     if (isIPv4) {
@@ -2090,11 +2104,6 @@ namespace openpeer
                         useRecord->mAAAAResult->mTTL = 3600;
                       }
                       useRecord->mAAAAResult->mIPAddresses.push_back(ip);
-                    }
-                    if (isIPv4) {
-                      useRecord->mAResult = AResultPtr(new AResult);
-                      useRecord->mAResult->mName = host;
-                      useRecord->mPort = ip.getPort();
                     }
                     if (useRecord == (&newRecord)) {
                       srv->mRecords.push_back(newRecord);
@@ -2131,11 +2140,11 @@ namespace openpeer
               }
             } catch (Platform::Exception ^ex) {
               if (pThis) {
-                ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())))
+                ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())) + pThis->toDebug())
                 pThis->cancel();
               }
             }
-          });
+          }, task_continuation_context::use_arbitrary());
         }
 
       public:
@@ -2144,7 +2153,7 @@ namespace openpeer
         {
           mThisWeak.reset();
           ZS_LOG_TRACE(log("destroyed"))
-            cancel();
+          cancel();
         }
 
         //--------------------------------------------------------------------
@@ -2155,12 +2164,13 @@ namespace openpeer
           bool includeIPv4,
           bool includeIPv6,
           const char *serviceName,
+          const char *protocol,
           WORD defaultPort,
           WORD defaultPriority,
           WORD defaultWeight
           )
         {
-          DNSWinRTPtr pThis(new DNSWinRT(delegate, name, port, includeIPv4, includeIPv6, serviceName, defaultPort, defaultPriority, defaultWeight));
+          DNSWinRTPtr pThis(new DNSWinRT(delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -2176,6 +2186,8 @@ namespace openpeer
 
           {
             AutoRecursiveLock lock(*this);
+
+            mCancellationTokenSource.cancel();
 
             delegate = mDelegate;
             mDelegate.reset();
@@ -2207,7 +2219,7 @@ namespace openpeer
         virtual bool isComplete() const
         {
           AutoRecursiveLock lock(*this);
-          return (bool)mDelegate;
+          return !((bool)mDelegate);
         }
 
         //--------------------------------------------------------------------
@@ -2248,6 +2260,31 @@ namespace openpeer
           return Log::Params(message, objectEl);
         }
 
+        //--------------------------------------------------------------------
+        ElementPtr toDebug() const
+        {
+          AutoRecursiveLock lock(*this);
+
+          ElementPtr resultEl = Element::create("services::DNSWinRT");
+
+          IHelper::debugAppend(resultEl, "id", mID);
+
+          IHelper::debugAppend(resultEl, "name", mName);
+          IHelper::debugAppend(resultEl, "port", mPort);
+          IHelper::debugAppend(resultEl, "ipv4", mIncludeIPv4);
+          IHelper::debugAppend(resultEl, "ipv6", mIncludeIPv6);
+          IHelper::debugAppend(resultEl, "service name", mServiceName);
+          IHelper::debugAppend(resultEl, "protocol", mProtocol);
+          IHelper::debugAppend(resultEl, "priority", mDefaultPriority);
+          IHelper::debugAppend(resultEl, "weight", mDefaultWeight);
+
+          IHelper::debugAppend(resultEl, "a", (bool)mA);
+          IHelper::debugAppend(resultEl, "aaaa", (bool)mAAAA);
+          IHelper::debugAppend(resultEl, "srv", (bool)mSRV);
+
+          return resultEl;
+        }
+
       protected:
         AutoPUID mID;
         DNSWinRTWeakPtr mThisWeak;
@@ -2259,6 +2296,7 @@ namespace openpeer
         bool mIncludeIPv4;
         bool mIncludeIPv6;
         String mServiceName;
+        String mProtocol;
         WORD mDefaultPriority;
         WORD mDefaultWeight;
 
@@ -2328,7 +2366,7 @@ namespace openpeer
         String strName = extractPort(name, port);
 
 #ifdef WINRT
-        return internal::DNSWinRT::create(delegate, strName, port, true, false, NULL, 0, 0, 0);
+        return internal::DNSWinRT::create(delegate, strName, port, true, false, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAQuery::create(delegate, strName, port);
 #endif //WINRT
@@ -2375,7 +2413,7 @@ namespace openpeer
         String strName = extractPort(name, port);
 
 #ifdef WINRT
-        return internal::DNSWinRT::create(delegate, strName, port, false, true, NULL, 0, 0, 0);
+        return internal::DNSWinRT::create(delegate, strName, port, false, true, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAAAAQuery::create(delegate, strName, port);
 #endif //WINRT
@@ -2431,7 +2469,7 @@ namespace openpeer
         WORD port = 0;
         String strName = extractPort(name, port);
 
-        return internal::DNSWinRT::create(delegate, strName, port, true, true, NULL, 0, 0, 0);
+        return internal::DNSWinRT::create(delegate, strName, port, true, true, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAorAAAAQuery::create(delegate, name);
 #endif //WINRT
@@ -2517,7 +2555,7 @@ namespace openpeer
 #ifdef WINRT
         String protocolStr(protocol);
         if (protocolStr == "udp") {
-          return internal::DNSWinRT::create(delegate, strName, port, true, true, "udp", defaultPort, defaultPriority, defaultWeight);
+          return internal::DNSWinRT::create(delegate, strName, port, true, true, service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
         ZS_LOG_WARNING(Trace, log("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
 #endif //WINRT

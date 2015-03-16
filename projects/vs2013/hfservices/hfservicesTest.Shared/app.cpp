@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "App.h"
 
+#include <zsLib\Singleton.h>
 #include <openpeer\services\test\testing.h>
 
 #include <ppltasks.h>
@@ -21,6 +22,8 @@ using namespace Windows::Graphics::Display;
 [Platform::MTAThread]
 int main(Platform::Array<Platform::String^>^)
 {
+  zsLib::SingletonManager::Initializer init;
+
   auto direct3DApplicationSource = ref new TestApplicationSource();
 	CoreApplication::Run(direct3DApplicationSource);
 	return 0;

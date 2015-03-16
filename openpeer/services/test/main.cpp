@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include <zsLib/Log.h>
+#include <zsLib/Singleton.h>
 
 #ifdef _WIN32
 #include <tchar.h>
@@ -44,6 +45,8 @@ int _tmain(int argc, _TCHAR* argv[]) {
 int main (int argc, char * const argv[]) {
 #endif //_WIN32
   // insert code here...
+
+  zsLib::SingletonManager::Initializer init;
 
   std::cout << "TEST NOW STARTING...\n\n";
 
