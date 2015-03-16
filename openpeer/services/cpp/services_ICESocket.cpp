@@ -930,6 +930,22 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      void ICESocket::onWake()
+      {
+        ZS_LOG_TRACE(log("on wake"))
+        AutoRecursiveLock lock(*this);
+        step();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ICESocket => ITimerDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
       void ICESocket::onTimer(TimerPtr timer)
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer ID", timer->getID()))
@@ -965,6 +981,23 @@ namespace openpeer
         }
 
         ZS_LOG_WARNING(Detail, log("received timer notification on obsolete timer") + ZS_PARAM("timer ID", timer->getID()))
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ICESocket => ITimerDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void ICESocket::onLookupCompleted(IDNSQueryPtr query)
+      {
+        ZS_LOG_TRACE(log("on dns lookup complete"))
+
+        AutoRecursiveLock lock(*this);
+        step();
       }
 
       //-----------------------------------------------------------------------
@@ -1176,6 +1209,7 @@ namespace openpeer
 
         ZS_LOG_DEBUG(debug("step"))
 
+        if (!stepResolveLocalIPs()) goto post_candidate_check;
         if (!stepBind()) goto post_candidate_check;
         if (!stepSTUN()) goto post_candidate_check;
         if (!stepTURN()) goto post_candidate_check;
@@ -1196,6 +1230,117 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      bool ICESocket::stepResolveLocalIPs()
+      {
+        ZS_LOG_TRACE(log("resolve local IPs"))
+
+        if ((mResolveLocalIPs.size() < 1) &&
+            (mResolveLocalIPQueries.size() < 1)) {
+          ZS_LOG_TRACE(log("nothing to resolve at this time"))
+          return true;
+        }
+
+        for (auto iter = mResolveLocalIPs.begin(); iter != mResolveLocalIPs.end(); ++iter) {
+          auto data = (*iter);
+
+          Sorter::QueryData query;
+          query.mData = data;
+
+          if (data.mHostName.isEmpty()) {
+            ZS_LOG_TRACE(log("no host name to resolve (attempt to add pre-resolved)"))
+            goto add_if_valid;
+          }
+
+          query.mQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), data.mHostName);
+          if (!query.mQuery) {
+            ZS_LOG_TRACE(log("did not create DNS query (attempt to add pre-resolved)"))
+            goto add_if_valid;
+          }
+
+          {
+            ZS_LOG_TRACE(log("waiting for query to resolve") + ZS_PARAM("query", query.mQuery->getID()))
+            mResolveLocalIPQueries[query.mQuery->getID()] = query;
+            continue;
+          }
+
+        add_if_valid:
+          {
+            // immediately resolve if IP is appropriate
+            if (data.mIP.isEmpty()) continue;
+            if (data.mIP.isAddressEmpty()) continue;
+            if (data.mIP.isLoopback()) continue;
+            if (data.mIP.isAddrAny()) continue;
+
+            mResolveLocalIPQueries[zsLib::createPUID()] = query;
+          }
+        }
+
+        mResolveLocalIPs.clear();
+
+        Sorter::QueryMap resolvedQueries;
+
+        bool foundPending = false;
+        for (auto iter_doNotUse = mResolveLocalIPQueries.begin(); iter_doNotUse != mResolveLocalIPQueries.end();) {
+          auto current = iter_doNotUse;
+          ++iter_doNotUse;
+
+          Sorter::QueryID id = (*current).first;
+          Sorter::QueryData &query = (*current).second;
+
+          if (!query.mQuery) {
+            ZS_LOG_TRACE(log("query previously resolved") + ZS_PARAM("query id", id))
+            continue;
+          }
+          if (!query.mQuery->isComplete()) {
+            ZS_LOG_TRACE(log("still waiting for DNS to resolve") + ZS_PARAM("query id", id))
+            foundPending = true;
+            continue;
+          }
+
+          IDNS::AResultPtr aRecords = query.mQuery->getA();
+          IDNS::AAAAResultPtr aaaaRecords = query.mQuery->getAAAA();
+
+          IPAddressList ips;
+          if (aRecords) {
+            ips = aRecords->mIPAddresses;
+          }
+          if (aaaaRecords) {
+            ips.merge(aaaaRecords->mIPAddresses);
+          }
+
+          // query is not finished
+          query.mQuery.reset();
+          for (auto ipIter = ips.begin(); ipIter != ips.end(); ++ipIter) {
+            IPAddress &ip = (*ipIter);
+
+            if (ip.isEmpty()) continue;
+            if (ip.isAddressEmpty()) continue;
+            if (ip.isLoopback()) continue;
+            if (ip.isAddrAny()) continue;
+
+            ip.setPort(mBindPort);
+
+            ZS_LOG_TRACE(log("found resolved IP") + ZS_PARAM("ip", ip.string()))
+
+            Sorter::QueryData tempQuery;
+            tempQuery.mData = query.mData;
+            tempQuery.mData.mIP = ip;
+
+            resolvedQueries[zsLib::createPUID()] = tempQuery;
+          }
+
+          mResolveLocalIPQueries.erase(iter_doNotUse);
+        }
+
+        mResolveLocalIPQueries.insert(resolvedQueries.begin(), resolvedQueries.end());
+
+        mResolveFailed = (mResolveLocalIPQueries.size() < 1);
+
+        ZS_LOG_TRACE(log("query resolution") + ZS_PARAM("completed", !foundPending))
+        return !foundPending;
+      }
+
+      //-----------------------------------------------------------------------
       bool ICESocket::stepBind()
       {
         if (mSockets.size() > 0) {
@@ -1211,7 +1356,8 @@ namespace openpeer
 
         IPAddressList localIPs;
         if (!getLocalIPs(localIPs)) {
-          ZS_LOG_WARNING(Detail, log("failed to obtain any local IPs"))
+          ZS_LOG_TRACE(log("local IPs need to be resolved before continuing"))
+          return false;
         }
 
         bool hadNone = (mSockets.size() < 1);
@@ -1872,194 +2018,34 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool ICESocket::getLocalIPs(IPAddressList &outIPs)
       {
-        class Sorter
-        {
-        public:
-          //-------------------------------------------------------------------
-          struct Data {
-            String mHostName;
-            IPAddress mIP;
-            OrderID mOrderIndex;
-            ULONG mAdapterMetric;
-            ULONG mIndex;
-
-            Data() : mOrderIndex(0), mAdapterMetric(0), mIndex(0) {}
-          };
-          
-          typedef std::list<Data> DataList;
-
-          //-------------------------------------------------------------------
-          static bool compareLocalIPs(const Data &data1, const Data &data2)
-          {
-            if (data1.mOrderIndex < data2.mOrderIndex) return true;
-            if (data1.mOrderIndex > data2.mOrderIndex) return false;
-            if (data1.mAdapterMetric < data2.mAdapterMetric) return true;
-            if (data1.mAdapterMetric > data2.mAdapterMetric) return false;
-            if (data1.mIndex < data2.mIndex) return true;
-            if (data1.mIndex > data2.mIndex) return false;
-
-            if (data1.mIP.isIPv4()) {
-              if (data2.mIP.isIPv4()) {
-                return data1.mIP < data2.mIP;
-              }
-              return true;
-            }
-
-            if (data2.mIP.isIPv4())
-              return false;
-            
-            return data1.mIP < data2.mIP;
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(const IPAddress &ip)
-          {
-            Data data;
-            data.mIP = ip;
-            return data;
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(
-                              const char *hostName,
-                              const IPAddress &ip
-                              )
-          {
-            Data data;
-            data.mHostName = String(hostName);
-            data.mIP = ip;
-            return data;
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(
-                              const char *hostName,
-                              const IPAddress &ip,
-                              const char *name,
-                              const InterfaceNameToOrderMap &prefs
-                              )
-          {
-            return prepare(hostName, ip, name, 0, prefs);
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(
-                              const IPAddress &ip,
-                              const char *name,
-                              const InterfaceNameToOrderMap &prefs
-                              )
-          {
-            return prepare(ip, name, 0, prefs);
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(
-                              const IPAddress &ip,
-                              const char *name,
-                              ULONG metric,
-                              const InterfaceNameToOrderMap &prefs
-                              )
-          {
-            return prepare(NULL, ip, name, metric, prefs);
-          }
-
-          //-------------------------------------------------------------------
-          static Data prepare(
-                              const char *hostName,
-                              const IPAddress &ip,
-                              const char *name,
-                              ULONG metric,
-                              const InterfaceNameToOrderMap &prefs
-                              )
-          {
-            Data data;
-
-            data.mHostName = String(hostName);
-            data.mIP = ip;
-            data.mAdapterMetric = metric;
-
-            if (prefs.size() > 0) {
-              const char *numStr = name + strlen(name);
-
-              for (; numStr != name; --numStr) {
-                if ('\0' == *numStr) continue;
-                if (isdigit(*numStr)) continue;
-
-                ++numStr; // skip the non-digit
-                break;
-              }
-
-              String namePart;
-              ULONG parsedIndex = 0;
-
-              if (numStr != name) {
-
-                // found a number on the end
-                size_t length = (numStr - name);
-
-                namePart = name;
-                namePart = namePart.substr(0, length);
-
-                try {
-                  parsedIndex = Numeric<decltype(data.mIndex)>(numStr);
-                } catch(Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
-                  ZS_LOG_WARNING(Detail, Log::Params("number failed to convert", "ICESocket") + ZS_PARAM("name", name))
-                }
-              } else {
-                namePart = name;
-              }
-
-              data.mIndex = parsedIndex;
-              namePart.trim();
-
-              InterfaceNameToOrderMap::const_iterator found = prefs.find(namePart);
-              if (found != prefs.end()) {
-                data.mOrderIndex = (*found).second;
-              } else {
-                data.mOrderIndex = prefs.size();  // last
-                // search for partial name inside adapter name
-                for (auto iter = prefs.begin(); iter != prefs.end(); ++iter) {
-                  const String &prefName = (*iter).first;
-                  auto pos = namePart.find(prefName);
-                  if (pos != String::npos) {
-                    data.mOrderIndex = (*iter).second;
-                    break;
-                  }
-                }
-              }
-            }
-
-            return data;
-          }
-
-          //------------------------------------------------------------------
-          static void sort(
-                           DataList &ioDataList,
-                           IPAddressList &outIPs
-                           )
-          {
-            ioDataList.sort(Sorter::compareLocalIPs);
-            for (DataList::iterator iter = ioDataList.begin(); iter != ioDataList.end(); ++iter) {
-              Sorter::Data &value = (*iter);
-              outIPs.push_back(value.mIP);
-            }
-          }
-        };
-
         typedef Sorter::DataList DataList;
 
         DataList data;
+        bool resolveLater = false;
 
         ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: START ---"))
+
+        if (mResolveFailed) {
+          ZS_LOG_TRACE(log("resolve failed (attempt again later)"))
+          mResolveFailed = false;
+          mResolveLocalIPs.clear();
+          mResolveLocalIPQueries.clear();
+          goto sort_now;
+        }
+
+        if (mResolveLocalIPQueries.size() > 0) {
+          for (auto iter = mResolveLocalIPQueries.begin(); iter != mResolveLocalIPQueries.end(); ++iter) {
+            auto query = (*iter).second;
+            data.push_back(query.mData);
+          }
+        }
 
 #ifdef _WIN32
 
 #ifdef WINRT
         // http://stackoverflow.com/questions/10336521/query-local-ip-address
 
-        bool resolveLater = false;
-
-        // search for IP addresses
+        // Use WinRT GetHostNames to search for IP addresses
         {
           typedef std::map<String, bool> HostNameMap;
           typedef std::list<ConnectionProfile ^> ConnectionProfileList;
@@ -2176,11 +2162,6 @@ namespace openpeer
           }
         }
 
-        if (resolveLater) {
-          ZS_LOG_DEBUG(log("cannot obtain IP address information at this time (will need to resolve later)"))
-          return false;
-        }
-
 #else //WINRT
         // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365915(v=vs.85).aspx
 
@@ -2193,6 +2174,7 @@ namespace openpeer
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
+        // scope: use GetAdaptersAddresses
         {
           ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_FRIENDLY_NAME;
 
@@ -2303,34 +2285,35 @@ namespace openpeer
 #if 0
         // http://tangentsoft.net/wskfaq/examples/ipaddr.html
 
-        // OLD CODE USED FOR IPv4 ONLY
-
-        ULONG size = 0;
-
-        // the 1st call is just to get the table size
-        if(GetIpAddrTable(NULL, &size, FALSE) == ERROR_INSUFFICIENT_BUFFER)
+        // scope: use GetIpAddrTable (OLD CODE USED FOR IPv4 ONLY)
         {
-          // now that you know the size, allocate a pointer
-          MIB_IPADDRTABLE *ipAddr = (MIB_IPADDRTABLE *) new BYTE[size];
-          // the 2nd call is to retrieve the info for real
-          if(GetIpAddrTable(ipAddr, &size, TRUE) == NO_ERROR)
+          ULONG size = 0;
+
+          // the 1st call is just to get the table size
+          if(GetIpAddrTable(NULL, &size, FALSE) == ERROR_INSUFFICIENT_BUFFER)
           {
-            // need to loop it to handle multiple interfaces
-            for(DWORD i = 0; i < ipAddr->dwNumEntries; i++)
+            // now that you know the size, allocate a pointer
+            MIB_IPADDRTABLE *ipAddr = (MIB_IPADDRTABLE *) new BYTE[size];
+            // the 2nd call is to retrieve the info for real
+            if(GetIpAddrTable(ipAddr, &size, TRUE) == NO_ERROR)
             {
-              // this is the IP address
-              DWORD dwordIP = ntohl(ipAddr->table[i].dwAddr);
-              IPAddress ip(dwordIP);
+              // need to loop it to handle multiple interfaces
+              for(DWORD i = 0; i < ipAddr->dwNumEntries; i++)
+              {
+                // this is the IP address
+                DWORD dwordIP = ntohl(ipAddr->table[i].dwAddr);
+                IPAddress ip(dwordIP);
 
-              if (ip.isAddressEmpty()) continue;
-              if (ip.isLoopback()) continue;
-              if (ip.isAddrAny()) continue;
+                if (ip.isAddressEmpty()) continue;
+                if (ip.isLoopback()) continue;
+                if (ip.isAddrAny()) continue;
 
-              ip.setPort(mBindPort);
+                ip.setPort(mBindPort);
 
-              ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("ip", ip.string()))
+                ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("ip", ip.string()))
 
-              data.push_back(Sorter::prepare(ip));
+                data.push_back(Sorter::prepare(ip));
+              }
             }
           }
         }
@@ -2338,47 +2321,59 @@ namespace openpeer
 #endif //WINRT
 
 #else //_WIN32
-        ifaddrs *ifAddrStruct = NULL;
-        ifaddrs *ifa = NULL;
-
-        getifaddrs(&ifAddrStruct);
-
-        for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
+        // scope: use getifaddrs
         {
-          IPAddress ip;
-          if (AF_INET == ifa ->ifa_addr->sa_family) {
-            ip = IPAddress(*((sockaddr_in *)ifa->ifa_addr));      // this is an IPv4 address
-          } else if (AF_INET6 == ifa->ifa_addr->sa_family) {
-            if (mSupportIPv6) {
-              ip = IPAddress(*((sockaddr_in6 *)ifa->ifa_addr));     // this is an IPv6 address
+          ifaddrs *ifAddrStruct = NULL;
+          ifaddrs *ifa = NULL;
+
+          getifaddrs(&ifAddrStruct);
+
+          for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
+          {
+            IPAddress ip;
+            if (AF_INET == ifa ->ifa_addr->sa_family) {
+              ip = IPAddress(*((sockaddr_in *)ifa->ifa_addr));      // this is an IPv4 address
+            } else if (AF_INET6 == ifa->ifa_addr->sa_family) {
+              if (mSupportIPv6) {
+                ip = IPAddress(*((sockaddr_in6 *)ifa->ifa_addr));     // this is an IPv6 address
+              }
             }
+
+            // do not add these addresses...
+            if (ip.isAddressEmpty()) continue;
+            if (ip.isLoopback()) continue;
+            if (ip.isAddrAny()) continue;
+
+            ip.setPort(mBindPort);
+
+            ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("local IP", ip.string()) + ZS_PARAM("name", ifa->ifa_name))
+
+            data.push_back(Sorter::prepare(ip, ifa->ifa_name, mInterfaceOrders));
           }
 
-          // do not add these addresses...
-          if (ip.isAddressEmpty()) continue;
-          if (ip.isLoopback()) continue;
-          if (ip.isAddrAny()) continue;
-
-          ip.setPort(mBindPort);
-
-          ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("local IP", ip.string()) + ZS_PARAM("name", ifa->ifa_name))
-
-          data.push_back(Sorter::prepare(ip, ifa->ifa_name, mInterfaceOrders));
-        }
-
-        if (ifAddrStruct) {
-          freeifaddrs(ifAddrStruct);
-          ifAddrStruct = NULL;
+          if (ifAddrStruct) {
+            freeifaddrs(ifAddrStruct);
+            ifAddrStruct = NULL;
+          }
         }
 #endif //_WIN32
 
-        ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
+      sort_now:
+        {
+          ZS_LOG_DEBUG(log("--- GATHERING LOCAL IPs: END ---"))
 
-        Sorter::sort(data, outIPs);
+          if (resolveLater) {
+            ZS_LOG_DEBUG(log("cannot obtain IP address information at this time (will need to resolve later)"))
+            mResolveLocalIPs = data;
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            return false;
+          }
 
-        if (outIPs.empty()) {
-          ZS_LOG_DEBUG(log("failed to read any local IPs (at this time)"))
-          return false;
+          Sorter::sort(data, outIPs);
+
+          if (outIPs.empty()) {
+            ZS_LOG_DEBUG(log("failed to read any local IPs (at this time)"))
+          }
         }
 
         return true;
@@ -2809,6 +2804,171 @@ namespace openpeer
         }
 
         mTURNSockets.erase(found);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IICESocketFactory::Sorter
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      bool ICESocket::Sorter::compareLocalIPs(const Data &data1, const Data &data2)
+      {
+        if (data1.mOrderIndex < data2.mOrderIndex) return true;
+        if (data1.mOrderIndex > data2.mOrderIndex) return false;
+        if (data1.mAdapterMetric < data2.mAdapterMetric) return true;
+        if (data1.mAdapterMetric > data2.mAdapterMetric) return false;
+        if (data1.mIndex < data2.mIndex) return true;
+        if (data1.mIndex > data2.mIndex) return false;
+
+        if (data1.mIP.isIPv4()) {
+          if (data2.mIP.isIPv4()) {
+            return data1.mIP < data2.mIP;
+          }
+          return true;
+        }
+
+        if (data2.mIP.isIPv4())
+          return false;
+
+        return data1.mIP < data2.mIP;
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(const IPAddress &ip)
+      {
+        Data data;
+        data.mIP = ip;
+        return data;
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(
+                                                         const char *hostName,
+                                                         const IPAddress &ip
+                                                         )
+      {
+        Data data;
+        data.mHostName = String(hostName);
+        data.mIP = ip;
+        return data;
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(
+                                                         const char *hostName,
+                                                         const IPAddress &ip,
+                                                         const char *name,
+                                                         const InterfaceNameToOrderMap &prefs
+                                                         )
+      {
+        return prepare(hostName, ip, name, 0, prefs);
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(
+                                                         const IPAddress &ip,
+                                                         const char *name,
+                                                         const InterfaceNameToOrderMap &prefs
+                                                         )
+      {
+        return prepare(ip, name, 0, prefs);
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(
+                                                         const IPAddress &ip,
+                                                         const char *name,
+                                                         ULONG metric,
+                                                         const InterfaceNameToOrderMap &prefs
+                                                         )
+      {
+        return prepare(NULL, ip, name, metric, prefs);
+      }
+
+      //-----------------------------------------------------------------------
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(
+                                                         const char *hostName,
+                                                         const IPAddress &ip,
+                                                         const char *name,
+                                                         ULONG metric,
+                                                         const InterfaceNameToOrderMap &prefs
+                                                         )
+      {
+        Data data;
+
+        data.mHostName = String(hostName);
+        data.mIP = ip;
+        data.mAdapterMetric = metric;
+
+        if (prefs.size() > 0) {
+          const char *numStr = name + strlen(name);
+
+          for (; numStr != name; --numStr) {
+            if ('\0' == *numStr) continue;
+            if (isdigit(*numStr)) continue;
+
+            ++numStr; // skip the non-digit
+            break;
+          }
+
+          String namePart;
+          ULONG parsedIndex = 0;
+
+          if (numStr != name) {
+
+            // found a number on the end
+            size_t length = (numStr - name);
+
+            namePart = name;
+            namePart = namePart.substr(0, length);
+
+            try {
+              parsedIndex = Numeric<decltype(data.mIndex)>(numStr);
+            } catch(Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
+              ZS_LOG_WARNING(Detail, Log::Params("number failed to convert", "ICESocket") + ZS_PARAM("name", name))
+            }
+          } else {
+            namePart = name;
+          }
+
+          data.mIndex = parsedIndex;
+          namePart.trim();
+
+          InterfaceNameToOrderMap::const_iterator found = prefs.find(namePart);
+          if (found != prefs.end()) {
+            data.mOrderIndex = (*found).second;
+          } else {
+            data.mOrderIndex = prefs.size();  // last
+            // search for partial name inside adapter name
+            for (auto iter = prefs.begin(); iter != prefs.end(); ++iter) {
+              const String &prefName = (*iter).first;
+              auto pos = namePart.find(prefName);
+              if (pos != String::npos) {
+                data.mOrderIndex = (*iter).second;
+                break;
+              }
+            }
+          }
+        }
+        
+        return data;
+      }
+      
+      //-----------------------------------------------------------------------
+      void ICESocket::Sorter::sort(
+                                   DataList &ioDataList,
+                                   IPAddressList &outIPs
+                                   )
+      {
+        ioDataList.sort(Sorter::compareLocalIPs);
+        for (DataList::iterator iter = ioDataList.begin(); iter != ioDataList.end(); ++iter) {
+          Sorter::Data &value = (*iter);
+          outIPs.push_back(value.mIP);
+        }
       }
 
       //-----------------------------------------------------------------------

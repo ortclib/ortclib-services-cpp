@@ -38,6 +38,7 @@
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ITURNSocket.h>
 #include <openpeer/services/ISTUNDiscovery.h>
+#include <openpeer/services/IWakeDelegate.h>
 
 #include <zsLib/types.h>
 #include <zsLib/IPAddress.h>
@@ -122,7 +123,9 @@ namespace openpeer
                         public ITURNSocketDelegate,
                         public ISTUNDiscoveryDelegate,
                         public IICESocketForICESocketSession,
-                        public ITimerDelegate
+                        public IWakeDelegate,
+                        public ITimerDelegate,
+                        public IDNSDelegate
       {
       public:
         friend interaction IICESocketFactory;
@@ -133,6 +136,8 @@ namespace openpeer
         ZS_DECLARE_STRUCT_PTR(TURNInfo)
         ZS_DECLARE_STRUCT_PTR(STUNInfo)
         ZS_DECLARE_STRUCT_PTR(LocalSocket)
+
+        ZS_DECLARE_CLASS_PTR(Sorter)
 
         typedef std::list<IPAddress> IPAddressList;
 
@@ -382,10 +387,94 @@ namespace openpeer
 
         //---------------------------------------------------------------------
         #pragma mark
+        #pragma mark ICESocket => IWakeDelegate
+        #pragma mark
+
+        virtual void onWake();
+
+        //---------------------------------------------------------------------
+        #pragma mark
         #pragma mark ICESocket => ITimerDelegate
         #pragma mark
 
         virtual void onTimer(TimerPtr timer);
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ICESocket => IDNSDelegate
+        #pragma mark
+
+        virtual void onLookupCompleted(IDNSQueryPtr query);
+
+      public:
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ICESocket::Sorter
+        #pragma mark
+
+        class Sorter
+        {
+        public:
+          //-------------------------------------------------------------------
+          struct Data {
+            String mHostName;
+            IPAddress mIP;
+            OrderID mOrderIndex {};
+            ULONG mAdapterMetric {};
+            ULONG mIndex {};
+          };
+
+          struct QueryData
+          {
+            IDNSQueryPtr mQuery;
+            Data mData;
+          };
+
+          typedef std::list<Data> DataList;
+
+          typedef PUID QueryID;
+          typedef std::map<QueryID, QueryData> QueryMap;
+
+          static bool compareLocalIPs(const Data &data1, const Data &data2);
+
+          static Data prepare(const IPAddress &ip);
+          static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip
+                              );
+          static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip,
+                              const char *name,
+                              const InterfaceNameToOrderMap &prefs
+                              );
+          static Data prepare(
+                              const IPAddress &ip,
+                              const char *name,
+                              const InterfaceNameToOrderMap &prefs
+                              );
+          static Data prepare(
+                              const IPAddress &ip,
+                              const char *name,
+                              ULONG metric,
+                              const InterfaceNameToOrderMap &prefs
+                              );
+          static Data prepare(
+                              const char *hostName,
+                              const IPAddress &ip,
+                              const char *name,
+                              ULONG metric,
+                              const InterfaceNameToOrderMap &prefs
+                              );
+
+          static void sort(
+                           DataList &ioDataList,
+                           IPAddressList &outIPs
+                           );
+        };
 
       protected:
         //---------------------------------------------------------------------
@@ -404,6 +493,7 @@ namespace openpeer
         void cancel();
         
         void step();
+        bool stepResolveLocalIPs();
         bool stepBind();
         bool stepSTUN();
         bool stepTURN();
@@ -412,7 +502,7 @@ namespace openpeer
         void setState(ICESocketStates state);
         void setError(WORD errorCode, const char *inReason = NULL);
 
-        bool getLocalIPs(IPAddressList &outIPs);
+        bool getLocalIPs(IPAddressList &outIPs);  // returns false if IPs must be resolved later
 
         void stopSTUNAndTURN(LocalSocketPtr localSocket);
         bool closeIfTURNGone(LocalSocketPtr localSocket);
@@ -491,6 +581,10 @@ namespace openpeer
         bool                mSupportIPv6;
 
         Milliseconds        mMaxRebindAttemptDuration;
+
+        bool                mResolveFailed {};
+        Sorter::DataList    mResolveLocalIPs;
+        Sorter::QueryMap    mResolveLocalIPQueries;
       };
 
       //-----------------------------------------------------------------------
