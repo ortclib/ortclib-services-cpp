@@ -1305,13 +1305,16 @@ namespace openpeer
             ips = aRecords->mIPAddresses;
           }
           if (aaaaRecords) {
-            ips.merge(aaaaRecords->mIPAddresses);
+            for (auto ipIter = aaaaRecords->mIPAddresses.begin(); ipIter != aaaaRecords->mIPAddresses.end(); ++ipIter) {
+              ips.push_back(*ipIter);
+            }
           }
 
           // query is not finished
           query.mQuery.reset();
           for (auto ipIter = ips.begin(); ipIter != ips.end(); ++ipIter) {
             IPAddress &ip = (*ipIter);
+            IPAddress skippedIP;
 
             if (ip.isEmpty()) continue;
             if (ip.isAddressEmpty()) continue;
@@ -1320,16 +1323,46 @@ namespace openpeer
 
             ip.setPort(mBindPort);
 
-            ZS_LOG_TRACE(log("found resolved IP") + ZS_PARAM("ip", ip.string()))
+            // check tagainst those that are already resolved previously
+            for (auto iterExisting = mResolveLocalIPQueries.begin(); iterExisting != mResolveLocalIPQueries.end(); ++iterExisting) {
+              Sorter::QueryData &checkQuery = (*iterExisting).second;
+              if (checkQuery.mQuery) continue;  // do not check against queries that are still pending
+              if (checkQuery.mData.mIP == ip) {
+                skippedIP = checkQuery.mData.mIP;
+                goto found_existing;
+              }
+            }
+            // check those that have been temporarily moved to resolved status
+            for (auto iterExisting = resolvedQueries.begin(); iterExisting != resolvedQueries.end(); ++iterExisting) {
+              Sorter::QueryData &checkQuery = (*iterExisting).second;
+              if (checkQuery.mData.mIP == ip) {
+                skippedIP = checkQuery.mData.mIP;
+                goto found_existing;
+              }
+            }
 
-            Sorter::QueryData tempQuery;
-            tempQuery.mData = query.mData;
-            tempQuery.mData.mIP = ip;
+            goto add_resolved;
 
-            resolvedQueries[zsLib::createPUID()] = tempQuery;
+          found_existing:
+            {
+              ZS_LOG_TRACE(log("already found this IP address previously (thus skipping)") + ZS_PARAM("ip", ip.string()) + ZS_PARAM("existing ip", skippedIP.string()))
+              continue;
+            }
+
+          add_resolved:
+            {
+              ZS_LOG_TRACE(log("found resolved IP") + ZS_PARAM("ip", ip.string()))
+
+              Sorter::QueryData tempQuery;
+              tempQuery.mData = query.mData;
+              tempQuery.mData.mHostName.clear();  // already resolved this hostname
+              tempQuery.mData.mIP = ip;
+
+              resolvedQueries[zsLib::createPUID()] = tempQuery;
+            }
           }
 
-          mResolveLocalIPQueries.erase(iter_doNotUse);
+          mResolveLocalIPQueries.erase(current);
         }
 
         mResolveLocalIPQueries.insert(resolvedQueries.begin(), resolvedQueries.end());
@@ -2037,7 +2070,10 @@ namespace openpeer
           for (auto iter = mResolveLocalIPQueries.begin(); iter != mResolveLocalIPQueries.end(); ++iter) {
             auto query = (*iter).second;
             data.push_back(query.mData);
+            ZS_LOG_DEBUG(log("found local IP") + ZS_PARAM("ip", query.mData.mIP.string()))
           }
+          mResolveLocalIPs.clear();
+          mResolveLocalIPQueries.clear();
           goto sort_now;
         }
 
@@ -2157,7 +2193,7 @@ namespace openpeer
               if (profileName.hasData()) {
                 data.push_back(Sorter::prepare(useName, ip, profileName, mInterfaceOrders));
               } else {
-                data.push_back(Sorter::prepare(ip));
+                data.push_back(Sorter::prepare(useName, ip));
               }
             }
           }

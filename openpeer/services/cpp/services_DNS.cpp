@@ -1320,32 +1320,40 @@ namespace openpeer
 
           // the SRV resolved so now we must do a lookup for each SRV result
           for (IDNS::SRVResult::SRVRecordList::iterator iter = mSRVResult->mRecords.begin(); iter != mSRVResult->mRecords.end(); ++iter) {
+            SRVResult::SRVRecord &record =(*iter);
+
+            // see if it already has resolve IPs (WinRT will resolve IP addresses natively)
+            if ((record.mAResult) ||
+                (record.mAAAAResult)) {
+              mResolvers.push_back(IDNSQueryPtr()); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
+              continue; // we don't need to go any futher
+            }
+
             // first we should check if this is actually an IP address
-            if (IPAddress::isConvertable((*iter).mName)) {
-              IPAddress temp((*iter).mName, (*iter).mPort);
+            if (IPAddress::isConvertable(record.mName)) {
+              IPAddress temp(record.mName, (*iter).mPort);
               IDNS::AResultPtr ipResult(new IDNS::AResult);
 
-              ipResult->mName = (*iter).mName;
+              ipResult->mName = record.mName;
               ipResult->mTTL = mSRVResult->mTTL;
               ipResult->mIPAddresses.push_back(temp);
 
               if (temp.isIPv4()) {
-                (*iter).mAResult = ipResult;
+                record.mAResult = ipResult;
               } else {
-                (*iter).mAAAAResult = ipResult;
+                record.mAAAAResult = ipResult;
               }
 
-              IDNSQueryPtr subQuery;
-              mResolvers.push_back(subQuery); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
+              mResolvers.push_back(IDNSQueryPtr()); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
               continue; // we don't need to go any futher
             }
 
             IDNSQueryPtr subQuery;
             if (IDNS::SRVLookupType_AutoLookupA == (mLookupType & IDNS::SRVLookupType_AutoLookupA)) {
               if (IDNS::SRVLookupType_AutoLookupAAAA == (mLookupType & IDNS::SRVLookupType_AutoLookupAAAA)) {
-                subQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), (*iter).mName);
+                subQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), record.mName);
               } else {
-                subQuery = IDNS::lookupA(mThisWeak.lock(), (*iter).mName);
+                subQuery = IDNS::lookupA(mThisWeak.lock(), record.mName);
               }
             } else {
               subQuery = IDNS::lookupAAAA(mThisWeak.lock(), (*iter).mName);
@@ -1968,7 +1976,14 @@ namespace openpeer
           Platform::String ^hostnameStr = ref new Platform::String(mName.wstring().c_str());
           Platform::String ^serviceNameStr = mServiceName.hasData() ? ref new Platform::String(mServiceName.wstring().c_str()) : ref new Platform::String(L"0");
 
-          HostName ^hostname = ref new HostName(hostnameStr);
+          HostName ^hostname;
+          try {
+            hostname = ref new HostName(hostnameStr);
+          } catch(Platform::Exception ^ex) {
+            ZS_LOG_WARNING(Detail, log("exception caught") + ZS_PARAM("error", String(ex->Message->Data())) + toDebug())
+            cancel();
+            return;
+          }
           HostNameType debugtype = hostname->Type;
 
           create_task(DatagramSocket::GetEndpointPairsAsync(hostname, serviceNameStr), mCancellationTokenSource.get_token())
@@ -2037,7 +2052,15 @@ namespace openpeer
                     continue;
                   }
 
-                  IPAddress ip(host);
+                  IPAddress ip;
+
+                  try {
+                    IPAddress tempIP(host);
+                    ip = tempIP;
+                  } catch (IPAddress::Exceptions::ParseError &) {
+                    ZS_LOG_WARNING(Debug, slog(id, "failed to convert to IP") + ZS_PARAM("host", host))
+                    continue;
+                  }
 
                   if (service.hasData()) {
                     try {
@@ -2552,6 +2575,10 @@ namespace openpeer
           defaultPort = port;
         }
 
+        if (SRVLookupType_LookupOnly != lookupType) {
+          return internal::DNSSRVResolverQuery::create(delegate, strName, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+        }
+
 #ifdef WINRT
         String protocolStr(protocol);
         if (protocolStr == "udp") {
@@ -2560,11 +2587,7 @@ namespace openpeer
         ZS_LOG_WARNING(Trace, log("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
 #endif //WINRT
 
-        if (SRVLookupType_LookupOnly != lookupType) {
-          return internal::DNSSRVResolverQuery::create(delegate, strName, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
-        }
-
-        return internal::DNSSRVQuery::create(delegate, name, service, protocol, defaultPort);
+          return internal::DNSSRVQuery::create(delegate, name, service, protocol, defaultPort);
       }
       
       //-----------------------------------------------------------------------
