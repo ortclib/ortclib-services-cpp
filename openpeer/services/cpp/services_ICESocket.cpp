@@ -49,24 +49,27 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/crc.h>
 
-#ifndef _WIN32
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif //HAVE_SYS_TYPES_H
+
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif //HAVE_IFADDRS_H
+
 #ifdef _ANDROID
 #include <openpeer/services/internal/ifaddrs-android.h>
 #else
-#include <ifaddrs.h>
 #endif
 
-#else //_WIN32
+#ifdef HAVE_IPHLPAPI_H
+#include <Iphlpapi.h>
+#endif //HAVE_IPHLPAPI_H
 
 #ifdef WINRT
 using namespace Windows::Networking::Connectivity;
-#else //WINRT
-#include <Iphlpapi.h>
 #endif //WINRT
 
-#endif //_WIN32
 
 #define OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
 
@@ -2077,9 +2080,7 @@ namespace openpeer
           goto sort_now;
         }
 
-#ifdef _WIN32
-
-#ifdef WINRT
+#if defined(WINRT) && !defined(HAVE_GETADAPTERADDRESSES)
         // http://stackoverflow.com/questions/10336521/query-local-ip-address
 
         // Use WinRT GetHostNames to search for IP addresses
@@ -2199,7 +2200,9 @@ namespace openpeer
           }
         }
 
-#else //WINRT
+#endif //defined(WINRT) && !defined(HAVE_GETADAPTERADDRESSES)
+
+#ifdef HAVE_GETADAPTERADDRESSES
         // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365915(v=vs.85).aspx
 
 #undef MALLOC
@@ -2355,9 +2358,9 @@ namespace openpeer
           }
         }
 #endif //0
-#endif //WINRT
+#endif //HAVE_GETADAPTERADDRESSES
 
-#else //_WIN32
+#ifdef HAVE_GETIFADDRS
         // scope: use getifaddrs
         {
           ifaddrs *ifAddrStruct = NULL;
@@ -2393,7 +2396,7 @@ namespace openpeer
             ifAddrStruct = NULL;
           }
         }
-#endif //_WIN32
+#endif //HAVE_GETIFADDRS
 
       sort_now:
         {
