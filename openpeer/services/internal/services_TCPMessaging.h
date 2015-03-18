@@ -122,7 +122,7 @@ namespace openpeer
 
         virtual void enableKeepAlive(bool enable = true);
 
-        virtual void shutdown(Seconds lingerTime = Seconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_SECONDS));
+        virtual void shutdown(Milliseconds lingerTime = Milliseconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS));
 
         virtual SessionStates getState(
                                        WORD *outLastErrorCode = NULL,

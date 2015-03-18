@@ -39,7 +39,7 @@
 
 #define OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
 
-#define OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_SECONDS (1000)
+#define OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS (1000)
 
 namespace openpeer
 {
@@ -118,7 +118,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: This closes the session gracefully.
-      virtual void shutdown(Seconds lingerTime = Seconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_SECONDS)) = 0;
+      virtual void shutdown(Milliseconds lingerTime = Milliseconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: return the current state of the connection
