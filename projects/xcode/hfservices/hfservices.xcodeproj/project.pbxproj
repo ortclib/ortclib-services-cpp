@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		000CC03717A475F90075E86C /* services_Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 000CC03617A475F90075E86C /* services_Logger.cpp */; };
 		001AEF5A1853DE9300029ABC /* services_Cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 001AEF591853DE9300029ABC /* services_Cache.cpp */; };
+		0020ED4F1AB86D4300B66C74 /* ifaddrs-android.cc in Sources */ = {isa = PBXBuildFile; fileRef = 0020ED4D1AB86D4300B66C74 /* ifaddrs-android.cc */; };
+		0020ED501AB86D4300B66C74 /* services_HTTP_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0020ED4E1AB86D4300B66C74 /* services_HTTP_WinRT.cpp */; };
 		002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4819A915B500F360CE /* services_Decryptor.cpp */; };
 		002FCF4B19A915B500F360CE /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4919A915B500F360CE /* services_Encryptor.cpp */; };
 		003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD317A607190002EB47 /* services_MessageLayerSecurityChannel.cpp */; };
@@ -54,6 +56,11 @@
 		001AEF571853DDDD00029ABC /* ICache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICache.h; sourceTree = "<group>"; };
 		001AEF581853DE6600029ABC /* services_Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Cache.h; sourceTree = "<group>"; };
 		001AEF591853DE9300029ABC /* services_Cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Cache.cpp; sourceTree = "<group>"; };
+		0020ED4A1AB86D2600B66C74 /* ifaddrs-android.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ifaddrs-android.h"; sourceTree = "<group>"; };
+		0020ED4B1AB86D2600B66C74 /* platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
+		0020ED4C1AB86D2600B66C74 /* services_HTTP_WinRT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_HTTP_WinRT.h; sourceTree = "<group>"; };
+		0020ED4D1AB86D4300B66C74 /* ifaddrs-android.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ifaddrs-android.cc"; sourceTree = "<group>"; };
+		0020ED4E1AB86D4300B66C74 /* services_HTTP_WinRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_HTTP_WinRT.cpp; sourceTree = "<group>"; };
 		002FCF4319A9158400F360CE /* IDecryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDecryptor.h; sourceTree = "<group>"; };
 		002FCF4419A9158400F360CE /* IEncryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IEncryptor.h; sourceTree = "<group>"; };
 		002FCF4519A9158400F360CE /* IFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IFactory.h; sourceTree = "<group>"; };
@@ -250,6 +257,7 @@
 		0095D91C16CA83EA005F53D3 /* cpp */ = {
 			isa = PBXGroup;
 			children = (
+				0020ED4D1AB86D4300B66C74 /* ifaddrs-android.cc */,
 				0095D92C16CA83EA005F53D3 /* services_services.cpp */,
 				007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */,
 				0073287E1A46F4D400331796 /* services_BackOffTimer.cpp */,
@@ -264,6 +272,7 @@
 				002FCF4919A915B500F360CE /* services_Encryptor.cpp */,
 				0095D92116CA83EA005F53D3 /* services_Helper.cpp */,
 				0095D92216CA83EA005F53D3 /* services_HTTP.cpp */,
+				0020ED4E1AB86D4300B66C74 /* services_HTTP_WinRT.cpp */,
 				0095D92316CA83EA005F53D3 /* services_ICESocket.cpp */,
 				0095D92416CA83EA005F53D3 /* services_ICESocketSession.cpp */,
 				000CC03617A475F90075E86C /* services_Logger.cpp */,
@@ -295,7 +304,9 @@
 			isa = PBXGroup;
 			children = (
 				0095D94D16CA83EA005F53D3 /* types.h */,
+				0020ED4B1AB86D2600B66C74 /* platform.h */,
 				0095D93916CA83EA005F53D3 /* services.h */,
+				0020ED4A1AB86D2600B66C74 /* ifaddrs-android.h */,
 				00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */,
 				007E8F9018C0DC4700364908 /* services_Backgrounding.h */,
 				007328801A46F4E100331796 /* services_BackOffTimer.h */,
@@ -310,6 +321,7 @@
 				002FCF4719A9159E00F360CE /* services_Encryptor.h */,
 				0095D93E16CA83EA005F53D3 /* services_Helper.h */,
 				0095D93F16CA83EA005F53D3 /* services_HTTP.h */,
+				0020ED4C1AB86D2600B66C74 /* services_HTTP_WinRT.h */,
 				0095D94016CA83EA005F53D3 /* services_ICESocket.h */,
 				0095D94116CA83EA005F53D3 /* services_ICESocketSession.h */,
 				000CC03517A475E00075E86C /* services_Logger.h */,
@@ -416,6 +428,7 @@
 				0095DAD716CA83EB005F53D3 /* services_RUDPTransport.cpp in Sources */,
 				0095DAD816CA83EB005F53D3 /* services_RUDPListener.cpp in Sources */,
 				0095DAD916CA83EB005F53D3 /* services_RUDPMessaging.cpp in Sources */,
+				0020ED501AB86D4300B66C74 /* services_HTTP_WinRT.cpp in Sources */,
 				0095DADA16CA83EB005F53D3 /* services_RUDPPacket.cpp in Sources */,
 				0095DADB16CA83EB005F53D3 /* services_services.cpp in Sources */,
 				0095DADC16CA83EB005F53D3 /* services_STUNDiscovery.cpp in Sources */,
@@ -427,6 +440,7 @@
 				0095DAE016CA83EB005F53D3 /* services_TURNSocket.cpp in Sources */,
 				002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */,
 				000CC03717A475F90075E86C /* services_Logger.cpp in Sources */,
+				0020ED4F1AB86D4300B66C74 /* ifaddrs-android.cc in Sources */,
 				003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */,
 				003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */,
 				00F11C7C189B6D5E00EB33BB /* services_Settings.cpp in Sources */,
