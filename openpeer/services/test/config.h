@@ -44,17 +44,17 @@
 #define OPENPEER_SERVICE_TEST_TELNET_LOGGING_PORT         (59999)
 #define OPENPEER_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT  (51999)
 
-#define OPENPEER_SERVICE_TEST_DO_BACKOFF_RETRY_TEST                    (false)
-#define OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST                    (false)
-#define OPENPEER_SERVICE_TEST_DO_DH_TEST                               (false)
-#define OPENPEER_SERVICE_TEST_DO_DNS_TEST                              (false)
-#define OPENPEER_SERVICE_TEST_DO_HELPER_TEST                           (false)
+#define OPENPEER_SERVICE_TEST_DO_BACKOFF_RETRY_TEST                    (true)
+#define OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST                    (true)
+#define OPENPEER_SERVICE_TEST_DO_DH_TEST                               (true)
+#define OPENPEER_SERVICE_TEST_DO_DNS_TEST                              (true)
+#define OPENPEER_SERVICE_TEST_DO_HELPER_TEST                           (true)
 #define OPENPEER_SERVICE_TEST_DO_ICE_SOCKET_TEST                       (true)
-#define OPENPEER_SERVICE_TEST_DO_STUN_TEST                             (false)
-#define OPENPEER_SERVICE_TEST_DO_TURN_TEST                             (false)
-#define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST           (false)
-#define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST   (false)
-#define OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST                    (false)
+#define OPENPEER_SERVICE_TEST_DO_STUN_TEST                             (true)
+#define OPENPEER_SERVICE_TEST_DO_TURN_TEST                             (true)
+#define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST           (true)
+#define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST   (false)  // needs to be run manually do to lunch two different versions requirement
+#define OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST                    (true)
 
 #define OPENPEER_SERVICE_TEST_DNS_ZONE "dnstest.hookflash.me"
 
