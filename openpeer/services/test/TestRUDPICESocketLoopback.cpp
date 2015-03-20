@@ -702,7 +702,7 @@ void doTestRUDPICESocketLoopback()
             break;
           }
           case 1: {
-            if (39 == totalWait) {
+            if (49 == totalWait) {
               found = 2;
             } else {
               // we want to prevent early auto-shutdown when the objects aren't ready
@@ -741,9 +741,9 @@ void doTestRUDPICESocketLoopback()
     } while (true);
   }
 
-  ZS_LOG_BASIC("WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
+  ZS_LOG_BASIC("WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (20 second wait).");
 
-  TESTING_SLEEP(10000)
+  TESTING_SLEEP(20000)
 
   // wait for shutdown
   {

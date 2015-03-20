@@ -587,8 +587,8 @@ void doTestICESocket()
     } while (true);
   }
 
-  TESTING_STDOUT() << "WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).\n";
-  TESTING_SLEEP(10000)
+  TESTING_STDOUT() << "WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (20 second wait).\n";
+  TESTING_SLEEP(20000)
 
   // wait for shutdown
   {
