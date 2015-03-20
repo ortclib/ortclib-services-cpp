@@ -645,8 +645,8 @@ void doTestRUDPICESocketLoopback()
         }
         case 1: {
           expecting = 2;
-          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true, true, false, false, true, false, true, false);
-          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, false, true, false, false, true, false, true, false);
+          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true);
+          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);
@@ -683,11 +683,15 @@ void doTestRUDPICESocketLoopback()
             break;
           }
           case 1: {
-            if (10 == totalWait) {
+            if (1 == totalWait) {
               testObject1->createSessionFromRemoteCandidates(IICESocket::ICEControl_Controlling);
               testObject2->createSessionFromRemoteCandidates(IICESocket::ICEControl_Controlling);
             }
 
+			if (50 == totalWait) {
+				testObject1->shutdown();
+				testObject2->shutdown();
+			}
             break;
           }
         }
@@ -702,12 +706,6 @@ void doTestRUDPICESocketLoopback()
             break;
           }
           case 1: {
-            if (39 == totalWait) {
-              found = 2;
-            } else {
-              // we want to prevent early auto-shutdown when the objects aren't ready
-              found = 0;
-            }
             break;
           }
         }
@@ -741,9 +739,9 @@ void doTestRUDPICESocketLoopback()
     } while (true);
   }
 
-  ZS_LOG_BASIC("WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
+  ZS_LOG_BASIC("WAITING:      All ICE sockets have finished. Waiting for 'bogus' events to process (20 second wait).");
 
-  TESTING_SLEEP(10000)
+  TESTING_SLEEP(20000)
 
   // wait for shutdown
   {
