@@ -543,6 +543,8 @@ void doTestICESocket()
 
             if (39 == totalWait) {
               found = 2;
+              testObject1->shutdown();
+              testObject2->shutdown();
             }
 
             break;
