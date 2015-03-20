@@ -517,7 +517,7 @@ void doTestICESocket()
       {
         TESTING_SLEEP(1000)
         ++totalWait;
-        if (totalWait >= 30)
+        if (totalWait >= 40)
           break;
 
         found = 0;
@@ -541,7 +541,7 @@ void doTestICESocket()
               testObject2->createSessionFromRemoteCandidates(IICESocket::ICEControl_Controlling);
             }
 
-            if (20 == totalWait) {
+            if (39 == totalWait) {
               found = 2;
             }
 

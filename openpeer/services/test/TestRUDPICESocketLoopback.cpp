@@ -702,7 +702,7 @@ void doTestRUDPICESocketLoopback()
             break;
           }
           case 1: {
-            if (30 == totalWait) {
+            if (39 == totalWait) {
               found = 2;
             } else {
               // we want to prevent early auto-shutdown when the objects aren't ready
