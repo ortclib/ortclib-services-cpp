@@ -155,6 +155,8 @@ namespace Testing
   
   void runAllTests()
   {
+    srand(static_cast<signed int>(time(NULL)));
+
     TESTING_INSTALL_LOGGER()
 
     TESTING_RUN_TEST_FUNC(doTestBackoffRetry)

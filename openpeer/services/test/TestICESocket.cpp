@@ -484,16 +484,16 @@ void doTestICESocket()
       ULONG expecting = 0;
       switch (step) {
         case 0: {
-          testObject1 = TestICESocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER);
-          testObject2 = TestICESocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER);
+          testObject1 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER);
+          testObject2 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);
           break;
         }
         case 1: {
-          testObject1 = TestICESocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
-          testObject2 = TestICESocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
+          testObject1 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
+          testObject2 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);

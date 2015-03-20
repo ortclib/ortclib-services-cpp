@@ -538,11 +538,11 @@ void doTestTURNSocket()
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
-  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
-  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
-  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, 0, "bogus." OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
-  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
-  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 0, OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
+  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
+  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
+  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), "bogus." OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
+  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
+  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
 
   TESTING_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
 
