@@ -97,6 +97,10 @@ namespace Testing
     ILogger::setLogLevel("openpeer_services", zsLib::Log::Trace);
     ILogger::setLogLevel("openpeer_services_http", zsLib::Log::Trace);
 
+    if (OPENPEER_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
+      ILogger::installDebuggerLogger();
+    }
+
     if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
       ILogger::installStdOutLogger(false);
     }
@@ -118,10 +122,6 @@ namespace Testing
       }
     }
 
-    if (OPENPEER_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
-      ILogger::installDebuggerLogger();
-    }
-
     TESTING_STDOUT() << "INSTALLED LOGGER...\n\n";
   }
   
@@ -129,14 +129,14 @@ namespace Testing
   {
     TESTING_STDOUT() << "REMOVING LOGGER...\n\n";
 
-    if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
-      ILogger::uninstallStdOutLogger();
-    }
     if (OPENPEER_SERVICE_TEST_USE_FIFO_LOGGING) {
       ILogger::uninstallFileLogger();
     }
     if (OPENPEER_SERVICE_TEST_USE_TELNET_LOGGING) {
       ILogger::uninstallTelnetLogger();
+    }
+    if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
+      ILogger::uninstallStdOutLogger();
     }
     if (OPENPEER_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
       ILogger::uninstallDebuggerLogger();
