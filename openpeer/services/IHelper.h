@@ -108,6 +108,59 @@ namespace openpeer
                                             bool prettyPrint = false
                                             );
 
+      static String getAttributeID(ElementPtr el);
+      static void setAttributeIDWithText(ElementPtr el, const String &value);
+      static void setAttributeIDWithNumber(ElementPtr el, const String &value);
+
+      static String getAttribute(
+                                 ElementPtr el,
+                                 const String &attributeName
+                                 );
+
+      static void setAttributeWithText(
+                                       ElementPtr el,
+                                       const String &attrName,
+                                       const String &value
+                                       );
+
+      static void setAttributeWithNumber(
+                                         ElementPtr el,
+                                         const String &attrName,
+                                         const String &value
+                                         );
+
+      static ElementPtr createElement(const String &elName);
+
+      static ElementPtr createElementWithText(
+                                              const String &elName,
+                                              const String &textVal
+                                              );
+      static ElementPtr createElementWithNumber(
+                                                const String &elName,
+                                                const String &numberAsStringValue
+                                                );
+      static ElementPtr createElementWithTime(
+                                              const String &elName,
+                                              Time time
+                                              );
+      static ElementPtr createElementWithTextAndJSONEncode(
+                                                           const String &elName,
+                                                           const String &textVal
+                                                           );
+      static ElementPtr createElementWithTextID(
+                                                const String &elName,
+                                                const String &idValue
+                                                );
+      static ElementPtr createElementWithNumberID(
+                                                  const String &elName,
+                                                  const String &idValue
+                                                  );
+
+      static TextPtr createText(const String &textVal);
+
+      static String getElementText(ElementPtr el);
+      static String getElementTextAndDecode(ElementPtr el);
+
       static String timeToString(const Time &value);
       static Time stringToTime(const String &str);
 
@@ -276,7 +329,18 @@ namespace openpeer
                         SplitMap &outResult,
                         char splitChar
                         );
-      
+
+      static void split(
+                        const String &input,
+                        SplitMap &outResult,
+                        const char *splitStr
+                        );
+
+      static void splitPruneEmpty(
+                                  SplitMap &ioResult,
+                                  bool reindex = true
+                                  );
+
       static const String &get(
                                const SplitMap &inResult,
                                Index index
@@ -294,6 +358,28 @@ namespace openpeer
                                    ULONG bytesPerGroup = 4,
                                    ULONG maxLineLength = 160
                                    );
+    };
+
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
+    #pragma mark SHA1
+    #pragma mark
+
+    template <typename XHASHER>
+    class Hasher : public XHASHER
+    {
+    public:
+      void update(const char *message) {this->Update((const BYTE *)message, strlen(message));}
+      void update(const std::string &message) {this->Update((const BYTE *)message.c_str(), message.length());}
+
+      String final() {
+        SecureByteBlock buffer(this->DigestSize());
+        this->Final(buffer);
+        return IHelper::convertToHex(buffer);
+      }
     };
 
   }

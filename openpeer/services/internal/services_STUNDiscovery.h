@@ -35,6 +35,7 @@
 #include <openpeer/services/ISTUNDiscovery.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/ISTUNRequester.h>
+
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Timer.h>
 
@@ -56,9 +57,11 @@ namespace openpeer
                             public MessageQueueAssociator,
                             public ISTUNDiscovery,
                             public IDNSDelegate,
-                            public ISTUNRequesterDelegate
+                            public ISTUNRequesterDelegate,
+                            public ITimerDelegate
       {
       public:
+        friend interaction ISTUNDiscovery;
         friend interaction ISTUNDiscoveryFactory;
 
         typedef std::list<IPAddress> IPAddressList;
@@ -66,7 +69,8 @@ namespace openpeer
       protected:
         STUNDiscovery(
                       IMessageQueuePtr queue,
-                      ISTUNDiscoveryDelegatePtr delegate
+                      ISTUNDiscoveryDelegatePtr delegate,
+                      Seconds keepWarmPingTime
                       );
         
         STUNDiscovery(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
@@ -79,6 +83,8 @@ namespace openpeer
       public:
         ~STUNDiscovery();
 
+        static STUNDiscoveryPtr convert(ISTUNDiscoveryPtr object);
+
       protected:
 
         //---------------------------------------------------------------------
@@ -86,16 +92,20 @@ namespace openpeer
         #pragma mark STUNDiscovery => ISTUNDiscovery
         #pragma mark
 
+        static ElementPtr toDebug(STUNDiscoveryPtr discovery);
+
         static STUNDiscoveryPtr create(
                                        IMessageQueuePtr queue,
                                        ISTUNDiscoveryDelegatePtr delegate,
-                                       IDNS::SRVResultPtr service
+                                       IDNS::SRVResultPtr service,
+                                       Seconds keepWarmPingTime
                                        );
 
         static STUNDiscoveryPtr create(
                                        IMessageQueuePtr queue,
                                        ISTUNDiscoveryDelegatePtr delegate,
-                                       const char *srvName
+                                       const char *srvName,
+                                       Seconds keepWarmPingTime
                                        );
         
         virtual PUID getID() const {return mID;}
@@ -112,6 +122,13 @@ namespace openpeer
         #pragma mark
 
         virtual void onLookupCompleted(IDNSQueryPtr query);
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark STUNDiscovery => IDNSDelegate
+        #pragma mark
+
+        virtual void onTimer(TimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -139,6 +156,7 @@ namespace openpeer
         #pragma mark
 
         Log::Params log(const char *message) const;
+        ElementPtr toDebug() const;
 
         void step();
         bool hasContactedServerBefore(const IPAddress &server);
@@ -152,7 +170,7 @@ namespace openpeer
         mutable RecursiveLock mLock;
         STUNDiscoveryWeakPtr mThisWeak;
 
-        PUID mID;
+        AutoPUID mID;
 
         IDNSQueryPtr mSRVQuery;
         IDNS::SRVResultPtr mSRVResult;
@@ -164,6 +182,9 @@ namespace openpeer
         IPAddress mMapppedAddress;
 
         IPAddressList mPreviouslyContactedServers;
+
+        Seconds mKeepWarmPingTime;
+        TimerPtr mKeepWarmPingTimer;
       };
 
       //-----------------------------------------------------------------------
@@ -181,13 +202,15 @@ namespace openpeer
         virtual STUNDiscoveryPtr create(
                                         IMessageQueuePtr queue,
                                         ISTUNDiscoveryDelegatePtr delegate,
-                                        IDNS::SRVResultPtr service
+                                        IDNS::SRVResultPtr service,
+                                        Seconds keepWarmPingTime
                                         );
 
         virtual STUNDiscoveryPtr create(
                                         IMessageQueuePtr queue,
                                         ISTUNDiscoveryDelegatePtr delegate,
-                                        const char *srvName
+                                        const char *srvName,
+                                        Seconds keepWarmPingTime
                                         );
 
       };

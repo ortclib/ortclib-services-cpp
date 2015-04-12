@@ -50,17 +50,21 @@ namespace openpeer
 
     interaction ISTUNDiscovery
     {
+      static ElementPtr toDebug(ISTUNDiscoveryPtr discovery);
+
       // NOTE: IDNS::setup must have been called before calling this method
       static ISTUNDiscoveryPtr create(
                                       IMessageQueuePtr queue,                   // which message queue to use for this service (should be on the same queue as the requesting object)
                                       ISTUNDiscoveryDelegatePtr delegate,
-                                      IDNS::SRVResultPtr service                // which service to use to preform the STUN lookup (only stun/udp is supported)
+                                      IDNS::SRVResultPtr service,               // which service to use to preform the STUN lookup (only stun/udp is supported)
+                                      Seconds keepWarmPingTime = Seconds()
                                       );
 
       static ISTUNDiscoveryPtr create(
                                       IMessageQueuePtr queue,                   // which message queue to use for this service (should be on the same queue as the requesting object)
                                       ISTUNDiscoveryDelegatePtr delegate,
-                                      const char *srvName                       // will automatically perform a stun/udp lookup on the name passed in
+                                      const char *srvName,                      // will automatically perform a stun/udp lookup on the name passed in
+                                      Seconds keepWarmPingTime = Seconds()
                                       );
 
       static STUNPacket::RFCs usingRFC();
@@ -124,6 +128,8 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies that a STUN discovery is now complete.
+      // NOTE:    If "keepWarmPingTime" is set, this event can be fired
+      //          more than once to indicate a change in mapped address
       virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery) = 0;
     };
   }

@@ -62,10 +62,10 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNDiscovery::STUNDiscovery(
                                    IMessageQueuePtr queue,
-                                   ISTUNDiscoveryDelegatePtr delegate
+                                   ISTUNDiscoveryDelegatePtr delegate,
+                                   Seconds keepWarmPingTime
                                    ) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
         mDelegate(ISTUNDiscoveryDelegateProxy::createWeak(queue, delegate))
       {
         ZS_LOG_DEBUG(log("created"))
@@ -100,6 +100,12 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      STUNDiscoveryPtr STUNDiscovery::convert(ISTUNDiscoveryPtr object)
+      {
+        return ZS_DYNAMIC_PTR_CAST(STUNDiscovery, object);
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -108,17 +114,25 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
+      ElementPtr STUNDiscovery::toDebug(STUNDiscoveryPtr discovery)
+      {
+        if (!discovery) return ElementPtr();
+        return discovery->toDebug();
+      }
+
+      //-----------------------------------------------------------------------
       STUNDiscoveryPtr STUNDiscovery::create(
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
-                                             IDNS::SRVResultPtr service
+                                             IDNS::SRVResultPtr service,
+                                             Seconds keepWarmPingTime
                                              )
       {
         ZS_THROW_INVALID_USAGE_IF(!queue)
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!service)
 
-        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate));
+        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate, keepWarmPingTime));
         pThis->mThisWeak = pThis;
         pThis->init(service, NULL);
         return pThis;
@@ -128,14 +142,15 @@ namespace openpeer
       STUNDiscoveryPtr STUNDiscovery::create(
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
-                                             const char *srvName
+                                             const char *srvName,
+                                             Seconds keepWarmPingTime
                                              )
       {
         ZS_THROW_INVALID_USAGE_IF(!queue)
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!srvName)
 
-        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate));
+        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate, keepWarmPingTime));
         pThis->mThisWeak = pThis;
         pThis->init(IDNS::SRVResultPtr(), srvName);
         return pThis;
@@ -189,6 +204,31 @@ namespace openpeer
 
         mSRVResult = query->getSRV();
         mSRVQuery.reset();
+        step();
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark STUNDiscovery => IDNSDelegate
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void STUNDiscovery::onTimer(TimerPtr timer)
+      {
+        AutoRecursiveLock lock(mLock);
+        if (timer != mKeepWarmPingTimer) {
+          ZS_LOG_WARNING(Trace, log("notified about obsolete timer") + ZS_PARAM("timer", timer->getID()))
+          return;
+        }
+
+        ZS_LOG_TRACE(log("keep alive timer fired"))
+
+        mKeepWarmPingTimer->cancel();
+        mKeepWarmPingTimer.reset();
+
         step();
       }
 
@@ -272,17 +312,30 @@ namespace openpeer
         }
 
         ZS_LOG_BASIC(log("found mapped address") + ZS_PARAM("mapped address", response->mMappedAddress.string()) + response->toDebug())
+
+        IPAddress oldMappedAddress = mMapppedAddress;
         mMapppedAddress = response->mMappedAddress;
 
-        // we now have a reply, inform the delegate
-        try {
-          mDelegate->onSTUNDiscoveryCompleted(mThisWeak.lock());  // this is a success! yay! inform the delegate
-        } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+        if (oldMappedAddress != mMapppedAddress) {
+          // we now have a reply, inform the delegate
+          try {
+            mDelegate->onSTUNDiscoveryCompleted(mThisWeak.lock());  // this is a success! yay! inform the delegate
+          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+          }
         }
 
         mSTUNRequester.reset();
 
-        cancel();
+        if (Seconds() == mKeepWarmPingTime) {
+          ZS_LOG_TRACE(log("shutting down stun discovery"))
+          cancel();
+          return  true;
+        }
+
+        if (!mKeepWarmPingTimer) {
+          ZS_LOG_TRACE(log("setup server ping timer") + ZS_PARAM("keep alive (s)", mKeepWarmPingTime))
+          mKeepWarmPingTimer = Timer::create(mThisWeak.lock(), zsLib::now() + mKeepWarmPingTime);
+        }
         return true;
       }
 
@@ -314,6 +367,28 @@ namespace openpeer
         ElementPtr objectEl = Element::create("STUNDiscovery");
         IHelper::debugAppend(objectEl, "id", mID);
         return Log::Params(message, objectEl);
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr STUNDiscovery::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("openpeer::services::STUNDiscovery");
+
+        IHelper::debugAppend(resultEl, "srv query", mSRVQuery ? mSRVQuery->getID() : 0);
+        IHelper::debugAppend(resultEl, "srv result", (bool)mSRVResult);
+
+        IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
+        IHelper::debugAppend(resultEl, "stun requester", mSTUNRequester ? mSTUNRequester->getID(): 0);
+
+        IHelper::debugAppend(resultEl, "server", mServer.isEmpty() ? String() : mServer.string());
+        IHelper::debugAppend(resultEl, "mapped address", mMapppedAddress.isEmpty() ? String() : mMapppedAddress.string());
+
+        IHelper::debugAppend(resultEl, "previously contacted servers", mPreviouslyContactedServers.size());
+
+        IHelper::debugAppend(resultEl, "keep warm ping time (s)", mKeepWarmPingTime);
+        IHelper::debugAppend(resultEl, "keep warm ping timer", mKeepWarmPingTimer ? mKeepWarmPingTimer->getID() : 0);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
@@ -396,22 +471,24 @@ namespace openpeer
       STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
                                                      IMessageQueuePtr queue,
                                                      ISTUNDiscoveryDelegatePtr delegate,
-                                                     IDNS::SRVResultPtr service
+                                                     IDNS::SRVResultPtr service,
+                                                     Seconds keepWarmPingTime
                                                      )
       {
         if (this) {}
-        return STUNDiscovery::create(queue, delegate, service);
+        return STUNDiscovery::create(queue, delegate, service, keepWarmPingTime);
       }
 
       //-----------------------------------------------------------------------
       STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
                                                      IMessageQueuePtr queue,
                                                      ISTUNDiscoveryDelegatePtr delegate,
-                                                     const char *srvName
+                                                     const char *srvName,
+                                                     Seconds keepWarmPingTime
                                                      )
       {
         if (this) {}
-        return STUNDiscovery::create(queue, delegate, srvName);
+        return STUNDiscovery::create(queue, delegate, srvName, keepWarmPingTime);
       }
       
     }
@@ -425,23 +502,31 @@ namespace openpeer
     #pragma mark
 
     //-------------------------------------------------------------------------
-    ISTUNDiscoveryPtr ISTUNDiscovery::create(
-                                             IMessageQueuePtr queue,
-                                             ISTUNDiscoveryDelegatePtr delegate,
-                                             IDNS::SRVResultPtr service
-                                             )
+    ElementPtr ISTUNDiscovery::toDebug(ISTUNDiscoveryPtr discovery)
     {
-      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, service);
+      return internal::STUNDiscovery::toDebug(internal::STUNDiscovery::convert(discovery));
     }
 
     //-------------------------------------------------------------------------
     ISTUNDiscoveryPtr ISTUNDiscovery::create(
-                                             IMessageQueuePtr queue,     // which message queue to use for this service (should be on the same queue as the requesting object)
+                                             IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
-                                             const char *srvName                // will automatically perform a stun/udp lookup on the name passed in
+                                             IDNS::SRVResultPtr service,
+                                             Seconds keepWarmPingTime
                                              )
     {
-      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, srvName);
+      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, service, keepWarmPingTime);
+    }
+
+    //-------------------------------------------------------------------------
+    ISTUNDiscoveryPtr ISTUNDiscovery::create(
+                                             IMessageQueuePtr queue,
+                                             ISTUNDiscoveryDelegatePtr delegate,
+                                             const char *srvName,
+                                             Seconds keepWarmPingTime
+                                             )
+    {
+      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, srvName, keepWarmPingTime);
     }
 
     //-------------------------------------------------------------------------

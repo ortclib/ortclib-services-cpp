@@ -73,6 +73,59 @@ namespace openpeer
                                               bool prettyPrint
                                               );
 
+        static String getAttributeID(ElementPtr el);
+        static void setAttributeIDWithText(ElementPtr el, const String &value);
+        static void setAttributeIDWithNumber(ElementPtr el, const String &value);
+
+        static String getAttribute(
+                                   ElementPtr el,
+                                   const String &attributeName
+                                   );
+
+        static void setAttributeWithText(
+                                         ElementPtr el,
+                                         const String &attrName,
+                                         const String &value
+                                         );
+
+        static void setAttributeWithNumber(
+                                           ElementPtr el,
+                                           const String &attrName,
+                                           const String &value
+                                           );
+
+        static ElementPtr createElement(const String &elName);
+
+        static ElementPtr createElementWithText(
+                                                const String &elName,
+                                                const String &textVal
+                                                );
+        static ElementPtr createElementWithNumber(
+                                                  const String &elName,
+                                                  const String &numberAsStringValue
+                                                  );
+        static ElementPtr createElementWithTime(
+                                                const String &elName,
+                                                Time time
+                                                );
+        static ElementPtr createElementWithTextAndJSONEncode(
+                                                             const String &elName,
+                                                             const String &textVal
+                                                             );
+        static ElementPtr createElementWithTextID(
+                                                  const String &elName,
+                                                  const String &idValue
+                                                  );
+        static ElementPtr createElementWithNumberID(
+                                                    const String &elName,
+                                                    const String &idValue
+                                                    );
+        
+        static TextPtr createText(const String &textVal);
+
+        static String getElementText(ElementPtr node);
+        static String getElementTextAndDecode(ElementPtr node);
+
         static String timeToString(const Time &value);
         static Time stringToTime(const String &str);
 
@@ -223,7 +276,18 @@ namespace openpeer
                           SplitMap &outResult,
                           char splitChar
                           );
-        
+
+        static void split(
+                          const String &input,
+                          SplitMap &outResult,
+                          const char *splitStr
+                          );
+
+        static void splitPruneEmpty(
+                                    SplitMap &ioResult,
+                                    bool reindex = true
+                                    );
+
         static const String &get(
                                  const SplitMap &inResult,
                                  Index index

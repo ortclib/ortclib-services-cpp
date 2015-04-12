@@ -132,6 +132,7 @@ namespace openpeer
 
     ZS_DECLARE_USING_PTR(zsLib::XML, Element)
     ZS_DECLARE_USING_PTR(zsLib::XML, Document)
+    ZS_DECLARE_USING_PTR(zsLib::XML, Text)
 
     typedef CryptoPP::SecBlock<byte, CryptoPP::AllocatorWithNul<byte> > SecureByteBlockWithNulAllocator;
     ZS_DECLARE_TYPEDEF_PTR(SecureByteBlockWithNulAllocator, SecureByteBlock)

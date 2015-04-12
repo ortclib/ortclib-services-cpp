@@ -291,6 +291,198 @@ namespace openpeer
         return Helper::convertToBuffer(output, length);
       }
 
+      //---------------------------------------------------------------------
+      String Helper::getAttributeID(ElementPtr el)
+      {
+        return Helper::getAttribute(el, "id");
+      }
+
+      //---------------------------------------------------------------------
+      void Helper::setAttributeIDWithText(ElementPtr elem, const String &value)
+      {
+        if (value.isEmpty()) return;
+        Helper::setAttributeWithText(elem, "id", value);
+      }
+
+      //---------------------------------------------------------------------
+      void Helper::setAttributeIDWithNumber(ElementPtr elem, const String &value)
+      {
+        if (value.isEmpty()) return;
+        Helper::setAttributeWithNumber(elem, "id", value);
+      }
+
+      //-----------------------------------------------------------------------
+      String Helper::getAttribute(
+                                  ElementPtr node,
+                                  const String &attributeName
+                                  )
+      {
+        if (!node) return String();
+
+        AttributePtr attribute = node->findAttribute(attributeName);
+        if (!attribute) return String();
+
+        return attribute->getValue();
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::setAttributeWithText(
+                                        ElementPtr elem,
+                                        const String &attrName,
+                                        const String &value
+                                        )
+      {
+        if (!elem) return;
+        if (value.isEmpty()) return;
+
+        AttributePtr attr = Attribute::create();
+        attr->setName(attrName);
+        attr->setValue(value);
+
+        elem->setAttribute(attr);
+      }
+
+      //-----------------------------------------------------------------------
+      void Helper::setAttributeWithNumber(
+                                          ElementPtr elem,
+                                          const String &attrName,
+                                          const String &value
+                                          )
+      {
+        if (!elem) return;
+        if (value.isEmpty()) return;
+
+        AttributePtr attr = Attribute::create();
+        attr->setName(attrName);
+        attr->setValue(value);
+        attr->setQuoted(false);
+
+        elem->setAttribute(attr);
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElement(const String &elName)
+      {
+        ElementPtr tmp = Element::create();
+        tmp->setValue(elName);
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithText(
+                                               const String &elName,
+                                               const String &textVal
+                                               )
+      {
+        ElementPtr tmp = Element::create(elName);
+
+        if (textVal.isEmpty()) return tmp;
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValue(textVal, Text::Format_JSONStringEncoded);
+
+        tmp->adoptAsFirstChild(tmpTxt);
+
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithNumber(
+                                                 const String &elName,
+                                                 const String &numberAsStringValue
+                                                 )
+      {
+        ElementPtr tmp = Element::create(elName);
+
+        if (numberAsStringValue.isEmpty()) {
+          TextPtr tmpTxt = Text::create();
+          tmpTxt->setValue("0", Text::Format_JSONNumberEncoded);
+          tmp->adoptAsFirstChild(tmpTxt);
+          return tmp;
+        }
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValue(numberAsStringValue, Text::Format_JSONNumberEncoded);
+        tmp->adoptAsFirstChild(tmpTxt);
+
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithTime(
+                                               const String &elName,
+                                               Time time
+                                               )
+      {
+        return createElementWithNumber(elName, IHelper::timeToString(time));
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithTextAndJSONEncode(
+                                                            const String &elName,
+                                                            const String &textVal
+                                                            )
+      {
+        ElementPtr tmp = Element::create(elName);
+        if (textVal.isEmpty()) return tmp;
+
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValueAndJSONEncode(textVal);
+        tmp->adoptAsFirstChild(tmpTxt);
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithTextID(
+                                                 const String &elName,
+                                                 const String &idValue
+                                                 )
+      {
+        ElementPtr tmp = createElement(elName);
+
+        if (idValue.isEmpty()) return tmp;
+
+        setAttributeIDWithText(tmp, idValue);
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr Helper::createElementWithNumberID(
+                                                   const String &elName,
+                                                   const String &idValue
+                                                   )
+      {
+        ElementPtr tmp = createElement(elName);
+
+        if (idValue.isEmpty()) return tmp;
+
+        setAttributeIDWithNumber(tmp, idValue);
+        return tmp;
+      }
+
+      //-----------------------------------------------------------------------
+      TextPtr Helper::createText(const String &textVal)
+      {
+        TextPtr tmpTxt = Text::create();
+        tmpTxt->setValue(textVal);
+
+        return tmpTxt;
+      }
+
+      //-----------------------------------------------------------------------
+      String Helper::getElementText(ElementPtr el)
+      {
+        if (!el) return String();
+        return el->getText();
+      }
+
+      //-----------------------------------------------------------------------
+      String Helper::getElementTextAndDecode(ElementPtr el)
+      {
+        if (!el) return String();
+        return el->getTextDecoded();
+      }
+
       //-----------------------------------------------------------------------
       String Helper::timeToString(const Time &value)
       {
@@ -1269,7 +1461,7 @@ namespace openpeer
         }
 
         if (0 != start) {
-          // special case where start is not a /
+          // case where start is not a split char
           outResult[index] = input.substr(0, start);
           ++index;
         }
@@ -1278,7 +1470,7 @@ namespace openpeer
           end = input.find(splitChar, start+1);
           
           if (end == String::npos) {
-            // there is no more splits left so copy from start / to end
+            // there is no more splits left so copy from start split char to end
             outResult[index] = input.substr(start+1);
             ++index;
             break;
@@ -1298,6 +1490,92 @@ namespace openpeer
         } while (true);
       }
       
+      //-----------------------------------------------------------------------
+      void Helper::split(
+                         const String &input,
+                         SplitMap &outResult,
+                         const char *inSplitStr
+                         )
+      {
+        String splitStr(inSplitStr);
+
+        Index index = 0;
+
+        if (0 == input.size()) return;
+        if (splitStr.isEmpty()) {
+          outResult[index] = input;
+          return;
+        }
+
+        size_t start = input.find(splitStr);
+        size_t end = String::npos;
+
+        if (String::npos == start) {
+          outResult[index] = input;
+          return;
+        }
+
+        if (0 != start) {
+          // case where start is not a split str
+          outResult[index] = input.substr(0, start);
+          ++index;
+        }
+
+        do {
+          end = input.find(splitStr, start+splitStr.length());
+
+          if (end == String::npos) {
+            // there is no more splits left so copy from start / to end
+            outResult[index] = input.substr(start+1);
+            ++index;
+            break;
+          }
+
+          // take the mid-point of the string
+          if (end != start+splitStr.length()) {
+            outResult[index] = input.substr(start+splitStr.length(), end-(start+splitStr.length()));
+            ++index;
+          } else {
+            outResult[index] = String();
+            ++index;
+          }
+
+          // the next starting point will be the current end point
+          start = end;
+        } while (true);
+      }
+      
+      //-----------------------------------------------------------------------
+      void Helper::splitPruneEmpty(
+                                   SplitMap &ioResult,
+                                   bool reindex
+                                   )
+      {
+        if (!reindex) {
+          for (auto iter_doNotUse = ioResult.begin(); iter_doNotUse != ioResult.end();) {
+            auto current = iter_doNotUse;
+            ++iter_doNotUse;
+
+            const String &value = (*current).second;
+            if (value.hasData()) continue;
+            ioResult.erase(current);
+          }
+          return;
+        }
+
+        Index index = 0;
+        SplitMap temp;
+        for (auto iter = ioResult.begin(); iter != ioResult.end(); ++iter) {
+          const String &value = (*iter).second;
+          if (value.isEmpty()) continue;
+
+          temp[index] = value;
+          ++index;
+        }
+
+        ioResult = temp;
+      }
+
       //-----------------------------------------------------------------------
       const String &Helper::get(
                                 const SplitMap &inResult,
@@ -1711,6 +1989,101 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
+    String IHelper::getAttribute(
+                                 ElementPtr el,
+                                 const String &attributeName
+                                 )
+    {
+      return internal::Helper::getAttribute(el, attributeName);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setAttributeWithText(
+                                       ElementPtr el,
+                                       const String &attrName,
+                                       const String &value
+                                       )
+    {
+      internal::Helper::setAttributeWithText(el, attrName, value);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setAttributeWithNumber(
+                                         ElementPtr el,
+                                         const String &attrName,
+                                         const String &value
+                                         )
+    {
+      internal::Helper::setAttributeWithNumber(el, attrName, value);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElement(const String &elName)
+    {
+      return internal::Helper::createElement(elName);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithText(
+                                              const String &elName,
+                                              const String &textVal
+                                              )
+    {
+      return internal::Helper::createElementWithText(elName, textVal);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithNumber(
+                                                const String &elName,
+                                                const String &numberAsStringValue
+                                                )
+    {
+      return internal::Helper::createElementWithNumber(elName, numberAsStringValue);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithTime(
+                                              const String &elName,
+                                              Time time
+                                              )
+    {
+      return internal::Helper::createElementWithTime(elName, time);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithTextAndJSONEncode(
+                                                           const String &elName,
+                                                           const String &textVal
+                                                           )
+    {
+      return internal::Helper::createElementWithTextAndJSONEncode(elName, textVal);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithTextID(
+                                                const String &elName,
+                                                const String &idValue
+                                                )
+    {
+      return internal::Helper::createElementWithTextID(elName, idValue);
+    }
+
+    //-------------------------------------------------------------------------
+    ElementPtr IHelper::createElementWithNumberID(
+                                                  const String &elName,
+                                                  const String &idValue
+                                                  )
+    {
+      return internal::Helper::createElementWithNumberID(elName, idValue);
+    }
+    
+    //-------------------------------------------------------------------------
+    TextPtr IHelper::createText(const String &textVal)
+    {
+      return internal::Helper::createText(textVal);
+    }
+
+    //-------------------------------------------------------------------------
     String IHelper::timeToString(const Time &value)
     {
       return internal::Helper::timeToString(value);
@@ -2078,6 +2451,25 @@ namespace openpeer
                         )
     {
       internal::Helper::split(input, outResult, splitChar);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::split(
+                        const String &input,
+                        SplitMap &outResult,
+                        const char *splitStr
+                        )
+    {
+      internal::Helper::split(input, outResult, splitStr);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::splitPruneEmpty(
+                                  SplitMap &ioResult,
+                                  bool reindex
+                                  )
+    {
+      internal::Helper::splitPruneEmpty(ioResult, reindex);
     }
 
     //-------------------------------------------------------------------------
