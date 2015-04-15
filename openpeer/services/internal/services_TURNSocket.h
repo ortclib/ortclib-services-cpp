@@ -186,6 +186,7 @@ namespace openpeer
         virtual IPAddress getActiveServerIP();
         virtual IPAddress getRelayedIP();
         virtual IPAddress getReflectedIP();
+        virtual IPAddress getServerResponseIP() const;
 
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,

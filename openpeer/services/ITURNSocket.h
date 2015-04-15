@@ -119,6 +119,7 @@ namespace openpeer
       virtual IPAddress getActiveServerIP() = 0;
       virtual IPAddress getRelayedIP() = 0;
       virtual IPAddress getReflectedIP() = 0;
+      virtual IPAddress getServerResponseIP() const = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the TURN socket that it has a packet that it must

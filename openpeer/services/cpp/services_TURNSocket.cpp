@@ -493,6 +493,13 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      IPAddress TURNSocket::getServerResponseIP()
+      {
+        AutoRecursiveLock lock(mLock);
+        return mAllocateResponseIP;
+      }
+
+      //-----------------------------------------------------------------------
       bool TURNSocket::handleSTUNPacket(
                                         IPAddress fromIPAddress,
                                         STUNPacketPtr turnPacket
