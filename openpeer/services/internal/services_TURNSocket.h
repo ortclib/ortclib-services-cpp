@@ -183,9 +183,9 @@ namespace openpeer
                                 bool bindChannelIfPossible = false
                                 );
 
-        virtual IPAddress getActiveServerIP();
-        virtual IPAddress getRelayedIP();
-        virtual IPAddress getReflectedIP();
+        virtual IPAddress getActiveServerIP() const;
+        virtual IPAddress getRelayedIP() const;
+        virtual IPAddress getReflectedIP() const;
         virtual IPAddress getServerResponseIP() const;
 
         virtual bool handleSTUNPacket(

@@ -130,6 +130,11 @@ namespace openpeer
       virtual Time getNextRetryAfterTime() const = 0;
 
       //-----------------------------------------------------------------------
+      // PURPOSE: Check to see if the backoff timer will no longer attempt
+      //          again due to complete retry failures.
+      virtual bool hasFullyFailed() const = 0;
+
+      //-----------------------------------------------------------------------
       // PURPOSE: After a retry attempt has occured has failed notify the
       //          retry after timer of the failure
       virtual void notifyFailure() = 0;

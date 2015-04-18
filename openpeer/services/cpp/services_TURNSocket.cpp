@@ -471,7 +471,7 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getActiveServerIP()
+      IPAddress TURNSocket::getActiveServerIP() const
       {
         AutoRecursiveLock lock(mLock);
         if (!mActiveServer) return IPAddress();
@@ -479,21 +479,21 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getRelayedIP()
+      IPAddress TURNSocket::getRelayedIP() const
       {
         AutoRecursiveLock lock(mLock);
         return mRelayedIP;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getReflectedIP()
+      IPAddress TURNSocket::getReflectedIP() const
       {
         AutoRecursiveLock lock(mLock);
         return mReflectedIP;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getServerResponseIP()
+      IPAddress TURNSocket::getServerResponseIP() const
       {
         AutoRecursiveLock lock(mLock);
         return mAllocateResponseIP;

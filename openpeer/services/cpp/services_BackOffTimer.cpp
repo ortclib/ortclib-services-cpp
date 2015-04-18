@@ -213,10 +213,18 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      bool BackOffTimer::hasFullyFailed() const
+      {
+        AutoRecursiveLock lock(*this);
+        return mFinalFailure;
+      }
+
+      //-----------------------------------------------------------------------
       void BackOffTimer::notifyFailure()
       {
         typedef decltype(mLastRetryTimer) CronoType;
         typedef decltype(mLastRetryTimer)::rep ClockRepType;
+
         AutoRecursiveLock lock(*this);
 
         if (mTimer) {

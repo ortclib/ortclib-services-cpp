@@ -103,6 +103,8 @@ namespace openpeer
 
         virtual Time getNextRetryAfterTime() const;
 
+        virtual bool hasFullyFailed() const;
+
         virtual void notifyFailure();
 
         static BackOffTimerPtr create(
