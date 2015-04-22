@@ -89,6 +89,7 @@ namespace openpeer
         return length + (sizeof(DWORD) - (length % sizeof(DWORD)));
       }
 
+      //-----------------------------------------------------------------------
       static const char *toString(ITURNSocket::TURNSocketStates state)
       {
         switch (state)
@@ -102,6 +103,7 @@ namespace openpeer
         return "UNDEFINED";
       }
 
+      //-----------------------------------------------------------------------
       static const char *toString(ITURNSocket::TURNSocketErrors error)
       {
         switch (error)
@@ -2684,6 +2686,18 @@ namespace openpeer
     #pragma mark
     #pragma mark ITURNSocket
     #pragma mark
+
+    //-------------------------------------------------------------------------
+    const char *ITURNSocket::toString(TURNSocketStates state)
+    {
+      return internal::toString(state);
+    }
+
+    //-------------------------------------------------------------------------
+    const char *ITURNSocket::toString(TURNSocketErrors error)
+    {
+      return internal::toString(error);
+    }
 
     //-------------------------------------------------------------------------
     ITURNSocketPtr ITURNSocket::create(

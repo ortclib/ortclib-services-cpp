@@ -61,6 +61,7 @@ namespace openpeer
         TURNSocketState_ShuttingDown,
         TURNSocketState_Shutdown,
       };
+      static const char *toString(TURNSocketStates state);
 
       enum TURNSocketErrors
       {
@@ -72,6 +73,7 @@ namespace openpeer
         TURNSocketError_UnexpectedSocketFailure,
         TURNSocketError_BogusDataOnSocketReceived,
       };
+      static const char *toString(TURNSocketErrors error);
 
       static ITURNSocketPtr create(
                                    IMessageQueuePtr queue,
