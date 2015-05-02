@@ -90,6 +90,8 @@ namespace openpeer
       virtual STUNPacketPtr getRequest() const = 0;
 
       virtual Milliseconds getMaxTimeout() const = 0;
+
+      virtual size_t getTotalTries() const = 0;
     };
 
     //-------------------------------------------------------------------------

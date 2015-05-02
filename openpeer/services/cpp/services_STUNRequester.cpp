@@ -79,7 +79,6 @@ namespace openpeer
         mServerIP(serverIP),
         mUsingRFC(usingRFC),
         mCurrentTimeout(Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS)),
-        mTryNumber(0),
         mRequestStartTime(zsLib::now()),
         mMaxTimeout(Milliseconds() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
       {
@@ -211,6 +210,13 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
         return mMaxTimeout;
+      }
+
+      //-----------------------------------------------------------------------
+      size_t STUNRequester::getTotalTries() const
+      {
+        AutoRecursiveLock lock(mLock);
+        return mTotalTries;
       }
 
       //-----------------------------------------------------------------------
@@ -391,6 +397,7 @@ namespace openpeer
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
 
           try {
+            ++mTotalTries;
             mDelegate->onSTUNRequesterSendPacket(mThisWeak.lock(), mServerIP, packet);
           } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
             ZS_LOG_WARNING(Trace, log("delegate gone thus cancelling requester"))

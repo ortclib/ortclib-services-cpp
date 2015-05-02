@@ -133,6 +133,8 @@ namespace openpeer
 
         virtual Milliseconds getMaxTimeout() const;
 
+        virtual size_t getTotalTries() const;
+
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark STUNRequester => ISTUNRequesterForSTUNRequesterManager
@@ -182,12 +184,14 @@ namespace openpeer
         TimerPtr mMaxTimeTimer;
 
         Milliseconds mCurrentTimeout;
-        ULONG mTryNumber;
+        ULONG mTryNumber {0};
 
         STUNPacket::RFCs mUsingRFC;
 
         Time mRequestStartTime;
         Milliseconds mMaxTimeout;
+
+        size_t mTotalTries {0};
       };
 
       //-----------------------------------------------------------------------
