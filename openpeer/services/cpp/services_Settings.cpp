@@ -182,7 +182,9 @@ namespace openpeer
           if (!delegate) {
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return String();
-            return (*found).second.second;
+            auto result = (*found).second.second;
+            ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+            return result;
           }
         }
 
@@ -202,7 +204,9 @@ namespace openpeer
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return 0;
             try {
-              return Numeric<LONG>((*found).second.second);
+              auto result = Numeric<LONG>((*found).second.second);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              return result;
             } catch(Numeric<LONG>::ValueOutOfRange &) {
             }
             return 0;
@@ -225,7 +229,9 @@ namespace openpeer
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return 0;
             try {
-              return Numeric<ULONG>((*found).second.second);
+              auto result = Numeric<ULONG>((*found).second.second);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              return result;
             } catch(Numeric<ULONG>::ValueOutOfRange &) {
             }
             return 0;
@@ -248,7 +254,9 @@ namespace openpeer
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return false;
             try {
-              return Numeric<bool>((*found).second.second);
+              auto result = Numeric<bool>((*found).second.second);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              return result;
             } catch(Numeric<bool>::ValueOutOfRange &) {
             }
             return false;
@@ -271,7 +279,9 @@ namespace openpeer
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return 0;
             try {
-              return Numeric<float>((*found).second.second);
+              auto result = Numeric<float>((*found).second.second);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              return result;
             } catch(Numeric<float>::ValueOutOfRange &) {
             }
             return 0;
@@ -294,7 +304,9 @@ namespace openpeer
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return 0;
             try {
-              return Numeric<double>((*found).second.second);
+              auto result = Numeric<double>((*found).second.second);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              return result;
             } catch(Numeric<double>::ValueOutOfRange &) {
             }
             return 0;
@@ -318,6 +330,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_String, String(value));
+            ZS_LOG_TRACE(log("set string") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -339,6 +352,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_Int, string(value));
+            ZS_LOG_TRACE(log("set int") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -360,6 +374,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_UInt, string(value));
+            ZS_LOG_TRACE(log("set uint") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -381,6 +396,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_Bool, string(value));
+            ZS_LOG_TRACE(log("set bool") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -402,6 +418,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_Float, string(value));
+            ZS_LOG_TRACE(log("set float") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -423,6 +440,7 @@ namespace openpeer
 
           if (!delegate) {
             (*mStored)[String(key)] = ValuePair(DataType_Double, string(value));
+            ZS_LOG_TRACE(log("set double") + ZS_PARAM("key", key) + ZS_PARAM("value", value))
             return;
           }
         }
@@ -444,6 +462,7 @@ namespace openpeer
             if (found == mStored->end()) return;
 
             mStored->erase(found);
+            ZS_LOG_TRACE(log("clear setting") + ZS_PARAM("key", key))
             return;
           }
         }
@@ -645,6 +664,8 @@ namespace openpeer
           delegate = mDelegate;
 
           mStored->clear();
+
+          ZS_LOG_TRACE(log("clear all"))
 
           if (!delegate) return;
         }

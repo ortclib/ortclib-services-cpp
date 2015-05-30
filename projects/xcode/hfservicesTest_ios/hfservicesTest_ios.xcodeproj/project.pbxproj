@@ -125,7 +125,7 @@
 		00BDBF9E1A1A6D3400F0DA1C /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		00BDBF9F1A1A6D3400F0DA1C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		00BDBFA01A1A6D3400F0DA1C /* TestCanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCanonicalXML.cpp; sourceTree = "<group>"; };
-		00BDBFA11A1A6D3400F0DA1C /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
+		00BDBFA11A1A6D3400F0DA1C /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		00BDBFA21A1A6D3400F0DA1C /* TestDNS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDNS.cpp; sourceTree = "<group>"; };
 		00BDBFA31A1A6D3400F0DA1C /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
 		00BDBFA41A1A6D3400F0DA1C /* TestICESocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestICESocket.cpp; sourceTree = "<group>"; };

@@ -112,13 +112,6 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      static String getElementTextAndDecode(ElementPtr node)
-      {
-        if (!node) return String();
-        return node->getTextDecoded();
-      }
-
-      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -2081,6 +2074,18 @@ namespace openpeer
     TextPtr IHelper::createText(const String &textVal)
     {
       return internal::Helper::createText(textVal);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::getElementText(ElementPtr el)
+    {
+      return internal::Helper::getElementText(el);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::getElementTextAndDecode(ElementPtr el)
+    {
+      return internal::Helper::getElementTextAndDecode(el);
     }
 
     //-------------------------------------------------------------------------

@@ -1550,7 +1550,8 @@ namespace openpeer
             if (!server->mIsUDP) {
               if (!server->mTCPSocket) {
                 ZS_LOG_DEBUG(log("creating socket for TCP") + ZS_PARAM("server IP", server->mServerIP.string()))
-                server->mTCPSocket = Socket::createTCP();
+                auto createFamily = (server->mServerIP.isIPv6() ? Socket::Create::IPv6 : Socket::Create::IPv4);
+                server->mTCPSocket = Socket::createTCP(createFamily);
                 server->mTCPSocket->setBlocking(false);
                 try {
 #ifndef __QNX__
