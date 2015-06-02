@@ -53,8 +53,9 @@ using namespace openpeer::services::test;
 ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
 ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
 
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimer, UseBackoffRetry)
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimerDelegate, UseBackoffRetryDelegate)
+ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimer, UseBackOffTimer)
+ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimerDelegate, UseBackOffTimerDelegate)
+ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimerPattern, UseBackOffTimerPattern)
 ZS_DECLARE_TYPEDEF_PTR(openpeer::services::ISettings, UseSettings)
 
 template <typename duration_type>
@@ -72,43 +73,63 @@ static void timeCheck(
 
 static void testRetry1()
 {
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,6///");
+  UseBackOffTimerPatternPtr pattern = UseBackOffTimerPattern::create();
+  pattern->addNextRetryAfterFailureDuration(Seconds(1));
+  pattern->addNextRetryAfterFailureDuration(Seconds(2));
+  pattern->addNextRetryAfterFailureDuration(Seconds(4));
+  pattern->addNextRetryAfterFailureDuration(Seconds(6));
+
+  UseBackOffTimerPtr backoff = UseBackOffTimer::create(pattern);
   TESTING_CHECK(backoff)
 
   Time now = zsLib::now();
 
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
 
-  backoff->notifyFailure();
-  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  backoff->notifyAttempting();
+  backoff->notifyAttemptFailed();
+  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), Seconds(1));
 
-  backoff->notifyFailure();
-  TESTING_EQUAL(string(Seconds(2)), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  backoff->notifyTryAgainNow();
+  backoff->notifyAttempting();
+  backoff->notifyAttemptFailed();
+  TESTING_EQUAL(string(Seconds(2)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), Seconds(2));
 
-  backoff->notifyFailure();
-  TESTING_EQUAL(string(Seconds(4)), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  backoff->notifyTryAgainNow();
+  backoff->notifyAttempting();
+  backoff->notifyAttemptFailed();
+  TESTING_EQUAL(string(Seconds(4)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), Seconds(4));
 
-  backoff->notifyFailure();
-  TESTING_EQUAL(string(Seconds(6)), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  backoff->notifyTryAgainNow();
+  backoff->notifyAttempting();
+  backoff->notifyAttemptFailed();
+  TESTING_EQUAL(string(Seconds(6)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), Seconds(6));
 
-  backoff->notifyFailure();
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-  TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
+  backoff->notifyTryAgainNow();
+  backoff->notifyAttempting();
+  backoff->notifyAttemptFailed();
+  TESTING_EQUAL(string(Seconds(6)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
+  timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), Seconds(6));
 }
 
 static void testRetry2()
 {
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:60///");
+  UseBackOffTimerPatternPtr pattern = UseBackOffTimerPattern::create();
+  pattern->addNextRetryAfterFailureDuration(Seconds(1));
+  pattern->setMultiplierForLastRetryAfterFailureDuration(2.0);
+  pattern->setMaxRetryAfterFailureDuration(Seconds(60));
+
+  UseBackOffTimerPtr backoff = UseBackOffTimer::create(pattern);
   TESTING_CHECK(backoff)
 
   Time now = zsLib::now();
 
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
 
   Seconds current(1);
@@ -118,22 +139,32 @@ static void testRetry2()
       current = Seconds(60);
     }
 
-    backoff->notifyFailure();
-    TESTING_EQUAL(string(current), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+    backoff->notifyAttempting();
+    backoff->notifyAttemptFailed();
+
+    TESTING_EQUAL(string(current), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
     timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), current);
 
     current *= 2;
+
+    backoff->notifyTryAgainNow();
   }
 }
 
 static void testRetry3()
 {
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:60//15/");
+  UseBackOffTimerPatternPtr pattern = UseBackOffTimerPattern::create();
+  pattern->setMaxAttempts(15);
+  pattern->addNextRetryAfterFailureDuration(Seconds(1));
+  pattern->setMultiplierForLastRetryAfterFailureDuration(2.0);
+  pattern->setMaxRetryAfterFailureDuration(Seconds(60));
+
+  UseBackOffTimerPtr backoff = UseBackOffTimer::create(pattern);
   TESTING_CHECK(backoff)
 
   Time now = zsLib::now();
 
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
 
   Seconds current(1);
@@ -143,27 +174,36 @@ static void testRetry3()
       current = Seconds(60);
     }
 
-    backoff->notifyFailure();
+    backoff->notifyAttempting();
+    backoff->notifyAttemptFailed();
 
-    if (loop < 15) {
-      TESTING_EQUAL(string(current), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+    if (loop < 14) {
+      TESTING_EQUAL(string(current), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
       timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), current);
     } else {
-      TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-      TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
+      TESTING_CHECK(backoff->isComplete())
+      TESTING_CHECK(backoff->haveAllAttemptsFailed())
     }
 
     current *= 2;
+
+    backoff->notifyTryAgainNow();
   }
 }
 
 static void testRetry4()
 {
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:60//15/", 16);
+  UseBackOffTimerPatternPtr pattern = UseBackOffTimerPattern::create();
+  pattern->setMaxAttempts(15);
+  pattern->addNextRetryAfterFailureDuration(Seconds(1));
+  pattern->setMultiplierForLastRetryAfterFailureDuration(2.0);
+  pattern->setMaxRetryAfterFailureDuration(Seconds(60));
+
+  UseBackOffTimerPtr backoff = UseBackOffTimer::create(pattern, 16);
   TESTING_CHECK(backoff)
 
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-  TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
+  TESTING_CHECK(backoff->isComplete())
+  TESTING_CHECK(backoff->haveAllAttemptsFailed())
 }
 
 static void testRetry5(MessageQueueThreadPtr queue)
@@ -171,7 +211,7 @@ static void testRetry5(MessageQueueThreadPtr queue)
   ZS_DECLARE_CLASS_PTR(BackoffDelegate)
 
   class BackoffDelegate : public MessageQueueAssociator,
-                          public UseBackoffRetryDelegate
+                          public UseBackOffTimerDelegate
   {
   public:
     BackoffDelegate(IMessageQueuePtr queue) :
@@ -181,84 +221,101 @@ static void testRetry5(MessageQueueThreadPtr queue)
 
     ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimer, IBackOffTimer)
 
-    virtual void onBackOffTimerAttemptAgainNow(IBackOffTimerPtr timer)
+    virtual void onBackOffTimerStateChanged(
+                                            IBackOffTimerPtr timer,
+                                            IBackOffTimer::States state
+                                            ) override
     {
       mAttemptNowTime = zsLib::now();
 
-      ++mFiredAttemptAgainNow;
-      ZS_LOG_BASIC("backoff attempt again now")
-    }
+      ZS_LOG_BASIC(zsLib::Log::Params("backoff state changed") + ZS_PARAM("state", UseBackOffTimer::toString(state)))
 
-    virtual void onBackOffTimerAttemptTimeout(IBackOffTimerPtr backoff)
-    {
-      zsLib::Time now = zsLib::now();
+      switch (state) {
+        case IBackOffTimer::State_AttemptNow:                 {
+          ++mFiredAttemptNow;
+          timer->notifyAttempting();
+          break;
+        }
+        case IBackOffTimer::State_Attempting:                 {
+          ++mFiredAttemptting;
+          break;
+        }
+        case IBackOffTimer::State_WaitingAfterAttemptFailure: {
+          ++mFiredAttemptFailures;
+          TESTING_EQUAL(string(mCurrent), string(timer->getNextRetryAfterFailureDuration<Seconds>()))
 
-      TESTING_CHECK(now - mAttemptNowTime >= Seconds(5))
-      TESTING_CHECK(now - mAttemptNowTime < Seconds(8))
-      mAttemptNowTime = Time();
-
-      ++mFiredAttemptTimeout;
-
-      backoff->notifyFailure();
-
-      if (mFiredAttemptTimeout < 12) {
-        TESTING_EQUAL(string(mCurrent), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-        timeCheck<Seconds>(now, backoff->getNextRetryAfterTime(), mCurrent);
-      } else {
-        TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-        TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
+          mCurrent *= 2;
+          if (mCurrent > Seconds(10)) {
+            mCurrent = Seconds(10);
+          }
+          break;
+        }
+        case IBackOffTimer::State_AllAttemptsFailed:          {
+          ++mFiredAllAttemptsFailed;
+          TESTING_CHECK(timer->isComplete())
+          TESTING_CHECK(timer->haveAllAttemptsFailed())
+          TESTING_CHECK(!timer->isSuccessful())
+          break;
+        }
+        case IBackOffTimer::State_Succeeded:                  {
+          ++mFiredSucceeded;
+          TESTING_CHECK(timer->isComplete())
+          TESTING_CHECK(!timer->haveAllAttemptsFailed())
+          TESTING_CHECK(timer->isSuccessful())
+          break;
+        }
       }
 
-      mCurrent *= 2;
-      if (mCurrent > Seconds(10)) {
-        mCurrent = Seconds(10);
-      }
-    }
-
-    virtual void onBackOffTimerAllAttemptsFailed(IBackOffTimerPtr backoff)
-    {
-      TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
-      TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
-
-      ++mFiredFailed;
     }
 
   public:
 
     Time mAttemptNowTime;
 
-    size_t mFiredAttemptAgainNow {};
-    size_t mFiredAttemptTimeout {};
-    size_t mFiredFailed {};
+    size_t mFiredAttemptNow {};
+    size_t mFiredAttemptting {};
+    size_t mFiredAttemptFailures {};
+    size_t mFiredAllAttemptsFailed {};
+    size_t mFiredSucceeded {};
 
-    Seconds mCurrent {2};
+    Seconds mCurrent {1};
   };
 
   BackoffDelegatePtr delegate = BackoffDelegatePtr(new BackoffDelegate(queue));
 
-  UseBackoffRetryPtr backoff = UseBackoffRetry::create<Seconds>("/1,2,4,8,*2:10/5/12/", delegate);
+  UseBackOffTimerPatternPtr pattern = UseBackOffTimerPattern::create();
+  pattern->setMaxAttempts(12);
+  pattern->addNextRetryAfterFailureDuration(Seconds(1));
+  pattern->setMultiplierForLastRetryAfterFailureDuration(2.0);
+  pattern->setMaxRetryAfterFailureDuration(Seconds(10));
+  pattern->addNextAttemptTimeout(Seconds(5));
+
+  UseBackOffTimerPtr backoff = UseBackOffTimer::create(pattern, delegate);
   TESTING_CHECK(backoff)
 
-  TESTING_EQUAL(string(Seconds()), string(backoff->getNextRetryAfterWaitPeriod<Seconds>()))
+  TESTING_EQUAL(string(Seconds(1)), string(backoff->getNextRetryAfterFailureDuration<Seconds>()))
   TESTING_EQUAL(string(Time()), string(backoff->getNextRetryAfterTime()))
 
-  backoff->notifyFailure();
+  backoff->notifyAttempting();
 
   Time start = zsLib::now();
   Seconds maxWaitTime = Seconds(200);
 
   while (true) {
     TESTING_SLEEP(1000)
-    if (delegate->mFiredFailed) break;
+    if (0 != delegate->mFiredAllAttemptsFailed) break;
     Time now = zsLib::now();
     TESTING_CHECK(start + maxWaitTime > now)
 
-    ZS_LOG_BASIC(zsLib::Log::Params("Testing backoff retry timer") + ZS_PARAM("attempt again", delegate->mFiredAttemptAgainNow) + ZS_PARAM("attempt timeout", delegate->mFiredAttemptTimeout) + ZS_PARAM("diff", now - start))
+    ZS_LOG_BASIC(zsLib::Log::Params("Testing backoff retry timer") + ZS_PARAM("attempt now", delegate->mFiredAttemptNow) + ZS_PARAM("attempting", delegate->mFiredAttemptting) + ZS_PARAM("attempt failures", delegate->mFiredAttemptFailures) + ZS_PARAM("diff", now - start))
   }
 
-  TESTING_EQUAL(delegate->mFiredFailed, 1)
-  TESTING_EQUAL(delegate->mFiredAttemptAgainNow, 12)
-  TESTING_EQUAL(delegate->mFiredAttemptTimeout, 12)
+  TESTING_EQUAL(delegate->mFiredAttemptNow, 11)
+  TESTING_EQUAL(delegate->mFiredAttemptting, 12)
+  TESTING_EQUAL(delegate->mFiredAttemptFailures, 11)
+
+  TESTING_EQUAL(delegate->mFiredSucceeded, 0)
+  TESTING_EQUAL(delegate->mFiredAllAttemptsFailed, 1)
 }
 
 void doTestBackoffRetry()

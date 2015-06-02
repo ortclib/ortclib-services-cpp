@@ -2527,7 +2527,7 @@ namespace openpeer
         }
 
         if (!newRequest) return ISTUNRequesterPtr();
-        return ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getMaxTimeout());
+        return ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getBackOffTimerPattern());
       }
 
       //-----------------------------------------------------------------------

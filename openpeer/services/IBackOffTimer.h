@@ -32,6 +32,7 @@
 #pragma once
 
 #include <openpeer/services/types.h>
+#include <openpeer/services/IBackOffTimerPattern.h>
 
 #include <zsLib/Log.h>
 
@@ -49,53 +50,59 @@ namespace openpeer
 
     interaction IBackOffTimer
     {
+      typedef IBackOffTimerPattern::DurationType DurationType;
+
+      enum States
+      {
+        State_AttemptNow,
+        State_Attempting,
+        State_WaitingAfterAttemptFailure,
+
+        State_AllAttemptsFailed,
+
+        State_Succeeded,
+      };
+
+      static const char *toString(States state);
+
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug element containing internal object state
       static ElementPtr toDebug(IBackOffTimerPtr timer);
 
       //-----------------------------------------------------------------------
-      // PURPOSE: create a retry after timer
-      // NOTES:   the pattern is encoded as follows:
-      //          /retry1,retry2,.../optional_timeout/max_number_retries/
-      //
-      //          e.g.: /2,4,8,16,32,64/10//
-      //          - retry after 2, 4, 6, 8, 32, 64 units of time.
-      //          - each attempt fails after 10 units of time of trying
-      //          - after the final retry fail entirely
-      //
-      //          e.g.: /2,4,8,16,32,64///
-      //          - retry after 2, 4, 8, 32, 64 units of time.
-      //          - each attempt takes as long as it takes to fail
-      //          - after the final retry fail entirely
-      //
-      //          e.g.: /1,2,3,5,*2/60/10/
-      //          - retry after 1,2,5, 5*2=10, 10*2=20, ...
-      //          - each attempt fails after 60 units of time of trying
-      //          - retry forever with a maximum retry of 10 times
-      //
-      //          e.g.: /1,*2:600/60/20/
-      //          - retry after 1,2,5, 5*2=10, 10*2=20, ...
-      //          - each attempt fails after 60 units of time of trying
-      //          - retry with a maximum of 600 units of time up to a maximum
-      //            of 20 retry attempts
-      template <class TimeUnit>
+      // PURPOSE: Create a backoff timer using a pre-created pattern
       static IBackOffTimerPtr create(
-                                     const char *pattern,                                                      // the timeout and retry backoff pattern to use
+                                     IBackOffTimerPatternPtr pattern,
                                      size_t totalFailuresThusFar = 0,
                                      IBackOffTimerDelegatePtr delegate = IBackOffTimerDelegatePtr()
+                                     );
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Create a backoff timer using a pattern
+      static IBackOffTimerPtr create(
+                                     IBackOffTimerPatternPtr pattern,
+                                     IBackOffTimerDelegatePtr delegate
                                      ) {
-        return create(pattern, std::chrono::duration_cast<Microseconds>(TimeUnit(1)), totalFailuresThusFar, delegate);
+        return create(pattern, 0, delegate);
       }
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Creation function without option to specify total failures
-      //          thus far.
-      template <class TimeUnit>
+      // PURPOSE: Create a backoff timer using a previuosly saved pattern
       static IBackOffTimerPtr create(
-                                     const char *pattern,                                                      // the timeout and retry backoff pattern to use
+                                     const char *pattern,
                                      IBackOffTimerDelegatePtr delegate
                                      ) {
-        return create(pattern, std::chrono::duration_cast<Microseconds>(TimeUnit(1)), 0, delegate);
+        return create(IBackOffTimerPattern::create(pattern), 0, delegate);
+      }
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Create a backoff timer using a previuosly saved pattern
+      static IBackOffTimerPtr create(
+                                     const char *pattern,
+                                     size_t totalFailuresThusFar = 0,
+                                     IBackOffTimerDelegatePtr delegate = IBackOffTimerDelegatePtr()
+                                     ) {
+        return create(IBackOffTimerPattern::create(pattern), totalFailuresThusFar, delegate);
       }
 
       //-----------------------------------------------------------------------
@@ -111,47 +118,81 @@ namespace openpeer
       virtual void cancel() = 0;
 
       //-----------------------------------------------------------------------
+      // PURPOSE: Get the timeout pattern in use
+      virtual IBackOffTimerPatternPtr getPattern() const = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Get the attempt number happening right now (0 based)
+      virtual size_t getAttemptNumber() const = 0;
+
+      //-----------------------------------------------------------------------
       // PURPOSE: Get the total failures thus far
       virtual size_t getTotalFailures() const = 0;
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Get the total failures thus far
-      virtual size_t getMaxFailures() const = 0;
+      // PURPOSE: Returns the current backoff timer state
+      virtual States getState() const = 0;
 
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if an attempt should be attempted at this time
+      bool shouldAttemptNow() const {return State_AttemptNow == getState();}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if an attempt is in progress
+      bool isAttempting() const {return State_Attempting == getState();}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if the attempt failed (and must wait until
+      //          next attempt)
+      bool isWaitingForNextAttempt() const {return State_WaitingAfterAttemptFailure == getState();}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if an attempt is in progress
+      bool isComplete() const {auto state = getState(); return ((State_AllAttemptsFailed == state) || (State_Succeeded == state));}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if an attempt is in progress
+      bool haveAllAttemptsFailed() const {return State_AllAttemptsFailed == getState();}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Returns true if an attempt is in progress
+      bool isSuccessful() const {return State_Succeeded == getState();}
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Get the wait duration of the next retry after period
       template <class TimeUnit>
-      TimeUnit getNextRetryAfterWaitPeriod() {
-        Microseconds result = actualGetNextRetryAfterWaitPeriod();
-        if (Microseconds() == result) return TimeUnit();
-        return std::chrono::duration_cast<TimeUnit>(result);
-      }
+      TimeUnit getNextRetryAfterFailureDuration() {return std::chrono::duration_cast<TimeUnit>(actualGetNextRetryAfterFailureDuration());}
 
       //-----------------------------------------------------------------------
       // PURPOSE: Get the time when the next retry after is supposed to occur
       virtual Time getNextRetryAfterTime() const = 0;
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Check to see if the backoff timer will no longer attempt
-      //          again due to complete retry failures.
-      virtual bool hasFullyFailed() const = 0;
+      // PURPOSE: Notify the engine that an attempt has failed
+      // NOTES:   Must be in the "State_AttemptNow" or call is ignored
+      virtual void notifyAttempting() = 0;
 
       //-----------------------------------------------------------------------
-      // PURPOSE: After a retry attempt has occured has failed notify the
-      //          retry after timer of the failure
-      virtual void notifyFailure() = 0;
+      // PURPOSE: Notify the engine that an attempt has failed
+      // NOTES:   Must be in the "State_Attempting" or call is ignored
+      virtual void notifyAttemptFailed() = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Notify the engine that an attempt should be made again
+      // NOTES:   Must be in the "State_WaitingAfterAttemptFailure"
+      //          or call is ignored
+      virtual void notifyTryAgainNow() = 0;
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Notify the engine that an attempt should be made again
+      // NOTES:   Must be in the "State_WaitingAfterAttemptFailure"
+      //          or call is ignored
+      virtual void notifySucceeded() = 0;
 
     protected:
       //-----------------------------------------------------------------------
-      // PURPOSE: Create a backoff retry timer based upon a time out period
-      static IBackOffTimerPtr create(
-                                     const char *pattern,
-                                     const Microseconds &unit,
-                                     size_t totalFailuresThusFar = 0,
-                                     IBackOffTimerDelegatePtr delegate = IBackOffTimerDelegatePtr()
-                                     );
-
-      //-----------------------------------------------------------------------
       // PURPOSE: Get the time when the next retry after is supposed to occur
-      virtual Microseconds actualGetNextRetryAfterWaitPeriod() = 0;
+      virtual DurationType actualGetNextRetryAfterFailureDuration() = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -164,17 +205,12 @@ namespace openpeer
 
     interaction IBackOffTimerDelegate
     {
-      //-----------------------------------------------------------------------
-      // PURPOSE: notify another retry attempt should be made
-      virtual void onBackOffTimerAttemptAgainNow(IBackOffTimerPtr timer) = 0;
+      typedef IBackOffTimer::States States;
 
-      //-----------------------------------------------------------------------
-      // PURPOSE: notify an individual attempt should timeout now
-      virtual void onBackOffTimerAttemptTimeout(IBackOffTimerPtr timer) = 0;
-
-      //-----------------------------------------------------------------------
-      // PURPOSE: notify of a complete failure of all retries
-      virtual void onBackOffTimerAllAttemptsFailed(IBackOffTimerPtr timer) = 0;
+      virtual void onBackOffTimerStateChanged(
+                                              IBackOffTimerPtr timer,
+                                              States state
+                                              ) = 0;
     };
 
     //-------------------------------------------------------------------------
@@ -199,14 +235,12 @@ namespace openpeer
 
 ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackOffTimerDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackOffTimerPtr, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackOffTimerAttemptAgainNow, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackOffTimerAttemptTimeout, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackOffTimerAllAttemptsFailed, IBackOffTimerPtr)
+ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackOffTimer::States, States)
+ZS_DECLARE_PROXY_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IBackOffTimerDelegate, openpeer::services::IBackOffTimerSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackOffTimerPtr, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackOffTimerAttemptAgainNow, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackOffTimerAttemptTimeout, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackOffTimerAllAttemptsFailed, IBackOffTimerPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackOffTimer::States, States)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

@@ -34,6 +34,9 @@
 #include <openpeer/services/internal/types.h>
 #include <openpeer/services/ISTUNRequester.h>
 #include <openpeer/services/STUNPacket.h>
+
+#include <openpeer/services/IBackOffTimer.h>
+
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Timer.h>
 #include <zsLib/Proxy.h>
@@ -78,7 +81,7 @@ namespace openpeer
                             public MessageQueueAssociator,
                             public ISTUNRequester,
                             public ISTUNRequesterForSTUNRequesterManager,
-                            public ITimerDelegate
+                            public IBackOffTimerDelegate
       {
       public:
         friend interaction ISTUNRequesterFactory;
@@ -92,7 +95,7 @@ namespace openpeer
                       IPAddress serverIP,
                       STUNPacketPtr stun,
                       STUNPacket::RFCs usingRFC,
-                      Milliseconds maxTimeout
+                      IBackOffTimerPatternPtr pattern
                       );
         
         STUNRequester(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
@@ -117,23 +120,23 @@ namespace openpeer
                                        IPAddress serverIP,
                                        STUNPacketPtr stun,
                                        STUNPacket::RFCs usingRFC,
-                                       Milliseconds maxTimeout = Milliseconds()
+                                       IBackOffTimerPatternPtr pattern = IBackOffTimerPatternPtr()
                                        );
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const override {return mID;}
 
-        virtual bool isComplete() const;
+        virtual bool isComplete() const override;
 
-        virtual void cancel();
+        virtual void cancel() override;
 
-        virtual void retryRequestNow();
+        virtual void retryRequestNow() override;
 
-        virtual IPAddress getServerIP() const;
-        virtual STUNPacketPtr getRequest() const;
+        virtual IPAddress getServerIP() const override;
+        virtual STUNPacketPtr getRequest() const override;
 
-        virtual Milliseconds getMaxTimeout() const;
+        virtual IBackOffTimerPatternPtr getBackOffTimerPattern() const override;
 
-        virtual size_t getTotalTries() const;
+        virtual size_t getTotalTries() const override;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -145,14 +148,17 @@ namespace openpeer
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,
                                       STUNPacketPtr packet
-                                      );
+                                      ) override;
 
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark STUNRequester => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onBackOffTimerStateChanged(
+                                                IBackOffTimerPtr timer,
+                                                IBackOffTimer::States state
+                                                ) override;
 
       protected:
         //---------------------------------------------------------------------
@@ -162,7 +168,6 @@ namespace openpeer
 
         Log::Params log(const char *message) const;
 
-        void internalCancel();
         void step();
 
       protected:
@@ -180,18 +185,12 @@ namespace openpeer
 
         IPAddress mServerIP;
 
-        TimerPtr mTimer;
-        TimerPtr mMaxTimeTimer;
-
-        Milliseconds mCurrentTimeout;
-        ULONG mTryNumber {0};
-
         STUNPacket::RFCs mUsingRFC;
 
-        Time mRequestStartTime;
-        Milliseconds mMaxTimeout;
+        IBackOffTimerPtr mBackOffTimer;
+        IBackOffTimerPatternPtr mBackOffTimerPattern;
 
-        size_t mTotalTries {0};
+        ULONG mTotalTries {0};
       };
 
       //-----------------------------------------------------------------------
@@ -212,7 +211,7 @@ namespace openpeer
                                         IPAddress serverIP,
                                         STUNPacketPtr stun,
                                         STUNPacket::RFCs usingRFC,
-                                        Milliseconds maxTimeout = Milliseconds()
+                                        IBackOffTimerPatternPtr pattern = IBackOffTimerPatternPtr()
                                         );
       };
 

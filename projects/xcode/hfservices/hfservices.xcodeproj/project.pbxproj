@@ -13,6 +13,7 @@
 		0020ED501AB86D4300B66C74 /* services_HTTP_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0020ED4E1AB86D4300B66C74 /* services_HTTP_WinRT.cpp */; };
 		002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4819A915B500F360CE /* services_Decryptor.cpp */; };
 		002FCF4B19A915B500F360CE /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002FCF4919A915B500F360CE /* services_Encryptor.cpp */; };
+		0030F67B1B1B764A00E8649B /* services_BackOffTimerPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0030F67A1B1B764A00E8649B /* services_BackOffTimerPattern.cpp */; };
 		003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD317A607190002EB47 /* services_MessageLayerSecurityChannel.cpp */; };
 		003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD417A607190002EB47 /* services_RSAPrivateKey.cpp */; };
 		003BEDD817A607190002EB47 /* services_RSAPublicKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 003BEDD517A607190002EB47 /* services_RSAPublicKey.cpp */; };
@@ -68,6 +69,9 @@
 		002FCF4719A9159E00F360CE /* services_Encryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Encryptor.h; sourceTree = "<group>"; };
 		002FCF4819A915B500F360CE /* services_Decryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Decryptor.cpp; sourceTree = "<group>"; };
 		002FCF4919A915B500F360CE /* services_Encryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Encryptor.cpp; sourceTree = "<group>"; };
+		0030F6791B1B763C00E8649B /* services_BackOffTimerPattern.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_BackOffTimerPattern.h; sourceTree = "<group>"; };
+		0030F67A1B1B764A00E8649B /* services_BackOffTimerPattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_BackOffTimerPattern.cpp; sourceTree = "<group>"; };
+		0030F6951B1BC9B200E8649B /* IBackOffTimerPattern.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackOffTimerPattern.h; sourceTree = "<group>"; };
 		003BEDCD17A606E80002EB47 /* IMessageLayerSecurityChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageLayerSecurityChannel.h; sourceTree = "<group>"; };
 		003BEDCE17A606E80002EB47 /* IRSAPrivateKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPrivateKey.h; sourceTree = "<group>"; };
 		003BEDCF17A606E80002EB47 /* IRSAPublicKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRSAPublicKey.h; sourceTree = "<group>"; };
@@ -216,6 +220,7 @@
 				0095D95916CA83EA005F53D3 /* services.h */,
 				007E8F8F18C0DC3100364908 /* IBackgrounding.h */,
 				0073287C1A46EB3700331796 /* IBackOffTimer.h */,
+				0030F6951B1BC9B200E8649B /* IBackOffTimerPattern.h */,
 				001AEF571853DDDD00029ABC /* ICache.h */,
 				0095D93216CA83EA005F53D3 /* ICanonicalXML.h */,
 				002FCF4319A9158400F360CE /* IDecryptor.h */,
@@ -261,6 +266,7 @@
 				0095D92C16CA83EA005F53D3 /* services_services.cpp */,
 				007E8F9118C0DC5600364908 /* services_Backgrounding.cpp */,
 				0073287E1A46F4D400331796 /* services_BackOffTimer.cpp */,
+				0030F67A1B1B764A00E8649B /* services_BackOffTimerPattern.cpp */,
 				001AEF591853DE9300029ABC /* services_Cache.cpp */,
 				0095D91D16CA83EA005F53D3 /* services_CanonicalXML.cpp */,
 				002FCF4819A915B500F360CE /* services_Decryptor.cpp */,
@@ -310,6 +316,7 @@
 				00C063BC185D619400AB1438 /* services_AllocatorWithNul.h */,
 				007E8F9018C0DC4700364908 /* services_Backgrounding.h */,
 				007328801A46F4E100331796 /* services_BackOffTimer.h */,
+				0030F6791B1B763C00E8649B /* services_BackOffTimerPattern.h */,
 				001AEF581853DE6600029ABC /* services_Cache.h */,
 				0095D93A16CA83EA005F53D3 /* services_CanonicalXML.h */,
 				002FCF4619A9159E00F360CE /* services_Decryptor.h */,
@@ -440,6 +447,7 @@
 				0095DAE016CA83EB005F53D3 /* services_TURNSocket.cpp in Sources */,
 				002FCF4A19A915B500F360CE /* services_Decryptor.cpp in Sources */,
 				000CC03717A475F90075E86C /* services_Logger.cpp in Sources */,
+				0030F67B1B1B764A00E8649B /* services_BackOffTimerPattern.cpp in Sources */,
 				0020ED4F1AB86D4300B66C74 /* ifaddrs-android.cc in Sources */,
 				003BEDD617A607190002EB47 /* services_MessageLayerSecurityChannel.cpp in Sources */,
 				003BEDD717A607190002EB47 /* services_RSAPrivateKey.cpp in Sources */,

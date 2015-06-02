@@ -46,6 +46,8 @@ namespace openpeer
   {
     namespace internal
     {
+      ZS_DECLARE_INTERACTION_PTR(IBackOffTimerPatternForBackOffTimer)
+      
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -64,13 +66,11 @@ namespace openpeer
         friend interaction IBackOffTimer;
 
         ZS_DECLARE_TYPEDEF_PTR(IBackOffTimerDelegateSubscriptions, UseSubscriptions)
-
-        typedef std::vector<Microseconds> RetryTimerVector;
+        ZS_DECLARE_TYPEDEF_PTR(IBackOffTimerPatternForBackOffTimer, UsePattern)
 
       protected:
         BackOffTimer(
-                     const char *pattern,
-                     const Microseconds &unit,
+                     IBackOffTimerPatternPtr pattern,
                      size_t totalFailuresThusFar,
                      IBackOffTimerDelegatePtr delegate
                      );
@@ -81,7 +81,7 @@ namespace openpeer
         ~BackOffTimer();
 
       public:
-        static BackOffTimerPtr convert(IBackOffTimerPtr BackOffTimer);
+        static BackOffTimerPtr convert(IBackOffTimerPtr timer);
 
       protected:
         //---------------------------------------------------------------------
@@ -91,30 +91,37 @@ namespace openpeer
 
         static ElementPtr toDebug(IBackOffTimerPtr timer);
 
-        virtual IBackOffTimerSubscriptionPtr subscribe(IBackOffTimerDelegatePtr delegate);
-
-        virtual PUID getID() const {return mID;}
-
-        virtual void cancel();
-
-        virtual size_t getTotalFailures() const;
-
-        virtual size_t getMaxFailures() const;
-
-        virtual Time getNextRetryAfterTime() const;
-
-        virtual bool hasFullyFailed() const;
-
-        virtual void notifyFailure();
-
         static BackOffTimerPtr create(
-                                      const char *pattern,
-                                      const Microseconds &unit,
+                                      IBackOffTimerPatternPtr pattern,
                                       size_t totalFailuresThusFar = 0,
                                       IBackOffTimerDelegatePtr delegate = IBackOffTimerDelegatePtr()
                                       );
 
-        virtual Microseconds actualGetNextRetryAfterWaitPeriod();
+        virtual IBackOffTimerSubscriptionPtr subscribe(IBackOffTimerDelegatePtr delegate) override;
+
+        virtual PUID getID() const override {return mID;}
+
+        virtual void cancel() override;
+
+        virtual IBackOffTimerPatternPtr getPattern() const override;
+
+        virtual size_t getAttemptNumber() const override;
+
+        virtual size_t getTotalFailures() const override;
+
+        virtual States getState() const override;
+
+        virtual Time getNextRetryAfterTime() const override;
+
+        virtual void notifyAttempting() override;
+
+        virtual void notifyAttemptFailed() override;
+
+        virtual void notifyTryAgainNow() override;
+
+        virtual void notifySucceeded() override;
+
+        virtual DurationType actualGetNextRetryAfterFailureDuration() override;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -135,7 +142,9 @@ namespace openpeer
 
         virtual ElementPtr toDebug() const;
 
-        void initialzePattern();
+        void setState(States state);
+        void cancelTimer();
+        void createOneTimeTimer(DurationType timeout);
 
       protected:
         //---------------------------------------------------------------------
@@ -146,30 +155,17 @@ namespace openpeer
         AutoPUID mID;
         BackOffTimerWeakPtr mThisWeak;
 
+        UsePatternPtr mPattern; // no lock needed
+
         UseSubscriptions mSubscriptions;
         IBackOffTimerSubscriptionPtr mDefaultSubscription;
 
-        Microseconds mUnit;
+        States mCurrentState {State_AttemptNow};
+        Time mLastStateChange;
 
-        bool mShutdown {};
-        bool mFinalFailure {};
-        bool mNotifiedFailure {};
-
-        String mPattern;
-        size_t mTotalFailures {};
-
-        size_t mMaximumRetries {};
-        Microseconds mAttemptTimeout {};
-        RetryTimerVector mRetryTimerVector;
-
-        double mMultiplier {};
-        Microseconds mMaximumRetry {};
-
-        Microseconds mLastRetryTimer {};
-        Time mNextRetryAfter;
+        size_t mAttemptNumber {0};
 
         TimerPtr mTimer;
-        TimerPtr mAttemptTimer;
       };
 
       //-----------------------------------------------------------------------
@@ -185,8 +181,7 @@ namespace openpeer
         static IBackOffTimerFactory &singleton();
 
         virtual BackOffTimerPtr create(
-                                       const char *pattern,
-                                       const Microseconds &unit,
+                                       IBackOffTimerPatternPtr pattern,
                                        size_t totalFailuresThusFar,
                                        IBackOffTimerDelegatePtr delegate
                                        );

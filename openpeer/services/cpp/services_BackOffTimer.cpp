@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_BackOffTimer.h>
+#include <openpeer/services/internal/services_BackOffTimerPattern.h>
 #include <openpeer/services/internal/services_MessageQueueManager.h>
 
 #include <openpeer/services/IHelper.h>
@@ -67,30 +68,24 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       BackOffTimer::BackOffTimer(
-                                 const char *pattern,
-                                 const Microseconds &unit,
+                                 IBackOffTimerPatternPtr pattern,
                                  size_t totalFailuresThusFar,
                                  IBackOffTimerDelegatePtr delegate
                                  ) :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
-        mPattern(pattern),
-        mUnit(unit),
-        mTotalFailures(0)
+        mPattern(UsePatternPtr(BackOffTimerPattern::convert(pattern))->clone()),
+        mLastStateChange(zsLib::now())
       {
         ZS_LOG_DETAIL(log("created"))
 
         static auto sMaximumFailures = ISettings::getUInt(OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES);
         auto maximumFailures = (sMaximumFailures > 0 ? sMaximumFailures : totalFailuresThusFar);
 
-        initialzePattern();
-
         for (ULONG loop = 0; (loop < totalFailuresThusFar) && (loop < maximumFailures); ++loop) {
-          notifyFailure();
-        }
-
-        if (mTotalFailures < totalFailuresThusFar) {
-          mTotalFailures = totalFailuresThusFar;
+          notifyAttempting();
+          notifyAttemptFailed();
+          notifyTryAgainNow();
         }
 
         if (delegate) {
@@ -102,14 +97,8 @@ namespace openpeer
       void BackOffTimer::init()
       {
         AutoRecursiveLock lock(*this);
-        if (!mFinalFailure) {
-          if (Microseconds() != mAttemptTimeout) {
-            mAttemptTimer = Timer::create(mThisWeak.lock(), mAttemptTimeout, false);
-          }
-        } else {
-          if (!mNotifiedFailure) {
-            mSubscriptions.delegate()->onBackOffTimerAllAttemptsFailed(mThisWeak.lock());
-          }
+        if (State_AttemptNow != mCurrentState) {
+          mSubscriptions.delegate()->onBackOffTimerStateChanged(mThisWeak.lock(), mCurrentState);
         }
       }
 
@@ -144,6 +133,19 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      BackOffTimerPtr BackOffTimer::create(
+                                           IBackOffTimerPatternPtr pattern,
+                                           size_t totalFailuresThusFar,
+                                           IBackOffTimerDelegatePtr delegate
+                                           )
+      {
+        BackOffTimerPtr pThis(new BackOffTimer(pattern, totalFailuresThusFar, delegate));
+        pThis->mThisWeak = pThis;
+        pThis->init();
+        return pThis;
+      }
+
+      //-----------------------------------------------------------------------
       IBackOffTimerSubscriptionPtr BackOffTimer::subscribe(IBackOffTimerDelegatePtr originalDelegate)
       {
         ZS_LOG_DETAIL(log("subscribing to BackOffTimer"))
@@ -153,11 +155,16 @@ namespace openpeer
 
         IBackOffTimerSubscriptionPtr subscription = mSubscriptions.subscribe(originalDelegate);
 
-        if (!mShutdown) {
-          IBackOffTimerDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
-          if (delegate) {
-            if (mFinalFailure) delegate->onBackOffTimerAllAttemptsFailed(mThisWeak.lock());
+        IBackOffTimerDelegatePtr delegate = mSubscriptions.delegate(subscription, true);
+
+        if (delegate) {
+          if (State_AttemptNow != mCurrentState) {
+            delegate->onBackOffTimerStateChanged(mThisWeak.lock(), mCurrentState);
           }
+        }
+
+        if (isComplete()) {
+          mSubscriptions.clear();
         }
 
         return subscription;
@@ -173,134 +180,144 @@ namespace openpeer
           mDefaultSubscription.reset();
         }
 
-        if (mTimer) {
-          mTimer->cancel();
-          mTimer.reset();
-        }
-        if (mAttemptTimer) {
-          mAttemptTimer->cancel();
-          mAttemptTimer.reset();
+        cancelTimer();
+
+        if (!isComplete()) {
+          setState(State_AllAttemptsFailed);
         }
 
         mSubscriptions.clear();
+      }
 
-        mFinalFailure = true;
-        mShutdown = true;
+      //-----------------------------------------------------------------------
+      IBackOffTimerPatternPtr BackOffTimer::getPattern() const
+      {
+        auto pattern = mPattern->clone();
+        return BackOffTimerPattern::convert(pattern);
+      }
 
-        mLastRetryTimer = Microseconds();
-        mNextRetryAfter = Time();
+      //-----------------------------------------------------------------------
+      size_t BackOffTimer::getAttemptNumber() const
+      {
+        AutoRecursiveLock lock(*this);
+        return mAttemptNumber;
       }
 
       //-----------------------------------------------------------------------
       size_t BackOffTimer::getTotalFailures() const
       {
         AutoRecursiveLock lock(*this);
-        return mTotalFailures;
+
+        auto failures = mAttemptNumber;
+
+        if ((State_AllAttemptsFailed == mCurrentState) ||
+            (State_WaitingAfterAttemptFailure == mCurrentState) ||
+            (State_AllAttemptsFailed == mCurrentState)) {
+          ++failures;
+        }
+
+        return failures;
       }
 
       //-----------------------------------------------------------------------
-      size_t BackOffTimer::getMaxFailures() const
+      IBackOffTimer::States BackOffTimer::getState() const
       {
         AutoRecursiveLock lock(*this);
-        return mMaximumRetries;
+        return mCurrentState;
       }
 
       //-----------------------------------------------------------------------
       Time BackOffTimer::getNextRetryAfterTime() const
       {
         AutoRecursiveLock lock(*this);
-        return mNextRetryAfter;
+        Time result;
+
+        switch (mCurrentState) {
+          case State_AttemptNow:          break;
+          case State_Attempting:          break;
+          case State_WaitingAfterAttemptFailure: {
+            result = mLastStateChange + mPattern->getRetryAfterDuration();
+            break;
+          }
+          case State_AllAttemptsFailed:   break;
+          case State_Succeeded:           break;
+        }
+
+        ZS_LOG_TRACE(log("next retry after time") + ZS_PARAM("retry after", result))
+
+        return result;
       }
 
       //-----------------------------------------------------------------------
-      bool BackOffTimer::hasFullyFailed() const
+      void BackOffTimer::notifyAttempting()
       {
         AutoRecursiveLock lock(*this);
-        return mFinalFailure;
-      }
-
-      //-----------------------------------------------------------------------
-      void BackOffTimer::notifyFailure()
-      {
-        typedef decltype(mLastRetryTimer) CronoType;
-        typedef decltype(mLastRetryTimer)::rep ClockRepType;
-
-        AutoRecursiveLock lock(*this);
-
-        if (mTimer) {
-          mTimer->cancel();
-          mTimer.reset();
-        }
-        if (mAttemptTimer) {
-          mAttemptTimer->cancel();
-          mAttemptTimer.reset();
-        }
-
-        if (mTotalFailures >= mRetryTimerVector.size()) {
-          // this could be the final attempt
-          if (mMultiplier > 0.0) {
-            ClockRepType value = mLastRetryTimer.count();
-            double converted = (double)value;
-            converted *= mMultiplier;
-            mLastRetryTimer = CronoType((ClockRepType)converted);
-          } else {
-            mFinalFailure = true;
-          }
-          if (Microseconds() != mMaximumRetry) {
-            if (mLastRetryTimer > mMaximumRetry) mLastRetryTimer = mMaximumRetry;
-          }
-        } else {
-          mLastRetryTimer = mRetryTimerVector[mTotalFailures];
-        }
-
-        ++mTotalFailures;
-        if (0 != mMaximumRetries) {
-          if (mTotalFailures > mMaximumRetries) {
-            mFinalFailure = true;
-          }
-        }
-
-        Time now = zsLib::now();
-        mNextRetryAfter = now + mLastRetryTimer;
-        
-        if (mFinalFailure) {
-          if (!mNotifiedFailure) {
-            BackOffTimerPtr pThis = mThisWeak.lock();
-            if (pThis) {
-              mSubscriptions.delegate()->onBackOffTimerAllAttemptsFailed(pThis);
-              mNotifiedFailure = true;
-            }
-          }
-
-          cancel();
+        if (State_AttemptNow != mCurrentState) {
+          ZS_LOG_WARNING(Detail, log("cannot notify attempting - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
           return;
         }
 
-        BackOffTimerPtr pThis = mThisWeak.lock();
-        if (pThis) {
-          mTimer = Timer::create(pThis, mNextRetryAfter);
-        }
+        setState(State_Attempting);
+
+        createOneTimeTimer(mPattern->getAttemptTimeout());
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPtr BackOffTimer::create(
-                                           const char *pattern,
-                                           const Microseconds &unit,
-                                           size_t totalFailuresThusFar,
-                                           IBackOffTimerDelegatePtr delegate
-                                           )
-      {
-        BackOffTimerPtr pThis(new BackOffTimer(pattern, unit, totalFailuresThusFar, delegate));
-        pThis->mThisWeak = pThis;
-        pThis->init();
-        return pThis;
-      }
-
-      //-----------------------------------------------------------------------
-      Microseconds BackOffTimer::actualGetNextRetryAfterWaitPeriod()
+      void BackOffTimer::notifyAttemptFailed()
       {
         AutoRecursiveLock lock(*this);
-        return mLastRetryTimer;
+        if (State_Attempting != mCurrentState) {
+          ZS_LOG_WARNING(Detail, log("cannot notify attempt failed - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
+          return;
+        }
+
+        cancelTimer();
+
+        auto maxAttempts = mPattern->getMaxAttempts();
+
+        if (0 != maxAttempts) {
+          if (mAttemptNumber + 1 >= maxAttempts) {
+            setState(State_AllAttemptsFailed);
+            ZS_LOG_WARNING(Debug, log("all attempts have failed"))
+            return;
+          }
+        }
+
+        setState(State_WaitingAfterAttemptFailure);
+
+        createOneTimeTimer(mPattern->getRetryAfterDuration());
+      }
+
+      //-----------------------------------------------------------------------
+      void BackOffTimer::notifyTryAgainNow()
+      {
+        AutoRecursiveLock lock(*this);
+        if (State_WaitingAfterAttemptFailure != mCurrentState) {
+          ZS_LOG_WARNING(Detail, log("cannot try again now - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
+          return;
+        }
+
+        setState(State_AttemptNow);
+
+        cancelTimer();
+
+        ++mAttemptNumber;
+        mPattern->nextAttempt();
+      }
+
+      //-----------------------------------------------------------------------
+      void BackOffTimer::notifySucceeded()
+      {
+        AutoRecursiveLock lock(*this);
+
+        cancelTimer();
+        setState(State_Succeeded);
+      }
+
+      //-----------------------------------------------------------------------
+      IBackOffTimer::DurationType BackOffTimer::actualGetNextRetryAfterFailureDuration()
+      {
+        return mPattern->getRetryAfterDuration();
       }
 
       //-----------------------------------------------------------------------
@@ -317,25 +334,18 @@ namespace openpeer
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer", timer->getID()))
 
         AutoRecursiveLock lock(*this);
-        if (mShutdown) return;
-        if (mFinalFailure) return;
 
         if (timer == mTimer) {
-          mSubscriptions.delegate()->onBackOffTimerAttemptAgainNow(mThisWeak.lock());
           mTimer.reset();
 
-          if (Microseconds() != mAttemptTimeout) {
-            if (mAttemptTimer) {
-              mAttemptTimer->cancel();
-              mAttemptTimer.reset();
-            }
-            mAttemptTimer = Timer::create(mThisWeak.lock(), mAttemptTimeout, false);
+          switch (mCurrentState) {
+            case IBackOffTimer::State_AttemptNow:                 break;
+            case IBackOffTimer::State_Attempting:                 notifyAttemptFailed(); break;
+            case IBackOffTimer::State_WaitingAfterAttemptFailure: notifyTryAgainNow(); break;
+            case IBackOffTimer::State_AllAttemptsFailed:          break;
+            case IBackOffTimer::State_Succeeded:                  break;
           }
-          return;
-        }
-        if (timer == mAttemptTimer ) {
-          mSubscriptions.delegate()->onBackOffTimerAttemptTimeout(mThisWeak.lock());
-          mAttemptTimer.reset();
+
           return;
         }
 
@@ -379,103 +389,56 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "id", mID);
 
+        IHelper::debugAppend(resultEl, IBackOffTimerPattern::toDebug(BackOffTimerPattern::convert(mPattern)));
+
         IHelper::debugAppend(resultEl, "subscriptions", mSubscriptions.size());
         IHelper::debugAppend(resultEl, "default subscription", (bool)mDefaultSubscription);
 
-        IHelper::debugAppend(resultEl, "unit", mUnit);
+        IHelper::debugAppend(resultEl, "state", toString(mCurrentState));
+        IHelper::debugAppend(resultEl, "last state changed", mLastStateChange);
 
-        IHelper::debugAppend(resultEl, "shutdown", mShutdown);
-        IHelper::debugAppend(resultEl, "final failure", mFinalFailure);
-        IHelper::debugAppend(resultEl, "notified failure", mNotifiedFailure);
-
-        IHelper::debugAppend(resultEl, "pattern", mPattern);
-        IHelper::debugAppend(resultEl, "total failures", mTotalFailures);
-
-        IHelper::debugAppend(resultEl, "maximum retries", mMaximumRetries);
-        IHelper::debugAppend(resultEl, "attempt timeout", mAttemptTimeout);
-        IHelper::debugAppend(resultEl, "retry vector", mRetryTimerVector.size());
-
-        IHelper::debugAppend(resultEl, "multiplier", mMultiplier);
-        IHelper::debugAppend(resultEl, "maximum retry", mMaximumRetry);
-
-        IHelper::debugAppend(resultEl, "last retry timer", mLastRetryTimer);
-        IHelper::debugAppend(resultEl, "next retry after", mNextRetryAfter);
+        IHelper::debugAppend(resultEl, "attempt number", mAttemptNumber);
 
         IHelper::debugAppend(resultEl, "timer", mTimer ? mTimer->getID() : 0);
-        IHelper::debugAppend(resultEl, "attempt timer", mAttemptTimer ? mAttemptTimer->getID() : 0);
 
         return resultEl;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimer::initialzePattern()
+      void BackOffTimer::setState(States state)
       {
-        typedef IHelper::SplitMap SplitMap;
+        if (state == mCurrentState) return;
 
-        SplitMap split;
-        IHelper::split(mPattern, split, '/');
+        ZS_LOG_DEBUG(log("state changed") + ZS_PARAM("new state", toString(state)) + ZS_PARAM("old state", toString(mCurrentState)))
 
-        String retriesStr = IHelper::get(split, 0);
-        String eachAttemptStr = IHelper::get(split, 1);
-        String maxRetriesStr = IHelper::get(split, 2);
+        mCurrentState = state;
+        mLastStateChange = zsLib::now();
 
-        Microseconds::rep eachAttemp = 0;
-
-        try {
-          eachAttemp = Numeric<decltype(eachAttemp)>(eachAttemptStr);
-          if (eachAttemp > 0) {
-            mAttemptTimeout = Microseconds(eachAttemp * mUnit.count());
-          }
-        } catch(Numeric<decltype(eachAttemp)>::ValueOutOfRange &) {
+        auto pThis = mThisWeak.lock();
+        if (pThis) {
+          mSubscriptions.delegate()->onBackOffTimerStateChanged(pThis, mCurrentState);
         }
+      }
 
-        try {
-          mMaximumRetries = Numeric<decltype(mMaximumRetries)>(maxRetriesStr);
-        } catch(Numeric<decltype(mMaximumRetries)>::ValueOutOfRange &) {
-          ZS_LOG_WARNING(Detail, log("maximum retry value out of range") + ZS_PARAMIZE(maxRetriesStr))
-        }
+      //-----------------------------------------------------------------------
+      void BackOffTimer::cancelTimer()
+      {
+        if (!mTimer) return;
 
-        split.empty();
-        IHelper::split(retriesStr, split, ',');
+        mTimer->cancel();
+        mTimer.reset();
+      }
 
-        mRetryTimerVector.resize(split.size());
+      //-----------------------------------------------------------------------
+      void BackOffTimer::createOneTimeTimer(DurationType timeout)
+      {
+        cancelTimer();
 
-        for (int loop = 0; true; ++loop) {
-          String valueStr = IHelper::get(split, loop);
-          if (valueStr.isEmpty()) break;
+        auto pThis = mThisWeak.lock();
+        if (!pThis) return;
+        if (DurationType() == timeout) return;
 
-          if ('*' == valueStr[(size_t)0]) {
-            SplitMap finalSplit;
-            IHelper::split(valueStr, finalSplit, ':');
-            valueStr = IHelper::get(finalSplit, 0).substr(1);
-            String maximumStr = IHelper::get(finalSplit, 1);
-
-            try {
-              mMultiplier = Numeric<decltype(mMultiplier)>(valueStr);
-            } catch(Numeric<decltype(mMultiplier)>::ValueOutOfRange &) {
-              ZS_LOG_WARNING(Detail, log("multiplier value out of range") + ZS_PARAMIZE(valueStr))
-            }
-
-            try {
-              auto max = Numeric<Microseconds::rep>(maximumStr);
-              if (max > 0) {
-                mMaximumRetry = Microseconds(max * mUnit.count());
-              }
-            } catch(Numeric<Microseconds::rep>::ValueOutOfRange *) {
-            }
-
-            // this is the final value in the array
-            mRetryTimerVector.resize(loop);
-            break;
-          }
-
-          try {
-            Microseconds::rep value = Numeric<decltype(value)>(valueStr);
-            mRetryTimerVector[loop] = Microseconds(value * mUnit.count());
-          } catch(Numeric<Microseconds::rep>::ValueOutOfRange &) {
-            ZS_LOG_WARNING(Detail, log("maximum retry value out of range") + ZS_PARAMIZE(valueStr))
-          }
-        }
+        mTimer = Timer::create(pThis, zsLib::now() + timeout);
       }
 
       //-----------------------------------------------------------------------
@@ -494,14 +457,13 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       BackOffTimerPtr IBackOffTimerFactory::create(
-                                                   const char *pattern,
-                                                   const Microseconds &unit,
+                                                   IBackOffTimerPatternPtr pattern,
                                                    size_t totalFailuresThusFar,
                                                    IBackOffTimerDelegatePtr delegate
                                                    )
       {
         if (this) {}
-        return BackOffTimer::create(pattern, unit, totalFailuresThusFar, delegate);
+        return BackOffTimer::create(pattern, totalFailuresThusFar, delegate);
       }
 
     }
@@ -515,6 +477,19 @@ namespace openpeer
     #pragma mark
 
     //-------------------------------------------------------------------------
+    const char *IBackOffTimer::toString(States state)
+    {
+      switch (state) {
+        case State_AttemptNow:                 return "Attempt now";
+        case State_Attempting:                 return "Attempting";
+        case State_WaitingAfterAttemptFailure: return "Waiting after attempt failure";
+        case State_AllAttemptsFailed:          return "All attempts failed";
+        case State_Succeeded:                  return "Succeeded";
+      }
+      return "Unknown";
+    }
+
+    //-------------------------------------------------------------------------
     ElementPtr IBackOffTimer::toDebug(IBackOffTimerPtr timer)
     {
       return internal::BackOffTimer::toDebug(timer);
@@ -522,14 +497,12 @@ namespace openpeer
 
     //-------------------------------------------------------------------------
     IBackOffTimerPtr IBackOffTimer::create(
-                                           const char *pattern,
-                                           const Microseconds &unit,
+                                           IBackOffTimerPatternPtr pattern,
                                            size_t totalFailuresThusFar,
                                            IBackOffTimerDelegatePtr delegate
                                            )
     {
-      return internal::IBackOffTimerFactory::singleton().create(pattern, unit, totalFailuresThusFar, delegate);
+      return internal::IBackOffTimerFactory::singleton().create(pattern, totalFailuresThusFar, delegate);
     }
   }
 }
-

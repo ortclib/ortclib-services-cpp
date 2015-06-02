@@ -64,6 +64,7 @@ namespace openpeer
                                       IMessageQueuePtr queue,                   // which message queue to use for this service (should be on the same queue as the requesting object)
                                       ISTUNDiscoveryDelegatePtr delegate,
                                       const char *srvName,                      // will automatically perform a stun/udp lookup on the name passed in
+                                      IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
                                       Seconds keepWarmPingTime = Seconds()
                                       );
 

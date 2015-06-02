@@ -32,6 +32,7 @@
 #include <openpeer/services/internal/services_STUNRequester.h>
 #include <openpeer/services/internal/services_STUNRequesterManager.h>
 
+#include <openpeer/services/IBackOffTimerPattern.h>
 #include <openpeer/services/IHelper.h>
 
 #include <zsLib/Exception.h>
@@ -40,10 +41,7 @@
 #include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
-#define OPENPEER_SERVICES_STUN_REQUESTER_MAX_RETRANSMIT_STUN_ATTEMPTS (6)
-#define OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS (500)
-#define OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS (39500)
-
+#define OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS (6)
 
 namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
 
@@ -70,7 +68,7 @@ namespace openpeer
                                    IPAddress serverIP,
                                    STUNPacketPtr stun,
                                    STUNPacket::RFCs usingRFC,
-                                   Milliseconds maxTimeout
+                                   IBackOffTimerPatternPtr pattern
                                    ) :
         MessageQueueAssociator(queue),
         mID(zsLib::createPUID()),
@@ -78,11 +76,16 @@ namespace openpeer
         mSTUNRequest(stun),
         mServerIP(serverIP),
         mUsingRFC(usingRFC),
-        mCurrentTimeout(Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS)),
-        mRequestStartTime(zsLib::now()),
-        mMaxTimeout(Milliseconds() != maxTimeout ? maxTimeout : Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_MAX_REQUEST_TIME_IN_MILLISECONDS))
+        mBackOffTimerPattern(pattern)
       {
         IHelper::setTimerThreadPriority();
+        if (!mBackOffTimerPattern) {
+          mBackOffTimerPattern = IBackOffTimerPattern::create();
+          mBackOffTimerPattern->setMaxAttempts(OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS);
+          mBackOffTimerPattern->addNextAttemptTimeout(Milliseconds(500));
+          mBackOffTimerPattern->setMultiplierForLastAttemptTimeout(2.0);
+          mBackOffTimerPattern->addNextRetryAfterFailureDuration(Milliseconds(1));
+        }
       }
 
       //-----------------------------------------------------------------------
@@ -132,7 +135,7 @@ namespace openpeer
                                              IPAddress serverIP,
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
-                                             Milliseconds maxTimeout
+                                             IBackOffTimerPatternPtr pattern
                                              )
       {
         ZS_THROW_INVALID_USAGE_IF(!delegate)
@@ -140,7 +143,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(serverIP.isAddressEmpty())
         ZS_THROW_INVALID_USAGE_IF(serverIP.isPortEmpty())
 
-        STUNRequesterPtr pThis(new STUNRequester(queue, delegate, serverIP, stun, usingRFC, maxTimeout));
+        STUNRequesterPtr pThis(new STUNRequester(queue, delegate, serverIP, stun, usingRFC, pattern));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -159,33 +162,31 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
+        ZS_LOG_TRACE(log("cancel called") + mSTUNRequest->toDebug())
+
+        mServerIP.clear();
+
         if (mDelegate) {
-          if (ZS_IS_LOGGING(Trace)) {
-            ZS_LOG_BASIC(log("cancelled") + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
+          mDelegate.reset();
+
+          // tie the lifetime of the monitoring to the delegate
+          UseSTUNRequesterManagerPtr manager = UseSTUNRequesterManager::singleton();
+          if (manager) {
+            manager->monitorStop(*this);
           }
         }
-
-        internalCancel();
       }
 
       //-----------------------------------------------------------------------
       void STUNRequester::retryRequestNow()
       {
         AutoRecursiveLock lock(mLock);
-        if (!mDelegate) return;
-        if (mServerIP.isAddressEmpty()) return;
-        if (!mSTUNRequest) return;
 
-        mRequestStartTime = zsLib::now();
-        mCurrentTimeout = Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS);
-        mTryNumber = 0;
-        if (mTimer) {
-          mTimer->cancel();
-          mTimer.reset();
-        }
-        if (mMaxTimeTimer) {
-          mMaxTimeTimer->cancel();
-          mMaxTimeTimer.reset();
+        ZS_LOG_DEBUG(log("retry request now") + mSTUNRequest->toDebug())
+
+        if (mBackOffTimer) {
+          mBackOffTimer->cancel();
+          mBackOffTimer.reset();
         }
 
         step();
@@ -206,10 +207,10 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      Milliseconds STUNRequester::getMaxTimeout() const
+      IBackOffTimerPatternPtr STUNRequester::getBackOffTimerPattern() const
       {
         AutoRecursiveLock lock(mLock);
-        return mMaxTimeout;
+        return mBackOffTimerPattern;
       }
 
       //-----------------------------------------------------------------------
@@ -266,7 +267,10 @@ namespace openpeer
         // clear out the request since it's now complete
         {
           AutoRecursiveLock lock(mLock);
-          internalCancel();
+          if (ZS_IS_LOGGING(Trace)) {
+            ZS_LOG_BASIC(log("success") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("request", mSTUNRequest->toDebug()) + ZS_PARAM("response", packet->toDebug()))
+          }
+          cancel();
         }
         return true;
       }
@@ -280,55 +284,15 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void STUNRequester::onTimer(TimerPtr timer)
+      void STUNRequester::onBackOffTimerStateChanged(
+                                                     IBackOffTimerPtr timer,
+                                                     IBackOffTimer::States state
+                                                     )
       {
-        Time tick = zsLib::now();
-        Milliseconds totalTime = zsLib::toMilliseconds(tick - mRequestStartTime);
+        AutoRecursiveLock lock(mLock);
 
-        {
-          AutoRecursiveLock lock(mLock);
-          if (!mDelegate) return;
-
-          if (timer == mMaxTimeTimer) goto timed_out;
-
-          if (timer != mTimer) {
-            ZS_LOG_WARNING(Debug, log("received timer event from an obsolete timer"))
-            return;
-          }
-
-          // the timer fired, that means the STUN lookup timed out
-          mTimer.reset();
-
-          ++mTryNumber;
-
-          if ((mTryNumber >= OPENPEER_SERVICES_STUN_REQUESTER_MAX_RETRANSMIT_STUN_ATTEMPTS) ||
-              (totalTime > mMaxTimeout)) {
-            return;
-          }
-
-          mCurrentTimeout = mCurrentTimeout + mCurrentTimeout + Milliseconds(OPENPEER_SERVICES_STUN_REQUESTER_FIRST_ATTEMPT_TIMEOUT_IN_MILLISECONDS);
-
-          // create a new timer using the new timeout
-          step();
-          return;
-        }
-
-      timed_out:
-        {
-          AutoRecursiveLock lock(mLock);
-          ZS_LOG_WARNING(Detail, log("request timed out") + ZS_PARAM("on try number", mTryNumber) + ZS_PARAM("timeout duration (ms)", totalTime))
-          if (mSTUNRequest) {
-            ZS_LOG_TRACE(log("timed-out") + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
-          }
-          try {
-            if (mDelegate) {
-              mDelegate->onSTUNRequesterTimedOut(mThisWeak.lock());
-            }
-          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
-          }
-        }
-
-        internalCancel();
+        ZS_LOG_TRACE(log("backoff timer state changed") + ZS_PARAM("timer id", timer->getID()) + ZS_PARAM("state", IBackOffTimer::toString(state)))
+        step();
       }
 
       //-----------------------------------------------------------------------
@@ -348,50 +312,30 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequester::internalCancel()
-      {
-        AutoRecursiveLock lock(mLock);
-
-        mServerIP.clear();
-
-        if (mDelegate) {
-          mDelegate.reset();
-
-          // tie the lifetime of the monitoring to the delegate
-          UseSTUNRequesterManagerPtr manager = UseSTUNRequesterManager::singleton();
-          if (manager) {
-            manager->monitorStop(*this);
-          }
-        }
-
-        if (mTimer) {
-          mTimer->cancel();
-          mTimer.reset();
-        }
-        if (mMaxTimeTimer) {
-          mMaxTimeTimer->cancel();
-          mMaxTimeTimer.reset();
-        }
-      }
-
-      //-----------------------------------------------------------------------
       void STUNRequester::step()
       {
         if (!mDelegate) return;                                                 // if there is no delegate then the request has completed or is cancelled
-
         if (mServerIP.isAddressEmpty()) return;
 
-        if (!mSTUNRequest) return;
-
-        if (!mMaxTimeTimer) {
-          mMaxTimeTimer = Timer::create(mThisWeak.lock(), mMaxTimeout, false);
+        if (!mBackOffTimer) {
+          mBackOffTimer = IBackOffTimer::create(mBackOffTimerPattern, mThisWeak.lock());
         }
 
-        if (!mTimer) {
-          // we have a stun request but not a timer, setup the timer now...
-          mTimer = Timer::create(mThisWeak.lock(), mCurrentTimeout, false);
+        if (mBackOffTimer->haveAllAttemptsFailed()) {
+          try {
+            mDelegate->onSTUNRequesterTimedOut(mThisWeak.lock());
+          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+            ZS_LOG_WARNING(Debug, log("delegate gone"))
+          }
 
-          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("try number", mTryNumber) + ZS_PARAM("timeout duration (ms)", mCurrentTimeout) + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
+          cancel();
+          return;
+        }
+
+        if (mBackOffTimer->shouldAttemptNow()) {
+          mBackOffTimer->notifyAttempting();
+
+          ZS_LOG_TRACE(log("sending packet now") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("tries", mTotalTries) + ZS_PARAM("stun packet", mSTUNRequest->toDebug()))
 
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
@@ -404,8 +348,6 @@ namespace openpeer
             cancel();
             return;
           }
-          // we have sent out the request, nothing more we can do but sit back and wait...
-          return;
         }
 
         // nothing more to do... sit back, relax and enjoy the ride!
@@ -432,11 +374,11 @@ namespace openpeer
                                                      IPAddress serverIP,
                                                      STUNPacketPtr stun,
                                                      STUNPacket::RFCs usingRFC,
-                                                     Milliseconds maxTimeout
+                                                     IBackOffTimerPatternPtr pattern
                                                      )
       {
         if (this) {}
-        return STUNRequester::create(queue, delegate, serverIP, stun, usingRFC, maxTimeout);
+        return STUNRequester::create(queue, delegate, serverIP, stun, usingRFC, pattern);
       }
 
     }
@@ -456,10 +398,10 @@ namespace openpeer
                                              IPAddress serverIP,
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
-                                             Milliseconds maxTimeout
+                                             IBackOffTimerPatternPtr pattern
                                              )
     {
-      return internal::ISTUNRequesterFactory::singleton().create(queue, delegate, serverIP, stun, usingRFC, maxTimeout);
+      return internal::ISTUNRequesterFactory::singleton().create(queue, delegate, serverIP, stun, usingRFC, pattern);
     }
 
     //-------------------------------------------------------------------------

@@ -77,7 +77,8 @@ namespace openpeer
 
         void init(
                   IDNS::SRVResultPtr service,
-                  const char *srvName
+                  const char *srvName,
+                  IDNS::SRVLookupTypes lookupType
                   );
 
       public:
@@ -105,30 +106,31 @@ namespace openpeer
                                        IMessageQueuePtr queue,
                                        ISTUNDiscoveryDelegatePtr delegate,
                                        const char *srvName,
+                                       IDNS::SRVLookupTypes lookupType,
                                        Seconds keepWarmPingTime
                                        );
         
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const override {return mID;}
 
-        virtual bool isComplete() const;
+        virtual bool isComplete() const override;
 
-        virtual void cancel();
+        virtual void cancel() override;
 
-        virtual IPAddress getMappedAddress() const;
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => IDNSDelegate
-        #pragma mark
-
-        virtual void onLookupCompleted(IDNSQueryPtr query);
+        virtual IPAddress getMappedAddress() const override;
 
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark STUNDiscovery => IDNSDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onLookupCompleted(IDNSQueryPtr query) override;
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark STUNDiscovery => IDNSDelegate
+        #pragma mark
+
+        virtual void onTimer(TimerPtr timer) override;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -139,15 +141,15 @@ namespace openpeer
                                                ISTUNRequesterPtr requester,
                                                IPAddress destination,
                                                SecureByteBlockPtr packet
-                                               );
+                                               ) override;
 
         virtual bool handleSTUNRequesterResponse(
                                                  ISTUNRequesterPtr requester,
                                                  IPAddress fromIPAddress,
                                                  STUNPacketPtr response
-                                                 );
+                                                 ) override;
 
-        virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester);
+        virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester) override;
 
       protected:
         //---------------------------------------------------------------------
@@ -210,6 +212,7 @@ namespace openpeer
                                         IMessageQueuePtr queue,
                                         ISTUNDiscoveryDelegatePtr delegate,
                                         const char *srvName,
+                                        IDNS::SRVLookupTypes lookupType,
                                         Seconds keepWarmPingTime
                                         );
 

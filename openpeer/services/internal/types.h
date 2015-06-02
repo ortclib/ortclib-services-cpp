@@ -95,6 +95,7 @@ namespace openpeer
 
       ZS_DECLARE_CLASS_PTR(Backgrounding)
       ZS_DECLARE_CLASS_PTR(BackOffTimer)
+      ZS_DECLARE_CLASS_PTR(BackOffTimerPattern)
       ZS_DECLARE_CLASS_PTR(Cache)
       ZS_DECLARE_CLASS_PTR(DNS)
       ZS_DECLARE_CLASS_PTR(Decryptor)

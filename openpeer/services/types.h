@@ -140,6 +140,7 @@ namespace openpeer
     ZS_DECLARE_INTERACTION_PTR(IBackgrounding)
     ZS_DECLARE_INTERACTION_PTR(IBackgroundingNotifier)
     ZS_DECLARE_INTERACTION_PTR(IBackgroundingQuery)
+    ZS_DECLARE_INTERACTION_PTR(IBackOffTimerPattern)
     ZS_DECLARE_INTERACTION_PTR(IBackOffTimer)
     ZS_DECLARE_INTERACTION_PTR(ICache)
     ZS_DECLARE_INTERACTION_PTR(ICacheDelegate)

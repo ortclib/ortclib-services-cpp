@@ -35,6 +35,7 @@
 #include <openpeer/services/internal/services_AllocatorWithNul.h>
 #include <openpeer/services/internal/services_Backgrounding.h>
 #include <openpeer/services/internal/services_BackOffTimer.h>
+#include <openpeer/services/internal/services_BackOffTimerPattern.h>
 #include <openpeer/services/internal/services_Cache.h>
 #include <openpeer/services/internal/services_CanonicalXML.h>
 #include <openpeer/services/internal/services_Decryptor.h>
