@@ -70,7 +70,7 @@ namespace openpeer
       BackOffTimerPattern::BackOffTimerPattern(ElementPtr patternEl) :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
-        ZS_LOG_DETAIL(log("created"))
+        ZS_LOG_DEBUG(log("created"))
 
         if (patternEl) {
           try {
@@ -165,7 +165,7 @@ namespace openpeer
       BackOffTimerPattern::~BackOffTimerPattern()
       {
         mThisWeak.reset();
-        ZS_LOG_DETAIL(log("destroyed"))
+        ZS_LOG_DEBUG(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------

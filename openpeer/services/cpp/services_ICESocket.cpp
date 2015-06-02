@@ -1945,6 +1945,7 @@ namespace openpeer
                                                               turnInfo->mServerInfo->mTURNServer,
                                                               turnInfo->mServerInfo->mTURNServerUsername,
                                                               turnInfo->mServerInfo->mTURNServerPassword,
+                                                              IDNS::SRVLookupType_AutoLookupAndFallbackAll,
                                                               mFirstWORDInAnyPacketWillNotConflictWithTURNChannels
                                                               );
                 } else {

@@ -135,6 +135,7 @@ namespace openpeer
                              const char *turnServer,
                              const char *turnServerUsername,
                              const char *turnServerPassword,
+                             IDNS::SRVLookupTypes lookupType,
                              bool useChannelBinding,
                              WORD limitChannelToRangeStart,
                              WORD limitChannelRoRangeEnd
@@ -147,6 +148,7 @@ namespace openpeer
         mServerName(turnServer ? turnServer : ""),
         mUsername(turnServerUsername ? turnServerUsername : ""),
         mPassword(turnServerPassword ? turnServerPassword : ""),
+        mLookupType(lookupType),
         mUseChannelBinding(useChannelBinding),
         mLimitChannelToRangeStart(limitChannelToRangeStart),
         mLimitChannelToRangeEnd(limitChannelRoRangeEnd),
@@ -247,6 +249,7 @@ namespace openpeer
                                        const char *turnServer,
                                        const char *turnServerUsername,
                                        const char *turnServerPassword,
+                                       IDNS::SRVLookupTypes lookupType,
                                        bool useChannelBinding,
                                        WORD limitChannelToRangeStart,
                                        WORD limitChannelRoRangeEnd
@@ -256,7 +259,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!turnServer)
 
-        TURNSocketPtr pThis(new TURNSocket(queue, delegate, turnServer, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
+        TURNSocketPtr pThis(new TURNSocket(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -1492,7 +1495,7 @@ namespace openpeer
         if (!mTURNUDPSRVResult) {
           if (!mTURNUDPQuery) {
             ZS_LOG_DEBUG(log("performing _turn._udp SRV lookup") + ZS_PARAM("server", mServerName))
-            mTURNUDPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "udp", 3478);
+            mTURNUDPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "udp", 3478, 10, 0, mLookupType);
           }
 
           if (!mTURNUDPQuery->isComplete())
@@ -1504,7 +1507,7 @@ namespace openpeer
         if (!mTURNTCPSRVResult) {
           if (!mTURNTCPQuery) {
             ZS_LOG_DEBUG(log("performing _turn._tcp SRV lookup") + ZS_PARAM("server", mServerName))
-            mTURNTCPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "tcp", 3478);
+            mTURNTCPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "tcp", 3478, 10, 0, mLookupType);
           }
 
           if (!mTURNTCPQuery->isComplete())
@@ -2653,13 +2656,14 @@ namespace openpeer
                                                const char *turnServer,
                                                const char *turnServerUsername,
                                                const char *turnServerPassword,
+                                               IDNS::SRVLookupTypes lookupType,
                                                bool useChannelBinding,
                                                WORD limitChannelToRangeStart,
                                                WORD limitChannelRoRangeEnd
                                                )
       {
         if (this) {}
-        return TURNSocket::create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+        return TURNSocket::create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
       }
 
       //-----------------------------------------------------------------------
@@ -2707,12 +2711,13 @@ namespace openpeer
                                        const char *turnServer,
                                        const char *turnServerUsername,
                                        const char *turnServerPassword,
+                                       IDNS::SRVLookupTypes lookupType,
                                        bool useChannelBinding,
                                        WORD limitChannelToRangeStart,
                                        WORD limitChannelRoRangeEnd
                                        )
     {
-      return internal::ITURNSocketFactory::singleton().create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+      return internal::ITURNSocketFactory::singleton().create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
     }
 
     //-------------------------------------------------------------------------

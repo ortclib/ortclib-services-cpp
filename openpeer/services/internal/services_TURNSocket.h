@@ -110,6 +110,7 @@ namespace openpeer
                    const char *turnServer,
                    const char *turnServerUsername,
                    const char *turnServerPassword,
+                   IDNS::SRVLookupTypes lookupType,
                    bool useChannelBinding,
                    WORD limitChannelToRangeStart,
                    WORD limitChannelRoRangeEnd
@@ -148,6 +149,7 @@ namespace openpeer
                                     const char *turnServer,
                                     const char *turnServerUsername,
                                     const char *turnServerPassword,
+                                    IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
                                     bool useChannelBinding = false,
                                     WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
                                     WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
@@ -455,6 +457,7 @@ namespace openpeer
         String mPassword;
         String mRealm;
         String mNonce;
+        IDNS::SRVLookupTypes mLookupType;
 
         IDNSQueryPtr mTURNUDPQuery;
         IDNSQueryPtr mTURNTCPQuery;
@@ -515,6 +518,7 @@ namespace openpeer
                                      const char *turnServer,
                                      const char *turnServerUsername,
                                      const char *turnServerPassword,
+                                     IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
                                      bool useChannelBinding = false,
                                      WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
                                      WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
