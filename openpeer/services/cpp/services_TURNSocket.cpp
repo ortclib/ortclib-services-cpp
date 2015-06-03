@@ -1152,10 +1152,19 @@ namespace openpeer
           return;
         }
 
-        if (timer == mActivationTimer) {
-          ZS_LOG_DEBUG(log("activation timer"))
-          step();
-          return;
+        {
+          auto found = mActivationTimers.find(timer->getID());
+          if (found != mActivationTimers.end()) {
+            ZS_LOG_DEBUG(log("activation timer fired") + ZS_PARAM("timer", timer->getID()))
+
+            timer->cancel();
+            timer.reset();
+
+            mActivationTimers.erase(found);
+
+            step();
+            return;
+          }
         }
 
         if (timer == mRefreshTimer) {
@@ -1378,7 +1387,7 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "deallocate requester", (bool)mDeallocateRequester);
         IHelper::debugAppend(resultEl, "deallocate timer", (bool)mDeallocTimer);
         IHelper::debugAppend(resultEl, "servers", mServers.size());
-        IHelper::debugAppend(resultEl, "activation timer", (bool)mActivationTimer);
+        IHelper::debugAppend(resultEl, "activation timers", mActivationTimers.size());
         IHelper::debugAppend(resultEl, "permissions", mPermissions.size());
         IHelper::debugAppend(resultEl, "permission timer", (bool)mPermissionTimer);
         IHelper::debugAppend(resultEl, "permission requester", (bool)mPermissionRequester);
@@ -1475,6 +1484,9 @@ namespace openpeer
           server->mServerIP = result;
           server->mActivateAfter = activateAfter;
 
+          server->mActivationTimer = Timer::create(mThisWeak.lock(), activateAfter);
+          mActivationTimers[server->mActivationTimer->getID()] = server->mActivationTimer;
+
           activateAfter += Seconds(OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
 
           mServers.push_back(server);
@@ -1528,12 +1540,6 @@ namespace openpeer
           mLastError = TURNSocketError_FailedToConnectToAnyServer;
           cancel();
           return;
-        }
-
-        if (mServers.size() > 0) {
-          if (!mActivationTimer) {
-            mActivationTimer = Timer::create(mThisWeak.lock(), Seconds(1));
-          }
         }
 
         Time tick = zsLib::now();
@@ -1679,10 +1685,20 @@ namespace openpeer
         mChannelIPMap.clear();
         mChannelNumberMap.clear();
 
-        if (mActivationTimer) {
-          mActivationTimer->cancel();
-          mActivationTimer.reset();
+        {
+          for (auto iter_doNotUse = mActivationTimers.begin(); iter_doNotUse != mActivationTimers.end(); ) {
+            auto current = iter_doNotUse;
+            ++iter_doNotUse;
+
+            auto timer = (*current).second;
+
+            timer->cancel();
+            timer.reset();
+
+            mActivationTimers.erase(current);
+          }
         }
+
         if (mRefreshTimer) {
           mRefreshTimer->cancel();
           mRefreshTimer.reset();
@@ -1887,10 +1903,6 @@ namespace openpeer
         mReflectedIP = response->mMappedAddress;
         mActiveServer = server;
         mServers.clear();
-        if (mActivationTimer) {
-          mActivationTimer->cancel();
-          mActivationTimer.reset();
-        }
 
         ZS_LOG_DETAIL(log("alloc request completed") + ZS_PARAM("relayed ip", mRelayedIP.string()) + ZS_PARAM("reflected", mReflectedIP.string()) + ZS_PARAM("username", mUsername) + ZS_PARAM("password", mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
 

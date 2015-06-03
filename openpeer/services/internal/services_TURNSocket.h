@@ -102,6 +102,9 @@ namespace openpeer
 
         typedef Helper::IPAddressMap IPAddressMap;
 
+        typedef PUID TimerID;
+        typedef std::map<TimerID, TimerPtr> TimerMap;
+
       protected:
 
         TURNSocket(
@@ -374,6 +377,7 @@ namespace openpeer
           bool mIsConnected;
           bool mInformedWriteReady;
 
+          TimerPtr mActivationTimer;
           Time mActivateAfter;
 
           ISTUNRequesterPtr mAllocateRequester;
@@ -485,7 +489,7 @@ namespace openpeer
         TimerPtr mDeallocTimer;
 
         ServerList mServers;
-        TimerPtr mActivationTimer;
+        TimerMap mActivationTimers;
 
         PermissionMap mPermissions;
         TimerPtr mPermissionTimer;
