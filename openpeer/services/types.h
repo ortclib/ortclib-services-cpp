@@ -53,6 +53,8 @@ namespace openpeer
       void throwOnlySetOnce();
     }
 
+    using std::make_shared;
+
     using zsLib::PUID;
     using zsLib::CHAR;
     using zsLib::UCHAR;
@@ -93,7 +95,7 @@ namespace openpeer
     class SharedRecursiveLock
     {
     public:
-      static SharedRecursiveLock create() {return SharedRecursiveLock(RecursiveLockPtr(new RecursiveLock));}
+      static SharedRecursiveLock create() {return SharedRecursiveLock(RecursiveLockPtr(make_shared<RecursiveLock>()));}
 
       SharedRecursiveLock(const SharedRecursiveLock &source) : mLock(source.mLock) {}
       SharedRecursiveLock(RecursiveLockPtr shared) : mLock(shared) {}

@@ -130,6 +130,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TURNSocket::TURNSocket(
+                             const make_private &,
                              IMessageQueuePtr queue,
                              ITURNSocketDelegatePtr delegate,
                              const char *turnServer,
@@ -165,6 +166,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TURNSocket::TURNSocket(
+                             const make_private &,
                              IMessageQueuePtr queue,
                              ITURNSocketDelegatePtr delegate,
                              IDNS::SRVResultPtr srvTURNUDP,
@@ -259,7 +261,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!turnServer)
 
-        TURNSocketPtr pThis(new TURNSocket(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
+        TURNSocketPtr pThis(make_shared<TURNSocket>(make_private {}, queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -282,7 +284,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF((!srvTURNUDP) && (!srvTURNTCP))
 
-        TURNSocketPtr pThis(new TURNSocket(queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
+        TURNSocketPtr pThis(make_shared<TURNSocket>(make_private{}, queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -395,7 +397,7 @@ namespace openpeer
               ChannelInfoPtr info = (*found).second;
               if (info->mBound) {
                 // yes, it is active, so we can packetize this in a special way to send to the remote peer
-                packet = SecureByteBlockPtr(new SecureByteBlock(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes)));
+                packet = SecureByteBlockPtr(make_shared<SecureByteBlock>(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes)));
 
                 ((WORD *)(packet->BytePtr()))[0] = htons(info->mChannelNumber);
                 ((WORD *)(packet->BytePtr()))[1] = htons((WORD)bufferLengthInBytes);
@@ -2594,7 +2596,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TURNSocket::ServerPtr TURNSocket::Server::create()
       {
-        ServerPtr pThis(new Server);
+        ServerPtr pThis(make_shared<Server>());
         return pThis;
       }
 
@@ -2623,7 +2625,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TURNSocket::PermissionPtr TURNSocket::Permission::create()
       {
-        PermissionPtr pThis(new Permission);
+        PermissionPtr pThis(make_shared<Permission>());
         pThis->mInstalled = false;
         pThis->mLastSentDataAt = zsLib::now();
         return pThis;
@@ -2640,7 +2642,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       TURNSocket::ChannelInfoPtr TURNSocket::ChannelInfo::create()
       {
-        ChannelInfoPtr pThis(new ChannelInfo);
+        ChannelInfoPtr pThis(make_shared<ChannelInfo>());
         pThis->mBound = 0;
         pThis->mChannelNumber = 0;
         pThis->mLastSentDataAt = zsLib::now();

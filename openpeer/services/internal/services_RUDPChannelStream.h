@@ -79,6 +79,9 @@ namespace openpeer
                                 public IRUDPChannelStreamAsync,
                                 public ITransportStreamReaderDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IRUDPChannelStreamFactory;
         friend interaction IRUDPChannelStream;
@@ -92,8 +95,9 @@ namespace openpeer
           ZS_DECLARE_CUSTOM_EXCEPTION(IllegalACK)
         };
 
-      protected:
+      public:
         RUDPChannelStream(
+                          const make_private &,
                           IMessageQueuePtr queue,
                           IRUDPChannelStreamDelegatePtr delegate,
                           QWORD nextSequenceNumberToUseForSending,
@@ -102,6 +106,8 @@ namespace openpeer
                           WORD receivingChannelNumber,
                           DWORD minimumNegotiatedRTTInMilliseconds
                           );
+
+      protected:
         RUDPChannelStream(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

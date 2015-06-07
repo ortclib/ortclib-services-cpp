@@ -70,7 +70,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Backgrounding::Backgrounding() :
+      Backgrounding::Backgrounding(const make_private &) :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mCurrentBackgroundingID(zsLib::createPUID()),
@@ -99,7 +99,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       BackgroundingPtr Backgrounding::create()
       {
-        BackgroundingPtr pThis(new Backgrounding());
+        BackgroundingPtr pThis(make_shared<Backgrounding>(make_private{}));
         pThis->mThisWeak = pThis;
         return pThis;
       }
@@ -125,7 +125,7 @@ namespace openpeer
           BackgroundingPtr mSingleton;
         };
 
-        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(new GracefulAlert(result)));
+        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(make_shared<GracefulAlert>(result)));
 
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
@@ -185,7 +185,7 @@ namespace openpeer
         PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(phase);
         if (found == mPhaseSubscriptions.end()) {
           ZS_LOG_DEBUG(log("added new phase to backgrounding for background subscriber") + ZS_PARAM("phase", phase))
-          subscriptions = UseBackgroundingDelegateSubscriptionsPtr(new UseBackgroundingDelegateSubscriptions);
+          subscriptions = UseBackgroundingDelegateSubscriptionsPtr(make_shared<UseBackgroundingDelegateSubscriptions>());
           mPhaseSubscriptions[phase] = subscriptions;
         } else {
           ZS_LOG_DEBUG(log("adding background subscriber to existing phase") + ZS_PARAM("phase", phase))
@@ -668,7 +668,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Backgrounding::Notifier::Notifier(ExchangedNotifierPtr notifier) :
+      Backgrounding::Notifier::Notifier(
+                                        const make_private &,
+                                        ExchangedNotifierPtr notifier
+                                        ) :
         mBackgroundingID(notifier->getID()),
         SharedRecursiveLock(*(notifier->getOuter())),
         mOuter(notifier->getOuter()),
@@ -687,7 +690,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       Backgrounding::NotifierPtr Backgrounding::Notifier::create(ExchangedNotifierPtr notifier)
       {
-        return NotifierPtr(new Notifier(notifier));
+        return NotifierPtr(make_shared<Notifier>(make_private{}, notifier));
       }
 
       //-----------------------------------------------------------------------
@@ -725,7 +728,7 @@ namespace openpeer
                                                                                    Phase phase
                                                                                    )
       {
-        return ExchangedNotifierPtr(new ExchangedNotifier(backgrounding, backgroundingID, phase));
+        return ExchangedNotifierPtr(make_shared<ExchangedNotifier>(make_private{}, backgrounding, backgroundingID, phase));
       }
 
       //-----------------------------------------------------------------------
@@ -742,7 +745,7 @@ namespace openpeer
                                                            PUID backgroundingID
                                                            )
       {
-        return QueryPtr(new Query(outer, backgroundingID));
+        return QueryPtr(make_shared<Query>(make_private{}, outer, backgroundingID));
       }
 
       //-----------------------------------------------------------------------
@@ -832,9 +835,13 @@ namespace openpeer
 
         class BogusQuery : public IBackgroundingQuery
         {
-          BogusQuery() {}
+        protected:
+          struct make_private {};
         public:
-          static BogusQueryPtr create() {return BogusQueryPtr(new BogusQuery);}
+          BogusQuery(const make_private &) {}
+
+        public:
+          static BogusQueryPtr create() {return BogusQueryPtr(make_shared<BogusQuery>(make_private{}));}
 
           virtual PUID getID() const {return mID;}
           virtual bool isReady() const {return true;}

@@ -106,7 +106,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RSAPrivateKey::RSAPrivateKey()
+      RSAPrivateKey::RSAPrivateKey(const make_private &)
       {
         ZS_LOG_DEBUG(log("created"))
       }
@@ -155,7 +155,7 @@ namespace openpeer
         AutoSeededRandomPool rng;
         SecureByteBlock publicKeyBuffer;
 
-        RSAPrivateKeyPtr pThis(new RSAPrivateKey);
+        RSAPrivateKeyPtr pThis(make_shared<RSAPrivateKey>(make_private{}));
 
         ZS_LOG_DEBUG(pThis->log("generating private key"))
 
@@ -199,7 +199,7 @@ namespace openpeer
         byteQueue.LazyPut(buffer.BytePtr(), buffer.SizeInBytes());
         byteQueue.FinalizeLazyPut();
 
-        RSAPrivateKeyPtr pThis(new RSAPrivateKey);
+        RSAPrivateKeyPtr pThis(make_shared<RSAPrivateKey>(make_private{}));
 
         ZS_LOG_DEBUG(pThis->log("loading private key"))
         ZS_LOG_INSANE(pThis->log("loading private key") + ZS_PARAM("private key", IHelper::convertToBase64(buffer)))
@@ -232,7 +232,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr RSAPrivateKey::save() const
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
         ByteQueue byteQueue;
         mPrivateKey.Save(byteQueue);
 
@@ -270,7 +270,7 @@ namespace openpeer
         AutoSeededRandomPool rng;
         RsaDecryptor decryptor(mPrivateKey);
 
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         if (IHelper::isEmpty(buffer)) return output;
 
@@ -338,7 +338,7 @@ namespace openpeer
                                              size_t inBufferSizeInBytes
                                              ) const
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         AutoSeededRandomPool rng;
 

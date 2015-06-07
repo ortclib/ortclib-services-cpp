@@ -52,13 +52,17 @@ namespace openpeer
                            public SharedRecursiveLock,
                            public IReachability
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IReachabilityFactory;
         friend interaction IReachability;
 
-      protected:
-        Reachability();
+      public:
+        Reachability(const make_private &);
 
+      protected:
         static ReachabilityPtr create();
 
       public:

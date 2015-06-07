@@ -66,6 +66,9 @@ namespace openpeer
                            public ISocketDelegate,
                            public IRUDPChannelDelegateForSessionAndListener
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IRUDPListenerFactory;
 
@@ -80,14 +83,16 @@ namespace openpeer
 
         typedef std::list<UseRUDPChannelPtr> PendingSessionList;
 
-      protected:
+      public:
         RUDPListener(
+                     const make_private &,
                      IMessageQueuePtr queue,
                      IRUDPListenerDelegatePtr delegate,
                      WORD port,
                      const char *realm
                      );
-        
+
+      protected:
         RUDPListener(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

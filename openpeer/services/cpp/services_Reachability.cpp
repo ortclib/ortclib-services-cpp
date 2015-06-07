@@ -75,7 +75,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Reachability::Reachability() :
+      Reachability::Reachability(const make_private &) :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mLastState(InterfaceType_None)
@@ -99,7 +99,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ReachabilityPtr Reachability::create()
       {
-        ReachabilityPtr pThis(new Reachability());
+        ReachabilityPtr pThis(make_shared<Reachability>(make_private{}));
         pThis->mThisWeak = pThis;
         return pThis;
       }

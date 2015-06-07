@@ -67,7 +67,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      BackOffTimerPattern::BackOffTimerPattern(ElementPtr patternEl) :
+      BackOffTimerPattern::BackOffTimerPattern(
+                                               const make_private &,
+                                               ElementPtr patternEl
+                                               ) :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
         ZS_LOG_DEBUG(log("created"))
@@ -206,7 +209,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       BackOffTimerPatternPtr BackOffTimerPattern::create(ElementPtr patternEl)
       {
-        BackOffTimerPatternPtr pThis(new BackOffTimerPattern(patternEl));
+        BackOffTimerPatternPtr pThis(make_shared<BackOffTimerPattern>(make_private{}, patternEl));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -317,7 +320,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(*this);
 
-        BackOffTimerPatternPtr pCopy(new BackOffTimerPattern(NULL));
+        BackOffTimerPatternPtr pCopy(make_shared<BackOffTimerPattern>(make_private{}, ElementPtr()));
         pCopy->mThisWeak = pCopy;
 
         pCopy->mMaxAttempts = mMaxAttempts;

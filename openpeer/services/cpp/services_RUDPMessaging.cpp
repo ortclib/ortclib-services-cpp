@@ -64,6 +64,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       RUDPMessaging::RUDPMessaging(
+                                   const make_private &,
                                    IMessageQueuePtr queue,
                                    IRUDPMessagingDelegatePtr delegate,
                                    ITransportStreamPtr receiveStream,
@@ -140,7 +141,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
 
-        RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
+        RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->mLock);
@@ -171,7 +172,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
 
-        RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
+        RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->mLock);
@@ -203,7 +204,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
 
-        RUDPMessagingPtr pThis(new RUDPMessaging(queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
+        RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->mLock);
@@ -449,7 +450,7 @@ namespace openpeer
         while (mOuterSendStream->getTotalReadBuffersAvailable() > 0) {
           SecureByteBlockPtr message = mOuterSendStream->read();
 
-          SecureByteBlockPtr buffer(new SecureByteBlock(message->SizeInBytes() + sizeof(DWORD)));
+          SecureByteBlockPtr buffer(make_shared<SecureByteBlock>(message->SizeInBytes() + sizeof(DWORD)));
 
           // put the size of the message at the front
           BYTE *dest = buffer->BytePtr();
@@ -492,7 +493,7 @@ namespace openpeer
 
           mWireReceiveStream->skip(sizeof(DWORD));
 
-          SecureByteBlockPtr message(new SecureByteBlock);
+          SecureByteBlockPtr message(make_shared<SecureByteBlock>());
           message->CleanNew(bufferSize);
           if (bufferSize > 0) {
             mWireReceiveStream->read(message->BytePtr(), bufferSize);

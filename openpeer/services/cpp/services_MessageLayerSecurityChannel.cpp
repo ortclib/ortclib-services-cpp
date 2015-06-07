@@ -182,6 +182,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       MessageLayerSecurityChannel::MessageLayerSecurityChannel(
+                                                               const make_private &,
                                                                IMessageQueuePtr queue,
                                                                IMessageLayerSecurityChannelDelegatePtr delegate,
                                                                ITransportStreamPtr receiveStreamEncoded,
@@ -271,7 +272,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!receiveStreamDecoded)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStreamDecoded)
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStreamEncoded)
-        MessageLayerSecurityChannelPtr pThis(new MessageLayerSecurityChannel(IHelper::getServiceQueue(), delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID));
+        MessageLayerSecurityChannelPtr pThis(make_shared<MessageLayerSecurityChannel>(make_private{}, IHelper::getServiceQueue(), delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -1169,7 +1170,7 @@ namespace openpeer
             }
 
 
-            SecureByteBlockPtr integrity(new SecureByteBlock(integritySize));
+            SecureByteBlockPtr integrity(make_shared<SecureByteBlock>(integritySize));
             memcpy(integrity->BytePtr(), source, integritySize);
 
             source += integritySize;
@@ -1674,7 +1675,7 @@ namespace openpeer
           GeneratorPtr generator = Generator::createJSONGenerator();
           std::unique_ptr<char[]> output = generator->write(mSendKeyingNeedingToSignDoc, &outputLength);
 
-          SecureByteBlockPtr buffer(new SecureByteBlock(sizeof(DWORD) + (outputLength * sizeof(char))));
+          SecureByteBlockPtr buffer(make_shared<SecureByteBlock>(sizeof(DWORD) + (outputLength * sizeof(char))));
 
           ((DWORD *)(buffer->BytePtr()))[0] = htonl(0);
 
@@ -1966,7 +1967,7 @@ namespace openpeer
           keyInfo.mNextIV = IHelper::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
           keyInfo.mLastIntegrity = calculatedIntegrity;
 
-          SecureByteBlockPtr output(new SecureByteBlock(sizeof(DWORD) + calculatedIntegrity->SizeInBytes() + encrypted->SizeInBytes()));
+          SecureByteBlockPtr output(make_shared<SecureByteBlock>(sizeof(DWORD) + calculatedIntegrity->SizeInBytes() + encrypted->SizeInBytes()));
 
           ((DWORD *)output->BytePtr())[0] = htonl(index);
 

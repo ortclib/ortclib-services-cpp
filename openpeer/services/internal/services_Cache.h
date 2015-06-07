@@ -50,11 +50,14 @@ namespace openpeer
 
       class Cache : public ICache
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ICache;
 
-      protected:
-        Cache();
+      public:
+        Cache(const make_private &);
 
       public:
         ~Cache();

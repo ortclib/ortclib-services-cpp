@@ -203,6 +203,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       RUDPListener::RUDPListener(
+                                 const make_private &,
                                  IMessageQueuePtr queue,
                                  IRUDPListenerDelegatePtr delegate,
                                  WORD port,
@@ -256,7 +257,7 @@ namespace openpeer
                                            const char *realm
                                            )
       {
-        RUDPListenerPtr pThis(new RUDPListener(queue, delegate, port, realm));
+        RUDPListenerPtr pThis(make_shared<RUDPListener>(make_private{}, queue, delegate, port, realm));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;

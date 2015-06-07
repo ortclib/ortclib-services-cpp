@@ -88,7 +88,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      RSAPublicKey::RSAPublicKey()
+      RSAPublicKey::RSAPublicKey(const make_private &)
       {
         ZS_LOG_DEBUG(log("created"))
       }
@@ -147,7 +147,7 @@ namespace openpeer
         byteQueue.LazyPut(buffer.BytePtr(), buffer.SizeInBytes());
         byteQueue.FinalizeLazyPut();
 
-        RSAPublicKeyPtr pThis(new RSAPublicKey());
+        RSAPublicKeyPtr pThis(make_shared<RSAPublicKey>(make_private{}));
 
         ZS_LOG_INSANE(pThis->log("loading public key") + ZS_PARAM("public key", IHelper::convertToBase64(buffer)))
 
@@ -170,7 +170,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr RSAPublicKey::save() const
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         ByteQueue byteQueue;
         mPublicKey.Save(byteQueue);
@@ -264,7 +264,7 @@ namespace openpeer
         AutoSeededRandomPool rng;
         RsaEncryptor encryptor(mPublicKey);
 
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         if (IHelper::isEmpty(buffer)) return output;
 

@@ -538,8 +538,8 @@ namespace openpeer
         ZS_DECLARE_TYPEDEF_PTR(SingletonLazySharedPtr< Self >, SingletonLazySelf)
 
         LoggerSingletonAndLockHolder() :
-          mLock(RecursiveLockPtr(new RecursiveLock)),
-          mSingleton(ReferenceHolderPtr(new ReferenceHolder))
+          mLock(RecursiveLockPtr(make_shared<RecursiveLock>())),
+          mSingleton(ReferenceHolderPtr(make_shared<ReferenceHolder>()))
         {
         }
 
@@ -569,7 +569,7 @@ namespace openpeer
 
       public:
         LoggerSingletonLazySharedPtr() :
-          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(HolderPtr(new Holder))
+          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(HolderPtr(make_shared<Holder>()))
         {
         }
 
@@ -577,7 +577,7 @@ namespace openpeer
         {
           HolderPtr result = singleton.singleton();
           if (!result) {
-            return RecursiveLockPtr(new RecursiveLock);
+            return RecursiveLockPtr(make_shared<RecursiveLock>());
           }
           return result->lock();
         }
@@ -586,7 +586,7 @@ namespace openpeer
         {
           HolderPtr result = singleton.singleton();
           if (!result) {
-            return ReferenceHolderPtr(new ReferenceHolder);
+            return ReferenceHolderPtr(make_shared<ReferenceHolder>());
           }
           return result->reference();
         }
@@ -621,7 +621,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static LogLevelLoggerPtr create()
         {
-          LogLevelLoggerPtr pThis(new LogLevelLogger());
+          LogLevelLoggerPtr pThis(make_shared<LogLevelLogger>());
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -741,7 +741,7 @@ namespace openpeer
                                       bool prettyPrint
                                       )
         {
-          StdOutLoggerPtr pThis(new StdOutLogger(colorizeOutput, prettyPrint));
+          StdOutLoggerPtr pThis(make_shared<StdOutLogger>(colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -843,7 +843,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static FileLoggerPtr create(const char *fileName, bool colorizeOutput)
         {
-          FileLoggerPtr pThis(new FileLogger(colorizeOutput));
+          FileLoggerPtr pThis(make_shared<FileLogger>(colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(fileName);
           return pThis;
@@ -944,7 +944,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static DebuggerLoggerPtr create(bool colorizeOutput)
         {
-          DebuggerLoggerPtr pThis(new DebuggerLogger(colorizeOutput));
+          DebuggerLoggerPtr pThis(make_shared<DebuggerLogger>(colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -1208,7 +1208,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static TelnetLoggerPtr create(USHORT listenPort, ULONG maxSecondsWaitForSocketToBeAvailable, bool colorizeOutput)
         {
-          TelnetLoggerPtr pThis(new TelnetLogger(IHelper::getLoggerQueue(), colorizeOutput));
+          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(IHelper::getLoggerQueue(), colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(listenPort, maxSecondsWaitForSocketToBeAvailable);
           return pThis;
@@ -1221,7 +1221,7 @@ namespace openpeer
                                       const char *sendStringUponConnection
                                       )
         {
-          TelnetLoggerPtr pThis(new TelnetLogger(IHelper::getLoggerQueue(), colorizeOutput));
+          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(IHelper::getLoggerQueue(), colorizeOutput));
           pThis->mThisWeak = pThis;
           pThis->init(serverHostWithPort, sendStringUponConnection);
           return pThis;

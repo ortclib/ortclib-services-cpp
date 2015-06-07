@@ -78,6 +78,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       Decryptor::Decryptor(
+                           const make_private &,
                            const SecureByteBlock &key,
                            const SecureByteBlock &iv,
                            EncryptionAlgorthms algorithm
@@ -100,7 +101,7 @@ namespace openpeer
                                      EncryptionAlgorthms algorithm
                                      )
       {
-        DecryptorPtr pThis(new Decryptor(key, iv, algorithm));
+        DecryptorPtr pThis(make_shared<Decryptor>(make_private {}, key, iv, algorithm));
         return pThis;
       }
 
@@ -116,7 +117,7 @@ namespace openpeer
                                             size_t inBufferSizeInBytes
                                             )
       {
-        SecureByteBlockPtr output(new SecureByteBlock(inBufferSizeInBytes));
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>(inBufferSizeInBytes));
         mData->decryptor.ProcessData(*output, inBuffer, inBufferSizeInBytes);
         return output;
       }
@@ -124,7 +125,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr Decryptor::decrypt(const SecureByteBlock &input)
       {
-        SecureByteBlockPtr output(new SecureByteBlock(input.SizeInBytes()));
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>(input.SizeInBytes()));
         mData->decryptor.ProcessData(*output, input.BytePtr(), input.SizeInBytes());
         return output;
       }

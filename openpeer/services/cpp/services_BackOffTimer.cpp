@@ -68,6 +68,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       BackOffTimer::BackOffTimer(
+                                 const make_private &,
                                  IBackOffTimerPatternPtr pattern,
                                  size_t totalFailuresThusFar,
                                  IBackOffTimerDelegatePtr delegate
@@ -139,7 +140,7 @@ namespace openpeer
                                            IBackOffTimerDelegatePtr delegate
                                            )
       {
-        BackOffTimerPtr pThis(new BackOffTimer(pattern, totalFailuresThusFar, delegate));
+        BackOffTimerPtr pThis(make_shared<BackOffTimer>(make_private{}, pattern, totalFailuresThusFar, delegate));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;

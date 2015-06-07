@@ -58,19 +58,24 @@ namespace openpeer
                             public ITransportStreamWriterDelegate,
                             public ITransportStreamReaderDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IRUDPMessagingFactory;
         friend interaction IRUDPMessaging;
         
-      protected:
+      public:
         RUDPMessaging(
-                     IMessageQueuePtr queue,
-                     IRUDPMessagingDelegatePtr delegate,
+                      const make_private &,
+                      IMessageQueuePtr queue,
+                      IRUDPMessagingDelegatePtr delegate,
                       ITransportStreamPtr receiveStream,
                       ITransportStreamPtr sendStream,
                       size_t maxMessageSizeInBytes
                      );
-        
+
+      protected:
         RUDPMessaging(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

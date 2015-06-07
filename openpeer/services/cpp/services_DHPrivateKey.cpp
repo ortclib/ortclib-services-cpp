@@ -66,7 +66,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      DHPrivateKey::DHPrivateKey(UseDHKeyDomainPtr keyDomain) :
+      DHPrivateKey::DHPrivateKey(
+                                 const make_private &,
+                                 UseDHKeyDomainPtr keyDomain
+                                 ) :
         mKeyDomain(keyDomain)
       {
         ZS_LOG_DEBUG(log("created"))
@@ -114,7 +117,7 @@ namespace openpeer
 
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
-        DHPrivateKeyPtr pThis(new DHPrivateKey(keyDomain));
+        DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, keyDomain));
 
         AutoSeededRandomPool rnd;
 
@@ -149,7 +152,7 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
-        DHPrivateKeyPtr pThis(new DHPrivateKey(DHKeyDomain::convert(keyDomain)));
+        DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, DHKeyDomain::convert(keyDomain)));
 
         pThis->mStaticPrivateKey.Assign(staticPrivateKey);
         pThis->mEphemeralPrivateKey.Assign(ephemeralPrivateKey);
@@ -197,7 +200,7 @@ namespace openpeer
 
         ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
 
-        DHPrivateKeyPtr pThis(new DHPrivateKey(keyDomain));
+        DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, keyDomain));
 
         DH &dh = pThis->mKeyDomain->getDH();
 
@@ -280,7 +283,7 @@ namespace openpeer
 
         DH2 dh2(dh);
 
-        SecureByteBlockPtr key(new SecureByteBlock(dh2.AgreedValueLength()));
+        SecureByteBlockPtr key(make_shared<SecureByteBlock>(dh2.AgreedValueLength()));
 
         UseDHPublicKeyPtr publicKey = DHPublicKey::convert(otherPartyPublicKey);
 

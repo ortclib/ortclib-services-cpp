@@ -149,6 +149,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       ICESocket::ICESocket(
+                           const make_private &,
                            IMessageQueuePtr queue,
                            IICESocketDelegatePtr delegate,
                            const TURNServerInfoList &turnServers,
@@ -274,14 +275,15 @@ namespace openpeer
                                      IICESocketPtr foundationSocket
                                      )
       {
-        ICESocketPtr pThis(new ICESocket(
-                                         queue,
-                                         delegate,
-                                         turnServers,
-                                         stunServers,
-                                         firstWORDInAnyPacketWillNotConflictWithTURNChannels,
-                                         port,
-                                         foundationSocket));
+        ICESocketPtr pThis(make_shared<ICESocket>(
+                                                  make_private{},
+                                                  queue,
+                                                  delegate,
+                                                  turnServers,
+                                                  stunServers,
+                                                  firstWORDInAnyPacketWillNotConflictWithTURNChannels,
+                                                  port,
+                                                  foundationSocket));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -1497,7 +1499,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("bind successful") + ZS_PARAM("IP", bindIP.string()))
 
-          LocalSocketPtr localSocket(new LocalSocket(mComponentID, localPreference));
+          LocalSocketPtr localSocket(make_shared<LocalSocket>(mComponentID, localPreference));
 
           localSocket->mSocket = socket;
           localSocket->mLocal->mIPAddress = bindIP;
@@ -1578,7 +1580,7 @@ namespace openpeer
             {
               STUNServerInfoPtr &stunServerInfo = (*infoIter);
               if (stunServerInfo->hasData()) {
-                STUNInfoPtr stunInfo(new STUNInfo(localSocket->mLocal->mComponentID, localPreference));
+                STUNInfoPtr stunInfo(make_shared<STUNInfo>(localSocket->mLocal->mComponentID, localPreference));
                 stunInfo->mReflexive->mRelatedIP = localSocket->mLocal->mIPAddress;
 
                 ZS_LOG_TRACE(log("constructed STUN info") + stunInfo->mReflexive->toDebug())
@@ -1597,7 +1599,7 @@ namespace openpeer
 
             if (!stunInfo->mSTUNDiscovery) {
               // clone the current candidate before modification
-              stunInfo->mReflexive = CandidatePtr(new Candidate(*stunInfo->mReflexive));
+              stunInfo->mReflexive = CandidatePtr(make_shared<Candidate>(*stunInfo->mReflexive));
 
               stunInfo->mReflexive->mIPAddress.clear();
               stunInfo->mReflexive->mFoundation.clear();
@@ -1629,7 +1631,7 @@ namespace openpeer
             }
 
             // clone current before modification
-            stunInfo->mReflexive = CandidatePtr(new Candidate(*stunInfo->mReflexive));
+            stunInfo->mReflexive = CandidatePtr(make_shared<Candidate>(*stunInfo->mReflexive));
 
             stunInfo->mReflexive->mIPAddress = stunInfo->mSTUNDiscovery->getMappedAddress();
             String usernameFrag = (mFoundation ? mFoundation->getUsernameFrag() : mUsernameFrag);
@@ -1674,7 +1676,7 @@ namespace openpeer
             {
               TURNServerInfoPtr &turnServerInfo = (*infoIter);
               if (turnServerInfo->hasData()) {
-                TURNInfoPtr turnInfo(new TURNInfo(localSocket->mLocal->mComponentID, localPreference));
+                TURNInfoPtr turnInfo(make_shared<TURNInfo>(localSocket->mLocal->mComponentID, localPreference));
                 turnInfo->mRelay->mRelatedIP = localSocket->mLocal->mIPAddress;
 
                 ZS_LOG_TRACE(log("constructed TURN info") + turnInfo->mRelay->toDebug())
@@ -1729,7 +1731,7 @@ namespace openpeer
 
                   if (turnInfo->mRelay->mIPAddress.isAddressEmpty()) {
                     // clone before modifying
-                    turnInfo->mRelay = CandidatePtr(new Candidate(*turnInfo->mRelay));
+                    turnInfo->mRelay = CandidatePtr(make_shared<Candidate>(*turnInfo->mRelay));
 
                     turnInfo->mRelay->mIPAddress = turnInfo->mTURNSocket->getRelayedIP();
                     turnInfo->mServerIP = turnInfo->mTURNSocket->getActiveServerIP();
@@ -1757,7 +1759,7 @@ namespace openpeer
                   turnInfo->mTURNSocket.reset();
 
                   // clone before modifying
-                  turnInfo->mRelay = CandidatePtr(new Candidate(*turnInfo->mRelay));
+                  turnInfo->mRelay = CandidatePtr(make_shared<Candidate>(*turnInfo->mRelay));
 
                   turnInfo->mRelay->mIPAddress.clear();
                   turnInfo->mRelay->mFoundation.clear();
@@ -1924,7 +1926,7 @@ namespace openpeer
 
             if (!turnInfo->mTURNSocket) {
               // clone before modification
-              turnInfo->mRelay = CandidatePtr(new Candidate(*(turnInfo->mRelay)));
+              turnInfo->mRelay = CandidatePtr(make_shared<Candidate>(*(turnInfo->mRelay)));
 
               turnInfo->mRelay->mIPAddress.clear();
               turnInfo->mRelay->mFoundation.clear();
@@ -2755,7 +2757,7 @@ namespace openpeer
                                     ) :
         mTURNRetryDuration(Milliseconds(OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS))
       {
-        mRelay = CandidatePtr(new Candidate);
+        mRelay = CandidatePtr(make_shared<Candidate>());
         mRelay->mLocalPreference = (decltype(mRelay->mLocalPreference))nextLocalPreference;
         mRelay->mType = ICESocket::Type_Relayed;
         mRelay->mComponentID = componentID;
@@ -2776,7 +2778,7 @@ namespace openpeer
                                     ULONG nextLocalPreference
                                     )
       {
-        mReflexive = CandidatePtr(new Candidate);
+        mReflexive = CandidatePtr(make_shared<Candidate>());
         mReflexive->mLocalPreference = (decltype(mReflexive->mLocalPreference))nextLocalPreference;
         mReflexive->mType = ICESocket::Type_ServerReflexive;
         mReflexive->mComponentID = componentID;
@@ -2813,7 +2815,7 @@ namespace openpeer
                                           ULONG localPreference
                                           )
       {
-        mLocal = CandidatePtr(new Candidate);
+        mLocal = CandidatePtr(make_shared<Candidate>());
         mLocal->mType = ICESocket::Type_Local;
         mLocal->mComponentID = componentID;
         updateLocalPreference(localPreference);
@@ -3182,7 +3184,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     IICESocket::CandidatePtr IICESocket::Candidate::create()
     {
-      CandidatePtr pThis(new Candidate);
+      CandidatePtr pThis(make_shared<Candidate>());
       return pThis;
     }
 
@@ -3224,7 +3226,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     IICESocket::TURNServerInfoPtr IICESocket::TURNServerInfo::create()
     {
-      return TURNServerInfoPtr(new TURNServerInfo);
+      return TURNServerInfoPtr(make_shared<TURNServerInfo>());
     }
 
     //-------------------------------------------------------------------------
@@ -3262,7 +3264,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     IICESocket::STUNServerInfoPtr IICESocket::STUNServerInfo::create()
     {
-      return STUNServerInfoPtr(new STUNServerInfo);
+      return STUNServerInfoPtr(make_shared<STUNServerInfo>());
     }
 
     //-------------------------------------------------------------------------

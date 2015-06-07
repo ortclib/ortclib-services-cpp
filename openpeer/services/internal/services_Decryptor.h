@@ -53,7 +53,11 @@ namespace openpeer
       class Decryptor : public IDecryptor
       {
       protected:
+        struct make_private {};
+
+      public:
         Decryptor(
+                  const make_private &,
                   const SecureByteBlock &key,
                   const SecureByteBlock &iv,
                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES

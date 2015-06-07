@@ -82,7 +82,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      MessageQueueManager::MessageQueueManager() :
+      MessageQueueManager::MessageQueueManager(const make_private &) :
         mPending(0),
         mProcessApplicationQueueOnShutdown(ISettings::getBool(OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT))
       {
@@ -98,7 +98,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageQueueManagerPtr MessageQueueManager::create()
       {
-        MessageQueueManagerPtr pThis(new MessageQueueManager);
+        MessageQueueManagerPtr pThis(make_shared<MessageQueueManager>(make_private{}));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -122,7 +122,7 @@ namespace openpeer
           MessageQueueManagerPtr mSingleton;
         };
 
-        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(new GracefulAlert(result)));
+        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(make_shared<GracefulAlert>(result)));
 
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
@@ -227,7 +227,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
-        MessageQueueMapPtr result(new MessageQueueMap(mQueues));
+        MessageQueueMapPtr result(make_shared<MessageQueueMap>(mQueues));
         return result;
       }
 
@@ -499,7 +499,7 @@ namespace openpeer
     IMessageQueueManager::MessageQueueMapPtr IMessageQueueManager::getRegisteredQueues()
     {
       internal::MessageQueueManagerPtr singleton = internal::MessageQueueManager::singleton();
-      if (!singleton) return IMessageQueueManager::MessageQueueMapPtr(new IMessageQueueManager::MessageQueueMap);
+      if (!singleton) return IMessageQueueManager::MessageQueueMapPtr(make_shared<IMessageQueueManager::MessageQueueMap>());
       return singleton->getRegisteredQueues();
     }
 

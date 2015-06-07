@@ -61,6 +61,9 @@ namespace openpeer
                            public IBackOffTimer,
                            public ITimerDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IBackOffTimerFactory;
         friend interaction IBackOffTimer;
@@ -68,13 +71,15 @@ namespace openpeer
         ZS_DECLARE_TYPEDEF_PTR(IBackOffTimerDelegateSubscriptions, UseSubscriptions)
         ZS_DECLARE_TYPEDEF_PTR(IBackOffTimerPatternForBackOffTimer, UsePattern)
 
-      protected:
+      public:
         BackOffTimer(
+                     const make_private &,
                      IBackOffTimerPatternPtr pattern,
                      size_t totalFailuresThusFar,
                      IBackOffTimerDelegatePtr delegate
                      );
 
+      protected:
         void init();
 
       public:

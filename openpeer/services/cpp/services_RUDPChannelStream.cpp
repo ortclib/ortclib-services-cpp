@@ -224,6 +224,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       RUDPChannelStream::RUDPChannelStream(
+                                           const make_private &,
                                            IMessageQueuePtr queue,
                                            IRUDPChannelStreamDelegatePtr delegate,
                                            QWORD nextSequenceNumberToUseForSending,
@@ -234,7 +235,7 @@ namespace openpeer
                                            ) :
         MessageQueueAssociator(queue),
         mDelegate(IRUDPChannelStreamDelegateProxy::createWeak(queue, delegate)),
-        mPendingReceiveData(new ByteQueue),
+        mPendingReceiveData(make_shared<ByteQueue>()),
         mDidReceiveWriteReady(true),
         mCurrentState(RUDPChannelStreamState_Connected),
         mSendingChannelNumber(sendingChannelNumber),
@@ -312,15 +313,16 @@ namespace openpeer
                                                      DWORD minimumNegotiatedRTT
                                                      )
       {
-        RUDPChannelStreamPtr pThis(new RUDPChannelStream(
-                                                         queue,
-                                                         delegate,
-                                                         nextSequenceNumberToUseForSending,
-                                                         nextSequenberNumberExpectingToReceive,
-                                                         sendingChannelNumber,
-                                                         receivingChannelNumber,
-                                                         minimumNegotiatedRTT
-                                                         ));
+        RUDPChannelStreamPtr pThis(make_shared<RUDPChannelStream>(
+                                                                  make_private {},
+                                                                  queue,
+                                                                  delegate,
+                                                                  nextSequenceNumberToUseForSending,
+                                                                  nextSequenberNumberExpectingToReceive,
+                                                                  sendingChannelNumber,
+                                                                  receivingChannelNumber,
+                                                                  minimumNegotiatedRTT
+                                                                  ));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -366,7 +368,7 @@ namespace openpeer
             if (size > 0) {
               ZS_LOG_DEBUG(log("buffered received data written to transport stream") + ZS_PARAM("size", size))
 
-              SecureByteBlockPtr buffer(new SecureByteBlock(size));
+              SecureByteBlockPtr buffer(make_shared<SecureByteBlock>(size));
               mPendingReceiveData->Get(buffer->BytePtr(), size);
 
               mReceiveStream->write(buffer);
@@ -2047,7 +2049,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       RUDPChannelStream::BufferedPacketPtr RUDPChannelStream::BufferedPacket::create()
       {
-        BufferedPacketPtr pThis(new BufferedPacket);
+        BufferedPacketPtr pThis(make_shared<BufferedPacket>());
         pThis->mSequenceNumber = 0;
         pThis->mTimeSentOrReceived = zsLib::now();
         pThis->mXORedParityToNow = false;

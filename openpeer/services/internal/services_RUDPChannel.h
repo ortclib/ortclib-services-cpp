@@ -206,6 +206,7 @@ namespace openpeer
                     QWORD remoteSequenceNumber = 0,
                     const char *remoteChannelInfo = NULL
                     );
+      protected:
         RUDPChannel(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

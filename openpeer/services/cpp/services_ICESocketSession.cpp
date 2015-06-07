@@ -170,7 +170,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ICESocketSession::CandidatePairPtr ICESocketSession::CandidatePair::create()
       {
-        CandidatePairPtr pThis(new CandidatePair);
+        CandidatePairPtr pThis(make_shared<CandidatePair>());
         pThis->mReceivedRequest = false;
         pThis->mReceivedResponse = false;
         pThis->mFailed = false;
@@ -202,6 +202,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       ICESocketSession::ICESocketSession(
+                                         const make_private &,
                                          IMessageQueuePtr queue,
                                          IICESocketSessionDelegatePtr delegate,
                                          ICESocketPtr inSocket,
@@ -304,7 +305,7 @@ namespace openpeer
 
         UseICESocketPtr socket = ICESocket::convert(inSocket);
 
-        ICESocketSessionPtr pThis(new ICESocketSession(socket->getMessageQueue(), delegate, ICESocket::convert(socket), remoteUsernameFrag, remotePassword, control, ICESocketSession::convert(foundation)));
+        ICESocketSessionPtr pThis(make_shared<ICESocketSession>(make_private{}, socket->getMessageQueue(), delegate, ICESocket::convert(socket), remoteUsernameFrag, remotePassword, control, ICESocketSession::convert(foundation)));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(*pThis);

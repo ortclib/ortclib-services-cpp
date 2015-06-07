@@ -276,7 +276,7 @@ namespace openpeer
                                              bool prettyPrint
                                              )
       {
-        if (!doc) return SecureByteBlockPtr(new SecureByteBlock);
+        if (!doc) return SecureByteBlockPtr(make_shared<SecureByteBlock>());
 
         size_t length = 0;
         std::unique_ptr<char[]> output = doc->writeAsJSON(prettyPrint, &length);
@@ -534,7 +534,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr Helper::random(size_t lengthInBytes)
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
         AutoSeededRandomPool rng;
         output->CleanNew(lengthInBytes);
         rng.GenerateBlock(*output, lengthInBytes);
@@ -622,7 +622,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr Helper::clone(const SecureByteBlock &buffer)
       {
-        SecureByteBlockPtr pBuffer(new SecureByteBlock);
+        SecureByteBlockPtr pBuffer(make_shared<SecureByteBlock>());
         SecureByteBlock::size_type size = buffer.SizeInBytes();
         if (size < 1) return pBuffer;
         pBuffer->CleanNew(size);
@@ -643,7 +643,7 @@ namespace openpeer
       {
         if (NULL == input) return SecureByteBlockPtr();
 
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
         size_t len = strlen(input);
         if (len < 1) return output;
 
@@ -659,7 +659,7 @@ namespace openpeer
                                                  size_t bufferLengthInBytes
                                                  )
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         if (bufferLengthInBytes < 1) return output;
 
@@ -720,7 +720,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr Helper::convertFromBase64(const String &input)
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         ByteQueue queue;
         queue.Put((BYTE *)input.c_str(), input.size());
@@ -768,7 +768,7 @@ namespace openpeer
       //-------------------------------------------------------------------------
       SecureByteBlockPtr Helper::convertFromHex(const String &input)
       {
-        SecureByteBlockPtr output(new SecureByteBlock);
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>());
         ByteQueue queue;
         queue.Put((BYTE *)input.c_str(), input.size());
 
@@ -817,7 +817,7 @@ namespace openpeer
                                          EncryptionAlgorthms algorithm
                                          )
       {
-        SecureByteBlockPtr output(new SecureByteBlock(bufferLengthInBytes));
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>(bufferLengthInBytes));
         CFB_Mode<AES>::Encryption cfbEncryption(key, key.size(), iv);
         cfbEncryption.ProcessData(*output, buffer, bufferLengthInBytes);
         return output;
@@ -831,7 +831,7 @@ namespace openpeer
                                          EncryptionAlgorthms algorithm
                                          )
       {
-        SecureByteBlockPtr output(new SecureByteBlock(buffer.size()));
+        SecureByteBlockPtr output(make_shared<SecureByteBlock>(buffer.size()));
         CFB_Mode<AES>::Decryption cfbDecryption(key, key.size(), iv);
         cfbDecryption.ProcessData(*output, buffer, buffer.size());
         return output;
@@ -869,21 +869,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             MD5 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             SHA1 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             SHA256 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
@@ -904,21 +904,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             MD5 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             SHA1 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             SHA256 hasher;
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
@@ -973,21 +973,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             HMAC<MD5> hasher(key, key.size());
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             HMAC<SHA1> hasher(key, key.size());
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             HMAC<SHA256> hasher(key, key.size());
-            output = SecureByteBlockPtr(new SecureByteBlock(hasher.DigestSize()));
+            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;
@@ -1011,7 +1011,7 @@ namespace openpeer
 
         SecureByteBlockPtr randomData = IHelper::random(key.SizeInBytes() + hash->SizeInBytes());
 
-        SecureByteBlockPtr final(new SecureByteBlock);
+        SecureByteBlockPtr final(make_shared<SecureByteBlock>());
         final->CleanNew(key.SizeInBytes() + hash->SizeInBytes());
 
         BYTE *dest = final->BytePtr();
@@ -1058,7 +1058,7 @@ namespace openpeer
           return SecureByteBlockPtr();
         }
 
-        SecureByteBlockPtr buffer(new SecureByteBlock);
+        SecureByteBlockPtr buffer(make_shared<SecureByteBlock>());
         buffer->CleanNew(part1->SizeInBytes() - extracted->SizeInBytes());
 
         BYTE *dest = buffer->BytePtr();
@@ -1753,7 +1753,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     RecursiveLockPtr IHelper::getGlobalLock()
     {
-      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(new RecursiveLock));
+      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(make_shared<RecursiveLock>()));
       return singleton.singleton();
     }
 

@@ -73,15 +73,19 @@ namespace openpeer
                           public IDHKeyDomain,
                           public IDHKeyDomainForDHPrivateKey
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IDHKeyDomainFactory;
         friend interaction IDHKeyDomain;
 
         typedef CryptoPP::DH DH;
 
+      public:
+        DHKeyDomain(const make_private &);
+
       protected:
-        DHKeyDomain();
-        
         DHKeyDomain(Noop) : Noop(true) {};
 
       public:

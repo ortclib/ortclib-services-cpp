@@ -62,6 +62,9 @@ namespace openpeer
                             public IICESocketSessionDelegate,
                             public IRUDPChannelDelegateForSessionAndListener
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IRUDPTransportFactory;
         friend interaction IRUDPTransport;
@@ -76,13 +79,15 @@ namespace openpeer
 
         typedef std::list<UseRUDPChannelPtr> PendingSessionList;
 
-      protected:
+      public:
         RUDPTransport(
+                      const make_private &,
                       IMessageQueuePtr queue,
                       IICESocketSessionPtr iceSession,
                       IRUDPTransportDelegatePtr delegate
                       );
 
+      protected:
         RUDPTransport(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

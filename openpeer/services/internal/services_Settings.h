@@ -52,6 +52,9 @@ namespace openpeer
 
       class Settings : public ISettings
       {
+      protected:
+        struct make_private {};
+        
       public:
         friend interaction ISettings;
 
@@ -73,8 +76,8 @@ namespace openpeer
 
         ZS_DECLARE_PTR(StoredSettingsMap)
 
-      protected:
-        Settings();
+      public:
+        Settings(const make_private &);
 
       public:
         ~Settings();

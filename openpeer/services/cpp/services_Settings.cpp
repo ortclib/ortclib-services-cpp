@@ -72,7 +72,7 @@ namespace openpeer
 
           stored = mStored;
 
-          mStored = StoredSettingsMapPtr(new StoredSettingsMap);
+          mStored = StoredSettingsMapPtr(make_shared<StoredSettingsMap>());
         }
 
         // apply all settings that occured before delegate was attached
@@ -135,8 +135,8 @@ namespace openpeer
       }
       
       //-----------------------------------------------------------------------
-      Settings::Settings() :
-        mStored(new StoredSettingsMap())
+      Settings::Settings(const make_private &) :
+        mStored(make_shared<StoredSettingsMap>())
       {
         ZS_LOG_DETAIL(log("created"))
       }
@@ -157,7 +157,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SettingsPtr Settings::create()
       {
-        SettingsPtr pThis(new Settings());
+        SettingsPtr pThis(make_shared<Settings>(make_private{}));
         pThis->mThisWeak = pThis;
         return pThis;
       }

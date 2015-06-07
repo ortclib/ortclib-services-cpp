@@ -78,6 +78,9 @@ namespace openpeer
                                    public ISTUNRequesterManager,
                                    public ISTUNRequesterManagerForSTUNRequester
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ISTUNRequesterManagerFactory;
         friend interaction ISTUNRequesterManager;
@@ -87,9 +90,10 @@ namespace openpeer
 
         typedef std::pair<QWORD, QWORD> QWORDPair;
 
+      public:
+        STUNRequesterManager(const make_private &);
+
       protected:
-        STUNRequesterManager();
-        
         STUNRequesterManager(Noop) : Noop(true) {};
 
       public:

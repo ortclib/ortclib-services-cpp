@@ -73,6 +73,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TCPMessaging::TCPMessaging(
+                                 const make_private &,
                                  IMessageQueuePtr queue,
                                  ITCPMessagingDelegatePtr delegate,
                                  ITransportStreamPtr receiveStream,
@@ -86,8 +87,8 @@ namespace openpeer
         mSendStream(sendStream->getReader()),
         mFramesHaveChannelNumber(framesHaveChannelNumber),
         mMaxMessageSizeInBytes(maxMessageSizeInBytes),
-        mSendingQueue(new ByteQueue),
-        mReceivingQueue(new ByteQueue)
+        mSendingQueue(make_shared<ByteQueue>()),
+        mReceivingQueue(make_shared<ByteQueue>())
       {
         IHelper::setSocketThreadPriority();
         IHelper::setTimerThreadPriority();
@@ -155,7 +156,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
         ZS_THROW_INVALID_ARGUMENT_IF(!socket)
 
-        TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
+        TCPMessagingPtr pThis(make_shared<TCPMessaging>(make_private {}, IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->getLock());
@@ -191,7 +192,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(remoteIP.isAddressEmpty())
         ZS_THROW_INVALID_ARGUMENT_IF(remoteIP.isPortEmpty())
 
-        TCPMessagingPtr pThis(new TCPMessaging(IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
+        TCPMessagingPtr pThis(make_shared<TCPMessaging>(make_private {}, IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
 
         AutoRecursiveLock lock(pThis->getLock());
@@ -445,7 +446,7 @@ namespace openpeer
           // skip over the peeked value
           mReceivingQueue->Skip(sizeof(bufferSize));
 
-          SecureByteBlockPtr message(new SecureByteBlock);
+          SecureByteBlockPtr message(make_shared<SecureByteBlock>());
           message->CleanNew(bufferSize);
           if (bufferSize > 0) {
             mReceivingQueue->Get(message->BytePtr(), bufferSize);
@@ -453,7 +454,7 @@ namespace openpeer
 
           ChannelHeaderPtr channelHeader;
           if (mFramesHaveChannelNumber) {
-            channelHeader = ChannelHeaderPtr(new ChannelHeader);
+            channelHeader = ChannelHeaderPtr(make_shared<ChannelHeader>());
             channelHeader->mChannelID = channel;
           }
 

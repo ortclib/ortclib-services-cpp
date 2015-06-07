@@ -82,6 +82,9 @@ namespace openpeer
                                   public SharedRecursiveLock,
                                   public IBackOffTimerPatternForBackOffTimer
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IBackOffTimerPattern;
         friend interaction IBackOffTimerPatternFactory;
@@ -90,9 +93,13 @@ namespace openpeer
         typedef IBackOffTimerPattern::DurationType DurationType;
         typedef std::vector<DurationType> DurationVector;
 
-      protected:
-        BackOffTimerPattern(ElementPtr patternEl);
+      public:
+        BackOffTimerPattern(
+                            const make_private &,
+                            ElementPtr patternEl
+                            );
 
+      protected:
         void init();
 
       public:

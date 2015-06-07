@@ -1533,7 +1533,7 @@ namespace openpeer
                                             const char *software
                                             )
     {
-      STUNPacketPtr stun(new STUNPacket);
+      STUNPacketPtr stun(make_shared<STUNPacket>());
       stun->mClass = Class_Request;
       stun->mMethod = method;
       if (software)
@@ -1563,7 +1563,7 @@ namespace openpeer
                                              const char *software
                                              )
     {
-      STUNPacketPtr stun(new STUNPacket);
+      STUNPacketPtr stun(make_shared<STUNPacket>());
       stun->mClass = Class_Response;
       stun->mMethod = request->mMethod;
       stun->mMagicCookie = request->mMagicCookie;
@@ -1624,7 +1624,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     STUNPacketPtr STUNPacket::clone(bool changeTransactionID) const
     {
-      STUNPacketPtr dest(new STUNPacket);
+      STUNPacketPtr dest(make_shared<STUNPacket>());
       dest->mOriginalPacket = mOriginalPacket;
       dest->mClass = mClass;
       dest->mMethod = mMethod;
@@ -1756,7 +1756,7 @@ namespace openpeer
       size_t availableBytes = messageLengthInBytes;
       const BYTE *pos = packet + OPENPEER_STUN_HEADER_SIZE_IN_BYTES;  //
 
-      STUNPacketPtr stun(new STUNPacket);
+      STUNPacketPtr stun(make_shared<STUNPacket>());
       stun->mMagicCookie = magicCookie;
       stun->mClass = static_cast<Classes>(messageTypeClass);
       stun->mMethod = static_cast<Methods>(messageTypeMethod);
@@ -2450,7 +2450,7 @@ namespace openpeer
 
       //**********************************************************************
       // now we know the packet size, we fill it up...
-      SecureByteBlockPtr outPacket(new SecureByteBlock(outPacketLengthInBytes));
+      SecureByteBlockPtr outPacket(make_shared<SecureByteBlock>(outPacketLengthInBytes));
 
       BYTE *packet = *outPacket;
       memset(packet, 0, outPacketLengthInBytes);

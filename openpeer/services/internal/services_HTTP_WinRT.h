@@ -62,6 +62,9 @@ namespace openpeer
                    public SharedRecursiveLock,
                    public IHTTP
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IHTTPFactory;
 
@@ -69,8 +72,10 @@ namespace openpeer
 
         friend class HTTPQuery;
 
+      public:
+        HTTP(const make_private &);
+
       protected:
-        HTTP();
         HTTP(Noop) :
           Noop(true),
           SharedRecursiveLock(SharedRecursiveLock::create())
@@ -146,7 +151,11 @@ namespace openpeer
                           public ITimerDelegate
         {
         protected:
+          struct make_private {};
+
+        public:
           HTTPQuery(
+                    const make_private &,
                     HTTPPtr outer,
                     IHTTPQueryDelegatePtr delegate,
                     bool isPost,
@@ -158,6 +167,7 @@ namespace openpeer
                     Milliseconds timeout
                     );
 
+        protected:
           void init();
 
         public:

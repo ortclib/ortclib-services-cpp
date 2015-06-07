@@ -66,7 +66,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      DHPublicKey::DHPublicKey()
+      DHPublicKey::DHPublicKey(const make_private &)
       {
         ZS_LOG_DEBUG(log("created"))
       }
@@ -107,7 +107,7 @@ namespace openpeer
                                        const SecureByteBlock &ephemeralPublicKey
                                        )
       {
-        DHPublicKeyPtr pThis(new DHPublicKey);
+        DHPublicKeyPtr pThis(make_shared<DHPublicKey>(make_private{}));
 
         pThis->mStaticPublicKey.Assign(staticPublicKey);
         pThis->mEphemeralPublicKey.Assign(ephemeralPublicKey);

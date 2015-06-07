@@ -60,19 +60,24 @@ namespace openpeer
                             public ISTUNRequesterDelegate,
                             public ITimerDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ISTUNDiscovery;
         friend interaction ISTUNDiscoveryFactory;
 
         typedef std::list<IPAddress> IPAddressList;
 
-      protected:
+      public:
         STUNDiscovery(
+                      const make_private &,
                       IMessageQueuePtr queue,
                       ISTUNDiscoveryDelegatePtr delegate,
                       Seconds keepWarmPingTime
                       );
-        
+
+      protected:
         STUNDiscovery(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init(

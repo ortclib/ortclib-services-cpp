@@ -288,7 +288,7 @@ namespace openpeer
           return IDNS::AResultPtr();
         }
 
-        IDNS::AResultPtr result = IDNS::AResultPtr(new IDNS::AResult);
+        IDNS::AResultPtr result = IDNS::AResultPtr(make_shared<IDNS::AResult>());
 
         fill(*result, typeEl);
 
@@ -323,7 +323,7 @@ namespace openpeer
           return IDNS::SRVResultPtr();
         }
 
-        IDNS::SRVResultPtr result = IDNS::SRVResultPtr(new IDNS::SRVResult);
+        IDNS::SRVResultPtr result = IDNS::SRVResultPtr(make_shared<IDNS::SRVResult>());
 
         ElementPtr recordsEl = rootEl->findFirstChildElement("records");
         if (recordsEl) {
@@ -340,7 +340,7 @@ namespace openpeer
             {
               ElementPtr aEl = recordEl->findFirstChildElement("a");
               if (aEl) {
-                IDNS::AResultPtr result = IDNS::AResultPtr(new IDNS::AResult);
+                IDNS::AResultPtr result = IDNS::AResultPtr(make_shared<IDNS::AResult>());
                 fill(*result, aEl);
                 record.mAResult = result;
               }
@@ -349,7 +349,7 @@ namespace openpeer
             {
               ElementPtr aaaaEl = recordEl->findFirstChildElement("aaaa");
               if (aaaaEl) {
-                IDNS::AAAAResultPtr result = IDNS::AAAAResultPtr(new IDNS::AAAAResult);
+                IDNS::AAAAResultPtr result = IDNS::AAAAResultPtr(make_shared<IDNS::AAAAResult>());
                 fill(*result, aaaaEl);
                 record.mAAAAResult = result;
               }
@@ -406,7 +406,10 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      DNSMonitor::DNSMonitor(IMessageQueuePtr queue) :
+      DNSMonitor::DNSMonitor(
+                             const make_private &,
+                             IMessageQueuePtr queue
+                             ) :
         MessageQueueAssociator(queue),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mCtx(NULL)
@@ -446,7 +449,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitorPtr DNSMonitor::create(IMessageQueuePtr queue)
       {
-        DNSMonitorPtr pThis(new DNSMonitor(queue));
+        DNSMonitorPtr pThis(make_shared<DNSMonitor>(make_private{}, queue));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -639,7 +642,7 @@ namespace openpeer
         }
 
         if (!useInfo) {
-          useInfo = ACacheInfoPtr(new ACacheInfo);
+          useInfo = ACacheInfoPtr(make_shared<ACacheInfo>());
           useInfo->mName = name;
           useInfo->mFlags = flags;
 
@@ -726,7 +729,7 @@ namespace openpeer
         }
 
         if (!useInfo) {
-          useInfo = SRVCacheInfoPtr(new SRVCacheInfo);
+          useInfo = SRVCacheInfoPtr(make_shared<SRVCacheInfo>());
           useInfo->mName = name;
           useInfo->mService = service;
           useInfo->mProtocol = protocol;
@@ -938,7 +941,7 @@ namespace openpeer
       void DNSMonitor::ACacheInfo::onAResult(struct dns_rr_a4 *record, int status)
       {
         if (NULL != record) {
-          IDNS::AResultPtr data(new IDNS::AResult);
+          IDNS::AResultPtr data(make_shared<IDNS::AResult>());
 
           data->mName = mName;
           data->mTTL = record->dnsa4_ttl;
@@ -970,7 +973,7 @@ namespace openpeer
       void DNSMonitor::ACacheInfo::onAAAAResult(struct dns_rr_a6 *record, int status)
       {
         if (NULL != record) {
-          IDNS::AAAAResultPtr data(new IDNS::AAAAResult);
+          IDNS::AAAAResultPtr data(make_shared<IDNS::AAAAResult>());
 
           data->mName = mName;
           data->mTTL = record->dnsa6_ttl;
@@ -1010,7 +1013,7 @@ namespace openpeer
       void DNSMonitor::SRVCacheInfo::onSRVResult(struct dns_rr_srv *record, int status)
       {
         if (NULL != record) {
-          IDNS::SRVResultPtr data(new IDNS::SRVResult);
+          IDNS::SRVResultPtr data(make_shared<IDNS::SRVResult>());
 
           data->mName = mName;
           data->mService = mService;

@@ -122,7 +122,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     RUDPPacketPtr RUDPPacket::create()
     {
-      RUDPPacketPtr pThis(new RUDPPacket);
+      RUDPPacketPtr pThis(make_shared<RUDPPacket>());
       pThis->mLogObject = NULL;
       pThis->mLogObjectID = 0;
       pThis->mChannelNumber = 0;
@@ -141,7 +141,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     RUDPPacketPtr RUDPPacket::clone()
     {
-      RUDPPacketPtr pThis(new RUDPPacket);
+      RUDPPacketPtr pThis(make_shared<RUDPPacket>());
       pThis->mLogObject = mLogObject;
       pThis->mLogObjectID = mLogObjectID;
       pThis->mChannelNumber = mChannelNumber;
@@ -226,7 +226,7 @@ namespace openpeer
 
       size_t length = OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes) + mDataLengthInBytes;
 
-      SecureByteBlockPtr outBuffer(new SecureByteBlock(length));
+      SecureByteBlockPtr outBuffer(make_shared<SecureByteBlock>(length));
 
       BYTE *packet = *outBuffer;
       memset(packet, 0, length);  // make sure to set the entire packet to "0" so all defaults are appropriately set

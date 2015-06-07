@@ -71,6 +71,9 @@ namespace openpeer
                                           public ITransportStreamReaderDelegate,
                                           public ITransportStreamWriterDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IMessageLayerSecurityChannelFactory;
         friend interaction IMessageLayerSecurityChannel;
@@ -96,8 +99,9 @@ namespace openpeer
 
         typedef std::list<DHPrivatePublicKeyPair> DHKeyList;
 
-      protected:
+      public:
         MessageLayerSecurityChannel(
+                                    const make_private &,
                                     IMessageQueuePtr queue,
                                     IMessageLayerSecurityChannelDelegatePtr delegate,
                                     ITransportStreamPtr receiveStreamEncoded,
@@ -107,6 +111,7 @@ namespace openpeer
                                     const char *contextID = NULL
                                     );
 
+      protected:
         MessageLayerSecurityChannel(Noop) :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()),

@@ -113,6 +113,9 @@ namespace openpeer
                                public ITimerDelegate,
                                public IBackgroundingDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IICESocketSessionFactory;
         friend interaction IICESocketSession;
@@ -148,8 +151,9 @@ namespace openpeer
 
         typedef std::list<CandidatePairPtr> CandidatePairList;
 
-      protected:
+      public:
         ICESocketSession(
+                         const make_private &,
                          IMessageQueuePtr queue,
                          IICESocketSessionDelegatePtr delegate,
                          ICESocketPtr inSocket,
@@ -165,6 +169,7 @@ namespace openpeer
           SharedRecursiveLock(SharedRecursiveLock::create())
         {}
 
+      protected:
         void init();
 
       public:

@@ -67,6 +67,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       TransportStream::TransportStream(
+                                       const make_private &,
                                        IMessageQueuePtr queue,
                                        ITransportStreamWriterDelegatePtr writerDelegate,
                                        ITransportStreamReaderDelegatePtr readerDelegate
@@ -124,7 +125,7 @@ namespace openpeer
                                                  ITransportStreamReaderDelegatePtr readerDelegate
                                                  )
       {
-        TransportStreamPtr pThis(new TransportStream(IHelper::getServiceQueue(), writerDelegate, readerDelegate));
+        TransportStreamPtr pThis(make_shared<TransportStream>(make_private {}, IHelper::getServiceQueue(), writerDelegate, readerDelegate));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -339,7 +340,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("blocking enabled"))
 
-          mBlockQueue = ByteQueuePtr(new ByteQueue);
+          mBlockQueue = ByteQueuePtr(make_shared<ByteQueue>());
           mBlockHeader.reset();
           return;
         }
@@ -361,7 +362,7 @@ namespace openpeer
           return;
         }
 
-        SecureByteBlockPtr buffer(new SecureByteBlock(size));
+        SecureByteBlockPtr buffer(make_shared<SecureByteBlock>(size));
         if (size > 0) {
           mBlockQueue->Get(buffer->BytePtr(), size);
         }
@@ -604,7 +605,7 @@ namespace openpeer
           if (buffer.mRead > 0) {
             size_t resultSize = result->SizeInBytes() - buffer.mRead;
 
-            SecureByteBlockPtr temp(new SecureByteBlock(resultSize));
+            SecureByteBlockPtr temp(make_shared<SecureByteBlock>(resultSize));
             memcpy(temp->BytePtr(), result->BytePtr() + buffer.mRead, resultSize);
 
             result = temp;
@@ -773,7 +774,7 @@ namespace openpeer
           }
         }
 
-        SecureByteBlockPtr result(new SecureByteBlock(bufferLengthInBytes));
+        SecureByteBlockPtr result(make_shared<SecureByteBlock>(bufferLengthInBytes));
 
         size_t read = peek(0 != bufferLengthInBytes ? result->BytePtr() : NULL, bufferLengthInBytes, outHeader);
 
@@ -786,7 +787,7 @@ namespace openpeer
           ZS_LOG_TRACE(log("peek completed but read less than expecting / hoping to read") + ZS_PARAM("read", read) + ZS_PARAM("expecting", result->SizeInBytes()))
 
           // read less than the expected size
-          SecureByteBlockPtr newResult(new SecureByteBlock(read));
+          SecureByteBlockPtr newResult(make_shared<SecureByteBlock>(read));
 
           memcpy(newResult->BytePtr(), result->BytePtr(), read);
           return newResult;

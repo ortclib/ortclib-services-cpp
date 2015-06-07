@@ -72,15 +72,19 @@ namespace openpeer
                                   public IWakeDelegate,
                                   public IMessageQueueManagerForBackgrounding
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IMessageQueueManager;
         friend interaction IMessageQueueManagerForBackgrounding;
 
         typedef std::map<MessageQueueName, ThreadPriorities> ThreadPriorityMap;
 
-      protected:
-        MessageQueueManager();
+      public:
+        MessageQueueManager(const make_private &);
 
+      protected:
         void init();
 
         static MessageQueueManagerPtr create();

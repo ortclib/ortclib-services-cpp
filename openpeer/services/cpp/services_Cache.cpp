@@ -54,7 +54,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      Cache::Cache()
+      Cache::Cache(const make_private &)
       {
         ZS_LOG_DETAIL(log("created"))
       }
@@ -75,7 +75,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       CachePtr Cache::create()
       {
-        CachePtr pThis(new Cache());
+        CachePtr pThis(make_shared<Cache>(make_private{}));
         pThis->mThisWeak = pThis;
         return pThis;
       }

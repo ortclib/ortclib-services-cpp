@@ -63,6 +63,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       STUNRequester::STUNRequester(
+                                   const make_private &,
                                    IMessageQueuePtr queue,
                                    ISTUNRequesterDelegatePtr delegate,
                                    IPAddress serverIP,
@@ -71,7 +72,6 @@ namespace openpeer
                                    IBackOffTimerPatternPtr pattern
                                    ) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
         mDelegate(ISTUNRequesterDelegateProxy::createWeak(queue, delegate)),
         mSTUNRequest(stun),
         mServerIP(serverIP),
@@ -143,7 +143,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(serverIP.isAddressEmpty())
         ZS_THROW_INVALID_USAGE_IF(serverIP.isPortEmpty())
 
-        STUNRequesterPtr pThis(new STUNRequester(queue, delegate, serverIP, stun, usingRFC, pattern));
+        STUNRequesterPtr pThis(make_shared<STUNRequester>(make_private{}, queue, delegate, serverIP, stun, usingRFC, pattern));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -291,7 +291,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(mLock);
 
-        ZS_LOG_TRACE(log("backoff timer state changed") + ZS_PARAM("timer id", timer->getID()) + ZS_PARAM("state", IBackOffTimer::toString(state)))
+        ZS_LOG_TRACE(log("backoff timer state changed") + ZS_PARAM("timer id", timer->getID()) + ZS_PARAM("state", IBackOffTimer::toString(state)) + ZS_PARAM("total tries", mTotalTries))
         step();
       }
 

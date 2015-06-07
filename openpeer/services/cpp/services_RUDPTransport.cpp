@@ -66,6 +66,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       RUDPTransport::RUDPTransport(
+                                   const make_private &,
                                    IMessageQueuePtr queue,
                                    IICESocketSessionPtr iceSession,
                                    IRUDPTransportDelegatePtr delegate
@@ -129,7 +130,7 @@ namespace openpeer
                                              IRUDPTransportDelegatePtr delegate
                                              )
       {
-        RUDPTransportPtr pThis(new RUDPTransport(queue, iceSession, delegate));
+        RUDPTransportPtr pThis(make_shared<RUDPTransport>(make_private{}, queue, iceSession, delegate));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;

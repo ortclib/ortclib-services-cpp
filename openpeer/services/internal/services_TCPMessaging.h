@@ -65,12 +65,16 @@ namespace openpeer
                            public ITimerDelegate,
                            public IBackgroundingDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ITCPMessagingFactory;
         friend interaction ITCPMessaging;
 
-      protected:
+      public:
         TCPMessaging(
+                     const make_private &,
                      IMessageQueuePtr queue,
                      ITCPMessagingDelegatePtr delegate,
                      ITransportStreamPtr receiveStream,
@@ -79,6 +83,7 @@ namespace openpeer
                      size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                      );
 
+      protected:
         TCPMessaging(Noop) :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()) {}

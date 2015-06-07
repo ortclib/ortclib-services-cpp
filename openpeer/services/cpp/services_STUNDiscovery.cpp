@@ -61,6 +61,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       STUNDiscovery::STUNDiscovery(
+                                   const make_private &,
                                    IMessageQueuePtr queue,
                                    ISTUNDiscoveryDelegatePtr delegate,
                                    Seconds keepWarmPingTime
@@ -134,7 +135,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!service)
 
-        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate, keepWarmPingTime));
+        STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, keepWarmPingTime));
         pThis->mThisWeak = pThis;
         pThis->init(service, NULL, IDNS::SRVLookupType_AutoLookupAll);
         return pThis;
@@ -153,7 +154,7 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE_IF(!delegate)
         ZS_THROW_INVALID_USAGE_IF(!srvName)
 
-        STUNDiscoveryPtr pThis(new STUNDiscovery(queue, delegate, keepWarmPingTime));
+        STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, keepWarmPingTime));
         pThis->mThisWeak = pThis;
         pThis->init(IDNS::SRVResultPtr(), srvName, lookupType);
         return pThis;

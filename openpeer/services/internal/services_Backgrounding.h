@@ -57,6 +57,9 @@ namespace openpeer
                             public IBackgrounding,
                             public ITimerDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IBackgroundingFactory;
         friend interaction IBackgrounding;
@@ -73,9 +76,10 @@ namespace openpeer
         friend class Notifier;
         friend class Query;
 
-      protected:
-        Backgrounding();
+      public:
+        Backgrounding(const make_private &);
 
+      protected:
         static BackgroundingPtr create();
 
       public:
@@ -166,7 +170,13 @@ namespace openpeer
                          public IBackgroundingNotifier
         {
         protected:
-          Notifier(ExchangedNotifierPtr notifier);
+          struct make_private {};
+
+        public:
+          Notifier(
+                   const make_private &,
+                   ExchangedNotifierPtr notifier
+                   );
 
         public:
           ~Notifier();
@@ -199,12 +209,16 @@ namespace openpeer
         class ExchangedNotifier : public SharedRecursiveLock,
                                   public IBackgroundingNotifier
         {
+        protected:
+          struct make_private {};
+
         public:
           friend class Backgrounding;
           friend class Notifier;
 
-        protected:
+        public:
           ExchangedNotifier(
+                            const make_private &,
                             BackgroundingPtr outer,
                             PUID backgroundingID,
                             Phase phase
@@ -256,7 +270,11 @@ namespace openpeer
                       public IBackgroundingQuery
         {
         protected:
+          struct make_private {};
+
+        public:
           Query(
+                const make_private &,
                 BackgroundingPtr outer,
                 PUID backgroundingID
                 ) :

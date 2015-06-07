@@ -127,6 +127,9 @@ namespace openpeer
                         public ITimerDelegate,
                         public IDNSDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IICESocketFactory;
         friend interaction IICESocket;
@@ -241,8 +244,9 @@ namespace openpeer
         typedef std::map<SocketPtr, LocalSocketPtr> LocalSocketMap;
         typedef std::map<InterfaceName, OrderID> InterfaceNameToOrderMap;
 
-      protected:
+      public:
         ICESocket(
+                  const make_private &,
                   IMessageQueuePtr queue,
                   IICESocketDelegatePtr delegate,
                   const TURNServerInfoList &turnServers,
@@ -252,6 +256,7 @@ namespace openpeer
                   IICESocketPtr foundationSocket
                   );
 
+      protected:
         ICESocket(Noop) :
           Noop(true),
           MessageQueueAssociator(IMessageQueuePtr()),

@@ -57,6 +57,9 @@ namespace openpeer
                               public ITransportStreamWriter,
                               public ITransportStreamReader
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ITransportStreamFactory;
         friend interaction ITransportStream;
@@ -77,13 +80,15 @@ namespace openpeer
 
         typedef std::list<Buffer> BufferList;
 
-      protected:
+      public:
         TransportStream(
+                        const make_private &,
                         IMessageQueuePtr queue,
                         ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
                         ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
                         );
 
+      protected:
         TransportStream(Noop) :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()) {}

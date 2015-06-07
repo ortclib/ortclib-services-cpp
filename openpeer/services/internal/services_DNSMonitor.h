@@ -60,6 +60,9 @@ namespace openpeer
                          public ISocketDelegate,
                          public ITimerDelegate
       {
+      protected:
+        struct make_private{};
+
         friend class DNSQuery;
         friend class DNSAQuery;
         friend class DNSAAAAQuery;
@@ -137,8 +140,12 @@ namespace openpeer
 
         typedef std::map<QueryID, CacheInfoPtr> PendingQueriesMap;
 
+      public:
+        DNSMonitor(
+                   const make_private &,
+                   IMessageQueuePtr queue
+                   );
       protected:
-        DNSMonitor(IMessageQueuePtr queue);
         void init();
         static DNSMonitorPtr create(IMessageQueuePtr queue);
 

@@ -457,7 +457,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      DHKeyDomain::DHKeyDomain()
+      DHKeyDomain::DHKeyDomain(const make_private &)
       {
         ZS_LOG_DEBUG(log("created"))
       }
@@ -500,7 +500,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DHKeyDomainPtr DHKeyDomain::generate(size_t keySizeInBits)
       {
-        DHKeyDomainPtr pThis(new DHKeyDomain);
+        DHKeyDomainPtr pThis(make_shared<DHKeyDomain>(make_private{}));
 
         AutoSeededRandomPool rnd;
         pThis->mDH.AccessGroupParameters().GenerateRandomWithKeySize(rnd, static_cast<unsigned int>(keySizeInBits));
@@ -598,7 +598,7 @@ namespace openpeer
                                        bool validate
                                        )
       {
-        DHKeyDomainPtr pThis(new DHKeyDomain);
+        DHKeyDomainPtr pThis(make_shared<DHKeyDomain>(make_private{}));
 
         try {
           Integer p(inP, inP.SizeInBytes());

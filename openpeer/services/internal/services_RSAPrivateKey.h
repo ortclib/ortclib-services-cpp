@@ -74,6 +74,9 @@ namespace openpeer
                             public IRSAPrivateKey,
                             public IRSAPrivateKeyForRSAPublicKey
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IRSAPrivateKey;
         friend interaction IRSAPrivateKeyFactory;
@@ -82,9 +85,10 @@ namespace openpeer
 
         typedef CryptoPP::RSA::PrivateKey PrivateKey;
 
+      public:
+        RSAPrivateKey(const make_private &);
+
       protected:
-        RSAPrivateKey();
-        
         RSAPrivateKey(Noop) : Noop(true) {};
 
       public:

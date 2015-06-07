@@ -68,13 +68,17 @@ namespace openpeer
                           public IDHPublicKey,
                           public IDHPublicKeyForDHPrivateKey
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IDHPublicKeyFactory;
         friend interaction IDHPublicKey;
 
+      public:
+        DHPublicKey(const make_private &);
+
       protected:
-        DHPublicKey();
-        
         DHPublicKey(Noop) : Noop(true) {};
 
       public:

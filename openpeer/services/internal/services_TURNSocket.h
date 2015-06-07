@@ -80,6 +80,9 @@ namespace openpeer
                          public ITimerDelegate,
                          public IBackgroundingDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ITURNSocket;
         friend interaction ITURNSocketFactory;
@@ -105,9 +108,9 @@ namespace openpeer
         typedef PUID TimerID;
         typedef std::map<TimerID, TimerPtr> TimerMap;
 
-      protected:
-
+      public:
         TURNSocket(
+                   const make_private &,
                    IMessageQueuePtr queue,
                    ITURNSocketDelegatePtr delegate,
                    const char *turnServer,
@@ -120,6 +123,7 @@ namespace openpeer
                    );
 
         TURNSocket(
+                   const make_private &,
                    IMessageQueuePtr queue,
                    ITURNSocketDelegatePtr delegate,
                    IDNS::SRVResultPtr srvTURNUDP,
@@ -130,7 +134,8 @@ namespace openpeer
                    WORD limitChannelToRangeStart,
                    WORD limitChannelRoRangeEnd
                    );
-        
+
+      protected:
         TURNSocket(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
         void init();

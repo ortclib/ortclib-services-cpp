@@ -54,6 +54,9 @@ namespace openpeer
       class DHPrivateKey : public Noop,
                            public IDHPrivateKey
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction IDHPrivateKeyFactory;
         friend interaction IDHPrivateKey;
@@ -61,9 +64,13 @@ namespace openpeer
         ZS_DECLARE_TYPEDEF_PTR(IDHKeyDomainForDHPrivateKey, UseDHKeyDomain)
         ZS_DECLARE_TYPEDEF_PTR(IDHPublicKeyForDHPrivateKey, UseDHPublicKey)
 
+      public:
+        DHPrivateKey(
+                     const make_private &,
+                     UseDHKeyDomainPtr keyDomain
+                     );
+
       protected:
-        DHPrivateKey(UseDHKeyDomainPtr keyDomain);
-        
         DHPrivateKey(Noop) : Noop(true) {};
 
       public:

@@ -358,6 +358,9 @@ namespace openpeer
                        public IDNSQuery
       {
       protected:
+        struct make_private {};
+
+      protected:
         //---------------------------------------------------------------------
         virtual void onAResult(IDNS::AResultPtr result) {}
 
@@ -394,7 +397,7 @@ namespace openpeer
         public:
           //-------------------------------------------------------------------
           static DNSIndirectReferencePtr create(DNSQueryPtr query) {
-            DNSIndirectReferencePtr pThis(new DNSIndirectReference);
+            DNSIndirectReferencePtr pThis(make_shared<DNSIndirectReference>());
             pThis->mThisWeak = pThis;
             pThis->mMonitor = DNSMonitor::singleton();
             pThis->mOuter = query;
@@ -625,8 +628,8 @@ namespace openpeer
 
       class DNSAQuery : public DNSQuery
       {
-      protected:
-        DNSAQuery(IDNSDelegatePtr delegate, const char *name, WORD port) :
+      public:
+        DNSAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mPort(port)
@@ -638,7 +641,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static DNSAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
         {
-          DNSAQueryPtr pThis(new DNSAQuery(delegate, name, port));
+          DNSAQueryPtr pThis(make_shared<DNSAQuery>(make_private{}, delegate, name, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -709,8 +712,8 @@ namespace openpeer
 
       class DNSAAAAQuery : public DNSQuery
       {
-      protected:
-        DNSAAAAQuery(IDNSDelegatePtr delegate, const char *name, WORD port) :
+      public:
+        DNSAAAAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mPort(port)
@@ -722,7 +725,7 @@ namespace openpeer
         //---------------------------------------------------------------------
         static DNSAAAAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
         {
-          DNSAAAAQueryPtr pThis(new DNSAAAAQuery(delegate, name, port));
+          DNSAAAAQueryPtr pThis(make_shared<DNSAAAAQuery>(make_private{}, delegate, name, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -794,8 +797,9 @@ namespace openpeer
 
       class DNSSRVQuery : public DNSQuery
       {
-      protected:
+      public:
         DNSSRVQuery(
+                    const make_private &,
                     IDNSDelegatePtr delegate,
                     const char *name,
                     const char *service,
@@ -821,7 +825,7 @@ namespace openpeer
                                      WORD port
                                      )
         {
-          DNSSRVQueryPtr pThis(new DNSSRVQuery(delegate, name, service, protocol, port));
+          DNSSRVQueryPtr pThis(make_shared<DNSSRVQuery>(make_private{}, delegate, name, service, protocol, port));
           pThis->mThisWeak = pThis;
           pThis->mMonitor = DNSMonitor::singleton();
           pThis->mQuery = DNSIndirectReference::create(pThis);
@@ -922,8 +926,11 @@ namespace openpeer
                               public IDNSDelegate
       {
       protected:
+        struct make_private {};
+      public:
         //---------------------------------------------------------------------
         DNSAorAAAAQuery(
+                        const make_private &,
                         IMessageQueuePtr queue,
                         IDNSDelegatePtr delegate
                         ) :
@@ -933,6 +940,7 @@ namespace openpeer
         {
         }
 
+      protected:
         //---------------------------------------------------------------------
         void init(const char *name)
         {
@@ -972,7 +980,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_BAD_STATE_IF(!queue)
 
-          DNSAorAAAAQueryPtr pThis(new DNSAorAAAAQuery(queue, delegate));
+          DNSAorAAAAQueryPtr pThis(make_shared<DNSAorAAAAQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
           pThis->init(name);
           return pThis;
@@ -1094,7 +1102,11 @@ namespace openpeer
                                   public IDNSDelegate
       {
       protected:
+        struct make_private {};
+
+      public:
         DNSSRVResolverQuery(
+                            const make_private &,
                             IMessageQueuePtr queue,
                             IDNSDelegatePtr delegate,
                             const char *name,
@@ -1173,7 +1185,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_INVALID_USAGE_IF(!queue)
 
-          DNSSRVResolverQueryPtr pThis(new DNSSRVResolverQuery(queue, delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType));
+          DNSSRVResolverQueryPtr pThis(make_shared<DNSSRVResolverQuery>(make_private{}, queue, delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -1332,7 +1344,7 @@ namespace openpeer
             // first we should check if this is actually an IP address
             if (IPAddress::isConvertable(record.mName)) {
               IPAddress temp(record.mName, (*iter).mPort);
-              IDNS::AResultPtr ipResult(new IDNS::AResult);
+              IDNS::AResultPtr ipResult(make_shared<IDNS::AResult>());
 
               ipResult->mName = record.mName;
               ipResult->mTTL = mSRVResult->mTTL;
@@ -1388,7 +1400,7 @@ namespace openpeer
           }
 
           // we didn't have an SRV result but now we will fake one
-          IDNS::SRVResultPtr data(new IDNS::SRVResult);
+          IDNS::SRVResultPtr data(make_shared<IDNS::SRVResult>());
 
           AResultPtr resultA = mBackupLookup->getA();
           AAAAResultPtr resultAAAA = mBackupLookup->getAAAA();
@@ -1554,10 +1566,14 @@ namespace openpeer
       class DNSInstantResultQuery : public IDNSQuery
       {
       protected:
-        DNSInstantResultQuery() : mID(zsLib::createPUID()) {}
+        struct make_private {};
+
+      public:
+        DNSInstantResultQuery(const make_private &) {}
+
       public:
         //---------------------------------------------------------------------
-        static DNSInstantResultQueryPtr create() {return DNSInstantResultQueryPtr(new DNSInstantResultQuery);}
+        static DNSInstantResultQueryPtr create() {return DNSInstantResultQueryPtr(make_shared<DNSInstantResultQuery>(make_private{}));}
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -1596,7 +1612,7 @@ namespace openpeer
         SRVResultPtr mSRV;
 
       private:
-        PUID mID;
+        AutoPUID mID;
       };
 
       //-----------------------------------------------------------------------
@@ -1611,12 +1627,16 @@ namespace openpeer
                            public IDNSQuery,
                            public IDNSDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         typedef IDNS::SRVLookupTypes SRVLookupTypes;
         typedef std::list<IDNSQueryPtr> DNSQueryList;
 
-      protected:
+      public:
         DNSListQuery(
+                     const make_private &,
                      IMessageQueuePtr queue,
                      IDNSDelegatePtr delegate
                      ) :
@@ -1626,6 +1646,7 @@ namespace openpeer
         {
         }
 
+      protected:
         void init()
         {
         }
@@ -1654,7 +1675,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_BAD_STATE_IF(!queue)
 
-          DNSListQueryPtr pThis(new DNSListQuery(queue, delegate));
+          DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
 
           for (StringList::const_iterator iter = dnsList.begin(); iter != dnsList.end(); ++iter)
@@ -1682,7 +1703,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_BAD_STATE_IF(!queue)
 
-          DNSListQueryPtr pThis(new DNSListQuery(queue, delegate));
+          DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
 
           for (StringList::const_iterator iter = dnsList.begin(); iter != dnsList.end(); ++iter)
@@ -1710,7 +1731,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_BAD_STATE_IF(!queue)
 
-          DNSListQueryPtr pThis(new DNSListQuery(queue, delegate));
+          DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
 
           for (StringList::const_iterator iter = dnsList.begin(); iter != dnsList.end(); ++iter)
@@ -1738,7 +1759,7 @@ namespace openpeer
           IMessageQueuePtr queue = Helper::getServiceQueue();
           ZS_THROW_BAD_STATE_IF(!queue)
 
-          DNSListQueryPtr pThis(new DNSListQuery(queue, delegate));
+          DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
 
           for (StringList::const_iterator iter = dnsList.begin(); iter != dnsList.end(); ++iter)
@@ -1932,14 +1953,18 @@ namespace openpeer
       class DNSWinRT : public SharedRecursiveLock,
         public IDNSQuery
       {
+      protected:
+        struct make_private {};
+
       public:
         typedef Windows::Networking::Sockets::DatagramSocket DatagramSocket;
         typedef Windows::Networking::HostName HostName;
         typedef Windows::Networking::EndpointPair EndpointPair;
 
-      protected:
+      public:
         //--------------------------------------------------------------------
         DNSWinRT(
+                 const make_private &,
                  IDNSDelegatePtr delegate,
                  const char *name,
                  WORD port,
@@ -1965,6 +1990,7 @@ namespace openpeer
           ZS_LOG_TRACE(log("created"))
         }
 
+      protected:
         //--------------------------------------------------------------------
         void init()
         {
@@ -2082,7 +2108,7 @@ namespace openpeer
                   if (isSRV) {
                     SRVResultPtr srv = pThis->mSRV;
                     if (!pThis->mSRV) {
-                      pThis->mSRV = SRVResultPtr(new SRVResult);
+                      pThis->mSRV = SRVResultPtr(make_shared<SRVResult>());
                       srv = pThis->mSRV;
 
                       srv->mName = pThis->mName;
@@ -2113,7 +2139,7 @@ namespace openpeer
 
                     if (isIPv4) {
                       if (!useRecord->mAResult) {
-                        useRecord->mAResult = AResultPtr(new AResult);
+                        useRecord->mAResult = AResultPtr(make_shared<AResult>());
                         useRecord->mAResult->mName = canonical;
                         useRecord->mAResult->mTTL = 3600;
                       }
@@ -2122,7 +2148,7 @@ namespace openpeer
 
                     if (isIPv6) {
                       if (!useRecord->mAAAAResult) {
-                        useRecord->mAAAAResult = AAAAResultPtr(new AAAAResult);
+                        useRecord->mAAAAResult = AAAAResultPtr(make_shared<AAAAResult>());
                         useRecord->mAAAAResult->mName = canonical;
                         useRecord->mAAAAResult->mTTL = 3600;
                       }
@@ -2134,7 +2160,7 @@ namespace openpeer
                   } else {
                     if (isIPv4) {
                       if (!pThis->mA) {
-                        pThis->mA = AResultPtr(new AResult);
+                        pThis->mA = AResultPtr(make_shared<AResult>());
                         pThis->mA->mName = canonical;
                         pThis->mA->mTTL = 3600;
                       }
@@ -2142,7 +2168,7 @@ namespace openpeer
                     }
                     if (isIPv6) {
                       if (!pThis->mAAAA) {
-                        pThis->mAAAA = AAAAResultPtr(new AAAAResult);
+                        pThis->mAAAA = AAAAResultPtr(make_shared<AAAAResult>());
                         pThis->mAAAA->mName = canonical;
                         pThis->mAAAA->mTTL = 3600;
                       }
@@ -2193,7 +2219,7 @@ namespace openpeer
           WORD defaultWeight
           )
         {
-          DNSWinRTPtr pThis(new DNSWinRT(delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
+          DNSWinRTPtr pThis(make_shared<DNSWinRT>(make_private{}, delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -2353,11 +2379,11 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr resultA = AResultPtr(new AResult);
+          AResultPtr resultA = AResultPtr(make_shared<AResult>());
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(new AAAAResult);
+          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
@@ -2409,7 +2435,7 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr result = AResultPtr(new AResult);
+          AResultPtr result = AResultPtr(make_shared<AResult>());
           result->mName = name;
           result->mTTL = 3600;
           result->mIPAddresses = ips;
@@ -2456,11 +2482,11 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr resultA = AResultPtr(new AResult);
+          AResultPtr resultA = AResultPtr(make_shared<AResult>());
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(new AAAAResult);
+          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
@@ -2519,7 +2545,7 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          SRVResultPtr result(new SRVResult);
+          SRVResultPtr result(make_shared<SRVResult>());
           result->mName = name;
           result->mService = service;
           result->mProtocol = protocol;
@@ -2531,11 +2557,11 @@ namespace openpeer
           record.mPort = defaultPort;
           record.mName = name;
 
-          AResultPtr resultA = AResultPtr(new AResult);
+          AResultPtr resultA = AResultPtr(make_shared<AResult>());
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(new AAAAResult);
+          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
@@ -2714,7 +2740,7 @@ namespace openpeer
                                                        UINT ttl
                                                        )
     {
-      AResultPtr result(new AResult);
+      AResultPtr result(make_shared<AResult>());
 
       result->mTTL = ttl;
       internal::copyToAddressList(ipAddresses, result->mIPAddresses, true, false);
@@ -2730,7 +2756,7 @@ namespace openpeer
                                                              UINT ttl
                                                              )
     {
-      AAAAResultPtr result(new AAAAResult);
+      AAAAResultPtr result(make_shared<AAAAResult>());
 
       result->mTTL = ttl;
       internal::copyToAddressList(ipAddresses, result->mIPAddresses, false, true);
@@ -2755,7 +2781,7 @@ namespace openpeer
 
       IDNS::AResultPtr useResult = (resultA ? resultA : resultAAAA);
 
-      SRVResultPtr result(new SRVResult);
+      SRVResultPtr result(make_shared<SRVResult>());
       result->mName = useResult->mName;
       result->mService = service;
       result->mProtocol = protocol;
@@ -2770,7 +2796,7 @@ namespace openpeer
       if (resultA) {
         SRVResult::SRVRecord record;
 
-        AResultPtr aResult(new AResult);
+        AResultPtr aResult(make_shared<AResult>());
         aResult->mName = resultA->mName;
         aResult->mTTL = resultA->mTTL;
         internal::copyToAddressList(resultA->mIPAddresses, aResult->mIPAddresses);
@@ -2789,7 +2815,7 @@ namespace openpeer
       if (resultAAAA) {
         SRVResult::SRVRecord record;
 
-        AAAAResultPtr aaaaResult(new AAAAResult);
+        AAAAResultPtr aaaaResult(make_shared<AAAAResult>());
         aaaaResult->mName = resultAAAA->mName;
         aaaaResult->mTTL = resultAAAA->mTTL;
         internal::copyToAddressList(resultAAAA->mIPAddresses, aaaaResult->mIPAddresses);
@@ -2922,7 +2948,7 @@ namespace openpeer
     {
       if (!result) return result;
 
-      AResultPtr clone(new AResult);
+      AResultPtr clone(make_shared<AResult>());
       clone->mName = result->mName;
       clone->mTTL = result->mTTL;
       internal::copyToAddressList(result->mIPAddresses, clone->mIPAddresses);
@@ -2940,7 +2966,7 @@ namespace openpeer
     {
       if (!srvResult) return srvResult;
 
-      SRVResultPtr clone(new SRVResult);
+      SRVResultPtr clone(make_shared<SRVResult>());
       clone->mName = srvResult->mName;
       clone->mService = srvResult->mService;
       clone->mProtocol = srvResult->mProtocol;

@@ -111,7 +111,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      HTTP::HTTP() :
+      HTTP::HTTP(const make_private &) :
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mShouldShutdown(false),
         mMultiCurl(NULL)
@@ -215,7 +215,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       HTTPPtr HTTP::create()
       {
-        HTTPPtr pThis(new HTTP);
+        HTTPPtr pThis(make_shared<HTTP>(make_private{}));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -664,6 +664,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQuery::HTTPQuery(
+                                 const make_private &,
                                  HTTPPtr outer,
                                  IHTTPQueryDelegatePtr delegate,
                                  bool isPost,
@@ -878,7 +879,7 @@ namespace openpeer
                                                  Milliseconds timeout
                                                  )
       {
-        HTTPQueryPtr pThis(new HTTPQuery(outer, delegate, isPost, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout));
+        HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private {}, outer, delegate, isPost, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;

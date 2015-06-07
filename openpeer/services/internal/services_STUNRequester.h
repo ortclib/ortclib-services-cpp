@@ -83,13 +83,17 @@ namespace openpeer
                             public ISTUNRequesterForSTUNRequesterManager,
                             public IBackOffTimerDelegate
       {
+      protected:
+        struct make_private {};
+
       public:
         friend interaction ISTUNRequesterFactory;
 
         ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, UseSTUNRequesterManager)
 
-      protected:
+      public:
         STUNRequester(
+                      const make_private &,
                       IMessageQueuePtr queue,
                       ISTUNRequesterDelegatePtr delegate,
                       IPAddress serverIP,
@@ -97,7 +101,8 @@ namespace openpeer
                       STUNPacket::RFCs usingRFC,
                       IBackOffTimerPatternPtr pattern
                       );
-        
+
+      protected:
         STUNRequester(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
         
         void init();
@@ -178,7 +183,7 @@ namespace openpeer
 
         mutable RecursiveLock mLock;
         STUNRequesterWeakPtr mThisWeak;
-        PUID mID;
+        AutoPUID mID;
 
         ISTUNRequesterDelegatePtr mDelegate;
         STUNPacketPtr mSTUNRequest;

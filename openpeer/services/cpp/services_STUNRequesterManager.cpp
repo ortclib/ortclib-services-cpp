@@ -98,7 +98,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      STUNRequesterManager::STUNRequesterManager() :
+      STUNRequesterManager::STUNRequesterManager(const make_private &) :
         mID(zsLib::createPUID())
       {
         ZS_LOG_DETAIL(log("created"))
@@ -123,7 +123,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNRequesterManagerPtr STUNRequesterManager::create()
       {
-        STUNRequesterManagerPtr pThis(new STUNRequesterManager);
+        STUNRequesterManagerPtr pThis(make_shared<STUNRequesterManager>(make_private{}));
         pThis->mThisWeak = pThis;
         return pThis;
       }
