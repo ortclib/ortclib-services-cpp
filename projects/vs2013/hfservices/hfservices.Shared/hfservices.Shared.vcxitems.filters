@@ -252,6 +252,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_HTTP_WinRT.h">
       <Filter>openpeer\services\internal</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\IBackOffTimerPattern.h">
+      <Filter>openpeer\services</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_BackOffTimerPattern.h">
+      <Filter>openpeer\services\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\ifaddrs-android.cc">
@@ -369,6 +375,9 @@
       <Filter>openpeer\services\cpp</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_HTTP_WinRT.cpp">
+      <Filter>openpeer\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_BackOffTimerPattern.cpp">
       <Filter>openpeer\services\cpp</Filter>
     </ClCompile>
   </ItemGroup>

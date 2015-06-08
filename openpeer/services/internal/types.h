@@ -49,6 +49,8 @@ namespace openpeer
   {
     namespace internal
     {
+      using std::make_shared;
+
       using zsLib::string;
       using zsLib::CSTR;
       using zsLib::AutoPUID;

@@ -19,6 +19,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\IBackgrounding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\IBackOffTimer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\IBackOffTimerPattern.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\ICache.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\ICanonicalXML.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\IDecryptor.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_AllocatorWithNul.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Backgrounding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_BackOffTimer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_BackOffTimerPattern.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Cache.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_CanonicalXML.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Decryptor.h" />
@@ -103,6 +105,7 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Backgrounding.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_BackOffTimer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_BackOffTimerPattern.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Cache.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_CanonicalXML.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_Decryptor.cpp" />

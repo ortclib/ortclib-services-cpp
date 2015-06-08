@@ -1753,7 +1753,7 @@ namespace openpeer
     //-------------------------------------------------------------------------
     RecursiveLockPtr IHelper::getGlobalLock()
     {
-      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(make_shared<RecursiveLock>()));
+      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(new RecursiveLock()));
       return singleton.singleton();
     }
 

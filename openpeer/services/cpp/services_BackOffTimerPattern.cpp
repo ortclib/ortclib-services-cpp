@@ -236,7 +236,7 @@ namespace openpeer
         if (mAttemptTimeoutVector.size() > 0) {
           ElementPtr timeoutsEl = Element::create("timeouts");
 
-          for (int loop = 0; loop < mAttemptTimeoutVector.size(); ++loop) {
+          for (decltype(mAttemptTimeoutVector)::size_type loop = 0; loop < mAttemptTimeoutVector.size(); ++loop) {
             timeoutsEl->adoptAsLastChild(IHelper::createElementWithNumber("timeout", string(mAttemptTimeoutVector[loop].count())));
           }
           rootEl->adoptAsLastChild(timeoutsEl);
@@ -246,7 +246,7 @@ namespace openpeer
         if (mRetryVector.size() > 0) {
           ElementPtr retriesEl = Element::create("retries");
 
-          for (int loop = 0; loop < mRetryVector.size(); ++loop) {
+          for (decltype(mRetryVector)::size_type loop = 0; loop < mRetryVector.size(); ++loop) {
             retriesEl->adoptAsLastChild(IHelper::createElementWithNumber("retry", string(mRetryVector[loop].count())));
           }
           rootEl->adoptAsLastChild(retriesEl);
@@ -428,7 +428,7 @@ namespace openpeer
         if (mAttemptTimeoutVector.size() > 0) {
           ElementPtr timeoutsEl = Element::create("timeouts");
 
-          for (int loop = 0; loop < mAttemptTimeoutVector.size(); ++loop) {
+          for (decltype(mAttemptTimeoutVector)::size_type loop = 0; loop < mAttemptTimeoutVector.size(); ++loop) {
             IHelper::debugAppend(timeoutsEl, "timeout", string(mAttemptTimeoutVector[loop].count()));
           }
 
@@ -440,7 +440,7 @@ namespace openpeer
         if (mRetryVector.size() > 0) {
           ElementPtr retriesEl = Element::create("retries");
 
-          for (int loop = 0; loop < mRetryVector.size(); ++loop) {
+          for (decltype(mRetryVector)::size_type loop = 0; loop < mRetryVector.size(); ++loop) {
             IHelper::debugAppend(retriesEl, "retry", string(mRetryVector[loop].count()));
           }
           IHelper::debugAppend(resultEl, retriesEl);

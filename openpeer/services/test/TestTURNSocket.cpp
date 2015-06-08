@@ -135,6 +135,7 @@ namespace openpeer
                                               srvName,
                                               gUsername,
                                               gPassword,
+                                              IDNS::SRVLookupType_AutoLookupAndFallbackAll,
                                               true
                                               );
             mID = mTURNSocket->getID();

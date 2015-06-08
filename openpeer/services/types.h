@@ -48,12 +48,12 @@ namespace openpeer
 {
   namespace services
   {
+    using std::make_shared;
+
     namespace internal
     {
       void throwOnlySetOnce();
     }
-
-    using std::make_shared;
 
     using zsLib::PUID;
     using zsLib::CHAR;
