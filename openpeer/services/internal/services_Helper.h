@@ -36,6 +36,7 @@
 
 #include <zsLib/String.h>
 
+#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY       "openpeer/services/services-thread-pool-priority"
 #define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "openpeer/services/services-thread-priority"
 #define OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "openpeer/services/logger-thread-priority"
 #define OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "openpeer/services/socket-monitor-thread-priority"

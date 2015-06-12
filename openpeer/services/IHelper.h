@@ -72,6 +72,7 @@ namespace openpeer
       static void setSocketThreadPriority();
       static void setTimerThreadPriority();
 
+      static IMessageQueuePtr getServicePoolQueue();
       static IMessageQueuePtr getServiceQueue();
       static IMessageQueuePtr getLoggerQueue();
 

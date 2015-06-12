@@ -66,6 +66,8 @@ namespace openpeer
       using zsLib::PrivateGlobalLock;
       using zsLib::Singleton;
       using zsLib::SingletonLazySharedPtr;
+      using zsLib::SingletonManager;
+      using zsLib::ISingletonManagerDelegate;
       using zsLib::ULONGEST;
 
       using zsLib::XML::WalkSink;
@@ -79,6 +81,7 @@ namespace openpeer
       ZS_DECLARE_USING_PTR(zsLib, Log)
       ZS_DECLARE_USING_PTR(zsLib, ILogDelegate)
       ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
+      ZS_DECLARE_USING_PTR(zsLib, MessageQueueThreadPool)
 
       ZS_DECLARE_USING_PTR(zsLib::XML, Attribute)
       ZS_DECLARE_USING_PTR(zsLib::XML, Document)

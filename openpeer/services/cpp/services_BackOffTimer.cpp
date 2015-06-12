@@ -73,7 +73,7 @@ namespace openpeer
                                  size_t totalFailuresThusFar,
                                  IBackOffTimerDelegatePtr delegate
                                  ) :
-        MessageQueueAssociator(IHelper::getServiceQueue()),
+        MessageQueueAssociator(IHelper::getServicePoolQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mPattern(UsePatternPtr(BackOffTimerPattern::convert(pattern))->clone()),
         mLastStateChange(zsLib::now())
@@ -176,15 +176,15 @@ namespace openpeer
       {
         AutoRecursiveLock lock(*this);
 
-        if (mDefaultSubscription) {
-          mDefaultSubscription->cancel();
-          mDefaultSubscription.reset();
-        }
-
         cancelTimer();
 
         if (!isComplete()) {
           setState(State_AllAttemptsFailed);
+        }
+
+        if (mDefaultSubscription) {
+          mDefaultSubscription->cancel();
+          mDefaultSubscription.reset();
         }
 
         mSubscriptions.clear();
@@ -440,6 +440,8 @@ namespace openpeer
         if (DurationType() == timeout) return;
 
         mTimer = Timer::create(pThis, zsLib::now() + timeout);
+
+        ZS_LOG_TRACE(debug("creating timer") + ZS_PARAM("timer id", mTimer->getID()) + ZS_PARAM("timeout", timeout))
       }
 
       //-----------------------------------------------------------------------

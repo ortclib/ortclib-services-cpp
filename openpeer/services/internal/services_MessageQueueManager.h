@@ -70,7 +70,8 @@ namespace openpeer
 
       class MessageQueueManager : public IMessageQueueManager,
                                   public IWakeDelegate,
-                                  public IMessageQueueManagerForBackgrounding
+                                  public IMessageQueueManagerForBackgrounding,
+                                  public ISingletonManagerDelegate
       {
       protected:
         struct make_private {};
@@ -80,6 +81,8 @@ namespace openpeer
         friend interaction IMessageQueueManagerForBackgrounding;
 
         typedef std::map<MessageQueueName, ThreadPriorities> ThreadPriorityMap;
+        typedef std::pair<MessageQueueThreadPoolPtr, size_t> MessageQueueThreadPoolPair;
+        typedef std::map<MessageQueueName, MessageQueueThreadPoolPair> MessageQueuePoolMap;
 
       public:
         MessageQueueManager(const make_private &);
@@ -102,10 +105,16 @@ namespace openpeer
         #pragma mark
 
         IMessageQueuePtr getMessageQueueForGUIThread();
-        IMessageQueuePtr getMessageQueue(const char *assignedThreadName);
+        IMessageQueuePtr getMessageQueue(const char *assignedQueueName);
+
+        IMessageQueuePtr getThreadPoolQueue(
+                                            const char *assignedThreadPoolQueueName,
+                                            const char *registeredQueueName = NULL,
+                                            size_t minThreadsRequired = 4
+                                            );
 
         void registerMessageQueueThreadPriority(
-                                                const char *assignedThreadName,
+                                                const char *assignedQueueName,
                                                 ThreadPriorities priority
                                                 );
 
@@ -128,6 +137,13 @@ namespace openpeer
         #pragma mark
 
         virtual void blockUntilDone();
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark MessageQueueManager => ISingletonManagerDelegate
+        #pragma mark
+
+        virtual void notifySingletonCleanup();
 
       protected:
         //---------------------------------------------------------------------
@@ -155,10 +171,14 @@ namespace openpeer
 
         MessageQueueManagerPtr mGracefulShutdownReference;
         bool mFinalCheck {};
+        std::atomic<bool> mFinalCheckComplete {};
         size_t mPending;
 
         MessageQueueMap mQueues;
         ThreadPriorityMap mThreadPriorities;
+
+        MessageQueuePoolMap mPools;
+        MessageQueueMap mRegisteredPoolQueues;
 
         bool mProcessApplicationQueueOnShutdown;
       };

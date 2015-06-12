@@ -78,7 +78,6 @@ namespace openpeer
         mUsingRFC(usingRFC),
         mBackOffTimerPattern(pattern)
       {
-        IHelper::setTimerThreadPriority();
         if (!mBackOffTimerPattern) {
           mBackOffTimerPattern = IBackOffTimerPattern::create();
           mBackOffTimerPattern->setMaxAttempts(OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS);
@@ -256,9 +255,11 @@ namespace openpeer
         // NOTE:  We inform the delegate syncrhonously thus we cannot call
         //        the delegate from inside a lock in case the delegate is
         //        calling us (that would cause a potential deadlock).
-        try {
-          success = delegate->handleSTUNRequesterResponse(mThisWeak.lock(), fromIPAddress, packet);  // this is a success! yay! inform the delegate
-        } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+        if (delegate) {
+          try {
+            success = delegate->handleSTUNRequesterResponse(mThisWeak.lock(), fromIPAddress, packet);  // this is a success! yay! inform the delegate
+          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+          }
         }
 
         if (!success)

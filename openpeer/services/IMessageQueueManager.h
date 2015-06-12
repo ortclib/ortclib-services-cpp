@@ -64,19 +64,29 @@ namespace openpeer
       static IMessageQueuePtr getMessageQueueForGUIThread();
 
       //-----------------------------------------------------------------------
-      // PURPOSE: Obtains an existing message queue for the thread name or
-      //          creates a new one if it does not exist
-      static IMessageQueuePtr getMessageQueue(const char *assignedThreadName);
+      // PURPOSE: Obtains an existing message queue for for registered queues
+      //          or creates a new message queue thread if no such queue name
+      //          exists.
+      static IMessageQueuePtr getMessageQueue(const char *assignedQueueName);
+
+      //-----------------------------------------------------------------------
+      // PURPOSE: Create a message queue for a pool
+      static IMessageQueuePtr getThreadPoolQueue(
+                                                 const char *assignedThreadPoolQueueName,
+                                                 const char *registeredQueueName = NULL,
+                                                 size_t minThreadsRequired = 4
+                                                 );
 
       //-----------------------------------------------------------------------
       // PURPOSE: Registers the thread priority to use for a thread that may
-      //          be created by way of "getMessageQueue".
+      //          be created by way of "getMessageQueue" or thread pools
+      //          registered with previous calls to "getThreadPoolQueue"
       //
       // WARNING: This method must be called before the thread is obtained via
-      //          the "getMessageQueue" method or the thread priority will
-      //          be ignored.
+      //          the "getMessageQueue" or "getThreadPoolQueue" method or
+      //          the thread priority will be ignored.
       static void registerMessageQueueThreadPriority(
-                                                     const char *assignedThreadName,
+                                                     const char *assignedQueueName,
                                                      ThreadPriorities priority
                                                      );
 

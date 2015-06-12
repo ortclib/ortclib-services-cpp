@@ -64,6 +64,7 @@
 
 #include <idn/api.h>
 
+#define OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME "org.openpeer.services.serviceThreadPool"
 #define OPENPEER_SERVICES_SERVICE_THREAD_NAME "org.openpeer.services.serviceThread"
 #define OPENPEER_SERVICES_LOGGER_THREAD_NAME "org.openpeer.services.loggerThread"
 
@@ -1767,6 +1768,20 @@ namespace openpeer
     void IHelper::setTimerThreadPriority()
     {
       zsLib::Timer::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY)));
+    }
+
+    //-------------------------------------------------------------------------
+    IMessageQueuePtr IHelper::getServicePoolQueue()
+    {
+      class Once {
+      public:
+        Once() {
+          IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));
+          setTimerThreadPriority();
+        }
+      };
+      static Once once;
+      return IMessageQueueManager::getThreadPoolQueue(OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME);
     }
 
     //-------------------------------------------------------------------------

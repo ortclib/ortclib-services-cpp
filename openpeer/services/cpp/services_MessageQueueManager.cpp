@@ -33,6 +33,7 @@
 #include <openpeer/services/IHelper.h>
 #include <openpeer/services/ISettings.h>
 
+#include <zsLib/MessageQueueThreadPool.h>
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 
@@ -110,19 +111,7 @@ namespace openpeer
         static SingletonLazySharedPtr<MessageQueueManager> singleton(create());
         MessageQueueManagerPtr result = singleton.singleton();
 
-        ZS_DECLARE_CLASS_PTR(GracefulAlert)
-
-        class GracefulAlert
-        {
-        public:
-          GracefulAlert(MessageQueueManagerPtr singleton) : mSingleton(singleton) {}
-          ~GracefulAlert() {mSingleton->shutdownAllQueues();}
-
-        protected:
-          MessageQueueManagerPtr mSingleton;
-        };
-
-        static SingletonLazySharedPtr<GracefulAlert> alertSingleton(GracefulAlertPtr(make_shared<GracefulAlert>(result)));
+        static SingletonManager::Register registerSingleton("openpeer::services::MessageQueueManager", result);
 
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
@@ -154,16 +143,19 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IMessageQueuePtr MessageQueueManager::getMessageQueue(const char *assignedThreadName)
+      IMessageQueuePtr MessageQueueManager::getMessageQueue(const char *assignedQueueName)
       {
+        String name(assignedQueueName);
+
         AutoRecursiveLock lock(mLock);
 
-        String name(assignedThreadName);
-
-        MessageQueueMap::iterator found = mQueues.find(name);
-        if (found != mQueues.end()) {
-          ZS_LOG_TRACE(log("re-using existing message queue with name") + ZS_PARAM("name", name))
-          return (*found).second;
+        // scope: check thread queues
+        {
+          MessageQueueMap::iterator found = mQueues.find(name);
+          if (found != mQueues.end()) {
+            ZS_LOG_TRACE(log("re-using existing message queue with name") + ZS_PARAM("name", name))
+            return (*found).second;
+          }
         }
 
         IMessageQueuePtr queue;
@@ -191,23 +183,85 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      IMessageQueuePtr MessageQueueManager::getThreadPoolQueue(
+                                                               const char *assignedThreadPoolQueueName,
+                                                               const char *registeredQueueName,
+                                                               size_t minThreadsRequired
+                                                               )
+      {
+        String poolName(assignedThreadPoolQueueName);
+        String name(registeredQueueName);
+
+        AutoRecursiveLock lock(mLock);
+
+        // scope: check registered queues
+        if (name.hasData()) {
+          auto found = mRegisteredPoolQueues.find(String(poolName + ":" + name));
+          if (found != mRegisteredPoolQueues.end()) {
+            ZS_LOG_TRACE(log("re-using existing pool message queue with name") + ZS_PARAM("name", poolName + ":" + name))
+            return (*found).second;
+          }
+        }
+
+        ThreadPriorities priority = zsLib::ThreadPriority_NormalPriority;
+
+        ThreadPriorityMap::const_iterator foundPriority = mThreadPriorities.find(poolName);
+        if (foundPriority != mThreadPriorities.end()) {
+          priority = (*foundPriority).second;
+        }
+
+        MessageQueueThreadPoolPtr pool;
+        size_t totalThreadsCreated = 0;
+
+        {
+          auto found = mPools.find(poolName);
+          if (found != mPools.end()) {
+            pool = (*found).second.first;
+            totalThreadsCreated = (*found).second.second;
+          }
+        }
+
+        if (!pool) {
+          ZS_LOG_TRACE(log("creating thread pool") + ZS_PARAM("name", poolName))
+          pool = MessageQueueThreadPool::create();
+        }
+
+        while (totalThreadsCreated < minThreadsRequired) {
+          ++totalThreadsCreated;
+          ZS_LOG_TRACE(log("creating pool thread") + ZS_PARAM("poolName", poolName + "." + string(totalThreadsCreated)) + ZS_PARAM("priority", zsLib::toString(priority)))
+          pool->createThread((poolName + "." + string(totalThreadsCreated)).c_str());
+        }
+
+        mPools[poolName] = MessageQueueThreadPoolPair(pool, totalThreadsCreated);
+
+        IMessageQueuePtr queue = pool->createQueue();
+
+        if (name.hasData()) {
+          ZS_LOG_TRACE(log("registering queue with name") + ZS_PARAM("name", poolName + ":" + name))
+          mRegisteredPoolQueues[String(poolName + ":" + name)] = queue;
+        }
+
+        return queue;
+      }
+
+      //-----------------------------------------------------------------------
       void MessageQueueManager::registerMessageQueueThreadPriority(
-                                                                   const char *assignedThreadName,
+                                                                   const char *assignedQueueName,
                                                                    ThreadPriorities priority
                                                                    )
       {
         AutoRecursiveLock lock(mLock);
 
-        String name(assignedThreadName);
+        String name(assignedQueueName);
         mThreadPriorities[name] = priority;
 
         MessageQueueMap::iterator found = mQueues.find(name);
         if (found == mQueues.end()) {
-          ZS_LOG_DEBUG(log("message queue specified is not in use at yet") + ZS_PARAM("name", assignedThreadName) + ZS_PARAM("priority", zsLib::toString(priority)))
+          ZS_LOG_DEBUG(log("message queue specified is not in use at yet") + ZS_PARAM("name", name) + ZS_PARAM("priority", zsLib::toString(priority)))
           return;
         }
 
-        ZS_LOG_DEBUG(log("updating message queue thread") + ZS_PARAM("name", assignedThreadName) + ZS_PARAM("priority", zsLib::toString(priority)))
+        ZS_LOG_DEBUG(log("updating message queue thread") + ZS_PARAM("name", name) + ZS_PARAM("priority", zsLib::toString(priority)))
 
         ZS_DECLARE_TYPEDEF_PTR(zsLib::IMessageQueueThread, IMessageQueueThread)
 
@@ -215,7 +269,7 @@ namespace openpeer
 
         IMessageQueueThreadPtr thread = ZS_DYNAMIC_PTR_CAST(IMessageQueueThread, queue);
         if (!thread) {
-          ZS_LOG_WARNING(Detail, log("found thread was not recognized as a message queue thread") + ZS_PARAM("name", assignedThreadName))
+          ZS_LOG_WARNING(Detail, log("found thread was not recognized as a message queue thread") + ZS_PARAM("name", name))
           return;
         }
 
@@ -228,6 +282,11 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
 
         MessageQueueMapPtr result(make_shared<MessageQueueMap>(mQueues));
+        for (auto iter = mRegisteredPoolQueues.begin(); iter != mRegisteredPoolQueues.end(); ++iter) {
+          auto name = (*iter).first;
+          auto queue = (*iter).second;
+          (*result)[name] = queue;
+        }
         return result;
       }
 
@@ -241,6 +300,11 @@ namespace openpeer
         for (MessageQueueMap::const_iterator iter = mQueues.begin(); iter != mQueues.end(); ++iter) {
           const IMessageQueuePtr &queue = (*iter).second;
           result += queue->getTotalUnprocessedMessages();
+        }
+
+        for (auto iter = mPools.begin(); iter != mPools.end(); ++iter) {
+          auto pool = (*iter).second.first;
+          result += (pool->hasPendingMessages() ? 1 : 0);
         }
 
         return result;
@@ -274,10 +338,11 @@ namespace openpeer
 
         if (0 != mPending) {
           --mPending;
-          return;
+          if (0 != mPending) return;
         }
 
-        if (mQueues.size() < 1) {
+        if ((mQueues.size() < 1) &&
+            (mPools.size() < 1)) {
           mGracefulShutdownReference.reset();
           return;
         }
@@ -287,10 +352,24 @@ namespace openpeer
           IMessageQueuePtr queue = (*iter).second;
 
           size_t remaining = queue->getTotalUnprocessedMessages();
-          if (0 != remaining) {
-            ++mPending;
-            IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
-          }
+          if (0 == remaining) continue;
+
+          ++mPending;
+
+          IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
+          std::this_thread::yield();
+        }
+
+        for (auto iter = mPools.begin(); iter != mPools.end(); ++iter) {
+          auto pool = (*iter).second.first;
+
+          bool hasPending = pool->hasPendingMessages();
+          if (!hasPending) continue;
+
+          ++mPending;
+
+          IMessageQueuePtr tempQueue = pool->createQueue();
+          IWakeDelegateProxy::create(tempQueue, mThisWeak.lock())->onWake();
           std::this_thread::yield();
         }
 
@@ -303,17 +382,37 @@ namespace openpeer
           if (!mFinalCheck) {
             mFinalCheck = true;
 
-            // perform one-time double check to truly make sure all queues are empty
-            IMessageQueuePtr queue = (*mQueues.begin()).second;
+            if (mQueues.size() > 0) {
+              // perform one-time double check to truly make sure all queues are empty
+              for (auto iter = mQueues.begin(); iter != mQueues.end(); ++iter) {
+                const MessageQueueName &name = (*iter).first;
+                IMessageQueuePtr queue = (*iter).second;
 
-            ++mPending;
-            IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
-            return;
+                if (name == OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME)
+                  continue;
+
+                ++mPending;
+                IWakeDelegateProxy::create(queue, mThisWeak.lock())->onWake();
+                std::this_thread::yield();
+                return;
+              }
+            }
+
+            if (mPools.size() > 0) {
+              auto pool = (*(mPools.begin())).second.first;
+
+              ++mPending;
+
+              IMessageQueuePtr tempQueue = pool->createQueue();
+              IWakeDelegateProxy::create(tempQueue, mThisWeak.lock())->onWake();
+              std::this_thread::yield();
+              return;
+            }
           }
         }
 
         // all queue are empty
-        cancel();
+        mFinalCheckComplete = true;
       }
 
       //-----------------------------------------------------------------------
@@ -330,11 +429,15 @@ namespace openpeer
         bool processApplicationQueueOnShutdown = false;
 
         MessageQueueMap queues;
+        MessageQueuePoolMap pools;
 
         {
           AutoRecursiveLock lock(mLock);
           processApplicationQueueOnShutdown = mProcessApplicationQueueOnShutdown;
           queues = mQueues;
+          pools = mPools;
+
+          mPools.clear();
         }
 
         size_t totalRemaining = 0;
@@ -353,10 +456,17 @@ namespace openpeer
 
               IMessageQueueThreadPtr thread = ZS_DYNAMIC_PTR_CAST(IMessageQueueThread, queue);
 
-              thread->processMessagesFromThread();
+              if (thread) {
+                thread->processMessagesFromThread();
+              }
             }
 
             totalRemaining += queue->getTotalUnprocessedMessages();
+          }
+
+          for (auto iter = pools.begin(); iter != pools.end(); ++iter) {
+            auto pool = (*iter).second.first;
+            if (pool->hasPendingMessages()) ++totalRemaining;
           }
 
           if (totalRemaining < 1) {
@@ -366,6 +476,27 @@ namespace openpeer
           std::this_thread::yield();
         } while (totalRemaining > 0);
 
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageQueueManager => IMessageQueueManagerForBackgrounding
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void MessageQueueManager::notifySingletonCleanup()
+      {
+        shutdownAllQueues();
+        while (true) {
+          if (mFinalCheckComplete) break;
+          std::this_thread::yield();
+        }
+
+        cancel();
+        blockUntilDone();
       }
 
       //-----------------------------------------------------------------------
@@ -409,6 +540,11 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "total queues", mQueues.size());
         IHelper::debugAppend(resultEl, "total priorities", mThreadPriorities.size());
 
+        IHelper::debugAppend(resultEl, "pools", mPools.size());
+        IHelper::debugAppend(resultEl, "registered pool queues", mRegisteredPoolQueues.size());
+
+        IHelper::debugAppend(resultEl, "process application queue on shutdown", mProcessApplicationQueueOnShutdown);
+
         return resultEl;
       }
 
@@ -420,10 +556,6 @@ namespace openpeer
         while (true)
         {
           MessageQueueMapPtr queues = getRegisteredQueues();
-          if (queues->size() < 1) {
-            ZS_LOG_DEBUG(log("all queues are now gone"))
-            break;
-          }
 
           for (MessageQueueMap::iterator iter = queues->begin(); iter != queues->end(); ++iter)
           {
@@ -436,7 +568,10 @@ namespace openpeer
             }
 
             MessageQueueThreadPtr threadQueue = ZS_DYNAMIC_PTR_CAST(MessageQueueThread, queue);
-            threadQueue->waitForShutdown();
+
+            if (threadQueue) {
+              threadQueue->waitForShutdown();
+            }
 
             // scope: remove the queue from the list of managed queues
             {
@@ -448,6 +583,32 @@ namespace openpeer
               }
               mQueues.erase(found);
             }
+          }
+
+          MessageQueuePoolMap pools;
+
+          {
+            AutoRecursiveLock lock(mLock);
+            pools = mPools;
+
+            mPools.clear();
+          }
+
+          for (auto iter_doNotUse = pools.begin(); iter_doNotUse != pools.end(); ) {
+            auto current = iter_doNotUse;
+            ++iter_doNotUse;
+
+            auto pool = (*current).second.first;
+
+            pool->waitForShutdown();
+
+            pools.erase(current);
+          }
+
+          if ((queues->size() < 1) &&
+              (pools.size() < 1)) {
+            ZS_LOG_DEBUG(log("all queues / pools are now gone"))
+            break;
           }
         }
 
@@ -477,22 +638,34 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
-    IMessageQueuePtr IMessageQueueManager::getMessageQueue(const char *assignedThreadName)
+    IMessageQueuePtr IMessageQueueManager::getMessageQueue(const char *assignedQueueName)
     {
       internal::MessageQueueManagerPtr singleton = internal::MessageQueueManager::singleton();
       if (!singleton) return IMessageQueuePtr();
-      return singleton->getMessageQueue(assignedThreadName);
+      return singleton->getMessageQueue(assignedQueueName);
+    }
+
+    //-------------------------------------------------------------------------
+    IMessageQueuePtr IMessageQueueManager::getThreadPoolQueue(
+                                                              const char *assignedThreadPoolQueueName,
+                                                              const char *registeredQueueName,
+                                                              size_t minThreadsRequired
+                                                              )
+    {
+      internal::MessageQueueManagerPtr singleton = internal::MessageQueueManager::singleton();
+      if (!singleton) return IMessageQueuePtr();
+      return singleton->getThreadPoolQueue(assignedThreadPoolQueueName, registeredQueueName, minThreadsRequired);
     }
 
     //-------------------------------------------------------------------------
     void IMessageQueueManager::registerMessageQueueThreadPriority(
-                                                                  const char *assignedThreadName,
+                                                                  const char *assignedQueueName,
                                                                   ThreadPriorities priority
                                                                   )
     {
       internal::MessageQueueManagerPtr singleton = internal::MessageQueueManager::singleton();
       if (!singleton) return;
-      singleton->registerMessageQueueThreadPriority(assignedThreadName, priority);
+      singleton->registerMessageQueueThreadPriority(assignedQueueName, priority);
     }
 
     //-------------------------------------------------------------------------
