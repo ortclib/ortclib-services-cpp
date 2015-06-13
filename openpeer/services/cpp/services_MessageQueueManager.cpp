@@ -436,8 +436,6 @@ namespace openpeer
           processApplicationQueueOnShutdown = mProcessApplicationQueueOnShutdown;
           queues = mQueues;
           pools = mPools;
-
-          mPools.clear();
         }
 
         size_t totalRemaining = 0;
@@ -490,13 +488,12 @@ namespace openpeer
       void MessageQueueManager::notifySingletonCleanup()
       {
         shutdownAllQueues();
+        blockUntilDone();
         while (true) {
           if (mFinalCheckComplete) break;
           std::this_thread::yield();
         }
-
         cancel();
-        blockUntilDone();
       }
 
       //-----------------------------------------------------------------------
