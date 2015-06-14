@@ -493,27 +493,20 @@ namespace openpeer
         int result = 0;
         for (int tries = 0; tries < 20; ++tries) {
           result = dns_open(mCtx);
-          if (result < 0) {
-            // try a different random port instead of a hard coded fixed port - application should find one hopefully within 20 tries
-            if (!triedZero) {
-              dns_set_opt(mCtx, DNS_OPT_PORT, 0);
-              triedZero = true;
-            } else
-              dns_set_opt(mCtx, DNS_OPT_PORT, rand()%(65534-5000) + 5000);
-          }
-          else
-            break;
+          if (result < 0) continue;
+          break;
         }
-        if (result < 0) {
+        if (result >= 0) {
+          mSocket->adopt((SOCKET)result);
+          mSocket->setBlocking(false);
+          mSocket->setDelegate(mThisWeak.lock());
+
+          mTimer = Timer::create(mThisWeak.lock(), Seconds(1), true);
+        }
+        else {
           dns_free(mCtx);
           mCtx = NULL;
         }
-
-        mSocket->adopt((SOCKET)result);
-        mSocket->setBlocking(false);
-        mSocket->setDelegate(mThisWeak.lock());
-
-        mTimer = Timer::create(mThisWeak.lock(), Seconds(1), true);
       }
 
       //-----------------------------------------------------------------------
