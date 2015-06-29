@@ -488,8 +488,6 @@ namespace openpeer
 
         dns_init(mCtx, 0);  // do open ourselves...
 
-        bool triedZero = false;
-
         int result = 0;
         for (int tries = 0; tries < 20; ++tries) {
           result = dns_open(mCtx);
