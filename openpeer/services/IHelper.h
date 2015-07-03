@@ -98,6 +98,29 @@ namespace openpeer
       static void debugAppend(ElementPtr &parentEl, const char *name, const Milliseconds &value);
       static void debugAppend(ElementPtr &parentEl, const char *name, const Microseconds &value);
       static void debugAppend(ElementPtr &parentEl, const char *name, const Nanoseconds &value);
+
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<String> &value)        {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<bool> &value)          {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<CHAR> &value)          {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<UCHAR> &value)         {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<SHORT> &value)         {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<USHORT> &value)        {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<INT> &value)           {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<UINT> &value)          {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<LONG> &value)          {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<ULONG> &value)         {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<LONGLONG> &value)      {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<ULONGLONG> &value)     {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<FLOAT> &value)         {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<DOUBLE> &value)        {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value(), false);}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Time> &value)          {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Hours> &value)         {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Minutes> &value)       {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Seconds> &value)       {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Milliseconds> &value)  {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Microseconds> &value)  {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+      static void debugAppend(ElementPtr &parentEl, const char *name, const Optional<Nanoseconds> &value)   {if (!value.hasValue()) return; debugAppend(parentEl, name, value.value());}
+
       static void debugAppend(ElementPtr &parentEl, const Log::Param &param);
       static void debugAppend(ElementPtr &parentEl, const char *name, ElementPtr childEl);
       static void debugAppend(ElementPtr &parentEl, ElementPtr childEl);
@@ -375,6 +398,55 @@ namespace openpeer
     public:
       void update(const char *message) {this->Update((const BYTE *)message, strlen(message));}
       void update(const std::string &message) {this->Update((const BYTE *)message.c_str(), message.length());}
+
+      void update(bool value)                 {this->Update((const BYTE *)(value ? "t" : "f"), strlen("t"));}
+      void update(CHAR value)                 {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(UCHAR value)                {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(SHORT value)                {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(USHORT value)               {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(INT value)                  {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(UINT value)                 {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(LONG value)                 {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(ULONG value)                {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(LONGLONG value)             {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(ULONGLONG value)            {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(FLOAT value)                {this->Update((const BYTE *)(&value), sizeof(value));}
+      void update(DOUBLE value)               {this->Update((const BYTE *)(&value), sizeof(value));}
+
+      void update(const Time &value)          {Time::duration::rep tmp = value.time_since_epoch().count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Hours &value)         {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Minutes &value)       {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Seconds &value)       {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Milliseconds &value)  {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Microseconds &value)  {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+      void update(const Nanoseconds &value)   {auto tmp = value.count(); this->Update((const BYTE *)(&tmp), sizeof(tmp));}
+
+      void update(
+                  const Optional<String> &value,
+                  const char *hashValueWhenNotPresent
+                  )                                     {if (value.hasValue()) update(value.value()); else update(hashValueWhenNotPresent);}
+
+      void update(const Optional<bool> &value)          {if (value.hasValue()) update(value.value());}
+      void update(const Optional<CHAR> &value)          {if (value.hasValue()) update(value.value());}
+      void update(const Optional<UCHAR> &value)         {if (value.hasValue()) update(value.value());}
+      void update(const Optional<SHORT> &value)         {if (value.hasValue()) update(value.value());}
+      void update(const Optional<USHORT> &value)        {if (value.hasValue()) update(value.value());}
+      void update(const Optional<INT> &value)           {if (value.hasValue()) update(value.value());}
+      void update(const Optional<UINT> &value)          {if (value.hasValue()) update(value.value());}
+      void update(const Optional<LONG> &value)          {if (value.hasValue()) update(value.value());}
+      void update(const Optional<ULONG> &value)         {if (value.hasValue()) update(value.value());}
+      void update(const Optional<LONGLONG> &value)      {if (value.hasValue()) update(value.value());}
+      void update(const Optional<ULONGLONG> &value)     {if (value.hasValue()) update(value.value());}
+      void update(const Optional<FLOAT> &value)         {if (value.hasValue()) update(value.value());}
+      void update(const Optional<DOUBLE> &value)        {if (value.hasValue()) update(value.value());}
+
+      void update(const Optional<Time> &value)          {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Hours> &value)         {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Minutes> &value)       {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Seconds> &value)       {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Milliseconds> &value)  {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Microseconds> &value)  {if (value.hasValue()) update(value.value());}
+      void update(const Optional<Nanoseconds> &value)   {if (value.hasValue()) update(value.value());}
 
       String final() {
         SecureByteBlock buffer(this->DigestSize());

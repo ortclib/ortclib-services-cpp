@@ -86,6 +86,7 @@ namespace openpeer
     using zsLib::AutoLock;
     using zsLib::Log;
     using zsLib::Singleton;
+    using zsLib::Optional;
 
     typedef zsLib::ThreadPriorities ThreadPriorities;
 
