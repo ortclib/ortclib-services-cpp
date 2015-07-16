@@ -1604,6 +1604,7 @@ namespace openpeer
             allocRequest->mLifetime = mLifetime;
             allocRequest->mRequestedTransport = STUNPacket::Protocol_UDP;
             allocRequest->mDontFragmentIncluded = true;
+            allocRequest->mMobilityTicketIncluded = true;
             server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, allocRequest, STUNPacket::RFC_5766_TURN);
           }
         }
@@ -1742,6 +1743,13 @@ namespace openpeer
               deallocRequest->mLifetimeIncluded = true;
               deallocRequest->mLifetime = 0;
               deallocRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
+              if (mMobilityTicket) {
+                deallocRequest->mMobilityTicketIncluded = true;
+                std::unique_ptr<BYTE[]> buffer(new BYTE[mMobilityTicket->SizeInBytes()]);
+                memcpy(buffer.get(), mMobilityTicket->BytePtr(), mMobilityTicket->SizeInBytes());
+                deallocRequest->mMobilityTicket = std::move(buffer);
+                deallocRequest->mMobilityTicketLength = mMobilityTicket->SizeInBytes();
+              }
               mDeallocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, deallocRequest, STUNPacket::RFC_5766_TURN);
 
               if (!mDeallocTimer) {
@@ -1863,13 +1871,25 @@ namespace openpeer
 
           // this request failed - why?
           switch (response->mErrorCode) {
+            case STUNPacket::ErrorCode_MobilityForbidden:
+            {
+              ZS_LOG_WARNING(Detail, log("alloc failed because mobility ticket is forbidden (thus attempting again without MOBILITY_TICKET attribute)") + ZS_PARAM("server IP", server->mServerIP.string()))
+
+              // did not understand the don't fragment, try again without it
+              STUNPacketPtr newRequest = (requester->getRequest())->clone(true);
+              newRequest->mDontFragmentIncluded = request->mDontFragmentIncluded;
+              newRequest->mMobilityTicketIncluded = false;
+              server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+              return true;
+            }
             case STUNPacket::ErrorCode_UnknownAttribute:              {
               if (response->hasUnknownAttribute(STUNPacket::Attribute_DontFragment)) {
-                ZS_LOG_WARNING(Detail, log("alloc failed thus attempting again without DONT_FRAGMENT attribute") + ZS_PARAM("server IP", server->mServerIP.string()))
+                ZS_LOG_WARNING(Detail, log("alloc failed (thus attempting again without DONT_FRAGMENT attribute)") + ZS_PARAM("server IP", server->mServerIP.string()))
 
                 // did not understand the don't fragment, try again without it
                 STUNPacketPtr newRequest = (requester->getRequest())->clone(true);
                 newRequest->mDontFragmentIncluded = false;
+                newRequest->mMobilityTicketIncluded = request->mMobilityTicketIncluded;
                 server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
                 return true;
               }
@@ -1898,6 +1918,14 @@ namespace openpeer
 
         if (response->hasAttribute(STUNPacket::Attribute_Lifetime)) {
           mLifetime = response->mLifetime;
+        }
+
+        if (response->hasAttribute(STUNPacket::Attribute_MobilityTicket)) {
+          if (0 != response->mMobilityTicketLength) {
+            mMobilityTicket = SecureByteBlockPtr(make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength));
+          } else {
+            mMobilityTicket = SecureByteBlockPtr();
+          }
         }
 
         mAllocateResponseIP = fromIPAddress;
@@ -1982,6 +2010,14 @@ namespace openpeer
         ZS_LOG_DEBUG(log("refresh requester completed"))
         if (response->hasAttribute(STUNPacket::Attribute_Lifetime)) {
           mLifetime = response->mLifetime;
+        }
+
+        if (response->hasAttribute(STUNPacket::Attribute_MobilityTicket)) {
+          if (0 != response->mMobilityTicketLength) {
+            mMobilityTicket = SecureByteBlockPtr(make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength));
+          } else {
+            mMobilityTicket = SecureByteBlockPtr();
+          }
         }
 
         return true;
@@ -2224,6 +2260,13 @@ namespace openpeer
         newRequest->mRealm = mRealm;
         newRequest->mNonce = mNonce;
         newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
+        if (mMobilityTicket) {
+          newRequest->mMobilityTicketIncluded = true;
+          std::unique_ptr<BYTE[]> buffer(new BYTE[mMobilityTicket->SizeInBytes()]);
+          memcpy(buffer.get(), mMobilityTicket->BytePtr(), mMobilityTicket->SizeInBytes());
+          newRequest->mMobilityTicket = std::move(buffer);
+          newRequest->mMobilityTicketLength = mMobilityTicket->SizeInBytes();
+        }
         mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
       }
       

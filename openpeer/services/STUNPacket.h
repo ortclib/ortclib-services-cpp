@@ -109,6 +109,8 @@ namespace openpeer
         Attribute_RequestedTransport =      0x0019,
         Attribute_DontFragment =            0x001A,
         Attribute_ReservationToken =        0x0022,
+        // http://tools.ietf.org/html/draft-wing-tram-turn-mobility-02
+        Attribute_MobilityTicket =          0x802E,
 
         // RFC5245 ICE specific attributes
         Attribute_Priority =                0x0024,
@@ -155,6 +157,7 @@ namespace openpeer
 
         // RFC 5766 TURN specific error codes
         ErrorCode_Forbidden =                     403,
+        ErrorCode_MobilityForbidden =             405,
         ErrorCode_AllocationMismatch =            437,
         ErrorCode_WrongCredentials =              441,
         ErrorCode_UnsupportedTransportProtocol =  442,
@@ -335,6 +338,10 @@ namespace openpeer
 
       bool mReservationTokenIncluded;                           // set this to true if the RESERVATION-TOKEN attribute should be included
       BYTE mReservationToken[8];                                // The RESERVATION-TOKEN attribute contains a token that uniquely identifies a relayed transport address being held in reserve by the server.
+
+      bool mMobilityTicketIncluded;
+      std::unique_ptr<BYTE[]> mMobilityTicket;                  // if set, points to the buffer containing the mobility ticket
+      size_t mMobilityTicketLength;                             // how long is the mobility ticket buffer (if non-zero then mMobilityTicket must be set)
 
       // RFC 5245 ICE attributes
       bool mPriorityIncluded;

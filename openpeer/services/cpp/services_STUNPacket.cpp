@@ -102,6 +102,7 @@ namespace openpeer
         STUNPacket::Attribute_RequestedTransport,
         STUNPacket::Attribute_DontFragment,
         STUNPacket::Attribute_ReservationToken,
+        STUNPacket::Attribute_MobilityTicket,
 
         // RFC5245 ICE specific attributes
         STUNPacket::Attribute_Priority,
@@ -267,6 +268,7 @@ namespace openpeer
           case STUNPacket::Attribute_RequestedTransport:  return sizeof(DWORD);
           case STUNPacket::Attribute_DontFragment:        return 0;
           case STUNPacket::Attribute_ReservationToken:    return sizeof(stun.mReservationToken);
+          case STUNPacket::Attribute_MobilityTicket:      return stun.mMobilityTicketLength;
 
           case STUNPacket::Attribute_Priority:            return sizeof(DWORD);
           case STUNPacket::Attribute_UseCandidate:        return 0;
@@ -386,6 +388,7 @@ namespace openpeer
           case STUNPacket::Attribute_RequestedTransport:  rfcBits = STUNPacket::RFC_5766_TURN; break;
           case STUNPacket::Attribute_DontFragment:        rfcBits = STUNPacket::RFC_5766_TURN; break;
           case STUNPacket::Attribute_ReservationToken:    rfcBits = STUNPacket::RFC_5766_TURN; break;
+          case STUNPacket::Attribute_MobilityTicket:      rfcBits = STUNPacket::RFC_5766_TURN; break;
 
           case STUNPacket::Attribute_Priority:            rfcBits = STUNPacket::RFC_5245_ICE; break;
           case STUNPacket::Attribute_UseCandidate:        rfcBits = STUNPacket::RFC_5245_ICE; break;
@@ -407,7 +410,7 @@ namespace openpeer
           case STUNPacket::Attribute_ReservedChangedAddress:
           case STUNPacket::Attribute_ReservedPassword:
           case STUNPacket::Attribute_ReservedReflectedFrom: return true;  // just ignore all these attributes
-          default:                                        break;
+          default:                                          break;
         }
         return (0 != (((UINT)allowedRFCs) & ((UINT)rfcBits)));
       }
@@ -617,6 +620,21 @@ namespace openpeer
               return false;
 
             return true;
+          }
+
+          case STUNPacket::Attribute_MobilityTicket:      {
+            switch (stun.mClass) {
+              case STUNPacket::Class_Indication:
+              case STUNPacket::Class_ErrorResponse:       return false;
+              default:                                    break;
+            }
+
+            switch (stun.mMethod) {
+              case STUNPacket::Method_Allocate:
+              case STUNPacket::Method_Refresh:            return true;
+              default:                                    break;
+            }
+            return false;
           }
 
           // ICE attributes
@@ -860,6 +878,8 @@ namespace openpeer
           case STUNPacket::Attribute_DontFragment:        return false;
 
           case STUNPacket::Attribute_ReservationToken:    return false;
+
+          case STUNPacket::Attribute_MobilityTicket:      return false;
 
           case STUNPacket::Attribute_Priority:            {
             if (STUNPacket::Class_Request == stun.mClass)
@@ -1125,6 +1145,7 @@ namespace openpeer
       }
 
       static void packetizeBuffer(BYTE *pos, const BYTE *buffer, size_t length) {
+        if (0 == length) return;
         ZS_THROW_INVALID_USAGE_IF(!buffer)
         memcpy(pos, buffer, length);
       }
@@ -1304,6 +1325,7 @@ namespace openpeer
           case STUNPacket::Attribute_RequestedTransport:  *pos = stun.mRequestedTransport; break;
           case STUNPacket::Attribute_DontFragment:        break;  // it is just a flag
           case STUNPacket::Attribute_ReservationToken:    packetizeBuffer(pos, &(stun.mReservationToken[0]), sizeof(stun.mReservationToken)); break;
+          case STUNPacket::Attribute_MobilityTicket:      packetizeBuffer(pos, stun.mMobilityTicket.get(), stun.mMobilityTicketLength); break;
 
           case STUNPacket::Attribute_Priority:            packetizeDWORD(pos, stun.mPriority); break;
           case STUNPacket::Attribute_UseCandidate:        break;  // it is just a flag
@@ -1391,6 +1413,7 @@ namespace openpeer
         case Attribute_RequestedTransport:      return "requested transport";
         case Attribute_DontFragment:            return "don't fragment";
         case Attribute_ReservationToken:        return "reserved token";
+        case Attribute_MobilityTicket:          return "mobility ticket";
 
         case Attribute_Priority:                return "priority";
         case Attribute_UseCandidate:            return "use candidate";
@@ -1439,6 +1462,7 @@ namespace openpeer
         case ErrroCode_ServerError:                   return "server error";
 
         case ErrorCode_Forbidden:                     return "forbidden";
+        case ErrorCode_MobilityForbidden:             return "mobility forbidden";
         case ErrorCode_AllocationMismatch:            return "allocation mismatch";
         case ErrorCode_WrongCredentials:              return "wrong credentials";
         case ErrorCode_UnsupportedTransportProtocol:  return "unsupported transport protocol";
@@ -1506,6 +1530,8 @@ namespace openpeer
       mRequestedTransport(Protocol_None),
       mDontFragmentIncluded(false),
       mReservationTokenIncluded(false),
+      mMobilityTicketIncluded(false),
+      mMobilityTicketLength(0),
       mPriorityIncluded(false),
       mPriority(0),
       mUseCandidateIncluded(false),
@@ -1602,6 +1628,7 @@ namespace openpeer
 
           // RFC 5766 TURN specific error codes
         case ErrorCode_Forbidden:                     reason = "Forbidden"; break;
+        case ErrorCode_MobilityForbidden:             reason = "Mobility Forbidden"; break;
         case ErrorCode_AllocationMismatch:            reason = "Allocation Mismatch"; break;
         case ErrorCode_WrongCredentials:              reason = "Wrong Credentials"; break;
         case ErrorCode_UnsupportedTransportProtocol:  reason = "Unsupported Transport Protocol"; break;
@@ -1934,6 +1961,30 @@ namespace openpeer
             case Attribute_ReservationToken:      {
               if (attributeLength < sizeof(stun->mReservationToken)) return STUNPacketPtr();
               memcpy(&(stun->mReservationToken[0]), &(dataPos[0]), sizeof(stun->mReservationToken));
+              break;
+            }
+            case Attribute_MobilityTicket:
+            {
+              stun->mMobilityTicketIncluded = true;
+              if (attributeLength < sizeof(BYTE)) break;
+
+              std::unique_ptr<BYTE[]> buffer(new BYTE[attributeLength]);
+              memcpy(buffer.get(), dataPos, attributeLength);
+              stun->mMobilityTicket = std::move(buffer);
+              stun->mMobilityTicketLength = attributeLength;
+              if (0 == stun->mErrorCode) {
+                bool requiresBuffer = true;
+
+                if ((STUNPacket::Method_Allocate == stun->mMethod) &&
+                    (STUNPacket::Class_Request == stun->mClass)) {
+                  requiresBuffer = false;
+                }
+
+                bool failure = (requiresBuffer ? (0 != attributeLength) : (0 == attributeLength));
+                if (failure) {
+                  stun->mErrorCode = ErrorCode_BadRequest;
+                }
+              }
               break;
             }
 
@@ -2305,6 +2356,13 @@ namespace openpeer
       if (hasAttribute(STUNPacket::Attribute_ReservationToken)) {
         IHelper::debugAppend(resultEl, "reservation token", internal::convertToHex(&(mReservationToken[0]), sizeof(mReservationToken)));
       }
+      if (hasAttribute(STUNPacket::Attribute_MobilityTicket)) {
+        IHelper::debugAppend(resultEl, "mobility ticket", true);
+        IHelper::debugAppend(resultEl, "mobility ticket length", mMobilityTicketLength);
+        if (0 != mMobilityTicketLength) {
+          IHelper::debugAppend(resultEl, "mobility ticket", internal::convertToHex(mMobilityTicket.get(), mMobilityTicketLength));
+        }
+      }
       if (hasAttribute(STUNPacket::Attribute_Priority)) {
         IHelper::debugAppend(resultEl, "priority", mPriority);
       }
@@ -2621,6 +2679,7 @@ namespace openpeer
         case Attribute_RequestedTransport:  return Protocol_None != mRequestedTransport;
         case Attribute_DontFragment:        return mDontFragmentIncluded;
         case Attribute_ReservationToken:    return mReservationTokenIncluded;
+        case Attribute_MobilityTicket:      return mMobilityTicketIncluded || (0 != mMobilityTicketLength);
 
         case Attribute_Priority:            return mPriorityIncluded;
         case Attribute_UseCandidate:        return mUseCandidateIncluded;

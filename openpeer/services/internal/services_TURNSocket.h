@@ -486,6 +486,8 @@ namespace openpeer
 
         ISTUNRequesterPtr mRefreshRequester;
 
+        SecureByteBlockPtr mMobilityTicket;
+
         TimerPtr mRefreshTimer;
         Time mLastSentDataToServer;
         Time mLastRefreshTimerWasSentAt;
