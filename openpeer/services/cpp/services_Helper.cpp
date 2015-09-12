@@ -147,6 +147,56 @@ namespace openpeer
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
+
+      class CryptoPPHelper
+      {
+      public:
+        static CryptoPPHelper &singleton()
+        {
+          static Singleton<CryptoPPHelper> singleton;
+          return singleton.singleton();
+        }
+
+        CryptoPPHelper()
+        {
+          auto globalLock = Helper::getGlobalLock();
+
+          AutoRecursiveLock lock(*globalLock);
+
+          static const char *buffer = "1234567890";
+
+          String result;
+          {
+            Base64Encoder encoder(new StringSink(result), false);
+            encoder.Put((const BYTE *)buffer, strlen(buffer));
+            encoder.MessageEnd();
+          }
+
+          {
+            String &input = result;
+
+            ByteQueue queue;
+            queue.Put((BYTE *)input.c_str(), input.size());
+
+            ByteQueue *outputQueue = new ByteQueue;
+            Base64Decoder decoder(outputQueue);
+            queue.CopyTo(decoder);
+            decoder.MessageEnd();
+          }
+        }
+
+      protected:
+        //-----------------------------------------------------------------------
+        Log::Params log(const char *message)
+        {
+          return Log::Params(message, "services::CryptoPPHelper");
+        }
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
       #pragma mark
       #pragma mark Helper
       #pragma mark
@@ -697,6 +747,8 @@ namespace openpeer
                                      size_t bufferLengthInBytes
                                      )
       {
+        CryptoPPHelper::singleton();
+
         String result;
         Base64Encoder encoder(new StringSink(result), false);
         encoder.Put(buffer, bufferLengthInBytes);
@@ -721,6 +773,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SecureByteBlockPtr Helper::convertFromBase64(const String &input)
       {
+        CryptoPPHelper::singleton();
+
         SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
         ByteQueue queue;
