@@ -598,7 +598,7 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(minValue > maxValue)
         if (minValue == maxValue) return minValue;
 
-        auto range = maxValue - minValue;
+        auto range = (maxValue - minValue)+1;
 
         decltype(range) value = 0;
 
