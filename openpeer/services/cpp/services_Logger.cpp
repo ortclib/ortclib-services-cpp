@@ -234,6 +234,7 @@ namespace openpeer
         return message;
       }
 
+      //-----------------------------------------------------------------------
       static std::string getNowTime()
       {
         Time now = zsLib::now();
