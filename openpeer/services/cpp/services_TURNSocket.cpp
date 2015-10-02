@@ -397,7 +397,7 @@ namespace openpeer
               ChannelInfoPtr info = (*found).second;
               if (info->mBound) {
                 // yes, it is active, so we can packetize this in a special way to send to the remote peer
-                packet = SecureByteBlockPtr(make_shared<SecureByteBlock>(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes)));
+                packet = make_shared<SecureByteBlock>(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes));
 
                 ((WORD *)(packet->BytePtr()))[0] = htons(info->mChannelNumber);
                 ((WORD *)(packet->BytePtr()))[1] = htons((WORD)bufferLengthInBytes);
@@ -1922,7 +1922,7 @@ namespace openpeer
 
         if (response->hasAttribute(STUNPacket::Attribute_MobilityTicket)) {
           if (0 != response->mMobilityTicketLength) {
-            mMobilityTicket = SecureByteBlockPtr(make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength));
+            mMobilityTicket = make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength);
           } else {
             mMobilityTicket = SecureByteBlockPtr();
           }
@@ -2014,7 +2014,7 @@ namespace openpeer
 
         if (response->hasAttribute(STUNPacket::Attribute_MobilityTicket)) {
           if (0 != response->mMobilityTicketLength) {
-            mMobilityTicket = SecureByteBlockPtr(make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength));
+            mMobilityTicket = make_shared<SecureByteBlock>(response->mMobilityTicket.get(), response->mMobilityTicketLength);
           } else {
             mMobilityTicket = SecureByteBlockPtr();
           }

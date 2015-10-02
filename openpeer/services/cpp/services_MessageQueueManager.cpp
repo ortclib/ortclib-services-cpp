@@ -669,7 +669,7 @@ namespace openpeer
     IMessageQueueManager::MessageQueueMapPtr IMessageQueueManager::getRegisteredQueues()
     {
       internal::MessageQueueManagerPtr singleton = internal::MessageQueueManager::singleton();
-      if (!singleton) return IMessageQueueManager::MessageQueueMapPtr(make_shared<IMessageQueueManager::MessageQueueMap>());
+      if (!singleton) return make_shared<IMessageQueueManager::MessageQueueMap>();
       return singleton->getRegisteredQueues();
     }
 

@@ -340,7 +340,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("blocking enabled"))
 
-          mBlockQueue = ByteQueuePtr(make_shared<ByteQueue>());
+          mBlockQueue = make_shared<ByteQueue>();
           mBlockHeader.reset();
           return;
         }

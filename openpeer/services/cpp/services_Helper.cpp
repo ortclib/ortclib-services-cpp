@@ -327,7 +327,7 @@ namespace openpeer
                                              bool prettyPrint
                                              )
       {
-        if (!doc) return SecureByteBlockPtr(make_shared<SecureByteBlock>());
+        if (!doc) return make_shared<SecureByteBlock>();
 
         size_t length = 0;
         std::unique_ptr<char[]> output = doc->writeAsJSON(prettyPrint, &length);
@@ -924,21 +924,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             MD5 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             SHA1 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             SHA256 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update((const BYTE *)(value), strlen(value));
             hasher.Final(*output);
             break;
@@ -959,21 +959,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             MD5 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             SHA1 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             SHA256 hasher;
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer.BytePtr(), buffer.SizeInBytes());
             hasher.Final(*output);
             break;
@@ -1028,21 +1028,21 @@ namespace openpeer
         switch (algorithm) {
           case HashAlgorthm_MD5:      {
             HMAC<MD5> hasher(key, key.size());
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA1:     {
             HMAC<SHA1> hasher(key, key.size());
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;
           }
           case HashAlgorthm_SHA256:   {
             HMAC<SHA256> hasher(key, key.size());
-            output = SecureByteBlockPtr(make_shared<SecureByteBlock>(hasher.DigestSize()));
+            output = make_shared<SecureByteBlock>(hasher.DigestSize());
             hasher.Update(buffer, bufferLengthInBytes);
             hasher.Final(*output);
             break;

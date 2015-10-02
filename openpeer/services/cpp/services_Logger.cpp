@@ -539,8 +539,8 @@ namespace openpeer
         ZS_DECLARE_TYPEDEF_PTR(SingletonLazySharedPtr< Self >, SingletonLazySelf)
 
         LoggerSingletonAndLockHolder() :
-          mLock(RecursiveLockPtr(make_shared<RecursiveLock>())),
-          mSingleton(ReferenceHolderPtr(make_shared<ReferenceHolder>()))
+          mLock(make_shared<RecursiveLock>()),
+          mSingleton(make_shared<ReferenceHolder>())
         {
         }
 
@@ -570,7 +570,7 @@ namespace openpeer
 
       public:
         LoggerSingletonLazySharedPtr() :
-          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(HolderPtr(make_shared<Holder>()))
+          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(make_shared<Holder>())
         {
         }
 
@@ -578,7 +578,7 @@ namespace openpeer
         {
           HolderPtr result = singleton.singleton();
           if (!result) {
-            return RecursiveLockPtr(make_shared<RecursiveLock>());
+            return make_shared<RecursiveLock>();
           }
           return result->lock();
         }
@@ -587,7 +587,7 @@ namespace openpeer
         {
           HolderPtr result = singleton.singleton();
           if (!result) {
-            return ReferenceHolderPtr(make_shared<ReferenceHolder>());
+            return make_shared<ReferenceHolder>();
           }
           return result->reference();
         }

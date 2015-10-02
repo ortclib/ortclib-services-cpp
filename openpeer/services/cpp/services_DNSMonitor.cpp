@@ -288,7 +288,7 @@ namespace openpeer
           return IDNS::AResultPtr();
         }
 
-        IDNS::AResultPtr result = IDNS::AResultPtr(make_shared<IDNS::AResult>());
+        IDNS::AResultPtr result = make_shared<IDNS::AResult>();
 
         fill(*result, typeEl);
 
@@ -323,7 +323,7 @@ namespace openpeer
           return IDNS::SRVResultPtr();
         }
 
-        IDNS::SRVResultPtr result = IDNS::SRVResultPtr(make_shared<IDNS::SRVResult>());
+        IDNS::SRVResultPtr result = make_shared<IDNS::SRVResult>();
 
         ElementPtr recordsEl = rootEl->findFirstChildElement("records");
         if (recordsEl) {
@@ -340,7 +340,7 @@ namespace openpeer
             {
               ElementPtr aEl = recordEl->findFirstChildElement("a");
               if (aEl) {
-                IDNS::AResultPtr result = IDNS::AResultPtr(make_shared<IDNS::AResult>());
+                IDNS::AResultPtr result = make_shared<IDNS::AResult>();
                 fill(*result, aEl);
                 record.mAResult = result;
               }
@@ -349,7 +349,7 @@ namespace openpeer
             {
               ElementPtr aaaaEl = recordEl->findFirstChildElement("aaaa");
               if (aaaaEl) {
-                IDNS::AAAAResultPtr result = IDNS::AAAAResultPtr(make_shared<IDNS::AAAAResult>());
+                IDNS::AAAAResultPtr result = make_shared<IDNS::AAAAResult>();
                 fill(*result, aaaaEl);
                 record.mAAAAResult = result;
               }
@@ -633,7 +633,7 @@ namespace openpeer
         }
 
         if (!useInfo) {
-          useInfo = ACacheInfoPtr(make_shared<ACacheInfo>());
+          useInfo = make_shared<ACacheInfo>();
           useInfo->mName = name;
           useInfo->mFlags = flags;
 
@@ -720,7 +720,7 @@ namespace openpeer
         }
 
         if (!useInfo) {
-          useInfo = SRVCacheInfoPtr(make_shared<SRVCacheInfo>());
+          useInfo = make_shared<SRVCacheInfo>();
           useInfo->mName = name;
           useInfo->mService = service;
           useInfo->mProtocol = protocol;

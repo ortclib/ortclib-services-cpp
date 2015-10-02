@@ -1573,7 +1573,7 @@ namespace openpeer
 
       public:
         //---------------------------------------------------------------------
-        static DNSInstantResultQueryPtr create() {return DNSInstantResultQueryPtr(make_shared<DNSInstantResultQuery>(make_private{}));}
+        static DNSInstantResultQueryPtr create() {return make_shared<DNSInstantResultQuery>(make_private{});}
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -2108,7 +2108,7 @@ namespace openpeer
                   if (isSRV) {
                     SRVResultPtr srv = pThis->mSRV;
                     if (!pThis->mSRV) {
-                      pThis->mSRV = SRVResultPtr(make_shared<SRVResult>());
+                      pThis->mSRV = make_shared<SRVResult>();
                       srv = pThis->mSRV;
 
                       srv->mName = pThis->mName;
@@ -2139,7 +2139,7 @@ namespace openpeer
 
                     if (isIPv4) {
                       if (!useRecord->mAResult) {
-                        useRecord->mAResult = AResultPtr(make_shared<AResult>());
+                        useRecord->mAResult = make_shared<AResult>();
                         useRecord->mAResult->mName = canonical;
                         useRecord->mAResult->mTTL = 3600;
                       }
@@ -2148,7 +2148,7 @@ namespace openpeer
 
                     if (isIPv6) {
                       if (!useRecord->mAAAAResult) {
-                        useRecord->mAAAAResult = AAAAResultPtr(make_shared<AAAAResult>());
+                        useRecord->mAAAAResult = make_shared<AAAAResult>();
                         useRecord->mAAAAResult->mName = canonical;
                         useRecord->mAAAAResult->mTTL = 3600;
                       }
@@ -2160,7 +2160,7 @@ namespace openpeer
                   } else {
                     if (isIPv4) {
                       if (!pThis->mA) {
-                        pThis->mA = AResultPtr(make_shared<AResult>());
+                        pThis->mA = make_shared<AResult>();
                         pThis->mA->mName = canonical;
                         pThis->mA->mTTL = 3600;
                       }
@@ -2168,7 +2168,7 @@ namespace openpeer
                     }
                     if (isIPv6) {
                       if (!pThis->mAAAA) {
-                        pThis->mAAAA = AAAAResultPtr(make_shared<AAAAResult>());
+                        pThis->mAAAA = make_shared<AAAAResult>();
                         pThis->mAAAA->mName = canonical;
                         pThis->mAAAA->mTTL = 3600;
                       }
@@ -2379,11 +2379,11 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr resultA = AResultPtr(make_shared<AResult>());
+          AResultPtr resultA = make_shared<AResult>();
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
+          AAAAResultPtr resultAAAA = make_shared<AAAAResult>();
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
@@ -2435,7 +2435,7 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr result = AResultPtr(make_shared<AResult>());
+          AResultPtr result = make_shared<AResult>();
           result->mName = name;
           result->mTTL = 3600;
           result->mIPAddresses = ips;
@@ -2482,11 +2482,11 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr resultA = AResultPtr(make_shared<AResult>());
+          AResultPtr resultA = make_shared<AResult>();
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
+          AAAAResultPtr resultAAAA = make_shared<AAAAResult>();
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
@@ -2557,11 +2557,11 @@ namespace openpeer
           record.mPort = defaultPort;
           record.mName = name;
 
-          AResultPtr resultA = AResultPtr(make_shared<AResult>());
+          AResultPtr resultA = make_shared<AResult>();
           resultA->mName = name;
           resultA->mTTL = 3600;
 
-          AAAAResultPtr resultAAAA = AAAAResultPtr(make_shared<AAAAResult>());
+          AAAAResultPtr resultAAAA = make_shared<AAAAResult>();
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 

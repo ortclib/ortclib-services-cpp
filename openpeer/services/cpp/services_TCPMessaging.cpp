@@ -454,7 +454,7 @@ namespace openpeer
 
           ChannelHeaderPtr channelHeader;
           if (mFramesHaveChannelNumber) {
-            channelHeader = ChannelHeaderPtr(make_shared<ChannelHeader>());
+            channelHeader = make_shared<ChannelHeader>();
             channelHeader->mChannelID = channel;
           }
 

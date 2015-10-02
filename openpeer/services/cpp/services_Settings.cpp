@@ -72,7 +72,7 @@ namespace openpeer
 
           stored = mStored;
 
-          mStored = StoredSettingsMapPtr(make_shared<StoredSettingsMap>());
+          mStored = make_shared<StoredSettingsMap>();
         }
 
         // apply all settings that occured before delegate was attached

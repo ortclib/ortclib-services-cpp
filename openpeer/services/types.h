@@ -96,7 +96,7 @@ namespace openpeer
     class SharedRecursiveLock
     {
     public:
-      static SharedRecursiveLock create() {return SharedRecursiveLock(RecursiveLockPtr(make_shared<RecursiveLock>()));}
+      static SharedRecursiveLock create() {return SharedRecursiveLock(make_shared<RecursiveLock>());}
 
       SharedRecursiveLock(const SharedRecursiveLock &source) : mLock(source.mLock) {}
       SharedRecursiveLock(RecursiveLockPtr shared) : mLock(shared) {}
