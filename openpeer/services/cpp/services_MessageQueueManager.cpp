@@ -108,6 +108,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageQueueManagerPtr MessageQueueManager::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<MessageQueueManager> singleton(create());
         MessageQueueManagerPtr result = singleton.singleton();
 

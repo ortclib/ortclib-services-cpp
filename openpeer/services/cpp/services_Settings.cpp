@@ -126,6 +126,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       SettingsPtr Settings::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Settings> singleton(Settings::create());
         SettingsPtr result = singleton.singleton();
         if (!result) {

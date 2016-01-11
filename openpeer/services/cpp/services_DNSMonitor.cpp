@@ -458,6 +458,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       DNSMonitorPtr DNSMonitor::singleton()
       {
+        AutoRecursiveLock lock(*Helper::getGlobalLock());
         static SingletonLazySharedPtr<DNSMonitor> singleton(DNSMonitor::create(Helper::getServiceQueue()));
         DNSMonitorPtr result = singleton.singleton();
         if (!result) {
