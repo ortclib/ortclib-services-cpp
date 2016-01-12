@@ -107,6 +107,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       BackgroundingPtr Backgrounding::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Backgrounding> singleton(IBackgroundingFactory::singleton().createForBackgrounding());
         BackgroundingPtr result = singleton.singleton();
         if (!result) {

@@ -166,6 +166,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       HTTPPtr HTTP::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<HTTP> singleton(HTTP::create());
         HTTPPtr result = singleton.singleton();
         if (!result) {

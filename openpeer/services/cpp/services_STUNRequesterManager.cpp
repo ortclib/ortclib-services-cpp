@@ -139,6 +139,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       STUNRequesterManagerPtr STUNRequesterManager::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<STUNRequesterManager> singleton(ISTUNRequesterManagerFactory::singleton().createSTUNRequesterManager());
         STUNRequesterManagerPtr result = singleton.singleton();
         if (!result) {

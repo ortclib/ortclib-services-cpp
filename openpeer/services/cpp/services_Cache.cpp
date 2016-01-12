@@ -83,6 +83,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       CachePtr Cache::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Cache> singleton(Cache::create());
         CachePtr result = singleton.singleton();
         if (!result) {

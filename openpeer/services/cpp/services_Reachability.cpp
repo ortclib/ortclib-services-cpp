@@ -107,6 +107,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ReachabilityPtr Reachability::singleton()
       {
+        AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Reachability> singleton(IReachabilityFactory::singleton().createForReachability());
         ReachabilityPtr result = singleton.singleton();
         if (!result) {
