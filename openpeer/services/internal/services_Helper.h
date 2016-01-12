@@ -59,6 +59,8 @@ namespace openpeer
       class Helper : public IHelper
       {
       public:
+        static void setup();
+
         static void debugAppend(ElementPtr &parentEl, const char *name, const char *value);
         static void debugAppend(ElementPtr &parentEl, const char *name, const String &value);
         static void debugAppendNumber(ElementPtr &parentEl, const char *name, const String &value);

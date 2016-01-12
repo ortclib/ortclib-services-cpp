@@ -139,6 +139,7 @@ namespace openpeer
       Settings::Settings(const make_private &) :
         mStored(make_shared<StoredSettingsMap>())
       {
+        Helper::setup();
         ZS_LOG_DETAIL(log("created"))
       }
 
