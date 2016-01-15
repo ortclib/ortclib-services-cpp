@@ -98,6 +98,8 @@ namespace openpeer
       using CryptoPP::SHA256;
       using CryptoPP::SHA1;
 
+      void initSubsystems();
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -122,6 +124,7 @@ namespace openpeer
       public:
         static IDNHelper &singleton()
         {
+          AutoRecursiveLock lock(*IHelper::getGlobalLock());
           static Singleton<IDNHelper> singleton;
           return singleton.singleton();
         }
@@ -153,16 +156,13 @@ namespace openpeer
       public:
         static CryptoPPHelper &singleton()
         {
+          AutoRecursiveLock lock(*IHelper::getGlobalLock());
           static Singleton<CryptoPPHelper> singleton;
           return singleton.singleton();
         }
 
         CryptoPPHelper()
         {
-          auto globalLock = Helper::getGlobalLock();
-
-          AutoRecursiveLock lock(*globalLock);
-
           static const char *buffer = "1234567890";
 
           String result;
@@ -193,6 +193,28 @@ namespace openpeer
         }
       };
 
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      class ServicesSetup
+      {
+      public:
+        static ServicesSetup &singleton()
+        {
+          AutoRecursiveLock lock(*IHelper::getGlobalLock());
+          static Singleton<ServicesSetup> singleton;
+          return singleton.singleton();
+        }
+
+        ServicesSetup()
+        {
+          zsLib::setup();
+          initSubsystems();
+        }
+      };
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -200,6 +222,14 @@ namespace openpeer
       #pragma mark
       #pragma mark Helper
       #pragma mark
+
+      //-----------------------------------------------------------------------
+      void Helper::setup()
+      {
+        ServicesSetup::singleton();
+        IDNHelper::singleton();
+        CryptoPPHelper::singleton();
+      }
 
       //-----------------------------------------------------------------------
       void Helper::debugAppend(ElementPtr &parentEl, const char *name, const char *value)
@@ -1806,9 +1836,15 @@ namespace openpeer
     #pragma mark
 
     //-------------------------------------------------------------------------
+    void IHelper::setup()
+    {
+      internal::Helper::setup();
+    }
+
+    //-------------------------------------------------------------------------
     RecursiveLockPtr IHelper::getGlobalLock()
     {
-      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(RecursiveLockPtr(new RecursiveLock()));
+      static internal::SingletonLazySharedPtr<RecursiveLock> singleton(make_shared<RecursiveLock>());
       return singleton.singleton();
     }
 

@@ -67,6 +67,8 @@ namespace openpeer
       typedef size_t Index;
       typedef std::map<Index, String> SplitMap;
 
+      static void setup();
+
       static RecursiveLockPtr getGlobalLock();
 
       static void setSocketThreadPriority();

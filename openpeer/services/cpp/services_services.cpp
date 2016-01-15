@@ -43,3 +43,27 @@ namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_servic
 namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_tcp_messaging) } }
 namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_transport_stream) } }
 namespace openpeer { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_wire) } } }
+
+
+namespace openpeer
+{
+  namespace services
+  {
+    namespace internal
+    {
+      void initSubsystems()
+      {
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_http));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_ice));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_rudp));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_mls));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_tcp_messaging));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_transport_stream));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services::wire, openpeer_services_wire));
+      }
+    }
+  }
+}
