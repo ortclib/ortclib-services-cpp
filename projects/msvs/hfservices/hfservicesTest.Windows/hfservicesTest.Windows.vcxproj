@@ -201,16 +201,16 @@
     <None Include="hfservicesTest.Windows_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\cryptopp\projects\vs2013\cryptopp\cryptopp.Windows\cryptopp.Windows.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\cryptopp\projects\msvs\cryptopp\cryptopp.Windows\cryptopp.Windows.vcxproj">
       <Project>{81d2eeec-2d4c-4225-824b-a7de05bb6557}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\idnkit\projects\vs2013\idnkit\idnkit.Windows\idnkit.Windows.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\idnkit\projects\msvs\idnkit\idnkit.Windows\idnkit.Windows.vcxproj">
       <Project>{bfd348b9-016f-43bd-b92f-88da057b8fa8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\udns\projects\vs2013\udns\udns.Windows\udns.Windows.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\udns\projects\msvs\udns\udns.Windows\udns.Windows.vcxproj">
       <Project>{3c9c21f5-54be-4c18-ac96-f28a43ef2844}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\zsLib\projects\vs2013\zsLib\zsLib.Windows\zsLib.Windows.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\zsLib\projects\msvs\zsLib\zsLib.Windows\zsLib.Windows.vcxproj">
       <Project>{5df1d5b9-5a44-46ef-a4f9-10c718f31f41}</Project>
     </ProjectReference>
     <ProjectReference Include="..\hfservices.Windows\hfservices.Windows.vcxproj">

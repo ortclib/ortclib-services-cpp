@@ -190,16 +190,16 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\cryptopp\projects\vs2013\cryptopp\cryptopp.Windows.Universal\cryptopp.Windows.Universal.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\cryptopp\projects\msvs\cryptopp\cryptopp.Windows.Universal\cryptopp.Windows.Universal.vcxproj">
       <Project>{9b7e08b7-f3eb-418e-b69f-8a655ff913fa}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\idnkit\projects\vs2013\idnkit\idnkit.Windows.Universal\idnkit.Windows.Universal.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\idnkit\projects\msvs\idnkit\idnkit.Windows.Universal\idnkit.Windows.Universal.vcxproj">
       <Project>{0b940009-c54f-4932-8d03-03141dcc9a50}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\udns\projects\vs2013\udns\udns.Windows.Universal\udns.Windows.Universal.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\udns\projects\msvs\udns\udns.Windows.Universal\udns.Windows.Universal.vcxproj">
       <Project>{577f12ab-3473-4a93-8ee4-eeed2ce5dc61}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\zsLib\projects\vs2013\zsLib\zsLib.Windows.Universal\zsLib.Windows.Universal.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\zsLib\projects\msvs\zsLib\zsLib.Windows.Universal\zsLib.Windows.Universal.vcxproj">
       <Project>{e7265f01-f993-44f6-889c-24a62ab171a0}</Project>
     </ProjectReference>
     <ProjectReference Include="..\hfservices.Windows.Universal\hfservices.Windows.Universal.vcxproj">
