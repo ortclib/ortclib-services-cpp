@@ -1,0 +1,8 @@
+﻿<Application
+    x:Class="hfservicesTest_Windows_Universal.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:hfservicesTest_Windows_Universal"
+    RequestedTheme="Light">
+
+</Application>
