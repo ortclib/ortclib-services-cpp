@@ -426,10 +426,10 @@ namespace openpeer
 
         ISTUNRequesterPtr mAliveCheckRequester;
         Time mLastReceivedDataOrSTUN;
-        Milliseconds mKeepAliveDuration;
-        Milliseconds mExpectSTUNOrDataWithinDuration;
-        Milliseconds mKeepAliveSTUNRequestTimeout;
-        Milliseconds mBackgroundingTimeout;
+        Milliseconds mKeepAliveDuration {};
+        Milliseconds mExpectSTUNOrDataWithinDuration {};
+        Milliseconds mKeepAliveSTUNRequestTimeout {};
+        Milliseconds mBackgroundingTimeout {};
 
         CandidatePairList mCandidatePairs;
 

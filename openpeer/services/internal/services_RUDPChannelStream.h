@@ -331,9 +331,9 @@ namespace openpeer
         WORD mSendingChannelNumber;
         WORD mReceivingChannelNumber;
 
-        Milliseconds mMinimumRTT;
-        Milliseconds mCalculatedRTT;
-        QWORD mNextSequenceNumber;        // next sequence number to use for sending
+        Milliseconds mMinimumRTT {};
+        Milliseconds mCalculatedRTT {};
+        QWORD mNextSequenceNumber {};     // next sequence number to use for sending
         bool mXORedParityToNow {};        // the current parity of all packets sent to this point
 
         QWORD mGSNR;                      // Greatest Sequence Number Received (this is the remote party's sequence number)
@@ -371,13 +371,13 @@ namespace openpeer
         TimerPtr mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer;
 
         TimerPtr mAddToAvailableBurstBatonsTimer;               // add to the batons available when this timer fires (this timer is only active as long as there is data to send)
-        Milliseconds mAddToAvailableBurstBatonsDuation;         // every time there is new congestion this duration is doubled
+        Milliseconds mAddToAvailableBurstBatonsDuation {};      // every time there is new congestion this duration is doubled
 
         ULONG mPacketsPerBurst;                                 // how many packets to deliver in a single burst
 
         bool mBandwidthIncreaseFrozen {};                       // the bandwidth increase routine is currently frozen because an insufficient time without issues has not occurerd
         Time mStartedSendingAtTime;                             // when did the sending activate again (so when the final ACK comes in the total duration can be calculated)
-        Milliseconds mTotalSendingPeriodWithoutIssues;          // how long has there been a successful period of sending without and sending difficulties
+        Milliseconds mTotalSendingPeriodWithoutIssues{};        // how long has there been a successful period of sending without and sending difficulties
 
         QWORD mForceACKOfSentPacketsAtSendingSequnceNumber {};  // when the ACK reply comes back we can be sure of the state of lost packets up to this sequence number
         PUID mForceACKOfSentPacketsRequestID;                   // the identification of the request that is causing the force

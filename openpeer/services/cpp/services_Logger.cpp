@@ -1926,15 +1926,15 @@ namespace openpeer
 
         BufferedDataList mBufferedList;
 
-        WORD mListenPort;
+        WORD mListenPort {};
         Time mStartListenTime;
-        Milliseconds mMaxWaitTimeForSocketToBeAvailable;
+        Milliseconds mMaxWaitTimeForSocketToBeAvailable {};
 
         TimerPtr mRetryTimer;
         Time mNextRetryTime;
-        Milliseconds mRetryWaitTime;
+        Milliseconds mRetryWaitTime {};
 
-        bool mConnected;
+        bool mConnected {};
         IDNSQueryPtr mOutgoingServerQuery;
         String mStringToSendUponConnection;
 

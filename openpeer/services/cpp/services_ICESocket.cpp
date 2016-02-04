@@ -1968,7 +1968,7 @@ namespace openpeer
                 ZS_LOG_DEBUG(log("TURN socket created") + ZS_PARAM("base IP", string(localSocket->mLocal->mIPAddress)) + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
               } else {
                 if (!turnInfo->mTURNRetryTimer) {
-                  Milliseconds waitTime;
+                  Milliseconds waitTime {};
                   if (tick < turnInfo->mTURNRetryAfter) {
                     waitTime = zsLib::toMilliseconds(turnInfo->mTURNRetryAfter - tick);
                   } else {
