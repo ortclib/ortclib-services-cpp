@@ -229,6 +229,7 @@ namespace openpeer
         ServicesSetup::singleton();
         IDNHelper::singleton();
         CryptoPPHelper::singleton();
+        zsLib::setup();
       }
 
       //-----------------------------------------------------------------------
