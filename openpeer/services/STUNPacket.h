@@ -245,6 +245,7 @@ namespace openpeer
       Log::Params log(const char *message) const;
       Log::Params debug(const char *message) const;
       ElementPtr toDebug() const;
+      void trace(const char *message) const;
 
       bool isLegal(RFCs rfc) const;
       RFCs guessRFC(RFCs allowedRFCs) const;
@@ -274,17 +275,17 @@ namespace openpeer
                                           ) const;
 
     public:
-      const char *mLogObject;                                   // when output to a log, which object was responsible for this packet (never packetized or parsed)
-      PUID mLogObjectID;                                        // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
+      const char *mLogObject {};                                // when output to a log, which object was responsible for this packet (never packetized or parsed)
+      PUID mLogObjectID {};                                     // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
 
-      const BYTE *mOriginalPacket;                              // NOTE: This is only valid as long as the packet which it was parsed from is valid and must be valid for the validate routine
+      const BYTE *mOriginalPacket {};                           // NOTE: This is only valid as long as the packet which it was parsed from is valid and must be valid for the validate routine
                                                                 // ALSO: Because the RFC demands the length of the packet during MESSAGE-INTEGRITY be set to the value as if the MESSAGE-INTEGRITY but not including anything after we have to overwrite the length in the original packet momentarily then put back original value
 
-      Classes mClass;
-      Methods mMethod;
-      ULONG mTotalRetries;                                      // this is not an attribute that is encoded, instead it can be used to determine how many retries of a request have happened
+      Classes mClass {Class_Request};
+      Methods mMethod {Method_Binding};
+      ULONG mTotalRetries {};                                   // this is not an attribute that is encoded, instead it can be used to determine how many retries of a request have happened
 
-      WORD mErrorCode;                                          // if there was an error during the parse of the request, the error will be put here otherwise will be "0"
+      WORD mErrorCode {};                                       // if there was an error during the parse of the request, the error will be put here otherwise will be "0"
       String mReason;
 
       DWORD  mMagicCookie;                                      // if this is 0x2112A442 then this is the new RFC otherwise it is RFC3489
@@ -306,72 +307,72 @@ namespace openpeer
 
       String mSoftware;
 
-      CredentialMechanisms mCredentialMechanism;
-      size_t mMessageIntegrityMessageLengthInBytes;              // how big is the input into the HMAC algorithm, including 20 byte header -- it is the length of the packet up to but not including the message integrity attribute or message-integrity value
+      CredentialMechanisms mCredentialMechanism {CredentialMechanisms_None};
+      size_t mMessageIntegrityMessageLengthInBytes {};          // how big is the input into the HMAC algorithm, including 20 byte header -- it is the length of the packet up to but not including the message integrity attribute or message-integrity value
       BYTE  mMessageIntegrity[OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES];   // the message integrity of the packet
 
-      bool mFingerprintIncluded;                                // should this packet include the fingerprint (or did include the fingerprint)
+      bool mFingerprintIncluded {};                             // should this packet include the fingerprint (or did include the fingerprint)
 
 
       // RFC 5766 TURN attributes
-      WORD mChannelNumber;                                      // 0x0000 -> 0x3FFF = illegal, 0x4000 -> 0x7FFF = valid, 0x8000 -> 0xFFFF = reserved. The CHANNEL-NUMBER attribute contains the number of the channel.
+      WORD mChannelNumber {};                                   // 0x0000 -> 0x3FFF = illegal, 0x4000 -> 0x7FFF = valid, 0x8000 -> 0xFFFF = reserved. The CHANNEL-NUMBER attribute contains the number of the channel.
 
-      bool mLifetimeIncluded;                                   // set this to true if the LIFETIME attribute should be included
-      DWORD mLifetime;                                          // The LIFETIME attribute represents the duration for which the server will maintain an allocation in the absence of a refresh.
+      bool mLifetimeIncluded {};                                // set this to true if the LIFETIME attribute should be included
+      DWORD mLifetime {};                                       // The LIFETIME attribute represents the duration for which the server will maintain an allocation in the absence of a refresh.
 
       typedef std::list<IPAddress> PeerAddressList;
       PeerAddressList mPeerAddressList;                         // The XOR-PEER-ADDRESS specifies the address and port of the peer as seen from the TURN server
       IPAddress mRelayedAddress;                                // The XOR-RELAYED-ADDRESS is present in Allocate responses.
 
-      const BYTE *mData;                                        // this is only valid as long as the packet/object the data was parsed from is valid
-      size_t mDataLength;
+      const BYTE *mData {};                                     // this is only valid as long as the packet/object the data was parsed from is valid
+      size_t mDataLength {};
 
-      bool mEvenPortIncluded;                                   // Set this to true if the "EVEN-PORT" attribute should be included
-      bool mEvenPort;                                           // This attribute allows the client to request that the port in the
+      bool mEvenPortIncluded {};                                // Set this to true if the "EVEN-PORT" attribute should be included
+      bool mEvenPort {true};                                    // This attribute allows the client to request that the port in the
                                                                 // relayed transport address be even, and (optionally) that the server
                                                                 // reserve the next-higher port number.
 
-      BYTE mRequestedTransport;                                 // This attribute is used by the client to request a specific transport protocol for the allocated transport address. 17 decimal = UDP
+      BYTE mRequestedTransport {Protocol_None};                 // This attribute is used by the client to request a specific transport protocol for the allocated transport address. 17 decimal = UDP
 
-      bool mDontFragmentIncluded;                               // This attribute is used by the client to request that the server set
+      bool mDontFragmentIncluded {};                            // This attribute is used by the client to request that the server set
                                                                 // the DF (Don't Fragment) bit in the IP header when relaying the application data onward to the peer.
 
-      bool mReservationTokenIncluded;                           // set this to true if the RESERVATION-TOKEN attribute should be included
+      bool mReservationTokenIncluded {};                        // set this to true if the RESERVATION-TOKEN attribute should be included
       BYTE mReservationToken[8];                                // The RESERVATION-TOKEN attribute contains a token that uniquely identifies a relayed transport address being held in reserve by the server.
 
-      bool mMobilityTicketIncluded;
+      bool mMobilityTicketIncluded {};
       std::unique_ptr<BYTE[]> mMobilityTicket;                  // if set, points to the buffer containing the mobility ticket
-      size_t mMobilityTicketLength;                             // how long is the mobility ticket buffer (if non-zero then mMobilityTicket must be set)
+      size_t mMobilityTicketLength {};                          // how long is the mobility ticket buffer (if non-zero then mMobilityTicket must be set)
 
       // RFC 5245 ICE attributes
-      bool mPriorityIncluded;
-      DWORD mPriority;                                          // The PRIORITY attribute indicates the priority that is to be associated with a peer reflexive candidate, should one be discovered by this check.
+      bool mPriorityIncluded {};
+      DWORD mPriority {};                                       // The PRIORITY attribute indicates the priority that is to be associated with a peer reflexive candidate, should one be discovered by this check.
 
-      bool mUseCandidateIncluded;                               // The USE-CANDIDATE attribute indicates that the candidate pair resulting from this check should be used for transmission of media.
+      bool mUseCandidateIncluded {};                            // The USE-CANDIDATE attribute indicates that the candidate pair resulting from this check should be used for transmission of media.
 
-      bool mIceControlledIncluded;                              // set to true if the ICE-CONTROLLED attrbute should be included
-      QWORD mIceControlled;                                     // The ICE-CONTROLLED attribute is present in a Binding request and indicates that the client believes it is currently in the controlled role.
+      bool mIceControlledIncluded {};                           // set to true if the ICE-CONTROLLED attrbute should be included
+      QWORD mIceControlled {};                                  // The ICE-CONTROLLED attribute is present in a Binding request and indicates that the client believes it is currently in the controlled role.
 
-      bool mIceControllingIncluded;                             // set to true if the ICE-CONTROLLING attribute should be included
-      QWORD mIceControlling;                                    // The ICE-CONTROLLING attribute is present in a Binding request and indicates that the client believes it is currently in the controlling role.
+      bool mIceControllingIncluded {};                          // set to true if the ICE-CONTROLLING attribute should be included
+      QWORD mIceControlling {};                                 // The ICE-CONTROLLING attribute is present in a Binding request and indicates that the client believes it is currently in the controlling role.
 
 
       // RFC_draft_RUDP
-      QWORD mNextSequenceNumber;                                // 0 means this value is not set
+      QWORD mNextSequenceNumber {};                             // 0 means this value is not set
 
-      bool mMinimumRTTIncluded;
-      DWORD mMinimumRTT;
+      bool mMinimumRTTIncluded {};
+      DWORD mMinimumRTT {};
 
       String mConnectionInfo;                                   // additional connection information in RUDP
 
-      QWORD mGSNR;                                              // 0 means this value is not set
-      QWORD mGSNFR;                                             // 0 means this value is not set
+      QWORD mGSNR {};                                           // 0 means this value is not set
+      QWORD mGSNFR {};                                          // 0 means this value is not set
 
-      bool mReliabilityFlagsIncluded;
-      BYTE mReliabilityFlags;
+      bool mReliabilityFlagsIncluded {};
+      BYTE mReliabilityFlags {};
 
       std::unique_ptr<BYTE[]> mACKVector;                       // if set, points to the buffer containing the RLE ACK vector
-      size_t mACKVectorLength;                                  // how long is the ACK vector (if non-zero then mACKVector must be set)
+      size_t mACKVectorLength {};                               // how long is the ACK vector (if non-zero then mACKVector must be set)
 
       typedef std::list<IRUDPChannel::CongestionAlgorithms> CongestionControlList;
       CongestionControlList mLocalCongestionControl;

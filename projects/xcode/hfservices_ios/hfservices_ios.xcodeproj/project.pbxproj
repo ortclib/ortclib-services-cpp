@@ -46,7 +46,7 @@
 		00D78BA0189AB21000E84E10 /* services_Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D78B9F189AB21000E84E10 /* services_Settings.cpp */; };
 		00E493A119967A1400335BB5 /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00E493A019967A1400335BB5 /* services_Encryptor.cpp */; };
 		00E493A6199681DB00335BB5 /* services_Decryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00E493A5199681DB00335BB5 /* services_Decryptor.cpp */; };
-		E214EEF71BBEFC35003DDC95 /* services_BackOffTimerPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E214EEF61BBEFC35003DDC95 /* services_BackOffTimerPattern.cpp */; settings = {ASSET_TAGS = (); }; };
+		E214EEF71BBEFC35003DDC95 /* services_BackOffTimerPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E214EEF61BBEFC35003DDC95 /* services_BackOffTimerPattern.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -89,6 +89,7 @@
 		00485CEF18BEF06900444E06 /* IBackgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBackgrounding.h; sourceTree = "<group>"; };
 		00485CF018BEF9E200444E06 /* services_Backgrounding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Backgrounding.cpp; sourceTree = "<group>"; };
 		00485CF218BEF9F400444E06 /* services_Backgrounding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Backgrounding.h; sourceTree = "<group>"; };
+		0049A6561C6CDC5000A7AACB /* services_Tracing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Tracing.h; sourceTree = "<group>"; };
 		004C4B0718CE5781009186EA /* IMessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageQueueManager.h; sourceTree = "<group>"; };
 		004C4B0B18CE5BB1009186EA /* services_MessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_MessageQueueManager.h; sourceTree = "<group>"; };
 		004C4B0C18CE5BC2009186EA /* services_MessageQueueManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_MessageQueueManager.cpp; sourceTree = "<group>"; };
@@ -359,6 +360,7 @@
 				0095DCB816CA8A16005F53D3 /* services_STUNRequester.h */,
 				0095DCB916CA8A16005F53D3 /* services_STUNRequesterManager.h */,
 				00ABD40817A7FFA700178078 /* services_TCPMessaging.h */,
+				0049A6561C6CDC5000A7AACB /* services_Tracing.h */,
 				003BEE0417A6F4CC0002EB47 /* services_TransportStream.h */,
 				0095DCBA16CA8A16005F53D3 /* services_TURNSocket.h */,
 				008C0E7E18628D750034958B /* services_wire.h */,

@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_BackOffTimerPattern.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/IHelper.h>
 #include <openpeer/services/ISettings.h>
@@ -144,6 +145,19 @@ namespace openpeer
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
         }
+
+        EventWriteOpServicesBackOffTimerPatternCreate(
+                                                      __func__,
+                                                      mID,
+                                                      mMaxAttempts,
+                                                      mAttemptTimeoutVector.size(),
+                                                      mAttemptTimeoutVector.size() > 0 ? mAttemptTimeoutVector.front().count() : 0,
+                                                      mAttemptTimeoutMultiplier,
+                                                      mMaxAttemptTimeout.count(),
+                                                      mRetryVector.size(), mRetryVector.size() > 0 ? mRetryVector.front().count() : 0,
+                                                      mRetryMultiplier,
+                                                      mMaxRetry.count()
+                                                      );
       }
 
       //-----------------------------------------------------------------------
@@ -169,6 +183,8 @@ namespace openpeer
       {
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
+
+        EventWriteOpServicesBackOffTimerPatternDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -332,6 +348,8 @@ namespace openpeer
         pCopy->mRetryMultiplier = mRetryMultiplier;
         pCopy->mMaxRetry = mMaxRetry;
 
+        EventWriteOpServicesBackOffTimerPatternClone(__func__, pCopy->mID, mID);
+
         pCopy->init();
 
         return pCopy;
@@ -370,6 +388,8 @@ namespace openpeer
         if (DurationType() != mMaxRetry) {
           if (mLastRetryDuration > mMaxRetry) mLastRetryDuration = mMaxRetry;
         }
+
+        EventWriteOpServicesBackOffTimerPatternNextAttempt(__func__, mID, mAttemptNumber, mLastAttemptTimeout.count(), mLastRetryDuration.count());
       }
 
       //-----------------------------------------------------------------------

@@ -56,6 +56,8 @@ namespace openpeer
       static IBackOffTimerPatternPtr create(const char *pattern = NULL);
       static IBackOffTimerPatternPtr create(ElementPtr patternEl);
 
+      virtual PUID getID() const = 0;
+
       virtual String save() const = 0;
       virtual ElementPtr saveToJSON() const = 0;
 

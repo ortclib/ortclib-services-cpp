@@ -32,6 +32,7 @@
 #include <openpeer/services/internal/services_BackOffTimer.h>
 #include <openpeer/services/internal/services_BackOffTimerPattern.h>
 #include <openpeer/services/internal/services_MessageQueueManager.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/IHelper.h>
 #include <openpeer/services/ISettings.h>
@@ -92,6 +93,8 @@ namespace openpeer
         if (delegate) {
           mDefaultSubscription = mSubscriptions.subscribe(delegate, IHelper::getServiceQueue());
         }
+
+        EventWriteOpServicesBackOffTimerCreate(__func__, mID, ((bool)pattern) ? pattern->getID() : 0);
       }
 
       //-----------------------------------------------------------------------
@@ -108,6 +111,8 @@ namespace openpeer
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
+
+        EventWriteOpServicesBackOffTimerDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -252,6 +257,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttempting()
       {
+        EventWriteOpServicesBackOffTimerNotifyAttempting(__func__, mID);
+
         AutoRecursiveLock lock(*this);
         if (State_AttemptNow != mCurrentState) {
           ZS_LOG_WARNING(Detail, log("cannot notify attempting - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
@@ -266,6 +273,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttemptFailed()
       {
+        EventWriteOpServicesBackOffTimerNotifyAttemptFailed(__func__, mID);
+
         AutoRecursiveLock lock(*this);
         if (State_Attempting != mCurrentState) {
           ZS_LOG_WARNING(Detail, log("cannot notify attempt failed - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
@@ -292,6 +301,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyTryAgainNow()
       {
+        EventWriteOpServicesBackOffTimerNotifyTryAgainNow(__func__, mID);
+
         AutoRecursiveLock lock(*this);
         if (State_WaitingAfterAttemptFailure != mCurrentState) {
           ZS_LOG_WARNING(Detail, log("cannot try again now - not in correct state") + ZS_PARAM("state", toString(mCurrentState)))
@@ -309,6 +320,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void BackOffTimer::notifySucceeded()
       {
+        EventWriteOpServicesBackOffTimerNotifySucceeded(__func__, mID);
+
         AutoRecursiveLock lock(*this);
 
         cancelTimer();
@@ -414,6 +427,8 @@ namespace openpeer
 
         mCurrentState = state;
         mLastStateChange = zsLib::now();
+
+        EventWriteOpServicesBackOffTimerStateChangedEventFired(__func__, mID, zsLib::to_underlying(state));
 
         auto pThis = mThisWeak.lock();
         if (pThis) {

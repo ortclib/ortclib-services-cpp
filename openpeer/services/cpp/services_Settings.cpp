@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_Settings.h>
 #include <openpeer/services/internal/services.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/IHelper.h>
 
@@ -186,11 +187,14 @@ namespace openpeer
             if (found == mStored->end()) return String();
             auto result = (*found).second.second;
             ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+            EventWriteOpServicesSettingGetString(__func__, mID, key, result);
             return result;
           }
         }
 
-        return delegate->getString(key);
+        auto result = delegate->getString(key);
+        EventWriteOpServicesSettingGetString(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -208,14 +212,18 @@ namespace openpeer
             try {
               auto result = Numeric<LONG>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
               return result;
             } catch(Numeric<LONG>::ValueOutOfRange &) {
             }
+            EventWriteOpServicesSettingGetInt(__func__, mID, key, 0);
             return 0;
           }
         }
 
-        return delegate->getInt(key);
+        auto result = delegate->getInt(key);
+        EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -233,14 +241,18 @@ namespace openpeer
             try {
               auto result = Numeric<ULONG>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              EventWriteOpServicesSettingGetUInt(__func__, mID, key, result);
               return result;
             } catch(Numeric<ULONG>::ValueOutOfRange &) {
             }
+            EventWriteOpServicesSettingGetUInt(__func__, mID, key, 0);
             return 0;
           }
         }
 
-        return delegate->getUInt(key);
+        auto result = delegate->getUInt(key);
+        EventWriteOpServicesSettingGetUInt(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -258,14 +270,18 @@ namespace openpeer
             try {
               auto result = Numeric<bool>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              EventWriteOpServicesSettingGetBool(__func__, mID, key, result);
               return result;
             } catch(Numeric<bool>::ValueOutOfRange &) {
             }
+            EventWriteOpServicesSettingGetBool(__func__, mID, key, false);
             return false;
           }
         }
 
-        return delegate->getBool(key);
+        auto result = delegate->getBool(key);
+        EventWriteOpServicesSettingGetBool(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -283,14 +299,18 @@ namespace openpeer
             try {
               auto result = Numeric<float>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
               return result;
             } catch(Numeric<float>::ValueOutOfRange &) {
             }
+            EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0f);
             return 0;
           }
         }
 
-        return delegate->getFloat(key);
+        auto result = delegate->getFloat(key);
+        EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -308,14 +328,18 @@ namespace openpeer
             try {
               auto result = Numeric<double>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
+              EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
               return result;
             } catch(Numeric<double>::ValueOutOfRange &) {
             }
+            EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0);
             return 0;
           }
         }
 
-        return delegate->getDouble(key);
+        auto result = delegate->getDouble(key);
+        EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -324,6 +348,8 @@ namespace openpeer
                                const char *value
                                )
       {
+        EventWriteOpServicesSettingSetString(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -346,6 +372,8 @@ namespace openpeer
                             LONG value
                             )
       {
+        EventWriteOpServicesSettingSetInt(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -368,6 +396,8 @@ namespace openpeer
                              ULONG value
                              )
       {
+        EventWriteOpServicesSettingSetUInt(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -390,6 +420,8 @@ namespace openpeer
                              bool value
                              )
       {
+        EventWriteOpServicesSettingSetBool(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -412,6 +444,8 @@ namespace openpeer
                               float value
                               )
       {
+        EventWriteOpServicesSettingSetFloat(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -434,6 +468,8 @@ namespace openpeer
                                double value
                                )
       {
+        EventWriteOpServicesSettingSetDouble(__func__, mID, key, value);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -453,6 +489,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Settings::clear(const char *key)
       {
+        EventWriteOpServicesSettingClear(__func__, mID, key);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -475,6 +513,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       bool Settings::apply(const char *jsonSettings)
       {
+        EventWriteOpServicesSettingApply(__func__, mID, jsonSettings);
+
         typedef std::list<ElementPtr> NestedList;
 
         if (!jsonSettings) return false;
@@ -620,6 +660,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Settings::applyDefaults()
       {
+        EventWriteOpServicesSettingApplyDefaults(__func__, mID);
+
         setBool(OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN, false);
         setBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP, false);
@@ -660,6 +702,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Settings::clearAll()
       {
+        EventWriteOpServicesSettingClearAll(__func__, mID);
+
         ISettingsDelegatePtr delegate;
 
         {
@@ -694,17 +738,22 @@ namespace openpeer
 
               auto value = (*found).second.second;
               if (value.isEmpty()) goto not_found;
+
+              EventWriteOpServicesSettingVerifyExists(__func__, mID, key, true);
               return;
             }
           }
 
           String result = delegate->getString(key);
           if (result.isEmpty()) goto not_found;
+          EventWriteOpServicesSettingVerifyExists(__func__, mID, key, true);
           return;
         }
 
       not_found:
         {
+          EventWriteOpServicesSettingVerifyExists(__func__, mID, key, false);
+
           ZS_LOG_WARNING(Basic, log("setting was not set") + ZS_PARAM("setting name", key))
 
           ZS_THROW_INVALID_USAGE(String("setting is missing a value: ") + key)

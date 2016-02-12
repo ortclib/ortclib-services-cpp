@@ -33,6 +33,8 @@
 #include <openpeer/services/RUDPPacket.h>
 #include <openpeer/services/IHelper.h>
 
+#include <openpeer/services/internal/services_Tracing.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/helpers.h>
@@ -1511,42 +1513,7 @@ namespace openpeer
     STUNPacket::STUNPacket() :
       mLogObject("STUNPacket"),
       mLogObjectID(zsLib::createPUID()),
-      mClass(Class_Request),
-      mMethod(Method_Binding),
-      mTotalRetries(0),
-      mErrorCode(0),
-      mCredentialMechanism(CredentialMechanisms_None),
-      mOriginalPacket(NULL),
-      mMessageIntegrityMessageLengthInBytes(0),
-      mMagicCookie(OPENPEER_STUN_MAGIC_COOKIE),
-      mFingerprintIncluded(true),
-      mChannelNumber(0),
-      mLifetimeIncluded(false),
-      mLifetime(0),
-      mData(NULL),
-      mDataLength(0),
-      mEvenPortIncluded(false),
-      mEvenPort(true),
-      mRequestedTransport(Protocol_None),
-      mDontFragmentIncluded(false),
-      mReservationTokenIncluded(false),
-      mMobilityTicketIncluded(false),
-      mMobilityTicketLength(0),
-      mPriorityIncluded(false),
-      mPriority(0),
-      mUseCandidateIncluded(false),
-      mIceControlledIncluded(false),
-      mIceControlled(false),
-      mIceControllingIncluded(false),
-      mIceControlling(0),
-      mNextSequenceNumber(0),
-      mMinimumRTTIncluded(false),
-      mMinimumRTT(0),
-      mGSNR(0),
-      mGSNFR(0),
-      mReliabilityFlagsIncluded(false),
-      mReliabilityFlags(0),
-      mACKVectorLength(0)
+      mMagicCookie(OPENPEER_STUN_MAGIC_COOKIE)
     {
       memset(&(mTransactionID[0]), 0, sizeof(mTransactionID));  // reset it to zero
       memset(&(mMessageIntegrity[0]), 0, sizeof(mMessageIntegrity));
@@ -2258,6 +2225,75 @@ namespace openpeer
       }
       IHelper::debugAppend(objectEl, toDebug());
       return Log::Params(message, objectEl);
+    }
+
+    //-------------------------------------------------------------------------
+    void STUNPacket::trace(const char *message) const
+    {
+      EventWriteOpServicesStunPacket(
+                                     __func__,
+                                     message,
+                                     mLogObject,
+                                     mLogObjectID,
+                                     zsLib::to_underlying(mClass),
+                                     zsLib::to_underlying(mMethod),
+                                     mTotalRetries,
+                                     mErrorCode,
+                                     mReason,
+                                     mMagicCookie,
+                                     &(mTransactionID[0]),
+                                     sizeof(mTransactionID),
+                                     mUnknownAttributes.size(),
+                                     mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
+                                     mMappedAddress.string(),
+                                     mAlternateServer.string(),
+                                     mUsername,
+                                     mPassword,
+                                     mRealm,
+                                     mNonce,
+                                     mSoftware,
+                                     zsLib::to_underlying(mCredentialMechanism),
+                                     mMessageIntegrityMessageLengthInBytes,
+                                     &(mMessageIntegrity[0]),
+                                     sizeof(mMessageIntegrity),
+                                     mFingerprintIncluded,
+                                     mChannelNumber,
+                                     mLifetimeIncluded,
+                                     mLifetime,
+                                     mPeerAddressList.size(),
+                                     mPeerAddressList.size() > 0 ? mPeerAddressList.front().string().c_str() : (const char *)NULL,
+                                     mRelayedAddress.string(),
+                                     mDataLength,
+                                     mEvenPortIncluded,
+                                     mEvenPort,
+                                     mRequestedTransport,
+                                     mDontFragmentIncluded,
+                                     mReservationTokenIncluded,
+                                     &(mReservationToken[0]),
+                                     sizeof(mReservationToken),
+                                     mMobilityTicketIncluded,
+                                     mMobilityTicket.get(),
+                                     mMobilityTicketLength,
+                                     mPriorityIncluded,
+                                     mPriority,
+                                     mUseCandidateIncluded,
+                                     mIceControlledIncluded,
+                                     mIceControlled,
+                                     mIceControllingIncluded,
+                                     mIceControlling,
+                                     mNextSequenceNumber,
+                                     mMinimumRTTIncluded,
+                                     mMinimumRTT,
+                                     mConnectionInfo,
+                                     mGSNR,
+                                     mGSNFR,
+                                     mReliabilityFlagsIncluded,
+                                     mReliabilityFlags,
+                                     mACKVector.get(),
+                                     mACKVectorLength,
+                                     mLocalCongestionControl.size(),
+                                     mRemoteCongestionControl.size()
+                                     );
     }
 
     //-------------------------------------------------------------------------

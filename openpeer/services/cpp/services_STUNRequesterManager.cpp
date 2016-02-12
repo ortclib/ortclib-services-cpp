@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_STUNRequesterManager.h>
 #include <openpeer/services/internal/services_STUNRequester.h>
+#include <openpeer/services/internal/services_Tracing.h>
 #include <openpeer/services/IHelper.h>
 
 #include <zsLib/Exception.h>
@@ -101,6 +102,8 @@ namespace openpeer
       STUNRequesterManager::STUNRequesterManager(const make_private &) :
         mID(zsLib::createPUID())
       {
+        EventWriteOpServicesStunRequesterManagerCreate(__func__, mID);
+
         ZS_LOG_DETAIL(log("created"))
       }
 
@@ -110,6 +113,8 @@ namespace openpeer
         
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
+
+        EventWriteOpServicesStunRequesterManagerDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -159,6 +164,9 @@ namespace openpeer
           ZS_LOG_TRACE(log("ignoring STUN packet that are requests or indications"))
           return ISTUNRequesterPtr();
         }
+
+        EventWriteOpServicesStunRequesterManagerHandleStunPacket(__func__, mID, fromIPAddress.string());
+        stun->trace(__func__);
 
         QWORDPair key = getKey(stun);
 
@@ -226,6 +234,8 @@ namespace openpeer
 
         ZS_THROW_INVALID_USAGE_IF(!requester)
 
+        EventWriteOpServicesStunRequesterManagerMonitorStart(__func__, mID, requester->getID());
+
         QWORDPair key = getKey(request);
 
         AutoRecursiveLock lock(mLock);
@@ -236,6 +246,8 @@ namespace openpeer
       void STUNRequesterManager::monitorStop(STUNRequester &inRequester)
       {
         UseSTUNRequester &requester = inRequester;
+
+        EventWriteOpServicesStunRequesterManagerMonitorStop(__func__, mID, requester.getID());
 
         AutoRecursiveLock lock(mLock);
 

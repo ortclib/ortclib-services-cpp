@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_STUNDiscovery.h>
+#include <openpeer/services/internal/services_Tracing.h>
 #include <openpeer/services/ISTUNRequesterManager.h>
 #include <openpeer/services/IHelper.h>
 
@@ -70,6 +71,7 @@ namespace openpeer
         mDelegate(ISTUNDiscoveryDelegateProxy::createWeak(queue, delegate)),
         mKeepWarmPingTime(keepWarmPingTime)
       {
+        EventWriteOpServicesStunDiscoveryCreate(__func__, mID, keepWarmPingTime.count());
         ZS_LOG_DEBUG(log("created"))
       }
 
@@ -88,6 +90,7 @@ namespace openpeer
         if (!mSRVResult) {
           // attempt a DNS lookup on the name
           mSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "stun", "udp", 3478, 10, 0, lookupType);
+          EventWriteOpServicesStunDiscoveryLookupSrv(__func__, mID, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0, srvName, "stun", "udp", 3478, 10, 0, zsLib::to_underlying(lookupType));
         }
         step();
       }
@@ -100,6 +103,7 @@ namespace openpeer
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
         cancel();
+        EventWriteOpServicesStunDiscoveryDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -172,6 +176,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::cancel()
       {
+        EventWriteOpServicesStunDiscoveryCancel(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
         if (mSRVQuery) {
           mSRVQuery->cancel();
@@ -204,6 +210,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::onLookupCompleted(IDNSQueryPtr query)
       {
+        EventWriteOpServicesStunDiscoveryOnLookupComplete(__func__, mID, query->getID());
+
         AutoRecursiveLock lock(mLock);
         if (query != mSRVQuery) return;
 
@@ -223,7 +231,10 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::onTimer(TimerPtr timer)
       {
+        EventWriteOpServicesStunDiscoveryOnLookupComplete(__func__, mID, timer->getID());
+
         AutoRecursiveLock lock(mLock);
+
         if (timer != mKeepWarmPingTimer) {
           ZS_LOG_WARNING(Trace, log("notified about obsolete timer") + ZS_PARAM("timer", timer->getID()))
           return;
@@ -256,6 +267,7 @@ namespace openpeer
         if (requester != mSTUNRequester) return;
 
         try {
+          EventWriteOpServicesStunDiscoveryRequestSendPacket(__func__, mID, requester->getID(), destination.string(), ((bool)packet) ? packet->BytePtr() : NULL, ((bool)packet) ? packet->SizeInBytes() : 0);
           mDelegate->onSTUNDiscoverySendPacket(mThisWeak.lock(), mServer, packet);
         } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
           cancel(); return;
@@ -269,6 +281,8 @@ namespace openpeer
                                                       STUNPacketPtr response
                                                       )
       {
+        EventWriteOpServicesStunDiscoveryHandleResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? (&(response->mTransactionID[0])) : NULL, ((bool)response) ? sizeof(response->mTransactionID) : 0);
+
         AutoRecursiveLock lock(mLock);
 
         if (requester != mSTUNRequester) return true;               // if true, this must be for an old request so stop trying to handle it now...
@@ -277,12 +291,15 @@ namespace openpeer
 
           // this was reporting as a successful reply but it's actually errored
           if (STUNPacket::Class_ErrorResponse != response->mClass) {
+            EventWriteOpServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
             return false; // handled the packet but its not valid so retry the request
           }
 
           switch (response->mErrorCode) {
             case STUNPacket::ErrorCode_TryAlternate:      {
               mServer = response->mAlternateServer;
+
+              EventWriteOpServicesStunDiscoveryErrorUseAlternativeServer(__func__, mID, requester->getID(), mServer.string());
 
               // make sure it has a valid port
               if (mServer.isPortEmpty()) {
@@ -306,6 +323,7 @@ namespace openpeer
             case STUNPacket::ErrroCode_ServerError:
             default:                                      {
               // we should stop trying to contact this server
+              EventWriteOpServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
               mServer.clear();
               break;
             }
@@ -320,6 +338,8 @@ namespace openpeer
 
         IPAddress oldMappedAddress = mMapppedAddress;
         mMapppedAddress = response->mMappedAddress;
+
+        EventWriteOpServicesStunDiscoveryFoundMappedAddress(__func__, mID, requester->getID(), mMapppedAddress.string(), oldMappedAddress.string());
 
         if (oldMappedAddress != mMapppedAddress) {
           // we now have a reply, inform the delegate
@@ -347,6 +367,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::onSTUNRequesterTimedOut(ISTUNRequesterPtr requester)
       {
+        EventWriteOpServicesStunDiscoveryErrorTimeout(__func__, mID, requester->getID());
+
         AutoRecursiveLock lock(mLock);
         if (requester != mSTUNRequester) return;
 
@@ -447,6 +469,7 @@ namespace openpeer
                                                   request,
                                                   ISTUNDiscovery::usingRFC()
                                                   );
+          EventWriteOpServicesStunDiscoveryRequestCreate(__func__, mID, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0, mServer.string(), (&(request->mTransactionID[0])), sizeof(request->mTransactionID));
         }
 
         // nothing more to do... sit back, relax and enjoy the ride!

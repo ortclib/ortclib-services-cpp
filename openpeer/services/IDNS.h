@@ -64,6 +64,8 @@ namespace openpeer
         String mName;
         UINT   mTTL {};
         IPAddressList mIPAddresses;
+
+        void trace(const char *message);
       };
 
       ZS_DECLARE_TYPEDEF_PTR(AResult, AAAAResult)
@@ -90,6 +92,8 @@ namespace openpeer
         String mProtocol;
         UINT   mTTL {};
         SRVRecordList mRecords;
+
+        void trace(const char *message);
       };
 
       enum SRVLookupTypes {

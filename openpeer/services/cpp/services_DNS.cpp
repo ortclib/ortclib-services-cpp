@@ -33,6 +33,7 @@
 #include <openpeer/services/internal/services_DNS.h>
 #include <openpeer/services/internal/services_DNSMonitor.h>
 #include <openpeer/services/internal/services_Helper.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <cryptopp/osrng.h>
 
@@ -682,9 +683,14 @@ namespace openpeer
               }
               ZS_LOG_DEBUG(log("A record found") + ZS_PARAM("ip", ipAddress.string()))
             }
+            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "A", mName);
+            mA->trace(__func__);
           } else {
+            EventWriteOpServicesDnsLookupFailed(__func__, mID, "A", mName);
             ZS_LOG_DEBUG(log("A record lookup failed") + ZS_PARAM("name", mName))
           }
+
+          EventWriteOpServicesDnsLookupComplete(__func__, mID, "A", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -766,14 +772,18 @@ namespace openpeer
               }
               ZS_LOG_DEBUG(log("AAAA record found") + ZS_PARAM("ip", ipAddress.string()))
             }
+            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "AAAA", mName);
+            mAAAA->trace(__func__);
           } else {
+            EventWriteOpServicesDnsLookupFailed(__func__, mID, "AAAA", mName);
             ZS_LOG_DEBUG(log("AAAA record lookup failed") + ZS_PARAM("name", mName))
           }
 
+          EventWriteOpServicesDnsLookupComplete(__func__, mID, "AAAA", mName);
+
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
-          }
-          catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
 
@@ -889,9 +899,14 @@ namespace openpeer
                 ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
               }
             }
+            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "SRV", mName);
+            mSRV->trace(__func__);
           } else {
+            EventWriteOpServicesDnsLookupFailed(__func__, mID, "SRV", mName);
             ZS_LOG_DEBUG(log("SRV record lookup failed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
           }
+
+          EventWriteOpServicesDnsLookupComplete(__func__, mID, "SRV", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -935,7 +950,6 @@ namespace openpeer
                         IDNSDelegatePtr delegate
                         ) :
           MessageQueueAssociator(queue),
-          mID(zsLib::createPUID()),
           mDelegate(IDNSDelegateProxy::createWeak(queue, delegate))
         {
         }
@@ -945,8 +959,14 @@ namespace openpeer
         void init(const char *name)
         {
           AutoRecursiveLock lock(mLock);
+
+          mName = String(name);
+
           mALookup = IDNS::lookupA(mThisWeak.lock(), name);
           mAAAALookup = IDNS::lookupAAAA(mThisWeak.lock(), name);
+
+          EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "A or AAAA", name, ((bool)mALookup) ? mALookup->getID() : 0);
+          EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "A or AAAA", name, ((bool)mAAAALookup) ? mAAAALookup->getID() : 0);
         }
 
         //---------------------------------------------------------------------
@@ -960,6 +980,8 @@ namespace openpeer
           }
 
           if (!mDelegate) return;
+
+          EventWriteOpServicesDnsLookupComplete(__func__, mID, "A or AAAA", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -1080,10 +1102,12 @@ namespace openpeer
         #pragma mark
 
         mutable RecursiveLock mLock;
-        PUID mID;
+        AutoPUID mID;
 
         DNSAorAAAAQueryWeakPtr mThisWeak;
         IDNSDelegatePtr mDelegate;
+
+        String mName;
 
         IDNSQueryPtr mALookup;
         IDNSQueryPtr mAAAALookup;
@@ -1159,6 +1183,9 @@ namespace openpeer
           }
 
           mBackupLookup = backupQuery;
+
+          EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "SRV", mOriginalName, ((bool)mSRVLookup) ? mSRVLookup->getID() : 0);
+          EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "SRV", mOriginalName, ((bool)mBackupLookup) ? mBackupLookup->getID() : 0);
         }
 
       public:
@@ -1360,16 +1387,21 @@ namespace openpeer
               continue; // we don't need to go any futher
             }
 
+            const char *queryType = NULL;
             IDNSQueryPtr subQuery;
             if (IDNS::SRVLookupType_AutoLookupA == (mLookupType & IDNS::SRVLookupType_AutoLookupA)) {
               if (IDNS::SRVLookupType_AutoLookupAAAA == (mLookupType & IDNS::SRVLookupType_AutoLookupAAAA)) {
                 subQuery = IDNS::lookupAorAAAA(mThisWeak.lock(), record.mName);
+                queryType = "A or AAAA";
               } else {
                 subQuery = IDNS::lookupA(mThisWeak.lock(), record.mName);
+                queryType = "A";
               }
             } else {
               subQuery = IDNS::lookupAAAA(mThisWeak.lock(), (*iter).mName);
+              queryType = "AAAA";
             }
+            EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, queryType, record.mName, ((bool)subQuery) ? subQuery->getID() : 0);
             mResolvers.push_back(subQuery);
           }
 
@@ -1472,6 +1504,8 @@ namespace openpeer
           if (!mDelegate) return;
 
           mResolvers.clear();
+
+          EventWriteOpServicesDnsLookupComplete(__func__, mID, "SRV", mOriginalName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -1641,7 +1675,6 @@ namespace openpeer
                      IDNSDelegatePtr delegate
                      ) :
           MessageQueueAssociator(queue),
-          mID(zsLib::createPUID()),
           mDelegate(IDNSDelegateProxy::createWeak(delegate))
         {
         }
@@ -1686,6 +1719,7 @@ namespace openpeer
               ZS_LOG_WARNING(Detail, pThis->log("lookupSRV returned NULL"))
               return DNSListQueryPtr();
             }
+            EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "SRV", name, query->getID());
             pThis->mQueries.push_back(query);
           }
 
@@ -1714,6 +1748,7 @@ namespace openpeer
               ZS_LOG_WARNING(Detail, pThis->log("lookupA returned NULL"))
               return DNSListQueryPtr();
             }
+            EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "A", name, query->getID());
             pThis->mQueries.push_back(query);
           }
 
@@ -1742,6 +1777,7 @@ namespace openpeer
               ZS_LOG_WARNING(Detail, pThis->log("lookupAAAA returned NULL"))
               return DNSListQueryPtr();
             }
+            EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "AAAA", name, query->getID());
             pThis->mQueries.push_back(query);
           }
 
@@ -1770,6 +1806,7 @@ namespace openpeer
               ZS_LOG_WARNING(Detail, pThis->log("lookupAorAAAA returned NULL"))
               return DNSListQueryPtr();
             }
+            EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "A or AAAA", name, query->getID());
             pThis->mQueries.push_back(query);
           }
 
@@ -1926,7 +1963,7 @@ namespace openpeer
         #pragma mark
 
         mutable RecursiveLock mLock;
-        PUID mID;
+        AutoPUID mID;
         IDNSQueryWeakPtr mThisWeak;
         AResultPtr mA;
         AAAAResultPtr mAAAA;
@@ -1988,6 +2025,7 @@ namespace openpeer
           mDefaultWeight(defaultWeight)
         {
           ZS_LOG_TRACE(log("created"))
+          mLookupTypeDebugName = (mServiceName.hasData() ? "SRV" : (mIncludeIPv4 ? (mIncludeIPv6 ? "A or AAAA" : "A") : (mIncludeIPv6 ? "AAAA" : NULL)));
         }
 
       protected:
@@ -2029,6 +2067,8 @@ namespace openpeer
               IVectorView<EndpointPair ^> ^response = previousTask.get();
 
               bool isSRV = pThis->mServiceName.hasData();
+
+              EventWriteOpServicesDnsLookupSuccess(__func__, mID, pThis->mLookupTypeDebugName, pThis->mName);
 
               if (nullptr != response) {
                 AutoRecursiveLock lock(*pThis);
@@ -2189,6 +2229,7 @@ namespace openpeer
               }
             } catch (Platform::Exception ^ex) {
               if (pThis) {
+                EventWriteOpServicesDnsLookupFailed(__func__, mID, pThis->mLookupTypeDebugName, pThis->mName);
                 ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())) + pThis->toDebug())
                 pThis->cancel();
               }
@@ -2244,6 +2285,8 @@ namespace openpeer
 
           if (delegate) {
             ZS_LOG_TRACE(log("query completed"))
+
+            EventWriteOpServicesDnsLookupComplete(__func__, mID, mLookupTypeDebugName, mName);
 
             auto pThis = mThisWeak.lock();
             if (pThis) {
@@ -2340,14 +2383,15 @@ namespace openpeer
 
         IDNSDelegatePtr mDelegate;
 
+        const char *mLookupTypeDebugName {};
         String mName;
-        WORD mPort;
-        bool mIncludeIPv4;
-        bool mIncludeIPv6;
+        WORD mPort {};
+        bool mIncludeIPv4 {};
+        bool mIncludeIPv6 {};
         String mServiceName;
         String mProtocol;
-        WORD mDefaultPriority;
-        WORD mDefaultWeight;
+        WORD mDefaultPriority {};
+        WORD mDefaultWeight {};
 
         AResultPtr mA;
         AAAAResultPtr mAAAA;
@@ -2689,6 +2733,50 @@ namespace openpeer
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     #pragma mark
+    #pragma mark IDNS::AResult
+    #pragma mark
+
+    //-------------------------------------------------------------------------
+    void IDNS::AResult::trace(const char *message)
+    {
+      EventWriteOpServicesDnsResultListBegin(__func__, message, mName, mTTL, mIPAddresses.size());
+      for (auto iter = mIPAddresses.begin(); iter != mIPAddresses.end(); ++iter) {
+        EventWriteOpServicesDnsResultListEntry(__func__, message, mName, mTTL, (*iter).string());
+      }
+      EventWriteOpServicesDnsResultListEnd(__func__, message, mName);
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
+    #pragma mark IDNS::SRVResult
+    #pragma mark
+
+    //-------------------------------------------------------------------------
+    void IDNS::SRVResult::trace(const char *message)
+    {
+      EventWriteOpServicesDnsSrvResultListBegin(__func__, message, mName, mService, mProtocol, mTTL, mRecords.size());
+      for (auto iter = mRecords.begin(); iter != mRecords.end(); ++iter) {
+        auto &record = (*iter);
+        EventWriteOpServicesDnsSrvResultListEntryBegin(__func__, message, record.mName, record.mPriority, record.mWeight, record.mPort, ((bool)record.mAResult) ? record.mAResult->mIPAddresses.size() : 0, ((bool)record.mAAAAResult) ? record.mAAAAResult->mIPAddresses.size() : 0);
+        if (record.mAResult) {
+          record.mAResult->trace(message);
+        }
+        if (record.mAAAAResult) {
+          record.mAAAAResult->trace(message);
+        }
+        EventWriteOpServicesDnsSrvResultListEnd(__func__, message, record.mName);
+      }
+      EventWriteOpServicesDnsSrvResultListEnd(__func__, message, mName);
+    }
+
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
     #pragma mark IDNS
     #pragma mark
 
@@ -2698,7 +2786,9 @@ namespace openpeer
                                const char *name
                                )
     {
-      return internal::IDNSFactory::singleton().lookupA(delegate, name);
+      auto result = internal::IDNSFactory::singleton().lookupA(delegate, name);
+      EventWriteOpServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "A", name);
+      return result;
     }
 
     //-------------------------------------------------------------------------
@@ -2707,7 +2797,9 @@ namespace openpeer
                                   const char *name
                                   )
     {
-      return internal::IDNSFactory::singleton().lookupAAAA(delegate, name);
+      auto result = internal::IDNSFactory::singleton().lookupAAAA(delegate, name);
+      EventWriteOpServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "AAAA", name);
+      return result;
     }
 
     //-------------------------------------------------------------------------
@@ -2716,7 +2808,9 @@ namespace openpeer
                                      const char *name
                                      )
     {
-      return internal::IDNSFactory::singleton().lookupAorAAAA(delegate, name);
+      auto result = internal::IDNSFactory::singleton().lookupAorAAAA(delegate, name);
+      EventWriteOpServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "A or AAAA", name);
+      return result;
     }
 
     //-------------------------------------------------------------------------
@@ -2731,7 +2825,9 @@ namespace openpeer
                                  SRVLookupTypes lookupType
                                  )
     {
-      return internal::IDNSFactory::singleton().lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+      auto result = internal::IDNSFactory::singleton().lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
+      EventWriteOpServicesDnsSrvLookup(__func__, ((bool)result) ? result->getID() : 0, name, service, protocol, defaultPort, defaultPriority, defaultWeight, zsLib::to_underlying(lookupType));
+      return result;
     }
     
     //-------------------------------------------------------------------------

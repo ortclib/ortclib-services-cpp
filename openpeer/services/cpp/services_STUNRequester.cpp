@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_STUNRequester.h>
 #include <openpeer/services/internal/services_STUNRequesterManager.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/IBackOffTimerPattern.h>
 #include <openpeer/services/IHelper.h>
@@ -85,6 +86,8 @@ namespace openpeer
           mBackOffTimerPattern->setMultiplierForLastAttemptTimeout(2.0);
           mBackOffTimerPattern->addNextRetryAfterFailureDuration(Milliseconds(1));
         }
+
+        EventWriteOpServicesStunRequesterCreate(__func__, mID, serverIP.string(), zsLib::to_underlying(usingRFC), mBackOffTimerPattern->getID());
       }
 
       //-----------------------------------------------------------------------
@@ -94,6 +97,8 @@ namespace openpeer
         
         mThisWeak.reset();
         cancel();
+
+        EventWriteOpServicesStunRequesterDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -159,6 +164,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNRequester::cancel()
       {
+        EventWriteOpServicesStunRequesterCancel(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_TRACE(log("cancel called") + mSTUNRequest->toDebug())
@@ -179,6 +186,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNRequester::retryRequestNow()
       {
+        EventWriteOpServicesStunRequesterRetryNow(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_DEBUG(log("retry request now") + mSTUNRequest->toDebug())
@@ -233,6 +242,9 @@ namespace openpeer
                                            STUNPacketPtr packet
                                            )
       {
+        EventWriteOpServicesStunRequesterHandleStunPacket(__func__, mID, fromIPAddress.string());
+        packet->trace(__func__);
+
         ISTUNRequesterDelegatePtr delegate;
 
         // find out if this was truly handled
@@ -258,7 +270,7 @@ namespace openpeer
         if (delegate) {
           try {
             success = delegate->handleSTUNRequesterResponse(mThisWeak.lock(), fromIPAddress, packet);  // this is a success! yay! inform the delegate
-          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+          } catch(ISTUNRequesterDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
 
@@ -290,6 +302,8 @@ namespace openpeer
                                                      IBackOffTimer::States state
                                                      )
       {
+        EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(__func__, mID, timer->getID(), zsLib::to_underlying(state), mTotalTries);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_TRACE(log("backoff timer state changed") + ZS_PARAM("timer id", timer->getID()) + ZS_PARAM("state", IBackOffTimer::toString(state)) + ZS_PARAM("total tries", mTotalTries))
@@ -325,7 +339,7 @@ namespace openpeer
         if (mBackOffTimer->haveAllAttemptsFailed()) {
           try {
             mDelegate->onSTUNRequesterTimedOut(mThisWeak.lock());
-          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+          } catch(ISTUNRequesterDelegateProxy::Exceptions::DelegateGone &) {
             ZS_LOG_WARNING(Debug, log("delegate gone"))
           }
 
@@ -341,10 +355,12 @@ namespace openpeer
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
 
+          EventWriteOpServicesStunRequesterSendPacket(__func__, mID, packet->BytePtr(), packet->SizeInBytes());
+
           try {
             ++mTotalTries;
             mDelegate->onSTUNRequesterSendPacket(mThisWeak.lock(), mServerIP, packet);
-          } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
+          } catch(ISTUNRequesterDelegateProxy::Exceptions::DelegateGone &) {
             ZS_LOG_WARNING(Trace, log("delegate gone thus cancelling requester"))
             cancel();
             return;

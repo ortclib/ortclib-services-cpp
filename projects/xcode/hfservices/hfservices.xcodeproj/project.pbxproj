@@ -84,6 +84,7 @@
 		003BEECB17A747270002EB47 /* ITransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ITransportStream.h; sourceTree = "<group>"; };
 		003BEECC17A7473B0002EB47 /* services_TransportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_TransportStream.h; sourceTree = "<group>"; };
 		003BEECD17A747510002EB47 /* services_TransportStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = services_TransportStream.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		0049A6551C6CDC3200A7AACB /* services_Tracing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Tracing.h; sourceTree = "<group>"; };
 		004C4B0618CE5770009186EA /* IMessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IMessageQueueManager.h; sourceTree = "<group>"; };
 		004C4B0818CE5B82009186EA /* services_MessageQueueManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_MessageQueueManager.cpp; sourceTree = "<group>"; };
 		004C4B0A18CE5B94009186EA /* services_MessageQueueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_MessageQueueManager.h; sourceTree = "<group>"; };
@@ -348,6 +349,7 @@
 				0095D94A16CA83EA005F53D3 /* services_STUNRequester.h */,
 				0095D94B16CA83EA005F53D3 /* services_STUNRequesterManager.h */,
 				00ABD44A17A8424900178078 /* services_TCPMessaging.h */,
+				0049A6551C6CDC3200A7AACB /* services_Tracing.h */,
 				003BEECC17A7473B0002EB47 /* services_TransportStream.h */,
 				0095D94C16CA83EA005F53D3 /* services_TURNSocket.h */,
 				008C0EC018629F4B0034958B /* services_wire.h */,
