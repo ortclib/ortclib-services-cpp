@@ -39,7 +39,7 @@
 #else
 
 // Comment the following line to test inline versions of the same macros to test compilation
-#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+//#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
@@ -132,6 +132,11 @@
 #define EventWriteOpServicesDnsLookupSuccess(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 #define EventWriteOpServicesDnsLookupFailed(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 
+#define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xPtr_PostData, xsize_t_PostDataLengthInBytes, xStr_PostMimeType, xlong_long_Timeout)
+#define EventWriteOpServicesHttpQueryDestroy(xStr_Method, xPUID)
+#define EventWriteOpServicesHttpQueryCancel(xStr_Method, xPUID)
+#define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xPtr_ResultData, xsize_t_ResultReadSizeInBytes, xsize_t_BytesToRead)
+
 #else
 
 // duplicate testing compilation methods used to verify compilation when macros get defined
@@ -219,12 +224,17 @@ inline void EventWriteOpServicesDnsSrvResultListEnd(const char *xStr_Method, con
 inline void EventWriteOpServicesDnsLookup(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 inline void EventWriteOpServicesDnsSrvLookup(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_Name, const char *xStr_Service, const char *xStr_Protocol, WORD xWORD_DefaultPort, WORD xWORD_DefaultPriority, WORD xWORD_DefaultWeight, unsigned int xUInt_LookupType) {}
 
-inline void  EventWriteOpServicesDnsLookupResolverSubQuery(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name, PUID xPUID_RelatedQueryObjectID) {}
+inline void EventWriteOpServicesDnsLookupResolverSubQuery(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name, PUID xPUID_RelatedQueryObjectID) {}
 
 inline void EventWriteOpServicesDnsLookupComplete(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 
 inline void EventWriteOpServicesDnsLookupSuccess(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 inline void EventWriteOpServicesDnsLookupFailed(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
+
+inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, const void *xPtr_PostData, size_t xsize_t_PostDataLengthInBytes, const char *xStr_PostMimeType, long long xlong_long_Timeout) {}
+inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID xPUID) {}
+inline void EventWriteOpServicesHttpQueryCancel(const char *xStr_Method, PUID xPUID) {}
+inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, const void *xPtr_ResultData, size_t xsize_t_ResultReadSizeInBytes, size_t xsize_t_BytesToRead) {}
 
 }
 }

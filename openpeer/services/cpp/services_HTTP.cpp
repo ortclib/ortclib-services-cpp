@@ -32,6 +32,7 @@
 #include <openpeer/services/IHTTP.h>
 #include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/internal/services_HTTP_WinRT.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #ifndef WINRT
 
@@ -695,6 +696,8 @@ namespace openpeer
           mPostData.CleanNew(postDataLengthInBytes);
           memcpy(mPostData.BytePtr(), postData, postDataLengthInBytes);
         }
+
+        EventWriteOpServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postData, postDataLengthInBytes, postDataMimeType, timeout.count());
       }
 
       //-----------------------------------------------------------------------
@@ -708,6 +711,8 @@ namespace openpeer
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
         cancel();
+
+        EventWriteOpServicesHttpQueryDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -721,6 +726,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::cancel()
       {
+        EventWriteOpServicesHttpQueryCancel(__func__, mID);
+
         HTTPPtr outer;
         HTTPQueryPtr pThis;
 
@@ -805,7 +812,9 @@ namespace openpeer
                                          )
       {
         AutoRecursiveLock lock(*this);
-        return mHeader.Get(outResultData, bytesToRead);
+        auto result = mHeader.Get(outResultData, bytesToRead);
+        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, bytesToRead);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -822,7 +831,11 @@ namespace openpeer
         mHeader.Get(data.BytePtr(), static_cast<size_t>(available));
 
         outHeader = (const char *)data.BytePtr();
-        return strlen(outHeader);
+        auto result = strlen(outHeader);
+
+        EventWriteOpServicesHttpQueryRead(__func__, mID, data.BytePtr(), result, static_cast<size_t>(available));
+
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -839,7 +852,9 @@ namespace openpeer
                                        )
       {
         AutoRecursiveLock lock(*this);
-        return mBody.Get(outResultData, bytesToRead);
+        auto result = mBody.Get(outResultData, bytesToRead);
+        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, bytesToRead);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -856,7 +871,9 @@ namespace openpeer
         mBody.Get(data.BytePtr(), static_cast<size_t>(available));
 
         outResultData = (const char *)data.BytePtr();
-        return strlen(outResultData);
+        auto result = strlen(outResultData);
+        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, static_cast<size_t>(available));
+        return result;
       }
 
       //-----------------------------------------------------------------------

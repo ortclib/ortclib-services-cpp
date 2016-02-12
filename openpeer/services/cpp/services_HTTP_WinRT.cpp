@@ -32,6 +32,7 @@
 #include <openpeer/services/IHTTP.h>
 #include <openpeer/services/internal/services_HTTP.h>
 #include <openpeer/services/internal/services_HTTP_WinRT.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #ifdef WINRT
 
