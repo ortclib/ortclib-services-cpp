@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2014, Hookflash Inc.
+ Copyright (c) 2016, Hookflash Inc.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
-
-#define EventWriteOpServices(xStr_Method)
 
 #define EventWriteOpServicesStunPacket(xStr_Method, xStr_Message, xStr_Log, xPUID_ObjectID, xUInt_Class, xUInt_Method, xULONG_TotalRetries, xWORD_ErrorCode, xStr_Reason, xDWORD_MagicCookies, xPtr_TransactionIDBuffer, xsize_t_TransactionBufferLengthInBytes, xsize_t_TotalUnknownAttributes, xWORD_FirstUnknownAttribute, xStr_MappedAddressIP, xStr_AlternateServerIP, xStr_Username, xStr_Password, xStr_Realm, xStr_Nonce, xStr_Software, xUInt_CredentialMechanism, xsize_t_MessageIntegrityMessageLengthInBytes, xPtr_MessageIntegrityBuffer, xsize_t_MessageIntegrityBufferSizeInBytes, xBool_FingerprintIncluded, xWORD_ChannelNumber, xBool_LifetimeIncluded, xDWORD_mLifetime, xsize_t_PeerAddressListSize, xStr_FirstPeerAddress, xStr_RelayAddressIP, xsize_t_DataLengthInBytes, xBool_EvenPortIncluded, xBool_EvenPort, xBYTE_RequestTransport, xBool_DontFragementIncluded, xBool_ReservationTokenIncluded, xPtr_ReservationToken, xsize_t_ReservationTokenSizeInBytes, xBool_MobilityTicketIncluded, xPtr_MobilityTicketBuffer, xsize_t_MobilityTicketBufferSizeInBytes, xBool_PriorityIncluded, xDWORD_Priority, xBool_UseCandidateIncluded, xBool_IceControlledIncluded, xQWORD_IceControlled, xBool_IceControllingIncluded, xQWORD_IceControlling, xQWORD_NextSequenceNumber, xBool_MinimumRTTIncluded, xDWORD_MinimumRTT, xStr_ConnectionInfo, xQWORD_GSNR, xQWORD_mGSNFR, xBool_ReliabilityFlagsIncluded, xBool_ReliabilityFlags, xPtr_AckVectorBuffer, xsize_t_ACKVectorLengthInBytes, xsize_t_mLocalCongestionControl, xsize_t_mRemoteCongestionControl)
 
