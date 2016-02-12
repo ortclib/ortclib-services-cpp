@@ -2068,7 +2068,7 @@ namespace openpeer
 
               bool isSRV = pThis->mServiceName.hasData();
 
-              EventWriteOpServicesDnsLookupSuccess(__func__, mID, pThis->mLookupTypeDebugName, pThis->mName);
+              EventWriteOpServicesDnsLookupSuccess(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
 
               if (nullptr != response) {
                 AutoRecursiveLock lock(*pThis);
@@ -2229,7 +2229,7 @@ namespace openpeer
               }
             } catch (Platform::Exception ^ex) {
               if (pThis) {
-                EventWriteOpServicesDnsLookupFailed(__func__, mID, pThis->mLookupTypeDebugName, pThis->mName);
+                EventWriteOpServicesDnsLookupFailed(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
                 ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())) + pThis->toDebug())
                 pThis->cancel();
               }
