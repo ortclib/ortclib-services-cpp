@@ -39,7 +39,7 @@
 #else
 
 // Comment the following line to test inline versions of the same macros to test compilation
-//#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
@@ -113,6 +113,10 @@
 #define EventWriteOpServicesSettingApplyDefaults(xStr_Method, xPUID)
 #define EventWriteOpServicesSettingVerifyExists(xStr_Method, xPUID, xStr_Key, xBool_Exists)
 
+#define EventWriteOpServicesCacheFetch(xStr_Method, xPUID, xStr_CookieNamePath, xStr_Result) {}
+#define EventWriteOpServicesCacheStore(xStr_Method, xPUID, xStr_CookieNamePath, xStr_Expires, xStr_Value) {}
+#define EventWriteOpServicesCacheClear(xStr_Method, xPUID, xStr_CookieNamePath) {}
+
 #define EventWriteOpServicesDnsResultListBegin(xStr_Method, xStr_Message, xStr_Name, xUInt_TTL, xsize_t_TotalIPAddresses)
 #define EventWriteOpServicesDnsResultListEntry(xStr_Method, xStr_Message, xStr_Name, xUInt_TTL, xStr_IPAddress)
 #define EventWriteOpServicesDnsResultListEnd(xStr_Method, xStr_Message, xStr_Name)
@@ -136,6 +140,8 @@
 #define EventWriteOpServicesHttpQueryDestroy(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryCancel(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xPtr_ResultData, xsize_t_ResultReadSizeInBytes, xsize_t_BytesToRead)
+
+#define EventWriteOpServicesDebugLogger(xStr_Subsystem, xUInt_Severity, xUInt_Level, xStr_Function, xStr_FilePath, xULONG_LineNumber, xStr_Output) {}
 
 #else
 
@@ -212,6 +218,10 @@ inline void EventWriteOpServicesSettingApply(const char *xStr_Method, PUID xPUID
 inline void EventWriteOpServicesSettingApplyDefaults(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesSettingVerifyExists(const char *xStr_Method, PUID xPUID, const char *xStr_Key, bool xBool_Exists) {}
 
+inline void EventWriteOpServicesCacheFetch(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath, const char *xStr_Result) {}
+inline void EventWriteOpServicesCacheStore(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath, const char *xStr_Expires, const char *xStr_Value) {}
+inline void EventWriteOpServicesCacheClear(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath) {}
+
 inline void EventWriteOpServicesDnsResultListBegin(const char *xStr_Method, const char *xStr_Message, const char *xStr_Name, unsigned int xUInt_TTL, size_t xsize_t_TotalIPAddresses) {}
 inline void EventWriteOpServicesDnsResultListEntry(const char *xStr_Method, const char *xStr_Message, const char *xStr_Name, unsigned int xUInt_TTL, const char *xStr_IPAddress) {}
 inline void EventWriteOpServicesDnsResultListEnd(const char *xStr_Method, const char *xStr_Message, const char *xStr_Name) {}
@@ -235,6 +245,8 @@ inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xP
 inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryCancel(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, const void *xPtr_ResultData, size_t xsize_t_ResultReadSizeInBytes, size_t xsize_t_BytesToRead) {}
+
+inline void EventWriteOpServicesDebugLogger(const char *xStr_Subsystem, unsigned int xUInt_Severity, unsigned int xUInt_Level, const char *xStr_Function, const char *xStr_FilePath, ULONG xULONG_LineNumber, const char *xStr_Output) {}
 
 }
 }

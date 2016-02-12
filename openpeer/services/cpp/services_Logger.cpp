@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_Logger.h>
+#include <openpeer/services/internal/services_Tracing.h>
 #include <openpeer/services/IBackgrounding.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IHelper.h>
@@ -1008,10 +1009,11 @@ namespace openpeer
           qDebug() << output.c_str();
 #endif //ndef NDEBUG
 #endif //__QNX__
-#ifdef _WIN32
           String output = toWindowsString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
+#ifdef _WIN32
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
+          EventWriteOpServicesDebugLogger(inSubsystem.getName(), zsLib::to_underlying(inSeverity), zsLib::to_underlying(inLevel), inFunction, inFilePath, inLineNumber, output);
         }
 
       private:

@@ -30,6 +30,7 @@
  */
 
 #include <openpeer/services/internal/services_Cache.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/IHelper.h>
 
@@ -123,10 +124,13 @@ namespace openpeer
 
         if (!delegate) {
           ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath))
+          EventWriteOpServicesCacheFetch(__func__, mID, cookieNamePath, NULL);
           return String();
         }
 
-        return delegate->fetch(cookieNamePath);
+        auto result = delegate->fetch(cookieNamePath);
+        EventWriteOpServicesCacheFetch(__func__, mID, cookieNamePath, result);
+        return result;
       }
 
       //-----------------------------------------------------------------------
@@ -136,6 +140,8 @@ namespace openpeer
                         const char *str
                         )
       {
+        EventWriteOpServicesCacheStore(__func__, mID, cookieNamePath, string(expires), str);
+
         if (!cookieNamePath) return;
         if (!str) {
           clear(cookieNamePath);
@@ -164,6 +170,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void Cache::clear(const char *cookieNamePath)
       {
+        EventWriteOpServicesCacheClear(__func__, mID, cookieNamePath);
+
         if (!cookieNamePath) return;
 
         ICacheDelegatePtr delegate;
