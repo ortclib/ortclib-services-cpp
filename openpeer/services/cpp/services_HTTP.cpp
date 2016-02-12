@@ -832,9 +832,7 @@ namespace openpeer
 
         outHeader = (const char *)data.BytePtr();
         auto result = strlen(outHeader);
-
         EventWriteOpServicesHttpQueryRead(__func__, mID, data.BytePtr(), result, static_cast<size_t>(available));
-
         return result;
       }
 
