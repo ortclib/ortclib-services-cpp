@@ -72,6 +72,7 @@ namespace openpeer
     using zsLib::DOUBLE;
     using zsLib::DWORD;
     using zsLib::QWORD;
+    using zsLib::PTRNUMBER;
     using zsLib::String;
     using zsLib::Time;
     using zsLib::Hours;

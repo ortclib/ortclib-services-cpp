@@ -69,6 +69,7 @@ namespace openpeer
       using zsLib::SingletonManager;
       using zsLib::ISingletonManagerDelegate;
       using zsLib::ULONGEST;
+      using zsLib::PTRNUMBER;
 
       using zsLib::XML::WalkSink;
 

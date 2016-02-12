@@ -281,7 +281,7 @@ namespace openpeer
                                                       STUNPacketPtr response
                                                       )
       {
-        EventWriteOpServicesStunDiscoveryHandleResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? (&(response->mTransactionID[0])) : NULL, ((bool)response) ? sizeof(response->mTransactionID) : 0);
+        EventWriteOpServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? (&(response->mTransactionID[0])) : NULL, ((bool)response) ? sizeof(response->mTransactionID) : 0);
 
         AutoRecursiveLock lock(mLock);
 

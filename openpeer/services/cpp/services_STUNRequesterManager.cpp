@@ -165,7 +165,7 @@ namespace openpeer
           return ISTUNRequesterPtr();
         }
 
-        EventWriteOpServicesStunRequesterManagerHandleStunPacket(__func__, mID, fromIPAddress.string());
+        EventWriteOpServicesStunRequesterManagerReceivedStunPacket(__func__, mID, fromIPAddress.string());
         stun->trace(__func__);
 
         QWORDPair key = getKey(stun);

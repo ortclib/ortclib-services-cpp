@@ -32,6 +32,7 @@
 #include <openpeer/services/internal/services_TURNSocket.h>
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/internal/services_wire.h>
+#include <openpeer/services/internal/services_Tracing.h>
 
 #include <openpeer/services/ISettings.h>
 #include <openpeer/services/STUNPacket.h>
@@ -142,13 +143,12 @@ namespace openpeer
                              WORD limitChannelRoRangeEnd
                              ) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
         mCurrentState(TURNSocketState_Pending),
         mLastError(TURNSocketError_None),
         mDelegate(ITURNSocketDelegateProxy::createWeak(queue, delegate)),
-        mServerName(turnServer ? turnServer : ""),
-        mUsername(turnServerUsername ? turnServerUsername : ""),
-        mPassword(turnServerPassword ? turnServerPassword : ""),
+        mServerName(turnServer),
+        mUsername(turnServerUsername),
+        mPassword(turnServerPassword),
         mLookupType(lookupType),
         mUseChannelBinding(useChannelBinding),
         mLimitChannelToRangeStart(limitChannelToRangeStart),
@@ -160,6 +160,7 @@ namespace openpeer
         mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
         mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
+        EventWriteOpServicesTurnSocketCreate(__func__, mID, mServerName, mUsername, mPassword, zsLib::to_underlying(lookupType), mUseChannelBinding, mLimitChannelToRangeStart, mLimitChannelToRangeEnd);
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_DETAIL(log("created"))
       }
@@ -178,7 +179,6 @@ namespace openpeer
                              WORD limitChannelRoRangeEnd
                              ) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
         mCurrentState(TURNSocketState_Pending),
         mLastError(TURNSocketError_None),
         mDelegate(ITURNSocketDelegateProxy::createWeak(queue, delegate)),
@@ -196,6 +196,9 @@ namespace openpeer
         mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
         mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
       {
+        EventWriteOpServicesTurnSocketCreate(__func__, mID, mServerName, mUsername, mPassword, 0, mUseChannelBinding, mLimitChannelToRangeStart, mLimitChannelToRangeEnd);
+        if (srvTURNUDP) srvTURNUDP->trace(__func__);
+        if (srvTURNTCP) srvTURNTCP->trace(__func__);
         ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
         ZS_LOG_BASIC(log("created"))
       }
@@ -228,6 +231,8 @@ namespace openpeer
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
         cancel();
+
+        EventWriteOpServicesTurnSocketDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -342,6 +347,7 @@ namespace openpeer
                                   bool bindChannelIfPossible
                                   )
       {
+        EventWriteOpServicesTurnSocketSendPacket(__func__, mID, destination.string(), buffer, bufferLengthInBytes, bindChannelIfPossible);
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
@@ -406,6 +412,7 @@ namespace openpeer
 
                 // copy the entire buffer into the packet
                 memcpy(&((packet->BytePtr())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
+                EventWriteOpServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->BytePtr(), packet->SizeInBytes(), info->mChannelNumber);
                 OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
@@ -428,6 +435,8 @@ namespace openpeer
                 mChannelIPMap[destination] = info;
                 mChannelNumberMap[freeChannelNumber] = info;
 
+                EventWriteOpServicesTurnSocketInstallChannelOnWake(__func__, mID, destination.string(), freeChannelNumber);
+
                 IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
               }
             }
@@ -440,6 +449,9 @@ namespace openpeer
           sendData->mDataLength = bufferLengthInBytes;
 
           packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
+
+          EventWriteOpServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->BytePtr(), packet->SizeInBytes());
+          sendData->trace(__func__);
 
           // scope: we need to check if there is a permission set to be able to even contact this address
           {
@@ -454,6 +466,8 @@ namespace openpeer
               permission->mPendingData.push_back(packet);
 
               mPermissions[destination] = permission;
+
+              EventWriteOpServicesTurnSocketInstallPermissionOnWake(__func__, mID, destination.string());
 
               // since the permission isn't installed yet we can't send the data just yet... best kick start that permission now...
               (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
@@ -533,6 +547,8 @@ namespace openpeer
 
         // this is definately a TURN packet - handle the data within the packet...
 
+        EventWriteOpServicesTurnSocketReceivedStunPacketData(__func__, mID, turnPacket->mPeerAddressList.front().string(), turnPacket->mData, turnPacket->mDataLength);
+
         try {
           // send the packet to the delegate which is interested in the data received
           delegate->handleTURNSocketReceivedPacket(mThisWeak.lock(), turnPacket->mPeerAddressList.front(), turnPacket->mData, turnPacket->mDataLength);
@@ -598,6 +614,8 @@ namespace openpeer
           ChannelInfoPtr info = (*found).second;
           peerAddress = info->mPeerAddress;
         }
+
+        EventWriteOpServicesTurnSocketReceivedChannelData(__func__, mID, peerAddress.string(), realBuffer, length);
 
         try {
           // send the packet to the delegate which is interested in the data received
@@ -686,6 +704,8 @@ namespace openpeer
           }
         }
 
+        EventWriteOpServicesTurnSocketRequesterSendStunPacket(__func__, mID, requester->getID(), destination.string(), packet->BytePtr(), packet->SizeInBytes());
+
         sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }
 
@@ -696,6 +716,9 @@ namespace openpeer
                                                    STUNPacketPtr response
                                                    )
       {
+        EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(__func__, mID, requester->getID(), fromIPAddress.string());
+        response->trace(__func__);
+
         // scope: we can't be in the middle of a lock while we call the handlePermissionRequester method
         {
           AutoRecursiveLock lock(mLock);
@@ -719,6 +742,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onSTUNRequesterTimedOut(ISTUNRequesterPtr requester)
       {
+        EventWriteOpServicesTurnSocketRequesterTimedOut(__func__, mID, requester->getID());
+
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
           ZS_LOG_WARNING(Detail, log("notified of STUN request timeout after shutdown"))
@@ -821,6 +846,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onReadReady(SocketPtr socket)
       {
+        EventWriteOpServicesTurnSocketReadReady(__func__, mID, socket->getSocket());
+
         try
         {
           ITURNSocketDelegatePtr delegate;
@@ -1051,6 +1078,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onWriteReady(SocketPtr socket)
       {
+        EventWriteOpServicesTurnSocketWriteReady(__func__, mID, socket->getSocket());
+
         AutoRecursiveLock lock(mLock);
 
         if (isShutdown()) {
@@ -1089,6 +1118,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onException(SocketPtr socket)
       {
+        EventWriteOpServicesTurnSocketException(__func__, mID, socket->getSocket());
+
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
           ZS_LOG_WARNING(Detail, log("server notified exception while shutdown"))
@@ -1148,6 +1179,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onTimer(TimerPtr timer)
       {
+        EventWriteOpServicesTurnSocketTimerEventFired(__func__, mID, timer->getID());
+
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
           ZS_LOG_WARNING(Detail, log("notified timer event after shutdown"))
@@ -1222,6 +1255,8 @@ namespace openpeer
             newRequest->mChannelNumber = info->mChannelNumber;
             newRequest->mPeerAddressList.push_back(info->mPeerAddress);
             info->mChannelBindRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+
+            EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)info->mChannelBindRequester) ? info->mChannelBindRequester->getID() : 0, "channel bind");
             return;
           }
         }
@@ -1241,6 +1276,8 @@ namespace openpeer
                                                         IBackgroundingNotifierPtr notifier
                                                         )
       {
+        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_DEBUG(log("going to background thus will attempt to refresh TURN socket now to ensure we have the maximum lifetime before the TURN server deletes this client's bindings"))
@@ -1259,6 +1296,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
+        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_DEBUG(log("going to the background immediately thus cancel any pending refresh requester"))
@@ -1272,6 +1311,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
+        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+
         AutoRecursiveLock lock(mLock);
 
         ZS_LOG_DEBUG("returning from background")
@@ -1306,6 +1347,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription)
       {
+        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+
         ZS_LOG_DEBUG("application will quit")
       }
 
@@ -1425,7 +1468,7 @@ namespace openpeer
           if (!found) {
             ZS_LOG_DEBUG(log("no more servers found") + ZS_PARAM("server", (srv ? srv->mName : mServerName)))
 
-            // we failed to discover any UDP server that works
+            // we failed to discover any server that works
             return IPAddress();
           }
 
@@ -1480,6 +1523,8 @@ namespace openpeer
             exhausted = true;
             continue;
           }
+
+          EventWriteOpServicesTurnSocketUseNextServer(__func__, mID, result.string(), toggle);
 
           ServerPtr server = Server::create();
           server->mIsUDP = toggle;
@@ -1606,6 +1651,8 @@ namespace openpeer
             allocRequest->mDontFragmentIncluded = true;
             allocRequest->mMobilityTicketIncluded = true;
             server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, allocRequest, STUNPacket::RFC_5766_TURN);
+
+            EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate");
           }
         }
 
@@ -1650,6 +1697,8 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::cancel()
       {
+        EventWriteOpServicesTurnSocketCancel(__func__, mID);
+
         AutoRecursiveLock lock(mLock);    // just in case
 
         if (isShutdown()) {
@@ -1752,6 +1801,8 @@ namespace openpeer
               }
               mDeallocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, deallocRequest, STUNPacket::RFC_5766_TURN);
 
+              EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mDeallocateRequester) ? mDeallocateRequester->getID() : 0, "dealloc");
+
               if (!mDeallocTimer) {
                 mDeallocTimer = Timer::create(mGracefulShutdownReference, Seconds(1));
               }
@@ -1797,6 +1848,8 @@ namespace openpeer
 
         ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
         mCurrentState = newState;
+
+        EventWriteOpServicesTurnSocketStateEventFired(__func__, mID, zsLib::to_underlying(mCurrentState));
 
         if (!mDelegate) return;
 
@@ -1880,6 +1933,7 @@ namespace openpeer
               newRequest->mDontFragmentIncluded = request->mDontFragmentIncluded;
               newRequest->mMobilityTicketIncluded = false;
               server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+              EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate mobility ticket forbidden");
               return true;
             }
             case STUNPacket::ErrorCode_UnknownAttribute:              {
@@ -1891,6 +1945,7 @@ namespace openpeer
                 newRequest->mDontFragmentIncluded = false;
                 newRequest->mMobilityTicketIncluded = request->mMobilityTicketIncluded;
                 server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+                EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate unknown attribute");
                 return true;
               }
               break;
@@ -2222,6 +2277,8 @@ namespace openpeer
         permissionRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
         mPermissionRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, permissionRequest, STUNPacket::RFC_5766_TURN);
 
+        EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mPermissionRequester) ? mPermissionRequester->getID() : 0, "permission");
+
         // scope: remember which ones will become marked as having permission based on this request completing...
         {
           for (PermissionMap::iterator iter = mPermissions.begin(); iter != mPermissions.end(); ++iter) {
@@ -2268,6 +2325,7 @@ namespace openpeer
           newRequest->mMobilityTicketLength = mMobilityTicket->SizeInBytes();
         }
         mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
+        EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mRefreshRequester) ? mRefreshRequester->getID() : 0, "refresh");
       }
       
       //-----------------------------------------------------------------------
@@ -2587,7 +2645,9 @@ namespace openpeer
         }
 
         if (!newRequest) return ISTUNRequesterPtr();
-        return ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getBackOffTimerPattern());
+        auto result = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getBackOffTimerPattern());
+        EventWriteOpServicesTurnSocketRequesterCreateReauth(__func__, mID, ((bool)result) ? result->getID() : 0, ((bool)requester) ? requester->getID() : 0);
+        return result;
       }
 
       //-----------------------------------------------------------------------

@@ -448,7 +448,7 @@ namespace openpeer
         mutable RecursiveLock mLock;
         TURNSocketWeakPtr mThisWeak;
         TURNSocketPtr mGracefulShutdownReference;
-        PUID mID;
+        AutoPUID mID;
 
         TURNSocketStates mCurrentState;
         TURNSocketErrors mLastError;

@@ -242,7 +242,7 @@ namespace openpeer
                                            STUNPacketPtr packet
                                            )
       {
-        EventWriteOpServicesStunRequesterHandleStunPacket(__func__, mID, fromIPAddress.string());
+        EventWriteOpServicesStunRequesterReceivedStunPacket(__func__, mID, fromIPAddress.string());
         packet->trace(__func__);
 
         ISTUNRequesterDelegatePtr delegate;
