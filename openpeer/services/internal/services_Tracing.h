@@ -97,8 +97,8 @@
 #define EventWriteOpServicesTurnSocketReadReady(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
 #define EventWriteOpServicesTurnSocketWriteReady(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
 #define EventWriteOpServicesTurnSocketException(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
-#define EventWriteOpServicesTurnSocketTimerEventFired(xStr_Method, xPUID, xPUID_TimerID) {}
-#define EventWriteOpServicesTurnSocketBackgroundingEventFired(xStr_Method, xPUID) {}
+#define EventWriteOpServicesTurnSocketInternalTimerEventFired(xStr_Method, xPUID, xPUID_TimerID) {}
+#define EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(xStr_Method, xPUID) {}
 #define EventWriteOpServicesTurnSocketUseNextServer(xStr_Method, xPUID, xStr_ServerIP, xBool_IsUDP) {}
 
 #define EventWriteOpServicesBackOffTimerPatternCreate(xStr_Method, xPUID, xsize_t_MaxAttempts, xsize_t_DurationVectorSize, xlong_long_FrontDurationVectorInMicroseconds, xDouble_AttemptTimeoutMultiplier, xlong_long_MaxAttemptTimeoutInMicroseconds, xsize_t_RetryVector, xlong_long_FrontRetryVectorInMicroseconds, xDouble_RetryMultiplier, xlong_long_MaxRetryInMicroseconds)
@@ -225,8 +225,8 @@ inline void EventWriteOpServicesTurnSocketRequesterCreateReauth(const char *xStr
 inline void EventWriteOpServicesTurnSocketReadReady(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
 inline void EventWriteOpServicesTurnSocketWriteReady(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
 inline void EventWriteOpServicesTurnSocketException(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
-inline void EventWriteOpServicesTurnSocketTimerEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID) {}
-inline void EventWriteOpServicesTurnSocketBackgroundingEventFired(const char *xStr_Method, PUID xPUID) {}
+inline void EventWriteOpServicesTurnSocketInternalTimerEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID) {}
+inline void EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesTurnSocketUseNextServer(const char *xStr_Method, PUID xPUID, const char *xStr_ServerIP, bool xBool_IsUDP) {}
 
 inline void EventWriteOpServicesBackOffTimerPatternCreate(const char *xStr_Method, PUID xPUID, size_t xsize_t_MaxAttempts, size_t xsize_t_DurationVectorSize, long long xlong_long_FrontDurationVectorInMicroseconds, double xDouble_AttemptTimeoutMultiplier, long long xlong_long_MaxAttemptTimeoutInMicroseconds, size_t xsize_t_RetryVector, long long xlong_long_FrontRetryVectorInMicroseconds, double xDouble_RetryMultiplier, long long xlong_long_MaxRetryInMicroseconds) {}

@@ -1179,7 +1179,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onTimer(TimerPtr timer)
       {
-        EventWriteOpServicesTurnSocketTimerEventFired(__func__, mID, timer->getID());
+        EventWriteOpServicesTurnSocketInternalTimerEventFired(__func__, mID, timer->getID());
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
@@ -1276,7 +1276,7 @@ namespace openpeer
                                                         IBackgroundingNotifierPtr notifier
                                                         )
       {
-        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1296,7 +1296,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1311,7 +1311,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1347,7 +1347,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketBackgroundingEventFired(__func__, mID);
+        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
 
         ZS_LOG_DEBUG("application will quit")
       }
