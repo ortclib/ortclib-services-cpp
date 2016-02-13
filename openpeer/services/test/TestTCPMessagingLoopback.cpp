@@ -415,9 +415,9 @@ void doTestTCPMessagingLoopback()
     ULONG step = 0;
 
     IPAddress ip1("127.0.0.1");
-    ip1.setPort(IHelper::random(10000, 29999));
+    ip1.setPort(static_cast<zsLib::WORD>(IHelper::random(10000, 29999)));
     IPAddress ip2("127.0.0.1");
-    ip2.setPort(IHelper::random(30000, 49999));
+    ip2.setPort(static_cast<zsLib::WORD>(IHelper::random(30000, 49999)));
 
     //    IPAddress ip2("127.0.0.1:6543");
 
