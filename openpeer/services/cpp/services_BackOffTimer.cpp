@@ -428,7 +428,7 @@ namespace openpeer
         mCurrentState = state;
         mLastStateChange = zsLib::now();
 
-        EventWriteOpServicesBackOffTimerStateChangedEventFired(__func__, mID, zsLib::to_underlying(state));
+        EventWriteOpServicesBackOffTimerStateChangedEventFired(__func__, mID, toString(state));
 
         auto pThis = mThisWeak.lock();
         if (pThis) {

@@ -1849,7 +1849,7 @@ namespace openpeer
         ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
         mCurrentState = newState;
 
-        EventWriteOpServicesTurnSocketStateEventFired(__func__, mID, zsLib::to_underlying(mCurrentState));
+        EventWriteOpServicesTurnSocketStateEventFired(__func__, mID, toString(mCurrentState));
 
         if (!mDelegate) return;
 

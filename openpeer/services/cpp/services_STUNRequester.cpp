@@ -302,7 +302,7 @@ namespace openpeer
                                                      IBackOffTimer::States state
                                                      )
       {
-        EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(__func__, mID, timer->getID(), zsLib::to_underlying(state), mTotalTries);
+        EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(__func__, mID, timer->getID(), IBackOffTimer::toString(state), mTotalTries);
 
         AutoRecursiveLock lock(mLock);
 

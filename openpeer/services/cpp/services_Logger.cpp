@@ -1013,7 +1013,7 @@ namespace openpeer
 #ifdef _WIN32
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
-          EventWriteOpServicesDebugLogger(inSubsystem.getName(), zsLib::to_underlying(inSeverity), zsLib::to_underlying(inLevel), inFunction, inFilePath, inLineNumber, output);
+          EventWriteOpServicesDebugLogger(inSubsystem.getName(), Log::toString(inSeverity), Log::toString(inLevel), inFunction, inFilePath, inLineNumber, output);
         }
 
       private:

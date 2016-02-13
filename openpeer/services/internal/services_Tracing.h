@@ -51,7 +51,7 @@
 #define EventWriteOpServicesStunRequesterCancel(xStr_Method, xPUID)
 #define EventWriteOpServicesStunRequesterRetryNow(xStr_Method, xPUID)
 #define EventWriteOpServicesStunRequesterReceivedStunPacket(xStr_Method, xPUID, xStr_FromIP)
-#define EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(xStr_Method, xPUID, xPUID_TimerID, xUInt_State, xULONG_TotalTries)
+#define EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(xStr_Method, xPUID, xPUID_TimerID, xStr_State, xULONG_TotalTries)
 #define EventWriteOpServicesStunRequesterSendPacket(xStr_Method, xPUID, xPtr_StunPacketBuffer, xsize_t_StunPacketBufferSizeInBytes)
 
 #define EventWriteOpServicesStunRequesterManagerCreate(xStr_Method, xPUID)
@@ -81,7 +81,7 @@
 #define EventWriteOpServicesTurnSocketCreate(xStr_Method, xPUID, xStr_ServerName, xStr_ServerUsername, xStr_ServerPassword, xUInt_DnsLookupType, xBool_UseChannelBinding, xWORD_LimitChannelToRangeStart, xWORD_LimitChannelToRangeEnd) {}
 #define EventWriteOpServicesTurnSocketDestroy(xStr_Method, xPUID) {}
 #define EventWriteOpServicesTurnSocketCancel(xStr_Method, xPUID) {}
-#define EventWriteOpServicesTurnSocketStateEventFired(xStr_Method, xPUID, xUInt_State) {}
+#define EventWriteOpServicesTurnSocketStateEventFired(xStr_Method, xPUID, xStr_State) {}
 #define EventWriteOpServicesTurnSocketSendPacket(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes, xBool_BindIfPossible) {}
 #define EventWriteOpServicesTurnSocketSendPacketViaChannel(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes, xWORD_ChannelNumber) {}
 #define EventWriteOpServicesTurnSocketSendPacketViaStun(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes) {}
@@ -112,7 +112,7 @@
 #define EventWriteOpServicesBackOffTimerNotifyAttemptFailed(xStr_Method, xPUID)
 #define EventWriteOpServicesBackOffTimerNotifyTryAgainNow(xStr_Method, xPUID)
 #define EventWriteOpServicesBackOffTimerNotifySucceeded(xStr_Method, xPUID)
-#define EventWriteOpServicesBackOffTimerStateChangedEventFired(xStr_Method, xPUID, xUInt_State)
+#define EventWriteOpServicesBackOffTimerStateChangedEventFired(xStr_Method, xPUID, xStr_State)
 
 #define EventWriteOpServicesSettingGetString(xStr_Method, xPUID, xStr_Key, xStr_Result)
 #define EventWriteOpServicesSettingGetInt(xStr_Method, xPUID, xStr_Key, xLong_Result)
@@ -162,7 +162,7 @@
 #define EventWriteOpServicesHttpQueryCancel(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xPtr_ResultData, xsize_t_ResultReadSizeInBytes, xsize_t_BytesToRead)
 
-#define EventWriteOpServicesDebugLogger(xStr_Subsystem, xUInt_Severity, xUInt_Level, xStr_Function, xStr_FilePath, xULONG_LineNumber, xStr_Output)
+#define EventWriteOpServicesDebugLogger(xStr_Subsystem, xStr_Severity, xStr_Level, xStr_Function, xStr_FilePath, xULONG_LineNumber, xStr_Output)
 
 #else
 
@@ -179,7 +179,7 @@ inline void EventWriteOpServicesStunRequesterDestroy(const char *xStr_Method, PU
 inline void EventWriteOpServicesStunRequesterCancel(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesStunRequesterRetryNow(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesStunRequesterReceivedStunPacket(const char *xStr_Method, PUID xPUID, const char *xStr_FromIP) {}
-inline void EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID, unsigned int xUInt_State, ULONG xULONG_TotalTries) {}
+inline void EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID, const char *xStr_State, ULONG xULONG_TotalTries) {}
 inline void EventWriteOpServicesStunRequesterSendPacket(const char *xStr_Method, PUID xPUID, const void *xPtr_StunPacketBuffer, size_t xsize_t_StunPacketBufferSizeInBytes) {}
 
 inline void EventWriteOpServicesStunRequesterManagerCreate(const char *xStr_Method, PUID xPUID) {}
@@ -209,7 +209,7 @@ inline void EventWriteOpServicesStunDiscoveryErrorTimeout(const char *xStr_Metho
 inline void EventWriteOpServicesTurnSocketCreate(const char *xStr_Method, PUID xPUID, const char *xStr_ServerName, const char *xStr_ServerUsername, const char *xStr_ServerPassword, unsigned int xUInt_DnsLookupType, bool xBool_UseChannelBinding, WORD xWORD_LimitChannelToRangeStart, WORD xWORD_LimitChannelToRangeEnd) {}
 inline void EventWriteOpServicesTurnSocketDestroy(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesTurnSocketCancel(const char *xStr_Method, PUID xPUID) {}
-inline void EventWriteOpServicesTurnSocketStateEventFired(const char *xStr_Method, PUID xPUID, unsigned int xUInt_State) {}
+inline void EventWriteOpServicesTurnSocketStateEventFired(const char *xStr_Method, PUID xPUID, const char *xStr_State) {}
 inline void EventWriteOpServicesTurnSocketSendPacket(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes, bool xBool_BindIfPossible) {}
 inline void EventWriteOpServicesTurnSocketSendPacketViaChannel(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes, WORD xWORD_ChannelNumber) {}
 inline void EventWriteOpServicesTurnSocketSendPacketViaStun(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
@@ -240,7 +240,7 @@ inline void EventWriteOpServicesBackOffTimerNotifyAttempting(const char *xStr_Me
 inline void EventWriteOpServicesBackOffTimerNotifyAttemptFailed(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesBackOffTimerNotifyTryAgainNow(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesBackOffTimerNotifySucceeded(const char *xStr_Method, PUID xPUID) {}
-inline void EventWriteOpServicesBackOffTimerStateChangedEventFired(const char *xStr_Method, PUID xPUID, unsigned int xUInt_State) {}
+inline void EventWriteOpServicesBackOffTimerStateChangedEventFired(const char *xStr_Method, PUID xPUID, const char *xStr_State) {}
 
 inline void EventWriteOpServicesSettingGetString(const char *xStr_Method, PUID xPUID, const char *xStr_Key, const char *xStr_Result) {}
 inline void EventWriteOpServicesSettingGetInt(const char *xStr_Method, PUID xPUID, const char *xStr_Key, long xLong_Result) {}
@@ -290,7 +290,7 @@ inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID x
 inline void EventWriteOpServicesHttpQueryCancel(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, const void *xPtr_ResultData, size_t xsize_t_ResultReadSizeInBytes, size_t xsize_t_BytesToRead) {}
 
-inline void EventWriteOpServicesDebugLogger(const char *xStr_Subsystem, unsigned int xUInt_Severity, unsigned int xUInt_Level, const char *xStr_Function, const char *xStr_FilePath, ULONG xULONG_LineNumber, const char *xStr_Output) {}
+inline void EventWriteOpServicesDebugLogger(const char *xStr_Subsystem, const char *xStr_Severity, const char *xStr_Level, const char *xStr_Function, const char *xStr_FilePath, ULONG xULONG_LineNumber, const char *xStr_Output) {}
 
 }
 }
