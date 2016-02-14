@@ -2244,7 +2244,7 @@ namespace openpeer
 
           mPendingNominatation = pairing;
 
-          // this is done to inform the remote party of the nomination since the nominiation process has completed
+          // this is done to inform the remote party of the nomination since the nomination process has completed
           STUNPacketPtr request = STUNPacket::createRequest(STUNPacket::Method_Binding);
           fix(request);
           request->mUsername = mRemoteUsernameFrag + ":" + mLocalUsernameFrag;
