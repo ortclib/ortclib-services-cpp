@@ -157,7 +157,7 @@
 #define EventWriteOpServicesDnsLookupSuccess(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 #define EventWriteOpServicesDnsLookupFailed(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 
-#define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xPtr_PostData, xsize_t_PostDataLengthInBytes, xStr_PostMimeType, xlong_long_Timeout)
+#define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xPtr_PostData, xsize_t_PostDataLengthInBytes, xStr_PostMimeType, xlong_long_TimeoutInMilliseconds)
 #define EventWriteOpServicesHttpQueryDestroy(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryCancel(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xPtr_ResultData, xsize_t_ResultReadSizeInBytes, xsize_t_BytesToRead)
@@ -285,7 +285,7 @@ inline void EventWriteOpServicesDnsLookupComplete(const char *xStr_Method, PUID 
 inline void EventWriteOpServicesDnsLookupSuccess(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 inline void EventWriteOpServicesDnsLookupFailed(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 
-inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, const void *xPtr_PostData, size_t xsize_t_PostDataLengthInBytes, const char *xStr_PostMimeType, long long xlong_long_Timeout) {}
+inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, const void *xPtr_PostData, size_t xsize_t_PostDataLengthInBytes, const char *xStr_PostMimeType, long long xlong_long_TimeoutInMilliseconds) {}
 inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryCancel(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, const void *xPtr_ResultData, size_t xsize_t_ResultReadSizeInBytes, size_t xsize_t_BytesToRead) {}
