@@ -144,4 +144,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_TURNSocket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\services_wire.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.man">
+      <ExcludedFromBuild>false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </Xml>
+    <Xml Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp">
+      <ExcludedFromBuild>false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </Xml>
+  </ItemGroup>
 </Project>

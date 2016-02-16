@@ -384,4 +384,12 @@
       <Filter>openpeer\services\cpp</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.man">
+      <Filter>openpeer\services\internal</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp">
+      <Filter>openpeer\services\internal</Filter>
+    </None>
+  </ItemGroup>
 </Project>
