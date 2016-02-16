@@ -36,13 +36,13 @@
           <task name="BackOffTimer" symbol="TASK_BACKOFF_TIMER" value="7" message="$(string.Task.BackOffTimer)" />
           <task name="Settings" symbol="TASK_SETTINGS" value="8" message="$(string.Task.Settings)" />
           <task name="Cache" symbol="TASK_CACHE" value="9" message="$(string.Task.Cache)" />
-          <task name="Dns" symbol="TASK_DNS" value="4" message="$(string.Task.Dns)" />
-          <task name="Http" symbol="TASK_HTTP" value="10" message="$(string.Task.Http)" />
-          <task name="DebugLogger" symbol="TASK_DEBUG_LOGGER" value="11" message="$(string.Task.DebugLogger)" />
+          <task name="Dns" symbol="TASK_DNS" value="10" message="$(string.Task.Dns)" />
+          <task name="Http" symbol="TASK_HTTP" value="11" message="$(string.Task.Http)" />
+          <task name="DebugLogger" symbol="TASK_DEBUG_LOGGER" value="12" message="$(string.Task.DebugLogger)" />
         </tasks>
         <opcodes>
           <opcode name="Cancel" symbol="OPCODE_CANCEL" value="101" message="$(string.Opcode.Cancel)" />
-          <opcode name="InternalEvent" symbol="OPCODE_INTERNAL_EVENT" value="101" message="$(string.Opcode.InternalEvent)" />
+          <opcode name="InternalEvent" symbol="OPCODE_INTERNAL_EVENT" value="102" message="$(string.Opcode.InternalEvent)" />
         </opcodes>
         <templates>
           <template tid="T_StunPacket">

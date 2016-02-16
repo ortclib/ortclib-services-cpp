@@ -101,21 +101,27 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>PreBuildEvent</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -132,17 +138,17 @@
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -177,17 +183,17 @@ echo.
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -222,17 +228,17 @@ echo.
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -267,17 +273,17 @@ echo.
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -312,17 +318,17 @@ echo.
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -357,17 +363,17 @@ echo.
     </Link>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h $(ProjectDir)..\..\..\..\openpeer\services\internal $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\..\openpeer\services\internal" "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man"
 echo Create resource file...
 rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
 echo Create manifest resource dll...
 echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
 link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man $(OutDir)
-copy $(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp $(OutDir)
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:F
+copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" "$(OutDir)"
+icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
