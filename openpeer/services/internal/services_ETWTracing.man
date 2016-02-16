@@ -553,7 +553,7 @@
 
           <event symbol="OpServicesTurnSocketRequesterSendStunPacket" channel="os" template="T_TurnSocketRequesterSendStunPacket" task="TurnSocket" opcode="win:Send" value="1411" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterSendStunPacket)" />
           <event symbol="OpServicesTurnSocketRequesterReceivedStunResponse" channel="os" template="T_TurnSocketRequesterReceivedStunResponse" task="TurnSocket" opcode="win:Receive" value="1412" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterReceivedStunResponse)" />
-          <event symbol="OpServicesTurnSocketRequesterInternalTimedOutEventFired" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="TurnSocket" opcode="InternalEvent" value="1413" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterInternalTimedOutEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalRequesterTimedOutEventFired" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="TurnSocket" opcode="InternalEvent" value="1413" level="win:Informational" message="$(string.OpServicesTurnSocketInternalRequesterTimedOutEventFired)" />
           <event symbol="OpServicesTurnSocketRequesterCreate" channel="os" template="T_TurnSocketRequesterCreate" task="TurnSocket" opcode="win:Info" value="1414" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreate)" />
           <event symbol="OpServicesTurnSocketRequesterCreateReauth" channel="os" template="T_TurnSocketRequesterCreateReauth" task="TurnSocket" opcode="win:Info" value="1415" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreateReauth)" />
 
@@ -716,7 +716,7 @@
 
         <string id="Event.OpServicesTurnSocketRequesterSendStunPacket" value="OpServicesTurnSocketRequesterSendStunPacket"/>
         <string id="Event.OpServicesTurnSocketRequesterReceivedStunResponse" value="OpServicesTurnSocketRequesterReceivedStunResponse"/>
-        <string id="Event.OpServicesTurnSocketRequesterInternalTimedOutEventFired" value="OpServicesTurnSocketRequesterInternalTimedOutEventFired"/>
+        <string id="Event.OpServicesTurnSocketInternalRequesterTimedOutEventFired" value="OpServicesTurnSocketInternalRequesterTimedOutEventFired"/>
         <string id="Event.OpServicesTurnSocketRequesterCreate" value="OpServicesTurnSocketRequesterCreate"/>
         <string id="Event.OpServicesTurnSocketRequesterCreateReauth" value="OpServicesTurnSocketRequesterCreateReauth"/>
 

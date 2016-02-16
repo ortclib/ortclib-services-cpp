@@ -39,7 +39,7 @@
 #else
 
 // Comment the following line to test inline versions of the same macros to test compilation
-//#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
@@ -93,7 +93,7 @@
 
 #define EventWriteOpServicesTurnSocketRequesterSendStunPacket(xStr_Method, xPUID, xPUID_RequesterID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer)
 #define EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(xStr_Method, xPUID, xPUID_RequesterID, xStr_FromIP)
-#define EventWriteOpServicesTurnSocketRequesterInternalTimedOutEventFired(xStr_Method, xPUID, xPUID_RequesterID)
+#define EventWriteOpServicesTurnSocketInternalRequesterTimedOutEventFired(xStr_Method, xPUID, xPUID_RequesterID)
 #define EventWriteOpServicesTurnSocketRequesterCreate(xStr_Method, xPUID, xPUID_RequesterID, xStr_Type)
 #define EventWriteOpServicesTurnSocketRequesterCreateReauth(xStr_Method, xPUID, xPUID_RequesterID, xPUID_OldRequesterID)
 
@@ -224,7 +224,7 @@ inline void EventWriteOpServicesTurnSocketReceivedChannelData(const char *xStr_M
 
 inline void EventWriteOpServicesTurnSocketRequesterSendStunPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
 inline void EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_FromIP) {}
-inline void EventWriteOpServicesTurnSocketRequesterInternalTimedOutEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID) {}
+inline void EventWriteOpServicesTurnSocketInternalRequesterTimedOutEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID) {}
 inline void EventWriteOpServicesTurnSocketRequesterCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_Type) {}
 inline void EventWriteOpServicesTurnSocketRequesterCreateReauth(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, PUID xPUID_OldRequesterID) {}
 

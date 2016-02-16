@@ -742,7 +742,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onSTUNRequesterTimedOut(ISTUNRequesterPtr requester)
       {
-        EventWriteOpServicesTurnSocketRequesterTimedOut(__func__, mID, requester->getID());
+        EventWriteOpServicesTurnSocketInternalRequesterTimedOutEventFired(__func__, mID, requester->getID());
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
