@@ -24,66 +24,141 @@
         </channels>
         <tasks>
           <task name="Stun" symbol="TASK_STUN" value="1" message="$(string.Task.Stun)" />
-          <task name="StunRequester" symbol="TASK_STUN_REQUESTER" value="2" message="$(string.Task.StunRequester)" />
-          <task name="StunRequesterManager" symbol="TASK_STUN_REQUESTER_MANAGER" value="3" message="$(string.Task.StunRequesterManager)">
+          <task name="StunRequester" symbol="TASK_STUN_REQUESTER" value="2" message="$(string.Task.StunRequester)">
             <opcodes>
-              <opcode name="Exception" symbol="OPCODE_SOCKET_EXCEPTION" value="11" message="$(string.Opcode.Socket.Exception)" />
+              <opcode name="RetryNow" symbol="OPCODE_STUN_REQUESTER_RETRY_NOW" value="11" message="$(string.Opcode.StunRequester.RetryNow)" />
             </opcodes>
           </task>
-          <task name="StunDiscovery" symbol="TASK_STUN_DISCOVERY" value="4" message="$(string.Task.StunDiscovery)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="TurnSocket" symbol="TASK_TURN_SOCKET" value="5" message="$(string.Task.TurnSocket)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="BackOffTimerPattern" symbol="TASK_BACKOFF_TIMER_PATTERN" value="6" message="$(string.Task.BackOffTimerPattern)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="BackOffTimer" symbol="TASK_BACKOFF_TIMER" value="7" message="$(string.Task.BackOffTimer)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="Settings" symbol="TASK_SETTINGS" value="8" message="$(string.Task.Settings)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="Cache" symbol="TASK_CACHE" value="9" message="$(string.Task.Cache)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="Dns" symbol="TASK_DNS" value="4" message="$(string.Task.Dns)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="Http" symbol="TASK_HTTP" value="10" message="$(string.Task.Http)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
-          <task name="DebugLogger" symbol="TASK_DEBUG_LOGGER" value="11" message="$(string.Task.DebugLogger)">
-            <opcodes>
-              <opcode name="Event" symbol="OPCODE_TIMER_EVENT" value="11" message="$(string.Opcode.Timer.Event)" />
-            </opcodes>
-          </task>
+          <task name="StunRequesterManager" symbol="TASK_STUN_REQUESTER_MANAGER" value="3" message="$(string.Task.StunRequesterManager)" />
+          <task name="StunDiscovery" symbol="TASK_STUN_DISCOVERY" value="4" message="$(string.Task.StunDiscovery)" />
+          <task name="TurnSocket" symbol="TASK_TURN_SOCKET" value="5" message="$(string.Task.TurnSocket)" />
+          <task name="BackOffTimerPattern" symbol="TASK_BACKOFF_TIMER_PATTERN" value="6" message="$(string.Task.BackOffTimerPattern)" />
+          <task name="BackOffTimer" symbol="TASK_BACKOFF_TIMER" value="7" message="$(string.Task.BackOffTimer)" />
+          <task name="Settings" symbol="TASK_SETTINGS" value="8" message="$(string.Task.Settings)" />
+          <task name="Cache" symbol="TASK_CACHE" value="9" message="$(string.Task.Cache)" />
+          <task name="Dns" symbol="TASK_DNS" value="4" message="$(string.Task.Dns)" />
+          <task name="Http" symbol="TASK_HTTP" value="10" message="$(string.Task.Http)" />
+          <task name="DebugLogger" symbol="TASK_DEBUG_LOGGER" value="11" message="$(string.Task.DebugLogger)" />
         </tasks>
+        <opcodes>
+          <opcode name="Cancel" symbol="OPCODE_CANCEL" value="101" message="$(string.Opcode.Cancel)" />
+          <opcode name="InternalEvent" symbol="OPCODE_INTERNAL_EVENT" value="101" message="$(string.Opcode.InternalEvent)" />
+        </opcodes>
         <templates>
-          <template tid="T_SocketBasic">
+          <template tid="T_StunPacket">
             <data inType="win:AnsiString" name="Method" />
-            <data inType="win:UInt64"     name="Socket" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Log" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunClass" />
+            <data inType="win:UInt64"     name="StunMethod" />
+            <data inType="win:UInt64"     name="TotalRetries" />
+            <data inType="win:UInt16"     name="ErrorCode" />
+            <data inType="win:AnsiString" name="Reason" />
+            <data inType="win:UInt32"     name="MagicCookies" />
+            <data inType="win:UInt32"     name="TransactionBufferLengthInBytes" />
+            <data inType="win:Binary"     name="TransactionIDBuffer" length="TransactionBufferLengthInBytes" />
+            <data inType="win:UInt64"     name="TotalUnknownAttributes" />
+            <data inType="win:UInt16"     name="FirstUnknownAttribute" />
+            <data inType="win:AnsiString" name="MappedAddressIP" />
+            <data inType="win:AnsiString" name="AlternateServerIP" />
+            <data inType="win:AnsiString" name="Username" />
+            <data inType="win:AnsiString" name="Password" />
+            <data inType="win:AnsiString" name="Realm" />
+            <data inType="win:AnsiString" name="Nonce" />
+            <data inType="win:AnsiString" name="Software" />
+            <data inType="win:UInt64"     name="CredentialMechanism" />
+            <data inType="win:UInt64"     name="MessageIntegrityMessageLengthInBytes" />
+            <data inType="win:UInt32"     name="MessageIntegrityBufferSizeInBytes" />
+            <data inType="win:Binary"     name="MessageIntegrityBuffer" length="MessageIntegrityBufferSizeInBytes" />
+            <data inType="win:Boolean"    name="FingerprintIncluded" />
+            <data inType="win:UInt16"     name="ChannelNumber" />
+            <data inType="win:Boolean"    name="LifetimeIncluded" />
+            <data inType="win:UInt32"     name="Lifetime" />
+            <data inType="win:UInt64"     name="PeerAddressListSize" />
+            <data inType="win:AnsiString" name="FirstPeerAddress" />
+            <data inType="win:AnsiString" name="RelayAddressIP" />
+            <data inType="win:UInt64"     name="DataLengthInBytes" />
+            <data inType="win:Boolean"    name="EvenPortIncluded" />
+            <data inType="win:Boolean"    name="EvenPort" />
+            <data inType="win:UInt8"      name="RequestTransport" />
+            <data inType="win:Boolean"    name="DontFragementIncluded" />
+            <data inType="win:Boolean"    name="ReservationTokenIncluded" />
+            <data inType="win:UInt32"     name="ReservationTokenSizeInBytes" />
+            <data inType="win:Binary"     name="ReservationToken" length="ReservationTokenSizeInBytes" />
+            <data inType="win:Boolean"    name="MobilityTicketIncluded" />
+            <data inType="win:UInt32"     name="MobilityTicketBufferSizeInBytes" />
+            <data inType="win:Binary"     name="MobilityTicketBuffer" length="MobilityTicketBufferSizeInBytes" />
+            <data inType="win:Boolean"    name="PriorityIncluded" />
+            <data inType="win:UInt32"     name="Priority" />
+            <data inType="win:Boolean"    name="UseCandidateIncluded" />
+            <data inType="win:Boolean"    name="IceControlledIncluded" />
+            <data inType="win:UInt64"     name="IceControlled" />
+            <data inType="win:Boolean"    name="IceControllingIncluded" />
+            <data inType="win:UInt64"     name="IceControlling" />
+            <data inType="win:UInt64"     name="NextSequenceNumber" />
+            <data inType="win:Boolean"    name="MinimumRTTIncluded" />
+            <data inType="win:UInt32"     name="MinimumRTT" />
+            <data inType="win:AnsiString" name="ConnectionInfo" />
+            <data inType="win:UInt64"     name="GSNR" />
+            <data inType="win:UInt64"     name="GSNFR" />
+            <data inType="win:Boolean"    name="ReliabilityFlagsIncluded" />
+            <data inType="win:Boolean"    name="ReliabilityFlags" />
+            <data inType="win:UInt32"     name="ACKVectorLengthInBytes" />
+            <data inType="win:Binary"     name="AckVectorBuffer" length="ACKVectorLengthInBytes" />
+            <data inType="win:UInt64"     name="LocalCongestionControl" />
+            <data inType="win:UInt64"     name="RemoteCongestionControl" />
+          </template>
+          <template tid="T_StunRequesterCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="ServerIP" />
+            <data inType="win:UInt64"     name="UsingRFC" />
+            <data inType="win:UInt64"     name="BackOffTimerPatternObjectID" />
+          </template>
+          <template tid="T_BasicObject">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+          </template>
+          <template tid="T_BasicObjectWithFromIP">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="FromIP" />
+          </template>
+          <template tid="T_StunRequesterBackOffTimerStateEventFired">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="BackOffTimerObjectID" />
+            <data inType="win:AnsiString" name="State" />
+            <data inType="win:UInt64"     name="TotalTries" />
+          </template>
+          <template tid="T_StunRequesterSendPacket">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt32"     name="StunPacketBufferSizeInBytes" />
+            <data inType="win:Binary"     name="StunPacketBuffer" length="StunPacketBufferSizeInBytes" />
+          </template>
+          <template tid="T_BasicObjectWithStunRequesterObjectID">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
           </template>
         </templates>
         <events>
-          <event symbol="ZsExceptionEventFired" channel="os" template="T_Exception" task="Exception" opcode="Exception" value="1001" level="win:Error" message="$(string.Event.ZsExceptionEventFired)" />
+          <event symbol="OpServicesStunPacket" channel="os" template="T_StunPacket" task="Stun" opcode="win:Info" value="1001" level="win:Verbose" message="$(string.Event.OpServicesStunPacket)" />
+
+          <event symbol="OpServicesStunRequesterCreate" channel="os" template="T_StunRequesterCreate" task="StunRequester" opcode="win:Start" value="1101" level="win:Informational" message="$(string.Event.OpServicesStunRequesterCreate)" />
+          <event symbol="OpServicesStunRequesterDestroy" channel="os" template="T_BasicObject" task="StunRequester" opcode="win:Stop" value="1102" level="win:Informational" message="$(string.Event.OpServicesStunRequesterDestroy)" />
+          <event symbol="OpServicesStunRequesterCancel" channel="os" template="T_BasicObject" task="StunRequester" opcode="win:Stop" value="1103" level="win:Informational" message="$(string.Event.OpServicesStunRequesterCancel)" />
+          <event symbol="OpServicesStunRequesterRetryNow" channel="os" template="T_BasicObject" task="StunRequester" opcode="RetryNow" value="1104" level="win:Informational" message="$(string.Event.OpServicesStunRequesterRetryNow)" />
+          <event symbol="OpServicesStunRequesterReceivedStunPacket" channel="os" template="T_BasicObjectWithFromIP" task="StunRequester" opcode="win:Receive" value="1105" level="win:Informational" message="$(string.Event.OpServicesStunRequesterReceivedStunPacket)" />
+          <event symbol="OpServicesStunRequesterBackOffTimerStateEventFired" channel="os" template="T_StunRequesterBackOffTimerStateEventFired" task="StunRequester" opcode="InternalEvent" value="1106" level="win:Verbose" message="$(string.Event.OpServicesStunRequesterBackOffTimerStateEventFired)" />
+          <event symbol="OpServicesStunRequesterSendPacket" channel="os" template="T_StunRequesterSendPacket" task="StunRequester" opcode="win:Send" value="1107" level="win:Informational" message="$(string.Event.OpServicesStunRequesterSendPacket)" />
+
+          <event symbol="OpServicesStunRequesterManagerCreate" channel="os" template="T_BasicObject" task="StunRequesterManager" opcode="win:Start" value="1201" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerCreate)" />
+          <event symbol="OpServicesStunRequesterManagerDestroy" channel="os" template="T_BasicObject" task="StunRequesterManager" opcode="win:Stop" value="1202" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerDestroy)" />
+          <event symbol="OpServicesStunRequesterManagerReceivedStunPacket" channel="os" template="T_BasicObjectWithFromIP" task="StunRequesterManager" opcode="win:Receive" value="1203" level="win:Verbose" message="$(string.Event.OpServicesStunRequesterManagerReceivedStunPacket)" />
+
         </events>
       </provider>
 
@@ -115,9 +190,24 @@
         <string id="Task.Http" value="Http"/>
         <string id="Task.DebugLogger" value="DebugLogger"/>
 
-        <string id="Opcode.Stun.Exception" value="Exception"/>
+        <string id="Opcode.StunRequester.RetryNow" value="RetryNow"/>
 
-        <string id="Event.ZsExceptionEventFired" value="ZsExceptionEventFired"/>
+        <string id="Opcode.Cancel" value="Cancel"/>
+        <string id="Opcode.InternalEvent" value="InternalEvent"/>
+
+        <string id="Event.OpServicesStunPacket" value="OpServicesStunPacket"/>
+
+        <string id="Event.OpServicesStunRequesterCreate" value="OpServicesStunRequesterCreate"/>
+        <string id="Event.OpServicesStunRequesterDestroy" value="OpServicesStunRequesterDestroy"/>
+        <string id="Event.OpServicesStunRequesterCancel" value="OpServicesStunRequesterCancel"/>
+        <string id="Event.OpServicesStunRequesterRetryNow" value="OpServicesStunRequesterRetryNow"/>
+        <string id="Event.OpServicesStunRequesterReceivedStunPacket" value="OpServicesStunRequesterReceivedStunPacket"/>
+        <string id="Event.OpServicesStunRequesterBackOffTimerStateEventFired" value="OpServicesStunRequesterBackOffTimerStateEventFired"/>
+        <string id="Event.OpServicesStunRequesterSendPacket" value="OpServicesStunRequesterSendPacket"/>
+
+        <string id="Event.OpServicesStunRequesterManagerCreate" value="OpServicesStunRequesterManagerCreate"/>
+        <string id="Event.OpServicesStunRequesterManagerDestroy" value="OpServicesStunRequesterManagerDestroy"/>
+        <string id="Event.OpServicesStunRequesterManagerReceivedStunPacket" value="OpServicesStunRequesterManagerReceivedStunPacket"/>
 
       </stringTable>
     </resources>
