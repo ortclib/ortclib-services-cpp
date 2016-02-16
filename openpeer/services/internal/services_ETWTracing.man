@@ -36,13 +36,19 @@
           <task name="BackOffTimer" symbol="TASK_BACKOFF_TIMER" value="7" message="$(string.Task.BackOffTimer)" />
           <task name="Settings" symbol="TASK_SETTINGS" value="8" message="$(string.Task.Settings)" />
           <task name="Cache" symbol="TASK_CACHE" value="9" message="$(string.Task.Cache)" />
-          <task name="Dns" symbol="TASK_DNS" value="10" message="$(string.Task.Dns)" />
+          <task name="Dns" symbol="TASK_DNS" value="10" message="$(string.Task.Dns)">
+            <opcodes>
+              <opcode name="Lookup" symbol="OPCODE_DNS_LOOKUP" value="11" message="$(string.Opcode.Dns.Lookup)" />
+            </opcodes>
+          </task>
           <task name="Http" symbol="TASK_HTTP" value="11" message="$(string.Task.Http)" />
           <task name="DebugLogger" symbol="TASK_DEBUG_LOGGER" value="12" message="$(string.Task.DebugLogger)" />
         </tasks>
         <opcodes>
           <opcode name="Cancel" symbol="OPCODE_CANCEL" value="101" message="$(string.Opcode.Cancel)" />
-          <opcode name="InternalEvent" symbol="OPCODE_INTERNAL_EVENT" value="102" message="$(string.Opcode.InternalEvent)" />
+          <opcode name="Event" symbol="OPCODE_EVENT" value="102" message="$(string.Opcode.Event)" />
+          <opcode name="StateEvent" symbol="OPCODE_STATE_EVENT" value="103" message="$(string.Opcode.StateEvent)" />
+          <opcode name="InternalEvent" symbol="OPCODE_INTERNAL_EVENT" value="104" message="$(string.Opcode.InternalEvent)" />
         </opcodes>
         <templates>
           <template tid="T_StunPacket">
@@ -143,6 +149,360 @@
             <data inType="win:UInt64"     name="ObjectID" />
             <data inType="win:UInt64"     name="StunRequesterObjectID" />
           </template>
+          <template tid="T_StunDiscoveryCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:Int64"      name="KeepWarmPingTimeInSeconds" />
+          </template>
+          <template tid="T_StunDiscoveryLookupSrv">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:Int64"      name="DnsQueryObjectID" />
+            <data inType="win:AnsiString" name="SrvName" />
+            <data inType="win:AnsiString" name="Service" />
+            <data inType="win:AnsiString" name="Protocol" />
+            <data inType="win:UInt16"     name="DefaultPort" />
+            <data inType="win:UInt16"     name="DefaultPriority" />
+            <data inType="win:UInt16"     name="DefaultWeight" />
+            <data inType="win:UInt64"     name="LookupType" />
+          </template>
+          <template tid="T_StunDiscoveryInternalLookupCompleteEventFired">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="DnsQueryObjectID" />
+          </template>
+          <template tid="T_BasicObjectWithTimerID">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="TimerObjectID" />
+          </template>
+          <template tid="T_StunDiscoveryRequestCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="ServerIP" />
+            <data inType="win:UInt32"     name="TransactionBufferLengthInBytes" />
+            <data inType="win:Binary"     name="TransactionIDBuffer" length="TransactionBufferLengthInBytes" />
+          </template>
+          <template tid="T_StunDiscoveryRequestSendPacket">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+          </template>
+          <template tid="T_StunDiscoveryReceivedResponsePacket">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="FromIP" />
+            <data inType="win:UInt32"     name="TransactionBufferLengthInBytes" />
+            <data inType="win:Binary"     name="TransactionIDBuffer" length="TransactionBufferLengthInBytes" />
+          </template>
+          <template tid="T_StunDiscoveryFoundMappedAddress">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="NewMappedAddressIP" />
+            <data inType="win:AnsiString" name="OldMappedAddressIP" />
+          </template>
+          <template tid="T_StunDiscoveryError">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:UInt16"     name="ErrorCode" />
+          </template>
+          <template tid="T_StunDiscoveryErrorUseAlternativeServer">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="ServerIP" />
+          </template>
+          <template tid="T_StunDiscoveryErrorTimeout">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+          </template>
+          <template tid="T_TurnSocketCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="ServerName" />
+            <data inType="win:AnsiString" name="ServerUsername" />
+            <data inType="win:AnsiString" name="ServerPassword" />
+            <data inType="win:UInt64"     name="DnsLookupType" />
+            <data inType="win:Boolean"    name="UseChannelBinding" />
+            <data inType="win:UInt16"     name="LimitChannelToRangeStart" />
+            <data inType="win:UInt16"     name="LimitChannelToRangeEnd" />
+          </template>
+          <template tid="T_BasicObjectWithState">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="State" />
+          </template>
+          <template tid="T_TurnSocketSendPacket">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+            <data inType="win:Boolean"    name="BindIfPossible" />
+          </template>
+          <template tid="T_TurnSocketSendPacketViaChannel">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+            <data inType="win:UInt16"     name="ChannelNumber" />
+          </template>
+          <template tid="T_TurnSocketSendPacketViaStun">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+          </template>
+          <template tid="T_TurnSocketInstallChannelWake">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt16"     name="ChannelNumber" />
+          </template>
+          <template tid="T_TurnSocketInstallPermissionWake">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+          </template>
+          <template tid="T_BasicWithPeerAndBuffer">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="PeerIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+          </template>
+          <template tid="T_TurnSocketRequesterSendStunPacket">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="DestinationIP" />
+            <data inType="win:UInt32"     name="BufferLengthInBytes" />
+            <data inType="win:Binary"     name="Buffer" length="BufferLengthInBytes" />
+          </template>
+          <template tid="T_TurnSocketRequesterReceivedStunResponse">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="FromIP" />
+          </template>
+          <template tid="T_TurnSocketRequesterCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:AnsiString" name="Type" />
+          </template>
+          <template tid="T_BasicWithSocketID">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="SocketID" />
+          </template>
+          <template tid="T_TurnSocketUseNextServer">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="ServerIP" />
+            <data inType="win:Boolean"    name="IsUDP" />
+          </template>
+          <template tid="T_BackOffTimerPatternCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="MaxAttempts" />
+            <data inType="win:UInt64"     name="DurationVectorSize" />
+            <data inType="win:UInt64"     name="FrontDurationVectorInMicroseconds" />
+            <data inType="win:Double"     name="AttemptTimeoutMultiplier" />
+            <data inType="win:UInt64"     name="MaxAttemptTimeoutInMicroseconds" />
+            <data inType="win:UInt64"     name="RetryVector" />
+            <data inType="win:UInt64"     name="FrontRetryVectorInMicroseconds" />
+            <data inType="win:Double"     name="RetryMultiplier" />
+            <data inType="win:UInt64"     name="xlong_long_MaxRetryInMicroseconds" />
+          </template>
+          <template tid="T_BackOffTimerPatternClone">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="OriginalBackOffTimerPatternObjectID" />
+          </template>
+          <template tid="T_BackOffTimerPatternNextAttempt">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="AttemptNumber" />
+            <data inType="win:UInt64"     name="LastAttemptTimeoutInMicroseconds" />
+            <data inType="win:UInt64"     name="LastRetryDurationInMicroseconds" />
+          </template>
+          <template tid="T_BackOffTimerCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="BackOffTimerPatternObjectID" />
+          </template>
+          <template tid="T_SettingString">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:AnsiString" name="Value" />
+          </template>
+          <template tid="T_SettingInt">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:Int64"      name="Value" />
+          </template>
+          <template tid="T_SettingUInt">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:UInt64"     name="Value" />
+          </template>
+          <template tid="T_SettingBool">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:Boolean"    name="Value" />
+          </template>
+          <template tid="T_SettingFloat">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:Float"      name="Value" />
+          </template>
+          <template tid="T_SettingDouble">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:Double"     name="Value" />
+          </template>
+          <template tid="T_SettingClear">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+          </template>
+          <template tid="T_SettingApply">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Json" />
+          </template>
+          <template tid="T_SettingVerifyExists">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Key" />
+            <data inType="win:Boolean"    name="Exists" />
+          </template>
+          <template tid="T_CacheFetch">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="CookieNamePath" />
+            <data inType="win:AnsiString" name="Result" />
+          </template>
+          <template tid="T_CacheStore">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="CookieNamePath" />
+            <data inType="win:Int64"      name="ExpiresInSecondsSinceEpoch" />
+            <data inType="win:AnsiString" name="Value" />
+          </template>
+          <template tid="T_CacheClear">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="CookieNamePath" />
+            <data inType="win:Int64"      name="ExpiresInSecondsSinceEpoch" />
+            <data inType="win:AnsiString" name="Value" />
+          </template>
+          <template tid="T_DnsResultListBegin">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:Int64"      name="TTL" />
+            <data inType="win:Int64"      name="TotalIPAddresses" />
+          </template>
+          <template tid="T_DnsResultListEntry">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:UInt64"     name="TTL" />
+            <data inType="win:AnsiString" name="IPAddress" />
+          </template>
+          <template tid="T_DnsName">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Name" />
+          </template>
+          <template tid="T_DnsSrvResultListBegin">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:AnsiString" name="xStr_Service" />
+            <data inType="win:AnsiString" name="xStr_Protocol" />
+            <data inType="win:UInt64"     name="TTL" />
+            <data inType="win:UInt64"     name="TotalRecords" />
+          </template>
+          <template tid="T_DnsSrvResultListEntryBegin">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:AnsiString" name="Message" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:UInt16"     name="Priority" />
+            <data inType="win:UInt16"     name="Weight" />
+            <data inType="win:UInt16"     name="Port" />
+            <data inType="win:UInt64"     name="TotalAResults" />
+            <data inType="win:UInt64"     name="TotalAAAAResults" />
+          </template>
+          <template tid="T_DnsLookupName">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="LookupType" />
+            <data inType="win:AnsiString" name="Name" />
+          </template>
+          <template tid="T_DnsSrvLookup">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:AnsiString" name="Service" />
+            <data inType="win:AnsiString" name="Protocol" />
+            <data inType="win:UInt16"     name="DefaultPort" />
+            <data inType="win:UInt16"     name="DefaultPriority" />
+            <data inType="win:UInt16"     name="DefaultWeight" />
+            <data inType="win:UInt64"     name="LookupType" />
+          </template>
+          <template tid="T_DnsLookupResolverSubQuery">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:AnsiString" name="LookupType" />
+            <data inType="win:AnsiString" name="Name" />
+            <data inType="win:UInt64"     name="RelatedDnsQueryObjectID" />
+          </template>
+          <template tid="T_HttpQueryCreate">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:Boolean"    name="IsPost" />
+            <data inType="win:AnsiString" name="UserAgent" />
+            <data inType="win:AnsiString" name="Url" />
+            <data inType="win:UInt32"     name="PostDataLengthInBytes" />
+            <data inType="win:Binary"     name="PostData" length="PostDataLengthInBytes" />
+            <data inType="win:AnsiString" name="PostMimeType" />
+            <data inType="win:Int64"      name="TimeoutInMilliseconds" />
+          </template>
+          <template tid="T_HttpQueryRead">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt32"     name="ResultReadSizeInBytes" />
+            <data inType="win:Binary"     name="ResultData" length="ResultReadSizeInBytes" />
+            <data inType="win:Int64"      name="BytesToRead" />
+          </template>
+          <template tid="T_DebugLogger">
+            <data inType="win:AnsiString" name="Subsystem" />
+            <data inType="win:AnsiString" name="Severity" />
+            <data inType="win:AnsiString" name="Level" />
+            <data inType="win:AnsiString" name="Function" />
+            <data inType="win:AnsiString" name="FilePath" />
+            <data inType="win:UInt64"     name="LineNumber" />
+            <data inType="win:AnsiString" name="Output" />
+          </template>
         </templates>
         <events>
           <event symbol="OpServicesStunPacket" channel="os" template="T_StunPacket" task="Stun" opcode="win:Info" value="1001" level="win:Verbose" message="$(string.Event.OpServicesStunPacket)" />
@@ -157,8 +517,116 @@
 
           <event symbol="OpServicesStunRequesterManagerCreate" channel="os" template="T_BasicObject" task="StunRequesterManager" opcode="win:Start" value="1201" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerCreate)" />
           <event symbol="OpServicesStunRequesterManagerDestroy" channel="os" template="T_BasicObject" task="StunRequesterManager" opcode="win:Stop" value="1202" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerDestroy)" />
-          <event symbol="OpServicesStunRequesterManagerReceivedStunPacket" channel="os" template="T_BasicObjectWithFromIP" task="StunRequesterManager" opcode="win:Receive" value="1203" level="win:Verbose" message="$(string.Event.OpServicesStunRequesterManagerReceivedStunPacket)" />
+          <event symbol="OpServicesStunRequesterManagerMonitorStart" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="StunRequesterManager" opcode="win:Stop" value="1203" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerMonitorStart)" />
+          <event symbol="OpServicesStunRequesterManagerMonitorStop" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="StunRequesterManager" opcode="win:Stop" value="1204" level="win:Informational" message="$(string.Event.OpServicesStunRequesterManagerMonitorStop)" />
+          <event symbol="OpServicesStunRequesterManagerReceivedStunPacket" channel="os" template="T_BasicObjectWithFromIP" task="StunRequesterManager" opcode="win:Receive" value="1205" level="win:Verbose" message="$(string.Event.OpServicesStunRequesterManagerReceivedStunPacket)" />
 
+          <event symbol="OpServicesStunDiscoveryCreate" channel="os" template="T_StunDiscoveryCreate" task="StunDiscovery" opcode="win:Start" value="1301" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryCreate)" />
+          <event symbol="OpServicesStunDiscoveryDestroy" channel="os" template="T_BasicObject" task="StunDiscovery" opcode="win:Stop" value="1302" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryDestroy)" />
+          <event symbol="OpServicesStunDiscoveryCancel" channel="os" template="T_BasicObject" task="StunDiscovery" opcode="Cancel" value="1303" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryCancel)" />
+
+          <event symbol="OpServicesStunDiscoveryLookupSrv" channel="os" template="T_StunDiscoveryLookupSrv" task="StunDiscovery" opcode="win:Info" value="1304" level="win:Verbose" message="$(string.Event.OpServicesStunDiscoveryLookupSrv)" />
+          <event symbol="OpServicesStunDiscoveryInternalLookupCompleteEventFired" channel="os" template="T_StunDiscoveryInternalLookupCompleteEventFired" task="StunDiscovery" opcode="InternalEvent" value="1305" level="win:Verbose" message="$(string.Event.OpServicesStunDiscoveryInternalLookupCompleteEventFired)" />
+          <event symbol="OpServicesStunDiscoveryInternalTimerEventFired" channel="os" template="T_BasicObjectWithTimerID" task="StunDiscovery" opcode="InternalEvent" value="1306" level="win:Verbose" message="$(string.Event.OpServicesStunDiscoveryInternalTimerEventFired)" />
+          <event symbol="OpServicesStunDiscoveryRequestCreate" channel="os" template="T_StunDiscoveryRequestCreate" task="StunDiscovery" opcode="win:Info" value="1307" level="win:Verbose" message="$(string.Event.OpServicesStunDiscoveryRequestCreate)" />
+          <event symbol="OpServicesStunDiscoveryRequestSendPacket" channel="os" template="T_StunDiscoveryRequestSendPacket" task="StunDiscovery" opcode="win:Send" value="1308" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryRequestSendPacket)" />
+          <event symbol="OpServicesStunDiscoveryReceivedResponsePacket" channel="os" template="T_StunDiscoveryReceivedResponsePacket" task="StunDiscovery" opcode="win:Receive" value="1309" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryReceivedResponsePacket)" />
+
+          <event symbol="OpServicesStunDiscoveryFoundMappedAddress" channel="os" template="T_StunDiscoveryFoundMappedAddress" task="StunDiscovery" opcode="win:Info" value="1310" level="win:Informational" message="$(string.Event.OpServicesStunDiscoveryFoundMappedAddress)" />
+
+          <event symbol="OpServicesStunDiscoveryError" channel="os" template="T_StunDiscoveryError" task="StunDiscovery" opcode="win:Info" value="1311" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryError)" />
+          <event symbol="OpServicesStunDiscoveryErrorUseAlternativeServer" channel="os" template="T_StunDiscoveryErrorUseAlternativeServer" task="StunDiscovery" opcode="win:Info" value="1312" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryErrorUseAlternativeServer)" />
+          <event symbol="OpServicesStunDiscoveryErrorTimeout" channel="os" template="T_StunDiscoveryErrorTimeout" task="StunDiscovery" opcode="win:Info" value="1312" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryErrorTimeout)" />
+
+          <event symbol="OpServicesTurnSocketCreate" channel="os" template="T_TurnSocketCreate" task="TurnSocket" opcode="win:Start" value="1401" level="win:Informational" message="$(string.Event.OpServicesTurnSocketCreate)" />
+          <event symbol="OpServicesTurnSocketDestroy" channel="os" template="T_BasicObject" task="TurnSocket" opcode="win:Stop" value="1402" level="win:Informational" message="$(string.Event.OpServicesTurnSocketDestroy)" />
+          <event symbol="OpServicesTurnSocketCancel" channel="os" template="T_BasicObject" task="TurnSocket" opcode="Cancel" value="1403" level="win:Informational" message="$(string.Event.OpServicesTurnSocketCancel)" />
+          <event symbol="OpServicesTurnSocketStateEventFired" channel="os" template="T_BasicObjectWithState" task="TurnSocket" opcode="StateEvent" value="1404" level="win:Informational" message="$(string.OpServicesTurnSocketStateEventFired)" />
+          <event symbol="OpServicesTurnSocketSendPacket" channel="os" template="T_TurnSocketSendPacket" task="TurnSocket" opcode="win:Send" value="1405" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacket)" />
+          <event symbol="OpServicesTurnSocketSendPacketViaChannel" channel="os" template="T_TurnSocketSendPacketViaChannel" task="TurnSocket" opcode="win:Send" value="1406" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacketViaChannel)" />
+          <event symbol="OpServicesTurnSocketSendPacketViaStun" channel="os" template="T_TurnSocketSendPacketViaStun" task="TurnSocket" opcode="win:Send" value="1407" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacketViaStun)" />
+
+          <event symbol="OpServicesTurnSocketInstallChannelWake" channel="os" template="T_TurnSocketInstallChannelWake" task="TurnSocket" opcode="win:Info" value="1408" level="win:Verbose" message="$(string.OpServicesTurnSocketInstallChannelWake)" />
+          <event symbol="OpServicesTurnSocketInstallPermissionWake" channel="os" template="T_TurnSocketInstallPermissionWake" task="TurnSocket" opcode="win:Info" value="1409" level="win:Verbose" message="$(string.OpServicesTurnSocketInstallPermissionWake)" />
+          <event symbol="OpServicesTurnSocketReceivedStunPacketData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Send" value="1410" level="win:Verbose" message="$(string.OpServicesTurnSocketReceivedStunPacketData)" />
+          <event symbol="OpServicesTurnSocketReceivedChannelData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Receive" value="1411" level="win:Verbose" message="$(string.OpServicesTurnSocketReceivedChannelData)" />
+
+          <event symbol="OpServicesTurnSocketRequesterSendStunPacket" channel="os" template="T_TurnSocketRequesterSendStunPacket" task="TurnSocket" opcode="win:Send" value="1411" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterSendStunPacket)" />
+          <event symbol="OpServicesTurnSocketRequesterReceivedStunResponse" channel="os" template="T_TurnSocketRequesterReceivedStunResponse" task="TurnSocket" opcode="win:Receive" value="1412" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterReceivedStunResponse)" />
+          <event symbol="OpServicesTurnSocketRequesterInternalTimedOutEventFired" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="TurnSocket" opcode="InternalEvent" value="1413" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterInternalTimedOutEventFired)" />
+          <event symbol="OpServicesTurnSocketRequesterCreate" channel="os" template="T_TurnSocketRequesterCreate" task="TurnSocket" opcode="win:Info" value="1414" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreate)" />
+          <event symbol="OpServicesTurnSocketRequesterCreateReauth" channel="os" template="T_TurnSocketRequesterCreateReauth" task="TurnSocket" opcode="win:Info" value="1415" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreateReauth)" />
+
+          <event symbol="OpServicesTurnSocketInternalSocketReadReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1416" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketReadReadyEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalSocketWriteReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1417" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketWriteReadyEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalSocketExceptionEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1418" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketExceptionEventFired)" />
+
+          <event symbol="OpServicesTurnSocketInternalTimerEventFired" channel="os" template="T_BasicObjectWithTimerID" task="TurnSocket" opcode="InternalEvent" value="1419" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalTimerEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalBackgroundingEventFired" channel="os" template="T_BasicObject" task="TurnSocket" opcode="InternalEvent" value="1420" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalBackgroundingEventFired)" />
+
+          <event symbol="OpServicesTurnSocketUseNextServer" channel="os" template="T_TurnSocketUseNextServer" task="TurnSocket" opcode="win:Info" value="1421" level="win:Informational" message="$(string.OpServicesTurnSocketUseNextServer)" />
+
+          <event symbol="OpServicesBackOffTimerPatternCreate" channel="os" template="T_BackOffTimerPatternCreate" task="BackOffTimerPattern" opcode="win:Start" value="1501" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternCreate)" />
+          <event symbol="OpServicesBackOffTimerPatternDestroy" channel="os" template="T_BasicObject" task="BackOffTimerPattern" opcode="win:Stop" value="1502" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternDestroy)" />
+          <event symbol="OpServicesBackOffTimerPatternClone" channel="os" template="T_BackOffTimerPatternClone" task="BackOffTimerPattern" opcode="win:Info" value="1503" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternClone)" />
+          <event symbol="OpServicesBackOffTimerPatternNextAttempt" channel="os" template="T_BackOffTimerPatternNextAttempt" task="BackOffTimerPattern" opcode="win:Info" value="1504" level="win:Verbose" message="$(string.OpServicesBackOffTimerPatternNextAttempt)" />
+
+          <event symbol="OpServicesBackOffTimerCreate" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Start" value="1601" level="win:Informational" message="$(string.OpServicesBackOffTimerCreate)" />
+          <event symbol="OpServicesBackOffTimerDestroy" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Stop" value="1602" level="win:Informational" message="$(string.OpServicesBackOffTimerDestroy)" />
+          <event symbol="OpServicesBackOffTimerNotifyAttempting" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1603" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifyAttempting)" />
+          <event symbol="OpServicesBackOffTimerNotifyAttemptFailed" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1604" level="win:Warning" message="$(string.OpServicesBackOffTimerNotifyAttemptFailed)" />
+          <event symbol="OpServicesBackOffTimerNotifyTryAgainNow" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1605" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifyTryAgainNow)" />
+          <event symbol="OpServicesBackOffTimerNotifySucceeded" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1606" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifySucceeded)" />
+          <event symbol="OpServicesBackOffTimerStateChangedEventFired" channel="os" template="T_BasicObjectWithState" task="BackOffTimer" opcode="Event" value="1607" level="win:Informational" message="$(string.OpServicesBackOffTimerStateChangedEventFired)" />
+
+          <event symbol="OpServicesSettingGetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1701" level="win:Informational" message="$(string.OpServicesSettingGetString)" />
+          <event symbol="OpServicesSettingGetInt" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1702" level="win:Informational" message="$(string.OpServicesSettingGetInt)" />
+          <event symbol="OpServicesSettingGetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1703" level="win:Informational" message="$(string.OpServicesSettingGetUInt)" />
+          <event symbol="OpServicesSettingGetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1704" level="win:Informational" message="$(string.OpServicesSettingGetBool)" />
+          <event symbol="OpServicesSettingGetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1705" level="win:Informational" message="$(string.OpServicesSettingGetFloat)" />
+          <event symbol="OpServicesSettingGetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1706" level="win:Informational" message="$(string.OpServicesSettingGetDouble)" />
+
+          <event symbol="OpServicesSettingSetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1707" level="win:Informational" message="$(string.OpServicesSettingSetString)" />
+          <event symbol="OpServicesSettingSetString" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1708" level="win:Informational" message="$(string.OpServicesSettingSetString)" />
+          <event symbol="OpServicesSettingSetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1709" level="win:Informational" message="$(string.OpServicesSettingSetUInt)" />
+          <event symbol="OpServicesSettingSetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1710" level="win:Informational" message="$(string.OpServicesSettingSetBool)" />
+          <event symbol="OpServicesSettingSetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1711" level="win:Informational" message="$(string.OpServicesSettingSetFloat)" />
+          <event symbol="OpServicesSettingSetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1712" level="win:Informational" message="$(string.OpServicesSettingSetDouble)" />
+
+          <event symbol="OpServicesSettingClearAll" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1713" level="win:Informational" message="$(string.OpServicesSettingClearAll)" />
+          <event symbol="OpServicesSettingClear" channel="os" template="T_SettingClear" task="Settings" opcode="win:Info" value="1714" level="win:Informational" message="$(string.OpServicesSettingClear)" />
+          <event symbol="OpServicesSettingApply" channel="os" template="T_SettingApply" task="Settings" opcode="win:Info" value="1715" level="win:Informational" message="$(string.OpServicesSettingApply)" />
+          <event symbol="OpServicesSettingApplyDefaults" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1716" level="win:Informational" message="$(string.OpServicesSettingApplyDefaults)" />
+          <event symbol="OpServicesSettingVerifyExists" channel="os" template="T_SettingVerifyExists" task="Settings" opcode="win:Info" value="1717" level="win:Informational" message="$(string.OpServicesSettingVerifyExists)" />
+
+          <event symbol="OpServicesCacheFetch" channel="os" template="T_CacheFetch" task="Cache" opcode="win:Info" value="1801" level="win:Informational" message="$(string.OpServicesCacheFetch)" />
+          <event symbol="OpServicesCacheStore" channel="os" template="T_CacheStore" task="Cache" opcode="win:Info" value="1802" level="win:Informational" message="$(string.OpServicesCacheStore)" />
+          <event symbol="OpServicesCacheClear" channel="os" template="T_CacheClear" task="Cache" opcode="win:Info" value="1803" level="win:Informational" message="$(string.OpServicesCacheClear)" />
+
+          <event symbol="OpServicesDnsResultListBegin" channel="os" template="T_DnsResultListBegin" task="Dns" opcode="win:DC_Start" value="1901" level="win:Informational" message="$(string.OpServicesDnsResultListBegin)" />
+          <event symbol="OpServicesDnsResultListEntry" channel="os" template="T_DnsResultListEntry" task="Dns" opcode="win:Info" value="1902" level="win:Informational" message="$(string.OpServicesDnsResultListEntry)" />
+          <event symbol="OpServicesDnsResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1903" level="win:Informational" message="$(string.OpServicesDnsResultListEnd)" />
+
+          <event symbol="OpServicesDnsSrvResultListBegin" channel="os" template="T_DnsSrvResultListBegin" task="Dns" opcode="win:DC_Start" value="1904" level="win:Informational" message="$(string.OpServicesDnsSrvResultListBegin)" />
+          <event symbol="OpServicesDnsSrvResultListEntryBegin" channel="os" template="T_DnsSrvResultListEntryBegin" task="Dns" opcode="win:DC_Start" value="1905" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEntryBegin)" />
+          <event symbol="OpServicesDnsSrvResultListEntryEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1906" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEntryEnd)" />
+          <event symbol="OpServicesDnsSrvResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1907" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEnd)" />
+
+          <event symbol="OpServicesDnsLookup" channel="os" template="T_DnsLookupName" task="Dns" opcode="Lookup" value="1908" level="win:Informational" message="$(string.OpServicesDnsLookup)" />
+          <event symbol="OpServicesDnsSrvLookup" channel="os" template="T_DnsSrvLookup" task="Dns" opcode="Lookup" value="1909" level="win:Informational" message="$(string.OpServicesDnsSrvLookup)" />
+
+          <event symbol="OpServicesDnsLookupResolverSubQuery" channel="os" template="T_DnsLookupResolverSubQuery" task="Dns" opcode="Lookup" value="1910" level="win:Informational" message="$(string.OpServicesDnsLookupResolverSubQuery)" />
+
+          <event symbol="OpServicesDnsLookupCompleteEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1911" level="win:Informational" message="$(string.OpServicesDnsLookupCompleteEventFired)" />
+          <event symbol="OpServicesDnsLookupSuccessEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1912" level="win:Informational" message="$(string.OpServicesDnsLookupSuccessEventFired)" />
+          <event symbol="OpServicesDnsLookupFailedEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1913" level="win:Informational" message="$(string.OpServicesDnsLookupFailedEventFired)" />
+
+          <event symbol="OpServicesHttpQueryCreate" channel="os" template="T_HttpQueryCreate" task="Http" opcode="win:Start" value="2001" level="win:Informational" message="$(string.OpServicesHttpQueryCreate)" />
+          <event symbol="OpServicesHttpQueryDestroy" channel="os" template="T_BasicObject" task="Http" opcode="win:Stop" value="2002" level="win:Informational" message="$(string.OpServicesHttpQueryDestroy)" />
+          <event symbol="OpServicesHttpQueryCancel" channel="os" template="T_BasicObject" task="Http" opcode="Cancel" value="2003" level="win:Informational" message="$(string.OpServicesHttpQueryCancel)" />
+          <event symbol="OpServicesHttpQueryRead" channel="os" template="T_HttpQueryRead" task="Http" opcode="win:Receive" value="2003" level="win:Informational" message="$(string.OpServicesHttpQueryRead)" />
+
+          <event symbol="OpServicesDebugLogger" channel="os" template="T_DebugLogger" task="DebugLogger" opcode="win:Info" value="2101" level="win:Informational" message="$(string.OpServicesDebugLogger)" />
         </events>
       </provider>
 
@@ -192,7 +660,11 @@
 
         <string id="Opcode.StunRequester.RetryNow" value="RetryNow"/>
 
+        <string id="Opcode.Dns.Lookup" value="Lookup"/>
+
         <string id="Opcode.Cancel" value="Cancel"/>
+        <string id="Opcode.Event" value="Event"/>
+        <string id="Opcode.StateEvent" value="StateEvent"/>
         <string id="Opcode.InternalEvent" value="InternalEvent"/>
 
         <string id="Event.OpServicesStunPacket" value="OpServicesStunPacket"/>
@@ -207,8 +679,117 @@
 
         <string id="Event.OpServicesStunRequesterManagerCreate" value="OpServicesStunRequesterManagerCreate"/>
         <string id="Event.OpServicesStunRequesterManagerDestroy" value="OpServicesStunRequesterManagerDestroy"/>
+        <string id="Event.OpServicesStunRequesterManagerMonitorStart" value="Event.OpServicesStunRequesterManagerMonitorStart"/>
+        <string id="Event.OpServicesStunRequesterManagerMonitorStop" value="Event.OpServicesStunRequesterManagerMonitorStop"/>
         <string id="Event.OpServicesStunRequesterManagerReceivedStunPacket" value="OpServicesStunRequesterManagerReceivedStunPacket"/>
 
+
+        <string id="Event.OpServicesStunDiscoveryCreate" value="OpServicesStunDiscoveryCreate"/>
+        <string id="Event.OpServicesStunDiscoveryDestroy" value="OpServicesStunDiscoveryDestroy"/>
+        <string id="Event.OpServicesStunDiscoveryCancel" value="OpServicesStunDiscoveryCancel"/>
+
+        <string id="Event.OpServicesStunDiscoveryLookupSrv" value="OpServicesStunDiscoveryLookupSrv"/>
+        <string id="Event.OpServicesStunDiscoveryInternalLookupCompleteEventFired" value="OpServicesStunDiscoveryInternalLookupCompleteEventFired"/>
+        <string id="Event.OpServicesStunDiscoveryInternalTimerEventFired" value="OpServicesStunDiscoveryInternalTimerEventFired"/>
+        <string id="Event.OpServicesStunDiscoveryRequestCreate" value="OpServicesStunDiscoveryRequestCreate"/>
+        <string id="Event.OpServicesStunDiscoveryRequestSendPacket" value="OpServicesStunDiscoveryRequestSendPacket"/>
+        <string id="Event.OpServicesStunDiscoveryReceivedResponsePacket" value="OpServicesStunDiscoveryReceivedResponsePacket"/>
+
+        <string id="Event.OpServicesStunDiscoveryFoundMappedAddress" value="OpServicesStunDiscoveryFoundMappedAddress"/>
+
+        <string id="Event.OpServicesStunDiscoveryError" value="OpServicesStunDiscoveryError"/>
+        <string id="Event.OpServicesStunDiscoveryErrorUseAlternativeServer" value="OpServicesStunDiscoveryErrorUseAlternativeServer"/>
+        <string id="Event.OpServicesStunDiscoveryErrorTimeout" value="OpServicesStunDiscoveryErrorTimeout"/>
+
+        <string id="Event.OpServicesTurnSocketCreate" value="OpServicesTurnSocketCreate"/>
+        <string id="Event.OpServicesTurnSocketDestroy" value="OpServicesTurnSocketDestroy"/>
+        <string id="Event.OpServicesTurnSocketCancel" value="OpServicesTurnSocketCancel"/>
+        <string id="Event.OpServicesTurnSocketStateEventFired" value="OpServicesTurnSocketStateEventFired"/>
+        <string id="Event.OpServicesTurnSocketSendPacket" value="OpServicesTurnSocketSendPacket"/>
+        <string id="Event.OpServicesTurnSocketSendPacketViaChannel" value="OpServicesTurnSocketSendPacketViaChannel"/>
+        <string id="Event.OpServicesTurnSocketSendPacketViaStun" value="OpServicesTurnSocketSendPacketViaStun"/>
+
+        <string id="Event.OpServicesTurnSocketInstallChannelWake" value="OpServicesTurnSocketInstallChannelWake"/>
+        <string id="Event.OpServicesTurnSocketInstallPermissionWake" value="OpServicesTurnSocketInstallPermissionWake"/>
+        <string id="Event.OpServicesTurnSocketReceivedStunPacketData" value="OpServicesTurnSocketReceivedStunPacketData"/>
+        <string id="Event.OpServicesTurnSocketReceivedChannelData" value="OpServicesTurnSocketReceivedChannelData"/>
+
+        <string id="Event.OpServicesTurnSocketRequesterSendStunPacket" value="OpServicesTurnSocketRequesterSendStunPacket"/>
+        <string id="Event.OpServicesTurnSocketRequesterReceivedStunResponse" value="OpServicesTurnSocketRequesterReceivedStunResponse"/>
+        <string id="Event.OpServicesTurnSocketRequesterInternalTimedOutEventFired" value="OpServicesTurnSocketRequesterInternalTimedOutEventFired"/>
+        <string id="Event.OpServicesTurnSocketRequesterCreate" value="OpServicesTurnSocketRequesterCreate"/>
+        <string id="Event.OpServicesTurnSocketRequesterCreateReauth" value="OpServicesTurnSocketRequesterCreateReauth"/>
+
+        <string id="Event.OpServicesTurnSocketInternalSocketReadReadyEventFired" value="OpServicesTurnSocketInternalSocketReadReadyEventFired"/>
+        <string id="Event.OpServicesTurnSocketInternalSocketWriteReadyEventFired" value="OpServicesTurnSocketInternalSocketWriteReadyEventFired"/>
+        <string id="Event.OpServicesTurnSocketInternalSocketExceptionEventFired" value="OpServicesTurnSocketInternalSocketExceptionEventFired"/>
+
+        <string id="Event.OpServicesTurnSocketInternalTimerEventFired" value="OpServicesTurnSocketInternalTimerEventFired"/>
+        <string id="Event.OpServicesTurnSocketInternalBackgroundingEventFired" value="OpServicesTurnSocketInternalBackgroundingEventFired"/>
+
+        <string id="Event.OpServicesTurnSocketUseNextServer" value="OpServicesTurnSocketUseNextServer"/>
+
+        <string id="Event.OpServicesBackOffTimerPatternCreate" value="OpServicesBackOffTimerPatternCreate"/>
+        <string id="Event.OpServicesBackOffTimerPatternDestroy" value="OpServicesBackOffTimerPatternDestroy"/>
+        <string id="Event.OpServicesBackOffTimerPatternClone" value="OpServicesBackOffTimerPatternClone"/>
+        <string id="Event.OpServicesBackOffTimerPatternNextAttempt" value="OpServicesBackOffTimerPatternNextAttempt"/>
+
+        <string id="Event.OpServicesBackOffTimerCreate" value="OpServicesBackOffTimerCreate"/>
+        <string id="Event.OpServicesBackOffTimerDestroy" value="OpServicesBackOffTimerDestroy"/>
+        <string id="Event.OpServicesBackOffTimerNotifyAttempting" value="OpServicesBackOffTimerNotifyAttempting"/>
+        <string id="Event.OpServicesBackOffTimerNotifyAttemptFailed" value="OpServicesBackOffTimerNotifyAttemptFailed"/>
+        <string id="Event.OpServicesBackOffTimerNotifyTryAgainNow" value="OpServicesBackOffTimerNotifyTryAgainNow"/>
+        <string id="Event.OpServicesBackOffTimerNotifySucceeded" value="OpServicesBackOffTimerNotifySucceeded"/>
+        <string id="Event.OpServicesBackOffTimerStateChangedEventFired" value="OpServicesBackOffTimerStateChangedEventFired"/>
+
+        <string id="Event.OpServicesSettingGetString" value="OpServicesSettingGetString"/>
+        <string id="Event.OpServicesSettingGetInt" value="OpServicesSettingGetInt"/>
+        <string id="Event.OpServicesSettingGetUInt" value="OpServicesSettingGetUInt"/>
+        <string id="Event.OpServicesSettingGetBool" value="OpServicesSettingGetBool"/>
+        <string id="Event.OpServicesSettingGetFloat" value="OpServicesSettingGetFloat"/>
+        <string id="Event.OpServicesSettingGetDouble" value="OpServicesSettingGetDouble"/>
+
+        <string id="Event.OpServicesSettingSetString" value="OpServicesSettingSetString"/>
+        <string id="Event.OpServicesSettingSetString" value="OpServicesSettingSetString"/>
+        <string id="Event.OpServicesSettingSetUInt" value="OpServicesSettingSetUInt"/>
+        <string id="Event.OpServicesSettingSetBool" value="OpServicesSettingSetBool"/>
+        <string id="Event.OpServicesSettingSetFloat" value="OpServicesSettingSetFloat"/>
+        <string id="Event.OpServicesSettingSetDouble" value="OpServicesSettingSetDouble"/>
+
+        <string id="Event.OpServicesSettingClearAll" value="OpServicesSettingClearAll"/>
+        <string id="Event.OpServicesSettingClear" value="OpServicesSettingClear"/>
+        <string id="Event.OpServicesSettingApply" value="OpServicesSettingApply"/>
+        <string id="Event.OpServicesSettingApplyDefaults" value="OpServicesSettingApplyDefaults"/>
+        <string id="Event.OpServicesSettingVerifyExists" value="OpServicesSettingVerifyExists"/>
+
+        <string id="Event.OpServicesCacheFetch" value="OpServicesCacheFetch"/>
+        <string id="Event.OpServicesCacheStore" value="OpServicesCacheStore"/>
+        <string id="Event.OpServicesCacheClear" value="OpServicesCacheClear"/>
+
+        <string id="Event.OpServicesDnsResultListBegin" value="OpServicesDnsResultListBegin"/>
+        <string id="Event.OpServicesDnsResultListEntry" value="OpServicesDnsResultListEntry"/>
+        <string id="Event.OpServicesDnsResultListEnd" value="OpServicesDnsResultListEnd"/>
+
+        <string id="Event.OpServicesDnsSrvResultListBegin" value="OpServicesDnsSrvResultListBegin"/>
+        <string id="Event.OpServicesDnsSrvResultListEntryBegin" value="OpServicesDnsSrvResultListEntryBegin"/>
+        <string id="Event.OpServicesDnsSrvResultListEntryEnd" value="OpServicesDnsSrvResultListEntryEnd"/>
+        <string id="Event.OpServicesDnsSrvResultListEnd" value="OpServicesDnsSrvResultListEnd"/>
+
+        <string id="Event.OpServicesDnsLookup" value="OpServicesDnsLookup"/>
+        <string id="Event.OpServicesDnsSrvLookup" value="OpServicesDnsSrvLookup"/>
+
+        <string id="Event.OpServicesDnsLookupResolverSubQuery" value="OpServicesDnsLookupResolverSubQuery"/>
+
+        <string id="Event.OpServicesDnsLookupCompleteEventFired" value="OpServicesDnsLookupCompleteEventFired"/>
+        <string id="Event.OpServicesDnsLookupSuccessEventFired" value="OpServicesDnsLookupSuccessEventFired"/>
+        <string id="Event.OpServicesDnsLookupFailedEventFired" value="OpServicesDnsLookupFailedEventFired"/>
+
+        <string id="Event.OpServicesHttpQueryCreate" value="OpServicesHttpQueryCreate"/>
+        <string id="Event.OpServicesHttpQueryDestroy" value="OpServicesHttpQueryDestroy"/>
+        <string id="Event.OpServicesHttpQueryCancel" value="OpServicesHttpQueryCancel"/>
+        <string id="Event.OpServicesHttpQueryRead" value="OpServicesHttpQueryRead"/>
+
+        <string id="Event.OpServicesDebugLogger" value="OpServicesDebugLogger"/>
       </stringTable>
     </resources>
   </localization>

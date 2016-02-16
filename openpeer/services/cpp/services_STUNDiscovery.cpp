@@ -210,7 +210,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::onLookupCompleted(IDNSQueryPtr query)
       {
-        EventWriteOpServicesStunDiscoveryOnLookupComplete(__func__, mID, query->getID());
+        EventWriteOpServicesStunDiscoveryInternalLookupCompleteEventFired(__func__, mID, query->getID());
 
         AutoRecursiveLock lock(mLock);
         if (query != mSRVQuery) return;
@@ -231,7 +231,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void STUNDiscovery::onTimer(TimerPtr timer)
       {
-        EventWriteOpServicesStunDiscoveryOnLookupComplete(__func__, mID, timer->getID());
+        EventWriteOpServicesStunDiscoveryInternalTimerEventFired(__func__, mID, timer->getID());
 
         AutoRecursiveLock lock(mLock);
 

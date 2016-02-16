@@ -39,7 +39,7 @@
 #else
 
 // Comment the following line to test inline versions of the same macros to test compilation
-#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+//#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
@@ -62,11 +62,11 @@
 
 #define EventWriteOpServicesStunDiscoveryCreate(xStr_Method, xPUID, xlong_long_KeepWarmPingTimeInSeconds)
 #define EventWriteOpServicesStunDiscoveryDestroy(xStr_Method, xPUID)
+#define EventWriteOpServicesStunDiscoveryCancel(xStr_Method, xPUID)
 
 #define EventWriteOpServicesStunDiscoveryLookupSrv(xStr_Method, xPUID, xPUID_DNSQuery, xStr_SrvName, xStr_Service, xStr_Protocol, xWORD_DefaultPort, xWORD_DefaultPriority, xWORD_DefaultWeight, xUInt_LookupType)
-#define EventWriteOpServicesStunDiscoveryCancel(xStr_Method, xPUID)
-#define EventWriteOpServicesStunDiscoveryOnLookupComplete(xStr_Method, xPUID, xPUID_DNSQuery)
-#define EventWriteOpServicesStunDiscoveryTimer(xStr_Method, xPUID, xPUID_Timer)
+#define EventWriteOpServicesStunDiscoveryInternalLookupCompleteEventFired(xStr_Method, xPUID, xPUID_DNSQuery)
+#define EventWriteOpServicesStunDiscoveryInternalTimerEventFired(xStr_Method, xPUID, xPUID_TimerID)
 
 #define EventWriteOpServicesStunDiscoveryRequestCreate(xStr_Method, xPUID, xPUID_STUNRequester, xStr_ServerIP, xsize_t_TransactionBufferLengthInBytes, xPtr_TransactionIDBuffer)
 #define EventWriteOpServicesStunDiscoveryRequestSendPacket(xStr_Method, xPUID, xPUID_STUNRequester, xStr_IPDestination, xsize_t_BufferLengthInBytes, xPtr_Buffer)
@@ -78,28 +78,32 @@
 #define EventWriteOpServicesStunDiscoveryErrorUseAlternativeServer(xStr_Method, xPUID, xPUID_STUNRequester, xStr_ServerIP)
 #define EventWriteOpServicesStunDiscoveryErrorTimeout(xStr_Method, xPUID, xPUID_STUNRequester)
 
-#define EventWriteOpServicesTurnSocketCreate(xStr_Method, xPUID, xStr_ServerName, xStr_ServerUsername, xStr_ServerPassword, xUInt_DnsLookupType, xBool_UseChannelBinding, xWORD_LimitChannelToRangeStart, xWORD_LimitChannelToRangeEnd) {}
-#define EventWriteOpServicesTurnSocketDestroy(xStr_Method, xPUID) {}
-#define EventWriteOpServicesTurnSocketCancel(xStr_Method, xPUID) {}
-#define EventWriteOpServicesTurnSocketStateEventFired(xStr_Method, xPUID, xStr_State) {}
-#define EventWriteOpServicesTurnSocketSendPacket(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xBool_BindIfPossible) {}
-#define EventWriteOpServicesTurnSocketSendPacketViaChannel(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xWORD_ChannelNumber) {}
-#define EventWriteOpServicesTurnSocketSendPacketViaStun(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
-#define EventWriteOpServicesTurnSocketInstallChannelOnWake(xStr_Method, xPUID, xStr_DestinationIP, xWORD_ChannelNumber) {}
-#define EventWriteOpServicesTurnSocketInstallPermissionOnWake(xStr_Method, xPUID, xStr_DestinationIP) {}
-#define EventWriteOpServicesTurnSocketReceivedStunPacketData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
-#define EventWriteOpServicesTurnSocketReceivedChannelData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
-#define EventWriteOpServicesTurnSocketRequesterSendStunPacket(xStr_Method, xPUID, xPUID_RequesterID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
-#define EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(xStr_Method, xPUID, xPUID_RequesterID, xStr_FromIP) {}
-#define EventWriteOpServicesTurnSocketRequesterTimedOut(xStr_Method, xPUID, xPUID_RequesterID) {}
-#define EventWriteOpServicesTurnSocketRequesterCreate(xStr_Method, xPUID, xPUID_RequesterID, xStr_Type) {}
-#define EventWriteOpServicesTurnSocketRequesterCreateReauth(xStr_Method, xPUID, xPUID_RequesterID, xPUID_OldRequesterID) {}
-#define EventWriteOpServicesTurnSocketReadReady(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
-#define EventWriteOpServicesTurnSocketWriteReady(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
-#define EventWriteOpServicesTurnSocketException(xStr_Method, xPUID, xPTRNUMBER_SocketID) {}
-#define EventWriteOpServicesTurnSocketInternalTimerEventFired(xStr_Method, xPUID, xPUID_TimerID) {}
-#define EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(xStr_Method, xPUID) {}
-#define EventWriteOpServicesTurnSocketUseNextServer(xStr_Method, xPUID, xStr_ServerIP, xBool_IsUDP) {}
+#define EventWriteOpServicesTurnSocketCreate(xStr_Method, xPUID, xStr_ServerName, xStr_ServerUsername, xStr_ServerPassword, xUInt_DnsLookupType, xBool_UseChannelBinding, xWORD_LimitChannelToRangeStart, xWORD_LimitChannelToRangeEnd)
+#define EventWriteOpServicesTurnSocketDestroy(xStr_Method, xPUID)
+#define EventWriteOpServicesTurnSocketCancel(xStr_Method, xPUID)
+#define EventWriteOpServicesTurnSocketStateEventFired(xStr_Method, xPUID, xStr_State)
+#define EventWriteOpServicesTurnSocketSendPacket(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xBool_BindIfPossible)
+#define EventWriteOpServicesTurnSocketSendPacketViaChannel(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xWORD_ChannelNumber)
+#define EventWriteOpServicesTurnSocketSendPacketViaStun(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer)
+
+#define EventWriteOpServicesTurnSocketInstallChannelWake(xStr_Method, xPUID, xStr_DestinationIP, xWORD_ChannelNumber)
+#define EventWriteOpServicesTurnSocketInstallPermissionWake(xStr_Method, xPUID, xStr_DestinationIP)
+#define EventWriteOpServicesTurnSocketReceivedStunPacketData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer)
+#define EventWriteOpServicesTurnSocketReceivedChannelData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer)
+
+#define EventWriteOpServicesTurnSocketRequesterSendStunPacket(xStr_Method, xPUID, xPUID_RequesterID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer)
+#define EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(xStr_Method, xPUID, xPUID_RequesterID, xStr_FromIP)
+#define EventWriteOpServicesTurnSocketRequesterInternalTimedOutEventFired(xStr_Method, xPUID, xPUID_RequesterID)
+#define EventWriteOpServicesTurnSocketRequesterCreate(xStr_Method, xPUID, xPUID_RequesterID, xStr_Type)
+#define EventWriteOpServicesTurnSocketRequesterCreateReauth(xStr_Method, xPUID, xPUID_RequesterID, xPUID_OldRequesterID)
+
+#define EventWriteOpServicesTurnSocketInternalSocketReadReadyEventFired(xStr_Method, xPUID, xPTRNUMBER_SocketID)
+#define EventWriteOpServicesTurnSocketInternalSocketWriteReadyEventFired(xStr_Method, xPUID, xPTRNUMBER_SocketID)
+#define EventWriteOpServicesTurnSocketInternalSocketExceptionEventFired(xStr_Method, xPUID, xPTRNUMBER_SocketID)
+#define EventWriteOpServicesTurnSocketInternalTimerEventFired(xStr_Method, xPUID, xPUID_TimerID)
+#define EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(xStr_Method, xPUID)
+
+#define EventWriteOpServicesTurnSocketUseNextServer(xStr_Method, xPUID, xStr_ServerIP, xBool_IsUDP)
 
 #define EventWriteOpServicesBackOffTimerPatternCreate(xStr_Method, xPUID, xsize_t_MaxAttempts, xsize_t_DurationVectorSize, xlong_long_FrontDurationVectorInMicroseconds, xDouble_AttemptTimeoutMultiplier, xlong_long_MaxAttemptTimeoutInMicroseconds, xsize_t_RetryVector, xlong_long_FrontRetryVectorInMicroseconds, xDouble_RetryMultiplier, xlong_long_MaxRetryInMicroseconds)
 #define EventWriteOpServicesBackOffTimerPatternDestroy(xStr_Method, xPUID)
@@ -135,7 +139,7 @@
 #define EventWriteOpServicesSettingVerifyExists(xStr_Method, xPUID, xStr_Key, xBool_Exists)
 
 #define EventWriteOpServicesCacheFetch(xStr_Method, xPUID, xStr_CookieNamePath, xStr_Result)
-#define EventWriteOpServicesCacheStore(xStr_Method, xPUID, xStr_CookieNamePath, xStr_Expires, xStr_Value)
+#define EventWriteOpServicesCacheStore(xStr_Method, xPUID, xStr_CookieNamePath, xlong_long_ExpiresInSecondsSinceEpoch, xStr_Value)
 #define EventWriteOpServicesCacheClear(xStr_Method, xPUID, xStr_CookieNamePath)
 
 #define EventWriteOpServicesDnsResultListBegin(xStr_Method, xStr_Message, xStr_Name, xUInt_TTL, xsize_t_TotalIPAddresses)
@@ -152,10 +156,9 @@
 
 #define EventWriteOpServicesDnsLookupResolverSubQuery(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name, xPUID_RelatedQueryObjectID)
 
-#define EventWriteOpServicesDnsLookupComplete(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
-
-#define EventWriteOpServicesDnsLookupSuccess(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
-#define EventWriteOpServicesDnsLookupFailed(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
+#define EventWriteOpServicesDnsLookupCompleteEventFired(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
+#define EventWriteOpServicesDnsLookupSuccessEventFired(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
+#define EventWriteOpServicesDnsLookupFailedEventFired(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 
 #define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xsize_t_PostDataLengthInBytes, xPtr_PostData, xStr_PostMimeType, xlong_long_TimeoutInMilliseconds)
 #define EventWriteOpServicesHttpQueryDestroy(xStr_Method, xPUID)
@@ -190,11 +193,11 @@ inline void EventWriteOpServicesStunRequesterManagerReceivedStunPacket(const cha
 
 inline void EventWriteOpServicesStunDiscoveryCreate(const char *xStr_Method, PUID xPUID, long long xlong_long_KeepWarmPingTimeInSeconds) {}
 inline void EventWriteOpServicesStunDiscoveryDestroy(const char *xStr_Method, PUID xPUID) {}
+inline void EventWriteOpServicesStunDiscoveryCancel(const char *xStr_Method, PUID xPUID) {}
 
 inline void EventWriteOpServicesStunDiscoveryLookupSrv(const char *xStr_Method, PUID xPUID, PUID xPUID_DNSQuery, const char *xStr_SrvName, const char *xStr_Service, const char *xStr_Protocol, WORD xWORD_DefaultPort, WORD xWORD_DefaultPriority, WORD xWORD_DefaultWeight, unsigned int xUInt_LookupType) {}
-inline void EventWriteOpServicesStunDiscoveryCancel(const char *xStr_Method, PUID xPUID) {}
-inline void EventWriteOpServicesStunDiscoveryOnLookupComplete(const char *xStr_Method, PUID xPUID, PUID xPUID_DNSQuery) {}
-inline void EventWriteOpServicesStunDiscoveryTimer(const char *xStr_Method, PUID xPUID, PUID xPUID_Timer) {}
+inline void EventWriteOpServicesStunDiscoveryInternalLookupCompleteEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_DNSQuery) {}
+inline void EventWriteOpServicesStunDiscoveryInternalTimerEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID) {}
 
 inline void EventWriteOpServicesStunDiscoveryRequestCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_ServerIP, size_t xsize_t_TransactionBufferLengthInBytes, const BYTE *xPtr_TransactionIDBuffer) {}
 inline void EventWriteOpServicesStunDiscoveryRequestSendPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_IPDestination, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
@@ -213,20 +216,24 @@ inline void EventWriteOpServicesTurnSocketStateEventFired(const char *xStr_Metho
 inline void EventWriteOpServicesTurnSocketSendPacket(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer, bool xBool_BindIfPossible) {}
 inline void EventWriteOpServicesTurnSocketSendPacketViaChannel(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer, WORD xWORD_ChannelNumber) {}
 inline void EventWriteOpServicesTurnSocketSendPacketViaStun(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
-inline void EventWriteOpServicesTurnSocketInstallChannelOnWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, WORD xWORD_ChannelNumber) {}
-inline void EventWriteOpServicesTurnSocketInstallPermissionOnWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP) {}
+
+inline void EventWriteOpServicesTurnSocketInstallChannelWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, WORD xWORD_ChannelNumber) {}
+inline void EventWriteOpServicesTurnSocketInstallPermissionWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP) {}
 inline void EventWriteOpServicesTurnSocketReceivedStunPacketData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
 inline void EventWriteOpServicesTurnSocketReceivedChannelData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
+
 inline void EventWriteOpServicesTurnSocketRequesterSendStunPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
 inline void EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_FromIP) {}
-inline void EventWriteOpServicesTurnSocketRequesterTimedOut(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID) {}
+inline void EventWriteOpServicesTurnSocketRequesterInternalTimedOutEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID) {}
 inline void EventWriteOpServicesTurnSocketRequesterCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_Type) {}
 inline void EventWriteOpServicesTurnSocketRequesterCreateReauth(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, PUID xPUID_OldRequesterID) {}
-inline void EventWriteOpServicesTurnSocketReadReady(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
-inline void EventWriteOpServicesTurnSocketWriteReady(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
-inline void EventWriteOpServicesTurnSocketException(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
+
+inline void EventWriteOpServicesTurnSocketInternalSocketReadReadyEventFired(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
+inline void EventWriteOpServicesTurnSocketInternalSocketWriteReadyEventFired(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
+inline void EventWriteOpServicesTurnSocketInternalSocketExceptionEventFired(const char *xStr_Method, PUID xPUID, PTRNUMBER xPTRNUMBER_SocketID) {}
 inline void EventWriteOpServicesTurnSocketInternalTimerEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID) {}
 inline void EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(const char *xStr_Method, PUID xPUID) {}
+
 inline void EventWriteOpServicesTurnSocketUseNextServer(const char *xStr_Method, PUID xPUID, const char *xStr_ServerIP, bool xBool_IsUDP) {}
 
 inline void EventWriteOpServicesBackOffTimerPatternCreate(const char *xStr_Method, PUID xPUID, size_t xsize_t_MaxAttempts, size_t xsize_t_DurationVectorSize, long long xlong_long_FrontDurationVectorInMicroseconds, double xDouble_AttemptTimeoutMultiplier, long long xlong_long_MaxAttemptTimeoutInMicroseconds, size_t xsize_t_RetryVector, long long xlong_long_FrontRetryVectorInMicroseconds, double xDouble_RetryMultiplier, long long xlong_long_MaxRetryInMicroseconds) {}
@@ -263,7 +270,7 @@ inline void EventWriteOpServicesSettingApplyDefaults(const char *xStr_Method, PU
 inline void EventWriteOpServicesSettingVerifyExists(const char *xStr_Method, PUID xPUID, const char *xStr_Key, bool xBool_Exists) {}
 
 inline void EventWriteOpServicesCacheFetch(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath, const char *xStr_Result) {}
-inline void EventWriteOpServicesCacheStore(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath, const char *xStr_Expires, const char *xStr_Value) {}
+inline void EventWriteOpServicesCacheStore(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath, long long xlong_long_ExpiresInSecondsSinceEpoch, const char *xStr_Value) {}
 inline void EventWriteOpServicesCacheClear(const char *xStr_Method, PUID xPUID, const char *xStr_CookieNamePath) {}
 
 inline void EventWriteOpServicesDnsResultListBegin(const char *xStr_Method, const char *xStr_Message, const char *xStr_Name, unsigned int xUInt_TTL, size_t xsize_t_TotalIPAddresses) {}
@@ -280,10 +287,9 @@ inline void EventWriteOpServicesDnsSrvLookup(const char *xStr_Method, PUID xPUID
 
 inline void EventWriteOpServicesDnsLookupResolverSubQuery(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name, PUID xPUID_RelatedQueryObjectID) {}
 
-inline void EventWriteOpServicesDnsLookupComplete(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
-
-inline void EventWriteOpServicesDnsLookupSuccess(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
-inline void EventWriteOpServicesDnsLookupFailed(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
+inline void EventWriteOpServicesDnsLookupCompleteEventFired(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
+inline void EventWriteOpServicesDnsLookupSuccessEventFired(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
+inline void EventWriteOpServicesDnsLookupFailedEventFired(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 
 inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, size_t xsize_t_PostDataLengthInBytes, const BYTE *xPtr_PostData, const char *xStr_PostMimeType, long long xlong_long_TimeoutInMilliseconds) {}
 inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID xPUID) {}

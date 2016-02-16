@@ -683,14 +683,14 @@ namespace openpeer
               }
               ZS_LOG_DEBUG(log("A record found") + ZS_PARAM("ip", ipAddress.string()))
             }
-            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "A", mName);
+            EventWriteOpServicesDnsLookupSuccessEventFired(__func__, mID, "A", mName);
             mA->trace(__func__);
           } else {
-            EventWriteOpServicesDnsLookupFailed(__func__, mID, "A", mName);
+            EventWriteOpServicesDnsLookupFailedEventFired(__func__, mID, "A", mName);
             ZS_LOG_DEBUG(log("A record lookup failed") + ZS_PARAM("name", mName))
           }
 
-          EventWriteOpServicesDnsLookupComplete(__func__, mID, "A", mName);
+          EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "A", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -772,14 +772,14 @@ namespace openpeer
               }
               ZS_LOG_DEBUG(log("AAAA record found") + ZS_PARAM("ip", ipAddress.string()))
             }
-            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "AAAA", mName);
+            EventWriteOpServicesDnsLookupSuccessEventFired(__func__, mID, "AAAA", mName);
             mAAAA->trace(__func__);
           } else {
-            EventWriteOpServicesDnsLookupFailed(__func__, mID, "AAAA", mName);
+            EventWriteOpServicesDnsLookupFailedEventFired(__func__, mID, "AAAA", mName);
             ZS_LOG_DEBUG(log("AAAA record lookup failed") + ZS_PARAM("name", mName))
           }
 
-          EventWriteOpServicesDnsLookupComplete(__func__, mID, "AAAA", mName);
+          EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "AAAA", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -899,14 +899,14 @@ namespace openpeer
                 ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
               }
             }
-            EventWriteOpServicesDnsLookupSuccess(__func__, mID, "SRV", mName);
+            EventWriteOpServicesDnsLookupSuccessEventFired(__func__, mID, "SRV", mName);
             mSRV->trace(__func__);
           } else {
-            EventWriteOpServicesDnsLookupFailed(__func__, mID, "SRV", mName);
+            EventWriteOpServicesDnsLookupFailedEventFired(__func__, mID, "SRV", mName);
             ZS_LOG_DEBUG(log("SRV record lookup failed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
           }
 
-          EventWriteOpServicesDnsLookupComplete(__func__, mID, "SRV", mName);
+          EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "SRV", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -981,7 +981,7 @@ namespace openpeer
 
           if (!mDelegate) return;
 
-          EventWriteOpServicesDnsLookupComplete(__func__, mID, "A or AAAA", mName);
+          EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "A or AAAA", mName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -1505,7 +1505,7 @@ namespace openpeer
 
           mResolvers.clear();
 
-          EventWriteOpServicesDnsLookupComplete(__func__, mID, "SRV", mOriginalName);
+          EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "SRV", mOriginalName);
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
@@ -2068,7 +2068,7 @@ namespace openpeer
 
               bool isSRV = pThis->mServiceName.hasData();
 
-              EventWriteOpServicesDnsLookupSuccess(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
+              EventWriteOpServicesDnsLookupSuccessEventFired(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
 
               if (nullptr != response) {
                 AutoRecursiveLock lock(*pThis);
@@ -2229,7 +2229,7 @@ namespace openpeer
               }
             } catch (Platform::Exception ^ex) {
               if (pThis) {
-                EventWriteOpServicesDnsLookupFailed(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
+                EventWriteOpServicesDnsLookupFailedEventFired(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
                 ZS_LOG_WARNING(Detail, slog(id, "exception caught") + ZS_PARAM("error", String(ex->Message->Data())) + pThis->toDebug())
                 pThis->cancel();
               }
@@ -2286,7 +2286,7 @@ namespace openpeer
           if (delegate) {
             ZS_LOG_TRACE(log("query completed"))
 
-            EventWriteOpServicesDnsLookupComplete(__func__, mID, mLookupTypeDebugName, mName);
+            EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, mLookupTypeDebugName, mName);
 
             auto pThis = mThisWeak.lock();
             if (pThis) {

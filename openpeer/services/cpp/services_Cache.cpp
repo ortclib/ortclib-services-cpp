@@ -140,7 +140,7 @@ namespace openpeer
                         const char *str
                         )
       {
-        EventWriteOpServicesCacheStore(__func__, mID, cookieNamePath, string(expires), str);
+        EventWriteOpServicesCacheStore(__func__, mID, cookieNamePath, zsLib::timeSinceEpoch<Seconds>(expires).count(), str);
 
         if (!cookieNamePath) return;
         if (!str) {

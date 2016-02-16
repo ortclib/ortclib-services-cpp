@@ -435,7 +435,7 @@ namespace openpeer
                 mChannelIPMap[destination] = info;
                 mChannelNumberMap[freeChannelNumber] = info;
 
-                EventWriteOpServicesTurnSocketInstallChannelOnWake(__func__, mID, destination.string(), freeChannelNumber);
+                EventWriteOpServicesTurnSocketInstallChannelWake(__func__, mID, destination.string(), freeChannelNumber);
 
                 IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
               }
@@ -467,7 +467,7 @@ namespace openpeer
 
               mPermissions[destination] = permission;
 
-              EventWriteOpServicesTurnSocketInstallPermissionOnWake(__func__, mID, destination.string());
+              EventWriteOpServicesTurnSocketInstallPermissionWake(__func__, mID, destination.string());
 
               // since the permission isn't installed yet we can't send the data just yet... best kick start that permission now...
               (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
@@ -846,7 +846,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onReadReady(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketReadReady(__func__, mID, socket->getSocket());
+        EventWriteOpServicesTurnSocketInternalSocketReadReadyEventFired(__func__, mID, socket->getSocket());
 
         try
         {
@@ -1078,7 +1078,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onWriteReady(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketWriteReady(__func__, mID, socket->getSocket());
+        EventWriteOpServicesTurnSocketInternalSocketWriteReadyEventFired(__func__, mID, socket->getSocket());
 
         AutoRecursiveLock lock(mLock);
 
@@ -1118,7 +1118,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void TURNSocket::onException(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketException(__func__, mID, socket->getSocket());
+        EventWriteOpServicesTurnSocketInternalSocketExceptionEventFired(__func__, mID, socket->getSocket());
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
