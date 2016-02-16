@@ -301,6 +301,12 @@
             <data inType="win:UInt64"     name="StunRequesterObjectID" />
             <data inType="win:AnsiString" name="Type" />
           </template>
+          <template tid="T_TurnSocketRequesterCreateReauth">
+            <data inType="win:AnsiString" name="Method" />
+            <data inType="win:UInt64"     name="ObjectID" />
+            <data inType="win:UInt64"     name="StunRequesterObjectID" />
+            <data inType="win:UInt64"     name="OldStunRequesterObjectID" />
+          </template>
           <template tid="T_BasicWithSocketID">
             <data inType="win:AnsiString" name="Method" />
             <data inType="win:UInt64"     name="ObjectID" />
@@ -536,97 +542,97 @@
 
           <event symbol="OpServicesStunDiscoveryError" channel="os" template="T_StunDiscoveryError" task="StunDiscovery" opcode="win:Info" value="1311" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryError)" />
           <event symbol="OpServicesStunDiscoveryErrorUseAlternativeServer" channel="os" template="T_StunDiscoveryErrorUseAlternativeServer" task="StunDiscovery" opcode="win:Info" value="1312" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryErrorUseAlternativeServer)" />
-          <event symbol="OpServicesStunDiscoveryErrorTimeout" channel="os" template="T_StunDiscoveryErrorTimeout" task="StunDiscovery" opcode="win:Info" value="1312" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryErrorTimeout)" />
+          <event symbol="OpServicesStunDiscoveryErrorTimeout" channel="os" template="T_StunDiscoveryErrorTimeout" task="StunDiscovery" opcode="win:Info" value="1313" level="win:Error" message="$(string.Event.OpServicesStunDiscoveryErrorTimeout)" />
 
           <event symbol="OpServicesTurnSocketCreate" channel="os" template="T_TurnSocketCreate" task="TurnSocket" opcode="win:Start" value="1401" level="win:Informational" message="$(string.Event.OpServicesTurnSocketCreate)" />
           <event symbol="OpServicesTurnSocketDestroy" channel="os" template="T_BasicObject" task="TurnSocket" opcode="win:Stop" value="1402" level="win:Informational" message="$(string.Event.OpServicesTurnSocketDestroy)" />
           <event symbol="OpServicesTurnSocketCancel" channel="os" template="T_BasicObject" task="TurnSocket" opcode="Cancel" value="1403" level="win:Informational" message="$(string.Event.OpServicesTurnSocketCancel)" />
-          <event symbol="OpServicesTurnSocketStateEventFired" channel="os" template="T_BasicObjectWithState" task="TurnSocket" opcode="StateEvent" value="1404" level="win:Informational" message="$(string.OpServicesTurnSocketStateEventFired)" />
-          <event symbol="OpServicesTurnSocketSendPacket" channel="os" template="T_TurnSocketSendPacket" task="TurnSocket" opcode="win:Send" value="1405" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacket)" />
-          <event symbol="OpServicesTurnSocketSendPacketViaChannel" channel="os" template="T_TurnSocketSendPacketViaChannel" task="TurnSocket" opcode="win:Send" value="1406" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacketViaChannel)" />
-          <event symbol="OpServicesTurnSocketSendPacketViaStun" channel="os" template="T_TurnSocketSendPacketViaStun" task="TurnSocket" opcode="win:Send" value="1407" level="win:Informational" message="$(string.OpServicesTurnSocketSendPacketViaStun)" />
+          <event symbol="OpServicesTurnSocketStateEventFired" channel="os" template="T_BasicObjectWithState" task="TurnSocket" opcode="StateEvent" value="1404" level="win:Informational" message="$(string.Event.OpServicesTurnSocketStateEventFired)" />
+          <event symbol="OpServicesTurnSocketSendPacket" channel="os" template="T_TurnSocketSendPacket" task="TurnSocket" opcode="win:Send" value="1405" level="win:Informational" message="$(string.Event.OpServicesTurnSocketSendPacket)" />
+          <event symbol="OpServicesTurnSocketSendPacketViaChannel" channel="os" template="T_TurnSocketSendPacketViaChannel" task="TurnSocket" opcode="win:Send" value="1406" level="win:Informational" message="$(string.Event.OpServicesTurnSocketSendPacketViaChannel)" />
+          <event symbol="OpServicesTurnSocketSendPacketViaStun" channel="os" template="T_TurnSocketSendPacketViaStun" task="TurnSocket" opcode="win:Send" value="1407" level="win:Informational" message="$(string.Event.OpServicesTurnSocketSendPacketViaStun)" />
 
-          <event symbol="OpServicesTurnSocketInstallChannelWake" channel="os" template="T_TurnSocketInstallChannelWake" task="TurnSocket" opcode="win:Info" value="1408" level="win:Verbose" message="$(string.OpServicesTurnSocketInstallChannelWake)" />
-          <event symbol="OpServicesTurnSocketInstallPermissionWake" channel="os" template="T_TurnSocketInstallPermissionWake" task="TurnSocket" opcode="win:Info" value="1409" level="win:Verbose" message="$(string.OpServicesTurnSocketInstallPermissionWake)" />
-          <event symbol="OpServicesTurnSocketReceivedStunPacketData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Send" value="1410" level="win:Verbose" message="$(string.OpServicesTurnSocketReceivedStunPacketData)" />
-          <event symbol="OpServicesTurnSocketReceivedChannelData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Receive" value="1411" level="win:Verbose" message="$(string.OpServicesTurnSocketReceivedChannelData)" />
+          <event symbol="OpServicesTurnSocketInstallChannelWake" channel="os" template="T_TurnSocketInstallChannelWake" task="TurnSocket" opcode="win:Info" value="1408" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInstallChannelWake)" />
+          <event symbol="OpServicesTurnSocketInstallPermissionWake" channel="os" template="T_TurnSocketInstallPermissionWake" task="TurnSocket" opcode="win:Info" value="1409" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInstallPermissionWake)" />
+          <event symbol="OpServicesTurnSocketReceivedStunPacketData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Send" value="1410" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketReceivedStunPacketData)" />
+          <event symbol="OpServicesTurnSocketReceivedChannelData" channel="os" template="T_BasicWithPeerAndBuffer" task="TurnSocket" opcode="win:Receive" value="1411" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketReceivedChannelData)" />
 
-          <event symbol="OpServicesTurnSocketRequesterSendStunPacket" channel="os" template="T_TurnSocketRequesterSendStunPacket" task="TurnSocket" opcode="win:Send" value="1411" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterSendStunPacket)" />
-          <event symbol="OpServicesTurnSocketRequesterReceivedStunResponse" channel="os" template="T_TurnSocketRequesterReceivedStunResponse" task="TurnSocket" opcode="win:Receive" value="1412" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterReceivedStunResponse)" />
-          <event symbol="OpServicesTurnSocketInternalRequesterTimedOutEventFired" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="TurnSocket" opcode="InternalEvent" value="1413" level="win:Informational" message="$(string.OpServicesTurnSocketInternalRequesterTimedOutEventFired)" />
-          <event symbol="OpServicesTurnSocketRequesterCreate" channel="os" template="T_TurnSocketRequesterCreate" task="TurnSocket" opcode="win:Info" value="1414" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreate)" />
-          <event symbol="OpServicesTurnSocketRequesterCreateReauth" channel="os" template="T_TurnSocketRequesterCreateReauth" task="TurnSocket" opcode="win:Info" value="1415" level="win:Informational" message="$(string.OpServicesTurnSocketRequesterCreateReauth)" />
+          <event symbol="OpServicesTurnSocketRequesterSendStunPacket" channel="os" template="T_TurnSocketRequesterSendStunPacket" task="TurnSocket" opcode="win:Send" value="1412" level="win:Informational" message="$(string.Event.OpServicesTurnSocketRequesterSendStunPacket)" />
+          <event symbol="OpServicesTurnSocketRequesterReceivedStunResponse" channel="os" template="T_TurnSocketRequesterReceivedStunResponse" task="TurnSocket" opcode="win:Receive" value="1413" level="win:Informational" message="$(string.Event.OpServicesTurnSocketRequesterReceivedStunResponse)" />
+          <event symbol="OpServicesTurnSocketInternalRequesterTimedOutEventFired" channel="os" template="T_BasicObjectWithStunRequesterObjectID" task="TurnSocket" opcode="InternalEvent" value="1414" level="win:Informational" message="$(string.Event.OpServicesTurnSocketInternalRequesterTimedOutEventFired)" />
+          <event symbol="OpServicesTurnSocketRequesterCreate" channel="os" template="T_TurnSocketRequesterCreate" task="TurnSocket" opcode="win:Info" value="1415" level="win:Informational" message="$(string.Event.OpServicesTurnSocketRequesterCreate)" />
+          <event symbol="OpServicesTurnSocketRequesterCreateReauth" channel="os" template="T_TurnSocketRequesterCreateReauth" task="TurnSocket" opcode="win:Info" value="1416" level="win:Informational" message="$(string.Event.OpServicesTurnSocketRequesterCreateReauth)" />
 
-          <event symbol="OpServicesTurnSocketInternalSocketReadReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1416" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketReadReadyEventFired)" />
-          <event symbol="OpServicesTurnSocketInternalSocketWriteReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1417" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketWriteReadyEventFired)" />
-          <event symbol="OpServicesTurnSocketInternalSocketExceptionEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1418" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalSocketExceptionEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalSocketReadReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1417" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInternalSocketReadReadyEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalSocketWriteReadyEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1418" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInternalSocketWriteReadyEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalSocketExceptionEventFired" channel="os" template="T_BasicWithSocketID" task="TurnSocket" opcode="InternalEvent" value="1419" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInternalSocketExceptionEventFired)" />
 
-          <event symbol="OpServicesTurnSocketInternalTimerEventFired" channel="os" template="T_BasicObjectWithTimerID" task="TurnSocket" opcode="InternalEvent" value="1419" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalTimerEventFired)" />
-          <event symbol="OpServicesTurnSocketInternalBackgroundingEventFired" channel="os" template="T_BasicObject" task="TurnSocket" opcode="InternalEvent" value="1420" level="win:Verbose" message="$(string.OpServicesTurnSocketInternalBackgroundingEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalTimerEventFired" channel="os" template="T_BasicObjectWithTimerID" task="TurnSocket" opcode="InternalEvent" value="1420" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInternalTimerEventFired)" />
+          <event symbol="OpServicesTurnSocketInternalBackgroundingEventFired" channel="os" template="T_BasicObject" task="TurnSocket" opcode="InternalEvent" value="1421" level="win:Verbose" message="$(string.Event.OpServicesTurnSocketInternalBackgroundingEventFired)" />
 
-          <event symbol="OpServicesTurnSocketUseNextServer" channel="os" template="T_TurnSocketUseNextServer" task="TurnSocket" opcode="win:Info" value="1421" level="win:Informational" message="$(string.OpServicesTurnSocketUseNextServer)" />
+          <event symbol="OpServicesTurnSocketUseNextServer" channel="os" template="T_TurnSocketUseNextServer" task="TurnSocket" opcode="win:Info" value="1422" level="win:Informational" message="$(string.Event.OpServicesTurnSocketUseNextServer)" />
 
-          <event symbol="OpServicesBackOffTimerPatternCreate" channel="os" template="T_BackOffTimerPatternCreate" task="BackOffTimerPattern" opcode="win:Start" value="1501" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternCreate)" />
-          <event symbol="OpServicesBackOffTimerPatternDestroy" channel="os" template="T_BasicObject" task="BackOffTimerPattern" opcode="win:Stop" value="1502" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternDestroy)" />
-          <event symbol="OpServicesBackOffTimerPatternClone" channel="os" template="T_BackOffTimerPatternClone" task="BackOffTimerPattern" opcode="win:Info" value="1503" level="win:Informational" message="$(string.OpServicesBackOffTimerPatternClone)" />
-          <event symbol="OpServicesBackOffTimerPatternNextAttempt" channel="os" template="T_BackOffTimerPatternNextAttempt" task="BackOffTimerPattern" opcode="win:Info" value="1504" level="win:Verbose" message="$(string.OpServicesBackOffTimerPatternNextAttempt)" />
+          <event symbol="OpServicesBackOffTimerPatternCreate" channel="os" template="T_BackOffTimerPatternCreate" task="BackOffTimerPattern" opcode="win:Start" value="1501" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerPatternCreate)" />
+          <event symbol="OpServicesBackOffTimerPatternDestroy" channel="os" template="T_BasicObject" task="BackOffTimerPattern" opcode="win:Stop" value="1502" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerPatternDestroy)" />
+          <event symbol="OpServicesBackOffTimerPatternClone" channel="os" template="T_BackOffTimerPatternClone" task="BackOffTimerPattern" opcode="win:Info" value="1503" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerPatternClone)" />
+          <event symbol="OpServicesBackOffTimerPatternNextAttempt" channel="os" template="T_BackOffTimerPatternNextAttempt" task="BackOffTimerPattern" opcode="win:Info" value="1504" level="win:Verbose" message="$(string.Event.OpServicesBackOffTimerPatternNextAttempt)" />
 
-          <event symbol="OpServicesBackOffTimerCreate" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Start" value="1601" level="win:Informational" message="$(string.OpServicesBackOffTimerCreate)" />
-          <event symbol="OpServicesBackOffTimerDestroy" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Stop" value="1602" level="win:Informational" message="$(string.OpServicesBackOffTimerDestroy)" />
-          <event symbol="OpServicesBackOffTimerNotifyAttempting" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1603" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifyAttempting)" />
-          <event symbol="OpServicesBackOffTimerNotifyAttemptFailed" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1604" level="win:Warning" message="$(string.OpServicesBackOffTimerNotifyAttemptFailed)" />
-          <event symbol="OpServicesBackOffTimerNotifyTryAgainNow" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1605" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifyTryAgainNow)" />
-          <event symbol="OpServicesBackOffTimerNotifySucceeded" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1606" level="win:Informational" message="$(string.OpServicesBackOffTimerNotifySucceeded)" />
-          <event symbol="OpServicesBackOffTimerStateChangedEventFired" channel="os" template="T_BasicObjectWithState" task="BackOffTimer" opcode="Event" value="1607" level="win:Informational" message="$(string.OpServicesBackOffTimerStateChangedEventFired)" />
+          <event symbol="OpServicesBackOffTimerCreate" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Start" value="1601" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerCreate)" />
+          <event symbol="OpServicesBackOffTimerDestroy" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Stop" value="1602" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerDestroy)" />
+          <event symbol="OpServicesBackOffTimerNotifyAttempting" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1603" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerNotifyAttempting)" />
+          <event symbol="OpServicesBackOffTimerNotifyAttemptFailed" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1604" level="win:Warning" message="$(string.Event.OpServicesBackOffTimerNotifyAttemptFailed)" />
+          <event symbol="OpServicesBackOffTimerNotifyTryAgainNow" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1605" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerNotifyTryAgainNow)" />
+          <event symbol="OpServicesBackOffTimerNotifySucceeded" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1606" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerNotifySucceeded)" />
+          <event symbol="OpServicesBackOffTimerStateChangedEventFired" channel="os" template="T_BasicObjectWithState" task="BackOffTimer" opcode="Event" value="1607" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerStateChangedEventFired)" />
 
-          <event symbol="OpServicesSettingGetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1701" level="win:Informational" message="$(string.OpServicesSettingGetString)" />
-          <event symbol="OpServicesSettingGetInt" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1702" level="win:Informational" message="$(string.OpServicesSettingGetInt)" />
-          <event symbol="OpServicesSettingGetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1703" level="win:Informational" message="$(string.OpServicesSettingGetUInt)" />
-          <event symbol="OpServicesSettingGetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1704" level="win:Informational" message="$(string.OpServicesSettingGetBool)" />
-          <event symbol="OpServicesSettingGetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1705" level="win:Informational" message="$(string.OpServicesSettingGetFloat)" />
-          <event symbol="OpServicesSettingGetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1706" level="win:Informational" message="$(string.OpServicesSettingGetDouble)" />
+          <event symbol="OpServicesSettingGetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1701" level="win:Informational" message="$(string.Event.OpServicesSettingGetString)" />
+          <event symbol="OpServicesSettingGetInt" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1702" level="win:Informational" message="$(string.Event.OpServicesSettingGetInt)" />
+          <event symbol="OpServicesSettingGetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1703" level="win:Informational" message="$(string.Event.OpServicesSettingGetUInt)" />
+          <event symbol="OpServicesSettingGetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1704" level="win:Informational" message="$(string.Event.OpServicesSettingGetBool)" />
+          <event symbol="OpServicesSettingGetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1705" level="win:Informational" message="$(string.Event.OpServicesSettingGetFloat)" />
+          <event symbol="OpServicesSettingGetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1706" level="win:Informational" message="$(string.Event.OpServicesSettingGetDouble)" />
 
-          <event symbol="OpServicesSettingSetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1707" level="win:Informational" message="$(string.OpServicesSettingSetString)" />
-          <event symbol="OpServicesSettingSetString" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1708" level="win:Informational" message="$(string.OpServicesSettingSetString)" />
-          <event symbol="OpServicesSettingSetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1709" level="win:Informational" message="$(string.OpServicesSettingSetUInt)" />
-          <event symbol="OpServicesSettingSetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1710" level="win:Informational" message="$(string.OpServicesSettingSetBool)" />
-          <event symbol="OpServicesSettingSetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1711" level="win:Informational" message="$(string.OpServicesSettingSetFloat)" />
-          <event symbol="OpServicesSettingSetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1712" level="win:Informational" message="$(string.OpServicesSettingSetDouble)" />
+          <event symbol="OpServicesSettingSetString" channel="os" template="T_SettingString" task="Settings" opcode="win:Info" value="1707" level="win:Informational" message="$(string.Event.OpServicesSettingSetString)" />
+          <event symbol="OpServicesSettingSetInt" channel="os" template="T_SettingInt" task="Settings" opcode="win:Info" value="1708" level="win:Informational" message="$(string.Event.OpServicesSettingSetInt)" />
+          <event symbol="OpServicesSettingSetUInt" channel="os" template="T_SettingUInt" task="Settings" opcode="win:Info" value="1709" level="win:Informational" message="$(string.Event.OpServicesSettingSetUInt)" />
+          <event symbol="OpServicesSettingSetBool" channel="os" template="T_SettingBool" task="Settings" opcode="win:Info" value="1710" level="win:Informational" message="$(string.Event.OpServicesSettingSetBool)" />
+          <event symbol="OpServicesSettingSetFloat" channel="os" template="T_SettingFloat" task="Settings" opcode="win:Info" value="1711" level="win:Informational" message="$(string.Event.OpServicesSettingSetFloat)" />
+          <event symbol="OpServicesSettingSetDouble" channel="os" template="T_SettingDouble" task="Settings" opcode="win:Info" value="1712" level="win:Informational" message="$(string.Event.OpServicesSettingSetDouble)" />
 
-          <event symbol="OpServicesSettingClearAll" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1713" level="win:Informational" message="$(string.OpServicesSettingClearAll)" />
-          <event symbol="OpServicesSettingClear" channel="os" template="T_SettingClear" task="Settings" opcode="win:Info" value="1714" level="win:Informational" message="$(string.OpServicesSettingClear)" />
-          <event symbol="OpServicesSettingApply" channel="os" template="T_SettingApply" task="Settings" opcode="win:Info" value="1715" level="win:Informational" message="$(string.OpServicesSettingApply)" />
-          <event symbol="OpServicesSettingApplyDefaults" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1716" level="win:Informational" message="$(string.OpServicesSettingApplyDefaults)" />
-          <event symbol="OpServicesSettingVerifyExists" channel="os" template="T_SettingVerifyExists" task="Settings" opcode="win:Info" value="1717" level="win:Informational" message="$(string.OpServicesSettingVerifyExists)" />
+          <event symbol="OpServicesSettingClearAll" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1713" level="win:Informational" message="$(string.Event.OpServicesSettingClearAll)" />
+          <event symbol="OpServicesSettingClear" channel="os" template="T_SettingClear" task="Settings" opcode="win:Info" value="1714" level="win:Informational" message="$(string.Event.OpServicesSettingClear)" />
+          <event symbol="OpServicesSettingApply" channel="os" template="T_SettingApply" task="Settings" opcode="win:Info" value="1715" level="win:Informational" message="$(string.Event.OpServicesSettingApply)" />
+          <event symbol="OpServicesSettingApplyDefaults" channel="os" template="T_BasicObject" task="Settings" opcode="win:Info" value="1716" level="win:Informational" message="$(string.Event.OpServicesSettingApplyDefaults)" />
+          <event symbol="OpServicesSettingVerifyExists" channel="os" template="T_SettingVerifyExists" task="Settings" opcode="win:Info" value="1717" level="win:Informational" message="$(string.Event.OpServicesSettingVerifyExists)" />
 
-          <event symbol="OpServicesCacheFetch" channel="os" template="T_CacheFetch" task="Cache" opcode="win:Info" value="1801" level="win:Informational" message="$(string.OpServicesCacheFetch)" />
-          <event symbol="OpServicesCacheStore" channel="os" template="T_CacheStore" task="Cache" opcode="win:Info" value="1802" level="win:Informational" message="$(string.OpServicesCacheStore)" />
-          <event symbol="OpServicesCacheClear" channel="os" template="T_CacheClear" task="Cache" opcode="win:Info" value="1803" level="win:Informational" message="$(string.OpServicesCacheClear)" />
+          <event symbol="OpServicesCacheFetch" channel="os" template="T_CacheFetch" task="Cache" opcode="win:Info" value="1801" level="win:Informational" message="$(string.Event.OpServicesCacheFetch)" />
+          <event symbol="OpServicesCacheStore" channel="os" template="T_CacheStore" task="Cache" opcode="win:Info" value="1802" level="win:Informational" message="$(string.Event.OpServicesCacheStore)" />
+          <event symbol="OpServicesCacheClear" channel="os" template="T_CacheClear" task="Cache" opcode="win:Info" value="1803" level="win:Informational" message="$(string.Event.OpServicesCacheClear)" />
 
-          <event symbol="OpServicesDnsResultListBegin" channel="os" template="T_DnsResultListBegin" task="Dns" opcode="win:DC_Start" value="1901" level="win:Informational" message="$(string.OpServicesDnsResultListBegin)" />
-          <event symbol="OpServicesDnsResultListEntry" channel="os" template="T_DnsResultListEntry" task="Dns" opcode="win:Info" value="1902" level="win:Informational" message="$(string.OpServicesDnsResultListEntry)" />
-          <event symbol="OpServicesDnsResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1903" level="win:Informational" message="$(string.OpServicesDnsResultListEnd)" />
+          <event symbol="OpServicesDnsResultListBegin" channel="os" template="T_DnsResultListBegin" task="Dns" opcode="win:DC_Start" value="1901" level="win:Informational" message="$(string.Event.OpServicesDnsResultListBegin)" />
+          <event symbol="OpServicesDnsResultListEntry" channel="os" template="T_DnsResultListEntry" task="Dns" opcode="win:Info" value="1902" level="win:Informational" message="$(string.Event.OpServicesDnsResultListEntry)" />
+          <event symbol="OpServicesDnsResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_Stop" value="1903" level="win:Informational" message="$(string.Event.OpServicesDnsResultListEnd)" />
 
-          <event symbol="OpServicesDnsSrvResultListBegin" channel="os" template="T_DnsSrvResultListBegin" task="Dns" opcode="win:DC_Start" value="1904" level="win:Informational" message="$(string.OpServicesDnsSrvResultListBegin)" />
-          <event symbol="OpServicesDnsSrvResultListEntryBegin" channel="os" template="T_DnsSrvResultListEntryBegin" task="Dns" opcode="win:DC_Start" value="1905" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEntryBegin)" />
-          <event symbol="OpServicesDnsSrvResultListEntryEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1906" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEntryEnd)" />
-          <event symbol="OpServicesDnsSrvResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_End" value="1907" level="win:Informational" message="$(string.OpServicesDnsSrvResultListEnd)" />
+          <event symbol="OpServicesDnsSrvResultListBegin" channel="os" template="T_DnsSrvResultListBegin" task="Dns" opcode="win:DC_Start" value="1904" level="win:Informational" message="$(string.Event.OpServicesDnsSrvResultListBegin)" />
+          <event symbol="OpServicesDnsSrvResultListEntryBegin" channel="os" template="T_DnsSrvResultListEntryBegin" task="Dns" opcode="win:DC_Start" value="1905" level="win:Informational" message="$(string.Event.OpServicesDnsSrvResultListEntryBegin)" />
+          <event symbol="OpServicesDnsSrvResultListEntryEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_Stop" value="1906" level="win:Informational" message="$(string.Event.OpServicesDnsSrvResultListEntryEnd)" />
+          <event symbol="OpServicesDnsSrvResultListEnd" channel="os" template="T_DnsName" task="Dns" opcode="win:DC_Stop" value="1907" level="win:Informational" message="$(string.Event.OpServicesDnsSrvResultListEnd)" />
 
-          <event symbol="OpServicesDnsLookup" channel="os" template="T_DnsLookupName" task="Dns" opcode="Lookup" value="1908" level="win:Informational" message="$(string.OpServicesDnsLookup)" />
-          <event symbol="OpServicesDnsSrvLookup" channel="os" template="T_DnsSrvLookup" task="Dns" opcode="Lookup" value="1909" level="win:Informational" message="$(string.OpServicesDnsSrvLookup)" />
+          <event symbol="OpServicesDnsLookup" channel="os" template="T_DnsLookupName" task="Dns" opcode="Lookup" value="1908" level="win:Informational" message="$(string.Event.OpServicesDnsLookup)" />
+          <event symbol="OpServicesDnsSrvLookup" channel="os" template="T_DnsSrvLookup" task="Dns" opcode="Lookup" value="1909" level="win:Informational" message="$(string.Event.OpServicesDnsSrvLookup)" />
 
-          <event symbol="OpServicesDnsLookupResolverSubQuery" channel="os" template="T_DnsLookupResolverSubQuery" task="Dns" opcode="Lookup" value="1910" level="win:Informational" message="$(string.OpServicesDnsLookupResolverSubQuery)" />
+          <event symbol="OpServicesDnsLookupResolverSubQuery" channel="os" template="T_DnsLookupResolverSubQuery" task="Dns" opcode="Lookup" value="1910" level="win:Informational" message="$(string.Event.OpServicesDnsLookupResolverSubQuery)" />
 
-          <event symbol="OpServicesDnsLookupCompleteEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1911" level="win:Informational" message="$(string.OpServicesDnsLookupCompleteEventFired)" />
-          <event symbol="OpServicesDnsLookupSuccessEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1912" level="win:Informational" message="$(string.OpServicesDnsLookupSuccessEventFired)" />
-          <event symbol="OpServicesDnsLookupFailedEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1913" level="win:Informational" message="$(string.OpServicesDnsLookupFailedEventFired)" />
+          <event symbol="OpServicesDnsLookupCompleteEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1911" level="win:Informational" message="$(string.Event.OpServicesDnsLookupCompleteEventFired)" />
+          <event symbol="OpServicesDnsLookupSuccessEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1912" level="win:Informational" message="$(string.Event.OpServicesDnsLookupSuccessEventFired)" />
+          <event symbol="OpServicesDnsLookupFailedEventFired" channel="os" template="T_DnsLookupName" task="Dns" opcode="Event" value="1913" level="win:Informational" message="$(string.Event.OpServicesDnsLookupFailedEventFired)" />
 
-          <event symbol="OpServicesHttpQueryCreate" channel="os" template="T_HttpQueryCreate" task="Http" opcode="win:Start" value="2001" level="win:Informational" message="$(string.OpServicesHttpQueryCreate)" />
-          <event symbol="OpServicesHttpQueryDestroy" channel="os" template="T_BasicObject" task="Http" opcode="win:Stop" value="2002" level="win:Informational" message="$(string.OpServicesHttpQueryDestroy)" />
-          <event symbol="OpServicesHttpQueryCancel" channel="os" template="T_BasicObject" task="Http" opcode="Cancel" value="2003" level="win:Informational" message="$(string.OpServicesHttpQueryCancel)" />
-          <event symbol="OpServicesHttpQueryRead" channel="os" template="T_HttpQueryRead" task="Http" opcode="win:Receive" value="2003" level="win:Informational" message="$(string.OpServicesHttpQueryRead)" />
+          <event symbol="OpServicesHttpQueryCreate" channel="os" template="T_HttpQueryCreate" task="Http" opcode="win:Start" value="2001" level="win:Informational" message="$(string.Event.OpServicesHttpQueryCreate)" />
+          <event symbol="OpServicesHttpQueryDestroy" channel="os" template="T_BasicObject" task="Http" opcode="win:Stop" value="2002" level="win:Informational" message="$(string.Event.OpServicesHttpQueryDestroy)" />
+          <event symbol="OpServicesHttpQueryCancel" channel="os" template="T_BasicObject" task="Http" opcode="Cancel" value="2003" level="win:Informational" message="$(string.Event.OpServicesHttpQueryCancel)" />
+          <event symbol="OpServicesHttpQueryRead" channel="os" template="T_HttpQueryRead" task="Http" opcode="win:Receive" value="2004" level="win:Informational" message="$(string.Event.OpServicesHttpQueryRead)" />
 
-          <event symbol="OpServicesDebugLogger" channel="os" template="T_DebugLogger" task="DebugLogger" opcode="win:Info" value="2101" level="win:Informational" message="$(string.OpServicesDebugLogger)" />
+          <event symbol="OpServicesDebugLogger" channel="os" template="T_DebugLogger" task="DebugLogger" opcode="win:Info" value="2101" level="win:Informational" message="$(string.Event.OpServicesDebugLogger)" />
         </events>
       </provider>
 
@@ -750,7 +756,7 @@
         <string id="Event.OpServicesSettingGetDouble" value="OpServicesSettingGetDouble"/>
 
         <string id="Event.OpServicesSettingSetString" value="OpServicesSettingSetString"/>
-        <string id="Event.OpServicesSettingSetString" value="OpServicesSettingSetString"/>
+        <string id="Event.OpServicesSettingSetInt" value="OpServicesSettingSetInt"/>
         <string id="Event.OpServicesSettingSetUInt" value="OpServicesSettingSetUInt"/>
         <string id="Event.OpServicesSettingSetBool" value="OpServicesSettingSetBool"/>
         <string id="Event.OpServicesSettingSetFloat" value="OpServicesSettingSetFloat"/>
