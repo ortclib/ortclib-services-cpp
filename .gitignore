@@ -4,3 +4,4 @@ projects/android/libs
 projects/android/obj
 [Dd]ebug/
 [Rr]elease/
+openpeer/services/internal/services_ETWTracing.h
