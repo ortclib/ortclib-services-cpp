@@ -261,6 +261,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Tracing.h">
       <Filter>openpeer\services\internal</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.h">
+      <Filter>openpeer\services\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\cpp\ifaddrs-android.cc">

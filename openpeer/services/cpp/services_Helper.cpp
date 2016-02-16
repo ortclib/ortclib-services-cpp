@@ -31,6 +31,7 @@
 
 #include <openpeer/services/internal/services_Helper.h>
 #include <openpeer/services/internal/services_HTTP.h>
+#include <openpeer/services/internal/services_Tracing.h>
 #include <openpeer/services/IDNS.h>
 #include <openpeer/services/IMessageQueueManager.h>
 #include <openpeer/services/ISettings.h>
@@ -210,8 +211,14 @@ namespace openpeer
 
         ServicesSetup()
         {
+          EventRegisterOrtcServices();
           zsLib::setup();
           initSubsystems();
+        }
+
+        ~ServicesSetup()
+        {
+          EventUnregisterOrtcServices();
         }
       };
 

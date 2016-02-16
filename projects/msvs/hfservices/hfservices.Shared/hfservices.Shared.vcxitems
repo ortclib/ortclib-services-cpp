@@ -52,6 +52,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_DNS.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_DNSMonitor.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Encryptor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_Helper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_HTTP.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_HTTP_WinRT.h" />
