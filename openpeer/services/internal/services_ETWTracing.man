@@ -417,8 +417,6 @@
             <data inType="win:AnsiString" name="Method" />
             <data inType="win:UInt64"     name="ObjectID" />
             <data inType="win:AnsiString" name="CookieNamePath" />
-            <data inType="win:Int64"      name="ExpiresInSecondsSinceEpoch" />
-            <data inType="win:AnsiString" name="Value" />
           </template>
           <template tid="T_DnsResultListBegin">
             <data inType="win:AnsiString" name="Method" />
@@ -578,7 +576,7 @@
           <event symbol="OpServicesBackOffTimerPatternNextAttempt" channel="os" template="T_BackOffTimerPatternNextAttempt" task="BackOffTimerPattern" opcode="win:Info" value="1504" level="win:Verbose" message="$(string.Event.OpServicesBackOffTimerPatternNextAttempt)" />
 
           <event symbol="OpServicesBackOffTimerCreate" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Start" value="1601" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerCreate)" />
-          <event symbol="OpServicesBackOffTimerDestroy" channel="os" template="T_BackOffTimerCreate" task="BackOffTimer" opcode="win:Stop" value="1602" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerDestroy)" />
+          <event symbol="OpServicesBackOffTimerDestroy" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Stop" value="1602" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerDestroy)" />
           <event symbol="OpServicesBackOffTimerNotifyAttempting" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1603" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerNotifyAttempting)" />
           <event symbol="OpServicesBackOffTimerNotifyAttemptFailed" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1604" level="win:Warning" message="$(string.Event.OpServicesBackOffTimerNotifyAttemptFailed)" />
           <event symbol="OpServicesBackOffTimerNotifyTryAgainNow" channel="os" template="T_BasicObject" task="BackOffTimer" opcode="win:Info" value="1605" level="win:Informational" message="$(string.Event.OpServicesBackOffTimerNotifyTryAgainNow)" />

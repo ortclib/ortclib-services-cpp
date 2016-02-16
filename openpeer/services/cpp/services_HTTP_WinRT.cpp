@@ -462,7 +462,7 @@ namespace openpeer
 
         outResultData = (const char *)data.BytePtr();
         auto result = strlen(outResultData);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, result, outResultData, static_cast<size_t>(available));
+        EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
         return result;
       }
 

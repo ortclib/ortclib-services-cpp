@@ -328,7 +328,7 @@ namespace openpeer
             try {
               auto result = Numeric<double>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+              EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
               return result;
             } catch(Numeric<double>::ValueOutOfRange &) {
             }
@@ -338,7 +338,7 @@ namespace openpeer
         }
 
         auto result = delegate->getDouble(key);
-        EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+        EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
         return result;
       }
 
