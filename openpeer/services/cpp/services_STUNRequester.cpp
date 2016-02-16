@@ -355,7 +355,7 @@ namespace openpeer
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
 
-          EventWriteOpServicesStunRequesterSendPacket(__func__, mID, packet->BytePtr(), packet->SizeInBytes());
+          EventWriteOpServicesStunRequesterSendPacket(__func__, mID, packet->SizeInBytes(), packet->BytePtr());
 
           try {
             ++mTotalTries;

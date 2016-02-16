@@ -267,7 +267,7 @@ namespace openpeer
         if (requester != mSTUNRequester) return;
 
         try {
-          EventWriteOpServicesStunDiscoveryRequestSendPacket(__func__, mID, requester->getID(), destination.string(), ((bool)packet) ? packet->BytePtr() : NULL, ((bool)packet) ? packet->SizeInBytes() : 0);
+          EventWriteOpServicesStunDiscoveryRequestSendPacket(__func__, mID, requester->getID(), destination.string(), ((bool)packet) ? packet->SizeInBytes() : 0, ((bool)packet) ? packet->BytePtr() : NULL);
           mDelegate->onSTUNDiscoverySendPacket(mThisWeak.lock(), mServer, packet);
         } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
           cancel(); return;
@@ -281,7 +281,7 @@ namespace openpeer
                                                       STUNPacketPtr response
                                                       )
       {
-        EventWriteOpServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? (&(response->mTransactionID[0])) : NULL, ((bool)response) ? sizeof(response->mTransactionID) : 0);
+        EventWriteOpServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? sizeof(response->mTransactionID) : 0, ((bool)response) ? (&(response->mTransactionID[0])) : NULL);
 
         AutoRecursiveLock lock(mLock);
 
@@ -469,7 +469,7 @@ namespace openpeer
                                                   request,
                                                   ISTUNDiscovery::usingRFC()
                                                   );
-          EventWriteOpServicesStunDiscoveryRequestCreate(__func__, mID, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0, mServer.string(), (&(request->mTransactionID[0])), sizeof(request->mTransactionID));
+          EventWriteOpServicesStunDiscoveryRequestCreate(__func__, mID, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0, mServer.string(), sizeof(request->mTransactionID), (&(request->mTransactionID[0])));
         }
 
         // nothing more to do... sit back, relax and enjoy the ride!

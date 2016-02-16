@@ -347,7 +347,7 @@ namespace openpeer
                                   bool bindChannelIfPossible
                                   )
       {
-        EventWriteOpServicesTurnSocketSendPacket(__func__, mID, destination.string(), buffer, bufferLengthInBytes, bindChannelIfPossible);
+        EventWriteOpServicesTurnSocketSendPacket(__func__, mID, destination.string(), bufferLengthInBytes, buffer, bindChannelIfPossible);
         OPENPEER_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
@@ -412,7 +412,7 @@ namespace openpeer
 
                 // copy the entire buffer into the packet
                 memcpy(&((packet->BytePtr())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
-                EventWriteOpServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->BytePtr(), packet->SizeInBytes(), info->mChannelNumber);
+                EventWriteOpServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr(), info->mChannelNumber);
                 OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
@@ -450,7 +450,7 @@ namespace openpeer
 
           packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
 
-          EventWriteOpServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->BytePtr(), packet->SizeInBytes());
+          EventWriteOpServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr());
           sendData->trace(__func__);
 
           // scope: we need to check if there is a permission set to be able to even contact this address
@@ -547,7 +547,7 @@ namespace openpeer
 
         // this is definately a TURN packet - handle the data within the packet...
 
-        EventWriteOpServicesTurnSocketReceivedStunPacketData(__func__, mID, turnPacket->mPeerAddressList.front().string(), turnPacket->mData, turnPacket->mDataLength);
+        EventWriteOpServicesTurnSocketReceivedStunPacketData(__func__, mID, turnPacket->mPeerAddressList.front().string(), turnPacket->mDataLength, turnPacket->mData);
 
         try {
           // send the packet to the delegate which is interested in the data received
@@ -615,7 +615,7 @@ namespace openpeer
           peerAddress = info->mPeerAddress;
         }
 
-        EventWriteOpServicesTurnSocketReceivedChannelData(__func__, mID, peerAddress.string(), realBuffer, length);
+        EventWriteOpServicesTurnSocketReceivedChannelData(__func__, mID, peerAddress.string(), length, realBuffer);
 
         try {
           // send the packet to the delegate which is interested in the data received
@@ -704,7 +704,7 @@ namespace openpeer
           }
         }
 
-        EventWriteOpServicesTurnSocketRequesterSendStunPacket(__func__, mID, requester->getID(), destination.string(), packet->BytePtr(), packet->SizeInBytes());
+        EventWriteOpServicesTurnSocketRequesterSendStunPacket(__func__, mID, requester->getID(), destination.string(), packet->SizeInBytes(), packet->BytePtr());
 
         sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }

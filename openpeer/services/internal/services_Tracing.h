@@ -44,7 +44,7 @@
 // NO-OP VERSIONS OF ALL TRACING MACROS
 #ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
-#define EventWriteOpServicesStunPacket(xStr_Method, xStr_Message, xStr_Log, xPUID_ObjectID, xUInt_Class, xUInt_Method, xULONG_TotalRetries, xWORD_ErrorCode, xStr_Reason, xDWORD_MagicCookies, xPtr_TransactionIDBuffer, xsize_t_TransactionBufferLengthInBytes, xsize_t_TotalUnknownAttributes, xWORD_FirstUnknownAttribute, xStr_MappedAddressIP, xStr_AlternateServerIP, xStr_Username, xStr_Password, xStr_Realm, xStr_Nonce, xStr_Software, xUInt_CredentialMechanism, xsize_t_MessageIntegrityMessageLengthInBytes, xPtr_MessageIntegrityBuffer, xsize_t_MessageIntegrityBufferSizeInBytes, xBool_FingerprintIncluded, xWORD_ChannelNumber, xBool_LifetimeIncluded, xDWORD_mLifetime, xsize_t_PeerAddressListSize, xStr_FirstPeerAddress, xStr_RelayAddressIP, xsize_t_DataLengthInBytes, xBool_EvenPortIncluded, xBool_EvenPort, xBYTE_RequestTransport, xBool_DontFragementIncluded, xBool_ReservationTokenIncluded, xPtr_ReservationToken, xsize_t_ReservationTokenSizeInBytes, xBool_MobilityTicketIncluded, xPtr_MobilityTicketBuffer, xsize_t_MobilityTicketBufferSizeInBytes, xBool_PriorityIncluded, xDWORD_Priority, xBool_UseCandidateIncluded, xBool_IceControlledIncluded, xQWORD_IceControlled, xBool_IceControllingIncluded, xQWORD_IceControlling, xQWORD_NextSequenceNumber, xBool_MinimumRTTIncluded, xDWORD_MinimumRTT, xStr_ConnectionInfo, xQWORD_GSNR, xQWORD_mGSNFR, xBool_ReliabilityFlagsIncluded, xBool_ReliabilityFlags, xPtr_AckVectorBuffer, xsize_t_ACKVectorLengthInBytes, xsize_t_mLocalCongestionControl, xsize_t_mRemoteCongestionControl)
+#define EventWriteOpServicesStunPacket(xStr_Method, xStr_Message, xStr_Log, xPUID_ObjectID, xUInt_Class, xUInt_Method, xULONG_TotalRetries, xWORD_ErrorCode, xStr_Reason, xDWORD_MagicCookies, xsize_t_TransactionBufferLengthInBytes, xPtr_TransactionIDBuffer, xsize_t_TotalUnknownAttributes, xWORD_FirstUnknownAttribute, xStr_MappedAddressIP, xStr_AlternateServerIP, xStr_Username, xStr_Password, xStr_Realm, xStr_Nonce, xStr_Software, xUInt_CredentialMechanism, xsize_t_MessageIntegrityMessageLengthInBytes, xsize_t_MessageIntegrityBufferSizeInBytes, xPtr_MessageIntegrityBuffer, xBool_FingerprintIncluded, xWORD_ChannelNumber, xBool_LifetimeIncluded, xDWORD_mLifetime, xsize_t_PeerAddressListSize, xStr_FirstPeerAddress, xStr_RelayAddressIP, xsize_t_DataLengthInBytes, xBool_EvenPortIncluded, xBool_EvenPort, xBYTE_RequestTransport, xBool_DontFragementIncluded, xBool_ReservationTokenIncluded, xsize_t_ReservationTokenSizeInBytes, xPtr_ReservationToken, xBool_MobilityTicketIncluded, xsize_t_MobilityTicketBufferSizeInBytes, xPtr_MobilityTicketBuffer, xBool_PriorityIncluded, xDWORD_Priority, xBool_UseCandidateIncluded, xBool_IceControlledIncluded, xQWORD_IceControlled, xBool_IceControllingIncluded, xQWORD_IceControlling, xQWORD_NextSequenceNumber, xBool_MinimumRTTIncluded, xDWORD_MinimumRTT, xStr_ConnectionInfo, xQWORD_GSNR, xQWORD_mGSNFR, xBool_ReliabilityFlagsIncluded, xBool_ReliabilityFlags, xsize_t_ACKVectorLengthInBytes, xPtr_AckVectorBuffer, xsize_t_mLocalCongestionControl, xsize_t_mRemoteCongestionControl)
 
 #define EventWriteOpServicesStunRequesterCreate(xStr_Method, xPUID, xStr_ServerIP, xUInt_UsingRFC, xPUID_BackOffTimerPatternObjectID)
 #define EventWriteOpServicesStunRequesterDestroy(xStr_Method, xPUID)
@@ -52,7 +52,7 @@
 #define EventWriteOpServicesStunRequesterRetryNow(xStr_Method, xPUID)
 #define EventWriteOpServicesStunRequesterReceivedStunPacket(xStr_Method, xPUID, xStr_FromIP)
 #define EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(xStr_Method, xPUID, xPUID_TimerID, xStr_State, xULONG_TotalTries)
-#define EventWriteOpServicesStunRequesterSendPacket(xStr_Method, xPUID, xPtr_StunPacketBuffer, xsize_t_StunPacketBufferSizeInBytes)
+#define EventWriteOpServicesStunRequesterSendPacket(xStr_Method, xPUID, xsize_t_StunPacketBufferSizeInBytes, xPtr_StunPacketBuffer)
 
 #define EventWriteOpServicesStunRequesterManagerCreate(xStr_Method, xPUID)
 #define EventWriteOpServicesStunRequesterManagerDestroy(xStr_Method, xPUID)
@@ -68,9 +68,9 @@
 #define EventWriteOpServicesStunDiscoveryOnLookupComplete(xStr_Method, xPUID, xPUID_DNSQuery)
 #define EventWriteOpServicesStunDiscoveryTimer(xStr_Method, xPUID, xPUID_Timer)
 
-#define EventWriteOpServicesStunDiscoveryRequestCreate(xStr_Method, xPUID, xPUID_STUNRequester, xStr_ServerIP, xPtr_TransactionIDBuffer, xsize_t_TransactionBufferLengthInBytes)
-#define EventWriteOpServicesStunDiscoveryRequestSendPacket(xStr_Method, xPUID, xPUID_STUNRequester, xStr_IPDestination, xPtr_Buffer, xsize_t_BufferLengthInBytes)
-#define EventWriteOpServicesStunDiscoveryReceivedResponsePacket(xStr_Method, xPUID, xPUID_STUNRequester, xStr_FromIP, xPtr_TransactionIDBuffer, xsize_t_TransactionBufferLengthInBytes)
+#define EventWriteOpServicesStunDiscoveryRequestCreate(xStr_Method, xPUID, xPUID_STUNRequester, xStr_ServerIP, xsize_t_TransactionBufferLengthInBytes, xPtr_TransactionIDBuffer)
+#define EventWriteOpServicesStunDiscoveryRequestSendPacket(xStr_Method, xPUID, xPUID_STUNRequester, xStr_IPDestination, xsize_t_BufferLengthInBytes, xPtr_Buffer)
+#define EventWriteOpServicesStunDiscoveryReceivedResponsePacket(xStr_Method, xPUID, xPUID_STUNRequester, xStr_FromIP, xsize_t_TransactionBufferLengthInBytes, xPtr_TransactionIDBuffer)
 
 #define EventWriteOpServicesStunDiscoveryFoundMappedAddress(xStr_Method, xPUID, xPUID_STUNRequester, xStr_NewMappedAddressIP, xStr_OldMappedAddressIP)
 
@@ -82,14 +82,14 @@
 #define EventWriteOpServicesTurnSocketDestroy(xStr_Method, xPUID) {}
 #define EventWriteOpServicesTurnSocketCancel(xStr_Method, xPUID) {}
 #define EventWriteOpServicesTurnSocketStateEventFired(xStr_Method, xPUID, xStr_State) {}
-#define EventWriteOpServicesTurnSocketSendPacket(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes, xBool_BindIfPossible) {}
-#define EventWriteOpServicesTurnSocketSendPacketViaChannel(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes, xWORD_ChannelNumber) {}
-#define EventWriteOpServicesTurnSocketSendPacketViaStun(xStr_Method, xPUID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes) {}
+#define EventWriteOpServicesTurnSocketSendPacket(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xBool_BindIfPossible) {}
+#define EventWriteOpServicesTurnSocketSendPacketViaChannel(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer, xWORD_ChannelNumber) {}
+#define EventWriteOpServicesTurnSocketSendPacketViaStun(xStr_Method, xPUID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
 #define EventWriteOpServicesTurnSocketInstallChannelOnWake(xStr_Method, xPUID, xStr_DestinationIP, xWORD_ChannelNumber) {}
 #define EventWriteOpServicesTurnSocketInstallPermissionOnWake(xStr_Method, xPUID, xStr_DestinationIP) {}
-#define EventWriteOpServicesTurnSocketReceivedStunPacketData(xStr_Method, xPUID, xStr_PeerIP, xPtr_Buffer, xsize_t_BufferLengthInBytes) {}
-#define EventWriteOpServicesTurnSocketReceivedChannelData(xStr_Method, xPUID, xStr_PeerIP, xPtr_Buffer, xsize_t_BufferLengthInBytes) {}
-#define EventWriteOpServicesTurnSocketRequesterSendStunPacket(xStr_Method, xPUID, xPUID_RequesterID, xStr_DestinationIP, xPtr_Buffer, xsize_t_BufferLengthInBytes) {}
+#define EventWriteOpServicesTurnSocketReceivedStunPacketData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
+#define EventWriteOpServicesTurnSocketReceivedChannelData(xStr_Method, xPUID, xStr_PeerIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
+#define EventWriteOpServicesTurnSocketRequesterSendStunPacket(xStr_Method, xPUID, xPUID_RequesterID, xStr_DestinationIP, xsize_t_BufferLengthInBytes, xPtr_Buffer) {}
 #define EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(xStr_Method, xPUID, xPUID_RequesterID, xStr_FromIP) {}
 #define EventWriteOpServicesTurnSocketRequesterTimedOut(xStr_Method, xPUID, xPUID_RequesterID) {}
 #define EventWriteOpServicesTurnSocketRequesterCreate(xStr_Method, xPUID, xPUID_RequesterID, xStr_Type) {}
@@ -157,10 +157,10 @@
 #define EventWriteOpServicesDnsLookupSuccess(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 #define EventWriteOpServicesDnsLookupFailed(xStr_Method, xPUID_QueryObjectID, xStr_LookupType, xStr_Name)
 
-#define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xPtr_PostData, xsize_t_PostDataLengthInBytes, xStr_PostMimeType, xlong_long_TimeoutInMilliseconds)
+#define EventWriteOpServicesHttpQueryCreate(xStr_Method, xPUID, xBool_IsPost, xStr_UserAgent, xStr_Url, xsize_t_PostDataLengthInBytes, xPtr_PostData, xStr_PostMimeType, xlong_long_TimeoutInMilliseconds)
 #define EventWriteOpServicesHttpQueryDestroy(xStr_Method, xPUID)
 #define EventWriteOpServicesHttpQueryCancel(xStr_Method, xPUID)
-#define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xPtr_ResultData, xsize_t_ResultReadSizeInBytes, xsize_t_BytesToRead)
+#define EventWriteOpServicesHttpQueryRead(xStr_Method, xPUID, xsize_t_ResultReadSizeInBytes, xPtr_ResultData, xsize_t_BytesToRead)
 
 #define EventWriteOpServicesDebugLogger(xStr_Subsystem, xStr_Severity, xStr_Level, xStr_Function, xStr_FilePath, xULONG_LineNumber, xStr_Output)
 
@@ -172,7 +172,7 @@ namespace openpeer
 namespace services
 {
 
-inline void EventWriteOpServicesStunPacket(const char *xStr_Method, const char *xStr_Message, const char *xStr_Log, PUID xPUID_ObjectID, unsigned int xUInt_Class, unsigned int xUInt_Method, ULONG xULONG_TotalRetries, WORD xWORD_ErrorCode, const char *xStr_Reason, DWORD xDWORD_MagicCookies, const void *xPtr_TransactionIDBuffer, size_t xsize_t_TransactionBufferLengthInBytes, size_t xsize_t_TotalUnknownAttributes, WORD xWORD_FirstUnknownAttribute, const char *xStr_MappedAddressIP, const char *xStr_AlternateServerIP, const char *xStr_Username, const char *xStr_Password, const char *xStr_Realm, const char *xStr_Nonce, const char *xStr_Software, unsigned int xUInt_CredentialMechanism, size_t xsize_t_MessageIntegrityMessageLengthInBytes, const void *xPtr_MessageIntegrityBuffer, size_t xsize_t_MessageIntegrityBufferSizeInBytes, bool xBool_FingerprintIncluded, WORD xWORD_ChannelNumber, bool xBool_LifetimeIncluded, QWORD xDWORD_mLifetime, size_t xsize_t_PeerAddressListSize, const char *xStr_FirstPeerAddress, const char *xStr_RelayAddressIP, size_t xsize_t_DataLengthInBytes, bool xBool_EvenPortIncluded, bool xBool_EvenPort, BYTE xBYTE_RequestTransport, bool xBool_DontFragementIncluded, bool xBool_ReservationTokenIncluded, const void *xPtr_ReservationToken, size_t xsize_t_ReservationTokenSizeInBytes, bool xBool_MobilityTicketIncluded, const void *xPtr_MobilityTicketBuffer, size_t xsize_t_MobilityTicketBufferSizeInBytes, bool xBool_PriorityIncluded, DWORD xDWORD_Priority, bool xBool_UseCandidateIncluded, bool xBool_IceControlledIncluded, QWORD xQWORD_IceControlled, bool xBool_IceControllingIncluded, QWORD xQWORD_IceControlling, QWORD xQWORD_NextSequenceNumber, bool xBool_MinimumRTTIncluded, DWORD xDWORD_MinimumRTT, const char *xStr_ConnectionInfo, QWORD xQWORD_GSNR, QWORD xQWORD_mGSNFR, bool xBool_ReliabilityFlagsIncluded, BYTE xBool_ReliabilityFlags, const void *xPtr_AckVectorBuffer, size_t xsize_t_ACKVectorLengthInBytes, size_t xsize_t_mLocalCongestionControl, size_t xsize_t_mRemoteCongestionControl) {}
+inline void EventWriteOpServicesStunPacket(const char *xStr_Method, const char *xStr_Message, const char *xStr_Log, PUID xPUID_ObjectID, unsigned int xUInt_Class, unsigned int xUInt_Method, ULONG xULONG_TotalRetries, WORD xWORD_ErrorCode, const char *xStr_Reason, DWORD xDWORD_MagicCookies, size_t xsize_t_TransactionBufferLengthInBytes, const BYTE *xPtr_TransactionIDBuffer, size_t xsize_t_TotalUnknownAttributes, WORD xWORD_FirstUnknownAttribute, const char *xStr_MappedAddressIP, const char *xStr_AlternateServerIP, const char *xStr_Username, const char *xStr_Password, const char *xStr_Realm, const char *xStr_Nonce, const char *xStr_Software, unsigned int xUInt_CredentialMechanism, size_t xsize_t_MessageIntegrityMessageLengthInBytes, size_t xsize_t_MessageIntegrityBufferSizeInBytes, const BYTE *xPtr_MessageIntegrityBuffer, bool xBool_FingerprintIncluded, WORD xWORD_ChannelNumber, bool xBool_LifetimeIncluded, QWORD xDWORD_mLifetime, size_t xsize_t_PeerAddressListSize, const char *xStr_FirstPeerAddress, const char *xStr_RelayAddressIP, size_t xsize_t_DataLengthInBytes, bool xBool_EvenPortIncluded, bool xBool_EvenPort, BYTE xBYTE_RequestTransport, bool xBool_DontFragementIncluded, bool xBool_ReservationTokenIncluded, size_t xsize_t_ReservationTokenSizeInBytes, const BYTE *xPtr_ReservationToken, bool xBool_MobilityTicketIncluded, size_t xsize_t_MobilityTicketBufferSizeInBytes, const BYTE *xPtr_MobilityTicketBuffer, bool xBool_PriorityIncluded, DWORD xDWORD_Priority, bool xBool_UseCandidateIncluded, bool xBool_IceControlledIncluded, QWORD xQWORD_IceControlled, bool xBool_IceControllingIncluded, QWORD xQWORD_IceControlling, QWORD xQWORD_NextSequenceNumber, bool xBool_MinimumRTTIncluded, DWORD xDWORD_MinimumRTT, const char *xStr_ConnectionInfo, QWORD xQWORD_GSNR, QWORD xQWORD_mGSNFR, bool xBool_ReliabilityFlagsIncluded, BYTE xBool_ReliabilityFlags, size_t xsize_t_ACKVectorLengthInBytes, const BYTE *xPtr_AckVectorBuffer, size_t xsize_t_mLocalCongestionControl, size_t xsize_t_mRemoteCongestionControl) {}
 
 inline void EventWriteOpServicesStunRequesterCreate(const char *xStr_Method, PUID xPUID, const char *xStr_ServerIP, unsigned int xUInt_UsingRFC, PUID xPUID_BackOffTimerPatternObjectID) {}
 inline void EventWriteOpServicesStunRequesterDestroy(const char *xStr_Method, PUID xPUID) {}
@@ -180,7 +180,7 @@ inline void EventWriteOpServicesStunRequesterCancel(const char *xStr_Method, PUI
 inline void EventWriteOpServicesStunRequesterRetryNow(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesStunRequesterReceivedStunPacket(const char *xStr_Method, PUID xPUID, const char *xStr_FromIP) {}
 inline void EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(const char *xStr_Method, PUID xPUID, PUID xPUID_TimerID, const char *xStr_State, ULONG xULONG_TotalTries) {}
-inline void EventWriteOpServicesStunRequesterSendPacket(const char *xStr_Method, PUID xPUID, const void *xPtr_StunPacketBuffer, size_t xsize_t_StunPacketBufferSizeInBytes) {}
+inline void EventWriteOpServicesStunRequesterSendPacket(const char *xStr_Method, PUID xPUID, size_t xsize_t_StunPacketBufferSizeInBytes, const BYTE *xPtr_StunPacketBuffer) {}
 
 inline void EventWriteOpServicesStunRequesterManagerCreate(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesStunRequesterManagerDestroy(const char *xStr_Method, PUID xPUID) {}
@@ -196,9 +196,9 @@ inline void EventWriteOpServicesStunDiscoveryCancel(const char *xStr_Method, PUI
 inline void EventWriteOpServicesStunDiscoveryOnLookupComplete(const char *xStr_Method, PUID xPUID, PUID xPUID_DNSQuery) {}
 inline void EventWriteOpServicesStunDiscoveryTimer(const char *xStr_Method, PUID xPUID, PUID xPUID_Timer) {}
 
-inline void EventWriteOpServicesStunDiscoveryRequestCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_ServerIP, const void *xPtr_TransactionIDBuffer, size_t xsize_t_TransactionBufferLengthInBytes) {}
-inline void EventWriteOpServicesStunDiscoveryRequestSendPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_IPDestination, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
-inline void EventWriteOpServicesStunDiscoveryReceivedResponsePacket(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_FromIP, const void *xPtr_TransactionIDBuffer, size_t xsize_t_TransactionBufferLengthInBytes) {}
+inline void EventWriteOpServicesStunDiscoveryRequestCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_ServerIP, size_t xsize_t_TransactionBufferLengthInBytes, const BYTE *xPtr_TransactionIDBuffer) {}
+inline void EventWriteOpServicesStunDiscoveryRequestSendPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_IPDestination, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
+inline void EventWriteOpServicesStunDiscoveryReceivedResponsePacket(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_FromIP, size_t xsize_t_TransactionBufferLengthInBytes, const BYTE *xPtr_TransactionIDBuffer) {}
 
 inline void EventWriteOpServicesStunDiscoveryFoundMappedAddress(const char *xStr_Method, PUID xPUID, PUID xPUID_STUNRequester, const char *xStr_NewMappedAddressIP, const char *xStr_OldMappedAddressIP) {}
 
@@ -210,14 +210,14 @@ inline void EventWriteOpServicesTurnSocketCreate(const char *xStr_Method, PUID x
 inline void EventWriteOpServicesTurnSocketDestroy(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesTurnSocketCancel(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesTurnSocketStateEventFired(const char *xStr_Method, PUID xPUID, const char *xStr_State) {}
-inline void EventWriteOpServicesTurnSocketSendPacket(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes, bool xBool_BindIfPossible) {}
-inline void EventWriteOpServicesTurnSocketSendPacketViaChannel(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes, WORD xWORD_ChannelNumber) {}
-inline void EventWriteOpServicesTurnSocketSendPacketViaStun(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
+inline void EventWriteOpServicesTurnSocketSendPacket(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer, bool xBool_BindIfPossible) {}
+inline void EventWriteOpServicesTurnSocketSendPacketViaChannel(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer, WORD xWORD_ChannelNumber) {}
+inline void EventWriteOpServicesTurnSocketSendPacketViaStun(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
 inline void EventWriteOpServicesTurnSocketInstallChannelOnWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP, WORD xWORD_ChannelNumber) {}
 inline void EventWriteOpServicesTurnSocketInstallPermissionOnWake(const char *xStr_Method, PUID xPUID, const char *xStr_DestinationIP) {}
-inline void EventWriteOpServicesTurnSocketReceivedStunPacketData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
-inline void EventWriteOpServicesTurnSocketReceivedChannelData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
-inline void EventWriteOpServicesTurnSocketRequesterSendStunPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_DestinationIP, const void *xPtr_Buffer, size_t xsize_t_BufferLengthInBytes) {}
+inline void EventWriteOpServicesTurnSocketReceivedStunPacketData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
+inline void EventWriteOpServicesTurnSocketReceivedChannelData(const char *xStr_Method, PUID xPUID, const char *xStr_PeerIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
+inline void EventWriteOpServicesTurnSocketRequesterSendStunPacket(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_DestinationIP, size_t xsize_t_BufferLengthInBytes, const BYTE *xPtr_Buffer) {}
 inline void EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_FromIP) {}
 inline void EventWriteOpServicesTurnSocketRequesterTimedOut(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID) {}
 inline void EventWriteOpServicesTurnSocketRequesterCreate(const char *xStr_Method, PUID xPUID, PUID xPUID_RequesterID, const char *xStr_Type) {}
@@ -285,10 +285,10 @@ inline void EventWriteOpServicesDnsLookupComplete(const char *xStr_Method, PUID 
 inline void EventWriteOpServicesDnsLookupSuccess(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 inline void EventWriteOpServicesDnsLookupFailed(const char *xStr_Method, PUID xPUID_QueryObjectID, const char *xStr_LookupType, const char *xStr_Name) {}
 
-inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, const void *xPtr_PostData, size_t xsize_t_PostDataLengthInBytes, const char *xStr_PostMimeType, long long xlong_long_TimeoutInMilliseconds) {}
+inline void EventWriteOpServicesHttpQueryCreate(const char *xStr_Method, PUID xPUID, bool xBool_IsPost, const char *xStr_UserAgent, const char *xStr_Url, size_t xsize_t_PostDataLengthInBytes, const BYTE *xPtr_PostData, const char *xStr_PostMimeType, long long xlong_long_TimeoutInMilliseconds) {}
 inline void EventWriteOpServicesHttpQueryDestroy(const char *xStr_Method, PUID xPUID) {}
 inline void EventWriteOpServicesHttpQueryCancel(const char *xStr_Method, PUID xPUID) {}
-inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, const void *xPtr_ResultData, size_t xsize_t_ResultReadSizeInBytes, size_t xsize_t_BytesToRead) {}
+inline void EventWriteOpServicesHttpQueryRead(const char *xStr_Method, PUID xPUID, size_t xsize_t_ResultReadSizeInBytes, const BYTE *xPtr_ResultData, size_t xsize_t_BytesToRead) {}
 
 inline void EventWriteOpServicesDebugLogger(const char *xStr_Subsystem, const char *xStr_Severity, const char *xStr_Level, const char *xStr_Function, const char *xStr_FilePath, ULONG xULONG_LineNumber, const char *xStr_Output) {}
 

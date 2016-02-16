@@ -697,7 +697,7 @@ namespace openpeer
           memcpy(mPostData.BytePtr(), postData, postDataLengthInBytes);
         }
 
-        EventWriteOpServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postData, postDataLengthInBytes, postDataMimeType, timeout.count());
+        EventWriteOpServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postDataLengthInBytes, postData, postDataMimeType, timeout.count());
       }
 
       //-----------------------------------------------------------------------
@@ -813,7 +813,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(*this);
         auto result = mHeader.Get(outResultData, bytesToRead);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, bytesToRead);
+        EventWriteOpServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
         return result;
       }
 
@@ -832,7 +832,7 @@ namespace openpeer
 
         outHeader = (const char *)data.BytePtr();
         auto result = strlen(outHeader);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, data.BytePtr(), result, static_cast<size_t>(available));
+        EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
         return result;
       }
 
@@ -851,7 +851,7 @@ namespace openpeer
       {
         AutoRecursiveLock lock(*this);
         auto result = mBody.Get(outResultData, bytesToRead);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, bytesToRead);
+        EventWriteOpServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
         return result;
       }
 
@@ -870,7 +870,7 @@ namespace openpeer
 
         outResultData = (const char *)data.BytePtr();
         auto result = strlen(outResultData);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, outResultData, result, static_cast<size_t>(available));
+        EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
         return result;
       }
 

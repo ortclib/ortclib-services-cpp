@@ -174,6 +174,8 @@
 		00D78B9E189976E800E84E10 /* ISettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ISettings.h; sourceTree = "<group>"; };
 		00D78B9F189AB21000E84E10 /* services_Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Settings.cpp; sourceTree = "<group>"; };
 		00D78BA1189AB25400E84E10 /* services_Settings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Settings.h; sourceTree = "<group>"; };
+		00E3EDB01C737B1D0059D006 /* services_ETWTracing.man */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = services_ETWTracing.man; sourceTree = "<group>"; };
+		00E3EDB11C737B1D0059D006 /* services_ETWTracing.wprp */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = services_ETWTracing.wprp; sourceTree = "<group>"; };
 		00E493A019967A1400335BB5 /* services_Encryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Encryptor.cpp; sourceTree = "<group>"; };
 		00E493A219967A6700335BB5 /* services_Encryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = services_Encryptor.h; sourceTree = "<group>"; };
 		00E493A31996805300335BB5 /* IDecryptor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDecryptor.h; sourceTree = "<group>"; };
@@ -361,6 +363,8 @@
 				0095DCB916CA8A16005F53D3 /* services_STUNRequesterManager.h */,
 				00ABD40817A7FFA700178078 /* services_TCPMessaging.h */,
 				0049A6561C6CDC5000A7AACB /* services_Tracing.h */,
+				00E3EDB01C737B1D0059D006 /* services_ETWTracing.man */,
+				00E3EDB11C737B1D0059D006 /* services_ETWTracing.wprp */,
 				003BEE0417A6F4CC0002EB47 /* services_TransportStream.h */,
 				0095DCBA16CA8A16005F53D3 /* services_TURNSocket.h */,
 				008C0E7E18628D750034958B /* services_wire.h */,
