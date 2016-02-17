@@ -388,11 +388,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.man">
-      <Filter>openpeer\services\internal</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp">
-      <Filter>openpeer\services\internal</Filter>
-    </None>
+    <Xml Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.man" />
+    <Xml Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\internal\services_ETWTracing.wprp" />
   </ItemGroup>
 </Project>
