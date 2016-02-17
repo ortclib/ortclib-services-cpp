@@ -133,7 +133,7 @@ namespace openpeer
         #pragma mark BackOffTimer => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(TimerPtr timer) override;
 
       protected:
         //---------------------------------------------------------------------
