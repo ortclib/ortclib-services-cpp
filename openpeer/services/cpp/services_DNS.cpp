@@ -258,6 +258,24 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      static bool shouldResolveAWhenAnIP(IDNS::SRVLookupTypes types)
+      {
+        if (IDNS::SRVLookupType_LookupOnly == types) return true;
+        if (0 != (IDNS::SRVLookupType_AutoLookupA & types)) return true;
+        if (0 != (IDNS::SRVLookupType_FallbackToALookup & types)) return true;
+        return false;
+      }
+
+      //-----------------------------------------------------------------------
+      static bool shouldResolveAAAAWhenAnIP(IDNS::SRVLookupTypes types)
+      {
+        if (IDNS::SRVLookupType_LookupOnly == types) return true;
+        if (0 != (IDNS::SRVLookupType_AutoLookupAAAA & types)) return true;
+        if (0 != (IDNS::SRVLookupType_FallbackToAAAALookup & types)) return true;
+        return false;
+      }
+
+      //-----------------------------------------------------------------------
       static bool isDNSsList(
                              const char *name,
                              StringList &outList
@@ -2423,25 +2441,20 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr resultA = make_shared<AResult>();
-          resultA->mName = name;
-          resultA->mTTL = 3600;
-
-          AAAAResultPtr resultAAAA = make_shared<AAAAResult>();
-          resultAAAA->mName = name;
-          resultAAAA->mTTL = 3600;
+          AResultPtr result = make_shared<AResult>();
+          result->mName = name;
+          result->mTTL = 3600;
 
           for (IPAddressList::iterator iter = ips.begin(); iter != ips.end(); ++iter) {
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv4()) {
               ZS_LOG_DEBUG(log("A record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
-              temp->mA = resultA;
-              resultA->mIPAddresses.push_back(ip);
+              temp->mA = result;
+              result->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_ERROR(Debug, log("A record found ip but was IPv6 address for A record lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
-              temp->mAAAA = resultAAAA;
-              resultAAAA->mIPAddresses.push_back(ip);
+              ZS_LOG_ERROR(Debug, log("IPv6 record found for A record lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              // DO NOT PUT IN RESOLUTION LIST
             }
           }
           delegate->onLookupCompleted(temp);
@@ -2479,16 +2492,22 @@ namespace openpeer
           internal::DNSInstantResultQueryPtr temp = internal::DNSInstantResultQuery::create();
           delegate = IDNSDelegateProxy::create(internal::Helper::getServiceQueue(), delegate);
 
-          AResultPtr result = make_shared<AResult>();
+          AAAAResultPtr result = make_shared<AAAAResult>();
           result->mName = name;
           result->mTTL = 3600;
           result->mIPAddresses = ips;
 
-          temp->mAAAA = result;
-
           for (IPAddressList::iterator iter = ips.begin(); iter != ips.end(); ++iter) {
             const IPAddress &ip = (*iter);
-            ZS_LOG_DEBUG(log("AAAA record found (no resolve required") + ZS_PARAM("ip", ip.string()))
+
+            if (ip.isIPv6()) {
+              ZS_LOG_DEBUG(log("AAAA record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
+              temp->mAAAA = result;
+              result->mIPAddresses.push_back(ip);
+            } else {
+              ZS_LOG_ERROR(Debug, log("IPv4 record found for IPv6 lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              // DO NOT PUT IN RESOLUTION LIST
+            }
           }
 
           delegate->onLookupCompleted(temp);
@@ -2609,25 +2628,38 @@ namespace openpeer
           resultAAAA->mName = name;
           resultAAAA->mTTL = 3600;
 
+          bool foundAny = false;
+
           for (IPAddressList::iterator iter = ips.begin(); iter != ips.end(); ++iter) {
             const IPAddress &ip = (*iter);
 
-            if (ip.isIPv4()) {
-              resultA->mIPAddresses.push_back(ip);
-              record.mAResult = resultA;
-            } else {
-              resultAAAA->mIPAddresses.push_back(ip);
-              record.mAAAAResult = resultAAAA;
-            }
+            bool found = false;
 
-            ZS_LOG_DEBUG(log("SRV record found SRV record (no resolve required") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+            if (ip.isIPv4()) {
+              if (shouldResolveAWhenAnIP(lookupType)) {
+                resultA->mIPAddresses.push_back(ip);
+                record.mAResult = resultA;
+                found = foundAny = true;
+              }
+            } else {
+              if (shouldResolveAAAAWhenAnIP(lookupType)) {
+                resultAAAA->mIPAddresses.push_back(ip);
+                record.mAAAAResult = resultAAAA;
+                found = foundAny = true;
+              }
+            }
+            if (found) {
+              ZS_LOG_DEBUG(log("SRV record found SRV record (no resolve required") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+            } else {
+              ZS_LOG_WARNING(Debug, log("SRV record found IP address but mismatch on A or AAAA resolution type") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+            }
           }
 
-          result->mRecords.push_back(record);
-
-          internal::sortSRV(result);
-
-          temp->mSRV = result;
+          if (foundAny) {
+            result->mRecords.push_back(record);
+            internal::sortSRV(result);
+            temp->mSRV = result;
+          }
           delegate->onLookupCompleted(temp);
           return temp;
         }
