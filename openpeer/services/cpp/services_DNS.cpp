@@ -2684,7 +2684,7 @@ namespace openpeer
 #ifdef WINRT
         String protocolStr(protocol);
         if (protocolStr == "udp") {
-          return internal::DNSWinRT::create(delegate, strName, port, true, true, service, protocol, defaultPort, defaultPriority, defaultWeight);
+          return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
         ZS_LOG_WARNING(Trace, log("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
 #endif //WINRT
