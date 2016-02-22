@@ -1362,7 +1362,7 @@ namespace openpeer
 
             IPAddress ignored;
             int noThrowError = 0;
-            mTelnetSocket = mListenSocket->accept(ignored, &noThrowError);
+            mTelnetSocket = mListenSocket->accept(ignored, NULL, &noThrowError);
             if (!mTelnetSocket)
               return;
 

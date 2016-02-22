@@ -162,7 +162,7 @@ namespace openpeer
         AutoRecursiveLock lock(pThis->getLock());
 
         int errorCode = 0;
-        pThis->mSocket = socket->accept(pThis->mRemoteIP, &errorCode);
+        pThis->mSocket = socket->accept(pThis->mRemoteIP, NULL, &errorCode);
         if (!pThis->mSocket) {
           ZS_LOG_ERROR(Detail, pThis->log("failed to accept socket") + ZS_PARAM("error code", errorCode))
           pThis->shutdown(Seconds(0));
