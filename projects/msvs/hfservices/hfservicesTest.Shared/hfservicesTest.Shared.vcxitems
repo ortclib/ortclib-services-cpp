@@ -28,6 +28,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestRUDPICESocketLoopback.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestRUDPListener.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestSTUNDiscovery.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestSTUNPacket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestTCPMessagingLoopback.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestTURNSocket.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\config.h" />
