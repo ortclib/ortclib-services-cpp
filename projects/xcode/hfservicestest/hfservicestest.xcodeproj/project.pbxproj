@@ -29,6 +29,7 @@
 		00AD9018177BF90D009590EB /* libudns.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C90620177BF5140090BD8B /* libudns.a */; };
 		00CBC68A1A13A29500643BA7 /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CBC6891A13A29500643BA7 /* TestHelper.cpp */; };
 		00CF4B991A15547D00573A34 /* libidnkit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CF4B911A15531800573A34 /* libidnkit.a */; };
+		00DDFB411CAEE42500D05EB1 /* TestSTUNPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00DDFB401CAEE42500D05EB1 /* TestSTUNPacket.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -142,6 +143,7 @@
 		00C90623177BF5380090BD8B /* cryptopp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp/cryptopp.xcodeproj; sourceTree = "<group>"; };
 		00CBC6891A13A29500643BA7 /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
 		00CF4B8C1A15531800573A34 /* idnkit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit.xcodeproj; path = ../../../../idnkit/projects/xcode/idnkit.xcodeproj; sourceTree = "<group>"; };
+		00DDFB401CAEE42500D05EB1 /* TestSTUNPacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSTUNPacket.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +218,7 @@
 				0063C28F16CAA03800E6DB4D /* TestRUDPICESocketLoopback.cpp */,
 				0063C29016CAA03800E6DB4D /* TestRUDPListener.cpp */,
 				0063C29116CAA03800E6DB4D /* TestSTUNDiscovery.cpp */,
+				00DDFB401CAEE42500D05EB1 /* TestSTUNPacket.cpp */,
 				0063C29216CAA03800E6DB4D /* TestTURNSocket.cpp */,
 				00ABD44C17A8431D00178078 /* TestTCPMessagingLoopback.cpp */,
 			);
@@ -413,6 +416,7 @@
 				0063C3EB16CAA03800E6DB4D /* TestCanonicalXML.cpp in Sources */,
 				0063C3EC16CAA03800E6DB4D /* TestDNS.cpp in Sources */,
 				0063C3ED16CAA03800E6DB4D /* TestICESocket.cpp in Sources */,
+				00DDFB411CAEE42500D05EB1 /* TestSTUNPacket.cpp in Sources */,
 				0063C3EE16CAA03800E6DB4D /* TestRUDPICESocket.cpp in Sources */,
 				0063C3EF16CAA03800E6DB4D /* TestRUDPICESocketLoopback.cpp in Sources */,
 				0063C3F016CAA03800E6DB4D /* TestRUDPListener.cpp in Sources */,

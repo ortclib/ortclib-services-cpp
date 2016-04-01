@@ -60,6 +60,7 @@ void doTestDNS();
 void doTestHelper();
 void doTestICESocket();
 void doTestSTUNDiscovery();
+void doTestSTUNPacket();
 void doTestTURNSocket();
 void doTestRUDPListener();
 void doTestRUDPICESocket();
@@ -166,6 +167,7 @@ namespace Testing
     TESTING_RUN_TEST_FUNC(doTestHelper)
     TESTING_RUN_TEST_FUNC(doTestICESocket)
     TESTING_RUN_TEST_FUNC(doTestSTUNDiscovery)
+    TESTING_RUN_TEST_FUNC(doTestSTUNPacket)
     TESTING_RUN_TEST_FUNC(doTestTURNSocket)
     TESTING_RUN_TEST_FUNC(doTestRUDPICESocketLoopback)
     TESTING_RUN_TEST_FUNC(doTestRUDPListener)

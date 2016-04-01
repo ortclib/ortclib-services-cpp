@@ -55,6 +55,7 @@
 #define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST           (true)
 #define OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST   (false)  // needs to be run manually do to launch two different versions requirement
 #define OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST                    (true)
+#define OPENPEER_SERVICE_TEST_DO_STUN_PACKET_TEST                      (true)
 
 #define OPENPEER_SERVICE_TEST_DNS_ZONE "dnstest.hookflash.me"
 
