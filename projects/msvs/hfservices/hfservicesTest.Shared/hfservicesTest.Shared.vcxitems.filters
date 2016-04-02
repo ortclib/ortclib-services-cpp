@@ -55,6 +55,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestTURNSocket.cpp">
       <Filter>openpeer\services\test</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\openpeer\services\test\TestSTUNPacket.cpp">
+      <Filter>openpeer\services\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="openpeer">
