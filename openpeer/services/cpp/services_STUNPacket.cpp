@@ -1199,7 +1199,7 @@ namespace openpeer
             // put back the original length
             ((WORD *)stun.mOriginalPacket)[1] = originalLength;
 
-            hmac.Final(&(result[0]));
+            hmac.TruncatedFinal(&(result[0]), sizeof(result));
 
             memcpy(pos, &(result[0]), sizeof(result));
             break;
@@ -1825,7 +1825,10 @@ namespace openpeer
               foundIntegrity = true;
               if (attributeLength < sizeof(stun->mMessageIntegrity)) return STUNPacketPtr();
               memcpy(&(stun->mMessageIntegrity[0]), dataPos, sizeof(stun->mMessageIntegrity));
-              stun->mOriginalPacket = packet;
+              std::unique_ptr<BYTE[]> originalBuffer(new BYTE[packetLengthInBytes]);
+              memcpy(originalBuffer.get(), packet, packetLengthInBytes);
+              stun->mOriginalPacketBuffer = std::move(originalBuffer);
+              stun->mOriginalPacket = stun->mOriginalPacketBuffer.get();
               stun->mMessageIntegrityMessageLengthInBytes = ((PTRNUMBER)attributeStart) - ((PTRNUMBER)packet);
               break;
             }
@@ -2668,7 +2671,7 @@ namespace openpeer
       // put back the original value now...
       ((WORD *)mOriginalPacket)[1] = originalLength;
 
-      hmac.Final(&(result[0]));
+      hmac.TruncatedFinal(&(result[0]), sizeof(result));
       return (0 == memcmp(&(mMessageIntegrity[0]), &(result[0]), sizeof(result)));
     }
 

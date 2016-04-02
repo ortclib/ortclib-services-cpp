@@ -278,8 +278,8 @@ namespace openpeer
       const char *mLogObject {};                                // when output to a log, which object was responsible for this packet (never packetized or parsed)
       PUID mLogObjectID {};                                     // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
 
-      const BYTE *mOriginalPacket {};                           // NOTE: This is only valid as long as the packet which it was parsed from is valid and must be valid for the validate routine
-                                                                // ALSO: Because the RFC demands the length of the packet during MESSAGE-INTEGRITY be set to the value as if the MESSAGE-INTEGRITY but not including anything after we have to overwrite the length in the original packet momentarily then put back original value
+      std::unique_ptr<BYTE[]> mOriginalPacketBuffer;            // keep a copy of the original packet for the sake of validation
+      const BYTE *mOriginalPacket {};                           // ALSO: Because the RFC demands the length of the packet during MESSAGE-INTEGRITY be set to the value as if the MESSAGE-INTEGRITY but not including anything after we have to overwrite the length in the original packet momentarily then put back original value
 
       Classes mClass {Class_Request};
       Methods mMethod {Method_Binding};
