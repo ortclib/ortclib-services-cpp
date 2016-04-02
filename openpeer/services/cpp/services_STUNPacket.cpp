@@ -44,6 +44,8 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/crc.h>
 #include <cryptopp/hmac.h>
+#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 
 #include <algorithm>
@@ -76,6 +78,7 @@ namespace openpeer
     using zsLib::CSTR;
     using zsLib::string;
     using zsLib::IPv6Address;
+    using CryptoPP::Weak::MD5;
 
     namespace internal
     {
@@ -1170,15 +1173,24 @@ namespace openpeer
 
             size_t passwordLength = strlen(password);
 
-            const char *usePassword = password;
-            String replacementPassword;
+            const BYTE *useKey = reinterpret_cast<const BYTE *>(password);
+            BYTE replacementKey[MD5::DIGESTSIZE] {};
 
             if ((stun.mUsername.hasData()) &&
                 (stun.mRealm.hasData()))
             {
-              replacementPassword = stun.mRealm + ":" + stun.mUsername + ":" + password;
-              usePassword = replacementPassword.c_str();
-              passwordLength = replacementPassword.length();
+              useKey = &(replacementKey[0]);
+              passwordLength = sizeof(replacementKey);
+
+              MD5 hasher;
+              hasher.Update(reinterpret_cast<const BYTE *>(stun.mUsername.c_str()), stun.mUsername.length());
+              hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
+              hasher.Update(reinterpret_cast<const BYTE *>(stun.mRealm.c_str()), stun.mRealm.length());
+              hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
+              hasher.Update(reinterpret_cast<const BYTE *>(stun.mPassword.c_str()), stun.mPassword.length());
+
+              ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(replacementKey) != hasher.DigestSize());
+              hasher.Final(&(replacementKey[0]));
             }
 
             BYTE result[OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES];
@@ -1192,7 +1204,7 @@ namespace openpeer
             // change the length for the sake of doing the message integrity calculation
             ((WORD *)stun.mOriginalPacket)[1] = htons(static_cast<WORD>(messageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(stun.mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
 
-            CryptoPP::HMAC<CryptoPP::SHA1> hmac(reinterpret_cast<const BYTE *>(password), sizeof(passwordLength));
+            CryptoPP::HMAC<CryptoPP::SHA1> hmac(useKey, passwordLength);
             hmac.Update(stun.mOriginalPacket, messageIntegrityMessageLengthInBytes);
             ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
 
@@ -1617,6 +1629,7 @@ namespace openpeer
     STUNPacketPtr STUNPacket::clone(bool changeTransactionID) const
     {
       STUNPacketPtr dest(make_shared<STUNPacket>());
+      dest->mOriginalPacketBuffer = mOriginalPacketBuffer;
       dest->mOriginalPacket = mOriginalPacket;
       dest->mClass = mClass;
       dest->mMethod = mMethod;
@@ -1824,11 +1837,10 @@ namespace openpeer
               // found integrity but without knowing which usename and password to use there is no way to authenticate it, so that has to be done later
               foundIntegrity = true;
               if (attributeLength < sizeof(stun->mMessageIntegrity)) return STUNPacketPtr();
+
+              stun->mOriginalPacketBuffer = IHelper::convertToBuffer(packet, packetLengthInBytes);
+              stun->mOriginalPacket = stun->mOriginalPacketBuffer->BytePtr();
               memcpy(&(stun->mMessageIntegrity[0]), dataPos, sizeof(stun->mMessageIntegrity));
-              std::unique_ptr<BYTE[]> originalBuffer(new BYTE[packetLengthInBytes]);
-              memcpy(originalBuffer.get(), packet, packetLengthInBytes);
-              stun->mOriginalPacketBuffer = std::move(originalBuffer);
-              stun->mOriginalPacket = stun->mOriginalPacketBuffer.get();
               stun->mMessageIntegrityMessageLengthInBytes = ((PTRNUMBER)attributeStart) - ((PTRNUMBER)packet);
               break;
             }
@@ -2645,16 +2657,26 @@ namespace openpeer
 
       size_t passwordLength = strlen(password);
 
-      const char *usePassword = password;
-      String replacementPassword;
+      const BYTE *useKey = reinterpret_cast<const BYTE *>(password);
+      BYTE replacementKey[MD5::DIGESTSIZE]{};
 
       if ((NULL != username) &&
           (NULL != realm))
       {
-        replacementPassword = String(realm) + ":" + username + ":" + password;
-        usePassword = replacementPassword.c_str();
-        passwordLength = replacementPassword.length();
+        useKey = &(replacementKey[0]);
+        passwordLength = sizeof(replacementKey);
+
+        MD5 hasher;
+        hasher.Update(reinterpret_cast<const BYTE *>(username), strlen(username));
+        hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
+        hasher.Update(reinterpret_cast<const BYTE *>(realm), strlen(realm));
+        hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
+        hasher.Update(reinterpret_cast<const BYTE *>(password), strlen(password));
+
+        ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(replacementKey) != hasher.DigestSize());
+        hasher.Final(&(replacementKey[0]));
       }
+
 
       BYTE result[OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES];
       memset(&(result[0]), 0, sizeof(result));
@@ -2664,7 +2686,7 @@ namespace openpeer
       // for the sake of message integrity we have to set the length to the original size up to and including the message interity attribute
       ((WORD *)mOriginalPacket)[1] = htons(static_cast<WORD>(mMessageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
 
-      CryptoPP::HMAC<CryptoPP::SHA1> hmac(reinterpret_cast<const BYTE *>(usePassword), passwordLength);
+      CryptoPP::HMAC<CryptoPP::SHA1> hmac(useKey, passwordLength);
       hmac.Update(mOriginalPacket, mMessageIntegrityMessageLengthInBytes);
       ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
 
