@@ -1247,6 +1247,7 @@ namespace openpeer
 
             STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_ChannelBind);
             fix(newRequest);
+            newRequest->mFingerprintIncluded = true;
             newRequest->mUsername = mUsername;
             newRequest->mPassword = mPassword;
             newRequest->mRealm = mRealm;
@@ -1645,6 +1646,7 @@ namespace openpeer
             // we don't have an allocate request - form one now
             STUNPacketPtr allocRequest = STUNPacket::createRequest(STUNPacket::Method_Allocate);
             fix(allocRequest);
+            allocRequest->mFingerprintIncluded = true;
             allocRequest->mLifetimeIncluded = true;
             allocRequest->mLifetime = mLifetime;
             allocRequest->mRequestedTransport = STUNPacket::Protocol_UDP;
@@ -1785,6 +1787,7 @@ namespace openpeer
               // we need to shutdown gracefully... start the process now...
               STUNPacketPtr deallocRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
               fix(deallocRequest);
+              deallocRequest->mFingerprintIncluded = true;
               deallocRequest->mUsername = mUsername;
               deallocRequest->mPassword = mPassword;
               deallocRequest->mRealm = mRealm;
@@ -2270,6 +2273,7 @@ namespace openpeer
             permissionRequest->mPeerAddressList.push_back(permission->mPeerAddress);
           }
         }
+        permissionRequest->mFingerprintIncluded = true;
         permissionRequest->mUsername = mUsername;
         permissionRequest->mPassword = mPassword;
         permissionRequest->mRealm = mRealm;
@@ -2312,6 +2316,7 @@ namespace openpeer
         // this is the refresh timer... time to perform another refresh now...
         STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
         fix(newRequest);
+        newRequest->mFingerprintIncluded = true;
         newRequest->mUsername = mUsername;
         newRequest->mPassword = mPassword;
         newRequest->mRealm = mRealm;

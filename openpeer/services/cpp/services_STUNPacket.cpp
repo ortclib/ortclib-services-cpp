@@ -780,6 +780,7 @@ namespace openpeer
             }
             if (STUNPacket::Class_Response == stun.mClass)
               return true;                                              // required on binding and allocate responses for STUN/ICE
+            return false;
           }
 
           case STUNPacket::Attribute_Software:            return false; // never required (but recommended)
