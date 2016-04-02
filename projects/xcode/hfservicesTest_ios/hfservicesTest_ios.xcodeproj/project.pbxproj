@@ -31,6 +31,7 @@
 		00BDBFDD1A1A6D3400F0DA1C /* TestSTUNDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBFAA1A1A6D3400F0DA1C /* TestSTUNDiscovery.cpp */; };
 		00BDBFDE1A1A6D3400F0DA1C /* TestTCPMessagingLoopback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBFAB1A1A6D3400F0DA1C /* TestTCPMessagingLoopback.cpp */; };
 		00BDBFDF1A1A6D3400F0DA1C /* TestTURNSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00BDBFAC1A1A6D3400F0DA1C /* TestTURNSocket.cpp */; };
+		00DDFB431CB0291B00D05EB1 /* TestSTUNPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00DDFB421CB0291B00D05EB1 /* TestSTUNPacket.cpp */; };
 		00FF8DAD1AAB4E390011B082 /* libresolv.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FF8DAC1AAB4E390011B082 /* libresolv.9.dylib */; };
 /* End PBXBuildFile section */
 
@@ -139,6 +140,7 @@
 		00BDBFAC1A1A6D3400F0DA1C /* TestTURNSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTURNSocket.cpp; sourceTree = "<group>"; };
 		00D5376C1AAD57FD00E37867 /* idnkit_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = idnkit_ios.xcodeproj; path = ../../../../idnkit/projects/xcode/idnkit_ios.xcodeproj; sourceTree = "<group>"; };
 		00D537721AAD580300E37867 /* cryptopp_ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cryptopp_ios.xcodeproj; path = ../../../../cryptopp/projects/xcode/cryptopp_ios/cryptopp_ios.xcodeproj; sourceTree = "<group>"; };
+		00DDFB421CB0291B00D05EB1 /* TestSTUNPacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSTUNPacket.cpp; sourceTree = "<group>"; };
 		00FF8DAC1AAB4E390011B082 /* libresolv.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.9.dylib; path = usr/lib/libresolv.9.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -276,6 +278,7 @@
 				00BDBFA81A1A6D3400F0DA1C /* TestRUDPICESocketLoopback.cpp */,
 				00BDBFA91A1A6D3400F0DA1C /* TestRUDPListener.cpp */,
 				00BDBFAA1A1A6D3400F0DA1C /* TestSTUNDiscovery.cpp */,
+				00DDFB421CB0291B00D05EB1 /* TestSTUNPacket.cpp */,
 				00BDBFAB1A1A6D3400F0DA1C /* TestTCPMessagingLoopback.cpp */,
 				00BDBFAC1A1A6D3400F0DA1C /* TestTURNSocket.cpp */,
 			);
@@ -437,6 +440,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00DDFB431CB0291B00D05EB1 /* TestSTUNPacket.cpp in Sources */,
 				00BDBF0D1A1A6B7A00F0DA1C /* ViewController.m in Sources */,
 				00BDBFDC1A1A6D3400F0DA1C /* TestRUDPListener.cpp in Sources */,
 				00BDBF0A1A1A6B7A00F0DA1C /* AppDelegate.mm in Sources */,
