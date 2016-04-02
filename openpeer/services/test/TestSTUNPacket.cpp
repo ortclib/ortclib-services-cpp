@@ -73,6 +73,59 @@ static const unsigned char kRfc5769SampleRequest[] = {
   0xe5, 0x7a, 0x3b, 0xcf    //    CRC32 fingerprint
 };
 
+
+// 2.2.  Sample IPv4 Response
+static const unsigned char kRfc5769SampleResponse[] = {
+  0x01, 0x01, 0x00, 0x3c,  //     Response type and message length
+  0x21, 0x12, 0xa4, 0x42,  //     Magic cookie
+  0xb7, 0xe7, 0xa7, 0x01,  // }
+  0xbc, 0x34, 0xd6, 0x86,  // }  Transaction ID
+  0xfa, 0x87, 0xdf, 0xae,  // }
+  0x80, 0x22, 0x00, 0x0b,  //    SOFTWARE attribute header
+  0x74, 0x65, 0x73, 0x74,  // }
+  0x20, 0x76, 0x65, 0x63,  // }  UTF-8 server name
+  0x74, 0x6f, 0x72, 0x20,  // }
+  0x00, 0x20, 0x00, 0x08,  //    XOR-MAPPED-ADDRESS attribute header
+  0x00, 0x01, 0xa1, 0x47,  //    Address family (IPv4) and xor'd mapped port
+  0xe1, 0x12, 0xa6, 0x43,  //    Xor'd mapped IPv4 address
+  0x00, 0x08, 0x00, 0x14,  //    MESSAGE-INTEGRITY attribute header
+  0x2b, 0x91, 0xf5, 0x99,  // }
+  0xfd, 0x9e, 0x90, 0xc3,  // }
+  0x8c, 0x74, 0x89, 0xf9,  // }  HMAC-SHA1 fingerprint
+  0x2a, 0xf9, 0xba, 0x53,  // }
+  0xf0, 0x6b, 0xe7, 0xd7,  // }
+  0x80, 0x28, 0x00, 0x04,  //    FINGERPRINT attribute header
+  0xc0, 0x7d, 0x4c, 0x96   //    CRC32 fingerprint
+};
+
+// 2.3.  Sample IPv6 Response
+static const unsigned char kRfc5769SampleResponseIPv6[] = {
+  0x01, 0x01, 0x00, 0x48,  //    Response type and message length
+  0x21, 0x12, 0xa4, 0x42,  //    Magic cookie
+  0xb7, 0xe7, 0xa7, 0x01,  // }
+  0xbc, 0x34, 0xd6, 0x86,  // }  Transaction ID
+  0xfa, 0x87, 0xdf, 0xae,  // }
+  0x80, 0x22, 0x00, 0x0b,  //    SOFTWARE attribute header
+  0x74, 0x65, 0x73, 0x74,  // }
+  0x20, 0x76, 0x65, 0x63,  // }  UTF-8 server name
+  0x74, 0x6f, 0x72, 0x20,  // }
+  0x00, 0x20, 0x00, 0x14,  //    XOR-MAPPED-ADDRESS attribute header
+  0x00, 0x02, 0xa1, 0x47,  //    Address family (IPv6) and xor'd mapped port.
+  0x01, 0x13, 0xa9, 0xfa,  // }
+  0xa5, 0xd3, 0xf1, 0x79,  // }  Xor'd mapped IPv6 address
+  0xbc, 0x25, 0xf4, 0xb5,  // }
+  0xbe, 0xd2, 0xb9, 0xd9,  // }
+  0x00, 0x08, 0x00, 0x14,  //    MESSAGE-INTEGRITY attribute header
+  0xa3, 0x82, 0x95, 0x4e,  // }
+  0x4b, 0xe6, 0x7b, 0xf1,  // }
+  0x17, 0x84, 0xc9, 0x7c,  // }  HMAC-SHA1 fingerprint
+  0x82, 0x92, 0xc2, 0x75,  // }
+  0xbf, 0xe3, 0xed, 0x41,  // }
+  0x80, 0x28, 0x00, 0x04,  //    FINGERPRINT attribute header
+  0xc8, 0xfb, 0x0b, 0x4c   //    CRC32 fingerprint
+};
+
+
 namespace openpeer
 {
   namespace services
@@ -85,6 +138,8 @@ namespace openpeer
         TestIntegity()
         {
           test1();
+          test2();
+          test3();
         }
 
         void test1()
@@ -99,6 +154,29 @@ namespace openpeer
           TESTING_CHECK(valid)
         }
 
+        void test2()
+        {
+          // have to copy to a buffer because integrity is checked in place
+          SecureByteBlockPtr buffer = IHelper::convertToBuffer(kRfc5769SampleResponse, sizeof(kRfc5769SampleResponse));
+          STUNPacketPtr packet = STUNPacket::parseIfSTUN(buffer->BytePtr(), buffer->SizeInBytes(), STUNPacket::RFC_5245_ICE);
+
+          TESTING_CHECK((bool)packet)
+
+          bool valid = packet->isValidMessageIntegrity(kRfc5769SampleMsgPassword);
+          TESTING_CHECK(valid)
+        }
+
+        void test3()
+        {
+          // have to copy to a buffer because integrity is checked in place
+          SecureByteBlockPtr buffer = IHelper::convertToBuffer(kRfc5769SampleResponseIPv6, sizeof(kRfc5769SampleResponseIPv6));
+          STUNPacketPtr packet = STUNPacket::parseIfSTUN(buffer->BytePtr(), buffer->SizeInBytes(), STUNPacket::RFC_5245_ICE);
+
+          TESTING_CHECK((bool)packet)
+
+          bool valid = packet->isValidMessageIntegrity(kRfc5769SampleMsgPassword);
+          TESTING_CHECK(valid)
+        }
       };
     }
   }
