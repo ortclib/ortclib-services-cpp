@@ -2706,7 +2706,7 @@ namespace openpeer
         if (next) {
           // we found a quick route - but does it actually handle the packet
           // (it is possible for two routes to have same IP in strange firewall
-          // configruations thus we might pick the wrong session)
+          // configurations thus we might pick the wrong session)
           if (next->handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
 
           // we chose wrong, so allow the "hunt" method to take over
