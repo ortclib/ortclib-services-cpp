@@ -357,7 +357,7 @@ namespace openpeer
         String strPort = str.substr(pos+1);
         try {
           port = Numeric<WORD>(strPort);
-        } catch (Numeric<WORD>::ValueOutOfRange &) {
+        } catch(const Numeric<WORD>::ValueOutOfRange &) {
           ZS_LOG_WARNING(Detail, slog("failed to extract port") + ZS_PARAMIZE(strPort))
           return str;
         }
@@ -2152,7 +2152,7 @@ namespace openpeer
                       if (0 != port) {
                         ip.setPort(port);
                       }
-                    } catch (Numeric<WORD>::ValueOutOfRange &) {
+                    } catch(const Numeric<WORD>::ValueOutOfRange &) {
                       // ignorred
                     }
                   }

@@ -88,35 +88,35 @@ namespace openpeer
             case DataType_Int:      {
               try {
                 setInt(key, Numeric<LONG>(valuePair.second));
-              } catch(Numeric<LONG>::ValueOutOfRange &) {
+              } catch(const Numeric<LONG>::ValueOutOfRange &) {
               }
               break;
             }
             case DataType_UInt:     {
               try {
                 setUInt(key, Numeric<ULONG>(valuePair.second));
-              } catch(Numeric<ULONG>::ValueOutOfRange &) {
+              } catch(const Numeric<ULONG>::ValueOutOfRange &) {
               }
               break;
             }
             case DataType_Bool:     {
               try {
                 setBool(key, Numeric<bool>(valuePair.second));
-              } catch(Numeric<bool>::ValueOutOfRange &) {
+              } catch(const Numeric<bool>::ValueOutOfRange &) {
               }
               break;
             }
             case DataType_Float:    {
               try {
                 setFloat(key, Numeric<float>(valuePair.second));
-              } catch(Numeric<float>::ValueOutOfRange &) {
+              } catch(const Numeric<float>::ValueOutOfRange &) {
               }
               break;
             }
             case DataType_Double:   {
               try {
                 setDouble(key, Numeric<double>(valuePair.second));
-              } catch(Numeric<double>::ValueOutOfRange &) {
+              } catch(const Numeric<double>::ValueOutOfRange &) {
               }
               break;
             }
@@ -214,7 +214,7 @@ namespace openpeer
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
               EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
               return result;
-            } catch(Numeric<LONG>::ValueOutOfRange &) {
+            } catch(const Numeric<LONG>::ValueOutOfRange &) {
             }
             EventWriteOpServicesSettingGetInt(__func__, mID, key, 0);
             return 0;
@@ -243,7 +243,7 @@ namespace openpeer
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
               EventWriteOpServicesSettingGetUInt(__func__, mID, key, result);
               return result;
-            } catch(Numeric<ULONG>::ValueOutOfRange &) {
+            } catch(const Numeric<ULONG>::ValueOutOfRange &) {
             }
             EventWriteOpServicesSettingGetUInt(__func__, mID, key, 0);
             return 0;
@@ -272,7 +272,7 @@ namespace openpeer
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
               EventWriteOpServicesSettingGetBool(__func__, mID, key, result);
               return result;
-            } catch(Numeric<bool>::ValueOutOfRange &) {
+            } catch(const Numeric<bool>::ValueOutOfRange &) {
             }
             EventWriteOpServicesSettingGetBool(__func__, mID, key, false);
             return false;
@@ -301,7 +301,7 @@ namespace openpeer
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
               EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
               return result;
-            } catch(Numeric<float>::ValueOutOfRange &) {
+            } catch(const Numeric<float>::ValueOutOfRange &) {
             }
             EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0f);
             return 0;
@@ -330,7 +330,7 @@ namespace openpeer
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
               EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
               return result;
-            } catch(Numeric<double>::ValueOutOfRange &) {
+            } catch(const Numeric<double>::ValueOutOfRange &) {
             }
             EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0);
             return 0;
@@ -600,31 +600,31 @@ namespace openpeer
             } else if ("int" == attribute) {
               try {
                 setInt(key, Numeric<LONG>(value));
-              } catch(Numeric<LONG>::ValueOutOfRange &) {
+              } catch(const Numeric<LONG>::ValueOutOfRange &) {
                 handled = false;
               }
             } else if ("uint" == attribute) {
               try {
                 setUInt(key, Numeric<ULONG>(value));
-              } catch(Numeric<ULONG>::ValueOutOfRange &) {
+              } catch(const Numeric<ULONG>::ValueOutOfRange &) {
                 handled = false;
               }
             } else if ("bool" == attribute) {
               try {
                 setBool(key, Numeric<bool>(value));
-              } catch(Numeric<bool>::ValueOutOfRange &) {
+              } catch(const Numeric<bool>::ValueOutOfRange &) {
                 handled = false;
               }
             } else if ("float" == attribute) {
               try {
                 setFloat(key, Numeric<float>(value));
-              } catch(Numeric<float>::ValueOutOfRange &) {
+              } catch(const Numeric<float>::ValueOutOfRange &) {
                 handled = false;
               }
             } else if ("double" == attribute) {
               try {
                 setDouble(key, Numeric<double>(value));
-              } catch(Numeric<double>::ValueOutOfRange &) {
+              } catch(const Numeric<double>::ValueOutOfRange &) {
                 handled = false;
               }
             }

@@ -1552,7 +1552,7 @@ namespace openpeer
                   AlgorithmIndex index = 0;
                   try {
                     index = Numeric<AlgorithmIndex>(getElementTextAndDecode(keyEl->findFirstChildElementChecked("index")));
-                  } catch(Numeric<AlgorithmIndex>::ValueOutOfRange &) {
+                  } catch(const Numeric<AlgorithmIndex>::ValueOutOfRange &) {
                     ZS_LOG_WARNING(Detail, log("algorithm index value out of range"))
                   }
 

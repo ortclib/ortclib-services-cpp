@@ -2971,7 +2971,7 @@ namespace openpeer
 
             try {
               parsedIndex = Numeric<decltype(data.mIndex)>(numStr);
-            } catch(Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
+            } catch(const Numeric<decltype(data.mIndex)>::ValueOutOfRange &) {
               ZS_LOG_WARNING(Detail, Log::Params("number failed to convert", "ICESocket") + ZS_PARAM("name", name))
             }
           } else {

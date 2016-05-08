@@ -580,7 +580,7 @@ namespace openpeer
 
         try {
           return Numeric<Time>(str);
-        } catch(Numeric<Time>::ValueOutOfRange &) {
+        } catch(const Numeric<Time>::ValueOutOfRange &) {
           ZS_LOG_WARNING(Detail, log("unable to convert value to time") + ZS_PARAM("value", str))
         }
 
@@ -1663,6 +1663,15 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      void Helper::splitTrim(SplitMap &ioResult)
+      {
+        for (auto iter = ioResult.begin(); iter != ioResult.end(); ++iter) {
+          auto &value = (*iter).second;
+          value.trim();
+        }
+      }
+
+      //-----------------------------------------------------------------------
       const String &Helper::get(
                                 const SplitMap &inResult,
                                 Index index
@@ -2588,6 +2597,12 @@ namespace openpeer
                                   )
     {
       internal::Helper::splitPruneEmpty(ioResult, reindex);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::splitTrim(SplitMap &ioResult)
+    {
+      internal::Helper::splitTrim(ioResult);
     }
 
     //-------------------------------------------------------------------------

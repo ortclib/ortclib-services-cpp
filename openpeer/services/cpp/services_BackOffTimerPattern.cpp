@@ -79,7 +79,7 @@ namespace openpeer
         if (patternEl) {
           try {
             mMaxAttempts = Numeric<decltype(mMaxAttempts)>(IHelper::getElementText(patternEl->findFirstChildElement("maxAttempts")));
-          } catch(Numeric<decltype(mMaxAttempts)>::ValueOutOfRange &) {
+          } catch(const Numeric<decltype(mMaxAttempts)>::ValueOutOfRange &) {
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
 
@@ -93,7 +93,7 @@ namespace openpeer
               try {
                 DurationType::rep value = Numeric<DurationType::rep>(IHelper::getElementText(timeoutEl));
                 mAttemptTimeoutVector.push_back(DurationType(value));
-              } catch(Numeric<DurationType::rep>::ValueOutOfRange &) {
+              } catch(const Numeric<DurationType::rep>::ValueOutOfRange &) {
                 ZS_LOG_WARNING(Debug, log("value out of range"))
               }
 
@@ -104,13 +104,13 @@ namespace openpeer
           try {
             DurationType::rep value = Numeric<DurationType::rep>(IHelper::getElementText(patternEl->findFirstChildElement("maxTimeout")));
             mMaxAttemptTimeout = DurationType(value);
-          } catch(Numeric<DurationType::rep>::ValueOutOfRange &) {
+          } catch(const Numeric<DurationType::rep>::ValueOutOfRange &) {
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
 
           try {
             mAttemptTimeoutMultiplier = Numeric<decltype(mAttemptTimeoutMultiplier)>(IHelper::getElementText(patternEl->findFirstChildElement("timeoutMultiplier")));
-          } catch(Numeric<decltype(mAttemptTimeoutMultiplier)>::ValueOutOfRange &) {
+          } catch(const Numeric<decltype(mAttemptTimeoutMultiplier)>::ValueOutOfRange &) {
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
 
@@ -124,7 +124,7 @@ namespace openpeer
               try {
                 DurationType::rep value = Numeric<DurationType::rep>(IHelper::getElementText(retryEl));
                 mRetryVector.push_back(DurationType(value));
-              } catch(Numeric<DurationType::rep>::ValueOutOfRange &) {
+              } catch(const Numeric<DurationType::rep>::ValueOutOfRange &) {
                 ZS_LOG_WARNING(Debug, log("value out of range"))
               }
 
@@ -134,14 +134,14 @@ namespace openpeer
           
           try {
             mRetryMultiplier = Numeric<decltype(mRetryMultiplier)>(IHelper::getElementText(patternEl->findFirstChildElement("retryMultiplier")));
-          } catch(Numeric<decltype(mRetryMultiplier)>::ValueOutOfRange &) {
+          } catch(const Numeric<decltype(mRetryMultiplier)>::ValueOutOfRange &) {
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
 
           try {
             DurationType::rep value = Numeric<DurationType::rep>(IHelper::getElementText(patternEl->findFirstChildElement("maxRetry")));
             mMaxRetry = DurationType(value);
-          } catch(Numeric<DurationType::rep>::ValueOutOfRange &) {
+          } catch(const Numeric<DurationType::rep>::ValueOutOfRange &) {
             ZS_LOG_WARNING(Debug, log("value out of range"))
           }
         }

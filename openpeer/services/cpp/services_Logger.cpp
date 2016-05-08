@@ -1078,7 +1078,7 @@ namespace openpeer
 
             try {
               mListenPort = Numeric<WORD>(portStr);
-            } catch(Numeric<WORD>::ValueOutOfRange &) {
+            } catch(const Numeric<WORD>::ValueOutOfRange &) {
             }
           }
 

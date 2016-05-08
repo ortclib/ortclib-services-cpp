@@ -291,6 +291,8 @@ namespace openpeer
                                     bool reindex = true
                                     );
 
+        static void splitTrim(SplitMap &ioResult);
+
         static const String &get(
                                  const SplitMap &inResult,
                                  Index index
