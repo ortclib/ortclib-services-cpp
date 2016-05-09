@@ -66,6 +66,7 @@ namespace openpeer
 
       typedef size_t Index;
       typedef std::map<Index, String> SplitMap;
+      typedef std::list<String> StringList;
 
       static void setup();
 
@@ -368,6 +369,15 @@ namespace openpeer
                                   );
 
       static void splitTrim(SplitMap &ioResult);
+
+      static String combine(
+                            const SplitMap &input,
+                            const char *combineStr
+                            );
+      static String combine(
+                            const StringList &input,
+                            const char *combineStr
+                            );
 
       static const String &get(
                                const SplitMap &inResult,

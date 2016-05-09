@@ -293,6 +293,15 @@ namespace openpeer
 
         static void splitTrim(SplitMap &ioResult);
 
+        static String combine(
+                              const SplitMap &input,
+                              const char *combineStr
+                              );
+        static String combine(
+                              const StringList &input,
+                              const char *combineStr
+                              );
+
         static const String &get(
                                  const SplitMap &inResult,
                                  Index index

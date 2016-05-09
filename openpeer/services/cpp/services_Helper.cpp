@@ -1671,6 +1671,44 @@ namespace openpeer
         }
       }
 
+      //-------------------------------------------------------------------------
+      String Helper::combine(
+                             const SplitMap &input,
+                             const char *combineStr
+                             )
+      {
+        String result;
+        String spacer(combineStr);
+
+        for (auto iter = input.begin(); iter != input.end(); ++iter) {
+          auto &value = (*iter).second;
+          if (result.hasData()) {
+            result.append(spacer);
+          }
+          result.append(value);
+        }
+        return result;
+      }
+
+      //-------------------------------------------------------------------------
+      String Helper::combine(
+                             const StringList &input,
+                             const char *combineStr
+                             )
+      {
+        String result;
+        String spacer(combineStr);
+
+        for (auto iter = input.begin(); iter != input.end(); ++iter) {
+          auto &value = (*iter);
+          if (result.hasData()) {
+            result.append(spacer);
+          }
+          result.append(value);
+        }
+        return result;
+      }
+
       //-----------------------------------------------------------------------
       const String &Helper::get(
                                 const SplitMap &inResult,
@@ -2603,6 +2641,24 @@ namespace openpeer
     void IHelper::splitTrim(SplitMap &ioResult)
     {
       internal::Helper::splitTrim(ioResult);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::combine(
+      const SplitMap &input,
+      const char *combineStr
+      )
+    {
+      return internal::Helper::combine(input, combineStr);
+    }
+
+    //-------------------------------------------------------------------------
+    String IHelper::combine(
+                            const StringList &input,
+                            const char *combineStr
+                            )
+    {
+      return internal::Helper::combine(input, combineStr);
     }
 
     //-------------------------------------------------------------------------
