@@ -222,6 +222,7 @@ namespace openpeer
       struct Options
       {
         bool mBindResponseRequiresUsernameAttribute {};
+        bool mBindResponseAllowedUsernameAttribute {};
       };
 
       struct ParseOptions : public Options

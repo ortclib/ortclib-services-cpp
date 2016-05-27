@@ -444,7 +444,7 @@ namespace openpeer
           case STUNPacket::Attribute_Username:            {
             switch (stun.mClass)
             {
-              case STUNPacket::Class_Response:            return options.mBindResponseRequiresUsernameAttribute;
+              case STUNPacket::Class_Response:            return options.mBindResponseRequiresUsernameAttribute || options.mBindResponseAllowedUsernameAttribute;
               case STUNPacket::Class_ErrorResponse:       return false; // this can never be present on a response
               default:                                    break;
             }
@@ -741,7 +741,10 @@ namespace openpeer
                 return true;                                            // when there is a request and the credentials is present this attribute it required
               }
               switch (stun.mMethod) {
-                case STUNPacket::Method_Binding:              return options.mBindResponseRequiresUsernameAttribute;
+                case STUNPacket::Method_Binding:              {
+                  if (options.mBindResponseRequiresUsernameAttribute) return true;
+                  return false; // not required
+                }
                 case STUNPacket::Method_ReliableChannelOpen:  return false; // doesn't always require a username (i.e. in the case of a request anonymously to a server)
                 case STUNPacket::Method_ReliableChannelACK:   return true;  // the reliable requests always require a username
                 default:                                      break;
@@ -1050,7 +1053,13 @@ namespace openpeer
         switch (stun.mClass) {
           case STUNPacket::Class_Response: {
             switch (attribute) {
-              case STUNPacket::Attribute_Username:  return options.mBindResponseRequiresUsernameAttribute;
+              case STUNPacket::Attribute_Username:  {
+                if ((options.mBindResponseRequiresUsernameAttribute) ||
+                    (options.mBindResponseAllowedUsernameAttribute)) {
+                  return stun.hasAttribute(STUNPacket::Attribute_Username);
+                }
+                return false;
+              }
               case STUNPacket::Attribute_Realm:     return false;
               default:                              break;
             }
