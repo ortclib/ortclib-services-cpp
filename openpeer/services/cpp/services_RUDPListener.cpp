@@ -343,7 +343,7 @@ namespace openpeer
 
         STUNPacketPtr response;
 
-        stun = STUNPacket::parseIfSTUN(buffer.get(), bytesRead, static_cast<STUNPacket::RFCs>(STUNPacket::RFC_5389_STUN | STUNPacket::RFC_draft_RUDP), false, "RUDPListener", mID);
+        stun = STUNPacket::parseIfSTUN(buffer.get(), bytesRead, STUNPacket::ParseOptions(static_cast<STUNPacket::RFCs>(STUNPacket::RFC_5389_STUN | STUNPacket::RFC_draft_RUDP), false, "RUDPListener", mID));
         while (stun)  // NOTE: using this as a scope that can be broken rather than a loop
         {
           String localUsernameFrag;

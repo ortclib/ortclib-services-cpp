@@ -219,24 +219,59 @@ namespace openpeer
 
       STUNPacketPtr clone(bool changeTransactionID) const;
 
-      static STUNPacketPtr parseIfSTUN(                                         // returns empty smart pointer if wasn't a STUN packet
+      struct Options
+      {
+        bool mBindResponseRequiresUsernameAttribute {};
+      };
+
+      struct ParseOptions : public Options
+      {
+        RFCs mAllowedRFCs {RFC_AllowAll};
+        bool mAllowRFC3489CookieBehaviour {true};
+
+        const char *mLogObject{};                                // when output to a log, which object was responsible for this packet (never packetized or parsed)
+        PUID mLogObjectID{};                                     // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
+
+        ParseOptions() {}
+        ParseOptions(
+                     RFCs allowedRFCs,
+                     bool allowRFC3489CookieBehaviour = true,
+                     const char *logObject = NULL,
+                     PUID logObjectID = 0
+                     ) :
+          mAllowedRFCs(allowedRFCs),
+          mAllowRFC3489CookieBehaviour(allowRFC3489CookieBehaviour)
+        {
+          mLogObject = logObject;
+          mLogObjectID = logObjectID;
+        }
+        ParseOptions(const ParseOptions &op2) { (*this) = op2; }
+      };
+
+      static STUNPacketPtr parseIfSTUN(                                  // returns empty shared pointer if wasn't a STUN packet
                                        const BYTE *packet,               // NOTE: While this is const we have to overwrite the packet data momentarily during MESSAGE-INTEGRITY calculation
                                        size_t packetLengthInBytes,
-                                       RFCs allowedRFCs,
-                                       bool allowRFC3489 = true,
-                                       const char *logObject = NULL,
-                                       PUID logObjectID = 0
+                                       const ParseOptions &options
                                        );
+
+      struct ParseStreamOptions : public ParseOptions
+      {
+        ParseStreamOptions() { mAllowRFC3489CookieBehaviour = false; }
+        ParseStreamOptions(
+                           RFCs allowedRFCs,
+                           bool allowRFC3489CookieBehaviour = false,
+                           const char *logObject = NULL,
+                           PUID logObjectID = 0
+                           ) : ParseOptions(allowedRFCs, allowRFC3489CookieBehaviour, logObject, logObjectID) {}
+        ParseStreamOptions(const ParseStreamOptions &op2) { (*this) = op2; }
+      };
 
       static ParseLookAheadStates parseStreamIfSTUN(
                                                     STUNPacketPtr &outSTUN,
                                                     size_t &outActualSizeInBytes,
                                                     const BYTE *packet,        // NOTE: While this is const we have to overwrite the packet data momentarily during MESSAGE-INTEGRITY calculation
                                                     size_t streamDataAvailableInBytes,
-                                                    RFCs allowedRFCs,
-                                                    bool allowRFC3489 = false,
-                                                    const char *logObject = NULL,
-                                                    PUID logObjectID = 0
+                                                    const ParseStreamOptions &options
                                                     );
 
       const char *classAsString() const;
@@ -275,6 +310,8 @@ namespace openpeer
                                           ) const;
 
     public:
+      Options mOptions;
+
       const char *mLogObject {};                                // when output to a log, which object was responsible for this packet (never packetized or parsed)
       PUID mLogObjectID {};                                     // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
 

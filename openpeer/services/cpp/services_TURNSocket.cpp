@@ -936,7 +936,7 @@ namespace openpeer
                 AutoRecursiveLock lock(mLock);
 
                 size_t consumedBytes = 0;
-                ahead = STUNPacket::parseStreamIfSTUN(stun, consumedBytes, &(server->mReadBuffer[0]), server->mReadBufferFilledSizeInBytes, STUNPacket::RFC_5766_TURN, false, "TURNSocket", mID);
+                ahead = STUNPacket::parseStreamIfSTUN(stun, consumedBytes, &(server->mReadBuffer[0]), server->mReadBufferFilledSizeInBytes, STUNPacket::ParseStreamOptions(STUNPacket::RFC_5766_TURN, false, "TURNSocket", mID));
                 if (0 != consumedBytes) {
                   // the STUN packet is going to have it's parsed pointing into the read buffer which is about to be consumed, fix the pointers now...
                   ZS_THROW_INVALID_ASSUMPTION_IF(!stun)

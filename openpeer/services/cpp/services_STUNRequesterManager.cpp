@@ -318,13 +318,13 @@ namespace openpeer
                                                           IPAddress fromIPAddress,
                                                           const BYTE *packet,
                                                           size_t packetLengthInBytes,
-                                                          STUNPacket::RFCs allowedRFCs
+                                                          const STUNPacket::ParseOptions &options
                                                           )
     {
       ZS_THROW_INVALID_USAGE_IF(0 == packetLengthInBytes)
       ZS_THROW_INVALID_USAGE_IF(!packet)
 
-      STUNPacketPtr stun = STUNPacket::parseIfSTUN(packet, packetLengthInBytes, allowedRFCs, false);
+      STUNPacketPtr stun = STUNPacket::parseIfSTUN(packet, packetLengthInBytes, options);
       if (!stun) return ISTUNRequesterPtr();
 
       return handleSTUNPacket(fromIPAddress, stun);

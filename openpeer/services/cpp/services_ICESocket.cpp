@@ -2567,7 +2567,7 @@ namespace openpeer
       {
         // WARNING: DO NOT CALL THIS METHOD WHILE INSIDE A LOCK AS IT COULD
         //          ** DEADLOCK **. This method calls delegates synchronously.
-        STUNPacketPtr stun = STUNPacket::parseIfSTUN(buffer, bufferLengthInBytes, STUNPacket::RFC_AllowAll, false, "ICESocket", mID);
+        STUNPacketPtr stun = STUNPacket::parseIfSTUN(buffer, bufferLengthInBytes, STUNPacket::ParseOptions(STUNPacket::RFC_AllowAll, false, "ICESocket", mID));
 
         if (stun) {
           OPENPEER_SERVICES_WIRE_LOG_TRACE(log("received STUN packet") + ZS_PARAM("via candidate", viaCandidate.toDebug()) + ZS_PARAM("source ip", source.string()) + ZS_PARAM("class", stun->classAsString()) + ZS_PARAM("method", stun->methodAsString()))

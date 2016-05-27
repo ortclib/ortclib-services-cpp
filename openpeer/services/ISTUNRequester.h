@@ -66,7 +66,7 @@ namespace openpeer
                                IPAddress fromIPAddress,
                                const BYTE *packet,
                                size_t packetLengthInBytes,
-                               STUNPacket::RFCs allowedRFCs
+                               const STUNPacket::ParseOptions &options
                                );
 
       //-----------------------------------------------------------------------

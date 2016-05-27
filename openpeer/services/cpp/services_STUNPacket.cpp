@@ -422,7 +422,8 @@ namespace openpeer
       static bool isAttributeLegal(
                                    const STUNPacket &stun,
                                    STUNPacket::RFCs rfc,
-                                   STUNPacket::Attributes attribute
+                                   STUNPacket::Attributes attribute,
+                                   const STUNPacket::Options &options
                                    )
       {
         if (!isLegalMethod(stun.mMethod, stun.mClass, rfc))
@@ -443,7 +444,7 @@ namespace openpeer
           case STUNPacket::Attribute_Username:            {
             switch (stun.mClass)
             {
-              case STUNPacket::Class_Response:
+              case STUNPacket::Class_Response:            return options.mBindResponseRequiresUsernameAttribute;
               case STUNPacket::Class_ErrorResponse:       return false; // this can never be present on a response
               default:                                    break;
             }
@@ -699,7 +700,8 @@ namespace openpeer
       static bool isAttributeRequired(
                                       const STUNPacket &stun,
                                       STUNPacket::RFCs rfc,
-                                      STUNPacket::Attributes attribute
+                                      STUNPacket::Attributes attribute,
+                                      const STUNPacket::Options &options
                                       )
       {
         // can only be required if the attribute is known
@@ -710,7 +712,8 @@ namespace openpeer
         if (!isAttributeLegal(
                               stun,
                               rfc,
-                              attribute))
+                              attribute,
+                              options))
           return false;
 
         switch (attribute)
@@ -738,6 +741,7 @@ namespace openpeer
                 return true;                                            // when there is a request and the credentials is present this attribute it required
               }
               switch (stun.mMethod) {
+                case STUNPacket::Method_Binding:              return options.mBindResponseRequiresUsernameAttribute;
                 case STUNPacket::Method_ReliableChannelOpen:  return false; // doesn't always require a username (i.e. in the case of a request anonymously to a server)
                 case STUNPacket::Method_ReliableChannelACK:   return true;  // the reliable requests always require a username
                 default:                                      break;
@@ -1025,25 +1029,28 @@ namespace openpeer
       static bool shouldPacketizeAttribute(
                                            const STUNPacket &stun,
                                            STUNPacket::RFCs rfc,
-                                           STUNPacket::Attributes attribute
+                                           STUNPacket::Attributes attribute,
+                                           const STUNPacket::Options &options
                                            )
       {
         if (!isAttributeLegal(
                               stun,
                               rfc,
-                              attribute))
+                              attribute,
+                              options))
           return false; // should not packetize if not legal
 
         if (isAttributeRequired(
                                 stun,
                                 rfc,
-                                attribute))
+                                attribute,
+                                options))
           return true;  // must packetize if required
 
         switch (stun.mClass) {
           case STUNPacket::Class_Response: {
             switch (attribute) {
-              case STUNPacket::Attribute_Username:
+              case STUNPacket::Attribute_Username:  return options.mBindResponseRequiresUsernameAttribute;
               case STUNPacket::Attribute_Realm:     return false;
               default:                              break;
             }
@@ -1073,7 +1080,8 @@ namespace openpeer
       static size_t packetizeAttributeLength(
                                             const STUNPacket &stun,
                                             STUNPacket::RFCs rfc,
-                                            STUNPacket::Attributes attribute
+                                            STUNPacket::Attributes attribute,
+                                            const STUNPacket::Options &options
                                             )
       {
         // do not count length for packets that should not be packetized
@@ -1081,7 +1089,8 @@ namespace openpeer
         if (!shouldPacketizeAttribute(
                                       stun,
                                       rfc,
-                                      attribute)) return 0;
+                                      attribute,
+                                      options)) return 0;
 
         return sizeof(DWORD) + dwordBoundary(getActualAttributeLength(stun, attribute));  // the size of one header plus the attribute value size
       }
@@ -1288,14 +1297,16 @@ namespace openpeer
                                      BYTE * &pos,
                                      const STUNPacket &stun,
                                      STUNPacket::RFCs rfc,
-                                     STUNPacket::Attributes attribute
+                                     STUNPacket::Attributes attribute,
+                                     const STUNPacket::Options &options
                                      )
       {
         if (!stun.hasAttribute(attribute)) return;
         if (!shouldPacketizeAttribute(
                                       stun,
                                       rfc,
-                                      attribute)) return;
+                                      attribute,
+                                      options)) return;
 
         size_t attributeLength = getActualAttributeLength(stun, attribute);
 
@@ -1521,10 +1532,11 @@ namespace openpeer
 
     //-------------------------------------------------------------------------
     STUNPacket::STUNPacket() :
-      mLogObject("STUNPacket"),
-      mLogObjectID(zsLib::createPUID()),
       mMagicCookie(OPENPEER_STUN_MAGIC_COOKIE)
     {
+      mLogObject = "STUNPacket";
+      mLogObjectID = zsLib::createPUID();
+
       memset(&(mTransactionID[0]), 0, sizeof(mTransactionID));  // reset it to zero
       memset(&(mMessageIntegrity[0]), 0, sizeof(mMessageIntegrity));
       memset(&(mReservationToken[0]), 0, sizeof(mReservationToken));
@@ -1571,6 +1583,9 @@ namespace openpeer
       stun->mMethod = request->mMethod;
       stun->mMagicCookie = request->mMagicCookie;
       stun->mFingerprintIncluded = request->mFingerprintIncluded;
+      stun->mOptions = request->mOptions;
+      if (NULL != request->mLogObject) stun->mLogObject = request->mLogObject;
+      if (0 != request->mLogObjectID) stun->mLogObjectID = request->mLogObjectID;
       if (software)
         stun->mSoftware = software;
 
@@ -1629,6 +1644,8 @@ namespace openpeer
     STUNPacketPtr STUNPacket::clone(bool changeTransactionID) const
     {
       STUNPacketPtr dest(make_shared<STUNPacket>());
+
+      dest->mOptions = mOptions;
       dest->mOriginalPacketBuffer = mOriginalPacketBuffer;
       dest->mOriginalPacket = mOriginalPacket;
       dest->mClass = mClass;
@@ -1705,10 +1722,7 @@ namespace openpeer
     STUNPacketPtr STUNPacket::parseIfSTUN(
                                           const BYTE *packet,
                                           size_t packetLengthInBytes,
-                                          RFCs allowedRFCs,
-                                          bool allowRFC3489,
-                                          const char *logObject,
-                                          PUID logObjectID
+                                          const ParseOptions &options
                                           )
     {
       // 0                   1                   2                   3
@@ -1740,7 +1754,7 @@ namespace openpeer
 
       // The magic cookie field MUST contain the fixed value OPENPEER_STUN_MAGIC_COOKIE in network byte order.
       DWORD magicCookie = ntohl(((DWORD *)packet)[1]);
-      if ((!allowRFC3489) &&
+      if ((!options.mAllowRFC3489CookieBehaviour) &&
           (OPENPEER_STUN_MAGIC_COOKIE != magicCookie)) return STUNPacketPtr();
 
       WORD messageType = ntohs(((WORD *)packet)[0]);
@@ -1766,6 +1780,13 @@ namespace openpeer
       stun->mClass = static_cast<Classes>(messageTypeClass);
       stun->mMethod = static_cast<Methods>(messageTypeMethod);
 
+      stun->mOptions = options;
+
+      if (NULL != options.mLogObject)
+        stun->mLogObject = options.mLogObject;
+      if (0 != options.mLogObjectID)
+        stun->mLogObjectID = options.mLogObjectID;
+
       memcpy(&((stun->mTransactionID)[0]), &(((DWORD *)packet)[2]), sizeof(stun->mTransactionID));
 
       // only process classes and types that are understood
@@ -1778,7 +1799,7 @@ namespace openpeer
         default: return STUNPacketPtr();
       }
 
-      if (!internal::isLegalMethod(stun->mMethod, stun->mClass, allowedRFCs)) return STUNPacketPtr();
+      if (!internal::isLegalMethod(stun->mMethod, stun->mClass, options.mAllowedRFCs)) return STUNPacketPtr();
 
       bool foundIntegrity = false;
       bool foundFingerprint = false;
@@ -1804,7 +1825,7 @@ namespace openpeer
         pos += fullAttributeLength;
         availableBytes -= fullAttributeLength;
 
-        if (!internal::isAttributeKnown(allowedRFCs, (Attributes)attributeType))
+        if (!internal::isAttributeKnown(options.mAllowedRFCs, (Attributes)attributeType))
           handleAsUnknownAttribute = true;
 
         if (foundIntegrity) {
@@ -2069,19 +2090,19 @@ namespace openpeer
       }
 
       // Now that we have parsed the packet, we have to guess which RFC is truly belongs and restrict any attributes to only those allowed on the guessed RFC
-      RFCs guessedRFC = stun->guessRFC(allowedRFCs);
+      RFCs guessedRFC = stun->guessRFC(options.mAllowedRFCs);
 
       // go through all the attributes and check it they are still legal
       for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
         if (stun->hasAttribute(internal::gAttributeOrdering[loop])) {
           // this attribute is found but is it legal for the RFC?
-          if (!internal::isAttributeLegal(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop])) {
+          if (!internal::isAttributeLegal(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop], options)) {
             if (0 == stun->mErrorCode)                                                // if there is already an error code on the request then don't put another one
               stun->mErrorCode = ErrorCode_UnknownAttribute;                          // this request has an illegal attribute on it that required understanding but is not allowed in this RFC
             stun->mUnknownAttributes.push_back(internal::gAttributeOrdering[loop]);   // this is an illegal attribute
           }
         } else {
-          if (internal::isAttributeRequired(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop])) {
+          if (internal::isAttributeRequired(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop], options)) {
             // this attribute was required but it was missing!
             switch (stun->mClass) {
               case STUNPacket::Class_Request:
@@ -2103,10 +2124,6 @@ namespace openpeer
         }
       }
 
-      if (NULL != logObject)
-        stun->mLogObject = logObject;
-      if (0 != logObjectID)
-        stun->mLogObjectID = logObjectID;
       if (ZS_IS_LOGGING(Trace)) {
         ZS_LOG_BASIC(stun->debug("parse"));
       }
@@ -2119,10 +2136,7 @@ namespace openpeer
                                                                    size_t &outActualSizeInBytes,
                                                                    const BYTE *packet,
                                                                    size_t streamDataAvailableInBytes,
-                                                                   RFCs allowedRFC,
-                                                                   bool allowRFC3489,
-                                                                   const char *logObject,
-                                                                   PUID logObjectID
+                                                                   const ParseStreamOptions &options
                                                                    )
     {
       //0                   1                   2                   3
@@ -2162,7 +2176,7 @@ namespace openpeer
       }
 
       // only process classes and types that are understood
-      if (!internal::isLegalMethod(static_cast<STUNPacket::Methods>(messageTypeMethod), static_cast<STUNPacket::Classes>(messageTypeClass), allowedRFC)) return ParseLookAheadState_NotSTUN;
+      if (!internal::isLegalMethod(static_cast<STUNPacket::Methods>(messageTypeMethod), static_cast<STUNPacket::Classes>(messageTypeClass), options.mAllowedRFCs)) return ParseLookAheadState_NotSTUN;
 
       if (streamDataAvailableInBytes < sizeof(DWORD)) return ParseLookAheadState_InsufficientDataToDeterimine;
 
@@ -2180,7 +2194,7 @@ namespace openpeer
 
       // The magic cookie field MUST contain the fixed value OPENPEER_STUN_MAGIC_COOKIE in network byte order.
       DWORD magicCookie = ntohl(((DWORD *)packet)[1]);
-      if ((!allowRFC3489) &&
+      if ((!options.mAllowRFC3489CookieBehaviour) &&
           (OPENPEER_STUN_MAGIC_COOKIE != magicCookie)) return ParseLookAheadState_NotSTUN;
 
       outActualSizeInBytes = OPENPEER_STUN_HEADER_SIZE_IN_BYTES + messageLengthInBytes;
@@ -2194,10 +2208,7 @@ namespace openpeer
       outSTUN = parseIfSTUN(
                             packet,
                             outActualSizeInBytes,
-                            allowedRFC,
-                            allowRFC3489,
-                            logObject,
-                            logObjectID
+                            options
                             );
       if (!outSTUN) {
         outActualSizeInBytes = 0;
@@ -2513,18 +2524,19 @@ namespace openpeer
       for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
         if (hasAttribute(internal::gAttributeOrdering[loop])) {
           // has the attribute but is it legal?
-          if (!internal::isAttributeLegal(*this, rfc, internal::gAttributeOrdering[loop])) {
+          if (!internal::isAttributeLegal(*this, rfc, internal::gAttributeOrdering[loop], mOptions)) {
             ZS_LOG_WARNING(Trace, log("found an illegal attribute") + ZS_PARAM("RFC", toString(rfc)) + ZS_PARAM("attribute", toString(internal::gAttributeOrdering[loop])))
             return false;
           }
         } else {
           // does not have the attribute but is it required?
-          if (internal::isAttributeRequired(*this, rfc, internal::gAttributeOrdering[loop])) {
+          if (internal::isAttributeRequired(*this, rfc, internal::gAttributeOrdering[loop], mOptions)) {
             ZS_LOG_WARNING(Trace, log("missing an attribute") + ZS_PARAM("RFC", toString(rfc)) + ZS_PARAM("attribute", toString(internal::gAttributeOrdering[loop])))
             return false;
           }
         }
       }
+
       return true;
     }
 
@@ -2547,8 +2559,8 @@ namespace openpeer
       {
         for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
           if (hasAttribute(internal::gAttributeOrdering[loop])) {
-            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop])) {
-              outPacketLengthInBytes += internal::packetizeAttributeLength(*this, rfc, internal::gAttributeOrdering[loop]);
+            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop], mOptions)) {
+              outPacketLengthInBytes += internal::packetizeAttributeLength(*this, rfc, internal::gAttributeOrdering[loop], mOptions);
             }
           }
         }
@@ -2590,8 +2602,8 @@ namespace openpeer
       {
         for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
           if (hasAttribute(internal::gAttributeOrdering[loop])) {
-            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop])) {
-              internal::packetizeAttribute(pos, *this, rfc, internal::gAttributeOrdering[loop]);
+            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop], mOptions)) {
+              internal::packetizeAttribute(pos, *this, rfc, internal::gAttributeOrdering[loop], mOptions);
             }
           }
         }
@@ -2783,8 +2795,8 @@ namespace openpeer
       {
         for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
           if (hasAttribute(internal::gAttributeOrdering[loop])) {
-            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop])) {
-              packetLengthInBytes += internal::packetizeAttributeLength(*this, rfc, internal::gAttributeOrdering[loop]);
+            if (internal::shouldPacketizeAttribute(*this, rfc, internal::gAttributeOrdering[loop], mOptions)) {
+              packetLengthInBytes += internal::packetizeAttributeLength(*this, rfc, internal::gAttributeOrdering[loop], mOptions);
             }
           }
         }
