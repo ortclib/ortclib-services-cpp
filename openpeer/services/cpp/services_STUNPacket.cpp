@@ -1242,10 +1242,13 @@ namespace openpeer
               memset(&(zeroBuffer[0]), 0, sizeof(zeroBuffer));
 
               auto remaining = (messageIntegrityMessageLengthInBytes % stun.mOptions.mZeroPadMessageIntegrityInputToBlockSize);
-              while (remaining > 0) {
-                auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
-                hmac.Update(&(zeroBuffer[0]), consume);
-                remaining -= consume;
+              if (0 != remaining) {
+                remaining = (stun.mOptions.mZeroPadMessageIntegrityInputToBlockSize - remaining);
+                while (remaining > 0) {
+                  auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
+                  hmac.Update(&(zeroBuffer[0]), consume);
+                  remaining -= consume;
+                }
               }
             }
 
@@ -2755,10 +2758,13 @@ namespace openpeer
         memset(&(zeroBuffer[0]), 0, sizeof(zeroBuffer));
 
         auto remaining = (mMessageIntegrityMessageLengthInBytes % mOptions.mZeroPadMessageIntegrityInputToBlockSize);
-        while (remaining > 0) {
-          auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
-          hmac.Update(&(zeroBuffer[0]), consume);
-          remaining -= consume;
+        if (0 != remaining) {
+          remaining = (mOptions.mZeroPadMessageIntegrityInputToBlockSize - remaining);
+          while (remaining > 0) {
+            auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
+            hmac.Update(&(zeroBuffer[0]), consume);
+            remaining -= consume;
+          }
         }
       }
 
