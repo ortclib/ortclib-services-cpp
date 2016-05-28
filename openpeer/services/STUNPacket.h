@@ -85,56 +85,57 @@ namespace openpeer
       static const char *toString(Methods value);
 
       enum Attributes {
-        Attribute_None =                    0x0000,
+        Attribute_None =                          0x0000,
 
-        Attribute_MappedAddress =           0x0001,
-        Attribute_Username =                0x0006,
-        Attribute_MessageIntegrity =        0x0008,
-        Attribute_ErrorCode =               0x0009,
-        Attribute_UnknownAttribute =        0x000A,
-        Attribute_Realm =                   0x0014,
-        Attribute_Nonce =                   0x0015,
-        Attribute_XORMappedAddress =        0x0020,
-        Attribute_Software =                0x8022,
-        Attribute_AlternateServer =         0x8023,
-        Attribute_FingerPrint =             0x8028,
+        Attribute_MappedAddress =                 0x0001,
+        Attribute_Username =                      0x0006,
+        Attribute_MessageIntegrity =              0x0008,
+        Attribute_ErrorCode =                     0x0009,
+        Attribute_UnknownAttribute =              0x000A,
+        Attribute_Realm =                         0x0014,
+        Attribute_Nonce =                         0x0015,
+        Attribute_XORMappedAddress =              0x0020,
+        Attribute_Software =                      0x8022,
+        Attribute_AlternateServer =               0x8023,
+        Attribute_FingerPrint =                   0x8028,
 
         // RFC5766 TURN specific attributes
-        Attribute_ChannelNumber =           0x000C,
-        Attribute_Lifetime =                0x000D,
-        Attribute_XORPeerAddress =          0x0012,
-        Attribute_Data =                    0x0013,
-        Attribute_XORRelayedAddress =       0x0016,
-        Attribute_EvenPort =                0x0018,
-        Attribute_RequestedTransport =      0x0019,
-        Attribute_DontFragment =            0x001A,
-        Attribute_ReservationToken =        0x0022,
+        Attribute_ChannelNumber =                 0x000C,
+        Attribute_Lifetime =                      0x000D,
+        Attribute_XORPeerAddress =                0x0012,
+        Attribute_Data =                          0x0013,
+        Attribute_XORRelayedAddress =             0x0016,
+        Attribute_EvenPort =                      0x0018,
+        Attribute_RequestedTransport =            0x0019,
+        Attribute_DontFragment =                  0x001A,
+        Attribute_ReservationToken =              0x0022,
         // http://tools.ietf.org/html/draft-wing-tram-turn-mobility-02
-        Attribute_MobilityTicket =          0x802E,
+        Attribute_MobilityTicket =                0x802E,
 
         // RFC5245 ICE specific attributes
-        Attribute_Priority =                0x0024,
-        Attribute_UseCandidate =            0x0025,
-        Attribute_ICEControlled =           0x8029,
-        Attribute_ICEControlling =          0x802A,
+        Attribute_Priority =                      0x0024,
+        Attribute_UseCandidate =                  0x0025,
+        Attribute_ICEControlled =                 0x8029,
+        Attribute_ICEControlling =                0x802A,
+        Attribute_MSICE2_ImplementationVersion =  0x8070,
 
         // RFC_draft_RUDP
-        Attribute_NextSequenceNumber =      0x1740,
-        Attribute_MinimumRTT =              0x1741,
-        Attribute_ConnectionInfo =          0x1742,
-        Attribute_CongestionControl =       0x1743,
-        Attribute_GSNR =                    0x1744,
-        Attribute_GSNFR =                   0x1745,
-        Attribute_RUDPFlags =               0x1746,
-        Attribute_ACKVector =               0x1747,
+        Attribute_NextSequenceNumber =            0x1740,
+        Attribute_MinimumRTT =                    0x1741,
+        Attribute_ConnectionInfo =                0x1742,
+        Attribute_CongestionControl =             0x1743,
+        Attribute_GSNR =                          0x1744,
+        Attribute_GSNFR =                         0x1745,
+        Attribute_RUDPFlags =                     0x1746,
+        Attribute_ACKVector =                     0x1747,
 
         // obsolete attributes that should be ignored
-        Attribute_ReservedResponseAddress = 0x0002,
-        Attribute_ReservedChangeAddress =   0x0003,
-        Attribute_ReservedSourceAddress =   0x0004,
-        Attribute_ReservedChangedAddress =  0x0005,
-        Attribute_ReservedPassword =        0x0007,
-        Attribute_ReservedReflectedFrom =   0x000B,
+        Attribute_ReservedResponseAddress =       0x0002,
+        Attribute_ReservedChangeAddress =         0x0003,
+        Attribute_ReservedSourceAddress =         0x0004,
+        Attribute_ReservedChangedAddress =        0x0005,
+        Attribute_ReservedPassword =              0x0007,
+        Attribute_ReservedReflectedFrom =         0x000B,
       };
 
       static const char *toString(Attributes value);
@@ -394,6 +395,7 @@ namespace openpeer
       bool mIceControllingIncluded {};                          // set to true if the ICE-CONTROLLING attribute should be included
       QWORD mIceControlling {};                                 // The ICE-CONTROLLING attribute is present in a Binding request and indicates that the client believes it is currently in the controlling role.
 
+      DWORD mMSICE2ImplementationVersion {};                    // see https://msdn.microsoft.com/en-us/library/office/cc431504(v=office.12).aspx
 
       // RFC_draft_RUDP
       QWORD mNextSequenceNumber {};                             // 0 means this value is not set

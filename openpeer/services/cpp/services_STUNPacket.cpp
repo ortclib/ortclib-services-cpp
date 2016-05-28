@@ -50,20 +50,20 @@
 
 #include <algorithm>
 
-#define OPENPEER_STUN_MAGIC_COOKIE                 (0x2112A442)
-#define OPENPEER_STUN_MAGIC_XOR_FINGERPRINT_VALUE  (0x5354554e)
-#define OPENPEER_STUN_HEADER_SIZE_IN_BYTES         (20)
-#define OPENPEER_STUN_COMPREHENSION_REQUIRED_MIN   (0x0000)
-#define OPENPEER_STUN_COMPREHENSION_REQUIRED_MAX   (0x7FFF)
-#define OPENPEER_STUN_MAX_USERNAME                 (513)
-#define OPENPEER_STUN_MAX_REALM                    (127)
-#define OPENPEER_STUN_MAX_SERVER                   (127)
-#define OPENPEER_STUN_MAX_REASON                   (127)
-#define OPENPEER_STUN_MAX_NONCE                    (127)
-#define OPENPEER_STUN_MAX_SOFTWARE                 (127)
-#define OPENPEER_STUN_MAX_CONNECTION_INFO          (127)
-#define OPENPEER_STUN_MAX_STRING                   (513)
-#define OPENPEER_STUN_MAX_UTF8_UNICODE_ENCODED_CHAR (6)
+#define OPENPEER_STUN_MAGIC_COOKIE                        (0x2112A442)
+#define OPENPEER_STUN_MAGIC_XOR_FINGERPRINT_VALUE         (0x5354554e)
+#define OPENPEER_STUN_HEADER_SIZE_IN_BYTES                (20)
+#define OPENPEER_STUN_COMPREHENSION_REQUIRED_MIN          (0x0000)
+#define OPENPEER_STUN_COMPREHENSION_REQUIRED_MAX          (0x7FFF)
+#define OPENPEER_STUN_MAX_USERNAME                        (513)
+#define OPENPEER_STUN_MAX_REALM                           (127)
+#define OPENPEER_STUN_MAX_SERVER                          (127)
+#define OPENPEER_STUN_MAX_REASON                          (127)
+#define OPENPEER_STUN_MAX_NONCE                           (127)
+#define OPENPEER_STUN_MAX_SOFTWARE                        (127)
+#define OPENPEER_STUN_MAX_CONNECTION_INFO                 (127)
+#define OPENPEER_STUN_MAX_STRING                          (513)
+#define OPENPEER_STUN_MAX_UTF8_UNICODE_ENCODED_CHAR       (6)
 
 
 namespace openpeer { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(openpeer_services_wire) } } }
@@ -112,6 +112,7 @@ namespace openpeer
         STUNPacket::Attribute_UseCandidate,
         STUNPacket::Attribute_ICEControlled,
         STUNPacket::Attribute_ICEControlling,
+        STUNPacket::Attribute_MSICE2_ImplementationVersion,
 
         STUNPacket::Attribute_Data,
 
@@ -277,6 +278,7 @@ namespace openpeer
           case STUNPacket::Attribute_UseCandidate:        return 0;
           case STUNPacket::Attribute_ICEControlled:       return sizeof(QWORD);
           case STUNPacket::Attribute_ICEControlling:      return sizeof(QWORD);
+          case STUNPacket::Attribute_MSICE2_ImplementationVersion:  return sizeof(DWORD);
 
 
           case STUNPacket::Attribute_NextSequenceNumber:  return sizeof(QWORD);
@@ -393,10 +395,11 @@ namespace openpeer
           case STUNPacket::Attribute_ReservationToken:    rfcBits = STUNPacket::RFC_5766_TURN; break;
           case STUNPacket::Attribute_MobilityTicket:      rfcBits = STUNPacket::RFC_5766_TURN; break;
 
-          case STUNPacket::Attribute_Priority:            rfcBits = STUNPacket::RFC_5245_ICE; break;
-          case STUNPacket::Attribute_UseCandidate:        rfcBits = STUNPacket::RFC_5245_ICE; break;
-          case STUNPacket::Attribute_ICEControlled:       rfcBits = STUNPacket::RFC_5245_ICE; break;
-          case STUNPacket::Attribute_ICEControlling:      rfcBits = STUNPacket::RFC_5245_ICE; break;
+          case STUNPacket::Attribute_Priority:                      rfcBits = STUNPacket::RFC_5245_ICE; break;
+          case STUNPacket::Attribute_UseCandidate:                  rfcBits = STUNPacket::RFC_5245_ICE; break;
+          case STUNPacket::Attribute_ICEControlled:                 rfcBits = STUNPacket::RFC_5245_ICE; break;
+          case STUNPacket::Attribute_ICEControlling:                rfcBits = STUNPacket::RFC_5245_ICE; break;
+          case STUNPacket::Attribute_MSICE2_ImplementationVersion:  rfcBits = STUNPacket::RFC_5245_ICE; break;
 
           case STUNPacket::Attribute_NextSequenceNumber:  rfcBits = STUNPacket::RFC_draft_RUDP; break;
           case STUNPacket::Attribute_MinimumRTT:          rfcBits = STUNPacket::RFC_draft_RUDP; break;
@@ -665,6 +668,8 @@ namespace openpeer
 
             return true;
           }
+          case STUNPacket::Attribute_MSICE2_ImplementationVersion: return true;
+
 
           case STUNPacket::Attribute_NextSequenceNumber: return true;
           case STUNPacket::Attribute_MinimumRTT:
@@ -897,6 +902,7 @@ namespace openpeer
               return true;
             return false;
           }
+          case STUNPacket::Attribute_MSICE2_ImplementationVersion:  return false;
 
           case STUNPacket::Attribute_UseCandidate:        return false;
 
@@ -1363,6 +1369,7 @@ namespace openpeer
           case STUNPacket::Attribute_UseCandidate:        break;  // it is just a flag
           case STUNPacket::Attribute_ICEControlled:       packetizeQWORD(pos, stun.mIceControlled); break;
           case STUNPacket::Attribute_ICEControlling:      packetizeQWORD(pos, stun.mIceControlling); break;
+          case STUNPacket::Attribute_MSICE2_ImplementationVersion:  packetizeDWORD(pos, stun.mMSICE2ImplementationVersion); break;
 
           case STUNPacket::Attribute_NextSequenceNumber:  packetizeQWORD(pos, stun.mNextSequenceNumber); break;
           case STUNPacket::Attribute_MinimumRTT:          packetizeDWORD(pos, stun.mMinimumRTT); break;
@@ -1451,6 +1458,7 @@ namespace openpeer
         case Attribute_UseCandidate:            return "use candidate";
         case Attribute_ICEControlled:           return "ICE controlled";
         case Attribute_ICEControlling:          return "ICE controlling";
+        case Attribute_MSICE2_ImplementationVersion: return "MSICE2 implementation version";
 
         case Attribute_NextSequenceNumber:      return "next sequence number";
         case Attribute_MinimumRTT:              return "minimum RTT";
@@ -1593,6 +1601,7 @@ namespace openpeer
       stun->mMagicCookie = request->mMagicCookie;
       stun->mFingerprintIncluded = request->mFingerprintIncluded;
       stun->mOptions = request->mOptions;
+      stun->mMSICE2ImplementationVersion = request->mMSICE2ImplementationVersion;
       if (NULL != request->mLogObject) stun->mLogObject = request->mLogObject;
       if (0 != request->mLogObjectID) stun->mLogObjectID = request->mLogObjectID;
       if (software)
@@ -1700,6 +1709,7 @@ namespace openpeer
       dest->mIceControlled = mIceControlled;
       dest->mIceControllingIncluded = mIceControllingIncluded;
       dest->mIceControlling = mIceControlling;
+      dest->mMSICE2ImplementationVersion = mMSICE2ImplementationVersion;
 
       // RUDP attributes
       dest->mNextSequenceNumber = mNextSequenceNumber;
@@ -2017,6 +2027,11 @@ namespace openpeer
               if (attributeLength < sizeof(QWORD)) return STUNPacketPtr();
               stun->mIceControllingIncluded = true;
               stun->mIceControlling = internal::parseQWORD(dataPos);
+              break;
+            }
+            case Attribute_MSICE2_ImplementationVersion: {
+              if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
+              stun->mMSICE2ImplementationVersion = ntohl(((DWORD *)dataPos)[0]);
               break;
             }
 
@@ -2444,6 +2459,9 @@ namespace openpeer
       if (hasAttribute(STUNPacket::Attribute_ICEControlling)) {
         IHelper::debugAppend(resultEl, "ice controlling", mIceControlling);
       }
+      if (hasAttribute(STUNPacket::Attribute_MSICE2_ImplementationVersion)) {
+        IHelper::debugAppend(resultEl, "msice2 implementation version", mMSICE2ImplementationVersion);
+      }
       if (hasAttribute(STUNPacket::Attribute_NextSequenceNumber)) {
         IHelper::debugAppend(resultEl, "next sequence number", string(mNextSequenceNumber) + " (" +  + string(mNextSequenceNumber & 0xFFFFFF) + ")");
       }
@@ -2762,6 +2780,7 @@ namespace openpeer
         case Attribute_UseCandidate:        return mUseCandidateIncluded;
         case Attribute_ICEControlled:       return mIceControlledIncluded;
         case Attribute_ICEControlling:      return mIceControllingIncluded;
+        case Attribute_MSICE2_ImplementationVersion: return (0 != mMSICE2ImplementationVersion);
 
         case Attribute_NextSequenceNumber:  return (0 != mNextSequenceNumber);
         case Attribute_MinimumRTT:          return mMinimumRTTIncluded;
