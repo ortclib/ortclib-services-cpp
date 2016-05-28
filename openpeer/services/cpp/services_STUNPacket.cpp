@@ -1235,7 +1235,7 @@ namespace openpeer
             // put back the original length
             ((WORD *)stun.mOriginalPacket)[1] = originalLength;
 
-            hmac.TruncatedFinal(&(result[0]), sizeof(result));
+            hmac.Final(&(result[0]));
 
             memcpy(pos, &(result[0]), sizeof(result));
             break;
@@ -2732,7 +2732,7 @@ namespace openpeer
       // put back the original value now...
       ((WORD *)mOriginalPacket)[1] = originalLength;
 
-      hmac.TruncatedFinal(&(result[0]), sizeof(result));
+      hmac.Final(&(result[0]));
       return (0 == memcmp(&(mMessageIntegrity[0]), &(result[0]), sizeof(result)));
     }
 
