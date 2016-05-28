@@ -115,6 +115,17 @@ namespace openpeer
         ZS_THROW_INVALID_USAGE("services::LockValue object is only allowed to be set once")
       }
 
+      //-------------------------------------------------------------------------
+      static void set8(void* memory, size_t offset, BYTE v) {
+        static_cast<BYTE*>(memory)[offset] = v;
+      }
+
+      //-------------------------------------------------------------------------
+      static BYTE get8(const void* memory, size_t offset) {
+        return static_cast<const BYTE*>(memory)[offset];
+      }
+
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -2361,11 +2372,69 @@ namespace openpeer
     }
 
     //-------------------------------------------------------------------------
+    WORD IHelper::getBE16(const void* memory)
+    {
+      return static_cast<WORD>((internal::get8(memory, 0) << 8) |
+                               (internal::get8(memory, 1) << 0));
+    }
+
+    //-------------------------------------------------------------------------
+    DWORD IHelper::getBE32(const void* memory)
+    {
+      return (static_cast<DWORD>(internal::get8(memory, 0)) << 24) |
+             (static_cast<DWORD>(internal::get8(memory, 1)) << 16) |
+             (static_cast<DWORD>(internal::get8(memory, 2)) << 8) |
+             (static_cast<DWORD>(internal::get8(memory, 3)) << 0);
+    }
+
+    //-------------------------------------------------------------------------
+    QWORD IHelper::getBE64(const void* memory)
+    {
+      return (static_cast<QWORD>(internal::get8(memory, 0)) << 56) |
+             (static_cast<QWORD>(internal::get8(memory, 1)) << 48) |
+             (static_cast<QWORD>(internal::get8(memory, 2)) << 40) |
+             (static_cast<QWORD>(internal::get8(memory, 3)) << 32) |
+             (static_cast<QWORD>(internal::get8(memory, 4)) << 24) |
+             (static_cast<QWORD>(internal::get8(memory, 5)) << 16) |
+             (static_cast<QWORD>(internal::get8(memory, 6)) << 8) |
+             (static_cast<QWORD>(internal::get8(memory, 7)) << 0);
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setBE16(void* memory, WORD v)
+    {
+      internal::set8(memory, 0, static_cast<BYTE>(v >> 8));
+      internal::set8(memory, 1, static_cast<BYTE>(v >> 0));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setBE32(void* memory, DWORD v)
+    {
+      internal::set8(memory, 0, static_cast<BYTE>(v >> 24));
+      internal::set8(memory, 1, static_cast<BYTE>(v >> 16));
+      internal::set8(memory, 2, static_cast<BYTE>(v >> 8));
+      internal::set8(memory, 3, static_cast<BYTE>(v >> 0));
+    }
+
+    //-------------------------------------------------------------------------
+    void IHelper::setBE64(void* memory, QWORD v)
+    {
+      internal::set8(memory, 0, static_cast<BYTE>(v >> 56));
+      internal::set8(memory, 1, static_cast<BYTE>(v >> 48));
+      internal::set8(memory, 2, static_cast<BYTE>(v >> 40));
+      internal::set8(memory, 3, static_cast<BYTE>(v >> 32));
+      internal::set8(memory, 4, static_cast<BYTE>(v >> 24));
+      internal::set8(memory, 5, static_cast<BYTE>(v >> 16));
+      internal::set8(memory, 6, static_cast<BYTE>(v >> 8));
+      internal::set8(memory, 7, static_cast<BYTE>(v >> 0));
+    }
+
+    //-------------------------------------------------------------------------
     String IHelper::convertToBase64(
                                     const BYTE *buffer,
                                     size_t bufferLengthInBytes
                                     )
-    {
+    {      
       return internal::Helper::convertToBase64(buffer, bufferLengthInBytes);
     }
 

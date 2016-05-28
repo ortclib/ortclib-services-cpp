@@ -163,6 +163,13 @@ namespace openpeer
                                                   bool wipeOriginal = true
                                                   );
 
+        // (duplicate) static WORD getBE16(const void* memory);
+        // (duplicate) static DWORD getBE32(const void* memory);
+        // (duplicate) static QWORD getBE64(const void* memory);
+        // (duplicate) static void setBE16(void* memory, WORD v);
+        // (duplicate) static void setBE32(void* memory, DWORD v);
+        // (duplicate) static void setBE64(void* memory, QWORD v);
+
         static String convertToBase64(
                                       const BYTE *buffer,
                                       size_t bufferLengthInBytes

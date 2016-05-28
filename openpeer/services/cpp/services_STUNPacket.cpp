@@ -165,7 +165,7 @@ namespace openpeer
         if (attributeLength < sizeof(DWORD)) return false;
 
         BYTE family = dataPos[1];
-        WORD port = ntohs(((WORD *)dataPos)[1]);
+        WORD port = IHelper::getBE16(&(((WORD *)dataPos)[1]));
 
         // from RFC:
         // X-Port is computed by taking the mapped port in host byte order,
@@ -181,7 +181,7 @@ namespace openpeer
             // address in host byte order, XOR'ing it with the magic cookie, and
             // converting the result to network byte order.
 
-            DWORD ipAddress = ntohl(((DWORD *)dataPos)[1]);
+            DWORD ipAddress = IHelper::getBE32(&(((DWORD *)dataPos)[1]));
             ipAddress ^= magicCookie;
             outIPAddress = IPAddress(ipAddress, port);
             break;
@@ -1111,8 +1111,8 @@ namespace openpeer
       }
 
       static void packetizeAttributeHeader(BYTE * &pos, STUNPacket::Attributes attribute, size_t attributeLength) {
-        ((WORD *)pos)[0] = htons((WORD)attribute);
-        ((WORD *)pos)[1] = htons(static_cast<WORD>(attributeLength));
+        IHelper::setBE16(&(((WORD *)pos)[0]), static_cast<WORD>(attribute));
+        IHelper::setBE16(&(((WORD *)pos)[1]), static_cast<WORD>(attributeLength));
         pos += sizeof(DWORD);
       }
 
@@ -1123,11 +1123,11 @@ namespace openpeer
       static void packetizeIPAddress(BYTE *pos, const IPAddress &ipAddress, DWORD xorMagicCookie = 0, const BYTE *magicCookiePos = NULL)
       {
         pos[1] = (BYTE)(ipAddress.isIPv4() ? 0x01 : 0x02);
-        ((WORD *)pos)[1] = htons(ipAddress.getPort() ^ ((xorMagicCookie & 0xFFFF0000) >> (sizeof(WORD)*8)));
+        IHelper::setBE16(&(((WORD *)pos)[1]), ipAddress.getPort() ^ ((xorMagicCookie & 0xFFFF0000) >> (sizeof(WORD)*8)));
         pos += sizeof(DWORD);
 
         if (ipAddress.isIPv4()) {
-          ((DWORD *)pos)[0] = htonl(ipAddress.getIPv4AddressAsDWORD() ^ xorMagicCookie);
+          IHelper::setBE32(&(((DWORD *)pos)[0]), ipAddress.getIPv4AddressAsDWORD() ^ xorMagicCookie);
         } else {
           BYTE *dest = (BYTE *)(&(((DWORD *)pos)[0]));
           const BYTE *sour = &(ipAddress.mIPAddress.by[0]);
@@ -1159,10 +1159,12 @@ namespace openpeer
         }
       }
 
+      //-----------------------------------------------------------------------
       static void packetizeDWORD(BYTE *pos, DWORD value) {
-        ((DWORD *)pos)[0] = htonl(value);
+        IHelper::setBE32(&(((DWORD *)pos)[0]), value);
       }
 
+      //-----------------------------------------------------------------------
       static void packetizeQWORD(BYTE *pos, QWORD value) {
         // this is a quick way to fill the lowest to highest significance to do network byte order regardless of OS endianness
         pos = pos + sizeof(QWORD) - 1;
@@ -1172,6 +1174,7 @@ namespace openpeer
         }
       }
 
+      //-----------------------------------------------------------------------
       static void packetizeBuffer(BYTE *pos, const BYTE *buffer, size_t length) {
         if (0 == length) return;
         ZS_THROW_INVALID_USAGE_IF(!buffer)
@@ -1224,16 +1227,32 @@ namespace openpeer
             size_t messageIntegrityMessageLengthInBytes = ((PTRNUMBER)attributeStartPos) - ((PTRNUMBER)(stun.mOriginalPacket));
 
             // remember the packet's original length
-            WORD originalLength = ((WORD *)stun.mOriginalPacket)[1];
-            // change the length for the sake of doing the message integrity calculation
-            ((WORD *)stun.mOriginalPacket)[1] = htons(static_cast<WORD>(messageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(stun.mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
+            WORD originalLength = IHelper::getBE16(&(((WORD *)stun.mOriginalPacket)[1]));
+
+            if (!stun.mOptions.mCalculateMessageIntegrityUsingFinalMessageSize) {
+              // change the length for the sake of doing the message integrity calculation
+              IHelper::setBE16(&(((WORD *)stun.mOriginalPacket)[1]), static_cast<WORD>(messageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(stun.mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
+            }
 
             CryptoPP::HMAC<CryptoPP::SHA1> hmac(useKey, passwordLength);
             hmac.Update(stun.mOriginalPacket, messageIntegrityMessageLengthInBytes);
+
+            if (0 != stun.mOptions.mZeroPadMessageIntegrityInputToBlockSize) {
+              BYTE zeroBuffer[64] {};
+              memset(&(zeroBuffer[0]), 0, sizeof(zeroBuffer));
+
+              auto remaining = (messageIntegrityMessageLengthInBytes % stun.mOptions.mZeroPadMessageIntegrityInputToBlockSize);
+              while (remaining > 0) {
+                auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
+                hmac.Update(&(zeroBuffer[0]), consume);
+                remaining -= consume;
+              }
+            }
+
             ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
 
             // put back the original length
-            ((WORD *)stun.mOriginalPacket)[1] = originalLength;
+            IHelper::setBE16(&(((WORD *)stun.mOriginalPacket)[1]), originalLength);
 
             hmac.Final(&(result[0]));
 
@@ -1249,7 +1268,7 @@ namespace openpeer
         ULONG hundreds = stun.mErrorCode / 100;
         ULONG tensOnes = stun.mErrorCode % 100;
 
-        ((WORD *)pos)[1] = htons(static_cast<WORD>((hundreds << 8) | tensOnes));
+        IHelper::setBE16(&(((WORD *)pos)[1]), static_cast<WORD>((hundreds << 8) | tensOnes));
         pos += sizeof(DWORD);
 
         if (stun.mReason.length() > 0) {
@@ -1261,7 +1280,7 @@ namespace openpeer
       void packetizeUnknownAttributes(BYTE *pos, const STUNPacket &stun)
       {
         for (STUNPacket::UnknownAttributeList::const_iterator iter = stun.mUnknownAttributes.begin(); iter != stun.mUnknownAttributes.end(); ++iter) {
-          ((WORD *)pos)[0] = htons(*iter);
+          IHelper::setBE16(&(((WORD *)pos)[0]), *iter);
           pos += sizeof(WORD);
         }
       }
@@ -1278,7 +1297,7 @@ namespace openpeer
         crc.Final((BYTE *)(&crcValue));
         crcValue ^= OPENPEER_STUN_MAGIC_XOR_FINGERPRINT_VALUE;
 
-        ((DWORD *)pos)[0] = htonl(crcValue);
+        IHelper::setBE32(&(((DWORD *)pos)[0]), crcValue);
       }
 
       //-----------------------------------------------------------------------
@@ -1289,13 +1308,13 @@ namespace openpeer
         packetizeAttributeHeader(pos, STUNPacket::Attribute_CongestionControl, sizeof(WORD) + (sizeof(WORD)*(list.size())));
 
         // packetize the directional bit
-        ((WORD *)pos)[0] = htons(0);
+        IHelper::setBE16(&(((WORD *)pos)[0]), 0);
         pos[0] = (directionBit ? (1 << 7) : (0 << 7));
         pos += sizeof(WORD);
 
         for (STUNPacket::CongestionControlList::const_iterator iter = list.begin(); iter != list.end(); ++iter)
         {
-          ((WORD *)pos)[0] = htons(static_cast<WORD>(*iter));
+          IHelper::setBE16(&(((WORD *)pos)[0]), static_cast<WORD>(*iter));
           pos += sizeof(WORD);
         }
       }
@@ -1772,14 +1791,14 @@ namespace openpeer
       if (0 != (packet[0] & 0xC0)) return STUNPacketPtr();
 
       // The magic cookie field MUST contain the fixed value OPENPEER_STUN_MAGIC_COOKIE in network byte order.
-      DWORD magicCookie = ntohl(((DWORD *)packet)[1]);
+      DWORD magicCookie = IHelper::getBE32(&(((DWORD *)packet)[1]));
       if ((!options.mAllowRFC3489CookieBehaviour) &&
           (OPENPEER_STUN_MAGIC_COOKIE != magicCookie)) return STUNPacketPtr();
 
-      WORD messageType = ntohs(((WORD *)packet)[0]);
+      WORD messageType = IHelper::getBE16(&(((WORD *)packet)[0]));
       WORD messageTypeClass = ((messageType & 0x100) >> 7) | ((messageType & 0x10) >> 4);
       WORD messageTypeMethod = ((messageType & 0x3E00) >> 2) | ((messageType & 0xE0) >> 1) | (messageType & 0xF);
-      WORD messageLengthInBytes = htons(((WORD *)packet)[1]);
+      WORD messageLengthInBytes = IHelper::getBE16(&(((WORD *)packet)[1]));
 
       // The message length MUST contain the size, in bytes, of the message
       // not including the 20-byte STUN header.  Since all STUN attributes are
@@ -1830,8 +1849,8 @@ namespace openpeer
 
         ZS_THROW_BAD_STATE_IF(availableBytes < sizeof(DWORD))         // this can't be!
 
-        WORD attributeType = ntohs(((WORD *)pos)[0]);
-        WORD attributeLength = ntohs(((WORD *)pos)[1]);
+        WORD attributeType = IHelper::getBE16(&(((WORD *)pos)[0]));
+        WORD attributeLength = IHelper::getBE16(&(((WORD *)pos)[1]));
         const BYTE *attributeStart = pos;
 
         pos += sizeof(DWORD);
@@ -1887,7 +1906,7 @@ namespace openpeer
 
             case Attribute_ErrorCode: {
               if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
-              WORD code = ntohs(((WORD *)dataPos)[1]);
+              WORD code = IHelper::getBE16(&(((WORD *)dataPos)[1]));
               WORD hundredsDigit = (0x700 & code) >> 8;
               WORD twoDigits = (0xFF & code);
               if (((hundredsDigit < 3) || (hundredsDigit > 6)) ||
@@ -1903,7 +1922,7 @@ namespace openpeer
             case Attribute_UnknownAttribute: {
               if (0 != (attributeLength % sizeof(WORD))) return STUNPacketPtr();
               while (attributeLength >= 2) {
-                stun->mUnknownAttributes.push_back(htons(((WORD *)dataPos)[0]));
+                stun->mUnknownAttributes.push_back(IHelper::getBE16(&(((WORD *)dataPos)[0])));
                 dataPos += sizeof(WORD);
                 attributeLength -= 2;
               }
@@ -1931,7 +1950,7 @@ namespace openpeer
               DWORD crcValue = 0;
               crc.Final((BYTE *)(&crcValue));
               crcValue ^= OPENPEER_STUN_MAGIC_XOR_FINGERPRINT_VALUE;
-              if (crcValue != ntohl(((DWORD *)dataPos)[0])) return STUNPacketPtr();
+              if (crcValue != IHelper::getBE32(&(((DWORD *)dataPos)[0]))) return STUNPacketPtr();
               stun->mFingerprintIncluded = true;
               break;
             }
@@ -1939,13 +1958,13 @@ namespace openpeer
             // RFC5766 TURN specific attributes
             case Attribute_ChannelNumber:         {
               if (attributeLength < sizeof(WORD)) return STUNPacketPtr();
-              stun->mChannelNumber = ntohs(((WORD *)dataPos)[0]);
+              stun->mChannelNumber = IHelper::getBE16(&(((WORD *)dataPos)[0]));
               break;
             }
             case Attribute_Lifetime:              {
               if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
               stun->mLifetimeIncluded = true;
-              stun->mLifetime = ntohl(((DWORD *)dataPos)[0]);
+              stun->mLifetime = IHelper::getBE32(&(((DWORD *)dataPos)[0]));
               break;
             }
             case Attribute_XORPeerAddress:        {
@@ -2012,7 +2031,7 @@ namespace openpeer
             case Attribute_Priority:              {
               if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
               stun->mPriorityIncluded = true;
-              stun->mPriority = ntohl(((DWORD *)dataPos)[0]);
+              stun->mPriority = IHelper::getBE32(&(((DWORD *)dataPos)[0]));
               break;
             }
             case Attribute_UseCandidate:          stun->mUseCandidateIncluded = true; break;
@@ -2031,7 +2050,7 @@ namespace openpeer
             }
             case Attribute_MSICE2_ImplementationVersion: {
               if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
-              stun->mMSICE2ImplementationVersion = ntohl(((DWORD *)dataPos)[0]);
+              stun->mMSICE2ImplementationVersion = IHelper::getBE32(&(((DWORD *)dataPos)[0]));
               break;
             }
 
@@ -2044,7 +2063,7 @@ namespace openpeer
             case STUNPacket::Attribute_MinimumRTT:          {
               if (attributeLength < sizeof(DWORD)) return STUNPacketPtr();
               stun->mMinimumRTTIncluded = true;
-              stun->mMinimumRTT = ntohl(((DWORD *)dataPos)[0]);
+              stun->mMinimumRTT = IHelper::getBE32(&(((DWORD *)dataPos)[0]));
               break;
             }
             case STUNPacket::Attribute_ConnectionInfo:      if (!internal::parseSTUNString(dataPos, attributeLength, OPENPEER_STUN_MAX_CONNECTION_INFO, stun->mConnectionInfo)) return STUNPacketPtr(); break;
@@ -2058,7 +2077,7 @@ namespace openpeer
               dataPos += sizeof(WORD);  // skip over the header
               size_t length = ((attributeLength - sizeof(WORD)) / sizeof(WORD));
               for (; length > 0; --length) {
-                list.push_back(static_cast<IRUDPChannel::CongestionAlgorithms>(ntohs(((WORD *)dataPos)[0])));
+                list.push_back(static_cast<IRUDPChannel::CongestionAlgorithms>(IHelper::getBE16(&(((WORD *)dataPos)[0]))));
                 dataPos += sizeof(WORD);
               }
               if (direction)
@@ -2186,7 +2205,7 @@ namespace openpeer
 
       if (streamDataAvailableInBytes < sizeof(WORD)) return ParseLookAheadState_InsufficientDataToDeterimine;
 
-      WORD messageType = ntohs(((WORD *)packet)[0]);
+      WORD messageType = IHelper::getBE16(&(((WORD *)packet)[0]));
       WORD messageTypeClass = ((messageType & 0x100) >> 7) | ((messageType & 0x10) >> 4);
       WORD messageTypeMethod = ((messageType & 0x3E00) >> 2) | ((messageType & 0xE0) >> 1) | (messageType & 0xF);
 
@@ -2204,7 +2223,7 @@ namespace openpeer
 
       if (streamDataAvailableInBytes < sizeof(DWORD)) return ParseLookAheadState_InsufficientDataToDeterimine;
 
-      WORD messageLengthInBytes = htons(((WORD *)packet)[1]);
+      WORD messageLengthInBytes = IHelper::getBE16(&(((WORD *)packet)[1]));
       if (0 != (messageLengthInBytes % sizeof(DWORD))) return ParseLookAheadState_NotSTUN;  // every attribute is aligned to a DWORD size
 
       // The message length MUST contain the size, in bytes, of the message
@@ -2217,7 +2236,7 @@ namespace openpeer
       if (streamDataAvailableInBytes < (sizeof(DWORD)*2)) return ParseLookAheadState_InsufficientDataToDeterimine;
 
       // The magic cookie field MUST contain the fixed value OPENPEER_STUN_MAGIC_COOKIE in network byte order.
-      DWORD magicCookie = ntohl(((DWORD *)packet)[1]);
+      DWORD magicCookie = IHelper::getBE32(&(((DWORD *)packet)[1]));
       if ((!options.mAllowRFC3489CookieBehaviour) &&
           (OPENPEER_STUN_MAGIC_COOKIE != magicCookie)) return ParseLookAheadState_NotSTUN;
 
@@ -2616,10 +2635,10 @@ namespace openpeer
       WORD messageType = ((0x02 & ((WORD)mClass)) << 7) | ((0x01 & ((WORD)mClass)) << 4);
       messageType |= ((0xF80 & ((WORD)mMethod)) << 2) | ((0x70 & ((WORD)mMethod)) << 1) | (0xF & ((WORD)mMethod));
 
-      ((WORD *)packet)[0] = htons(messageType);
-      ((WORD *)packet)[1] = htons((WORD)(outPacketLengthInBytes - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
+      IHelper::setBE16(&(((WORD *)packet)[0]), messageType);
+      IHelper::setBE16(&(((WORD *)packet)[1]), static_cast<WORD>(outPacketLengthInBytes - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
 
-      ((DWORD *)packet)[1] = htonl(mMagicCookie);
+      IHelper::setBE32(&(((DWORD *)packet)[1]), mMagicCookie);
       memcpy(&(((DWORD *)packet)[2]), &(mTransactionID[0]), sizeof(mTransactionID));
 
       BYTE *pos = packet + OPENPEER_STUN_HEADER_SIZE_IN_BYTES;
@@ -2721,16 +2740,32 @@ namespace openpeer
       memset(&(result[0]), 0, sizeof(result));
 
       // we have to smash the original packet length to do calculation then put it back after...
-      WORD originalLength = ((WORD *)mOriginalPacket)[1];
-      // for the sake of message integrity we have to set the length to the original size up to and including the message interity attribute
-      ((WORD *)mOriginalPacket)[1] = htons(static_cast<WORD>(mMessageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
+      WORD originalLength = IHelper::getBE16(&((WORD *)mOriginalPacket)[1]);
+
+      if (!mOptions.mCalculateMessageIntegrityUsingFinalMessageSize) {
+        // for the sake of message integrity we have to set the length to the original size up to and including the message interity attribute
+        IHelper::setBE16(&(((WORD *)mOriginalPacket)[1]), static_cast<WORD>(mMessageIntegrityMessageLengthInBytes + sizeof(DWORD) + sizeof(mMessageIntegrity) - OPENPEER_STUN_HEADER_SIZE_IN_BYTES));
+      }
 
       CryptoPP::HMAC<CryptoPP::SHA1> hmac(useKey, passwordLength);
       hmac.Update(mOriginalPacket, mMessageIntegrityMessageLengthInBytes);
+
+      if (0 != mOptions.mZeroPadMessageIntegrityInputToBlockSize) {
+        BYTE zeroBuffer[64]{};
+        memset(&(zeroBuffer[0]), 0, sizeof(zeroBuffer));
+
+        auto remaining = (mMessageIntegrityMessageLengthInBytes % mOptions.mZeroPadMessageIntegrityInputToBlockSize);
+        while (remaining > 0) {
+          auto consume = (remaining > sizeof(zeroBuffer) ? sizeof(zeroBuffer) : remaining);
+          hmac.Update(&(zeroBuffer[0]), consume);
+          remaining -= consume;
+        }
+      }
+
       ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
 
       // put back the original value now...
-      ((WORD *)mOriginalPacket)[1] = originalLength;
+      IHelper::setBE16(&(((WORD *)mOriginalPacket)[1]), originalLength);
 
       hmac.Final(&(result[0]));
       return (0 == memcmp(&(mMessageIntegrity[0]), &(result[0]), sizeof(result)));

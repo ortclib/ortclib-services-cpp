@@ -30,6 +30,8 @@
  */
 
 #include <openpeer/services/RUDPPacket.h>
+#include <openpeer/services/IHelper.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>
 
@@ -166,7 +168,7 @@ namespace openpeer
       ZS_THROW_INVALID_USAGE_IF(!packet)
       if (packetLengthInBytes < OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
 
-      WORD channelNumber = ntohs(((WORD *)packet)[0]);
+      WORD channelNumber = IHelper::getBE16(&(((WORD *)packet)[0]));
 
       if ((channelNumber < LegalChannelNumber_StartRange) ||
           (channelNumber > LegalChannelNumber_EndRange)) {
@@ -174,11 +176,11 @@ namespace openpeer
         return RUDPPacketPtr();
       }
 
-      WORD dataLength = ntohs(((WORD *)packet)[1]);
+      WORD dataLength = IHelper::getBE16(&(((WORD *)packet)[1]));
 
       BYTE flags = packet[sizeof(WORD)+sizeof(WORD)];
-      DWORD sequenceNumber = ntohl(((DWORD *)packet)[1]) & 0xFFFFFF;  // lower 24bits are valid only
-      DWORD gsnr = ntohl(((DWORD *)packet)[2]) & 0xFFFFFF;            // lower 24bits are valid only
+      DWORD sequenceNumber = IHelper::getBE32(&(((DWORD *)packet)[1])) & 0xFFFFFF;  // lower 24bits are valid only
+      DWORD gsnr = IHelper::getBE32(&(((DWORD *)packet)[2])) & 0xFFFFFF;            // lower 24bits are valid only
       DWORD gsnfr = gsnr;
       BYTE vectorSize = 0;
       BYTE vectorFlags = 0;
@@ -188,7 +190,7 @@ namespace openpeer
         if (packetLengthInBytes < OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + sizeof(DWORD)) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
         vectorSize = (packet[sizeof(DWORD)*3]) & (0x7F);
         vectorFlags = (packet[sizeof(DWORD)*3]) & (0x80);
-        gsnfr = ntohl(((DWORD *)packet)[3]) & 0xFFFFFF;               // lower 24bits are valid only
+        gsnfr = IHelper::getBE32(&(((DWORD *)packet)[3])) & 0xFFFFFF;               // lower 24bits are valid only
       }
 
       // has to have enough room to contain vector, extended header and all data
@@ -232,14 +234,14 @@ namespace openpeer
       memset(packet, 0, length);  // make sure to set the entire packet to "0" so all defaults are appropriately set
 
       // put in channel number and length
-      ((WORD *)packet)[0] = htons(mChannelNumber);
-      ((WORD *)packet)[1] = htons(mDataLengthInBytes);
+      IHelper::setBE16(&(((WORD *)packet)[0]), mChannelNumber);
+      IHelper::setBE16(&(((WORD *)packet)[1]), mDataLengthInBytes);
 
-      ((DWORD *)packet)[1] = htonl(mSequenceNumber & 0xFFFFFF);
-      (packet[sizeof(DWORD)]) = mFlags;
-      ((DWORD *)packet)[2] = htonl(mGSNR & 0xFFFFFF);
+      IHelper::setBE32(&(((DWORD *)packet)[1]), mSequenceNumber & 0xFFFFFF);
+      IHelper::setBE32(&((packet[sizeof(DWORD)])), mFlags);
+      IHelper::setBE32(&(((DWORD *)packet)[2]), mGSNR & 0xFFFFFF);
       if (!eqFlag) {
-        ((DWORD *)packet)[3] = htonl(mGSNFR & 0xFFFFFF);
+        IHelper::setBE32(&(((DWORD *)packet)[3]), mGSNFR & 0xFFFFFF);
         ZS_THROW_BAD_STATE_IF(mVectorLengthInBytes > 0x7F)  // can only have from 0..127 bytes in the vector maximum
 
         (packet[sizeof(DWORD)*3]) = (mVectorLengthInBytes & 0x7F);

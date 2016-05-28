@@ -405,8 +405,8 @@ namespace openpeer
                 // yes, it is active, so we can packetize this in a special way to send to the remote peer
                 packet = make_shared<SecureByteBlock>(sizeof(DWORD)+dwordBoundary(bufferLengthInBytes));
 
-                ((WORD *)(packet->BytePtr()))[0] = htons(info->mChannelNumber);
-                ((WORD *)(packet->BytePtr()))[1] = htons((WORD)bufferLengthInBytes);
+                IHelper::setBE16(&(((WORD *)(packet->BytePtr()))[0]), info->mChannelNumber);
+                IHelper::setBE16(&(((WORD *)(packet->BytePtr()))[1]), static_cast<WORD>(bufferLengthInBytes));
 
                 info->mLastSentDataAt = zsLib::now();
 
@@ -582,8 +582,8 @@ namespace openpeer
 
         if (bufferLengthInBytes < sizeof(DWORD)) return false;
 
-        WORD channel = ntohs(((WORD *)buffer)[0]);
-        WORD length = ntohs(((WORD *)buffer)[1]);
+        WORD channel = IHelper::getBE16(&(((WORD *)buffer)[0]));
+        WORD length = IHelper::getBE16(&(((WORD *)buffer)[1]));
 
         if ((channel < mLimitChannelToRangeStart) ||
             (channel > mLimitChannelToRangeEnd)) return false;        // this can't be legal channel data
@@ -973,8 +973,8 @@ namespace openpeer
                       continue;
                     }
 
-                    WORD channel = ntohs(((WORD *)(server->mReadBuffer))[0]);
-                    length = ntohs(((WORD *)(server->mReadBuffer))[1]);;
+                    WORD channel = IHelper::getBE16(&(((WORD *)(server->mReadBuffer))[0]));
+                    length = IHelper::getBE16(&(((WORD *)(server->mReadBuffer))[1]));
 
                     size_t lengthAsSizeT = length;
 

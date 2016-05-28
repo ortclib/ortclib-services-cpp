@@ -224,6 +224,8 @@ namespace openpeer
       {
         bool mBindResponseRequiresUsernameAttribute {};
         bool mBindResponseAllowedUsernameAttribute {};
+        bool mCalculateMessageIntegrityUsingFinalMessageSize {};  // set to true to handle some implementations calculate the MESSAGE-INTEGRITY wrong by failing to adjust the packet size
+        size_t mZeroPadMessageIntegrityInputToBlockSize {};       // set to the block size of the padding required by some wrongly implemented MESSAGE-INTEGRITY calculations
       };
 
       struct ParseOptions : public Options
