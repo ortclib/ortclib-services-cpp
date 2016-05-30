@@ -128,16 +128,19 @@ namespace openpeer
             mTCPSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "turn", "tcp", 3478);
             mSTUNSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "stun", "udp", 3478);
           } else {
-            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), srvName);
-            mTURNSocket = ITURNSocket::create(
-                                              getAssociatedMessageQueue(),
-                                              mThisWeak.lock(),
-                                              srvName,
-                                              gUsername,
-                                              gPassword,
-                                              IDNS::SRVLookupType_AutoLookupAndFallbackAll,
-                                              true
-                                              );
+            ISTUNDiscovery::CreationOptions stunOptions;
+            stunOptions.mServers.push_back(String(srvName));
+
+            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
+
+            ITURNSocket::CreationOptions turnOptions;
+            turnOptions.mServers.push_back(String(srvName));
+            turnOptions.mUsername = gUsername;
+            turnOptions.mPassword = gPassword;
+            turnOptions.mLookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll;
+            turnOptions.mUseChannelBinding = true;
+
+            mTURNSocket = ITURNSocket::create(getAssociatedMessageQueue(), mThisWeak.lock(), turnOptions);
             mID = mTURNSocket->getID();
           }
 
@@ -185,7 +188,9 @@ namespace openpeer
             mTCPSRVQuery.reset();
           }
           if (query == mSTUNSRVQuery) {
-            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), query->getSRV());
+            ISTUNDiscovery::CreationOptions stunOptions;
+            stunOptions.mSRV = query->getSRV();
+            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
             mSTUNSRVQuery.reset();
             // do not allow the routine to continue in the case STUN SRV lookup completes otherwise the TURN server could get created twice
             return;
@@ -195,18 +200,17 @@ namespace openpeer
               (!mTCPSRVResult))
             return;
 
-          TESTING_CHECK(!mUDPSRVQuery)
-          TESTING_CHECK(!mTCPSRVQuery)
+          TESTING_CHECK(!mUDPSRVQuery);
+          TESTING_CHECK(!mTCPSRVQuery);
 
-          mTURNSocket = ITURNSocket::create(
-                                            getAssociatedMessageQueue(),
-                                            mThisWeak.lock(),
-                                            mUDPSRVResult,
-                                            mTCPSRVResult,
-                                            gUsername,
-                                            gPassword,
-                                            true
-                                            );
+          ITURNSocket::CreationOptions turnOptions;
+          turnOptions.mSRVUDP = mUDPSRVResult;
+          turnOptions.mSRVTCP = mTCPSRVResult;
+          turnOptions.mUsername = gUsername;
+          turnOptions.mPassword = gPassword;
+          turnOptions.mUseChannelBinding = true;
+
+          mTURNSocket = ITURNSocket::create(getAssociatedMessageQueue(), mThisWeak.lock(), turnOptions);
           mID = mTURNSocket->getID();
         }
 

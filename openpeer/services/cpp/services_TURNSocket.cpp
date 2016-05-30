@@ -41,6 +41,7 @@
 #include <zsLib/Socket.h>
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
+#include <zsLib/SafeInt.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/XML.h>
 
@@ -134,73 +135,39 @@ namespace openpeer
                              const make_private &,
                              IMessageQueuePtr queue,
                              ITURNSocketDelegatePtr delegate,
-                             const char *turnServer,
-                             const char *turnServerUsername,
-                             const char *turnServerPassword,
-                             IDNS::SRVLookupTypes lookupType,
-                             bool useChannelBinding,
-                             WORD limitChannelToRangeStart,
-                             WORD limitChannelRoRangeEnd
+                             const CreationOptions &options
                              ) :
         MessageQueueAssociator(queue),
         mCurrentState(TURNSocketState_Pending),
         mLastError(TURNSocketError_None),
         mDelegate(ITURNSocketDelegateProxy::createWeak(queue, delegate)),
-        mServerName(turnServer),
-        mUsername(turnServerUsername),
-        mPassword(turnServerPassword),
-        mLookupType(lookupType),
-        mUseChannelBinding(useChannelBinding),
-        mLimitChannelToRangeStart(limitChannelToRangeStart),
-        mLimitChannelToRangeEnd(limitChannelRoRangeEnd),
-        mLifetime(0),
+        mOptions(options),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0),
         mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
-        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
+        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP))
       {
-        EventWriteOpServicesTurnSocketCreate(__func__, mID, mServerName, mUsername, mPassword, zsLib::to_underlying(lookupType), mUseChannelBinding, mLimitChannelToRangeStart, mLimitChannelToRangeEnd);
-        ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
-        ZS_LOG_DETAIL(log("created"))
-      }
+        mOptions.mSRVUDP = IDNS::cloneSRV(mOptions.mSRVUDP);
+        mOptions.mSRVTCP = IDNS::cloneSRV(mOptions.mSRVTCP);
 
-      //-----------------------------------------------------------------------
-      TURNSocket::TURNSocket(
-                             const make_private &,
-                             IMessageQueuePtr queue,
-                             ITURNSocketDelegatePtr delegate,
-                             IDNS::SRVResultPtr srvTURNUDP,
-                             IDNS::SRVResultPtr srvTURNTCP,
-                             const char *turnServerUsername,
-                             const char *turnServerPassword,
-                             bool useChannelBinding,
-                             WORD limitChannelToRangeStart,
-                             WORD limitChannelRoRangeEnd
-                             ) :
-        MessageQueueAssociator(queue),
-        mCurrentState(TURNSocketState_Pending),
-        mLastError(TURNSocketError_None),
-        mDelegate(ITURNSocketDelegateProxy::createWeak(queue, delegate)),
-        mTURNUDPSRVResult(IDNS::cloneSRV(srvTURNUDP)),
-        mTURNTCPSRVResult(IDNS::cloneSRV(srvTURNTCP)),
-        mUsername(turnServerUsername),
-        mPassword(turnServerPassword),
-        mUseChannelBinding(useChannelBinding),
-        mLimitChannelToRangeStart(limitChannelToRangeStart),
-        mLimitChannelToRangeEnd(limitChannelRoRangeEnd),
-        mLifetime(0),
-        mLastSentDataToServer(zsLib::now()),
-        mLastRefreshTimerWasSentAt(zsLib::now()),
-        mPermissionRequesterMaxCapacity(0),
-        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
-        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP))
-      {
-        EventWriteOpServicesTurnSocketCreate(__func__, mID, mServerName, mUsername, mPassword, 0, mUseChannelBinding, mLimitChannelToRangeStart, mLimitChannelToRangeEnd);
-        if (srvTURNUDP) srvTURNUDP->trace(__func__);
-        if (srvTURNTCP) srvTURNTCP->trace(__func__);
-        ZS_THROW_INVALID_USAGE_IF(mLimitChannelToRangeStart > mLimitChannelToRangeEnd)
-        ZS_LOG_BASIC(log("created"))
+        if (mOptions.mSRVUDP) mOptions.mSRVUDP->trace(__func__);
+        if (mOptions.mSRVTCP) mOptions.mSRVTCP->trace(__func__);
+
+        ZS_THROW_INVALID_USAGE_IF((mOptions.mServers.size() < 1) && (!mOptions.mSRVUDP) && (!mOptions.mSRVTCP));
+
+        EventWriteOpServicesTurnSocketCreate(
+                                             __func__,
+                                             mID,
+                                             mOptions.mServers.size() > 0 ? mOptions.mServers.front().c_str() : NULL,
+                                             mOptions.mUsername,
+                                             mOptions.mPassword,
+                                             zsLib::to_underlying(mOptions.mLookupType),
+                                             mOptions.mUseChannelBinding,
+                                             mOptions.mLimitChannelToRangeStart,
+                                             mOptions.mLimitChannelToRangeEnd
+                                             );
+        ZS_THROW_INVALID_USAGE_IF(mOptions.mLimitChannelToRangeStart > mOptions.mLimitChannelToRangeEnd)
+        ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
@@ -253,43 +220,13 @@ namespace openpeer
       TURNSocketPtr TURNSocket::create(
                                        IMessageQueuePtr queue,
                                        ITURNSocketDelegatePtr delegate,
-                                       const char *turnServer,
-                                       const char *turnServerUsername,
-                                       const char *turnServerPassword,
-                                       IDNS::SRVLookupTypes lookupType,
-                                       bool useChannelBinding,
-                                       WORD limitChannelToRangeStart,
-                                       WORD limitChannelRoRangeEnd
+                                       const CreationOptions &options
                                        )
       {
-        ZS_THROW_INVALID_USAGE_IF(!queue)
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF(!turnServer)
+        ZS_THROW_INVALID_USAGE_IF(!queue);
+        ZS_THROW_INVALID_USAGE_IF(!delegate);
 
-        TURNSocketPtr pThis(make_shared<TURNSocket>(make_private {}, queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
-        pThis->mThisWeak = pThis;
-        pThis->init();
-        return pThis;
-      }
-
-      //-----------------------------------------------------------------------
-      TURNSocketPtr TURNSocket::create(
-                                       IMessageQueuePtr queue,
-                                       ITURNSocketDelegatePtr delegate,
-                                       IDNS::SRVResultPtr srvTURNUDP,
-                                       IDNS::SRVResultPtr srvTURNTCP,
-                                       const char *turnServerUsername,
-                                       const char *turnServerPassword,
-                                       bool useChannelBinding,
-                                       WORD limitChannelToRangeStart,
-                                       WORD limitChannelRoRangeEnd
-                                       )
-      {
-        ZS_THROW_INVALID_USAGE_IF(!queue)
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF((!srvTURNUDP) && (!srvTURNTCP))
-
-        TURNSocketPtr pThis(make_shared<TURNSocket>(make_private{}, queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd));
+        TURNSocketPtr pThis(make_shared<TURNSocket>(make_private {}, queue, delegate, options));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -424,7 +361,7 @@ namespace openpeer
               // there was no channel for this destination - try to bind a new one now...
               WORD freeChannelNumber = getNextChannelNumber();
               if ((0 != freeChannelNumber) &&
-                  (mUseChannelBinding)) {
+                  (mOptions.mUseChannelBinding)) {
 
                 ZS_LOG_DEBUG(log("will attempt to bind channel") + ZS_PARAM("channel", freeChannelNumber) + ZS_PARAM("ip", destination.string()))
 
@@ -576,7 +513,7 @@ namespace openpeer
           AutoRecursiveLock lock(mLock);
           if (isShutdown()) return false;
           if (!mDelegate) return false;
-          if (!mUseChannelBinding) return false;                  // can't be bound channels if TURN isn't allowed to use it
+          if (!mOptions.mUseChannelBinding) return false;                  // can't be bound channels if TURN isn't allowed to use it
           if (fromIPAddress != mAllocateResponseIP) return false; // must come from the TURN server
         }
 
@@ -585,8 +522,8 @@ namespace openpeer
         WORD channel = IHelper::getBE16(&(((WORD *)buffer)[0]));
         WORD length = IHelper::getBE16(&(((WORD *)buffer)[1]));
 
-        if ((channel < mLimitChannelToRangeStart) ||
-            (channel > mLimitChannelToRangeEnd)) return false;        // this can't be legal channel data
+        if ((channel < mOptions.mLimitChannelToRangeStart) ||
+            (channel > mOptions.mLimitChannelToRangeEnd)) return false;        // this can't be legal channel data
 
         if (length > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) return false;  // this can't be legal channel data
         if (length > (bufferLengthInBytes-sizeof(DWORD))) {
@@ -978,8 +915,8 @@ namespace openpeer
 
                     size_t lengthAsSizeT = length;
 
-                    if ((channel < mLimitChannelToRangeStart) ||
-                        (channel > mLimitChannelToRangeEnd) ||
+                    if ((channel < mOptions.mLimitChannelToRangeStart) ||
+                        (channel > mOptions.mLimitChannelToRangeEnd) ||
                         (lengthAsSizeT > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES)) {
                       ZS_LOG_ERROR(Basic, log("socket received bogus data and is being shutdown"))
                       // this socket has bogus data in it...
@@ -1248,8 +1185,8 @@ namespace openpeer
             STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_ChannelBind);
             fix(newRequest);
             newRequest->mFingerprintIncluded = true;
-            newRequest->mUsername = mUsername;
-            newRequest->mPassword = mPassword;
+            newRequest->mUsername = mOptions.mUsername;
+            newRequest->mPassword = mOptions.mPassword;
             newRequest->mRealm = mRealm;
             newRequest->mNonce = mNonce;
             newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
@@ -1396,19 +1333,19 @@ namespace openpeer
         IHelper::debugAppend(resultEl, "backgrounding subscription", (bool)mBackgroundingSubscription);
         IHelper::debugAppend(resultEl, "backgrounding notifier", (bool)mBackgroundingNotifier);
 
-        IHelper::debugAppend(resultEl, "limit channel range (start)", mLimitChannelToRangeStart);
-        IHelper::debugAppend(resultEl, "limit channel range (end)", mLimitChannelToRangeEnd);
+        IHelper::debugAppend(resultEl, "limit channel range (start)", mOptions.mLimitChannelToRangeStart);
+        IHelper::debugAppend(resultEl, "limit channel range (end)", mOptions.mLimitChannelToRangeEnd);
         IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
-        IHelper::debugAppend(resultEl, "server name", mServerName);
-        IHelper::debugAppend(resultEl, "username", mUsername);
-        IHelper::debugAppend(resultEl, "password", mPassword);
+        IHelper::debugAppend(resultEl, "server name", mOptions.mServers.size() > 0 ? mOptions.mServers.front() : String());
+        IHelper::debugAppend(resultEl, "username", mOptions.mUsername);
+        IHelper::debugAppend(resultEl, "password", mOptions.mPassword);
         IHelper::debugAppend(resultEl, "realm", mRealm);
         IHelper::debugAppend(resultEl, "nonce", mNonce);
         IHelper::debugAppend(resultEl, "udp dns query", (bool)mTURNUDPQuery);
         IHelper::debugAppend(resultEl, "tcp dns query", (bool)mTURNTCPQuery);
-        IHelper::debugAppend(resultEl, "udp dns srv records", mTURNUDPSRVResult ? mTURNUDPSRVResult->mRecords.size() : 0);
-        IHelper::debugAppend(resultEl, "tcp dns srv records", mTURNTCPSRVResult ? mTURNTCPSRVResult->mRecords.size() : 0);
-        IHelper::debugAppend(resultEl, "use channel binding", mUseChannelBinding);
+        IHelper::debugAppend(resultEl, "udp dns srv records", mOptions.mSRVUDP ? mOptions.mSRVUDP->mRecords.size() : 0);
+        IHelper::debugAppend(resultEl, "tcp dns srv records", mOptions.mSRVTCP ? mOptions.mSRVTCP->mRecords.size() : 0);
+        IHelper::debugAppend(resultEl, "use channel binding", mOptions.mUseChannelBinding);
         IHelper::debugAppend(resultEl, "allocated response IP", mAllocateResponseIP.string());
         IHelper::debugAppend(resultEl, "relayed IP", mRelayedIP.string());
         IHelper::debugAppend(resultEl, "reflected IP", mReflectedIP.string());
@@ -1454,96 +1391,6 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::stepGetNextServer(
-                                              IPAddressList &previouslyAdded,
-                                              SRVResultPtr &srv
-                                              )
-      {
-        IPAddress result;
-
-        // we don't have UDP server IP, try to obtain...
-        while (true) {
-          result.clear();
-
-          bool found = IDNS::extractNextIP(srv, result);
-          if (!found) {
-            ZS_LOG_DEBUG(log("no more servers found") + ZS_PARAM("server", (srv ? srv->mName : mServerName)))
-
-            // we failed to discover any server that works
-            return IPAddress();
-          }
-
-          if (result.isAddressEmpty()) continue;
-          if (result.isPortEmpty()) continue;
-
-          if (hasAddedBefore(previouslyAdded, result)) {
-            continue;
-          }
-
-          ZS_LOG_DETAIL(log("found server") + ZS_PARAM("server", (srv ? srv->mName : mServerName)) + ZS_PARAM("ip", result.string()))
-
-          // we now know the next server to try
-          previouslyAdded.push_back(result);
-          break;
-        }
-
-        return result;
-      }
-
-      //-----------------------------------------------------------------------
-      bool TURNSocket::stepPrepareServers()
-      {
-        if ((mServers.size() > 0) ||
-            (mActiveServer)) {
-          ZS_LOG_TRACE(log("servers are already prepared"))
-          return true;
-        }
-
-        IPAddressList previouslyContactedUDPServers;
-        IPAddressList previouslyContactedTCPServers;
-        bool udpExhausted = mForceTURNUseTCP;   // if true then no UDP server will ever be used
-        bool tcpExhausted = mForceTURNUseUDP;   // if true then no TCP server will ever be used
-
-        Time activateAfter = zsLib::now();
-
-        ULONG count = 0;
-        while ((!udpExhausted) &&
-               (!tcpExhausted))
-        {
-          bool toggle = (0 == count ? true : ((count % 2) == 1)); // true, true, false, true, false, true, false, ...
-          ++count;
-
-          IPAddressList &previousList = (toggle ? previouslyContactedUDPServers : previouslyContactedTCPServers);
-          bool &exhausted = (toggle ? udpExhausted : tcpExhausted);
-          SRVResultPtr &srv = (toggle ? mTURNUDPSRVResult : mTURNTCPSRVResult);
-
-          if (exhausted) continue;
-
-          IPAddress result = stepGetNextServer(previousList, srv);
-          if (result.isAddressEmpty()) {
-            exhausted = true;
-            continue;
-          }
-
-          EventWriteOpServicesTurnSocketUseNextServer(__func__, mID, result.string(), toggle);
-
-          ServerPtr server = Server::create();
-          server->mIsUDP = toggle;
-          server->mServerIP = result;
-          server->mActivateAfter = activateAfter;
-
-          server->mActivationTimer = Timer::create(mThisWeak.lock(), activateAfter);
-          mActivationTimers[server->mActivationTimer->getID()] = server->mActivationTimer;
-
-          activateAfter += Seconds(OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
-
-          mServers.push_back(server);
-        }
-
-        return mServers.size() > 0;
-      }
-
-      //-----------------------------------------------------------------------
       void TURNSocket::step()
       {
         if ((isShutdown()) ||
@@ -1552,43 +1399,9 @@ namespace openpeer
           return;
         }
 
-        if (!mTURNUDPSRVResult) {
-          if (!mTURNUDPQuery) {
-            ZS_LOG_DEBUG(log("performing _turn._udp SRV lookup") + ZS_PARAM("server", mServerName))
-            mTURNUDPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "udp", 3478, 10, 0, mLookupType);
-          }
+        if (!stepDNSLookupNextServer()) return;
 
-          if (!mTURNUDPQuery->isComplete())
-            return;
-
-          mTURNUDPSRVResult = mTURNUDPQuery->getSRV();
-        }
-
-        if (!mTURNTCPSRVResult) {
-          if (!mTURNTCPQuery) {
-            ZS_LOG_DEBUG(log("performing _turn._tcp SRV lookup") + ZS_PARAM("server", mServerName))
-            mTURNTCPQuery = IDNS::lookupSRV(mThisWeak.lock(), mServerName, "turn", "tcp", 3478, 10, 0, mLookupType);
-          }
-
-          if (!mTURNTCPQuery->isComplete())
-            return;
-
-          mTURNTCPSRVResult = mTURNTCPQuery->getSRV();
-        }
-
-        if ((!mTURNUDPSRVResult) &&
-            (!mTURNTCPSRVResult)) {
-          mLastError = TURNSocketError_DNSLookupFailure;
-          cancel();
-          return;
-        }
-
-        if (!stepPrepareServers()) {
-          ZS_LOG_WARNING(Detail, log("failed to prepare servers"))
-          mLastError = TURNSocketError_FailedToConnectToAnyServer;
-          cancel();
-          return;
-        }
+        if (!stepPrepareServers()) return;
 
         Time tick = zsLib::now();
 
@@ -1697,6 +1510,225 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      bool TURNSocket::stepDNSLookupNextServer()
+      {
+        if (mTURNUDPQuery) {
+          if (!mTURNUDPQuery->isComplete()) {
+            ZS_LOG_TRACE(log("still have pending UDP query"));
+            return false;
+          }
+        }
+        if (mTURNTCPQuery) {
+          if (!mTURNTCPQuery->isComplete()) {
+            ZS_LOG_TRACE(log("still have pending TCP query"));
+            return false;
+          }
+        }
+
+        if (mTURNUDPQuery) {
+          mOptions.mSRVUDP = mTURNUDPQuery->getSRV();
+          mTURNUDPQuery.reset();
+        }
+        if (mTURNTCPQuery) {
+          mOptions.mSRVTCP = mTURNTCPQuery->getSRV();
+          mTURNTCPQuery.reset();
+        }
+
+        if ((mServers.size() > 0) || (mOptions.mSRVUDP) || (mOptions.mSRVTCP)) {
+          ZS_LOG_TRACE(log("have not exhausted existing set of available servers"));
+          return true;
+        }
+
+        if (mOptions.mServers.size() < 1) {
+          ZS_LOG_WARNING(Debug, log("no more servers available to lookup (shutting down turn)"));
+          mLastError = TURNSocketError_DNSLookupFailure;
+          cancel();
+          return false;
+        }
+
+        String uri = mOptions.mServers.front();
+        mOptions.mServers.pop_front();
+
+        String uriPrefix("turn:");
+        if (0 == uri.compare(0, uriPrefix.length(), uriPrefix)) {
+          uri = uri.substr(uriPrefix.length());
+        }
+
+        String forcedTransport;
+
+        IHelper::SplitMap questSplitter;
+        IHelper::split(uri, questSplitter, "?");
+        IHelper::splitTrim(questSplitter);
+        IHelper::splitPruneEmpty(questSplitter);
+
+        if ((questSplitter.size() < 1) ||
+            (questSplitter.size() > 2)) {
+          ZS_LOG_WARNING(Debug, log("invalid server name specified") + ZS_PARAM("uri", uri));
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+          return false;
+        }
+
+        if (questSplitter.size() > 1) {
+          uri = questSplitter[0];
+
+          IHelper::SplitMap equalSplitter;
+          IHelper::split(uri, equalSplitter, "=");
+          IHelper::splitTrim(equalSplitter);
+          IHelper::splitPruneEmpty(equalSplitter);
+
+          if (2 == equalSplitter.size()) {
+            if (0 == equalSplitter[0].compareNoCase("transport")) {
+              forcedTransport = equalSplitter[1];
+            }
+          }
+        }
+
+        bool lookupUDP = true;
+        bool lookupTCP = true;
+
+        if (forcedTransport.hasData()) {
+          lookupUDP = false;
+          lookupTCP = false;
+
+          if (0 == forcedTransport.compareNoCase("udp")) {
+            lookupUDP = true;
+          }
+          if (0 == forcedTransport.compareNoCase("tcp")) {
+            lookupTCP = true;
+          }
+        }
+
+        if (mForceTURNUseUDP) {
+          lookupTCP = false;
+        }
+        if (mForceTURNUseTCP) {
+          lookupTCP = false;
+        }
+
+        if (lookupUDP) {
+          ZS_LOG_DEBUG(log("performing _turn._udp SRV lookup") + ZS_PARAM("server", uri));
+          mTURNUDPQuery = IDNS::lookupSRV(mThisWeak.lock(), uri, "turn", "udp", 3478, 10, 0, mOptions.mLookupType);
+        }
+
+        if (lookupTCP) {
+          ZS_LOG_DEBUG(log("performing _turn._tcp SRV lookup") + ZS_PARAM("server", uri));
+          mTURNTCPQuery = IDNS::lookupSRV(mThisWeak.lock(), uri, "turn", "tcp", 3478, 10, 0, mOptions.mLookupType);
+        }
+
+        if ((!mTURNUDPQuery) &&
+            (!mTURNTCPQuery)) {
+          if (mOptions.mServers.size() > 0) {
+            ZS_LOG_WARNING(Debug, log("no lookup was performed on uri (skipping and trying next server)") + ZS_PARAM("uri", uri));
+            IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+            return false;
+          }
+
+          ZS_LOG_WARNING(Debug, log("no more servers available to lookup (shutting down turn)"));
+          mLastError = TURNSocketError_FailedToConnectToAnyServer;
+          cancel();
+          return false;
+        }
+
+        return false;
+      }
+
+      //-----------------------------------------------------------------------
+      IPAddress TURNSocket::stepGetNextServer(
+                                              IPAddressList &previouslyAdded,
+                                              SRVResultPtr &srv
+                                              )
+      {
+        IPAddress result;
+
+        // we don't have UDP server IP, try to obtain...
+        while (true) {
+          result.clear();
+
+          bool found = IDNS::extractNextIP(srv, result);
+          if (!found) {
+            ZS_LOG_DEBUG(log("no more servers found") + ZS_PARAM("server", (srv ? srv->mName : String())));
+
+            // we failed to discover any server that works
+            return IPAddress();
+          }
+
+          if (result.isAddressEmpty()) continue;
+          if (result.isPortEmpty()) continue;
+
+          if (hasAddedBefore(previouslyAdded, result)) continue;
+
+          ZS_LOG_DETAIL(log("found server") + ZS_PARAM("server", (srv ? srv->mName : String())) + ZS_PARAM("ip", result.string()));
+
+          // we now know the next server to try
+          previouslyAdded.push_back(result);
+          break;
+        }
+
+        return result;
+      }
+
+      //-----------------------------------------------------------------------
+      bool TURNSocket::stepPrepareServers()
+      {
+        if ((mServers.size() > 0) ||
+            (mActiveServer)) {
+          ZS_LOG_TRACE(log("servers are already prepared"))
+          return true;
+        }
+
+        IPAddressList previouslyContactedUDPServers;
+        IPAddressList previouslyContactedTCPServers;
+        bool udpExhausted = mForceTURNUseTCP;   // if true then no UDP server will ever be used
+        bool tcpExhausted = mForceTURNUseUDP;   // if true then no TCP server will ever be used
+
+        Time activateAfter = zsLib::now();
+
+        ULONG count = 0;
+        while ((!udpExhausted) &&
+               (!tcpExhausted))
+        {
+          bool toggle = (0 == count ? true : ((count % 2) == 1)); // true, true, false, true, false, true, false, ...
+          ++count;
+
+          IPAddressList &previousList = (toggle ? previouslyContactedUDPServers : previouslyContactedTCPServers);
+          bool &exhausted = (toggle ? udpExhausted : tcpExhausted);
+          SRVResultPtr &srv = (toggle ? mOptions.mSRVUDP : mOptions.mSRVTCP);
+
+          if (exhausted) continue;
+
+          IPAddress result = stepGetNextServer(previousList, srv);
+          if (result.isAddressEmpty()) {
+            exhausted = true;
+            continue;
+          }
+
+          EventWriteOpServicesTurnSocketUseNextServer(__func__, mID, result.string(), toggle);
+
+          ServerPtr server = Server::create();
+          server->mIsUDP = toggle;
+          server->mServerIP = result;
+          server->mActivateAfter = activateAfter;
+
+          server->mActivationTimer = Timer::create(mThisWeak.lock(), activateAfter);
+          mActivationTimers[server->mActivationTimer->getID()] = server->mActivationTimer;
+
+          activateAfter += Seconds(OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
+
+          mServers.push_back(server);
+        }
+
+        mOptions.mSRVUDP.reset();
+        mOptions.mSRVTCP.reset();
+
+        if (mServers.size() < 1) {
+          ZS_LOG_WARNING(Debug, log("no servers were prepared (thus will attempt to lookup another server)"));
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+          return false;
+        }
+        return true;
+      }
+
+      //-----------------------------------------------------------------------
       void TURNSocket::cancel()
       {
         EventWriteOpServicesTurnSocketCancel(__func__, mID);
@@ -1771,8 +1803,8 @@ namespace openpeer
           mTURNTCPQuery.reset();
         }
 
-        mTURNUDPSRVResult.reset();
-        mTURNTCPSRVResult.reset();
+        mOptions.mSRVUDP.reset();
+        mOptions.mSRVTCP.reset();
 
         if (mGracefulShutdownReference) {
 
@@ -1788,8 +1820,8 @@ namespace openpeer
               STUNPacketPtr deallocRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
               fix(deallocRequest);
               deallocRequest->mFingerprintIncluded = true;
-              deallocRequest->mUsername = mUsername;
-              deallocRequest->mPassword = mPassword;
+              deallocRequest->mUsername = mOptions.mUsername;
+              deallocRequest->mPassword = mOptions.mPassword;
               deallocRequest->mRealm = mRealm;
               deallocRequest->mNonce = mNonce;
               deallocRequest->mLifetimeIncluded = true;
@@ -1921,7 +1953,7 @@ namespace openpeer
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
-          ZS_LOG_WARNING(Detail, log("alloc request failed") + ZS_PARAM("username", mUsername) + ZS_PARAM("password", mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
+          ZS_LOG_WARNING(Detail, log("alloc request failed") + ZS_PARAM("username", mOptions.mUsername) + ZS_PARAM("password", mOptions.mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
 
           bool tryDifferentServer = true;
 
@@ -1969,7 +2001,7 @@ namespace openpeer
         }
 
         // if this was a proper successful response then it should be signed with integrity
-        if (!response->isValidMessageIntegrity(mPassword, mUsername, mRealm)) {
+        if (!response->isValidMessageIntegrity(mOptions.mPassword, mOptions.mUsername, mRealm)) {
           ZS_LOG_ERROR(Detail, log("alloc response did not pass integrity check") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false; // this didn't have valid message integrity so it's not a valid response
         }
@@ -1992,7 +2024,7 @@ namespace openpeer
         mActiveServer = server;
         mServers.clear();
 
-        ZS_LOG_DETAIL(log("alloc request completed") + ZS_PARAM("relayed ip", mRelayedIP.string()) + ZS_PARAM("reflected", mReflectedIP.string()) + ZS_PARAM("username", mUsername) + ZS_PARAM("password", mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
+        ZS_LOG_DETAIL(log("alloc request completed") + ZS_PARAM("relayed ip", mRelayedIP.string()) + ZS_PARAM("reflected", mReflectedIP.string()) + ZS_PARAM("username", mOptions.mUsername) + ZS_PARAM("password", mOptions.mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
 
         setState(TURNSocketState_Ready);
 
@@ -2060,7 +2092,7 @@ namespace openpeer
         }
 
         // if this was a proper successful response then it should be signed with integrity
-        if (!response->isValidMessageIntegrity(mPassword, mUsername, mRealm)) {
+        if (!response->isValidMessageIntegrity(mOptions.mPassword, mOptions.mUsername, mRealm)) {
           ZS_LOG_ERROR(Detail, log("refresh response did not pass integrity check"))
           return false; // this didn't have valid message integrity so it's not a valid response
         }
@@ -2117,7 +2149,7 @@ namespace openpeer
               STUNPacketPtr packet = requester->getRequest();
               if (packet) {
                 if (packet->mPeerAddressList.size() > 1) {
-                  mPermissionRequesterMaxCapacity = packet->mPeerAddressList.size() - 1;
+                  mPermissionRequesterMaxCapacity = SafeInt<decltype(mPermissionRequesterMaxCapacity)>(packet->mPeerAddressList.size() - 1);
                   IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
                 }
               }
@@ -2135,7 +2167,7 @@ namespace openpeer
           }
 
           // if this was a proper successful response then it should be signed with integrity
-          if (!response->isValidMessageIntegrity(mPassword, mUsername, mRealm)) {
+          if (!response->isValidMessageIntegrity(mOptions.mPassword, mOptions.mUsername, mRealm)) {
             ZS_LOG_ERROR(Detail, log("permission response did not pass integrity check"))
             return false; // this didn't have valid message integrity so it's not a valid response
           }
@@ -2202,7 +2234,7 @@ namespace openpeer
         }
 
         // if this was a proper successful response then it should be signed with integrity
-        if (!response->isValidMessageIntegrity(mPassword, mUsername, mRealm)) {
+        if (!response->isValidMessageIntegrity(mOptions.mPassword, mOptions.mUsername, mRealm)) {
           ZS_LOG_ERROR(Detail, log("channel bind response did not pass integrity check"))
           return false; // this didn't have valid message integrity so it's not a valid response
         }
@@ -2274,8 +2306,8 @@ namespace openpeer
           }
         }
         permissionRequest->mFingerprintIncluded = true;
-        permissionRequest->mUsername = mUsername;
-        permissionRequest->mPassword = mPassword;
+        permissionRequest->mUsername = mOptions.mUsername;
+        permissionRequest->mPassword = mOptions.mPassword;
         permissionRequest->mRealm = mRealm;
         permissionRequest->mNonce = mNonce;
         permissionRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
@@ -2317,8 +2349,8 @@ namespace openpeer
         STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
         fix(newRequest);
         newRequest->mFingerprintIncluded = true;
-        newRequest->mUsername = mUsername;
-        newRequest->mPassword = mPassword;
+        newRequest->mUsername = mOptions.mUsername;
+        newRequest->mPassword = mOptions.mPassword;
         newRequest->mRealm = mRealm;
         newRequest->mNonce = mNonce;
         newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
@@ -2597,7 +2629,7 @@ namespace openpeer
           if (attempts > 100) return 0; // could not find a free channel in time... abandon effort...
 
           rng.GenerateBlock((BYTE *)(&channel), sizeof(channel));
-          channel = (channel % (mLimitChannelToRangeEnd - mLimitChannelToRangeStart)) + mLimitChannelToRangeStart;
+          channel = (channel % (mOptions.mLimitChannelToRangeEnd - mOptions.mLimitChannelToRangeStart)) + mOptions.mLimitChannelToRangeStart;
 
         } while(mChannelNumberMap.find(channel) != mChannelNumberMap.end());
 
@@ -2616,15 +2648,15 @@ namespace openpeer
         switch (response->mErrorCode) {
           case STUNPacket::ErrorCode_Unauthorized:                  {
             newRequest = (requester->getRequest())->clone(true);
-            if (newRequest->mUsername == mUsername) {
+            if (newRequest->mUsername == mOptions.mUsername) {
               // we tried once but failed to login, give up
               newRequest.reset();
               break;
             }
             mRealm = response->mRealm;
             mNonce = response->mNonce;
-            newRequest->mUsername = mUsername;
-            newRequest->mPassword = mPassword;
+            newRequest->mUsername = mOptions.mUsername;
+            newRequest->mPassword = mOptions.mPassword;
             newRequest->mNonce = mNonce;
             newRequest->mRealm = mRealm;
             newRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
@@ -2775,35 +2807,13 @@ namespace openpeer
       TURNSocketPtr ITURNSocketFactory::create(
                                                IMessageQueuePtr queue,
                                                ITURNSocketDelegatePtr delegate,
-                                               const char *turnServer,
-                                               const char *turnServerUsername,
-                                               const char *turnServerPassword,
-                                               IDNS::SRVLookupTypes lookupType,
-                                               bool useChannelBinding,
-                                               WORD limitChannelToRangeStart,
-                                               WORD limitChannelRoRangeEnd
+                                               const CreationOptions &options
                                                )
       {
         if (this) {}
-        return TURNSocket::create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+        return TURNSocket::create(queue, delegate, options);
       }
 
-      //-----------------------------------------------------------------------
-      TURNSocketPtr ITURNSocketFactory::create(
-                                               IMessageQueuePtr queue,
-                                               ITURNSocketDelegatePtr delegate,
-                                               IDNS::SRVResultPtr srvTURNUDP,
-                                               IDNS::SRVResultPtr srvTURNTCP,
-                                               const char *turnServerUsername,
-                                               const char *turnServerPassword,
-                                               bool useChannelBinding,
-                                               WORD limitChannelToRangeStart,
-                                               WORD limitChannelRoRangeEnd
-                                               )
-      {
-        if (this) {}
-        return TURNSocket::create(queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
-      }
     }
 
     //-------------------------------------------------------------------------
@@ -2830,32 +2840,10 @@ namespace openpeer
     ITURNSocketPtr ITURNSocket::create(
                                        IMessageQueuePtr queue,
                                        ITURNSocketDelegatePtr delegate,
-                                       const char *turnServer,
-                                       const char *turnServerUsername,
-                                       const char *turnServerPassword,
-                                       IDNS::SRVLookupTypes lookupType,
-                                       bool useChannelBinding,
-                                       WORD limitChannelToRangeStart,
-                                       WORD limitChannelRoRangeEnd
+                                       const CreationOptions &options
                                        )
     {
-      return internal::ITURNSocketFactory::singleton().create(queue, delegate, turnServer, turnServerUsername, turnServerPassword, lookupType, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
-    }
-
-    //-------------------------------------------------------------------------
-    ITURNSocketPtr ITURNSocket::create(
-                                       IMessageQueuePtr queue,
-                                       ITURNSocketDelegatePtr delegate,
-                                       IDNS::SRVResultPtr srvTURNUDP,
-                                       IDNS::SRVResultPtr srvTURNTCP,
-                                       const char *turnServerUsername,
-                                       const char *turnServerPassword,
-                                       bool useChannelBinding,
-                                       WORD limitChannelToRangeStart,
-                                       WORD limitChannelRoRangeEnd
-                                       )
-    {
-      return internal::ITURNSocketFactory::singleton().create(queue, delegate, srvTURNUDP, srvTURNTCP, turnServerUsername, turnServerPassword, useChannelBinding, limitChannelToRangeStart, limitChannelRoRangeEnd);
+      return internal::ITURNSocketFactory::singleton().create(queue, delegate, options);
     }
 
     //-------------------------------------------------------------------------

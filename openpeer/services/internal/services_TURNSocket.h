@@ -113,26 +113,7 @@ namespace openpeer
                    const make_private &,
                    IMessageQueuePtr queue,
                    ITURNSocketDelegatePtr delegate,
-                   const char *turnServer,
-                   const char *turnServerUsername,
-                   const char *turnServerPassword,
-                   IDNS::SRVLookupTypes lookupType,
-                   bool useChannelBinding,
-                   WORD limitChannelToRangeStart,
-                   WORD limitChannelRoRangeEnd
-                   );
-
-        TURNSocket(
-                   const make_private &,
-                   IMessageQueuePtr queue,
-                   ITURNSocketDelegatePtr delegate,
-                   IDNS::SRVResultPtr srvTURNUDP,
-                   IDNS::SRVResultPtr srvTURNTCP,
-                   const char *turnServerUsername,
-                   const char *turnServerPassword,
-                   bool useChannelBinding,
-                   WORD limitChannelToRangeStart,
-                   WORD limitChannelRoRangeEnd
+                   const CreationOptions &options
                    );
 
       protected:
@@ -154,25 +135,7 @@ namespace openpeer
         static TURNSocketPtr create(
                                     IMessageQueuePtr queue,
                                     ITURNSocketDelegatePtr delegate,
-                                    const char *turnServer,
-                                    const char *turnServerUsername,
-                                    const char *turnServerPassword,
-                                    IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
-                                    bool useChannelBinding = false,
-                                    WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                    WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
-                                    );
-
-        static TURNSocketPtr create(
-                                    IMessageQueuePtr queue,
-                                    ITURNSocketDelegatePtr delegate,
-                                    IDNS::SRVResultPtr srvTURNUDP,
-                                    IDNS::SRVResultPtr srvTURNTCP,
-                                    const char *turnServerUsername,
-                                    const char *turnServerPassword,
-                                    bool useChannelBinding = false,
-                                    WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                    WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
+                                    const CreationOptions &options
                                     );
 
         static ElementPtr toDebug(ITURNSocketPtr socket);
@@ -292,12 +255,13 @@ namespace openpeer
 
         void fix(STUNPacketPtr stun) const;
 
+        void step();
+        bool stepDNSLookupNextServer();
         IPAddress stepGetNextServer(
                                     IPAddressList &previouslyAdded,
                                     SRVResultPtr &srv
                                     );
         bool stepPrepareServers();
-        void step();
         void cancel();
 
         void setState(TURNSocketStates newState);
@@ -456,25 +420,15 @@ namespace openpeer
         IBackgroundingSubscriptionPtr mBackgroundingSubscription;
         IBackgroundingNotifierPtr mBackgroundingNotifier;
 
-        WORD mLimitChannelToRangeStart;
-        WORD mLimitChannelToRangeEnd;
-
         ITURNSocketDelegatePtr mDelegate;
 
-        String mServerName;
-        String mUsername;
-        String mPassword;
+        CreationOptions mOptions;
+
         String mRealm;
         String mNonce;
-        IDNS::SRVLookupTypes mLookupType;
 
         IDNSQueryPtr mTURNUDPQuery;
         IDNSQueryPtr mTURNTCPQuery;
-
-        SRVResultPtr mTURNUDPSRVResult;
-        SRVResultPtr mTURNTCPSRVResult;
-
-        bool mUseChannelBinding;
 
         IPAddress mAllocateResponseIP;
         IPAddress mRelayedIP;
@@ -482,15 +436,15 @@ namespace openpeer
 
         ServerPtr mActiveServer;
 
-        DWORD mLifetime;
+        DWORD mLifetime {};
 
         ISTUNRequesterPtr mRefreshRequester;
 
         SecureByteBlockPtr mMobilityTicket;
 
         TimerPtr mRefreshTimer;
-        Time mLastSentDataToServer;
-        Time mLastRefreshTimerWasSentAt;
+        Time mLastSentDataToServer {};
+        Time mLastRefreshTimerWasSentAt {};
 
         ISTUNRequesterPtr mDeallocateRequester;
         TimerPtr mDeallocTimer;
@@ -501,13 +455,13 @@ namespace openpeer
         PermissionMap mPermissions;
         TimerPtr mPermissionTimer;
         ISTUNRequesterPtr mPermissionRequester;
-        ULONG mPermissionRequesterMaxCapacity;
+        ULONG mPermissionRequesterMaxCapacity {};
 
         ChannelIPMap mChannelIPMap;
         ChannelNumberMap mChannelNumberMap;
 
-        bool          mForceTURNUseTCP;
-        bool          mForceTURNUseUDP;
+        bool          mForceTURNUseTCP {};
+        bool          mForceTURNUseUDP {};
         IPAddressMap  mRestrictedIPs;
       };
 
@@ -521,30 +475,14 @@ namespace openpeer
 
       interaction ITURNSocketFactory
       {
+        typedef ITURNSocket::CreationOptions CreationOptions;
+
         static ITURNSocketFactory &singleton();
 
         virtual TURNSocketPtr create(
                                      IMessageQueuePtr queue,
                                      ITURNSocketDelegatePtr delegate,
-                                     const char *turnServer,
-                                     const char *turnServerUsername,
-                                     const char *turnServerPassword,
-                                     IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
-                                     bool useChannelBinding = false,
-                                     WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                     WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
-                                     );
-
-        virtual TURNSocketPtr create(
-                                     IMessageQueuePtr queue,
-                                     ITURNSocketDelegatePtr delegate,
-                                     IDNS::SRVResultPtr srvTURNUDP,
-                                     IDNS::SRVResultPtr srvTURNTCP,
-                                     const char *turnServerUsername,
-                                     const char *turnServerPassword,
-                                     bool useChannelBinding = false,
-                                     WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                     WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
+                                     const CreationOptions &options
                                      );
       };
 

@@ -74,17 +74,13 @@ namespace openpeer
                       const make_private &,
                       IMessageQueuePtr queue,
                       ISTUNDiscoveryDelegatePtr delegate,
-                      Seconds keepWarmPingTime
+                      const CreationOptions &options
                       );
 
       protected:
         STUNDiscovery(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init(
-                  IDNS::SRVResultPtr service,
-                  const char *srvName,
-                  IDNS::SRVLookupTypes lookupType
-                  );
+        void init();
 
       public:
         ~STUNDiscovery();
@@ -103,18 +99,9 @@ namespace openpeer
         static STUNDiscoveryPtr create(
                                        IMessageQueuePtr queue,
                                        ISTUNDiscoveryDelegatePtr delegate,
-                                       IDNS::SRVResultPtr service,
-                                       Seconds keepWarmPingTime
+                                       const CreationOptions &options
                                        );
 
-        static STUNDiscoveryPtr create(
-                                       IMessageQueuePtr queue,
-                                       ISTUNDiscoveryDelegatePtr delegate,
-                                       const char *srvName,
-                                       IDNS::SRVLookupTypes lookupType,
-                                       Seconds keepWarmPingTime
-                                       );
-        
         virtual PUID getID() const override {return mID;}
 
         virtual bool isComplete() const override;
@@ -167,6 +154,7 @@ namespace openpeer
 
         void step();
         bool hasContactedServerBefore(const IPAddress &server);
+        void performNextLookup();
 
       protected:
         //---------------------------------------------------------------------
@@ -179,8 +167,9 @@ namespace openpeer
 
         AutoPUID mID;
 
+        CreationOptions mOptions;
+
         IDNSQueryPtr mSRVQuery;
-        IDNS::SRVResultPtr mSRVResult;
 
         ISTUNDiscoveryDelegatePtr mDelegate;
         ISTUNRequesterPtr mSTUNRequester;
@@ -190,7 +179,6 @@ namespace openpeer
 
         IPAddressList mPreviouslyContactedServers;
 
-        Seconds mKeepWarmPingTime;
         TimerPtr mKeepWarmPingTimer;
       };
 
@@ -204,21 +192,14 @@ namespace openpeer
 
       interaction ISTUNDiscoveryFactory
       {
+        typedef ISTUNDiscovery::CreationOptions CreationOptions;
+
         static ISTUNDiscoveryFactory &singleton();
 
         virtual STUNDiscoveryPtr create(
                                         IMessageQueuePtr queue,
                                         ISTUNDiscoveryDelegatePtr delegate,
-                                        IDNS::SRVResultPtr service,
-                                        Seconds keepWarmPingTime
-                                        );
-
-        virtual STUNDiscoveryPtr create(
-                                        IMessageQueuePtr queue,
-                                        ISTUNDiscoveryDelegatePtr delegate,
-                                        const char *srvName,
-                                        IDNS::SRVLookupTypes lookupType,
-                                        Seconds keepWarmPingTime
+                                        const CreationOptions &options
                                         );
 
       };

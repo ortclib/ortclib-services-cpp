@@ -65,33 +65,26 @@ namespace openpeer
                                    const make_private &,
                                    IMessageQueuePtr queue,
                                    ISTUNDiscoveryDelegatePtr delegate,
-                                   Seconds keepWarmPingTime
+                                   const CreationOptions &options
                                    ) :
         MessageQueueAssociator(queue),
         mDelegate(ISTUNDiscoveryDelegateProxy::createWeak(queue, delegate)),
-        mKeepWarmPingTime(keepWarmPingTime)
+        mOptions(options)
       {
-        EventWriteOpServicesStunDiscoveryCreate(__func__, mID, keepWarmPingTime.count());
+        mOptions.mSRV = IDNS::cloneSRV(mOptions.mSRV);
+
+        ZS_THROW_INVALID_USAGE_IF((!mOptions.mSRV) && (mOptions.mServers.size() < 1));
+
+        EventWriteOpServicesStunDiscoveryCreate(__func__, mID, mOptions.mKeepWarmPingTime.count());
         ZS_LOG_DEBUG(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::init(
-                               IDNS::SRVResultPtr service,
-                               const char *srvName,
-                               IDNS::SRVLookupTypes lookupType
-                               )
+      void STUNDiscovery::init()
       {
-        ZS_THROW_INVALID_USAGE_IF((!service) && (!srvName))
-
         AutoRecursiveLock lock(mLock);
 
-        mSRVResult = IDNS::cloneSRV(service);
-        if (!mSRVResult) {
-          // attempt a DNS lookup on the name
-          mSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "stun", "udp", 3478, 10, 0, lookupType);
-          EventWriteOpServicesStunDiscoveryLookupSrv(__func__, mID, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0, srvName, "stun", "udp", 3478, 10, 0, zsLib::to_underlying(lookupType));
-        }
+        performNextLookup();
         step();
       }
 
@@ -131,36 +124,15 @@ namespace openpeer
       STUNDiscoveryPtr STUNDiscovery::create(
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
-                                             IDNS::SRVResultPtr service,
-                                             Seconds keepWarmPingTime
+                                             const CreationOptions &options
                                              )
       {
         ZS_THROW_INVALID_USAGE_IF(!queue)
         ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF(!service)
 
-        STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, keepWarmPingTime));
+        STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, options));
         pThis->mThisWeak = pThis;
-        pThis->init(service, NULL, IDNS::SRVLookupType_AutoLookupAll);
-        return pThis;
-      }
-
-      //-----------------------------------------------------------------------
-      STUNDiscoveryPtr STUNDiscovery::create(
-                                             IMessageQueuePtr queue,
-                                             ISTUNDiscoveryDelegatePtr delegate,
-                                             const char *srvName,
-                                             IDNS::SRVLookupTypes lookupType,
-                                             Seconds keepWarmPingTime
-                                             )
-      {
-        ZS_THROW_INVALID_USAGE_IF(!queue)
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF(!srvName)
-
-        STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, keepWarmPingTime));
-        pThis->mThisWeak = pThis;
-        pThis->init(IDNS::SRVResultPtr(), srvName, lookupType);
+        pThis->init();
         return pThis;
       }
 
@@ -183,13 +155,14 @@ namespace openpeer
           mSRVQuery->cancel();
           mSRVQuery.reset();
         }
-        mSRVResult.reset();
+        mOptions.mSRV.reset();
         if (mSTUNRequester) {
           mSTUNRequester->cancel();
           mSTUNRequester.reset();
         }
         mDelegate.reset();
         mPreviouslyContactedServers.clear();
+        mOptions.mServers.clear();
       }
 
       //-----------------------------------------------------------------------
@@ -215,7 +188,7 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
         if (query != mSRVQuery) return;
 
-        mSRVResult = query->getSRV();
+        mOptions.mSRV = query->getSRV();
         mSRVQuery.reset();
         step();
       }
@@ -351,15 +324,15 @@ namespace openpeer
 
         mSTUNRequester.reset();
 
-        if (Seconds() == mKeepWarmPingTime) {
+        if (Seconds() == mOptions.mKeepWarmPingTime) {
           ZS_LOG_TRACE(log("shutting down stun discovery"))
           cancel();
           return  true;
         }
 
         if (!mKeepWarmPingTimer) {
-          ZS_LOG_TRACE(log("setup server ping timer") + ZS_PARAM("keep alive (s)", mKeepWarmPingTime))
-          mKeepWarmPingTimer = Timer::create(mThisWeak.lock(), zsLib::now() + mKeepWarmPingTime);
+          ZS_LOG_TRACE(log("setup server ping timer") + ZS_PARAM("keep alive (s)", mOptions.mKeepWarmPingTime));
+          mKeepWarmPingTimer = Timer::create(mThisWeak.lock(), zsLib::now() + mOptions.mKeepWarmPingTime);
         }
         return true;
       }
@@ -402,7 +375,7 @@ namespace openpeer
         ElementPtr resultEl = Element::create("openpeer::services::STUNDiscovery");
 
         IHelper::debugAppend(resultEl, "srv query", mSRVQuery ? mSRVQuery->getID() : 0);
-        IHelper::debugAppend(resultEl, "srv result", (bool)mSRVResult);
+        IHelper::debugAppend(resultEl, "srv result", (bool)mOptions.mSRV);
 
         IHelper::debugAppend(resultEl, "delegate", (bool)mDelegate);
         IHelper::debugAppend(resultEl, "stun requester", mSTUNRequester ? mSTUNRequester->getID(): 0);
@@ -412,7 +385,7 @@ namespace openpeer
 
         IHelper::debugAppend(resultEl, "previously contacted servers", mPreviouslyContactedServers.size());
 
-        IHelper::debugAppend(resultEl, "keep warm ping time (s)", mKeepWarmPingTime);
+        IHelper::debugAppend(resultEl, "keep warm ping time (s)", mOptions.mKeepWarmPingTime);
         IHelper::debugAppend(resultEl, "keep warm ping timer", mKeepWarmPingTimer ? mKeepWarmPingTimer->getID() : 0);
 
         return resultEl;
@@ -426,8 +399,14 @@ namespace openpeer
 
         // if there is no timer then we grab extract the next SRV server to try of the SRV record
         while (mServer.isAddressEmpty()) {
-          bool found = IDNS::extractNextIP(mSRVResult, mServer);
+          bool found = IDNS::extractNextIP(mOptions.mSRV, mServer);
           if (!found) {
+
+            mOptions.mSRV.reset();
+            performNextLookup();
+
+            if (mSRVQuery) return;
+
             // no more results could be found, inform of the failure...
             try {
               ZS_LOG_BASIC(log("failed to contact any STUN server"))
@@ -482,6 +461,28 @@ namespace openpeer
       }
 
       //-----------------------------------------------------------------------
+      void STUNDiscovery::performNextLookup()
+      {
+        if (mOptions.mSRV) return;
+        if (mOptions.mServers.size() < 1) return;
+
+        // attempt a DNS lookup on the name
+
+        String uri = mOptions.mServers.front();
+        mOptions.mServers.pop_front();
+
+        String uriPrefix("stun:");
+        if (0 == uri.compare(0, uriPrefix.length(), uriPrefix)) {
+          uri = uri.substr(uriPrefix.length());
+        }
+
+        ZS_LOG_DEBUG(log("performing next STUN server lookup") + ZS_PARAM("uri", uri));
+
+        mSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), uri, "stun", "udp", 3478, 10, 0, mOptions.mLookupType);
+        EventWriteOpServicesStunDiscoveryLookupSrv(__func__, mID, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0, uri.c_str(), "stun", "udp", 3478, 10, 0, zsLib::to_underlying(mOptions.mLookupType));
+      }
+
+      //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -499,25 +500,11 @@ namespace openpeer
       STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
                                                      IMessageQueuePtr queue,
                                                      ISTUNDiscoveryDelegatePtr delegate,
-                                                     IDNS::SRVResultPtr service,
-                                                     Seconds keepWarmPingTime
+                                                     const CreationOptions &options
                                                      )
       {
         if (this) {}
-        return STUNDiscovery::create(queue, delegate, service, keepWarmPingTime);
-      }
-
-      //-----------------------------------------------------------------------
-      STUNDiscoveryPtr ISTUNDiscoveryFactory::create(
-                                                     IMessageQueuePtr queue,
-                                                     ISTUNDiscoveryDelegatePtr delegate,
-                                                     const char *srvName,
-                                                     IDNS::SRVLookupTypes lookupType,
-                                                     Seconds keepWarmPingTime
-                                                     )
-      {
-        if (this) {}
-        return STUNDiscovery::create(queue, delegate, srvName, lookupType, keepWarmPingTime);
+        return STUNDiscovery::create(queue, delegate, options);
       }
       
     }
@@ -540,23 +527,10 @@ namespace openpeer
     ISTUNDiscoveryPtr ISTUNDiscovery::create(
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
-                                             IDNS::SRVResultPtr service,
-                                             Seconds keepWarmPingTime
+                                             const CreationOptions &options
                                              )
     {
-      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, service, keepWarmPingTime);
-    }
-
-    //-------------------------------------------------------------------------
-    ISTUNDiscoveryPtr ISTUNDiscovery::create(
-                                             IMessageQueuePtr queue,
-                                             ISTUNDiscoveryDelegatePtr delegate,
-                                             const char *srvName,
-                                             IDNS::SRVLookupTypes lookupType,
-                                             Seconds keepWarmPingTime
-                                             )
-    {
-      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, srvName, lookupType, keepWarmPingTime);
+      return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, options);
     }
 
     //-------------------------------------------------------------------------

@@ -94,7 +94,9 @@ namespace openpeer
           if (resolveFirst) {
             mSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "stun", "udp", 3478);
           } else {
-            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), srvName);
+            ISTUNDiscovery::CreationOptions stunOptions;
+            stunOptions.mServers.push_back(String(srvName));
+            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
           }
         }
 
@@ -115,13 +117,16 @@ namespace openpeer
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
           zsLib::AutoLock lock(mLock);
-          TESTING_CHECK(((bool)query))
-          TESTING_CHECK(query->hasResult())
+          TESTING_CHECK(((bool)query));
+          TESTING_CHECK(query->hasResult());
 
           TESTING_CHECK(query == mSRVQuery);
           TESTING_CHECK(mSRVQuery);
 
-          mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), query->getSRV());
+          ISTUNDiscovery::CreationOptions stunOptions;
+          stunOptions.mSRV = query->getSRV();
+
+          mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
           mSRVQuery.reset();
         }
 

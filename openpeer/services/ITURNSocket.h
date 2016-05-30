@@ -54,6 +54,9 @@ namespace openpeer
 
     interaction ITURNSocket
     {
+      typedef String URI;
+      typedef std::list<URI> URIList;
+
       enum TURNSocketStates
       {
         TURNSocketState_Pending,
@@ -75,28 +78,23 @@ namespace openpeer
       };
       static const char *toString(TURNSocketErrors error);
 
-      static ITURNSocketPtr create(
-                                   IMessageQueuePtr queue,
-                                   ITURNSocketDelegatePtr delegate,
-                                   const char *turnServer,
-                                   const char *turnServerUsername,
-                                   const char *turnServerPassword,
-                                   IDNS::SRVLookupTypes lookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll,
-                                   bool useChannelBinding = false,
-                                   WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                   WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
-                                   );
+      struct CreationOptions
+      {
+        URIList mServers;
+        IDNS::SRVResultPtr mSRVUDP;
+        IDNS::SRVResultPtr mSRVTCP;
+        String mUsername;
+        String mPassword;
+        IDNS::SRVLookupTypes mLookupType {IDNS::SRVLookupType_AutoLookupAndFallbackAll};
+        bool mUseChannelBinding {false};
+        WORD mLimitChannelToRangeStart {OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START};
+        WORD mLimitChannelToRangeEnd {OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END};
+      };
 
       static ITURNSocketPtr create(
                                    IMessageQueuePtr queue,
                                    ITURNSocketDelegatePtr delegate,
-                                   IDNS::SRVResultPtr srvTURNUDP,
-                                   IDNS::SRVResultPtr srvTURNTCP,
-                                   const char *turnServerUsername,
-                                   const char *turnServerPassword,
-                                   bool useChannelBinding = false,
-                                   WORD limitChannelToRangeStart = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START,
-                                   WORD limitChannelRoRangeEnd = OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END
+                                   const CreationOptions &options
                                    );
 
       static ElementPtr toDebug(ITURNSocketPtr socket);

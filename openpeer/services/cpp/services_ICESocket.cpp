@@ -43,6 +43,7 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Numeric.h>
 #include <zsLib/Stringize.h>
+#include <zsLib/SafeInt.h>
 #include <zsLib/XML.h>
 #include <zsLib/types.h>
 
@@ -196,7 +197,7 @@ namespace openpeer
           IHelper::split(networkOrder, split, ';');
           for (size_t index = 0; index < split.size(); ++index)
           {
-            mInterfaceOrders[(*split.find(index)).second] = index;
+            mInterfaceOrders[(*split.find(index)).second] = SafeInt<ULONG>(index);
           }
         }
 
@@ -1606,10 +1607,14 @@ namespace openpeer
 
               ZS_LOG_DEBUG(log("performing STUN discovery using IP") + ZS_PARAM("base IP", string(localSocket->mLocal->mIPAddress)))
               if (stunInfo->mServerInfo->mSRVSTUNServerUDP) {
-                stunInfo->mSTUNDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunInfo->mServerInfo->mSRVSTUNServerUDP);
+                ISTUNDiscovery::CreationOptions options;
+                options.mSRV = stunInfo->mServerInfo->mSRVSTUNServerUDP;
+                stunInfo->mSTUNDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), options);
               }
               if (!stunInfo->mServerInfo->mSTUNServer.isEmpty()) {
-                stunInfo->mSTUNDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunInfo->mServerInfo->mSTUNServer);
+                ISTUNDiscovery::CreationOptions options;
+                options.mServers.push_back(stunInfo->mServerInfo->mSTUNServer);
+                stunInfo->mSTUNDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), options);
               }
               localSocket->mSTUNDiscoveries[stunInfo->mSTUNDiscovery] = stunInfo;
               mSocketSTUNs[stunInfo->mSTUNDiscovery] = localSocket;
@@ -1940,27 +1945,16 @@ namespace openpeer
               }
 
               if (okayToContactTURN) {
-                if (!turnInfo->mServerInfo->mTURNServer.isEmpty()) {
-                  turnInfo->mTURNSocket = ITURNSocket::create(
-                                                              getAssociatedMessageQueue(),
-                                                              mThisWeak.lock(),
-                                                              turnInfo->mServerInfo->mTURNServer,
-                                                              turnInfo->mServerInfo->mTURNServerUsername,
-                                                              turnInfo->mServerInfo->mTURNServerPassword,
-                                                              IDNS::SRVLookupType_AutoLookupAndFallbackAll,
-                                                              mFirstWORDInAnyPacketWillNotConflictWithTURNChannels
-                                                              );
-                } else {
-                  turnInfo->mTURNSocket = ITURNSocket::create(
-                                                              getAssociatedMessageQueue(),
-                                                              mThisWeak.lock(),
-                                                              turnInfo->mServerInfo->mSRVTURNServerUDP,
-                                                              turnInfo->mServerInfo->mSRVTURNServerTCP,
-                                                              turnInfo->mServerInfo->mTURNServerUsername,
-                                                              turnInfo->mServerInfo->mTURNServerPassword,
-                                                              mFirstWORDInAnyPacketWillNotConflictWithTURNChannels
-                                                              );
-                }
+                ITURNSocket::CreationOptions options;
+                if (turnInfo->mServerInfo->mTURNServer.hasData()) options.mServers.push_back(turnInfo->mServerInfo->mTURNServer);
+                options.mSRVUDP = turnInfo->mServerInfo->mSRVTURNServerUDP;
+                options.mSRVTCP = turnInfo->mServerInfo->mSRVTURNServerTCP;
+                options.mUsername = turnInfo->mServerInfo->mTURNServerUsername;
+                options.mPassword = turnInfo->mServerInfo->mTURNServerPassword;
+                options.mLookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll;
+                options.mLimitChannelToRangeStart = mFirstWORDInAnyPacketWillNotConflictWithTURNChannels;
+
+                turnInfo->mTURNSocket = ITURNSocket::create(getAssociatedMessageQueue(), mThisWeak.lock(), options);
 
                 localSocket->mTURNSockets[turnInfo->mTURNSocket] = turnInfo;
                 mSocketTURNs[turnInfo->mTURNSocket] = localSocket;
@@ -2985,7 +2979,7 @@ namespace openpeer
           if (found != prefs.end()) {
             data.mOrderIndex = (*found).second;
           } else {
-            data.mOrderIndex = prefs.size();  // last
+            data.mOrderIndex = SafeInt<ULONG>(prefs.size());  // last
             // search for partial name inside adapter name
             for (auto iter = prefs.begin(); iter != prefs.end(); ++iter) {
               const String &prefName = (*iter).first;
