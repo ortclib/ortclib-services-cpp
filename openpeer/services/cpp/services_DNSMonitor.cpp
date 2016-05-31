@@ -39,7 +39,7 @@
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_dns) } }
 
 #define OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.openpeer.org/caching/dns/"
 

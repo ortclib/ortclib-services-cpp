@@ -44,7 +44,7 @@
 
 #define OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS (6)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
+namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_stun) } }
 
 namespace openpeer
 {
@@ -281,7 +281,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
           if (ZS_IS_LOGGING(Trace)) {
-            ZS_LOG_BASIC(log("success") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("request", mSTUNRequest->toDebug()) + ZS_PARAM("response", packet->toDebug()))
+            ZS_LOG_BASIC(log("handled") + ZS_PARAM("ip", mServerIP.string()) + ZS_PARAM("request", mSTUNRequest->toDebug()) + ZS_PARAM("response", packet->toDebug()))
           }
           cancel();
         }
