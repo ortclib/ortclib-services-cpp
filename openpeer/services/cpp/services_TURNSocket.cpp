@@ -1540,7 +1540,7 @@ namespace openpeer
           mTURNTCPQuery.reset();
         }
 
-        if ((mServers.size() > 0) || (mOptions.mSRVUDP) || (mOptions.mSRVTCP)) {
+        if ((mServers.size() > 0) || (mOptions.mSRVUDP) || (mOptions.mSRVTCP) || (mActiveServer)) {
           ZS_LOG_TRACE(log("have not exhausted existing set of available servers"));
           return true;
         }
