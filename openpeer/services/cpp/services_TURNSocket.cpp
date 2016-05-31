@@ -150,6 +150,13 @@ namespace openpeer
         mOptions.mSRVUDP = IDNS::cloneSRV(mOptions.mSRVUDP);
         mOptions.mSRVTCP = IDNS::cloneSRV(mOptions.mSRVTCP);
 
+        if (mForceTURNUseUDP) {
+          mOptions.mSRVTCP.reset();
+        }
+        if (mForceTURNUseTCP) {
+          mOptions.mSRVUDP.reset();
+        }
+
         if (mOptions.mSRVUDP) mOptions.mSRVUDP->trace(__func__);
         if (mOptions.mSRVTCP) mOptions.mSRVTCP->trace(__func__);
 
@@ -865,7 +872,7 @@ namespace openpeer
               parseAgain = false;
 
               STUNPacketPtr stun;
-              std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE]);
+              std::unique_ptr<BYTE[]> buffer;
               STUNPacket::ParseLookAheadStates ahead = STUNPacket::ParseLookAheadState_InsufficientDataToDeterimine;
 
               // scope: parse out the buffer
@@ -876,17 +883,16 @@ namespace openpeer
                 ahead = STUNPacket::parseStreamIfSTUN(stun, consumedBytes, &(server->mReadBuffer[0]), server->mReadBufferFilledSizeInBytes, STUNPacket::ParseStreamOptions(STUNPacket::RFC_5766_TURN, false, "TURNSocket", mID));
                 if (0 != consumedBytes) {
                   // the STUN packet is going to have it's parsed pointing into the read buffer which is about to be consumed, fix the pointers now...
-                  ZS_THROW_INVALID_ASSUMPTION_IF(!stun)
-                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE)
+                  ZS_THROW_INVALID_ASSUMPTION_IF(!stun);
+                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE);
 
-                  // make a duplicate of the data buffer
-                  memcpy(buffer.get(), &(server->mReadBuffer[0]), consumedBytes);
-
-                  // fix the STUN pointers to now point to the copied buffer instead of the original TCP read buffer...
-                  if (stun->mOriginalPacket) {
-                    stun->mOriginalPacket = buffer.get() + (stun->mOriginalPacket - &(server->mReadBuffer[0]));
-                  }
                   if (stun->mData) {
+                    std::unique_ptr<BYTE[]> newBuffer(new BYTE[OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE]);
+                    buffer = std::move(newBuffer);
+
+                    // make a duplicate of the data buffer
+                    memcpy(buffer.get(), &(server->mReadBuffer[0]), consumedBytes);
+
                     stun->mData = buffer.get() + (stun->mData - &(server->mReadBuffer[0]));
                   }
 
@@ -1572,7 +1578,7 @@ namespace openpeer
           uri = questSplitter[0];
 
           IHelper::SplitMap equalSplitter;
-          IHelper::split(uri, equalSplitter, "=");
+          IHelper::split(questSplitter[1], equalSplitter, "=");
           IHelper::splitTrim(equalSplitter);
           IHelper::splitPruneEmpty(equalSplitter);
 
@@ -1678,13 +1684,13 @@ namespace openpeer
 
         IPAddressList previouslyContactedUDPServers;
         IPAddressList previouslyContactedTCPServers;
-        bool udpExhausted = mForceTURNUseTCP;   // if true then no UDP server will ever be used
-        bool tcpExhausted = mForceTURNUseUDP;   // if true then no TCP server will ever be used
+        bool udpExhausted = false;
+        bool tcpExhausted = false;
 
         Time activateAfter = zsLib::now();
 
         ULONG count = 0;
-        while ((!udpExhausted) &&
+        while ((!udpExhausted) ||
                (!tcpExhausted))
         {
           bool toggle = (0 == count ? true : ((count % 2) == 1)); // true, true, false, true, false, true, false, ...
@@ -1698,6 +1704,7 @@ namespace openpeer
 
           IPAddress result = stepGetNextServer(previousList, srv);
           if (result.isAddressEmpty()) {
+            srv.reset();
             exhausted = true;
             continue;
           }

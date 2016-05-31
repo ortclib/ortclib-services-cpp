@@ -397,6 +397,8 @@ namespace openpeer
         if (!mDelegate) return;                                                 // if there is no delegate then the request has completed or is cancelled
         if (mSRVQuery) return;                                                  // if an outstanding SRV lookup is being done then do nothing
 
+        if (mSTUNRequester) return;                                             // already have an active STUN requester
+
         // if there is no timer then we grab extract the next SRV server to try of the SRV record
         while (mServer.isAddressEmpty()) {
           bool found = IDNS::extractNextIP(mOptions.mSRV, mServer);
@@ -419,10 +421,13 @@ namespace openpeer
             return;
           }
 
-          if (mServer.isAddressEmpty())
+          if (mServer.isAddressEmpty()) {
+            ZS_LOG_WARNING(Trace, log("server address is empty"));
             continue;
+          }
 
           if (mServer.isPortEmpty()) {
+            ZS_LOG_WARNING(Trace, log("server port is empty"));
             mServer.clear();
             continue;
           }

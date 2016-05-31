@@ -2743,7 +2743,7 @@ namespace openpeer
       memset(&(result[0]), 0, sizeof(result));
 
       // we have to smash the original packet length to do calculation then put it back after...
-      WORD originalLength = IHelper::getBE16(&((WORD *)mOriginalPacket)[1]);
+      WORD originalLength = IHelper::getBE16(&(((WORD *)mOriginalPacket)[1]));
 
       if (!mOptions.mCalculateMessageIntegrityUsingFinalMessageSize) {
         // for the sake of message integrity we have to set the length to the original size up to and including the message interity attribute
