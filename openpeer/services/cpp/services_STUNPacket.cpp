@@ -2243,12 +2243,12 @@ namespace openpeer
       if ((!options.mAllowRFC3489CookieBehaviour) &&
           (OPENPEER_STUN_MAGIC_COOKIE != magicCookie)) return ParseLookAheadState_NotSTUN;
 
-      outActualSizeInBytes = OPENPEER_STUN_HEADER_SIZE_IN_BYTES + messageLengthInBytes;
-
       // All STUN messages MUST start with a 20-byte header followed by zero or more Attributes.
       if (streamDataAvailableInBytes < OPENPEER_STUN_HEADER_SIZE_IN_BYTES) return ParseLookAheadState_AppearsSTUNButPacketNotFullyAvailable;
 
       if (streamDataAvailableInBytes < ((size_t)OPENPEER_STUN_HEADER_SIZE_IN_BYTES) + messageLengthInBytes) return ParseLookAheadState_AppearsSTUNButPacketNotFullyAvailable;
+
+      outActualSizeInBytes = OPENPEER_STUN_HEADER_SIZE_IN_BYTES + messageLengthInBytes;
 
       // we not have enough data available to truly determine if this is a STUN packet and decode this STUN packet
       outSTUN = parseIfSTUN(
