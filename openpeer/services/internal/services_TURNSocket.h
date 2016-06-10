@@ -334,28 +334,30 @@ namespace openpeer
 
         struct Server
         {
+          bool mIsUDP {true};  // true for UDP, false for TCP
+          IPAddress mServerIP;
+
+          SocketPtr mTCPSocket;
+          bool mIsConnected {};
+          bool mInformedWriteReady {};
+
+          TimerPtr mActivationTimer;
+          Time mActivateAfter {};
+
+          ISTUNRequesterPtr mAllocateRequester;
+
+          BYTE mReadBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
+          size_t mReadBufferFilledSizeInBytes {};
+
+          BYTE mWriteBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
+          size_t mWriteBufferFilledSizeInBytes {};
+
           Server();
           ~Server();
 
           static ServerPtr create();
 
-          bool mIsUDP;  // true for UDP, false for TCP
-          IPAddress mServerIP;
-
-          SocketPtr mTCPSocket;
-          bool mIsConnected;
-          bool mInformedWriteReady;
-
-          TimerPtr mActivationTimer;
-          Time mActivateAfter;
-
-          ISTUNRequesterPtr mAllocateRequester;
-
-          BYTE mReadBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
-          size_t mReadBufferFilledSizeInBytes;
-
-          BYTE mWriteBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
-          size_t mWriteBufferFilledSizeInBytes;
+          ElementPtr toDebug() const;
         };
 
         //---------------------------------------------------------------------

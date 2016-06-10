@@ -701,7 +701,7 @@ namespace openpeer
 
           ServerPtr &server = (*current);
           if (requester == server->mAllocateRequester) {
-            ZS_LOG_WARNING(Detail, log("allocate request timed out") + ZS_PARAM("server IP", server->mServerIP.string()))
+            ZS_LOG_WARNING(Detail, log("allocate request timed out") + server->toDebug())
             mServers.erase(current);
 
             step();
@@ -1092,6 +1092,8 @@ namespace openpeer
           ZS_LOG_WARNING(Detail, log("exception notification did not match any known TCP server connections"))
           return;
         }
+
+        ZS_LOG_WARNING(Debug, log("TCP socket was closed (okay if socket was intentionally closed, e.g. during shutdown or due to non-use)") + server->toDebug());
 
         server->mTCPSocket->close();
         server->mTCPSocket.reset();
@@ -1960,7 +1962,7 @@ namespace openpeer
         if ((0 != response->mErrorCode) ||
             (STUNPacket::Class_ErrorResponse == response->mClass)) {
 
-          ZS_LOG_WARNING(Detail, log("alloc request failed") + ZS_PARAM("username", mOptions.mUsername) + ZS_PARAM("password", mOptions.mPassword) + ZS_PARAM("server IP", server->mServerIP.string()))
+          ZS_LOG_WARNING(Detail, log("alloc request failed") + ZS_PARAM("username", mOptions.mUsername) + ZS_PARAM("password", mOptions.mPassword) + server->toDebug())
 
           bool tryDifferentServer = true;
 
@@ -2716,12 +2718,7 @@ namespace openpeer
       #pragma mark
 
       //-----------------------------------------------------------------------
-      TURNSocket::Server::Server() :
-        mIsUDP(true),
-        mIsConnected(false),
-        mInformedWriteReady(false),
-        mReadBufferFilledSizeInBytes(0),
-        mWriteBufferFilledSizeInBytes(0)
+      TURNSocket::Server::Server()
       {
         memset(&(mReadBuffer[0]), 0, sizeof(mReadBuffer));
         memset(&(mWriteBuffer[0]), 0, sizeof(mWriteBuffer));
@@ -2745,6 +2742,24 @@ namespace openpeer
       {
         ServerPtr pThis(make_shared<Server>());
         return pThis;
+      }
+
+      //-----------------------------------------------------------------------
+      ElementPtr TURNSocket::Server::toDebug() const
+      {
+        ElementPtr resultEl = Element::create("TURNSocket::Server");
+
+        IHelper::debugAppend(resultEl, "isUDP", mIsUDP);
+        IHelper::debugAppend(resultEl, "server ip", mServerIP.string());
+        IHelper::debugAppend(resultEl, "socket", mTCPSocket ? static_cast<PTRNUMBER>(mTCPSocket->getSocket()) : 0);
+        IHelper::debugAppend(resultEl, "connected", mIsConnected);
+        IHelper::debugAppend(resultEl, "informed write ready", mInformedWriteReady);
+        IHelper::debugAppend(resultEl, "activation timer", mActivationTimer ? mActivationTimer->getID() : 0);
+        IHelper::debugAppend(resultEl, "allocation requester", mAllocateRequester ? mAllocateRequester->getID() : 0);
+        IHelper::debugAppend(resultEl, "read buffer filled size (bytes)", mReadBufferFilledSizeInBytes);
+        IHelper::debugAppend(resultEl, "write buffer filled size (bytes)", mWriteBufferFilledSizeInBytes);
+
+        return resultEl;
       }
 
       //-----------------------------------------------------------------------
