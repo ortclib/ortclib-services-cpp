@@ -9,3 +9,4 @@ openpeer/services/internal/services_ETWTracing.h
 *.db
 ipch/
 Generated Files/
+*.opendb

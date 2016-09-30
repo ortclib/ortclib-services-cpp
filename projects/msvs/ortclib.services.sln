@@ -13,11 +13,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ortclib.services.Test", "or
 		{CC14FFE5-0018-4D8D-BC2C-C93477CE081C} = {CC14FFE5-0018-4D8D-BC2C-C93477CE081C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zsLib", "..\..\..\..\zsLib\projects\msvs\zsLib.Universal\zsLib.vcxproj", "{55555C53-504F-4237-ABC0-B2F59558A0E9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zsLib", "..\..\..\zsLib\projects\msvs\zsLib.Universal\zsLib.vcxproj", "{55555C53-504F-4237-ABC0-B2F59558A0E9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "udns", "..\..\..\..\udns\projects\msvs\udns.Universal\udns.vcxproj", "{6C13DFE2-3AA7-40B9-919C-5E95E47FC321}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "udns", "..\..\..\udns\projects\msvs\udns.Universal\udns.vcxproj", "{6C13DFE2-3AA7-40B9-919C-5E95E47FC321}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptopp", "..\..\..\..\cryptopp\projects\msvs\cryptopp.Universal\cryptopp.vcxproj", "{CC14FFE5-0018-4D8D-BC2C-C93477CE081C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptopp", "..\..\..\cryptopp\projects\msvs\cryptopp.Universal\cryptopp.vcxproj", "{CC14FFE5-0018-4D8D-BC2C-C93477CE081C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
