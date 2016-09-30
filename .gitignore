@@ -5,3 +5,7 @@ projects/android/obj
 [Dd]ebug/
 [Rr]elease/
 openpeer/services/internal/services_ETWTracing.h
+.vs/
+*.db
+ipch/
+Generated Files/
