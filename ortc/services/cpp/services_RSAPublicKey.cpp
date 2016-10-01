@@ -29,9 +29,9 @@
 
  */
 
-#include <openpeer/services/internal/services_RSAPublicKey.h>
-#include <openpeer/services/internal/services_RSAPrivateKey.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_RSAPublicKey.h>
+#include <ortc/services/internal/services_RSAPrivateKey.h>
+#include <ortc/services/internal/services_Helper.h>
 
 #include <zsLib/XML.h>
 #include <zsLib/Log.h>

@@ -33,7 +33,7 @@
 
 #include <zsLib/MessageQueueThread.h>
 
-#include <openpeer/services/types.h>
+#include <ortc/services/types.h>
 
 #include <map>
 

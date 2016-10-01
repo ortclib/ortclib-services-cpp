@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/STUNPacket.h>
-#include <openpeer/services/RUDPPacket.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/STUNPacket.h>
+#include <ortc/services/RUDPPacket.h>
+#include <ortc/services/IHelper.h>
 
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_Tracing.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>

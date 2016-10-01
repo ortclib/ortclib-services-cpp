@@ -29,16 +29,16 @@
 
  */
 
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/internal/services_HTTP.h>
-#include <openpeer/services/internal/services_HTTP_WinRT.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/internal/services_HTTP.h>
+#include <ortc/services/internal/services_HTTP_WinRT.h>
+#include <ortc/services/internal/services_Tracing.h>
 
 #ifndef WINRT
 
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>

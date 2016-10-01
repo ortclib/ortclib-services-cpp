@@ -31,10 +31,10 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/ISTUNDiscovery.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/ISTUNRequester.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/ISTUNDiscovery.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/ISTUNRequester.h>
 
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Timer.h>

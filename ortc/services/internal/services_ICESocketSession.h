@@ -31,13 +31,13 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IICESocketSession.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IICESocketSession.h>
 
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/ISTUNRequester.h>
+#include <ortc/services/IBackgrounding.h>
+#include <ortc/services/ISTUNRequester.h>
 
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/types.h>
 #include <zsLib/Timer.h>
@@ -46,7 +46,7 @@
 #include <list>
 #include <utility>
 
-#define OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-ice-socket-session"
+#define OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-ice-socket-session"
 
 namespace openpeer
 {

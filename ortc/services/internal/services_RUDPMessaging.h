@@ -31,11 +31,11 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/internal/types.h>
 
-#include <openpeer/services/IRUDPMessaging.h>
-#include <openpeer/services/IRUDPChannel.h>
-#include <openpeer/services/ITransportStream.h>
+#include <ortc/services/IRUDPMessaging.h>
+#include <ortc/services/IRUDPChannel.h>
+#include <ortc/services/ITransportStream.h>
 
 namespace openpeer
 {

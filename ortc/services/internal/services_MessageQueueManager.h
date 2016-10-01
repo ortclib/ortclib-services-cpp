@@ -31,13 +31,13 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IMessageQueueManager.h>
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IMessageQueueManager.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "openpeer/services/process-application-message-queue-on-quit"
+#define OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "ortc/services/process-application-message-queue-on-quit"
 
 namespace openpeer
 {

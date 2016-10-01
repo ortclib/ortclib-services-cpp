@@ -33,14 +33,14 @@
 #define NOMINMAX
 #endif //WIN32
 
-#include <openpeer/services/internal/services_ICESocketSession.h>
-#include <openpeer/services/internal/services_ICESocket.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_wire.h>
+#include <ortc/services/internal/services_ICESocketSession.h>
+#include <ortc/services/internal/services_ICESocket.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_wire.h>
 
-#include <openpeer/services/IICESocket.h>
-#include <openpeer/services/ISettings.h>
-#include <openpeer/services/ISTUNRequester.h>
+#include <ortc/services/IICESocket.h>
+#include <ortc/services/ISettings.h>
+#include <ortc/services/ISTUNRequester.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>

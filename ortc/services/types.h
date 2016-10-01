@@ -42,7 +42,7 @@
 #include <zsLib/Singleton.h>
 
 // special case where CryptoPP extension class is needed
-#include <openpeer/services/internal/services_AllocatorWithNul.h>
+#include <ortc/services/internal/services_AllocatorWithNul.h>
 
 namespace openpeer
 {

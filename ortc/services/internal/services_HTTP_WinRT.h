@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IHTTP.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IHTTP.h>
 
 #ifdef WINRT
 #include <zsLib/IPAddress.h>

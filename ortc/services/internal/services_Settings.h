@@ -31,8 +31,11 @@
 
 #pragma once
 
-#include <openpeer/services/ISettings.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/ISettings.h>
+#include <ortc/services/internal/types.h>
+
+#pragma warning(push)
+#pragma warning(disable:4290)
 
 #define OPENPEER_SERVICES_SETTINGS_ROOT_JSON_IS_NESTED_NODE "openpeer"
 
@@ -169,3 +172,5 @@ namespace openpeer
     }
   }
 }
+
+#pragma warning(pop)

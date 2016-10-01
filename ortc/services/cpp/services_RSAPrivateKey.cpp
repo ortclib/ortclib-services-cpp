@@ -29,10 +29,11 @@
 
  */
 
-#include <openpeer/services/internal/services_RSAPrivateKey.h>
-#include <openpeer/services/internal/services_RSAPublicKey.h>
-#include <openpeer/services/ICache.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/internal/services_RSAPrivateKey.h>
+#include <ortc/services/internal/services_RSAPublicKey.h>
+#include <ortc/services/ICache.h>
+#include <ortc/services/IHelper.h>
+
 #include <zsLib/Log.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>

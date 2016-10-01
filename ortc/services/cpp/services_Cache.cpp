@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_Cache.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_Cache.h>
+#include <ortc/services/internal/services_Tracing.h>
 
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/XML.h>
 

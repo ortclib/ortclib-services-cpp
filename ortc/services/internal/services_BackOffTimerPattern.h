@@ -31,14 +31,14 @@
 
 #pragma once
 
-#include <openpeer/services/IBackOffTimer.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/IBackOffTimer.h>
+#include <ortc/services/internal/types.h>
 
 #include <zsLib/Timer.h>
 
 #include <vector>
 
-#define OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES "openpeer/services/backoff-timer-max-constructor-failures"
+#define OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES "ortc/services/backoff-timer-max-constructor-failures"
 
 namespace openpeer
 {

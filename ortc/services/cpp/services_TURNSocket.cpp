@@ -29,14 +29,14 @@
 
  */
 
-#include <openpeer/services/internal/services_TURNSocket.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_wire.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_TURNSocket.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_wire.h>
+#include <ortc/services/internal/services_Tracing.h>
 
-#include <openpeer/services/ISettings.h>
-#include <openpeer/services/STUNPacket.h>
-#include <openpeer/services/ISTUNRequesterManager.h>
+#include <ortc/services/ISettings.h>
+#include <ortc/services/STUNPacket.h>
+#include <ortc/services/ISTUNRequesterManager.h>
 
 #include <zsLib/Socket.h>
 #include <zsLib/Exception.h>

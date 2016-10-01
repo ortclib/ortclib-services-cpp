@@ -29,13 +29,13 @@
 
  */
 
-#include <openpeer/services/internal/services_Logger.h>
-#include <openpeer/services/internal/services_Tracing.h>
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/IHelper.h>
-#include <openpeer/services/ISettings.h>
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/internal/services_Logger.h>
+#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/IBackgrounding.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/IHelper.h>
+#include <ortc/services/ISettings.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <cryptopp/osrng.h>
 

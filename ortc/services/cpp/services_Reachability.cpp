@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/internal/services_Reachability.h>
-#include <openpeer/services/internal/services_MessageQueueManager.h>
+#include <ortc/services/internal/services_Reachability.h>
+#include <ortc/services/internal/services_MessageQueueManager.h>
 
-#include <openpeer/services/IHelper.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/IHelper.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/XML.h>
 

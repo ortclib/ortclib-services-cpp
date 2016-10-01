@@ -29,16 +29,16 @@
 
  */
 
-#include <openpeer/services/internal/services_MessageLayerSecurityChannel.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/IRSAPrivateKey.h>
-#include <openpeer/services/IRSAPublicKey.h>
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/IDHKeyDomain.h>
-#include <openpeer/services/IDHPrivateKey.h>
-#include <openpeer/services/IDHPublicKey.h>
-#include <openpeer/services/ICache.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/internal/services_MessageLayerSecurityChannel.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/IRSAPrivateKey.h>
+#include <ortc/services/IRSAPublicKey.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/IDHKeyDomain.h>
+#include <ortc/services/IDHPrivateKey.h>
+#include <ortc/services/IDHPublicKey.h>
+#include <ortc/services/ICache.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
@@ -1946,7 +1946,7 @@ namespace openpeer
           }
 
           // pick an algorithm
-          AlgorithmIndex index = IHelper::random(1, mSendKeys.size());
+          AlgorithmIndex index = static_cast<AlgorithmIndex>(IHelper::random(1, mSendKeys.size()));
 
           KeyMap::iterator found = mSendKeys.find(index);
           ZS_THROW_BAD_STATE_IF(found == mSendKeys.end())

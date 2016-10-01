@@ -31,11 +31,11 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services_IRUDPChannelStream.h>
-#include <openpeer/services/IRUDPChannel.h>
-#include <openpeer/services/ISTUNRequester.h>
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/internal/services_IRUDPChannelStream.h>
+#include <ortc/services/IRUDPChannel.h>
+#include <ortc/services/ISTUNRequester.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/Timer.h>
 

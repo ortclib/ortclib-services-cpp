@@ -31,8 +31,9 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
-#include <openpeer/services/STUNPacket.h>
+#include <ortc/services/types.h>
+#include <ortc/services/STUNPacket.h>
+
 #include <zsLib/Proxy.h>
 
 namespace openpeer

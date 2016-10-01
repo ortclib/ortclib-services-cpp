@@ -29,8 +29,8 @@
 
  */
 
-#include <openpeer/services/internal/services_TransportStream.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_TransportStream.h>
+#include <ortc/services/internal/services_Helper.h>
 
 #include <cryptopp/queue.h>
 

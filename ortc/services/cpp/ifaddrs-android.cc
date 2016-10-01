@@ -28,7 +28,7 @@
 //Downloaded from https://code.google.com/p/libjingle/source/browse/trunk/talk/base/?r=273
 
 #if defined(ANDROID)
-#include <openpeer/services/internal/ifaddrs-android.h>
+#include <ortc/services/internal/ifaddrs-android.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>

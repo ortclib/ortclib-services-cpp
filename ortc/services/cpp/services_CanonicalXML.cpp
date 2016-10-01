@@ -29,7 +29,7 @@
 
  */
 
-#include <openpeer/services/internal/services_CanonicalXML.h>
+#include <ortc/services/internal/services_CanonicalXML.h>
 #include <zsLib/XML.h>
 
 #include <list>

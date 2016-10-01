@@ -31,10 +31,10 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services_IRUDPChannelStream.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/internal/services_IRUDPChannelStream.h>
 
-#include <openpeer/services/ITransportStream.h>
+#include <ortc/services/ITransportStream.h>
 
 #include <zsLib/Timer.h>
 #include <zsLib/Exception.h>

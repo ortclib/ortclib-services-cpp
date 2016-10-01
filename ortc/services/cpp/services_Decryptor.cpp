@@ -29,7 +29,7 @@
 
  */
 
-#include <openpeer/services/internal/services_Decryptor.h>
+#include <ortc/services/internal/services_Decryptor.h>
 
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>

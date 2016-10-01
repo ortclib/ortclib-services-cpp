@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/internal/services_BackOffTimerPattern.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_BackOffTimerPattern.h>
+#include <ortc/services/internal/services_Tracing.h>
 
-#include <openpeer/services/IHelper.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/IHelper.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>

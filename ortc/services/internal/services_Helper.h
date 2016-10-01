@@ -31,16 +31,16 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY       "openpeer/services/services-thread-pool-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "openpeer/services/services-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "openpeer/services/logger-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "openpeer/services/socket-monitor-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY  "openpeer/services/timer-monitor-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY  "ortc/services/services-thread-pool-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "ortc/services/services-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "ortc/services/logger-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "ortc/services/socket-monitor-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY  "ortc/services/timer-monitor-thread-priority"
 
 namespace openpeer
 {

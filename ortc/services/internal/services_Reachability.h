@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/IReachability.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/IReachability.h>
+#include <ortc/services/internal/types.h>
 
 namespace openpeer
 {

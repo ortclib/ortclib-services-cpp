@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IDHKeyDomain.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IDHKeyDomain.h>
 
 #include <cryptopp/dh.h>
 

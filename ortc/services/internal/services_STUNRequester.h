@@ -31,11 +31,11 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/ISTUNRequester.h>
-#include <openpeer/services/STUNPacket.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/ISTUNRequester.h>
+#include <ortc/services/STUNPacket.h>
 
-#include <openpeer/services/IBackOffTimer.h>
+#include <ortc/services/IBackOffTimer.h>
 
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Timer.h>

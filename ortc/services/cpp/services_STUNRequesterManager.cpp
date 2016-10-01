@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_STUNRequesterManager.h>
-#include <openpeer/services/internal/services_STUNRequester.h>
-#include <openpeer/services/internal/services_Tracing.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/internal/services_STUNRequesterManager.h>
+#include <ortc/services/internal/services_STUNRequester.h>
+#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/Log.h>

@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_TCPMessaging.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/internal/services_TCPMessaging.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/ISettings.h>
 
 #include <cryptopp/queue.h>
 

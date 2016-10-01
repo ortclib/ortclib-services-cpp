@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/internal/services_DNS.h>
-#include <openpeer/services/internal/services_DNSMonitor.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/internal/services_DNS.h>
+#include <ortc/services/internal/services_DNSMonitor.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_Tracing.h>
 
 #include <cryptopp/osrng.h>
 
@@ -2092,7 +2092,7 @@ namespace openpeer
                 AutoRecursiveLock lock(*pThis);
 
                 for (size_t index = 0; index != response->Size; ++index) {
-                  EndpointPair ^pair = response->GetAt(index);
+                  EndpointPair ^pair = response->GetAt(static_cast<unsigned int>(index));
                   if (!pair) {
                     ZS_LOG_WARNING(Detail, slog(id, "endpoint pair is null"))
                     continue;

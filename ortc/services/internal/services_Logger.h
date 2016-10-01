@@ -31,12 +31,12 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/ILogger.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/ILogger.h>
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE "openpeer/services/backgrounding-phase-telnet-logger"
+#define OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE "ortc/services/backgrounding-phase-telnet-logger"
 
 namespace openpeer
 {

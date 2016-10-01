@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IDHPublicKey.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IDHPublicKey.h>
 
 namespace openpeer
 {

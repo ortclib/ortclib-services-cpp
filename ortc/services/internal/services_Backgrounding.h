@@ -31,12 +31,12 @@
 
 #pragma once
 
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/IBackgrounding.h>
+#include <ortc/services/internal/types.h>
 
 #include <zsLib/Timer.h>
 
-#define OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "openpeer/services/backgrounding-phase-$phase$-timeout-in-seconds"
+#define OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "ortc/services/backgrounding-phase-$phase$-timeout-in-seconds"
 
 namespace openpeer
 {

@@ -29,16 +29,16 @@
 
  */
 
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/internal/services_HTTP.h>
-#include <openpeer/services/internal/services_HTTP_WinRT.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/internal/services_HTTP.h>
+#include <ortc/services/internal/services_HTTP_WinRT.h>
+#include <ortc/services/internal/services_Tracing.h>
 
 #ifdef WINRT
 
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
@@ -558,7 +558,7 @@ namespace openpeer
         }
         if (mPostData.SizeInBytes() > 0) {
           DataWriter ^writer = ref new DataWriter();
-          writer->WriteBytes(Platform::ArrayReference<BYTE>(mPostData.BytePtr(), mPostData.SizeInBytes()));
+          writer->WriteBytes(Platform::ArrayReference<BYTE>(mPostData.BytePtr(), static_cast<unsigned int>(mPostData.SizeInBytes())));
           IBuffer ^buffer = writer->DetachBuffer();
 
           request->Content = ref new HttpBufferContent(buffer);

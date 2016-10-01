@@ -31,9 +31,9 @@
 
 #pragma once
 
-#include <openpeer/services/internal/platform.h>
-#include <openpeer/services/types.h>
-#include <openpeer/services/IFactory.h>
+#include <ortc/services/internal/platform.h>
+#include <ortc/services/types.h>
+#include <ortc/services/IFactory.h>
 
 namespace CryptoPP
 {

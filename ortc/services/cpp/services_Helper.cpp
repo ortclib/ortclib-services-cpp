@@ -29,12 +29,12 @@
 
  */
 
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_HTTP.h>
-#include <openpeer/services/internal/services_Tracing.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/IMessageQueueManager.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_HTTP.h>
+#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/IMessageQueueManager.h>
+#include <ortc/services/ISettings.h>
 
 #include <cryptopp/osrng.h>
 

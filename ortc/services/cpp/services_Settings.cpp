@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/internal/services_Settings.h>
-#include <openpeer/services/internal/services.h>
-#include <openpeer/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_Settings.h>
+#include <ortc/services/internal/services.h>
+#include <ortc/services/internal/services_Tracing.h>
 
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>

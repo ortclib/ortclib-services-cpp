@@ -31,9 +31,9 @@
 
 #pragma once
 
-#include <openpeer/services/ITCPMessaging.h>
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/ITCPMessaging.h>
+#include <ortc/services/IBackgrounding.h>
+#include <ortc/services/internal/types.h>
 
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
@@ -41,7 +41,7 @@
 #include <list>
 #include <map>
 
-#define OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-tcp-messaging"
+#define OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-tcp-messaging"
 
 namespace openpeer
 {

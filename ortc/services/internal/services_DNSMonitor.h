@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IDNS.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IDNS.h>
 
 #include <udns/udns.h>
 #include <zsLib/Socket.h>

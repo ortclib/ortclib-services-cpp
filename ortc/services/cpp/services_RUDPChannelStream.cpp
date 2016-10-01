@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_RUDPChannelStream.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_RUDPChannelStream.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/RUDPPacket.h>
+#include <ortc/services/RUDPPacket.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
@@ -1404,7 +1404,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void RUDPChannelStream::sendNowCleanup()
       {
-        ULONG writeBuffers = mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0;
+        ULONG writeBuffers = static_cast<ULONG>(mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0);
 
         ZS_LOG_TRACE(log("starting send now cleanup routine") +
                      ZS_PARAM("packets to resend", mTotalPacketsToResend) +
@@ -1967,7 +1967,7 @@ namespace openpeer
             const BYTE *pos = bufferedPacket->mRUDPPacket->mData;
             size_t bytes = bufferedPacket->mRUDPPacket->mDataLengthInBytes;
 
-            totalDelivered += bytes;
+            totalDelivered += static_cast<decltype(totalDelivered)>(bytes);
 
             if (mReceiveStream) {
               mReceiveStream->write(pos, bytes);
@@ -2028,7 +2028,7 @@ namespace openpeer
         if (isShutdown()) return;       // already closed?
         if (!isShuttingDown()) return;  // do we want to close if all data is sent?
 
-        ULONG totalWriteBuffers = mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0;
+        ULONG totalWriteBuffers = static_cast<ULONG>(mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0);
 
         if ((0 != totalWriteBuffers) || (0 != mSendingPackets.size())) return;
 

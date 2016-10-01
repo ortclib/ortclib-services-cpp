@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
+#include <ortc/services/types.h>
 
 
 #define OPENPEER_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE (2048)

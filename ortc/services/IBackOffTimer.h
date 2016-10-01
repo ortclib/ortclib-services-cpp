@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
-#include <openpeer/services/IBackOffTimerPattern.h>
+#include <ortc/services/types.h>
+#include <ortc/services/IBackOffTimerPattern.h>
 
 #include <zsLib/Log.h>
 

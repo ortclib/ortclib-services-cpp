@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_DHPublicKey.h>
-#include <openpeer/services/internal/services_DHKeyDomain.h>
+#include <ortc/services/internal/services_DHPublicKey.h>
+#include <ortc/services/internal/services_DHKeyDomain.h>
 
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/XML.h>
 

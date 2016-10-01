@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
-#include <openpeer/services/IHTTP.h>
+#include <ortc/services/types.h>
+#include <ortc/services/IHTTP.h>
 
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>

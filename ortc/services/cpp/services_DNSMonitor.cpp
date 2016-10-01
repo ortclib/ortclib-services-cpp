@@ -30,9 +30,10 @@
 
  */
 
-#include <openpeer/services/internal/services_DNSMonitor.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/ICache.h>
+#include <ortc/services/internal/services_DNSMonitor.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/ICache.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/helpers.h>
@@ -1015,9 +1016,9 @@ namespace openpeer
             dns_srv &srv = record->dnssrv_srv[loop];
 
             IDNS::SRVResult::SRVRecord srvRecord;
-            srvRecord.mPriority = srv.priority;
-            srvRecord.mWeight = srv.weight;
-            srvRecord.mPort = srv.port;
+            srvRecord.mPriority = static_cast<decltype(srvRecord.mPriority)>(srv.priority);
+            srvRecord.mWeight = static_cast<decltype(srvRecord.mWeight)>(srv.weight);
+            srvRecord.mPort = static_cast<decltype(srvRecord.mPort)>(srv.port);
             srvRecord.mName = IHelper::convertIDNToUTF8(String(srv.name));
 
             data->mRecords.push_back(srvRecord);

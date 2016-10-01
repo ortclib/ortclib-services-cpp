@@ -29,10 +29,10 @@
 
  */
 
-#include <openpeer/services/internal/services_STUNDiscovery.h>
-#include <openpeer/services/internal/services_Tracing.h>
-#include <openpeer/services/ISTUNRequesterManager.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/internal/services_STUNDiscovery.h>
+#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/ISTUNRequesterManager.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>

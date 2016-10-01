@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/ICache.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/ICache.h>
+#include <ortc/services/internal/types.h>
 
 namespace openpeer
 {

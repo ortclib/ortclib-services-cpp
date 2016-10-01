@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IRSAPrivateKey.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IRSAPrivateKey.h>
 
 #include <cryptopp/rsa.h>
 #include <cryptopp/secblock.h>

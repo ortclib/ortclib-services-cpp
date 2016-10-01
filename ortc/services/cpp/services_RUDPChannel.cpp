@@ -29,12 +29,12 @@
 
  */
 
-#include <openpeer/services/internal/services_RUDPChannel.h>
-#include <openpeer/services/internal/services_ICESocket.h>
-#include <openpeer/services/internal/services_IRUDPChannelStream.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_RUDPChannel.h>
+#include <ortc/services/internal/services_ICESocket.h>
+#include <ortc/services/internal/services_IRUDPChannelStream.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/RUDPPacket.h>
+#include <ortc/services/RUDPPacket.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>

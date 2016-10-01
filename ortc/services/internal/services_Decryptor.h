@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IDecryptor.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IDecryptor.h>
 
 namespace openpeer
 {

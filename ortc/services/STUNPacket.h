@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
-#include <openpeer/services/IRUDPChannel.h>
+#include <ortc/services/types.h>
+#include <ortc/services/IRUDPChannel.h>
 
 #include <zsLib/IPAddress.h>
 #include <zsLib/Log.h>

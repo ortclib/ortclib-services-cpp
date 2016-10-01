@@ -31,8 +31,9 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IRUDPChannel.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IRUDPChannel.h>
+
 #include <zsLib/Proxy.h>
 
 #include <list>

@@ -33,8 +33,9 @@
 
 #include <zsLib/types.h>
 #include <zsLib/Proxy.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/STUNPacket.h>
+
+#include <ortc/services/IDNS.h>
+#include <ortc/services/STUNPacket.h>
 
 namespace openpeer
 {

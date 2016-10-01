@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/ICanonicalXML.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/ICanonicalXML.h>
 
 namespace openpeer
 {

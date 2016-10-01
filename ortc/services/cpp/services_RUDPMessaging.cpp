@@ -29,11 +29,11 @@
 
  */
 
-#include <openpeer/services/internal/services_RUDPMessaging.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_RUDPMessaging.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/IRUDPListener.h>
-#include <openpeer/services/IRUDPTransport.h>
+#include <ortc/services/IRUDPListener.h>
+#include <ortc/services/IRUDPTransport.h>
 
 #include <cryptopp/queue.h>
 
@@ -454,7 +454,7 @@ namespace openpeer
 
           // put the size of the message at the front
           BYTE *dest = buffer->BytePtr();
-          ((DWORD *)dest)[0] = htonl(message->SizeInBytes());
+          IHelper::setBE32(((DWORD *)dest[0]), static_cast<DWORD>(message->SizeInBytes()));
           memcpy(&(dest[sizeof(DWORD)]), message->BytePtr(), message->SizeInBytes());
 
           ZS_LOG_TRACE(log("sending buffer") + ZS_PARAM("message size", message->SizeInBytes()))

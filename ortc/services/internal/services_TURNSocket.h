@@ -31,14 +31,14 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/internal/services_Helper.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/internal/services_Helper.h>
 
-#include <openpeer/services/IBackgrounding.h>
-#include <openpeer/services/ITURNSocket.h>
-#include <openpeer/services/ISTUNRequester.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/IBackgrounding.h>
+#include <ortc/services/ITURNSocket.h>
+#include <ortc/services/ISTUNRequester.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Socket.h>
@@ -50,11 +50,11 @@
 #include <map>
 #include <utility>
 
-#define OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "openpeer/services/backgrounding-phase-turn"
+#define OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-turn"
 
-#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "openpeer/services/debug/force-turn-to-use-udp"
-#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "openpeer/services/debug/force-turn-to-use-tcp"
-#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "openpeer/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
+#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "ortc/services/debug/force-turn-to-use-udp"
+#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "ortc/services/debug/force-turn-to-use-tcp"
+#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "ortc/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
 
 namespace openpeer
 {

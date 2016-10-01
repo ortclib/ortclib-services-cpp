@@ -29,15 +29,15 @@
 
  */
 
-#include <openpeer/services/internal/services_ICESocket.h>
-#include <openpeer/services/internal/services_ICESocketSession.h>
-#include <openpeer/services/internal/services_TURNSocket.h>
-#include <openpeer/services/internal/services_Helper.h>
-#include <openpeer/services/internal/services_wire.h>
+#include <ortc/services/internal/services_ICESocket.h>
+#include <ortc/services/internal/services_ICESocketSession.h>
+#include <ortc/services/internal/services_TURNSocket.h>
+#include <ortc/services/internal/services_Helper.h>
+#include <ortc/services/internal/services_wire.h>
 
-#include <openpeer/services/ISTUNRequesterManager.h>
-#include <openpeer/services/IHTTP.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/ISTUNRequesterManager.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
@@ -59,7 +59,7 @@
 #endif //HAVE_IFADDRS_H
 
 #ifdef _ANDROID
-#include <openpeer/services/internal/ifaddrs-android.h>
+#include <ortc/services/internal/ifaddrs-android.h>
 #else
 #endif
 

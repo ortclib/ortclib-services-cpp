@@ -29,12 +29,12 @@
 
  */
 
-#include <openpeer/services/internal/services_DHPrivateKey.h>
-#include <openpeer/services/internal/services_DHKeyDomain.h>
-#include <openpeer/services/internal/services_DHPublicKey.h>
+#include <ortc/services/internal/services_DHPrivateKey.h>
+#include <ortc/services/internal/services_DHKeyDomain.h>
+#include <ortc/services/internal/services_DHPublicKey.h>
 
-#include <openpeer/services/IDHPublicKey.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IDHPublicKey.h>
+#include <ortc/services/IHelper.h>
 
 #include <cryptopp/osrng.h>
 #include <cryptopp/dh.h>

@@ -29,8 +29,8 @@
 
  */
 
-#include <openpeer/services/RUDPPacket.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/RUDPPacket.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>

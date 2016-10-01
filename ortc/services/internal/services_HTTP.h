@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/internal/types.h>
-#include <openpeer/services/IHTTP.h>
+#include <ortc/services/internal/types.h>
+#include <ortc/services/IHTTP.h>
 
 #ifndef WINRT
 #include <zsLib/IPAddress.h>
@@ -46,7 +46,7 @@
 
 #include <curl/curl.h>
 
-#define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "openpeer/services/http-thread-priority"
+#define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "ortc/services/http-thread-priority"
 
 namespace openpeer
 {

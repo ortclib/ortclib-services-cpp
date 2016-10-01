@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/ITransportStream.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/ITransportStream.h>
+#include <ortc/services/internal/types.h>
 
 #include <list>
 #include <map>

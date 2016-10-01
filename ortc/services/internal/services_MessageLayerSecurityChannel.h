@@ -31,11 +31,11 @@
 
 #pragma once
 
-#include <openpeer/services/IMessageLayerSecurityChannel.h>
-#include <openpeer/services/internal/types.h>
+#include <ortc/services/IMessageLayerSecurityChannel.h>
+#include <ortc/services/internal/types.h>
 
-#include <openpeer/services/ITransportStream.h>
-#include <openpeer/services/IWakeDelegate.h>
+#include <ortc/services/ITransportStream.h>
+#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/Timer.h>
 
@@ -46,7 +46,7 @@
 
 #define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
 
-#define OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER "openpeer/services/mls-change-sending-key-after-in-seconds"
+#define OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER "ortc/services/mls-change-sending-key-after-in-seconds"
 
 namespace openpeer
 {

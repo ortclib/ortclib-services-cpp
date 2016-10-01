@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <openpeer/services/types.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/types.h>
+#include <ortc/services/IHelper.h>
 
 namespace openpeer
 {
