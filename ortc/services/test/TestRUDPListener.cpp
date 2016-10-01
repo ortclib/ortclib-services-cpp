@@ -34,17 +34,17 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
-#include <openpeer/services/IRUDPListener.h>
-#include <openpeer/services/IRUDPMessaging.h>
-#include <openpeer/services/IHelper.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/ITransportStream.h>
+#include <ortc/services/IRUDPListener.h>
+#include <ortc/services/IRUDPMessaging.h>
+#include <ortc/services/IHelper.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/ITransportStream.h>
 
 
 #include "config.h"
 #include "testing.h"
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::BYTE;
 using zsLib::WORD;
@@ -55,16 +55,16 @@ using zsLib::SocketPtr;
 using zsLib::IPAddress;
 using zsLib::IMessageQueue;
 using zsLib::AutoRecursiveLock;
-using openpeer::services::IRUDPListener;
-using openpeer::services::IRUDPListenerPtr;
-using openpeer::services::IRUDPListenerDelegate;
-using openpeer::services::IRUDPMessaging;
-using openpeer::services::IRUDPMessagingPtr;
-using openpeer::services::IRUDPMessagingDelegate;
-using openpeer::services::IHelper;
-using openpeer::services::IDNS;
+using ortc::services::IRUDPListener;
+using ortc::services::IRUDPListenerPtr;
+using ortc::services::IRUDPListenerDelegate;
+using ortc::services::IRUDPMessaging;
+using ortc::services::IRUDPMessagingPtr;
+using ortc::services::IRUDPMessagingDelegate;
+using ortc::services::IHelper;
+using ortc::services::IDNS;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -201,21 +201,21 @@ namespace openpeer
   }
 }
 
-using namespace openpeer::services::test;
+using namespace ortc::services::test;
 
-using openpeer::services::test::TestRUDPListenerCallback;
-using openpeer::services::test::TestRUDPListenerCallbackPtr;
+using ortc::services::test::TestRUDPListenerCallback;
+using ortc::services::test::TestRUDPListenerCallbackPtr;
 
 void doTestRUDPListener()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
-  if (OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT) return;
+  if (!ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
+  if (ORTC_SERVICE_TEST_RUNNING_AS_CLIENT) return;
 
   TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
-  TestRUDPListenerCallbackPtr testObject1 = TestRUDPListenerCallback::create(thread, OPENPEER_SERVICE_TEST_RUDP_SERVER_PORT);
+  TestRUDPListenerCallbackPtr testObject1 = TestRUDPListenerCallback::create(thread, ORTC_SERVICE_TEST_RUDP_SERVER_PORT);
 
   ZS_LOG_BASIC("WAITING:      Waiting for RUDP Listener testing to complete (max wait is 60 minutes).");
 

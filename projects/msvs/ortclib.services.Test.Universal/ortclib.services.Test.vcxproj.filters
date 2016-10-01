@@ -8,6 +8,15 @@
       <UniqueIdentifier>7c9c1e68-48bb-44f1-85dc-52d2ac401de3</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
+    <Filter Include="ortc">
+      <UniqueIdentifier>{e2135ece-47c3-4f98-a2b1-8b07c3af30a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ortc\services">
+      <UniqueIdentifier>{f5420b3b-d50e-4210-b2b0-20d36d7978a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ortc\services\test">
+      <UniqueIdentifier>{64cd0cab-8aee-40ab-a6bb-b2a61b5eee2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="UnitTestApp.xaml" />
@@ -16,10 +25,61 @@
     <ClCompile Include="UnitTestApp.xaml.cpp" />
     <ClCompile Include="UnitTest.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\test\main.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestBackOffTimer.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestCanonicalXML.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestDH.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestDNS.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestHelper.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestICESocket.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\testing.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestRUDPICESocket.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestRUDPICESocketLoopback.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestRUDPListener.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestSTUNDiscovery.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestSTUNPacket.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestTCPMessagingLoopback.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\test\TestTURNSocket.cpp">
+      <Filter>ortc\services\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="UnitTestApp.xaml.h" />
+    <ClInclude Include="..\..\..\ortc\services\test\config.h">
+      <Filter>ortc\services\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\test\testing.h">
+      <Filter>ortc\services\test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UnitTestApp.rd.xml" />

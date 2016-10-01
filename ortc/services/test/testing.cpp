@@ -35,11 +35,11 @@
 #include <zsLib/types.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
-#include <openpeer/services/ILogger.h>
+#include <ortc/services/ILogger.h>
 
 #include <iostream>
 
-namespace openpeer { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_test) } } }
 
 
 #ifdef _WIN32
@@ -51,7 +51,7 @@ debugostream &getDebugCout()
 #endif //_WIN32
 
 
-typedef openpeer::services::ILogger ILogger;
+typedef ortc::services::ILogger ILogger;
 
 void doTestBackoffRetry();
 void doTestCanonicalXML();
@@ -95,24 +95,24 @@ namespace Testing
     TESTING_STDOUT() << "INSTALLING LOGGER...\n\n";
     ILogger::setLogLevel(zsLib::Log::Trace);
     ILogger::setLogLevel("zsLib", zsLib::Log::Trace);
-    ILogger::setLogLevel("openpeer_services", zsLib::Log::Trace);
-    ILogger::setLogLevel("openpeer_services_http", zsLib::Log::Trace);
+    ILogger::setLogLevel("ortc_services", zsLib::Log::Trace);
+    ILogger::setLogLevel("ortc_services_http", zsLib::Log::Trace);
 
-    if (OPENPEER_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
       ILogger::installDebuggerLogger();
     }
 
-    if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_STDOUT_LOGGING) {
       ILogger::installStdOutLogger(false);
     }
 
-    if (OPENPEER_SERVICE_TEST_USE_FIFO_LOGGING) {
-      ILogger::installFileLogger(OPENPEER_SERVICE_TEST_FIFO_LOGGING_FILE, true);
+    if (ORTC_SERVICE_TEST_USE_FIFO_LOGGING) {
+      ILogger::installFileLogger(ORTC_SERVICE_TEST_FIFO_LOGGING_FILE, true);
     }
 
-    if (OPENPEER_SERVICE_TEST_USE_TELNET_LOGGING) {
-      bool serverMode = (OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) && (!OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT);
-      ILogger::installTelnetLogger(serverMode ? OPENPEER_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT : OPENPEER_SERVICE_TEST_TELNET_LOGGING_PORT, 60, true);
+    if (ORTC_SERVICE_TEST_USE_TELNET_LOGGING) {
+      bool serverMode = (ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) && (!ORTC_SERVICE_TEST_RUNNING_AS_CLIENT);
+      ILogger::installTelnetLogger(serverMode ? ORTC_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT : ORTC_SERVICE_TEST_TELNET_LOGGING_PORT, 60, true);
 
       for (int tries = 0; tries < 60; ++tries)
       {
@@ -130,16 +130,16 @@ namespace Testing
   {
     TESTING_STDOUT() << "REMOVING LOGGER...\n\n";
 
-    if (OPENPEER_SERVICE_TEST_USE_FIFO_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_FIFO_LOGGING) {
       ILogger::uninstallFileLogger();
     }
-    if (OPENPEER_SERVICE_TEST_USE_TELNET_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_TELNET_LOGGING) {
       ILogger::uninstallTelnetLogger();
     }
-    if (OPENPEER_SERVICE_TEST_USE_STDOUT_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_STDOUT_LOGGING) {
       ILogger::uninstallStdOutLogger();
     }
-    if (OPENPEER_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
+    if (ORTC_SERVICE_TEST_USE_DEBUGGER_LOGGING) {
       ILogger::uninstallDebuggerLogger();
     }
 

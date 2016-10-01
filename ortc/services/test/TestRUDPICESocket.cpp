@@ -34,18 +34,18 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
-#include <openpeer/services/IICESocket.h>
-#include <openpeer/services/IICESocketSession.h>
-#include <openpeer/services/IRUDPTransport.h>
-#include <openpeer/services/IRUDPMessaging.h>
-#include <openpeer/services/ITransportStream.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IICESocket.h>
+#include <ortc/services/IICESocketSession.h>
+#include <ortc/services/IRUDPTransport.h>
+#include <ortc/services/IRUDPMessaging.h>
+#include <ortc/services/ITransportStream.h>
+#include <ortc/services/IHelper.h>
 
 
 #include "config.h"
 #include "testing.h"
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::BYTE;
 using zsLib::WORD;
@@ -56,23 +56,23 @@ using zsLib::SocketPtr;
 using zsLib::IPAddress;
 using zsLib::AutoRecursiveLock;
 using zsLib::IMessageQueue;
-using openpeer::services::IICESocket;
-using openpeer::services::IICESocketPtr;
-using openpeer::services::IICESocketDelegate;
-using openpeer::services::IICESocketSession;
-using openpeer::services::IICESocketSessionPtr;
-using openpeer::services::IICESocketSessionDelegate;
-using openpeer::services::IRUDPMessaging;
-using openpeer::services::IRUDPMessagingPtr;
-using openpeer::services::IRUDPMessagingDelegate;
-using openpeer::services::IHelper;
-using openpeer::services::IICESocket;
-using openpeer::services::IDNS;
+using ortc::services::IICESocket;
+using ortc::services::IICESocketPtr;
+using ortc::services::IICESocketDelegate;
+using ortc::services::IICESocketSession;
+using ortc::services::IICESocketSessionPtr;
+using ortc::services::IICESocketSessionDelegate;
+using ortc::services::IRUDPMessaging;
+using ortc::services::IRUDPMessagingPtr;
+using ortc::services::IRUDPMessagingDelegate;
+using ortc::services::IHelper;
+using ortc::services::IICESocket;
+using ortc::services::IDNS;
 
-static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
-static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
+static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
+static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -115,12 +115,12 @@ namespace openpeer
           IICESocket::STUNServerInfoList stunServers;
 
           IICESocket::TURNServerInfoPtr turnInfo = IICESocket::TURNServerInfo::create();
-          turnInfo->mTURNServer = OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN;
+          turnInfo->mTURNServer = ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN;
           turnInfo->mTURNServerUsername = gUsername;
           turnInfo->mTURNServerPassword = gPassword;
 
           IICESocket::STUNServerInfoPtr stunInfo = IICESocket::STUNServerInfo::create();
-          stunInfo->mSTUNServer = OPENPEER_SERVICE_TEST_STUN_SERVER;
+          stunInfo->mSTUNServer = ORTC_SERVICE_TEST_STUN_SERVER;
 
           turnServers.push_back(turnInfo);
           stunServers.push_back(stunInfo);
@@ -321,20 +321,20 @@ namespace openpeer
   }
 }
 
-using namespace openpeer::services::test;
-using openpeer::services::test::TestRUDPICESocketCallback;
-using openpeer::services::test::TestRUDPICESocketCallbackPtr;
+using namespace ortc::services::test;
+using ortc::services::test::TestRUDPICESocketCallback;
+using ortc::services::test::TestRUDPICESocketCallbackPtr;
 
 void doTestRUDPICESocket()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
-  if (!OPENPEER_SERVICE_TEST_RUNNING_AS_CLIENT) return;
+  if (!ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
+  if (!ORTC_SERVICE_TEST_RUNNING_AS_CLIENT) return;
 
   TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
-  TestRUDPICESocketCallbackPtr testObject1 = TestRUDPICESocketCallback::create(thread, IPAddress(OPENPEER_SERVICE_TEST_RUDP_SERVER_IP, OPENPEER_SERVICE_TEST_RUDP_SERVER_PORT));
+  TestRUDPICESocketCallbackPtr testObject1 = TestRUDPICESocketCallback::create(thread, IPAddress(ORTC_SERVICE_TEST_RUDP_SERVER_IP, ORTC_SERVICE_TEST_RUDP_SERVER_PORT));
 
   ZS_LOG_BASIC("WAITING:      Waiting for RUDP ICE socket testing to complete (max wait is 60 minutes).");
 

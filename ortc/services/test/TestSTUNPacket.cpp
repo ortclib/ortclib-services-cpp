@@ -29,8 +29,8 @@
  
  */
 
-#include <openpeer/services/STUNPacket.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/STUNPacket.h>
+#include <ortc/services/IHelper.h>
 
 #include <iostream>
 
@@ -126,7 +126,7 @@ static const unsigned char kRfc5769SampleResponseIPv6[] = {
 };
 
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -185,11 +185,11 @@ namespace openpeer
 
 void doTestSTUNPacket()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_STUN_PACKET_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_STUN_PACKET_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
-  openpeer::services::test::TestIntegity();
+  ortc::services::test::TestIntegity();
 
   TESTING_STDOUT() << "COMPLETED STUN PACKET TESTS...\n";
 }

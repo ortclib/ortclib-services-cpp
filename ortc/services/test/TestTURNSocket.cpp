@@ -34,9 +34,9 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
-#include <openpeer/services/ITURNSocket.h>
-#include <openpeer/services/STUNPacket.h>
-#include <openpeer/services/ISTUNDiscovery.h>
+#include <ortc/services/ITURNSocket.h>
+#include <ortc/services/STUNPacket.h>
+#include <ortc/services/ISTUNDiscovery.h>
 
 #include "config.h"
 #include "testing.h"
@@ -44,7 +44,7 @@
 #include <list>
 #include <iostream>
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::IMessageQueue;
 using zsLib::ULONG;
@@ -55,14 +55,14 @@ using zsLib::MessageQueueThread;
 using zsLib::Seconds;
 using zsLib::MessageQueueThreadPtr;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
     namespace test
     {
-      static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
-      static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
+      static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
+      static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
 
       ZS_DECLARE_CLASS_PTR(TestTURNSocketCallback)
 
@@ -530,12 +530,12 @@ namespace openpeer
   }
 }
 
-using openpeer::services::test::TestTURNSocketCallback;
-using openpeer::services::test::TestTURNSocketCallbackPtr;
+using ortc::services::test::TestTURNSocketCallback;
+using ortc::services::test::TestTURNSocketCallbackPtr;
 
 void doTestTURNSocket()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_TURN_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_TURN_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
@@ -543,11 +543,11 @@ void doTestTURNSocket()
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
-  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
-  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
-  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), "bogus." OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
-  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
-  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
+  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
+  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
+  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), "bogus." ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
+  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
+  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
 
   TESTING_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
 
@@ -657,14 +657,14 @@ void doTestTURNSocket()
     TESTING_CHECK(testObject5->getTotalUnreceived() < 10)
   }
 
-#ifdef OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
+#ifdef ORTC_SERVICE_TEST_WHAT_IS_MY_IP
   if (testObject1) {
-    TESTING_EQUAL(testObject1->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+    TESTING_EQUAL(testObject1->getIP().string(false), ORTC_SERVICE_TEST_WHAT_IS_MY_IP);
   }
   if (testObject2) {
-    TESTING_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
+    TESTING_EQUAL(testObject2->getIP().string(false), ORTC_SERVICE_TEST_WHAT_IS_MY_IP);
   }
-#endif //OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
+#endif //ORTC_SERVICE_TEST_WHAT_IS_MY_IP
 
   testObject1.reset();
   testObject2.reset();

@@ -29,8 +29,8 @@
  
  */
 
-#include <openpeer/services/IBackOffTimer.h>
-#include <openpeer/services/ISettings.h>
+#include <ortc/services/IBackOffTimer.h>
+#include <ortc/services/ISettings.h>
 
 #include <zsLib/String.h>
 #include <zsLib/MessageQueueAssociator.h>
@@ -41,22 +41,22 @@
 #include "config.h"
 #include "testing.h"
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::string;
 using zsLib::String;
 using zsLib::Seconds;
 using zsLib::Time;
 using zsLib::MessageQueueAssociator;
-using namespace openpeer::services::test;
+using namespace ortc::services::test;
 
 ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
 ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
 
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimer, UseBackOffTimer)
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimerDelegate, UseBackOffTimerDelegate)
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimerPattern, UseBackOffTimerPattern)
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::ISettings, UseSettings)
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimer, UseBackOffTimer)
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimerDelegate, UseBackOffTimerDelegate)
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimerPattern, UseBackOffTimerPattern)
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::ISettings, UseSettings)
 
 template <typename duration_type>
 static void timeCheck(
@@ -219,7 +219,7 @@ static void testRetry5(MessageQueueThreadPtr queue)
     {
     }
 
-    ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IBackOffTimer, IBackOffTimer)
+    ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimer, IBackOffTimer)
 
     virtual void onBackOffTimerStateChanged(
                                             IBackOffTimerPtr timer,
@@ -320,7 +320,7 @@ static void testRetry5(MessageQueueThreadPtr queue)
 
 void doTestBackoffRetry()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_BACKOFF_RETRY_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_BACKOFF_RETRY_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 

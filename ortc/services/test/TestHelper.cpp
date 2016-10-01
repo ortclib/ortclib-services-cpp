@@ -29,7 +29,7 @@
  
  */
 
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/String.h>
 
@@ -40,7 +40,7 @@
 
 using zsLib::String;
 
-ZS_DECLARE_TYPEDEF_PTR(openpeer::services::IHelper, UseHelper)
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::IHelper, UseHelper)
 
 static void testI18NIDN()
 {
@@ -146,7 +146,7 @@ static void testDomainValidation()
 
 void doTestHelper()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_HELPER_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_HELPER_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 

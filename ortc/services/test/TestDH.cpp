@@ -29,10 +29,10 @@
  
  */
 
-#include <openpeer/services/IDHKeyDomain.h>
-#include <openpeer/services/IDHPrivateKey.h>
-#include <openpeer/services/IDHPublicKey.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/IDHKeyDomain.h>
+#include <ortc/services/IDHPrivateKey.h>
+#include <ortc/services/IDHPublicKey.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/XML.h>
 #include <iostream>
@@ -40,19 +40,19 @@
 #include "config.h"
 #include "testing.h"
 
-using openpeer::services::IHelper;
-using openpeer::services::IDHKeyDomain;
-using openpeer::services::IDHKeyDomainPtr;
-using openpeer::services::IDHPrivateKey;
-using openpeer::services::IDHPrivateKeyPtr;
-using openpeer::services::IDHPublicKey;
-using openpeer::services::IDHPublicKeyPtr;
-using openpeer::services::SecureByteBlock;
-using openpeer::services::SecureByteBlockPtr;
+using ortc::services::IHelper;
+using ortc::services::IDHKeyDomain;
+using ortc::services::IDHKeyDomainPtr;
+using ortc::services::IDHPrivateKey;
+using ortc::services::IDHPrivateKeyPtr;
+using ortc::services::IDHPublicKey;
+using ortc::services::IDHPublicKeyPtr;
+using ortc::services::SecureByteBlock;
+using ortc::services::SecureByteBlockPtr;
 
 void doTestDH()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_DH_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_DH_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 

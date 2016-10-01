@@ -34,11 +34,11 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
-#include <openpeer/services/IICESocket.h>
-#include <openpeer/services/IICESocketSession.h>
-#include <openpeer/services/IRUDPTransport.h>
-#include <openpeer/services/IRUDPMessaging.h>
-#include <openpeer/services/ITransportStream.h>
+#include <ortc/services/IICESocket.h>
+#include <ortc/services/IICESocketSession.h>
+#include <ortc/services/IRUDPTransport.h>
+#include <ortc/services/IRUDPMessaging.h>
+#include <ortc/services/ITransportStream.h>
 
 #include "config.h"
 #include "testing.h"
@@ -50,7 +50,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::BYTE;
 using zsLib::WORD;
@@ -61,31 +61,31 @@ using zsLib::IPAddress;
 using zsLib::String;
 using zsLib::string;
 using zsLib::IMessageQueue;
-using openpeer::services::IDNS;
-using openpeer::services::IDNSQuery;
-using openpeer::services::ITURNSocket;
-using openpeer::services::ITURNSocketPtr;
-using openpeer::services::ITURNSocketDelegate;
-using openpeer::services::IICESocket;
-using openpeer::services::IICESocketDelegate;
-using openpeer::services::IICESocketSession;
-using openpeer::services::IICESocketSessionDelegate;
-using openpeer::services::IICESocketPtr;
-using openpeer::services::IRUDPTransport;
-using openpeer::services::IRUDPTransportPtr;
-using openpeer::services::IRUDPTransportDelegate;
-using openpeer::services::IRUDPMessaging;
-using openpeer::services::IRUDPMessagingPtr;
-using namespace openpeer::services::test;
+using ortc::services::IDNS;
+using ortc::services::IDNSQuery;
+using ortc::services::ITURNSocket;
+using ortc::services::ITURNSocketPtr;
+using ortc::services::ITURNSocketDelegate;
+using ortc::services::IICESocket;
+using ortc::services::IICESocketDelegate;
+using ortc::services::IICESocketSession;
+using ortc::services::IICESocketSessionDelegate;
+using ortc::services::IICESocketPtr;
+using ortc::services::IRUDPTransport;
+using ortc::services::IRUDPTransportPtr;
+using ortc::services::IRUDPTransportDelegate;
+using ortc::services::IRUDPMessaging;
+using ortc::services::IRUDPMessagingPtr;
+using namespace ortc::services::test;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
     namespace test
     {
-      static const char *gUsername = OPENPEER_SERVICE_TEST_TURN_USERNAME;
-      static const char *gPassword = OPENPEER_SERVICE_TEST_TURN_PASSWORD;
+      static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
+      static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
 
       ZS_DECLARE_CLASS_PTR(TestRUDPICESocketLoopback)
 
@@ -600,12 +600,12 @@ namespace openpeer
   }
 }
 
-using openpeer::services::test::TestRUDPICESocketLoopback;
-using openpeer::services::test::TestRUDPICESocketLoopbackPtr;
+using ortc::services::test::TestRUDPICESocketLoopback;
+using ortc::services::test::TestRUDPICESocketLoopbackPtr;
 
 void doTestRUDPICESocketLoopback()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
@@ -636,8 +636,8 @@ void doTestRUDPICESocketLoopback()
       switch (step) {
         case 0: {
           expecting = 2;
-          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true);
-          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, false);
+          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true);
+          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);
@@ -645,8 +645,8 @@ void doTestRUDPICESocketLoopback()
         }
         case 1: {
           expecting = 2;
-          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, true);
-          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), OPENPEER_SERVICE_TEST_TURN_SERVER_DOMAIN, OPENPEER_SERVICE_TEST_STUN_SERVER, false);
+          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true);
+          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);

@@ -30,9 +30,9 @@
  */
 
 
-#include <openpeer/services/ITCPMessaging.h>
-#include <openpeer/services/ITransportStream.h>
-#include <openpeer/services/IHelper.h>
+#include <ortc/services/ITCPMessaging.h>
+#include <ortc/services/ITransportStream.h>
+#include <ortc/services/IHelper.h>
 
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Exception.h>
@@ -44,7 +44,7 @@
 #include "config.h"
 #include "testing.h"
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::AutoPUID;
 using zsLib::ULONG;
@@ -56,10 +56,10 @@ using zsLib::RecursiveLock;
 using zsLib::IMessageQueue;
 using zsLib::ULONG;
 
-using namespace openpeer::services;
-using namespace openpeer::services::test;
+using namespace ortc::services;
+using namespace ortc::services::test;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -389,14 +389,14 @@ namespace openpeer
   }
 }
 
-using openpeer::services::test::TestTCPMessagingLoopback;
-using openpeer::services::test::TestTCPMessagingLoopbackPtr;
+using ortc::services::test::TestTCPMessagingLoopback;
+using ortc::services::test::TestTCPMessagingLoopbackPtr;
 
 void doTestTCPMessagingLoopback()
 {
   typedef zsLib::ULONG ULONG;
 
-  if (!OPENPEER_SERVICE_TEST_DO_TCP_MESSAGING_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_TCP_MESSAGING_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 

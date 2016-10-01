@@ -33,7 +33,7 @@
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <openpeer/services/ISTUNDiscovery.h>
+#include <ortc/services/ISTUNDiscovery.h>
 
 #include "config.h"
 #include "testing.h"
@@ -41,7 +41,7 @@
 #include <list>
 #include <iostream>
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::BYTE;
 using zsLib::WORD;
@@ -50,13 +50,13 @@ using zsLib::Socket;
 using zsLib::SocketPtr;
 using zsLib::IPAddress;
 using zsLib::IMessageQueue;
-using openpeer::services::IDNS;
-using openpeer::services::IDNSQuery;
-using openpeer::services::ISTUNDiscovery;
-using openpeer::services::ISTUNDiscoveryPtr;
-using openpeer::services::ISTUNDiscoveryDelegate;
+using ortc::services::IDNS;
+using ortc::services::IDNSQuery;
+using ortc::services::ISTUNDiscovery;
+using ortc::services::ISTUNDiscoveryPtr;
+using ortc::services::ISTUNDiscoveryDelegate;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -226,19 +226,19 @@ namespace openpeer
   }
 }
 
-using openpeer::services::test::TestSTUNDiscoveryCallback;
-using openpeer::services::test::TestSTUNDiscoveryCallbackPtr;
+using ortc::services::test::TestSTUNDiscoveryCallback;
+using ortc::services::test::TestSTUNDiscoveryCallbackPtr;
 
 void doTestSTUNDiscovery()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_STUN_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_STUN_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
-  TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, OPENPEER_SERVICE_TEST_STUN_SERVER, true);
-  TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, OPENPEER_SERVICE_TEST_STUN_SERVER, false);
+  TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, ORTC_SERVICE_TEST_STUN_SERVER, true);
+  TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, ORTC_SERVICE_TEST_STUN_SERVER, false);
 
   TESTING_STDOUT() << "WAITING:      Waiting for STUN discovery to complete (max wait is 180 seconds).\n";
 
@@ -285,10 +285,10 @@ void doTestSTUNDiscovery()
   TESTING_CHECK(testObject->getIP().isAddressEqual(testObject2->getIP()));
   TESTING_CHECK(testObject->getIP().getPort() != testObject2->getIP().getPort());
 
-#ifdef OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
-  TESTING_EQUAL(testObject->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
-  TESTING_EQUAL(testObject2->getIP().string(false), OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP);
-#endif //OPENPEER_SERVICE_TEST_WHAT_IS_MY_IP
+#ifdef ORTC_SERVICE_TEST_WHAT_IS_MY_IP
+  TESTING_EQUAL(testObject->getIP().string(false), ORTC_SERVICE_TEST_WHAT_IS_MY_IP);
+  TESTING_EQUAL(testObject2->getIP().string(false), ORTC_SERVICE_TEST_WHAT_IS_MY_IP);
+#endif //ORTC_SERVICE_TEST_WHAT_IS_MY_IP
 
   testObject.reset();
   testObject2.reset();

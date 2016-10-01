@@ -32,10 +32,10 @@
 
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Exception.h>
-#include <openpeer/services/IDNS.h>
-#include <openpeer/services/ISTUNDiscovery.h>
+#include <ortc/services/IDNS.h>
+#include <ortc/services/ISTUNDiscovery.h>
 
-#include <openpeer/services/internal/services_DNS.h>
+#include <ortc/services/internal/services_DNS.h>
 
 #include <zsLib/Socket.h>
 
@@ -44,16 +44,16 @@
 
 #include <list>
 
-namespace openpeer { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(openpeer_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
 using zsLib::ULONG;
 using zsLib::IMessageQueue;
-using openpeer::services::IDNS;
-using openpeer::services::IDNSPtr;
-using openpeer::services::IDNSQuery;
-using openpeer::services::IDNSQueryPtr;
+using ortc::services::IDNS;
+using ortc::services::IDNSPtr;
+using ortc::services::IDNSQuery;
+using ortc::services::IDNSQueryPtr;
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -256,14 +256,14 @@ namespace openpeer
   }
 }
 
-using openpeer::services::test::TestDNSFactory;
-using openpeer::services::test::TestDNSFactoryPtr;
-using openpeer::services::test::TestDNSCallback;
-using openpeer::services::test::TestDNSCallbackPtr;
+using ortc::services::test::TestDNSFactory;
+using ortc::services::test::TestDNSFactoryPtr;
+using ortc::services::test::TestDNSCallback;
+using ortc::services::test::TestDNSCallbackPtr;
 
 void doTestDNS()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_DNS_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_DNS_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
@@ -271,7 +271,7 @@ void doTestDNS()
 
   TestDNSFactoryPtr overrideFactory(new TestDNSFactory);
 
-  openpeer::services::internal::DNSFactory::override(overrideFactory);
+  ortc::services::internal::DNSFactory::override(overrideFactory);
 
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
@@ -282,26 +282,26 @@ void doTestDNS()
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 2
 #endif //WINRT
 
-  IDNSQueryPtr query = IDNS::lookupA(testObject, "www." OPENPEER_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query2 = IDNS::lookupA(testObject, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query = IDNS::lookupA(testObject, "www." ORTC_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query2 = IDNS::lookupA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
 #ifdef WINRT
   IDNSQueryPtr query3;
   IDNSQueryPtr query4;
 #else
-  IDNSQueryPtr query3 = IDNS::lookupAAAA(testObject, "unittest." OPENPEER_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query4 = IDNS::lookupAAAA(testObject, "unittest2." OPENPEER_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query3 = IDNS::lookupAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query4 = IDNS::lookupAAAA(testObject, "unittest2." ORTC_SERVICE_TEST_DNS_ZONE);
 #endif //WINRt
-  IDNSQueryPtr query5 = IDNS::lookupSRV(testObject, OPENPEER_SERVICE_TEST_DNS_ZONE, "sip", "udp", 5060, IDNS::SRVLookupType_LookupOnly);
-  IDNSQueryPtr query6 = IDNS::lookupA(testObject, "bogusbogus." OPENPEER_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query7 = IDNS::lookupAorAAAA(testObject, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query5 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp", 5060, IDNS::SRVLookupType_LookupOnly);
+  IDNSQueryPtr query6 = IDNS::lookupA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query7 = IDNS::lookupAorAAAA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
 #ifdef WINRT
   IDNSQueryPtr query8;
 #else
-  IDNSQueryPtr query8 = IDNS::lookupAorAAAA(testObject, "unittest." OPENPEER_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query8 = IDNS::lookupAorAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE);
 #endif// WINRT
-  IDNSQueryPtr query9 = IDNS::lookupAAAA(testObject, "bogusbogus." OPENPEER_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query10 = IDNS::lookupSRV(testObject, OPENPEER_SERVICE_TEST_DNS_ZONE, "sip", "udp");
-  IDNSQueryPtr query11 = IDNS::lookupSRV(testObject, OPENPEER_SERVICE_TEST_DNS_ZONE, "stun", "udp");
+  IDNSQueryPtr query9 = IDNS::lookupAAAA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE);
+  IDNSQueryPtr query10 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp");
+  IDNSQueryPtr query11 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "stun", "udp");
 
   TESTING_STDOUT() << "WAITING:      Waiting for DNS lookup to resolve (max wait is 60 seconds).\n";
 
@@ -320,14 +320,14 @@ void doTestDNS()
   if (query3)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
   if (query4)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
   if (query5)  { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 1; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 1; }
-  if (OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS) {
+  if (ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS) {
     if (query6)  { expectingTotal += 1; totalA += 1; totalAAAA += 0; totalSRV += 0; totalFailed += 0; factoryA += 1; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 0; }
   } else {
     if (query6)  { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 0; totalFailed += 1; factoryA += 1; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 0; }
   }
   if (query7)  { expectingTotal += 1; totalA += 1; totalAAAA += 0; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 1; factorySRV += 0; }
   if (query8)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 1; factorySRV += 0; }
-  if (OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS) {
+  if (ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS) {
     if (query9)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
   } else {
     if (query9)  { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 0; totalFailed += 1; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
@@ -443,7 +443,7 @@ void doTestDNS()
       TESTING_CHECK(srv1->mTTL <= 900);
       TESTING_EQUAL(srv1->mRecords.front().mPriority, 10);
       TESTING_EQUAL(srv1->mRecords.front().mWeight, 0);
-      TESTING_EQUAL(srv1->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+      TESTING_EQUAL(srv1->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
 #endif //ndef WINRT
       TESTING_EQUAL(srv1->mRecords.front().mPort, 5060);
       TESTING_EQUAL(srv1->mRecords.front().mAResult->mIPAddresses.front().string(), zsLib::IPAddress("173.239.150.198:5060").string());
@@ -455,15 +455,15 @@ void doTestDNS()
     IDNS::AResultPtr a6 = testObject->getA(query6);
     IDNS::AResultPtr aaaa6 = testObject->getAAAA(query6);
 
-    TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? ((bool)a6) : (!a6))
+    TESTING_CHECK(ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? ((bool)a6) : (!a6))
     TESTING_CHECK(!aaaa6)
 
-    if (!OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS) {
+    if (!ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS) {
       if (!testObject->isFailed(query6)) {
         TESTING_CHECK("This next DNS A lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
       }
     }
-    TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? !testObject->isFailed(query6) : testObject->isFailed(query6));
+    TESTING_CHECK(ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS ? !testObject->isFailed(query6) : testObject->isFailed(query6));
   }
 
   if (query7) {
@@ -501,14 +501,14 @@ void doTestDNS()
     IDNS::AResultPtr a5 = testObject->getA(query9);
     IDNS::AAAAResultPtr aaaa5 = testObject->getAAAA(query9);
     TESTING_CHECK(!a5)
-    TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? ((bool)aaaa5) : (!aaaa5))
+    TESTING_CHECK(ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? ((bool)aaaa5) : (!aaaa5))
 
-    if (!OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS) {
+    if (!ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS) {
       if (!testObject->isFailed(query9)) {
         TESTING_CHECK("This next DNS A or AAAA lookup should have failed to resolve but it did resolve. Verify your provider's DNS is returning no IPs when resolving bogus A or AAAA lookups; it should be but sometimes Internet providers give \"search\" page results for bogus DNS names")
       }
     }
-    TESTING_CHECK(OPENPEER_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? !testObject->isFailed(query9) : testObject->isFailed(query9));
+    TESTING_CHECK(ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS ? !testObject->isFailed(query9) : testObject->isFailed(query9));
   }
 
   if (query10) {
@@ -520,7 +520,7 @@ void doTestDNS()
       TESTING_CHECK(srv2->mTTL <= 900);
       TESTING_EQUAL(srv2->mRecords.front().mPriority, 10);
       TESTING_EQUAL(srv2->mRecords.front().mWeight, 0);
-      TESTING_EQUAL(srv2->mRecords.front().mName, "sip." OPENPEER_SERVICE_TEST_DNS_ZONE);
+      TESTING_EQUAL(srv2->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
       TESTING_CHECK(srv2->mRecords.front().mAResult->mTTL <= 900);
 #endif //ndef WINRT
       TESTING_EQUAL(srv2->mRecords.front().mPort, 5060);
@@ -533,8 +533,8 @@ void doTestDNS()
     IDNS::SRVResultPtr srv3 = testObject->getSRV(query11);
     TESTING_CHECK(srv3)
 
-    const char *first = "stun." OPENPEER_SERVICE_TEST_DNS_ZONE;
-    const char *second = "stun." OPENPEER_SERVICE_TEST_DNS_ZONE;
+    const char *first = "stun." ORTC_SERVICE_TEST_DNS_ZONE;
+    const char *second = "stun." ORTC_SERVICE_TEST_DNS_ZONE;
 
     const char *firstWIP = "54.242.132.131:3478";
     const char *secondWIP = "174.129.96.12:3478";

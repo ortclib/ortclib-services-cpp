@@ -29,7 +29,7 @@
  
  */
 
-#include <openpeer/services/ICanonicalXML.h>
+#include <ortc/services/ICanonicalXML.h>
 
 #include <zsLib/XML.h>
 #include <iostream>
@@ -37,11 +37,11 @@
 #include "config.h"
 #include "testing.h"
 
-using openpeer::services::ICanonicalXML;
+using ortc::services::ICanonicalXML;
 
 void doTestCanonicalXML()
 {
-  if (!OPENPEER_SERVICE_TEST_DO_CANONICAL_XML_TEST) return;
+  if (!ORTC_SERVICE_TEST_DO_CANONICAL_XML_TEST) return;
 
   TESTING_INSTALL_LOGGER();
 
