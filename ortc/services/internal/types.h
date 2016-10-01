@@ -43,7 +43,7 @@ namespace CryptoPP
   class HexDecoder;
 };
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

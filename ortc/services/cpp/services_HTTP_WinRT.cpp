@@ -54,9 +54,9 @@ using Windows::Storage::Streams::DataReader;
 using Windows::Storage::Streams::DataWriter;
 using Windows::Foundation::Uri;
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_http) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_http) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

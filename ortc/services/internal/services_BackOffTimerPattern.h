@@ -38,9 +38,9 @@
 
 #include <vector>
 
-#define OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES "ortc/services/backoff-timer-max-constructor-failures"
+#define ORTC_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES "ortc/services/backoff-timer-max-constructor-failures"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

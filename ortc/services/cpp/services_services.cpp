@@ -34,20 +34,19 @@
 
 #include <zsLib/Log.h>
 
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_dns) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_http) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_ice) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_stun) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_turn) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_rudp) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_mls) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_tcp_messaging) } }
-namespace openpeer { namespace services { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_transport_stream) } }
-namespace openpeer { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(openpeer_services_wire) } } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_dns) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_http) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_ice) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_stun) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_turn) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_mls) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_tcp_messaging) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_transport_stream) } }
+namespace ortc { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_wire) } } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -55,16 +54,16 @@ namespace openpeer
     {
       void initSubsystems()
       {
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_http));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_ice));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_turn));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_turn));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_rudp));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_mls));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_tcp_messaging));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services, openpeer_services_transport_stream));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(openpeer::services::wire, openpeer_services_wire));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_http));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_ice));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_rudp));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_mls));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_tcp_messaging));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_transport_stream));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services::wire, ortc_services_wire));
       }
     }
   }

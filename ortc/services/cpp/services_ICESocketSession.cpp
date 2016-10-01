@@ -49,19 +49,19 @@
 
 #include <cryptopp/osrng.h>
 
-#define OPENPEER_SERVICES_ICESOCKETSESSION_MAX_WAIT_TIME_FOR_CANDIDATE_TO_ACTIVATE_IF_ALL_DONE (60)
-#define OPENPEER_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS (15)
+#define ORTC_SERVICES_ICESOCKETSESSION_MAX_WAIT_TIME_FOR_CANDIDATE_TO_ACTIVATE_IF_ALL_DONE (60)
+#define ORTC_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS (15)
 
-#define OPENPEER_SERVICES_ICESOCKETSESSION_MAX_REASONABLE_CANDIDATE_PAIR_SEARCHES (100)
+#define ORTC_SERVICES_ICESOCKETSESSION_MAX_REASONABLE_CANDIDATE_PAIR_SEARCHES (100)
 
-#define OPENPEER_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS (20)
-#define OPENPEER_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS (2)
+#define ORTC_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS (20)
+#define ORTC_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS (2)
 
-#define OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS (10)
+#define ORTC_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS (10)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -222,7 +222,7 @@ namespace openpeer
         mConflictResolver(randomQWORD()),
         mLastSentData(zsLib::now()),
         mLastReceivedDataOrSTUN(zsLib::now()),
-        mKeepAliveDuration(Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS))
+        mKeepAliveDuration(Seconds(ORTC_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS))
       {
         IHelper::setTimerThreadPriority();
 
@@ -245,7 +245,7 @@ namespace openpeer
 
         mBackgroundingSubscription = IBackgrounding::subscribe(
                                                                mThisWeak.lock(),
-                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE)
+                                                               ISettings::getUInt(ORTC_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE)
                                                                );
 
         step();
@@ -469,7 +469,7 @@ namespace openpeer
         mBackgroundingTimeout = backgroundingTimeout;
 
         if (Milliseconds() != mBackgroundingTimeout) {
-          ZS_THROW_INVALID_USAGE_IF(mBackgroundingTimeout < Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS))
+          ZS_THROW_INVALID_USAGE_IF(mBackgroundingTimeout < Seconds(ORTC_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS))
         }
 
         ZS_LOG_DEBUG(log("forcing step to ensure all timers are properly created"))
@@ -551,28 +551,28 @@ namespace openpeer
       {
         ZS_THROW_INVALID_ARGUMENT_IF(!stun)
 
-        OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("stun packet", stun->toDebug()))
+        ORTC_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("stun packet", stun->toDebug()))
 
         if (mSubscriptions.size() < 1) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to handle STUN packet as no subscribers"))
           return false;
         }
 
         // inform that the session is now connected
         if (STUNPacket::Method_Binding != stun->mMethod) {
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("received incoming STUN which is not ICE related thus handing via delgate"))
+          ORTC_SERVICES_WIRE_LOG_TRACE(log("received incoming STUN which is not ICE related thus handing via delgate"))
           return mSubscriptions.delegate()->handleICESocketSessionReceivedSTUNPacket(mThisWeak.lock(), stun, localUsernameFrag, remoteUsernameFrag);
         }
 
         AutoRecursiveLock lock(*this);
 
         if (localUsernameFrag != mLocalUsernameFrag) {
-          OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("local username frag does not match") + ZS_PARAM("expecting", mLocalUsernameFrag) + ZS_PARAM("received", localUsernameFrag))
+          ORTC_SERVICES_WIRE_LOG_DEBUG(log("local username frag does not match") + ZS_PARAM("expecting", mLocalUsernameFrag) + ZS_PARAM("received", localUsernameFrag))
           return false;
         }
 
         if (remoteUsernameFrag != mRemoteUsernameFrag) {
-          OPENPEER_SERVICES_WIRE_LOG_DEBUG(log("remote username frag does not match") + ZS_PARAM("expecting", mRemoteUsernameFrag) + ZS_PARAM("received", remoteUsernameFrag))
+          ORTC_SERVICES_WIRE_LOG_DEBUG(log("remote username frag does not match") + ZS_PARAM("expecting", mRemoteUsernameFrag) + ZS_PARAM("received", remoteUsernameFrag))
           return false;
         }
 
@@ -825,22 +825,22 @@ namespace openpeer
           AutoRecursiveLock lock(*this);
           if ((NULL == packet) ||
               (0 == packetLengthInBytes)) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming data packet is NULL or of 0 length thus ignoring"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming data packet is NULL or of 0 length thus ignoring"))
             return false;
           }
 
           if (isShutdown()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("already shutdown thus ignoring incoming data packet"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("already shutdown thus ignoring incoming data packet"))
             return false;
           }
 
           if (!mNominated) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("cannot process data packets without a nominated ice pair"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("cannot process data packets without a nominated ice pair"))
             return false;                                          // can't receive if not connected
           }
 
           if (!isCandidateMatch(mNominated, viaLocalCandidate, source)) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated candidate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("incoming remote IP on data packet does not match nominated candidate thus ignoring") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local", mNominated->mLocal.toDebug()) + ZS_PARAM("remote", mNominated->mRemote.toDebug()))
             return false;
           }
 
@@ -865,18 +865,18 @@ namespace openpeer
         if (mInformedWriteReady) return;
 
         if (!mNominated) {
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify local write ready cannot inform delegate since nomination process is incomplete"))
+          ORTC_SERVICES_WIRE_LOG_TRACE(log("notify local write ready cannot inform delegate since nomination process is incomplete"))
           return;
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
+          ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
         mInformedWriteReady = false;
 
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify local write ready"))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("notify local write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
         mInformedWriteReady = true;
@@ -890,18 +890,18 @@ namespace openpeer
         if (mInformedWriteReady) return;
 
         if (!mNominated) {
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready cannot inform delegate since nomination process is incomplete"))
+          ORTC_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready cannot inform delegate since nomination process is incomplete"))
           return;
         }
 
         if (!isCandidateMatch(mNominated, viaLocalCandidate, mNominated->mRemote.mIPAddress)) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
+          ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("write ready notification does not match") + viaLocalCandidate.toDebug())
           return;
         }
 
         mInformedWriteReady = false;
 
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready"))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("notify relay write ready"))
 
         mSubscriptions.delegate()->onICESocketSessionWriteReady(mThisWeak.lock());
         mInformedWriteReady = true;
@@ -1913,7 +1913,7 @@ namespace openpeer
 
               // scope: check if candidate should be remoted
               {
-                if (totalAdded >= OPENPEER_SERVICES_ICESOCKETSESSION_MAX_REASONABLE_CANDIDATE_PAIR_SEARCHES) {
+                if (totalAdded >= ORTC_SERVICES_ICESOCKETSESSION_MAX_REASONABLE_CANDIDATE_PAIR_SEARCHES) {
                   // truncate the list at 100 pairs maximum - RFC says that anything above 100 is unreasonable
                   ZS_LOG_WARNING(Detail, log("too many candidates"))
                   reason = "too many candidates";
@@ -2037,7 +2037,7 @@ namespace openpeer
 
           ZS_LOG_DEBUG(log("creating activate timer"))
 
-          mActivateTimer = Timer::create(mThisWeak.lock(), Milliseconds(OPENPEER_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
+          mActivateTimer = Timer::create(mThisWeak.lock(), Milliseconds(ORTC_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
           return true;
         }
 
@@ -2090,7 +2090,7 @@ namespace openpeer
         if (!mNominated) {
           if (mStepTimer) return true;
 
-          mStepTimer = Timer::create(mThisWeak.lock(), Seconds(OPENPEER_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS)); // this will cause candidates to start searching right away
+          mStepTimer = Timer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS)); // this will cause candidates to start searching right away
           return true;
         }
 
@@ -2378,7 +2378,7 @@ namespace openpeer
           return false;
         }
 
-        OPENPEER_SERVICES_WIRE_LOG_TRACE((log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData)))
+        ORTC_SERVICES_WIRE_LOG_TRACE((log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData)))
         return socket->sendTo(viaLocalCandidate, destination, buffer, bufferLengthInBytes, isUserData);
       }
 

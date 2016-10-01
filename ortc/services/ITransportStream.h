@@ -33,7 +33,7 @@
 
 #include <ortc/services/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -392,22 +392,22 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ITransportStreamWriterDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ITransportStreamWriterDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_METHOD_1(onTransportStreamWriterReady, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::ITransportStreamWriterDelegate, openpeer::services::ITransportStreamWriterSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITransportStreamWriterDelegate, ortc::services::ITransportStreamWriterSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onTransportStreamWriterReady, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ITransportStreamReaderDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ITransportStreamReaderDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_METHOD_1(onTransportStreamReaderReady, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::ITransportStreamReaderDelegate, openpeer::services::ITransportStreamReaderSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITransportStreamReaderDelegate, ortc::services::ITransportStreamReaderSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onTransportStreamReaderReady, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

@@ -38,7 +38,7 @@
 
 #include <list>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -256,8 +256,8 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::internal::IRUDPChannelStreamDelegate)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPChannelStreamStateChanged, openpeer::services::internal::IRUDPChannelStreamPtr, openpeer::services::internal::IRUDPChannelStreamDelegate::RUDPChannelStreamStates)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_3(notifyRUDPChannelStreamSendPacket, bool, openpeer::services::internal::IRUDPChannelStreamPtr, const zsLib::BYTE *, size_t)
-ZS_DECLARE_PROXY_METHOD_3(onRUDPChannelStreamSendExternalACKNow, openpeer::services::internal::IRUDPChannelStreamPtr, bool, zsLib::PUID)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelStreamDelegate)
+ZS_DECLARE_PROXY_METHOD_2(onRUDPChannelStreamStateChanged, ortc::services::internal::IRUDPChannelStreamPtr, ortc::services::internal::IRUDPChannelStreamDelegate::RUDPChannelStreamStates)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_3(notifyRUDPChannelStreamSendPacket, bool, ortc::services::internal::IRUDPChannelStreamPtr, const zsLib::BYTE *, size_t)
+ZS_DECLARE_PROXY_METHOD_3(onRUDPChannelStreamSendExternalACKNow, ortc::services::internal::IRUDPChannelStreamPtr, bool, zsLib::PUID)
 ZS_DECLARE_PROXY_END()

@@ -36,7 +36,7 @@
 
 #include <cryptopp/dh.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

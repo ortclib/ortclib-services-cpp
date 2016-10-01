@@ -46,9 +46,9 @@
 
 #include <curl/curl.h>
 
-#define OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "ortc/services/http-thread-priority"
+#define ORTC_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "ortc/services/http-thread-priority"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -331,7 +331,7 @@ namespace openpeer
       };
 
 #else
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

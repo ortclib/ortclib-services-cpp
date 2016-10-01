@@ -37,7 +37,7 @@
 #include <ortc/services/IDNS.h>
 #include <ortc/services/STUNPacket.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -138,9 +138,9 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ISTUNDiscoveryDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ISTUNDiscoveryPtr, ISTUNDiscoveryPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::SecureByteBlockPtr, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ISTUNDiscoveryDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ISTUNDiscoveryPtr, ISTUNDiscoveryPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::SecureByteBlockPtr, SecureByteBlockPtr)
 ZS_DECLARE_PROXY_METHOD_3(onSTUNDiscoverySendPacket, ISTUNDiscoveryPtr, IPAddress, SecureByteBlockPtr)
 ZS_DECLARE_PROXY_METHOD_1(onSTUNDiscoveryCompleted, ISTUNDiscoveryPtr)
 ZS_DECLARE_PROXY_END()

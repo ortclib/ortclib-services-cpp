@@ -42,13 +42,13 @@
 #include <list>
 #include <map>
 
-#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_SIGNATURE_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
+#define ORTC_SERVICES_MESSAGE_LAYER_SECURITY_SIGNATURE_ALGORITHM "https://meta.ortclib.org/2012/12/14/jsonsig#rsa-sha1"
 
-#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
+#define ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM "https://meta.ortclib.org/2012/12/14/jsonmls#aes-cfb-32-16-16-sha1-md5"
 
-#define OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER "ortc/services/mls-change-sending-key-after-in-seconds"
+#define ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER "ortc/services/mls-change-sending-key-after-in-seconds"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

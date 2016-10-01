@@ -34,7 +34,7 @@
 #include <ortc/services/types.h>
 #include <ortc/services/IHelper.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

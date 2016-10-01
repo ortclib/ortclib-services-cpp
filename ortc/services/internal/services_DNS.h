@@ -34,7 +34,7 @@
 #include <ortc/services/internal/types.h>
 #include <ortc/services/IDNS.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

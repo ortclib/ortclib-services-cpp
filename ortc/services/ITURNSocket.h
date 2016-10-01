@@ -38,10 +38,10 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 
-#define OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START (0x4000)                    // the actual range is 0x4000 -> 0x7FFF but to prevent collision with RUDP this is a recommended range to use
-#define OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END   (0x5FFF)
+#define ORTC_SERVICES_TURN_CHANNEL_RANGE_START (0x4000)                    // the actual range is 0x4000 -> 0x7FFF but to prevent collision with RUDP this is a recommended range to use
+#define ORTC_SERVICES_TURN_CHANNEL_RANGE_END   (0x5FFF)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -88,8 +88,8 @@ namespace openpeer
         String mPassword;
         IDNS::SRVLookupTypes mLookupType {IDNS::SRVLookupType_AutoLookupAndFallbackAll};
         bool mUseChannelBinding {false};
-        WORD mLimitChannelToRangeStart {OPENPEER_SERVICES_TURN_CHANNEL_RANGE_START};
-        WORD mLimitChannelToRangeEnd {OPENPEER_SERVICES_TURN_CHANNEL_RANGE_END};
+        WORD mLimitChannelToRangeStart {ORTC_SERVICES_TURN_CHANNEL_RANGE_START};
+        WORD mLimitChannelToRangeEnd {ORTC_SERVICES_TURN_CHANNEL_RANGE_END};
       };
 
       static ITURNSocketPtr create(
@@ -197,11 +197,11 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ITURNSocketDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITURNSocketPtr, ITURNSocketPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITURNSocketDelegate::TURNSocketStates, TURNSocketStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ITURNSocketDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITURNSocketPtr, ITURNSocketPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITURNSocketDelegate::TURNSocketStates, TURNSocketStates)
 ZS_DECLARE_PROXY_METHOD_2(onTURNSocketStateChanged, ITURNSocketPtr, TURNSocketStates)
 ZS_DECLARE_PROXY_METHOD_SYNC_4(handleTURNSocketReceivedPacket, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_4(notifyTURNSocketSendPacket, bool, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
-ZS_DECLARE_PROXY_METHOD_1(onTURNSocketWriteReady, openpeer::services::ITURNSocketPtr)
+ZS_DECLARE_PROXY_METHOD_1(onTURNSocketWriteReady, ortc::services::ITURNSocketPtr)
 ZS_DECLARE_PROXY_END()

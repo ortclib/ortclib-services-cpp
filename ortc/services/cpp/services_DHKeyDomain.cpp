@@ -38,19 +38,18 @@
 
 #include <zsLib/XML.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN "https://meta.ortclib.org/dh/modp/uknown"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024    "https://meta.ortclib.org/dh/modp/1024"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538    "https://meta.ortclib.org/dh/modp/1538"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048    "https://meta.ortclib.org/dh/modp/2048"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072    "https://meta.ortclib.org/dh/modp/3072"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096    "https://meta.ortclib.org/dh/modp/4096"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144    "https://meta.ortclib.org/dh/modp/6144"
+#define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192    "https://meta.ortclib.org/dh/modp/8192"
 
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN "https://meta.openpeer.org/dh/modp/uknown"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024    "https://meta.openpeer.org/dh/modp/1024"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538    "https://meta.openpeer.org/dh/modp/1538"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048    "https://meta.openpeer.org/dh/modp/2048"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072    "https://meta.openpeer.org/dh/modp/3072"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096    "https://meta.openpeer.org/dh/modp/4096"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144    "https://meta.openpeer.org/dh/modp/6144"
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192    "https://meta.openpeer.org/dh/modp/8192"
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -796,16 +795,16 @@ namespace openpeer
     const char *IDHKeyDomain::toNamespace(KeyDomainPrecompiledTypes length)
     {
       switch (length) {
-        case KeyDomainPrecompiledType_Unknown:  return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN;
-        case KeyDomainPrecompiledType_1024:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024;
-        case KeyDomainPrecompiledType_1538:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538;
-        case KeyDomainPrecompiledType_2048:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048;
-        case KeyDomainPrecompiledType_3072:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072;
-        case KeyDomainPrecompiledType_4096:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096;
-        case KeyDomainPrecompiledType_6144:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144;
-        case KeyDomainPrecompiledType_8192:     return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192;
+        case KeyDomainPrecompiledType_Unknown:  return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN;
+        case KeyDomainPrecompiledType_1024:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024;
+        case KeyDomainPrecompiledType_1538:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538;
+        case KeyDomainPrecompiledType_2048:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048;
+        case KeyDomainPrecompiledType_3072:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072;
+        case KeyDomainPrecompiledType_4096:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096;
+        case KeyDomainPrecompiledType_6144:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144;
+        case KeyDomainPrecompiledType_8192:     return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192;
       }
-      return OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN;
+      return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN;
     }
 
     //-------------------------------------------------------------------------
@@ -814,25 +813,25 @@ namespace openpeer
       if (!inNamespace) return KeyDomainPrecompiledType_Unknown;
       if ('\0' == *inNamespace) return KeyDomainPrecompiledType_Unknown;
 
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1024)) {
         return KeyDomainPrecompiledType_1024;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_1538)) {
         return KeyDomainPrecompiledType_1538;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_2048)) {
         return KeyDomainPrecompiledType_2048;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_3072)) {
         return KeyDomainPrecompiledType_3072;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_4096)) {
         return KeyDomainPrecompiledType_4096;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144)) {
         return KeyDomainPrecompiledType_6144;
       }
-      if (0 == strcmp(inNamespace, OPENPEER_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192)) {
+      if (0 == strcmp(inNamespace, ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192)) {
         return KeyDomainPrecompiledType_8192;
       }
 

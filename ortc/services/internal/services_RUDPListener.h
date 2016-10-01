@@ -41,10 +41,10 @@
 #include <map>
 #include <utility>
 
-#define OPENPEER_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START (0x4000)
-#define OPENPEER_SERVICES_RUDPLISTENER_CHANNEL_RANGE_END   (0x7FFF)
+#define ORTC_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START (0x4000)
+#define ORTC_SERVICES_RUDPLISTENER_CHANNEL_RANGE_END   (0x7FFF)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

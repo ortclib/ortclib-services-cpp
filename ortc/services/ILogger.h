@@ -35,7 +35,7 @@
 
 #include <zsLib/Log.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

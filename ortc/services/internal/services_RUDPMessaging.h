@@ -37,7 +37,7 @@
 #include <ortc/services/IRUDPChannel.h>
 #include <ortc/services/ITransportStream.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

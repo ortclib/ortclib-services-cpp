@@ -40,9 +40,9 @@
 
 #include <list>
 
-#define OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS (10*60)
+#define ORTC_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS (10*60)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -193,7 +193,7 @@ namespace openpeer
       //          are ready. For example, TURN is shutdown while not in use
       //          and it must become active otherwise the TURN candidates will
       //          not be available.
-      virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) = 0;
+      virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(ORTC_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets a local list of offered candidates
@@ -255,16 +255,16 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IICESocketDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketPtr, IICESocketPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IICESocketDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
 ZS_DECLARE_PROXY_METHOD_2(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketCandidatesChanged, IICESocketPtr)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IICESocketDelegate, openpeer::services::IICESocketSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IICESocketPtr, IICESocketPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IICESocketDelegate, ortc::services::IICESocketSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketCandidatesChanged, IICESocketPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

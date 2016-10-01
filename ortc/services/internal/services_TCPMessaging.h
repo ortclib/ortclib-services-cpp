@@ -41,9 +41,9 @@
 #include <list>
 #include <map>
 
-#define OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-tcp-messaging"
+#define ORTC_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-tcp-messaging"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -80,7 +80,7 @@ namespace openpeer
                      ITransportStreamPtr receiveStream,
                      ITransportStreamPtr sendStream,
                      bool framesHaveChannelNumber,
-                     size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                     size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                      );
 
       protected:
@@ -109,7 +109,7 @@ namespace openpeer
                                       ITransportStreamPtr sendStream,
                                       bool framesHaveChannelNumber,
                                       SocketPtr socket,
-                                      size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                      size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                       );
 
         static TCPMessagingPtr connect(
@@ -118,7 +118,7 @@ namespace openpeer
                                        ITransportStreamPtr sendStream,
                                        bool framesHaveChannelNumber,
                                        IPAddress remoteIP,
-                                       size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                       size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                        );
 
         virtual PUID getID() const {return mID;}
@@ -127,7 +127,7 @@ namespace openpeer
 
         virtual void enableKeepAlive(bool enable = true);
 
-        virtual void shutdown(Milliseconds lingerTime = Milliseconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS));
+        virtual void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS));
 
         virtual SessionStates getState(
                                        WORD *outLastErrorCode = NULL,
@@ -255,7 +255,7 @@ namespace openpeer
                                        ITransportStreamPtr sendStream,
                                        bool framesHaveChannelNumber,
                                        SocketPtr socket,
-                                       size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                       size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                        );
 
         virtual TCPMessagingPtr connect(
@@ -264,7 +264,7 @@ namespace openpeer
                                         ITransportStreamPtr sendStream,
                                         bool framesHaveChannelNumber,
                                         IPAddress remoteIP,
-                                        size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                        size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                         );
       };
 

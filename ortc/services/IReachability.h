@@ -33,7 +33,7 @@
 
 #include <ortc/services/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -118,14 +118,14 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IReachabilityDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IReachabilityDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
 ZS_DECLARE_PROXY_METHOD_2(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IReachabilityDelegate, openpeer::services::IReachabilitySubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IReachabilityDelegate, ortc::services::IReachabilitySubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

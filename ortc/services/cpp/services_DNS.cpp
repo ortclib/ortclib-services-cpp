@@ -47,9 +47,9 @@
 #include <ppltasks.h>
 #endif //WINRT
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_dns) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_dns) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

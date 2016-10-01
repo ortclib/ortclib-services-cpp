@@ -33,7 +33,7 @@
 
 #include <ortc/services/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -193,18 +193,18 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackgroundingDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
 ZS_DECLARE_PROXY_METHOD_2(onBackgroundingGoingToBackground, IBackgroundingSubscriptionPtr, IBackgroundingNotifierPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IBackgroundingDelegate, openpeer::services::IBackgroundingSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IBackgroundingDelegate, ortc::services::IBackgroundingSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
 
   // notify each subscription of their backgrounding object
   virtual void onBackgroundingGoingToBackground(
@@ -220,7 +220,7 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackgroundingNotifie
       try {
         IBackgroundingSubscriptionPtr subscription = subscriptionWeak.lock();
         if (subscription) {
-          delegate->onBackgroundingGoingToBackground(subscription, openpeer::services::internal::getBackgroundingNotifier(notifier));
+          delegate->onBackgroundingGoingToBackground(subscription, ortc::services::internal::getBackgroundingNotifier(notifier));
         } else {
           ZS_INTERNAL_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_ERASE_KEY(key)
         }
@@ -235,8 +235,8 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingReturningFromBackground, 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackgroundingCompletionDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackgroundingQueryPtr, IBackgroundingQueryPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackgroundingCompletionDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingQueryPtr, IBackgroundingQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReady, IBackgroundingQueryPtr)
 ZS_DECLARE_PROXY_END()
 

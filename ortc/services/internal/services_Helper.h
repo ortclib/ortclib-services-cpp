@@ -36,13 +36,13 @@
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY  "ortc/services/services-thread-pool-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "ortc/services/services-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "ortc/services/logger-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "ortc/services/socket-monitor-thread-priority"
-#define OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY  "ortc/services/timer-monitor-thread-priority"
+#define ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY  "ortc/services/services-thread-pool-priority"
+#define ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY       "ortc/services/services-thread-priority"
+#define ORTC_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY         "ortc/services/logger-thread-priority"
+#define ORTC_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY "ortc/services/socket-monitor-thread-priority"
+#define ORTC_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY  "ortc/services/timer-monitor-thread-priority"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

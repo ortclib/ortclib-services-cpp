@@ -41,11 +41,11 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 
-#define OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES (64*1024)
+#define ORTC_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES (64*1024)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_tcp_messaging) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_tcp_messaging) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -106,7 +106,7 @@ namespace openpeer
 
         mBackgroundingSubscription = IBackgrounding::subscribe(
                                                                mThisWeak.lock(),
-                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE)
+                                                               ISettings::getUInt(ORTC_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE)
                                                                );
       }
 
@@ -361,9 +361,9 @@ namespace openpeer
         }
 
         try {
-          SecureByteBlock buffer(OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES);
+          SecureByteBlock buffer(ORTC_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES);
           bool wouldBlock = false;
-          size_t bytesRead = mSocket->receive(buffer.BytePtr(), OPENPEER_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES, &wouldBlock);
+          size_t bytesRead = mSocket->receive(buffer.BytePtr(), ORTC_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES, &wouldBlock);
 
           if (0 == bytesRead) {
 

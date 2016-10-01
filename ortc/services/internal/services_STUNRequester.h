@@ -41,7 +41,7 @@
 #include <zsLib/Timer.h>
 #include <zsLib/Proxy.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

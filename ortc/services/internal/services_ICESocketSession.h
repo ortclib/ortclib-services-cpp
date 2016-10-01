@@ -46,9 +46,9 @@
 #include <list>
 #include <utility>
 
-#define OPENPEER_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-ice-socket-session"
+#define ORTC_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-ice-socket-session"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

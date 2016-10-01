@@ -34,10 +34,9 @@
 
 #include <list>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

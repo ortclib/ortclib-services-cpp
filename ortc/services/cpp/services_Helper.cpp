@@ -65,16 +65,15 @@
 
 #include <idn/api.h>
 
-#define OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME "org.openpeer.services.serviceThreadPool"
-#define OPENPEER_SERVICES_SERVICE_THREAD_NAME "org.openpeer.services.serviceThread"
-#define OPENPEER_SERVICES_LOGGER_THREAD_NAME "org.openpeer.services.loggerThread"
+#define ORTC_SERVICES_SERVICE_THREAD_POOL_NAME "org.ortclib.services.serviceThreadPool"
+#define ORTC_SERVICES_SERVICE_THREAD_NAME "org.ortclib.services.serviceThread"
+#define ORTC_SERVICES_LOGGER_THREAD_NAME "org.ortclib.services.loggerThread"
 
-#define OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO (6)
+#define ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO (6)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -1466,10 +1465,10 @@ namespace openpeer
         char *destStr = &(outputBuffer[0]);
         size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
 
-        if (length * OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
-          overflowBuffer = std::unique_ptr<char[]>(new char[(length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
+        if (length * ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
+          overflowBuffer = std::unique_ptr<char[]>(new char[(length*ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
           destStr = overflowBuffer.get();
-          destLength = (length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
+          destLength = (length*ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
         }
 
         idn_result_t status = idn_decodename(IDN_DECODE_LOOKUP & (~IDN_UNICODECONV), idnStr.c_str(), destStr, destLength);
@@ -1497,10 +1496,10 @@ namespace openpeer
         char *destStr = &(outputBuffer[0]);
         size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
 
-        if (length * OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
-          overflowBuffer = std::unique_ptr<char[]>(new char[(length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
+        if (length * ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
+          overflowBuffer = std::unique_ptr<char[]>(new char[(length*ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
           destStr = overflowBuffer.get();
-          destLength = (length*OPENPEER_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
+          destLength = (length*ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO);
         }
 
         idn_result_t status = idn_encodename(IDN_ENCODE_LOOKUP & (~IDN_UNICODECONV), utf8Str.c_str(), destStr, destLength);
@@ -1917,13 +1916,13 @@ namespace openpeer
     //-------------------------------------------------------------------------
     void IHelper::setSocketThreadPriority()
     {
-      zsLib::Socket::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
+      zsLib::Socket::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_SOCKET_MONITOR_THREAD_PRIORITY)));
     }
 
     //-------------------------------------------------------------------------
     void IHelper::setTimerThreadPriority()
     {
-      zsLib::Timer::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY)));
+      zsLib::Timer::setMonitorPriority(zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_TIMER_MONITOR_THREAD_PRIORITY)));
     }
 
     //-------------------------------------------------------------------------
@@ -1932,12 +1931,12 @@ namespace openpeer
       class Once {
       public:
         Once() {
-          IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));
+          IMessageQueueManager::registerMessageQueueThreadPriority(ORTC_SERVICES_SERVICE_THREAD_POOL_NAME, zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));
           setTimerThreadPriority();
         }
       };
       static Once once;
-      return IMessageQueueManager::getThreadPoolQueue(OPENPEER_SERVICES_SERVICE_THREAD_POOL_NAME);
+      return IMessageQueueManager::getThreadPoolQueue(ORTC_SERVICES_SERVICE_THREAD_POOL_NAME);
     }
 
     //-------------------------------------------------------------------------
@@ -1945,10 +1944,10 @@ namespace openpeer
     {
       class Once {
       public:
-        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_SERVICE_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));}
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(ORTC_SERVICES_SERVICE_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY)));}
       };
       static Once once;
-      return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_SERVICE_THREAD_NAME);
+      return IMessageQueueManager::getMessageQueue(ORTC_SERVICES_SERVICE_THREAD_NAME);
     }
 
     //-------------------------------------------------------------------------
@@ -1956,10 +1955,10 @@ namespace openpeer
     {
       class Once {
       public:
-        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(OPENPEER_SERVICES_LOGGER_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY)));}
+        Once() {IMessageQueueManager::registerMessageQueueThreadPriority(ORTC_SERVICES_LOGGER_THREAD_NAME, zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY)));}
       };
       static Once once;
-      return IMessageQueueManager::getMessageQueue(OPENPEER_SERVICES_LOGGER_THREAD_NAME);
+      return IMessageQueueManager::getMessageQueue(ORTC_SERVICES_LOGGER_THREAD_NAME);
     }
 
     //-------------------------------------------------------------------------

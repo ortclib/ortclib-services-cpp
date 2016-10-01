@@ -35,9 +35,9 @@
 
 #include <zsLib/Log.h>
 
-#define OPENPEER_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN (512)
+#define ORTC_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN (512)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

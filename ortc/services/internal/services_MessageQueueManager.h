@@ -37,9 +37,9 @@
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "ortc/services/process-application-message-queue-on-quit"
+#define ORTC_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT "ortc/services/process-application-message-queue-on-quit"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

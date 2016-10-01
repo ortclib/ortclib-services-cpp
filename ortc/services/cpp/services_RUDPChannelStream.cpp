@@ -47,30 +47,30 @@
 #pragma warning(push)
 #pragma warning(disable:4290)
 
-#define OPENPEER_SERVICES_RUDP_MINIMUM_RECOMMENDED_RTT_IN_MILLISECONDS (40)
-#define OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS (20)
-#define OPENPEER_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS (200)
+#define ORTC_SERVICES_RUDP_MINIMUM_RECOMMENDED_RTT_IN_MILLISECONDS (40)
+#define ORTC_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS (20)
+#define ORTC_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS (200)
 
-#define OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER (256)
+#define ORTC_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER (256)
 
-#define OPENPEER_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS (10)
+#define ORTC_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS (10)
 
-#define OPENPEER_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION (10)
-#define OPENPEER_SERVICES_DEFAULT_PACKETS_PER_BURST (3)
+#define ORTC_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION (10)
+#define ORTC_SERVICES_DEFAULT_PACKETS_PER_BURST (3)
 
-//#define OPENPEER_INDUCE_FAKE_PACKET_LOSS
-#define OPENPEER_INDUCE_FAKE_PACKET_LOSS_PERCENTAGE (10)
+//#define ORTC_INDUCE_FAKE_PACKET_LOSS
+#define ORTC_INDUCE_FAKE_PACKET_LOSS_PERCENTAGE (10)
 
 
-#ifdef OPENPEER_INDUCE_FAKE_PACKET_LOSS
+#ifdef ORTC_INDUCE_FAKE_PACKET_LOSS
 #define WARNING_INDUCING_FAKE_PACKET_LOSS 1
 #define WARNING_INDUCING_FAKE_PACKET_LOSS 2
-#endif //OPENPEER_INDUCE_FAKE_PACKET_LOSS
+#endif //ORTC_INDUCE_FAKE_PACKET_LOSS
 
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -147,7 +147,7 @@ namespace openpeer
         if (0 == outRecommendedNextSequenceNumberForSending)
           outRecommendedNextSequenceNumberForSending = 1;
 
-        outMinimumRecommendedRTTInMilliseconds = OPENPEER_SERVICES_RUDP_MINIMUM_RECOMMENDED_RTT_IN_MILLISECONDS;
+        outMinimumRecommendedRTTInMilliseconds = ORTC_SERVICES_RUDP_MINIMUM_RECOMMENDED_RTT_IN_MILLISECONDS;
 
         outLocalAlgorithms.clear();
         outRemoteAlgoirthms.clear();
@@ -241,15 +241,15 @@ namespace openpeer
         mSendingChannelNumber(sendingChannelNumber),
         mReceivingChannelNumber(receivingChannelNumber),
         mMinimumRTT(Milliseconds(minimumNegotiatedRTTInMilliseconds)),
-        mCalculatedRTT(Milliseconds(OPENPEER_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS)),
+        mCalculatedRTT(Milliseconds(ORTC_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS)),
         mNextSequenceNumber(nextSequenceNumberToUseForSending),
         mGSNR(nextSequenberNumberExpectingToReceive-1),
         mGSNFR(nextSequenberNumberExpectingToReceive-1),
         mShutdownState(IRUDPChannel::Shutdown_None),
         mLastDeliveredReadData(zsLib::now()),
         mAvailableBurstBatons(1),
-        mAddToAvailableBurstBatonsDuation(Milliseconds(OPENPEER_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS)),
-        mPacketsPerBurst(OPENPEER_SERVICES_DEFAULT_PACKETS_PER_BURST),
+        mAddToAvailableBurstBatonsDuation(Milliseconds(ORTC_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS)),
+        mPacketsPerBurst(ORTC_SERVICES_DEFAULT_PACKETS_PER_BURST),
         mStartedSendingAtTime(zsLib::now()),
         mTotalSendingPeriodWithoutIssues(Milliseconds(0)),
         mForceACKOfSentPacketsRequestID(0)
@@ -470,7 +470,7 @@ namespace openpeer
           }
 
           // we can't process packets that are beyond the window in which we can process
-          if (sequenceNumber > (mGSNR + OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
+          if (sequenceNumber > (mGSNR + ORTC_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
             ZS_LOG_WARNING(Debug, log("received packet beyond allowed window") + ZS_PARAM("GSNR", sequenceToString(mGSNR)) + ZS_PARAM("packet sequence number", sequenceToString(sequenceNumber)))
             return false;
           }
@@ -506,13 +506,13 @@ namespace openpeer
           }
 
           // allow any packet to be delivered between the mGSNFR to the default window size to be added to the buffer (since it helps move the window)
-          if (sequenceNumber > mGSNFR+OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER) {
+          if (sequenceNumber > mGSNFR+ORTC_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER) {
 
             if (sequenceNumber > mGSNR) {
               Time current = zsLib::now();
 
               Milliseconds maxDuration = (mCalculatedRTT * 3);
-              if (maxDuration > Seconds(OPENPEER_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS)) {
+              if (maxDuration > Seconds(ORTC_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS)) {
                 // The remote party could have intentionally caused a really large
                 // RTT in order to open a very large buffer window in the receiver
                 // thus we have to prevent them expanding the window massively big
@@ -520,7 +520,7 @@ namespace openpeer
                 // idea to overload the receivers capacity. To prevent this we will
                 // calculate how many packets we actually receive during a 4 second
                 // window and limit our outstanding capacity to that window.
-                maxDuration = Seconds(OPENPEER_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS);
+                maxDuration = Seconds(ORTC_SERVICES_MAX_EXPAND_WINDOW_SINCE_LAST_READ_DELIVERED_IN_SECONDS);
               }
 
               // if this packet is attempting to expand the window, only allow expansion until the last delivered packet is 3xRTT old
@@ -1072,15 +1072,15 @@ namespace openpeer
                                             size_t packetLengthInBytes
                                             )
       {
-#ifdef OPENPEER_INDUCE_FAKE_PACKET_LOSS
-        bool forcePacketLoss = ((rand() % 100) < OPENPEER_INDUCE_FAKE_PACKET_LOSS_PERCENTAGE);
+#ifdef ORTC_INDUCE_FAKE_PACKET_LOSS
+        bool forcePacketLoss = ((rand() % 100) < ORTC_INDUCE_FAKE_PACKET_LOSS_PERCENTAGE);
         if (forcePacketLoss) {
           ZS_LOG_WARNING(Trace, log("faking packet loss in deliver attempt"))
         }
         return = (forcePacketLoss ? true : (delegate->notifyRUDPChannelStreamSendPacket(mThisWeak.lock(), buffer, packetLengthInBytes)));
 #else
         return delegate->notifyRUDPChannelStreamSendPacket(mThisWeak.lock(), buffer, packetLengthInBytes);
-#endif //OPENPEER_INDUCE_FAKE_PACKET_LOSS
+#endif //ORTC_INDUCE_FAKE_PACKET_LOSS
       }
 
       //-----------------------------------------------------------------------
@@ -1282,9 +1282,9 @@ namespace openpeer
                 newPacket->mVectorLengthInBytes = firstPacketCreated->mRUDPPacket->mVectorLengthInBytes;
               }
 
-              BYTE temp[OPENPEER_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN];
+              BYTE temp[ORTC_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN];
 
-              size_t availableBytes = newPacket->getRoomAvailableForData(OPENPEER_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN);
+              size_t availableBytes = newPacket->getRoomAvailableForData(ORTC_SERVICES_RUDP_MAX_PACKET_SIZE_WHEN_PMTU_IS_NOT_KNOWN);
 
               size_t bytesRead = getFromWriteBuffer(&(temp[0]), availableBytes);
               newPacket->mData = &(temp[0]);
@@ -1508,8 +1508,8 @@ namespace openpeer
 
             // all available bursts should happen in one RTT
             mBurstTimer = Timer::create(mThisWeak.lock(), burstDuration);
-            if (burstDuration < Milliseconds(OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS)) {
-              burstDuration = Milliseconds(OPENPEER_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS);
+            if (burstDuration < Milliseconds(ORTC_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS)) {
+              burstDuration = Milliseconds(ORTC_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS);
             }
 
             ZS_LOG_TRACE(log("creating a burst timer since there is data to send and available batons to send it") + ZS_PARAM("timer ID", mBurstTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("burst duration (ms)", burstDuration) + ZS_PARAM("calculated RTT (ms)", mCalculatedRTT))
@@ -1616,7 +1616,7 @@ namespace openpeer
           }
 
           // if the packet is too far ahead from the greatest packet received then it can't be processed
-          if (nextSequenceNumber > (mGSNR + OPENPEER_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
+          if (nextSequenceNumber > (mGSNR + ORTC_SERVICES_MAX_WINDOW_TO_NEXT_SEQUENCE_NUMBER)) {
             ZS_LOG_WARNING(Detail, log("ignoring ACK as it was for packet too far outside window") + ZS_PARAM("sequence number", sequenceToString(nextSequenceNumber)) + ZS_PARAM("GSNR", sequenceToString(mGSNR)))
             goto handleAckQuickExit;
           }
@@ -1911,7 +1911,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void RUDPChannelStream::handleUnfreezing()
       {
-        if (mTotalSendingPeriodWithoutIssues > Seconds(OPENPEER_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION)) {
+        if (mTotalSendingPeriodWithoutIssues > Seconds(ORTC_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION)) {
           mBandwidthIncreaseFrozen = false;
           mTotalSendingPeriodWithoutIssues = Milliseconds(0);
 

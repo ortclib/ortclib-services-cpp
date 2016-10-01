@@ -33,7 +33,7 @@
 
 #include <ortc/services/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -52,6 +52,6 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IWakeDelegate)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IWakeDelegate)
 ZS_DECLARE_PROXY_METHOD_0(onWake)
 ZS_DECLARE_PROXY_END()

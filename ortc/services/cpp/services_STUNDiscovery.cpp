@@ -44,9 +44,9 @@
 #include <zsLib/Stringize.h>
 
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -372,7 +372,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       ElementPtr STUNDiscovery::toDebug() const
       {
-        ElementPtr resultEl = Element::create("openpeer::services::STUNDiscovery");
+        ElementPtr resultEl = Element::create("ortc::services::STUNDiscovery");
 
         IHelper::debugAppend(resultEl, "srv query", mSRVQuery ? mSRVQuery->getID() : 0);
         IHelper::debugAppend(resultEl, "srv result", (bool)mOptions.mSRV);

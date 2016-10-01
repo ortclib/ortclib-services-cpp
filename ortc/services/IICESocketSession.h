@@ -39,7 +39,7 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -221,21 +221,21 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IICESocketSessionDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketSessionPtr, IICESocketSessionPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::STUNPacketPtr, STUNPacketPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketSessionDelegate::ICESocketSessionStates, ICESocketSessionStates)
-ZS_DECLARE_PROXY_METHOD_2(onICESocketSessionStateChanged, IICESocketSessionPtr, openpeer::services::IICESocketSessionDelegate::ICESocketSessionStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IICESocketSessionDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketSessionPtr, IICESocketSessionPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::STUNPacketPtr, STUNPacketPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketSessionDelegate::ICESocketSessionStates, ICESocketSessionStates)
+ZS_DECLARE_PROXY_METHOD_2(onICESocketSessionStateChanged, IICESocketSessionPtr, ortc::services::IICESocketSessionDelegate::ICESocketSessionStates)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionNominationChanged, IICESocketSessionPtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_3(handleICESocketSessionReceivedPacket, IICESocketSessionPtr, const BYTE *, size_t)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_4(handleICESocketSessionReceivedSTUNPacket, bool, IICESocketSessionPtr, STUNPacketPtr, const String &, const String &)
-ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionWriteReady, openpeer::services::IICESocketSessionPtr)
+ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionWriteReady, ortc::services::IICESocketSessionPtr)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IICESocketSessionDelegate, openpeer::services::IICESocketSessionSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IICESocketSessionPtr, IICESocketSessionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::STUNPacketPtr, STUNPacketPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IICESocketSession::ICESocketSessionStates, ICESocketSessionStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IICESocketSessionDelegate, ortc::services::IICESocketSessionSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketSessionPtr, IICESocketSessionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::STUNPacketPtr, STUNPacketPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketSession::ICESocketSessionStates, ICESocketSessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onICESocketSessionStateChanged, IICESocketSessionPtr, ICESocketSessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IICESocketSessionPtr)
 

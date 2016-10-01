@@ -37,9 +37,9 @@
 
 #include <zsLib/XML.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -646,7 +646,7 @@ namespace openpeer
           mTimer.reset();
         }
 
-        String timeoutSetting(OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT);
+        String timeoutSetting(ORTC_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT);
 
         timeoutSetting.replaceAll("$phase$", string(mCurrentPhase));
 

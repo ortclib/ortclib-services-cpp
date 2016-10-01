@@ -45,7 +45,7 @@
 #pragma warning(push)
 #pragma warning(disable:4290)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -413,7 +413,7 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::internal::IRUDPChannelStreamAsync)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelStreamAsync)
 ZS_DECLARE_PROXY_METHOD_0(onSendNow)
 ZS_DECLARE_PROXY_END()
 

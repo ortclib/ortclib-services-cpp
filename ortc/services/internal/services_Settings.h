@@ -37,9 +37,9 @@
 #pragma warning(push)
 #pragma warning(disable:4290)
 
-#define OPENPEER_SERVICES_SETTINGS_ROOT_JSON_IS_NESTED_NODE "openpeer"
+#define ORTC_SERVICES_SETTINGS_ROOT_JSON_IS_NESTED_NODE "ortc"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

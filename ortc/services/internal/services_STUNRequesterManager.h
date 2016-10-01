@@ -37,7 +37,7 @@
 #include <map>
 #include <utility>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

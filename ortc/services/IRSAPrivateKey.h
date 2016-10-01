@@ -34,9 +34,9 @@
 #include <ortc/services/types.h>
 
 
-#define OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE (2048)
+#define ORTC_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE (2048)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -54,7 +54,7 @@ namespace openpeer
 
       static IRSAPrivateKeyPtr generate(
                                         IRSAPublicKeyPtr &outPublicKey,
-                                        size_t keySizeInBits = OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
+                                        size_t keySizeInBits = ORTC_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
                                         );
 
       static IRSAPrivateKeyPtr load(const SecureByteBlock &buffer);

@@ -42,11 +42,11 @@
 #include <zsLib/XML.h>
 #include <zsLib/Stringize.h>
 
-#define OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS (6)
+#define ORTC_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS (6)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_stun) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_stun) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -81,7 +81,7 @@ namespace openpeer
       {
         if (!mBackOffTimerPattern) {
           mBackOffTimerPattern = IBackOffTimerPattern::create();
-          mBackOffTimerPattern->setMaxAttempts(OPENPEER_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS);
+          mBackOffTimerPattern->setMaxAttempts(ORTC_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS);
           mBackOffTimerPattern->addNextAttemptTimeout(Milliseconds(500));
           mBackOffTimerPattern->setMultiplierForLastAttemptTimeout(2.0);
           mBackOffTimerPattern->addNextRetryAfterFailureDuration(Milliseconds(1));

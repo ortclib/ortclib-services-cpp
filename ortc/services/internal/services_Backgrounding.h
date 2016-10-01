@@ -36,9 +36,9 @@
 
 #include <zsLib/Timer.h>
 
-#define OPENPEER_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "ortc/services/backgrounding-phase-$phase$-timeout-in-seconds"
+#define ORTC_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "ortc/services/backgrounding-phase-$phase$-timeout-in-seconds"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

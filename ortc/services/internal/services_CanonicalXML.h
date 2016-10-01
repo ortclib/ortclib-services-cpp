@@ -34,7 +34,7 @@
 #include <ortc/services/internal/types.h>
 #include <ortc/services/ICanonicalXML.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

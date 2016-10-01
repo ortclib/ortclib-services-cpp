@@ -45,12 +45,11 @@
 
 #include <algorithm>
 
-#define OPENPEER_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER (5)
+#define ORTC_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER (5)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -221,10 +220,10 @@ namespace openpeer
         do
         {
           ++tries;
-          if (tries > OPENPEER_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) return IRUDPChannelPtr();
+          if (tries > ORTC_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) return IRUDPChannelPtr();
 
           rng.GenerateBlock((BYTE *)(&channelNumber), sizeof(channelNumber));
-          channelNumber = (channelNumber % (OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_END - OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START)) + OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START;
+          channelNumber = (channelNumber % (ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_END - ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START)) + ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START;
 
           // check to see if the channel was used for this IP before...
           SessionMap::iterator found = mLocalChannelNumberSessions.find(channelNumber);
@@ -779,7 +778,7 @@ namespace openpeer
           do
           {
             ++tries;
-            if (tries > OPENPEER_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) {
+            if (tries > ORTC_SERVICES_RUDPICESOCKETSESSION_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) {
               stun->mErrorCode = STUNPacket::ErrorCode_InsufficientCapacity;
               response = STUNPacket::createErrorResponse(stun);
               fix(response);
@@ -787,7 +786,7 @@ namespace openpeer
             }
 
             rng.GenerateBlock((BYTE *)(&channelNumber), sizeof(channelNumber));
-            channelNumber = (channelNumber % (OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_END - OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START)) + OPENPEER_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START;
+            channelNumber = (channelNumber % (ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_END - ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START)) + ORTC_SERVICES_RUDPICESOCKETSESSION_CHANNEL_RANGE_START;
 
             // check to see if the channel was used for this IP before...
             SessionMap::iterator found = mLocalChannelNumberSessions.find(channelNumber);

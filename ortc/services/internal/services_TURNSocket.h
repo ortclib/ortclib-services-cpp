@@ -44,19 +44,19 @@
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
 
-#define OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
+#define ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
 
 #include <list>
 #include <map>
 #include <utility>
 
-#define OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-turn"
+#define ORTC_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-turn"
 
-#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "ortc/services/debug/force-turn-to-use-udp"
-#define OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "ortc/services/debug/force-turn-to-use-tcp"
-#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "ortc/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
+#define ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "ortc/services/debug/force-turn-to-use-udp"
+#define ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "ortc/services/debug/force-turn-to-use-tcp"
+#define ORTC_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "ortc/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -346,10 +346,10 @@ namespace openpeer
 
           ISTUNRequesterPtr mAllocateRequester;
 
-          BYTE mReadBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
+          BYTE mReadBuffer[ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
           size_t mReadBufferFilledSizeInBytes {};
 
-          BYTE mWriteBuffer[OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
+          BYTE mWriteBuffer[ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
           size_t mWriteBufferFilledSizeInBytes {};
 
           Server();

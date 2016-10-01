@@ -37,7 +37,7 @@
 #include <cryptopp/rsa.h>
 #include <cryptopp/secblock.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -107,7 +107,7 @@ namespace openpeer
 
         static RSAPrivateKeyPtr generate(
                                          RSAPublicKeyPtr &outPublicKey,
-                                         size_t keySizeInBits = OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
+                                         size_t keySizeInBits = ORTC_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
                                          );
 
         static RSAPrivateKeyPtr load(const SecureByteBlock &buffer);
@@ -162,7 +162,7 @@ namespace openpeer
 
         virtual RSAPrivateKeyPtr generate(
                                           RSAPublicKeyPtr &outPublicKey,
-                                          size_t keySizeInBits = OPENPEER_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
+                                          size_t keySizeInBits = ORTC_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
                                           );
 
         virtual RSAPrivateKeyPtr loadPrivateKey(const SecureByteBlock &buffer);

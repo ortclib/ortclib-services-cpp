@@ -36,9 +36,9 @@
 
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_SETTING_TELNET_LOGGER_PHASE "ortc/services/backgrounding-phase-telnet-logger"
+#define ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE "ortc/services/backgrounding-phase-telnet-logger"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

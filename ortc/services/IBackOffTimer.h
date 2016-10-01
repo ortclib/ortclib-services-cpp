@@ -36,7 +36,7 @@
 
 #include <zsLib/Log.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -233,14 +233,14 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IBackOffTimerDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackOffTimerPtr, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IBackOffTimer::States, States)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackOffTimerDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackOffTimerPtr, IBackOffTimerPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackOffTimer::States, States)
 ZS_DECLARE_PROXY_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IBackOffTimerDelegate, openpeer::services::IBackOffTimerSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackOffTimerPtr, IBackOffTimerPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IBackOffTimer::States, States)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IBackOffTimerDelegate, ortc::services::IBackOffTimerSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackOffTimerPtr, IBackOffTimerPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackOffTimer::States, States)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

@@ -40,11 +40,11 @@
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_dns) } }
+#define ORTC_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.ortclib.org/caching/dns/"
 
-#define OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.openpeer.org/caching/dns/"
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_dns) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -74,7 +74,7 @@ namespace openpeer
       static String getGenericCookieName(const String &name, int flags, const char *type)
       {
         String hash = IHelper::convertToHex(*IHelper::hash(name + ":" + string(flags)));
-        return String(OPENPEER_SERVICES_DNSMONITOR_CACHE_NAMESPACE) + type + "/" + hash;
+        return String(ORTC_SERVICES_DNSMONITOR_CACHE_NAMESPACE) + type + "/" + hash;
       }
 
       //-----------------------------------------------------------------------
@@ -949,8 +949,8 @@ namespace openpeer
           store(mName, IDNS::SRVLookupType_AutoLookupA, *data, mFlags, mExpires);
         } else {
           switch (status) {
-            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
-            default:             mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
+            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
+            default:             mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
           }
         }
 
@@ -981,8 +981,8 @@ namespace openpeer
           store(mName, IDNS::SRVLookupType_AutoLookupAAAA, *data, mFlags, mExpires);
         } else {
           switch (status) {
-            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
-            default:             mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
+            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
+            default:             mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
           }
         }
 
@@ -1030,8 +1030,8 @@ namespace openpeer
           store(mName, *data, mFlags, mExpires);
         } else {
           switch (status) {
-            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
-            default:             mExpires = zsLib::now() + Seconds(OPENPEER_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
+            case DNS_E_TEMPFAIL: mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS); break;
+            default:             mExpires = zsLib::now() + Seconds(ORTC_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS); break;
           }
         }
 

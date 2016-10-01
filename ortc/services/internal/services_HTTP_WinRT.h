@@ -44,7 +44,7 @@
 
 #include <ppltasks.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

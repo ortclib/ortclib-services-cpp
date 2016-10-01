@@ -40,7 +40,7 @@
 #pragma warning(disable:4290)
 #endif //_WIN32
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

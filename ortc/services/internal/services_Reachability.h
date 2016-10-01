@@ -34,7 +34,7 @@
 #include <ortc/services/IReachability.h>
 #include <ortc/services/internal/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

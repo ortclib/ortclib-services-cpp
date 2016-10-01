@@ -47,16 +47,16 @@
 #include <zsLib/Stringize.h>
 #include <zsLib/Numeric.h>
 
-#define OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_TOTAL_SEND_KEYS 3
+#define ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_TOTAL_SEND_KEYS 3
 
-#define OPENPEER_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS (2*(60*60))
+#define ORTC_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS (2*(60*60))
 
-#define OPENPEER_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE "https://meta.openpeer.org/caching/mls/nonce/"
+#define ORTC_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE "https://meta.ortclib.org/caching/mls/nonce/"
 
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_mls) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_mls) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -1487,8 +1487,8 @@ namespace openpeer
               // scope: we have a passphrase, see if the proof validates before attempting to decrypt any keys...
               {
                 String algorithm = getElementTextAndDecode(encodingEl->findFirstChildElementChecked("algorithm"));
-                if (OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
-                  ZS_LOG_ERROR(Detail, log("keying encoding not using known algorithm") + ZS_PARAM("algorithm", algorithm) + ZS_PARAM("expecting", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
+                if (ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
+                  ZS_LOG_ERROR(Detail, log("keying encoding not using known algorithm") + ZS_PARAM("algorithm", algorithm) + ZS_PARAM("expecting", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
                   setError(IHTTP::HTTPStatusCode_ExpectationFailed, "keyhing encoding not using expecting passphrase");
                   goto receive_error_out;
                 }
@@ -1511,7 +1511,7 @@ namespace openpeer
             // scope: check if nonce seen before
             {
               String hashNonce = IHelper::convertToHex(*IHelper::hash(nonce));
-              String nonceNamespace = OPENPEER_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE + hashNonce;
+              String nonceNamespace = ORTC_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE + hashNonce;
 
               String result = ICache::fetch(nonceNamespace);
               if (result.hasData()) {
@@ -1529,7 +1529,7 @@ namespace openpeer
               ElementPtr algorithmEl = keyingEl->findFirstChildElementChecked("algorithms")->findFirstChildElementChecked("algorithm");
               while (algorithmEl) {
                 String algorithm = getElementTextAndDecode(algorithmEl);
-                if (OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM == algorithm) {
+                if (ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM == algorithm) {
                   ZS_LOG_TRACE(log("found mandated algorithm"))
                   found = true;
                   break;
@@ -1537,7 +1537,7 @@ namespace openpeer
                 algorithmEl->findNextSiblingElement("algorithm");
               }
               if (!found) {
-                ZS_LOG_ERROR(Detail, log("did not find mandated MLS algorithm") + ZS_PARAM("expecting", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
+                ZS_LOG_ERROR(Detail, log("did not find mandated MLS algorithm") + ZS_PARAM("expecting", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM))
                 goto receive_error_out;
               }
             }
@@ -1562,7 +1562,7 @@ namespace openpeer
                   }
 
                   String algorithm = getElementTextAndDecode(keyEl->findFirstChildElementChecked("algorithm"));
-                  if (OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
+                  if (ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM != algorithm) {
                     ZS_LOG_WARNING(Detail, log("unsupported algorithm (thus skipping)") + ZS_PARAM("algorithm", algorithm))
                     goto next_key;
                   }
@@ -1708,7 +1708,7 @@ namespace openpeer
 
         if ((!mChangeSendingKeyTimer) &&
             (KeyingType_KeyAgreement == mSendKeyingType)) {
-          mChangeSendingKeyTimer = Timer::create(mThisWeak.lock(), Seconds(UseSettings::getUInt(OPENPEER_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER)));
+          mChangeSendingKeyTimer = Timer::create(mThisWeak.lock(), Seconds(UseSettings::getUInt(ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER)));
         }
 
         // create initial encryption offer (hint: it won't change)
@@ -1724,7 +1724,7 @@ namespace openpeer
         keyingEl->adoptAsLastChild(createElementWithText("nonce", nonce));
         keyingEl->adoptAsLastChild(createElementWithText("context", mLocalContextID));
 
-        Time expires = zsLib::now() + Seconds(OPENPEER_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS);
+        Time expires = zsLib::now() + Seconds(ORTC_SERVICES_MLS_DEFAULT_KEYING_EXPIRES_TIME_IN_SECONDS);
 
         keyingEl->adoptAsLastChild(createElementWithNumber("expires", IHelper::timeToString(expires)));
 
@@ -1737,7 +1737,7 @@ namespace openpeer
           case KeyingType_Unknown: break; // not possible
           case KeyingType_Passphrase: {
             encodingEl->adoptAsLastChild(createElementWithText("type", "passphrase"));
-            encodingEl->adoptAsLastChild(createElementWithText("algorithm", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
+            encodingEl->adoptAsLastChild(createElementWithText("algorithm", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
 
             String calculatedProof = IHelper::convertToHex(*IHelper::hmac(*IHelper::hmacKeyFromPassphrase(mSendPassphrase), "keying:" + nonce));
 
@@ -1816,7 +1816,7 @@ namespace openpeer
         }
 
         ElementPtr algorithmsEl = Element::create("algorithms");
-        algorithmsEl->adoptAsLastChild(createElementWithText("algorithm", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
+        algorithmsEl->adoptAsLastChild(createElementWithText("algorithm", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
 
         keyingEl->adoptAsLastChild(algorithmsEl);
 
@@ -1838,7 +1838,7 @@ namespace openpeer
         if (createKeys) {
           ElementPtr keysEl = Element::create("keys");
 
-          for (AlgorithmIndex index = 1; index <= OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_TOTAL_SEND_KEYS; ++index) {
+          for (AlgorithmIndex index = 1; index <= ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_TOTAL_SEND_KEYS; ++index) {
             KeyInfo key;
 
             key.mIntegrityPassphrase = IHelper::randomString((20*8/5));
@@ -1847,7 +1847,7 @@ namespace openpeer
 
             ElementPtr keyEl = Element::create("key");
             keyEl->adoptAsLastChild(createElementWithNumber("index", string(index)));
-            keyEl->adoptAsLastChild(createElementWithText("algorithm", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
+            keyEl->adoptAsLastChild(createElementWithText("algorithm", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
 
             ElementPtr inputsEl = Element::create("inputs");
             if (encodingPassphrase.hasData()) {
@@ -1901,7 +1901,7 @@ namespace openpeer
           ElementPtr signatureEl = Element::create("signature");
 
           signatureEl->adoptAsLastChild(createElementWithText("reference", referenceID));
-          signatureEl->adoptAsLastChild(createElementWithText("algorithm", OPENPEER_SERVICES_MESSAGE_LAYER_SECURITY_SIGNATURE_ALGORITHM));
+          signatureEl->adoptAsLastChild(createElementWithText("algorithm", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_SIGNATURE_ALGORITHM));
           signatureEl->adoptAsLastChild(createElementWithText("digestValue", IHelper::convertToBase64(*elementHash)));
           signatureEl->adoptAsLastChild(createElementWithText("digestSigned", IHelper::convertToBase64(*mSendSigningPrivateKey->sign(*elementHash))));
 

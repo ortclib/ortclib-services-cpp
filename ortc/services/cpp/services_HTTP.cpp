@@ -52,19 +52,19 @@
 //-----------------------------------------------------------------------------
 // NOTE: Uncomment only ONE of these options to force the TLS version
 
-//#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
-//#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
-//#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
+//#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
+//#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
+//#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
 
 
 //-----------------------------------------------------------------------------
 //WARNING: UNCOMMENTING THIS MAY CAUSE YOUR SSL TO BECOME COMPROMISED
 
-//#define OPENPEER_SERVICES_HTTP_ALLOW_BEAST
+//#define ORTC_SERVICES_HTTP_ALLOW_BEAST
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_http) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_http) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -451,7 +451,7 @@ namespace openpeer
 
           if (!mThread) {
             mThread = ThreadPtr(new std::thread(std::ref(*this)));
-            zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(OPENPEER_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY)));
+            zsLib::setThreadPriority(*mThread, zsLib::threadPriorityFromString(ISettings::getString(ORTC_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY)));
           }
 
           mPendingAddQueries[query->getID()] = query;
@@ -492,7 +492,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void HTTP::operator()()
       {
-        zsLib::debugSetCurrentThreadName("org.openpeer.services.http");
+        zsLib::debugSetCurrentThreadName("org.ortclib.services.http");
 
         ZS_LOG_BASIC(log("http thread started"))
 
@@ -967,30 +967,30 @@ namespace openpeer
           curl_easy_setopt(mCurl, CURLOPT_TIMEOUT_MS, zsLib::toMilliseconds(mTimeout));
         }
 
-#ifdef OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
+#ifdef ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
         curl_easy_setopt(mCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
-#endif //OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
+#endif //ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
 
-#ifdef OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
+#ifdef ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
         curl_easy_setopt(mCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_SSLv2);
-#endif //OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
+#endif //ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
 
-#ifdef OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
+#ifdef ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
         curl_easy_setopt(mCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_SSLv3);
-#endif //OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
+#endif //ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
 
-#ifdef OPENPEER_SERVICES_HTTP_ALLOW_BEAST
+#ifdef ORTC_SERVICES_HTTP_ALLOW_BEAST
         curl_easy_setopt(mCurl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST);
         ZS_LOG_WARNING(Basic, log("CURL beast is enabled (enabling CURL beast can compromise security)"))
 
-#define WARNING_OPENPEER_SERVICES_ENABLING_BEAST_CAN_COMPROMISE_SECURITY 1
-#define WARNING_OPENPEER_SERVICES_ENABLING_BEAST_CAN_COMPROMISE_SECURITY 2
+#define WARNING_ORTC_SERVICES_ENABLING_BEAST_CAN_COMPROMISE_SECURITY 1
+#define WARNING_ORTC_SERVICES_ENABLING_BEAST_CAN_COMPROMISE_SECURITY 2
 
-#endif //OPENPEER_SERVICES_HTTP_ALLOW_BEAST
+#endif //ORTC_SERVICES_HTTP_ALLOW_BEAST
 
-        //#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
-        //#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
-        //#define OPENPEER_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
+        //#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_TLS_1
+        //#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_2
+        //#define ORTC_SERVICES_HTTP_TLS_FORCE_TLS_VERSION_SSL_3
 
 
         if (ZS_IS_LOGGING(Debug)) {
@@ -1236,7 +1236,7 @@ namespace openpeer
         return 0;
       }
 #else
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

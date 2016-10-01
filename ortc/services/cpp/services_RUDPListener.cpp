@@ -55,15 +55,15 @@
 
 #include <algorithm>
 
-#define OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE (1 << (sizeof(WORD)*8))
+#define ORTC_SERVICES_RUDPLISTENER_BUFFER_SIZE (1 << (sizeof(WORD)*8))
 
-#define OPENPEER_SERVICES_RUDPLISTENER_MAX_NONCE_LIFETIME_IN_SECONDS (5*60)
+#define ORTC_SERVICES_RUDPLISTENER_MAX_NONCE_LIFETIME_IN_SECONDS (5*60)
 
-#define OPENPEER_SERVICES_RUDPLISTENER_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER (5)
+#define ORTC_SERVICES_RUDPLISTENER_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER (5)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -166,7 +166,7 @@ namespace openpeer
         if (0 != memcmp(&(key[0]), &(output[sizeof(time_t)]), sizeof(key))) return false;
 
         time_t now = time(NULL);
-        if (temp + OPENPEER_SERVICES_RUDPLISTENER_MAX_NONCE_LIFETIME_IN_SECONDS < now) return false;
+        if (temp + ORTC_SERVICES_RUDPLISTENER_MAX_NONCE_LIFETIME_IN_SECONDS < now) return false;
 
         return true;
       }
@@ -322,7 +322,7 @@ namespace openpeer
         IPAddress remote;
         STUNPacketPtr stun;
 
-        std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE]);
+        std::unique_ptr<BYTE[]> buffer(new BYTE[ORTC_SERVICES_RUDPLISTENER_BUFFER_SIZE]);
 
         size_t bytesRead = 0;
 
@@ -332,7 +332,7 @@ namespace openpeer
           if (!mDelegate) return;
 
           try {
-            bytesRead = mUDPSocket->receiveFrom(remote, buffer.get(), OPENPEER_SERVICES_RUDPLISTENER_BUFFER_SIZE);
+            bytesRead = mUDPSocket->receiveFrom(remote, buffer.get(), ORTC_SERVICES_RUDPLISTENER_BUFFER_SIZE);
           } catch(Socket::Exceptions::Unspecified &) {
             cancel();
             return;
@@ -787,7 +787,7 @@ namespace openpeer
           do
           {
             ++tries;
-            if (tries > OPENPEER_SERVICES_RUDPLISTENER_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) {
+            if (tries > ORTC_SERVICES_RUDPLISTENER_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER) {
               stun->mErrorCode = STUNPacket::ErrorCode_InsufficientCapacity;
               response = STUNPacket::createErrorResponse(stun);
               fix(response);
@@ -795,8 +795,8 @@ namespace openpeer
             }
 
             rng.GenerateBlock((BYTE *)(&channelNumber), sizeof(channelNumber));
-            channelNumber = channelNumber % (OPENPEER_SERVICES_RUDPLISTENER_CHANNEL_RANGE_END - OPENPEER_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START);
-            channelNumber += OPENPEER_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START;
+            channelNumber = channelNumber % (ORTC_SERVICES_RUDPLISTENER_CHANNEL_RANGE_END - ORTC_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START);
+            channelNumber += ORTC_SERVICES_RUDPLISTENER_CHANNEL_RANGE_START;
 
             // check to see if the channel was used for this IP before...
             ChannelPair search(remoteIP, channelNumber);

@@ -40,9 +40,9 @@
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -81,7 +81,7 @@ namespace openpeer
       {
         ZS_LOG_DETAIL(log("created"))
 
-        static auto sMaximumFailures = ISettings::getUInt(OPENPEER_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES);
+        static auto sMaximumFailures = ISettings::getUInt(ORTC_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES);
         auto maximumFailures = (sMaximumFailures > 0 ? sMaximumFailures : totalFailuresThusFar);
 
         for (ULONG loop = 0; (loop < totalFailuresThusFar) && (loop < maximumFailures); ++loop) {

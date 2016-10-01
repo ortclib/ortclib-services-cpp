@@ -43,12 +43,12 @@
 #include <zsLib/Stringize.h>
 #include <zsLib/XML.h>
 
-#define OPENPEER_SERVICES_RUDPMESSAGING_RECYCLE_BUFFER_SIZE ((1 << (sizeof(WORD)*8)) + sizeof(DWORD))
-#define OPENPEER_SERVICES_RUDPMESSAGING_MAX_RECYLCE_BUFFERS (100)
+#define ORTC_SERVICES_RUDPMESSAGING_RECYCLE_BUFFER_SIZE ((1 << (sizeof(WORD)*8)) + sizeof(DWORD))
+#define ORTC_SERVICES_RUDPMESSAGING_MAX_RECYLCE_BUFFERS (100)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

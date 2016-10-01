@@ -40,9 +40,9 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_stun) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_stun) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

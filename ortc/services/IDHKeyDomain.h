@@ -34,9 +34,9 @@
 #include <ortc/services/types.h>
 
 
-#define OPENPEER_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE (2048)
+#define ORTC_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE (2048)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -69,7 +69,7 @@ namespace openpeer
 
       static ElementPtr toDebug(IDHKeyDomainPtr keyDomain);
 
-      static IDHKeyDomainPtr generate(size_t keySizeInBits = OPENPEER_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE);
+      static IDHKeyDomainPtr generate(size_t keySizeInBits = ORTC_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE);
 
       static IDHKeyDomainPtr loadPrecompiled(
                                              KeyDomainPrecompiledTypes precompiledLength,

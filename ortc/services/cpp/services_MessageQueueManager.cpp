@@ -37,11 +37,11 @@
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 
-#define OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME "c745461ccd5bfd8427beeda5f952dc68fb09668a_openpeer.services.guiThread"
+#define ORTC_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME "c745461ccd5bfd8427beeda5f952dc68fb09668a_ortclib.services.guiThread"
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -85,7 +85,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       MessageQueueManager::MessageQueueManager(const make_private &) :
         mPending(0),
-        mProcessApplicationQueueOnShutdown(ISettings::getBool(OPENPEER_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT))
+        mProcessApplicationQueueOnShutdown(ISettings::getBool(ORTC_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT))
       {
         ZS_LOG_BASIC(log("created"))
       }
@@ -112,7 +112,7 @@ namespace openpeer
         static SingletonLazySharedPtr<MessageQueueManager> singleton(create());
         MessageQueueManagerPtr result = singleton.singleton();
 
-        static SingletonManager::Register registerSingleton("openpeer::services::MessageQueueManager", result);
+        static SingletonManager::Register registerSingleton("ortc::services::MessageQueueManager", result);
 
         if (!result) {
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
@@ -140,7 +140,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       IMessageQueuePtr MessageQueueManager::getMessageQueueForGUIThread()
       {
-        return getMessageQueue(OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME);
+        return getMessageQueue(ORTC_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME);
       }
 
       //-----------------------------------------------------------------------
@@ -162,7 +162,7 @@ namespace openpeer
         IMessageQueuePtr queue;
 
         // creating new thread
-        if (OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME == name) {
+        if (ORTC_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME == name) {
           ZS_LOG_TRACE(log("creating GUI thread"))
           queue = MessageQueueThread::singletonUsingCurrentGUIThreadsMessageQueue();
         } else {
@@ -389,7 +389,7 @@ namespace openpeer
                 const MessageQueueName &name = (*iter).first;
                 IMessageQueuePtr queue = (*iter).second;
 
-                if (name == OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME)
+                if (name == ORTC_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME)
                   continue;
 
                 ++mPending;
@@ -449,7 +449,7 @@ namespace openpeer
             const MessageQueueName &name = (*iter).first;
             IMessageQueuePtr queue = (*iter).second;
 
-            if (name == OPENPEER_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME) {
+            if (name == ORTC_SERVICES_MESSAGE_QUEUE_MANAGER_RESERVED_GUI_THREAD_NAME) {
               if (!processApplicationQueueOnShutdown)
                 continue;
 

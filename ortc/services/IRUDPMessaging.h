@@ -38,9 +38,9 @@
 #include <zsLib/Proxy.h>
 #include <zsLib/String.h>
 
-#define OPENPEER_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
+#define ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -93,7 +93,7 @@ namespace openpeer
                                              IRUDPMessagingDelegatePtr delegate,
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
-                                             size_t maxMessageSizeInBytes = OPENPEER_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                             size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                              );
 
       //-----------------------------------------------------------------------
@@ -107,7 +107,7 @@ namespace openpeer
                                              IRUDPMessagingDelegatePtr delegate,
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
-                                             size_t maxMessageSizeInBytes = OPENPEER_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                             size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                              );
 
       //-----------------------------------------------------------------------
@@ -122,7 +122,7 @@ namespace openpeer
                                            const char *connectionInfo,
                                            ITransportStreamPtr receiveStream,
                                            ITransportStreamPtr sendStream,
-                                           size_t maxMessageSizeInBytes = OPENPEER_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                           size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                            );
 
       virtual PUID getID() const = 0;
@@ -180,8 +180,8 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPMessagingDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPMessagingPtr, IRUDPMessagingPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPMessagingDelegate::RUDPMessagingStates, RUDPMessagingStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPMessagingDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPMessagingPtr, IRUDPMessagingPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPMessagingDelegate::RUDPMessagingStates, RUDPMessagingStates)
 ZS_DECLARE_PROXY_METHOD_2(onRUDPMessagingStateChanged, IRUDPMessagingPtr, RUDPMessagingStates)
 ZS_DECLARE_PROXY_END()

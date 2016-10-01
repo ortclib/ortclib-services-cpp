@@ -43,11 +43,11 @@
 #include <sys/types.h>
 #endif //_LINUX
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_rudp) } }
+#define ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES (12)
 
-#define OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES (12)
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -166,7 +166,7 @@ namespace openpeer
                                           )
     {
       ZS_THROW_INVALID_USAGE_IF(!packet)
-      if (packetLengthInBytes < OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
+      if (packetLengthInBytes < ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
 
       WORD channelNumber = IHelper::getBE16(&(((WORD *)packet)[0]));
 
@@ -187,14 +187,14 @@ namespace openpeer
 
       bool eqFlag = (0 != (flags & Flag_EQ_GSNREqualsGSNFR));
       if (!eqFlag) {
-        if (packetLengthInBytes < OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + sizeof(DWORD)) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
+        if (packetLengthInBytes < ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + sizeof(DWORD)) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
         vectorSize = (packet[sizeof(DWORD)*3]) & (0x7F);
         vectorFlags = (packet[sizeof(DWORD)*3]) & (0x80);
         gsnfr = IHelper::getBE32(&(((DWORD *)packet)[3])) & 0xFFFFFF;               // lower 24bits are valid only
       }
 
       // has to have enough room to contain vector, extended header and all data
-      if (packetLengthInBytes < OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(vectorSize) + ((size_t)dataLength)) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
+      if (packetLengthInBytes < ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(vectorSize) + ((size_t)dataLength)) return RUDPPacketPtr();  // does not meet the minimum size expectations so it can't be RUDP
 
       // this appears to be RUDP
       RUDPPacketPtr pThis = create();
@@ -210,7 +210,7 @@ namespace openpeer
       }
 
       if (0 != dataLength) {
-        pThis->mData = &(packet[OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(vectorSize)]);
+        pThis->mData = &(packet[ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(vectorSize)]);
         pThis->mDataLengthInBytes = dataLength;
       }
       pThis->log(Log::Trace, "parse");
@@ -226,7 +226,7 @@ namespace openpeer
       bool eqFlag = (0 != (mFlags & Flag_EQ_GSNREqualsGSNFR));
       ZS_THROW_BAD_STATE_IF(eqFlag && ((mGSNR & 0xFFFFFF) != (mGSNFR & 0xFFFFFF))) // they must match if the EQ flag is set to true or this is illegal
 
-      size_t length = OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes) + mDataLengthInBytes;
+      size_t length = ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes) + mDataLengthInBytes;
 
       SecureByteBlockPtr outBuffer(make_shared<SecureByteBlock>(length));
 
@@ -250,13 +250,13 @@ namespace openpeer
         // copy in the vector if it is present
         if (0 != mVectorLengthInBytes) {
           ZS_THROW_BAD_STATE_IF(mVectorLengthInBytes > 0x7F)  // this is illegal
-          memcpy(&(packet[OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + sizeof(DWORD)]), &(mVector[0]), mVectorLengthInBytes);
+          memcpy(&(packet[ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + sizeof(DWORD)]), &(mVector[0]), mVectorLengthInBytes);
         }
       }
 
       if (0 != mDataLengthInBytes) {
         ZS_THROW_BAD_STATE_IF(NULL == mData)  // cannot have set a length but forgot to specify the pointer
-        memcpy(&(packet[OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes)]), &(mData[0]), mDataLengthInBytes);
+        memcpy(&(packet[ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes)]), &(mData[0]), mDataLengthInBytes);
       }
       return outBuffer;
     }
@@ -360,7 +360,7 @@ namespace openpeer
       bool eqFlag = (0 != (mFlags & Flag_EQ_GSNREqualsGSNFR));
       ZS_THROW_BAD_STATE_IF(eqFlag & ((mGSNR & 0xFFFFFF) != (mGSNFR & 0xFFFFFF))) // they must match if the EQ flag is set to true or this is illegal
 
-      size_t length = OPENPEER_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes);
+      size_t length = ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES + ((!eqFlag) ? sizeof(DWORD) : 0) + internal::dwordBoundary(mVectorLengthInBytes);
       if (length > maxPacketLengthInBytes) return 0;
 
       return maxPacketLengthInBytes - length;

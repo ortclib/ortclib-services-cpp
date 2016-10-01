@@ -38,10 +38,10 @@
 #include <zsLib/Log.h>
 #include <zsLib/String.h>
 
-#define OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES (20)
-#define OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION "openpeer STUN 1.0"
+#define ORTC_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES (20)
+#define ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION "ortclib STUN 1.0"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -202,20 +202,20 @@ namespace openpeer
 
       static STUNPacketPtr createRequest(
                                          Methods method,
-                                         const char *software = OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION
+                                         const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
                                          );
       static STUNPacketPtr createIndication(
                                             Methods method,
-                                            const char *software = OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION
+                                            const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
                                             );
 
       static STUNPacketPtr createResponse(
                                           STUNPacketPtr request,
-                                          const char *software = OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION
+                                          const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
                                           );
       static STUNPacketPtr createErrorResponse(
                                                STUNPacketPtr request,
-                                               const char *software = OPENPEER_SERVICES_CLIENT_SOFTARE_DECLARATION
+                                               const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
                                                );          // put the error code into the request
 
       STUNPacketPtr clone(bool changeTransactionID) const;
@@ -350,7 +350,7 @@ namespace openpeer
 
       CredentialMechanisms mCredentialMechanism {CredentialMechanisms_None};
       size_t mMessageIntegrityMessageLengthInBytes {};          // how big is the input into the HMAC algorithm, including 20 byte header -- it is the length of the packet up to but not including the message integrity attribute or message-integrity value
-      BYTE  mMessageIntegrity[OPENPEER_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES];   // the message integrity of the packet
+      BYTE  mMessageIntegrity[ORTC_STUN_MESSAGE_INTEGRITY_LENGTH_IN_BYTES];   // the message integrity of the packet
 
       bool mFingerprintIncluded {};                             // should this packet include the fingerprint (or did include the fingerprint)
 

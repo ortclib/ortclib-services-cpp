@@ -35,7 +35,7 @@
 
 #include <zsLib/Proxy.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -230,8 +230,8 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IHTTPQueryDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IHTTPQueryPtr, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IHTTPQueryDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTPQueryPtr, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onHTTPReadDataAvailable, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onHTTPCompleted, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_END()

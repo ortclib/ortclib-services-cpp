@@ -43,10 +43,9 @@
 #include <cryptopp/rsa.h>
 
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
-
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -225,7 +224,7 @@ namespace openpeer
         // found the signature reference, now check if the peer URIs match - they must...
         try {
           String algorithm = signatureEl->findFirstChildElementChecked("algorithm")->getTextDecoded();
-          if (algorithm != OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM) {
+          if (algorithm != ORTC_SERVICES_JSON_SIGNATURE_ALGORITHM) {
             ZS_LOG_WARNING(Detail, log("signature validation algorithm is not understood") + ZS_PARAM("algorithm", algorithm))
             return false;
           }

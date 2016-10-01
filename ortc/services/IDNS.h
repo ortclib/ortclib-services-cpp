@@ -38,7 +38,7 @@
 
 #include <list>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -268,7 +268,7 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IDNSDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IDNSQueryPtr, IDNSQueryPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IDNSDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IDNSQueryPtr, IDNSQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onLookupCompleted, IDNSQueryPtr)
 ZS_DECLARE_PROXY_END()

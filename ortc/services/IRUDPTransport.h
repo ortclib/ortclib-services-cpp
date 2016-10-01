@@ -39,7 +39,7 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -140,17 +140,17 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPTransportDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPTransportPtr, IRUDPTransportPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPTransportDelegate::RUDPTransportStates, RUDPTransportStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPTransportDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPTransportPtr, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPTransportDelegate::RUDPTransportStates, RUDPTransportStates)
 ZS_DECLARE_PROXY_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
 ZS_DECLARE_PROXY_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_END()
 
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IRUDPTransportDelegate, openpeer::services::IRUDPTransportSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPTransportPtr, IRUDPTransportPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IRUDPTransport::RUDPTransportStates, RUDPTransportStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IRUDPTransportDelegate, ortc::services::IRUDPTransportSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IRUDPTransportPtr, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IRUDPTransport::RUDPTransportStates, RUDPTransportStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

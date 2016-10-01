@@ -49,22 +49,22 @@
 
 #include <algorithm>
 
-#define OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE (1 << (sizeof(WORD)*8))
+#define ORTC_SERVICES_TURNSOCKET_BUFFER_SIZE (1 << (sizeof(WORD)*8))
 
-#define OPENPEER_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS (20)             // keep alive should be 20 because ICE sends its keep alives every 15 seconds
-#define OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS (15)               // do not allow server to dictate a LIFETIME lower than 15 seconds
-#define OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS (60) // should try to refresh at least 60 seconds before LIFETIME of an allocation expires
+#define ORTC_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS (20)             // keep alive should be 20 because ICE sends its keep alives every 15 seconds
+#define ORTC_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS (15)               // do not allow server to dictate a LIFETIME lower than 15 seconds
+#define ORTC_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS (60) // should try to refresh at least 60 seconds before LIFETIME of an allocation expires
 
-#define OPENPEER_SERVICES_TURN_RECOMMENDED_LIFETIME_IN_SECONDS (60*10)                 // 10 minutes is recommended LIFETIME for an allocation on TURN
-#define OPENPEER_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS (4*60)                      // 5 minutes until permissions expire so retry in 4 minutes
-#define OPENPEER_SERVICES_TURN_REMOVE_PERMISSION_IF_NO_DATA_IN_SECONDS (10*60)         // remove any created permission if no data was sent in 10 minutes
-#define OPENPEER_SERVICES_TURN_REMOVE_CHANNEL_IF_NO_DATA_IN_SECONDS (10*60)            // remove any channels created if no data was sent in 10 minutes
+#define ORTC_SERVICES_TURN_RECOMMENDED_LIFETIME_IN_SECONDS (60*10)                 // 10 minutes is recommended LIFETIME for an allocation on TURN
+#define ORTC_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS (4*60)                      // 5 minutes until permissions expire so retry in 4 minutes
+#define ORTC_SERVICES_TURN_REMOVE_PERMISSION_IF_NO_DATA_IN_SECONDS (10*60)         // remove any created permission if no data was sent in 10 minutes
+#define ORTC_SERVICES_TURN_REMOVE_CHANNEL_IF_NO_DATA_IN_SECONDS (10*60)            // remove any channels created if no data was sent in 10 minutes
 
-#define OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS (4)
+#define ORTC_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS (4)
 
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_turn) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_turn) } }
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -144,8 +144,8 @@ namespace openpeer
         mOptions(options),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mForceTURNUseUDP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
-        mForceTURNUseTCP(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP))
+        mForceTURNUseUDP(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP))
       {
         mOptions.mSRVUDP = IDNS::cloneSRV(mOptions.mSRVUDP);
         mOptions.mSRVTCP = IDNS::cloneSRV(mOptions.mSRVTCP);
@@ -186,12 +186,12 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
 
-        String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
+        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
         mBackgroundingSubscription = IBackgrounding::subscribe(
                                                                mThisWeak.lock(),
-                                                               ISettings::getUInt(OPENPEER_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE)
+                                                               ISettings::getUInt(ORTC_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE)
                                                                );
 
         step();
@@ -292,14 +292,14 @@ namespace openpeer
                                   )
       {
         EventWriteOpServicesTurnSocketSendPacket(__func__, mID, destination.string(), bufferLengthInBytes, buffer, bindChannelIfPossible);
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination is invalid"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination is invalid"))
           return false;
         }
         if (destination.isPortEmpty()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet over TURN as destination port is invalid") + ZS_PARAM("ip", destination.string()))
           return false;
         }
 
@@ -309,15 +309,15 @@ namespace openpeer
         }
 
         if (NULL == buffer) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer is NULL"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer is NULL"))
           return false;
         }
         if (0 == bufferLengthInBytes) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is empty"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is empty"))
           return false;
         }
-        if (bufferLengthInBytes > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ZS_PARAM("size", bufferLengthInBytes))
+        if (bufferLengthInBytes > ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) {
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as buffer length is greater than maximum capacity") + ZS_PARAM("size", bufferLengthInBytes))
           return false;  // illegal to be so large
         }
 
@@ -332,7 +332,7 @@ namespace openpeer
           }
 
           if (!isReady()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet as TURN is not ready"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet as TURN is not ready"))
             return false;
           }
 
@@ -357,7 +357,7 @@ namespace openpeer
                 // copy the entire buffer into the packet
                 memcpy(&((packet->BytePtr())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
                 EventWriteOpServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr(), info->mChannelNumber);
-                OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
+                ORTC_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
 
@@ -532,9 +532,9 @@ namespace openpeer
         if ((channel < mOptions.mLimitChannelToRangeStart) ||
             (channel > mOptions.mLimitChannelToRangeEnd)) return false;        // this can't be legal channel data
 
-        if (length > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) return false;  // this can't be legal channel data
+        if (length > ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES) return false;  // this can't be legal channel data
         if (length > (bufferLengthInBytes-sizeof(DWORD))) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("reported length", length) + ZS_PARAM("actual length", bufferLengthInBytes))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received with a length set too large") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("reported length", length) + ZS_PARAM("actual length", bufferLengthInBytes))
           return false;
         }
 
@@ -551,7 +551,7 @@ namespace openpeer
 
           ChannelNumberMap::iterator found = mChannelNumberMap.find(channel);
           if (mChannelNumberMap.end() == found) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("channel", channel))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("channel packet received for non-existant channel") + ZS_PARAM("ip", fromIPAddress.string()) + ZS_PARAM("channel", channel))
             return false;                             // this isn't any bound channel we know about...
           }
 
@@ -580,7 +580,7 @@ namespace openpeer
 
         if (mActiveServer) {
           if (!mActiveServer->mIsUDP) {
-            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notified delegate sender is write ready however we are sending via TCP so we will ignore this notification"))
+            ORTC_SERVICES_WIRE_LOG_TRACE(log("notified delegate sender is write ready however we are sending via TCP so we will ignore this notification"))
             return;
           }
         }
@@ -817,7 +817,7 @@ namespace openpeer
             }
 
             if (!server) {
-              OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("read ready notification on socket does not match any known servers"))
+              ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("read ready notification on socket does not match any known servers"))
               return;
             }
 
@@ -833,7 +833,7 @@ namespace openpeer
 
               if (isShutdown()) return;
               if (!server->mTCPSocket) {
-                OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TCP socket was closed") + ZS_PARAM("server IP", server->mServerIP.string()))
+                ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("TCP socket was closed") + ZS_PARAM("server IP", server->mServerIP.string()))
                 return;
               }
 
@@ -884,10 +884,10 @@ namespace openpeer
                 if (0 != consumedBytes) {
                   // the STUN packet is going to have it's parsed pointing into the read buffer which is about to be consumed, fix the pointers now...
                   ZS_THROW_INVALID_ASSUMPTION_IF(!stun);
-                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE);
+                  ZS_THROW_INVALID_ASSUMPTION_IF(consumedBytes > ORTC_SERVICES_TURNSOCKET_BUFFER_SIZE);
 
                   if (stun->mData) {
-                    std::unique_ptr<BYTE[]> newBuffer(new BYTE[OPENPEER_SERVICES_TURNSOCKET_BUFFER_SIZE]);
+                    std::unique_ptr<BYTE[]> newBuffer(new BYTE[ORTC_SERVICES_TURNSOCKET_BUFFER_SIZE]);
                     buffer = std::move(newBuffer);
 
                     // make a duplicate of the data buffer
@@ -923,7 +923,7 @@ namespace openpeer
 
                     if ((channel < mOptions.mLimitChannelToRangeStart) ||
                         (channel > mOptions.mLimitChannelToRangeEnd) ||
-                        (lengthAsSizeT > OPENPEER_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES)) {
+                        (lengthAsSizeT > ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES)) {
                       ZS_LOG_ERROR(Basic, log("socket received bogus data and is being shutdown"))
                       // this socket has bogus data in it...
                       mLastError = TURNSocketError_BogusDataOnSocketReceived;
@@ -968,7 +968,7 @@ namespace openpeer
                 case STUNPacket::ParseLookAheadState_STUNPacket:                            {
                   parseAgain = true;
                   if (ISTUNRequesterManager::handleSTUNPacket(server->mServerIP, stun)) {
-                    OPENPEER_SERVICES_WIRE_LOG_TRACE(log("STUN request handled via request manager"))
+                    ORTC_SERVICES_WIRE_LOG_TRACE(log("STUN request handled via request manager"))
                     continue;  // if this was handled by the requester manager then nothing more to do
                   }
 
@@ -990,7 +990,7 @@ namespace openpeer
                       }
 
                       if (server != mActiveServer) {
-                        OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ZS_PARAM("server IP", server->mServerIP.string()))
+                        ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot forward STUN packet when server not promoted to active") + ZS_PARAM("server IP", server->mServerIP.string()))
                         continue;
                       }
 
@@ -1002,7 +1002,7 @@ namespace openpeer
                     case STUNPacket::Class_ErrorResponse:
                     default:                                {
                       // if this was truly a response that was cared about it would have already been handled by the requester manager so ignore the response
-                      OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN received a respose (or error response) but it was not handle (likely obsolete)"))
+                      ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN received a respose (or error response) but it was not handle (likely obsolete)"))
                       continue;
                     }
                   }
@@ -1012,7 +1012,7 @@ namespace openpeer
             }
           }
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("delegate gone"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("delegate gone"))
           cancel();
           return;
         }
@@ -1026,7 +1026,7 @@ namespace openpeer
         AutoRecursiveLock lock(mLock);
 
         if (isShutdown()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("server notified write ready while shutdown"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("server notified write ready while shutdown"))
           return;
         }
 
@@ -1046,7 +1046,7 @@ namespace openpeer
         }
 
         if (!server) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("notify write ready did not match any known TCP server connections"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("notify write ready did not match any known TCP server connections"))
           return;
         }
 
@@ -1149,15 +1149,15 @@ namespace openpeer
 
         if (timer == mRefreshTimer) {
           // figure out how much time do we have before the lifetime expires
-          DWORD totalSeconds = (mLifetime > (OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS+30) ? mLifetime - OPENPEER_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS : mLifetime / 2);
-          if (totalSeconds < OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS)
-            totalSeconds = OPENPEER_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS;
+          DWORD totalSeconds = (mLifetime > (ORTC_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS+30) ? mLifetime - ORTC_SERVICES_TURN_RECOMMENDED_REFRESH_BEFORE_LIFETIME_END_IN_SECONDS : mLifetime / 2);
+          if (totalSeconds < ORTC_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS)
+            totalSeconds = ORTC_SERVICES_TURN_MINIMUM_LIFETIME_FOR_TURN_IN_SECONDS;
 
           Time current = zsLib::now();
 
           // if we haven't sent data to the server in a while we should otherwise our firewall socket port could close
-          if (mLastSentDataToServer + Seconds(OPENPEER_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS) < current)
-            totalSeconds = (totalSeconds > OPENPEER_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS ? OPENPEER_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS : totalSeconds);
+          if (mLastSentDataToServer + Seconds(ORTC_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS) < current)
+            totalSeconds = (totalSeconds > ORTC_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS ? ORTC_SERVICES_TURN_MINIMUM_KEEP_ALIVE_FOR_TURN_IN_SECONDS : totalSeconds);
 
           if (mLastRefreshTimerWasSentAt + Seconds(totalSeconds) > current) {
             // we don't need to refresh yet because we sent data to the server recently and the lifetime hasn't expired yet...
@@ -1462,7 +1462,7 @@ namespace openpeer
 
             ZS_LOG_DETAIL(log("creating alloc request") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("is UDP", server->mIsUDP))
 
-            mLifetime = OPENPEER_SERVICES_TURN_RECOMMENDED_LIFETIME_IN_SECONDS;
+            mLifetime = ORTC_SERVICES_TURN_RECOMMENDED_LIFETIME_IN_SECONDS;
 
             // we don't have an allocate request - form one now
             STUNPacketPtr allocRequest = STUNPacket::createRequest(STUNPacket::Method_Allocate);
@@ -1510,7 +1510,7 @@ namespace openpeer
 
         // we need to refresh permissions every 4 minutes
         if (!mPermissionTimer) {
-          mPermissionTimer = Timer::create(mThisWeak.lock(), Seconds(OPENPEER_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS));  // refresh permissions every 4 minutes
+          mPermissionTimer = Timer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS));  // refresh permissions every 4 minutes
         }
 
         // finally we need to make sure all channels are created imemdiately
@@ -1721,7 +1721,7 @@ namespace openpeer
           server->mActivationTimer = Timer::create(mThisWeak.lock(), activateAfter);
           mActivationTimers[server->mActivationTimer->getID()] = server->mActivationTimer;
 
-          activateAfter += Seconds(OPENPEER_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
+          activateAfter += Seconds(ORTC_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
 
           mServers.push_back(server);
         }
@@ -2271,7 +2271,7 @@ namespace openpeer
             PermissionMap::iterator current = permIter;
             ++permIter;
 
-            if (time > ((*current).second->mLastSentDataAt + Seconds(OPENPEER_SERVICES_TURN_REMOVE_PERMISSION_IF_NO_DATA_IN_SECONDS))) {
+            if (time > ((*current).second->mLastSentDataAt + Seconds(ORTC_SERVICES_TURN_REMOVE_PERMISSION_IF_NO_DATA_IN_SECONDS))) {
               mPermissions.erase(current);
             } else
               found = true;
@@ -2388,7 +2388,7 @@ namespace openpeer
           {
             for (ChannelNumberMap::iterator iter = mChannelNumberMap.begin(); iter != mChannelNumberMap.end(); ++iter) {
               ChannelInfoPtr info = (*iter).second;
-              if (time > (info->mLastSentDataAt + Seconds(OPENPEER_SERVICES_TURN_REMOVE_CHANNEL_IF_NO_DATA_IN_SECONDS))) {
+              if (time > (info->mLastSentDataAt + Seconds(ORTC_SERVICES_TURN_REMOVE_CHANNEL_IF_NO_DATA_IN_SECONDS))) {
                 infoList.push_back(info);
               }
             }
@@ -2452,7 +2452,7 @@ namespace openpeer
         {
           AutoRecursiveLock lock(mLock);
           if (isShutdown()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN is shutdown"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN is shutdown"))
             return false;
           }
 
@@ -2463,7 +2463,7 @@ namespace openpeer
                 (server->mIsConnected)) {
               return sendPacketOverTCPOrDropIfBufferFull(server, buffer, bufferSizeInBytes);
             }
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("cannot send packet to server as TCP connection is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
             return false;
           }
 
@@ -2478,7 +2478,7 @@ namespace openpeer
         try {
           return delegate->notifyTURNSocketSendPacket(pThis, serverIP, buffer, bufferSizeInBytes);
         } catch(ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN delegate is gone"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN delegate is gone"))
           cancel();
         }
         return false;
@@ -2494,22 +2494,22 @@ namespace openpeer
         ZS_THROW_INVALID_ARGUMENT_IF(!server)
 
         if (isShutdown()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         if (!server->mTCPSocket) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ZS_PARAM("server IP", server->mServerIP.string()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not set") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
         if (!server->mIsConnected) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TCP socket is not connected") + ZS_PARAM("server IP", server->mServerIP.string()))
           return false;
         }
 
         // never allow the buffer to overflow
         if (bufferSizeInBytes > sizeof(server->mWriteBuffer)) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("sending bytes", bufferSizeInBytes) + ZS_PARAM("capacity", sizeof(server->mWriteBuffer)))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as sending data is over capacity to write buffer") + ZS_PARAM("server IP", server->mServerIP.string()) + ZS_PARAM("sending bytes", bufferSizeInBytes) + ZS_PARAM("capacity", sizeof(server->mWriteBuffer)))
           return false;
         }
 
@@ -2531,7 +2531,7 @@ namespace openpeer
                 }
               }
             } catch(Socket::Exceptions::Unspecified &error) {
-              OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
+              ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
               cancel();
               return false;
@@ -2560,7 +2560,7 @@ namespace openpeer
             informWriteReady();
           }
           if (!wasRoom) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange??)"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange??)"))
           }
           return wasRoom;
         }
@@ -2574,7 +2574,7 @@ namespace openpeer
             // we have exhasted the send buffer - horray! nothing more to do now...
             server->mWriteBufferFilledSizeInBytes = 0;
             if (!wasRoom) {
-              OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("data was sent over the wire but buffer capacity was reached"))
+              ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("data was sent over the wire but buffer capacity was reached"))
             }
             return wasRoom;
           }
@@ -2590,13 +2590,13 @@ namespace openpeer
             }
           }
         } catch(Socket::Exceptions::Unspecified &error) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket send failure") + ZS_PARAM("error", error.errorCode()))
 
           cancel();
           return false;
         }
         if (!wasRoom) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("data was not completely sent over the wire and buffer capacity was reached"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("data was not completely sent over the wire and buffer capacity was reached"))
         }
         return wasRoom;
       }
@@ -2607,7 +2607,7 @@ namespace openpeer
         if (isShutdown()) return;
 
         if (!mActiveServer) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Trace, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Trace, log("notify write ready does not have an active server yet (probably okay if during TURN setup process)"))
           return;
         }
 

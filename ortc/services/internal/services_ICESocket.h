@@ -51,20 +51,20 @@
 #include <list>
 #include <tuple>
 
-#define OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "ortc/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
+#define ORTC_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "ortc/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
 
-#define OPENPEER_SERVICES_SETTING_FORCE_USE_TURN                                "ortc/services/debug/force-packets-over-turn"
-#define OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS          "ortc/services/debug/only-allow-data-sent-to-specific-ips"
+#define ORTC_SERVICES_SETTING_FORCE_USE_TURN                                "ortc/services/debug/force-packets-over-turn"
+#define ORTC_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS          "ortc/services/debug/only-allow-data-sent-to-specific-ips"
 
-#define OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER                          "ortc/services/interface-name-order"
-#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
+#define ORTC_SERVICES_SETTING_INTERFACE_NAME_ORDER                          "ortc/services/interface-name-order"
+#define ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
 
-#define OPENPEER_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS        "ortc/services/max-ice-socket-rebind-attempt-duration-in-seconds"
-#define OPENPEER_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE "ortc/services/ice-socket-fail-when-no-local-ips"
+#define ORTC_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS        "ortc/services/max-ice-socket-rebind-attempt-duration-in-seconds"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE "ortc/services/ice-socket-fail-when-no-local-ips"
 
-#define OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
+#define ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -620,15 +620,15 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::internal::IICESocketForICESocketSession)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IICESocketForICESocketSession)
 ZS_DECLARE_PROXY_TYPEDEF(zsLib::IMessageQueuePtr, IMessageQueuePtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::internal::ICESocketSessionPtr, ICESocketSessionPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocketPtr, IICESocketPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IICESocket, IICESocket)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::ICESocketSessionPtr, ICESocketSessionPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocket, IICESocket)
 ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getMessageQueue, IMessageQueuePtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_1(attach, bool, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_5(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
 ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionClosed, PUID)
-ZS_DECLARE_PROXY_METHOD_SYNC_4(addRoute, openpeer::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)
-ZS_DECLARE_PROXY_METHOD_SYNC_1(removeRoute, openpeer::services::internal::ICESocketSessionPtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_4(addRoute, ortc::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)
+ZS_DECLARE_PROXY_METHOD_SYNC_1(removeRoute, ortc::services::internal::ICESocketSessionPtr)
 ZS_DECLARE_PROXY_END()

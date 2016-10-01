@@ -39,10 +39,10 @@
 #else
 
 // Comment the following line to test inline versions of the same macros to test compilation
-#define OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+#define ORTC_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 // NO-OP VERSIONS OF ALL TRACING MACROS
-#ifdef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+#ifdef ORTC_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 #define EventRegisterOrtcServices()
 #define EventUnregisterOrtcServices()
@@ -173,7 +173,7 @@
 #else
 
 // duplicate testing compilation methods used to verify compilation when macros get defined
-namespace openpeer
+namespace ortc
 {
 namespace services
 {
@@ -306,7 +306,7 @@ inline void EventWriteOpServicesDebugLogger(const char *xStr_Subsystem, const ch
 
 }
 }
-#endif //ndef OPENPEER_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
+#endif //ndef ORTC_SERVICES_USE_NOOP_EVENT_TRACE_MACROS
 
 #endif //USE_ETW
 

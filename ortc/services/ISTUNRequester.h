@@ -36,7 +36,7 @@
 
 #include <zsLib/Proxy.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -134,10 +134,10 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ISTUNRequesterDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ISTUNRequesterPtr, ISTUNRequesterPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::STUNPacketPtr, STUNPacketPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::SecureByteBlockPtr, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ISTUNRequesterDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ISTUNRequesterPtr, ISTUNRequesterPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::STUNPacketPtr, STUNPacketPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::SecureByteBlockPtr, SecureByteBlockPtr)
 ZS_DECLARE_PROXY_METHOD_3(onSTUNRequesterSendPacket, ISTUNRequesterPtr, IPAddress, SecureByteBlockPtr)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_3(handleSTUNRequesterResponse, bool, ISTUNRequesterPtr, IPAddress, STUNPacketPtr)
 ZS_DECLARE_PROXY_METHOD_1(onSTUNRequesterTimedOut, ISTUNRequesterPtr)

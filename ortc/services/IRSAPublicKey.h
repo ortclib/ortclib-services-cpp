@@ -33,9 +33,9 @@
 
 #include <ortc/services/types.h>
 
-#define OPENPEER_SERVICES_JSON_SIGNATURE_ALGORITHM "https://meta.openpeer.org/2012/12/14/jsonsig#rsa-sha1"
+#define ORTC_SERVICES_JSON_SIGNATURE_ALGORITHM "https://meta.ortclib.org/2012/12/14/jsonsig#rsa-sha1"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

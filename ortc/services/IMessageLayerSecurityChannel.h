@@ -33,7 +33,7 @@
 
 #include <ortc/services/types.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -409,14 +409,14 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IMessageLayerSecurityChannelDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IMessageLayerSecurityChannelDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
 ZS_DECLARE_PROXY_METHOD_2(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::IMessageLayerSecurityChannelDelegate, openpeer::services::IMessageLayerSecurityChannelSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IMessageLayerSecurityChannelDelegate, ortc::services::IMessageLayerSecurityChannelSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

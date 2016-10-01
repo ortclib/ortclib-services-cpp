@@ -41,7 +41,7 @@
 
 #include <map>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -569,9 +569,9 @@ namespace openpeer
 }
 
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::internal::IRUDPChannelDelegateForSessionAndListener)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::internal::RUDPChannelPtr, RUDPChannelPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::internal::IRUDPChannelDelegateForSessionAndListener::RUDPChannelStates, RUDPChannelStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelDelegateForSessionAndListener)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::RUDPChannelPtr, RUDPChannelPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::IRUDPChannelDelegateForSessionAndListener::RUDPChannelStates, RUDPChannelStates)
 ZS_DECLARE_PROXY_METHOD_2(onRUDPChannelStateChanged, RUDPChannelPtr, RUDPChannelStates)
 ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_4(notifyRUDPChannelSendPacket, bool, RUDPChannelPtr, const IPAddress &, const BYTE *, size_t)
 ZS_DECLARE_PROXY_END()

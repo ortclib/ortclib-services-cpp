@@ -38,7 +38,7 @@
 #include <zsLib/Proxy.h>
 #include <zsLib/String.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -142,8 +142,8 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPChannelDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPChannelPtr, IRUDPChannelPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::IRUDPChannelDelegate::RUDPChannelStates, RUDPChannelStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPChannelDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPChannelPtr, IRUDPChannelPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPChannelDelegate::RUDPChannelStates, RUDPChannelStates)
 ZS_DECLARE_PROXY_METHOD_2(onRDUPChannelStateChanged, IRUDPChannelPtr, RUDPChannelStates)
 ZS_DECLARE_PROXY_END()

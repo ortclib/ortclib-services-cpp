@@ -39,7 +39,7 @@
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Timer.h>
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

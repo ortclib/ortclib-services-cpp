@@ -36,11 +36,11 @@
 
 #include <zsLib/IPAddress.h>
 
-#define OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
+#define ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES (0xFFFFF)
 
-#define OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS (1000)
+#define ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS (1000)
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -90,7 +90,7 @@ namespace openpeer
                                      ITransportStreamPtr sendStream,
                                      bool messagesHaveChannelNumber,
                                      SocketPtr socket,
-                                     size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                     size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                      );
 
       //-----------------------------------------------------------------------
@@ -102,7 +102,7 @@ namespace openpeer
                                       ITransportStreamPtr sendStream,
                                       bool messagesHaveChannelNumber,
                                       IPAddress remoteIP,
-                                      size_t maxMessageSizeInBytes = OPENPEER_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
+                                      size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
                                       );
 
       virtual PUID getID() const = 0;
@@ -117,7 +117,7 @@ namespace openpeer
 
       //-----------------------------------------------------------------------
       // PURPOSE: This closes the session gracefully.
-      virtual void shutdown(Milliseconds lingerTime = Milliseconds(OPENPEER_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) = 0;
+      virtual void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: return the current state of the connection
@@ -172,14 +172,14 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::ITCPMessagingDelegate)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITCPMessagingPtr, ITCPMessagingPtr)
-ZS_DECLARE_PROXY_TYPEDEF(openpeer::services::ITCPMessagingDelegate::SessionStates, SessionStates)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::ITCPMessagingDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITCPMessagingPtr, ITCPMessagingPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITCPMessagingDelegate::SessionStates, SessionStates)
 ZS_DECLARE_PROXY_METHOD_2(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
 ZS_DECLARE_PROXY_END()
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(openpeer::services::ITCPMessagingDelegate, openpeer::services::ITCPMessagingSubscription)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::ITCPMessagingPtr, ITCPMessagingPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(openpeer::services::ITCPMessagingDelegate::SessionStates, SessionStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITCPMessagingDelegate, ortc::services::ITCPMessagingSubscription)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITCPMessagingPtr, ITCPMessagingPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITCPMessagingDelegate::SessionStates, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

@@ -38,7 +38,7 @@
 // FOR COMPATIBILITY WITH ENCYPRTION ALGORITHMS, SEE:
 // http://www.codeproject.com/Articles/21877/Applied-Crypto-Block-Ciphers
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {

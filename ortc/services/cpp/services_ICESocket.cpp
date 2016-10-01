@@ -72,23 +72,22 @@ using namespace Windows::Networking::Connectivity;
 #endif //WINRT
 
 
-#define OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
+#define ORTC_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
 
-#define OPENPEER_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS  OPENPEER_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS
+#define ORTC_SERVICES_ICESOCKET_MINIMUM_TURN_KEEP_ALIVE_TIME_IN_SECONDS  ORTC_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS
 
-#define OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS (500)
-#define OPENPEER_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS (60*60)
+#define ORTC_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS (500)
+#define ORTC_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS (60*60)
 
-#define OPENPEER_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS (2)
-#define OPENPEER_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS (30)
+#define ORTC_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS (2)
+#define ORTC_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS (30)
 
-#define OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX (0xFFFF)
-
-
-namespace openpeer { namespace services { ZS_DECLARE_SUBSYSTEM(openpeer_services_ice) } }
+#define ORTC_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX (0xFFFF)
 
 
-namespace openpeer
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
+
+namespace ortc
 {
   namespace services
   {
@@ -181,17 +180,17 @@ namespace openpeer
 
         mLastCandidateCRC(0),
 
-        mForceUseTURN(ISettings::getBool(OPENPEER_SERVICES_SETTING_FORCE_USE_TURN)),
-        mSupportIPv6(ISettings::getBool(OPENPEER_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6)),
+        mForceUseTURN(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_USE_TURN)),
+        mSupportIPv6(ISettings::getBool(ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6)),
 
-        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS)))
+        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS)))
       {
         IHelper::setSocketThreadPriority();
         IHelper::setTimerThreadPriority();
 
         ZS_LOG_BASIC(log("created"))
 
-        String networkOrder = ISettings::getString(OPENPEER_SERVICES_SETTING_INTERFACE_NAME_ORDER);
+        String networkOrder = ISettings::getString(ORTC_SERVICES_SETTING_INTERFACE_NAME_ORDER);
         if (networkOrder.hasData()) {
           IHelper::SplitMap split;
           IHelper::split(networkOrder, split, ';');
@@ -220,7 +219,7 @@ namespace openpeer
         AutoRecursiveLock lock(*this);
         ZS_LOG_DETAIL(log("init"))
 
-        String restricted = ISettings::getString(OPENPEER_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
+        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
         step();
@@ -368,7 +367,7 @@ namespace openpeer
 
         mTURNLastUsed = zsLib::now();
 
-        mTURNShutdownIfNotUsedBy = Seconds(ISettings::getUInt(OPENPEER_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS));
+        mTURNShutdownIfNotUsedBy = Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS));
         mTURNShutdownIfNotUsedBy = (mTURNShutdownIfNotUsedBy > minimumTimeCandidatesMustRemainValidWhileNotUsed ? mTURNShutdownIfNotUsedBy : minimumTimeCandidatesMustRemainValidWhileNotUsed);
 
         step();
@@ -471,7 +470,7 @@ namespace openpeer
                              )
       {
         if (isShutdown()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -484,7 +483,7 @@ namespace openpeer
 
           LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(getViaLocalIP(viaLocalCandidate));
           if (found == mSocketLocalIPs.end()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("did not find local IP to use"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("did not find local IP to use"))
             return false;
           }
 
@@ -501,7 +500,7 @@ namespace openpeer
 
         if (viaLocalCandidate.mType == Type_Relayed) {
           if (!turnSocket) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via TURN socket as it is not connected") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
             return false;
           }
 
@@ -510,7 +509,7 @@ namespace openpeer
         }
 
         if (!socket) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet as UDP socket is not set") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
           return false;
         }
 
@@ -529,10 +528,10 @@ namespace openpeer
           }
 
           size_t bytesSent = socket->sendTo(destination, buffer, bufferLengthInBytes, &wouldBlock);
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
+          ORTC_SERVICES_WIRE_LOG_TRACE(log("sending packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData) + ZS_PARAM("bytes sent", bytesSent) + ZS_PARAM("would block", wouldBlock))
           if (ZS_IS_LOGGING(Insane)) {
             String base64 = IHelper::convertToBase64(buffer, bytesSent);
-            OPENPEER_SERVICES_WIRE_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
+            ORTC_SERVICES_WIRE_LOG_INSANE(log("SEND PACKET ON WIRE") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("wire out", base64))
           }
           return ((!wouldBlock) && (bufferLengthInBytes == bytesSent));
         } catch(Socket::Exceptions::Unspecified &error) {
@@ -615,7 +614,7 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onReadReady(SocketPtr socket)
       {
-        std::unique_ptr<BYTE[]> buffer(new BYTE[OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE]);
+        std::unique_ptr<BYTE[]> buffer(new BYTE[ORTC_SERVICES_ICESOCKET_BUFFER_SIZE]);
 
         CandidatePtr viaLocalCandidate;
         IPAddress source;
@@ -627,7 +626,7 @@ namespace openpeer
 
           LocalSocketMap::iterator found = mSockets.find(socket);
           if (found == mSockets.end()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
             return;
           }
 
@@ -637,14 +636,14 @@ namespace openpeer
           try {
             bool wouldBlock = false;
 
-            bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), OPENPEER_SERVICES_ICESOCKET_BUFFER_SIZE, &wouldBlock);
+            bytesRead = localSocket->mSocket->receiveFrom(source, buffer.get(), ORTC_SERVICES_ICESOCKET_BUFFER_SIZE, &wouldBlock);
             if (0 == bytesRead) return;
 
-            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()) + ZS_PARAM("handle", socket->getSocket()))
+            ORTC_SERVICES_WIRE_LOG_TRACE(log("packet received") + ZS_PARAM("ip", + source.string()) + ZS_PARAM("handle", socket->getSocket()))
 
             if (ZS_IS_LOGGING(Insane)) {
               String base64 = Helper::convertToBase64(buffer.get(), bytesRead);
-              OPENPEER_SERVICES_WIRE_LOG_INSANE(log("RECEIVE PACKET ON WIRE") + ZS_PARAM("source", source.string()) + ZS_PARAM("wire in", base64))
+              ORTC_SERVICES_WIRE_LOG_INSANE(log("RECEIVE PACKET ON WIRE") + ZS_PARAM("source", source.string()) + ZS_PARAM("wire in", base64))
             }
 
           } catch(Socket::Exceptions::Unspecified &error) {
@@ -662,12 +661,12 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onWriteReady(SocketPtr socket)
       {
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("write ready"))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("write ready"))
         AutoRecursiveLock lock(*this);
 
         LocalSocketMap::iterator found = mSockets.find(socket);
         if (found == mSockets.end()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("UDP socket is not ready"))
           return;
         }
 
@@ -680,7 +679,7 @@ namespace openpeer
         for (TURNInfoMap::iterator iter = localSocket->mTURNInfos.begin(); iter != localSocket->mTURNInfos.end(); ++iter) {
           TURNInfoPtr &turnInfo = (*iter).second;
           if (turnInfo->mTURNSocket) {
-            OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notifying TURN socket of write ready") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
+            ORTC_SERVICES_WIRE_LOG_TRACE(log("notifying TURN socket of write ready") + ZS_PARAM("TURN socket ID", turnInfo->mTURNSocket->getID()))
             turnInfo->mTURNSocket->notifyWriteReady();
           }
         }
@@ -788,7 +787,7 @@ namespace openpeer
           AutoRecursiveLock lock(*this);
           LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
           if (found == mSocketTURNs.end()) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN not associated with any local socket"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("TURN not associated with any local socket"))
             return;
           }
           LocalSocketPtr &localSocket = (*found).second;
@@ -813,16 +812,16 @@ namespace openpeer
       {
         AutoRecursiveLock lock(*this);
 
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("sending packet for TURN") + ZS_PARAM("TURN socket ID", socket->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("sending packet for TURN") + ZS_PARAM("TURN socket ID", socket->getID()) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("length", packetLengthInBytes))
 
         if (isShutdown()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as ICE socket is shutdown") + ZS_PARAM("TURN socket ID", socket->getID()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as ICE socket is shutdown") + ZS_PARAM("TURN socket ID", socket->getID()))
           return false;
         }
 
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
         if (found == mSocketTURNs.end()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as TURN socket does not match any local socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", socket->getID()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as TURN socket does not match any local socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", socket->getID()))
           return false;
         }
         LocalSocketPtr &localSocket = (*found).second;
@@ -838,11 +837,11 @@ namespace openpeer
           size_t bytesSent = localSocket->mSocket->sendTo(destination, packet, packetLengthInBytes, &wouldBlock);
           bool sent = ((!wouldBlock) && (bytesSent == packetLengthInBytes));
           if (!sent) {
-            OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as UDP socket did not send the data") + ZS_PARAM("would block", wouldBlock) + ZS_PARAM("bytes sent", bytesSent))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("unable to send data on behalf of TURN as UDP socket did not send the data") + ZS_PARAM("would block", wouldBlock) + ZS_PARAM("bytes sent", bytesSent))
           }
           return sent;
         } catch(Socket::Exceptions::Unspecified &error) {
-          OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
+          ORTC_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
         return false;
       }
@@ -850,13 +849,13 @@ namespace openpeer
       //-----------------------------------------------------------------------
       void ICESocket::onTURNSocketWriteReady(ITURNSocketPtr socket)
       {
-        OPENPEER_SERVICES_WIRE_LOG_TRACE(log("notified that TURN is write ready") + ZS_PARAM("TURN socket ID", socket->getID()))
+        ORTC_SERVICES_WIRE_LOG_TRACE(log("notified that TURN is write ready") + ZS_PARAM("TURN socket ID", socket->getID()))
 
         AutoRecursiveLock lock(*this);
 
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(socket);
         if (found == mSocketTURNs.end()) {
-          OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot notify socket write ready as TURN socket does not match current TURN socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", + socket->getID()))
+          ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot notify socket write ready as TURN socket does not match current TURN socket (TURN reconnect reattempt?)") + ZS_PARAM("socket ID", + socket->getID()))
           return;
         }
 
@@ -915,7 +914,7 @@ namespace openpeer
 
           localSocket->mSocket->sendTo(destination, *packet, packet->SizeInBytes(), &wouldBlock);
         } catch(Socket::Exceptions::Unspecified &error) {
-          OPENPEER_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
+          ORTC_SERVICES_WIRE_LOG_ERROR(Detail, log("sendTo error") + ZS_PARAM("error", error.errorCode()))
         }
       }
 
@@ -1437,7 +1436,7 @@ namespace openpeer
           }
         }
 
-        ULONG nextLocalPreference = OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX;
+        ULONG nextLocalPreference = ORTC_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX;
 
         for (IPAddressList::iterator iter = localIPs.begin(); iter != localIPs.end(); ++iter)
         {
@@ -1449,10 +1448,10 @@ namespace openpeer
           ULONG localPreference = nextLocalPreference;
 
           nextLocalPreference -= 0xF;
-          if (nextLocalPreference > OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX) {
+          if (nextLocalPreference > ORTC_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX) {
             ZS_LOG_WARNING(Basic, log("unexpected local preference wrap around -- that a lot of IPs!"))
             --nextLocalPreference;
-            nextLocalPreference = (nextLocalPreference | OPENPEER_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX);
+            nextLocalPreference = (nextLocalPreference | ORTC_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX);
           }
 
           LocalSocketIPAddressMap::iterator found = mSocketLocalIPs.find(bindIP);
@@ -1525,7 +1524,7 @@ namespace openpeer
         }
 
         if (!mRebindTimer) {
-          mRebindTimer = Timer::create(mThisWeak.lock(), Seconds(mSockets.size() > 0 ? OPENPEER_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS : OPENPEER_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS));
+          mRebindTimer = Timer::create(mThisWeak.lock(), Seconds(mSockets.size() > 0 ? ORTC_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS : ORTC_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS));
         }
 
         if (!mMonitoringWriteReady) {
@@ -1539,7 +1538,7 @@ namespace openpeer
           return true;
         }
 
-        if (!ISettings::getBool(OPENPEER_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE)) {
+        if (!ISettings::getBool(ORTC_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE)) {
           if (localIPs.size() < 1) {
             mRebindAttemptStartTime = Time();
 
@@ -1732,7 +1731,7 @@ namespace openpeer
 
                   // reset the retry for TURN since it connected just fine
                   turnInfo->mTURNRetryAfter = Time();
-                  turnInfo->mTURNRetryDuration = Milliseconds(OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS);
+                  turnInfo->mTURNRetryDuration = Milliseconds(ORTC_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS);
 
                   if (turnInfo->mRelay->mIPAddress.isAddressEmpty()) {
                     // clone before modifying
@@ -1774,8 +1773,8 @@ namespace openpeer
                   ZS_LOG_WARNING(Detail, log("turn socket shutdown") + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
 
                   turnInfo->mTURNRetryDuration = turnInfo->mTURNRetryDuration + turnInfo->mTURNRetryDuration;
-                  if (turnInfo->mTURNRetryDuration > Seconds(OPENPEER_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS)) {
-                    turnInfo->mTURNRetryDuration = Seconds(OPENPEER_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS);
+                  if (turnInfo->mTURNRetryDuration > Seconds(ORTC_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS)) {
+                    turnInfo->mTURNRetryDuration = Seconds(ORTC_SERVICES_TURN_MAX_RETRY_AFTER_DURATION_IN_SECONDS);
                   }
 
                   break;
@@ -2564,7 +2563,7 @@ namespace openpeer
         STUNPacketPtr stun = STUNPacket::parseIfSTUN(buffer, bufferLengthInBytes, STUNPacket::ParseOptions(STUNPacket::RFC_AllowAll, false, "ICESocket", mID));
 
         if (stun) {
-          OPENPEER_SERVICES_WIRE_LOG_TRACE(log("received STUN packet") + ZS_PARAM("via candidate", viaCandidate.toDebug()) + ZS_PARAM("source ip", source.string()) + ZS_PARAM("class", stun->classAsString()) + ZS_PARAM("method", stun->methodAsString()))
+          ORTC_SERVICES_WIRE_LOG_TRACE(log("received STUN packet") + ZS_PARAM("via candidate", viaCandidate.toDebug()) + ZS_PARAM("source ip", source.string()) + ZS_PARAM("class", stun->classAsString()) + ZS_PARAM("method", stun->methodAsString()))
           ITURNSocketPtr turn;
           if (IICESocket::Type_Relayed != normalize(viaCandidate.mType)) {
 
@@ -2733,7 +2732,7 @@ namespace openpeer
           if (next->handlePacket(viaCandidate, source, buffer, bufferLengthInBytes)) return;
         }
 
-        OPENPEER_SERVICES_WIRE_LOG_WARNING(Debug, log("did not find any socket session to handle data packet"))
+        ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("did not find any socket session to handle data packet"))
       }
 
       //-----------------------------------------------------------------------
@@ -2749,7 +2748,7 @@ namespace openpeer
                                     WORD componentID,
                                     ULONG nextLocalPreference
                                     ) :
-        mTURNRetryDuration(Milliseconds(OPENPEER_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS))
+        mTURNRetryDuration(Milliseconds(ORTC_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS))
       {
         mRelay = make_shared<Candidate>();
         mRelay->mLocalPreference = (decltype(mRelay->mLocalPreference))nextLocalPreference;

@@ -36,9 +36,9 @@
 #include <zsLib/IPAddress.h>
 #include <zsLib/Proxy.h>
 
-#define OPENPEER_SERVICES_IRUDPLISTENER_DEFAULT_REALM "hookflash.com"
+#define ORTC_SERVICES_IRUDPLISTENER_DEFAULT_REALM "hookflash.com"
 
-namespace openpeer
+namespace ortc
 {
   namespace services
   {
@@ -65,7 +65,7 @@ namespace openpeer
                                      IMessageQueuePtr queue,
                                      IRUDPListenerDelegatePtr delegate,
                                      WORD port = 0,
-                                     const char *realm = OPENPEER_SERVICES_IRUDPLISTENER_DEFAULT_REALM
+                                     const char *realm = ORTC_SERVICES_IRUDPLISTENER_DEFAULT_REALM
                                      );
 
       virtual PUID getID() const = 0;
@@ -109,7 +109,7 @@ namespace openpeer
   }
 }
 
-ZS_DECLARE_PROXY_BEGIN(openpeer::services::IRUDPListenerDelegate)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPListenerStateChanged, openpeer::services::IRUDPListenerPtr, openpeer::services::IRUDPListenerDelegate::RUDPListenerStates)
-ZS_DECLARE_PROXY_METHOD_1(onRUDPListenerChannelWaiting, openpeer::services::IRUDPListenerPtr)
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPListenerDelegate)
+ZS_DECLARE_PROXY_METHOD_2(onRUDPListenerStateChanged, ortc::services::IRUDPListenerPtr, ortc::services::IRUDPListenerDelegate::RUDPListenerStates)
+ZS_DECLARE_PROXY_METHOD_1(onRUDPListenerChannelWaiting, ortc::services::IRUDPListenerPtr)
 ZS_DECLARE_PROXY_END()
