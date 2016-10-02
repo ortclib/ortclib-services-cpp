@@ -575,11 +575,17 @@ void doTestTURNSocket()
     TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
   }
 
-  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
-  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
-  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, port3, "bogus." ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
-  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, port4, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
-  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, port5, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
+  bool doTest1 = true;
+  bool doTest2 = false;
+  bool doTest3 = false;
+  bool doTest4 = false;
+  bool doTest5 = false;
+
+  TestTURNSocketCallbackPtr testObject1 = (doTest1 ? TestTURNSocketCallback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true) : TestTURNSocketCallbackPtr());
+  TestTURNSocketCallbackPtr testObject2 = (doTest2 ? TestTURNSocketCallback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false) : TestTURNSocketCallbackPtr());
+  TestTURNSocketCallbackPtr testObject3 = (doTest3 ? TestTURNSocketCallback::create(thread, port3, "bogus." ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true) : TestTURNSocketCallbackPtr());
+  TestTURNSocketCallbackPtr testObject4 = (doTest4 ? TestTURNSocketCallback::create(thread, port4, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true) : TestTURNSocketCallbackPtr());
+  TestTURNSocketCallbackPtr testObject5 = (doTest5 ? TestTURNSocketCallback::create(thread, port5, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false) : TestTURNSocketCallbackPtr());
 
   TESTING_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
 

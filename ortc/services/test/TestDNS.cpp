@@ -277,31 +277,38 @@ void doTestDNS()
 
   TestDNSCallbackPtr testObject = TestDNSCallback::create(thread);
 
+  bool doQuery1 = true;
+  bool doQuery2 = true;
+  bool doQuery3 = true;
+  bool doQuery4 = true;
+  bool doQuery5 = true;
+  bool doQuery6 = true;
+  bool doQuery7 = true;
+  bool doQuery8 = true;
+  bool doQuery9 = true;
+  bool doQuery10 = true;
+  bool doQuery11 = true;
+
 #ifdef WINRT
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 1
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 2
-#endif //WINRT
 
-  IDNSQueryPtr query = IDNS::lookupA(testObject, "www." ORTC_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query2 = IDNS::lookupA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
-#ifdef WINRT
-  IDNSQueryPtr query3;
-  IDNSQueryPtr query4;
-#else
-  IDNSQueryPtr query3 = IDNS::lookupAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query4 = IDNS::lookupAAAA(testObject, "unittest2." ORTC_SERVICE_TEST_DNS_ZONE);
-#endif //WINRt
-  IDNSQueryPtr query5 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp", 5060, IDNS::SRVLookupType_LookupOnly);
-  IDNSQueryPtr query6 = IDNS::lookupA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query7 = IDNS::lookupAorAAAA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
-#ifdef WINRT
-  IDNSQueryPtr query8;
-#else
-  IDNSQueryPtr query8 = IDNS::lookupAorAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE);
-#endif// WINRT
-  IDNSQueryPtr query9 = IDNS::lookupAAAA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE);
-  IDNSQueryPtr query10 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp");
-  IDNSQueryPtr query11 = IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "stun", "udp");
+  bool doQuery3 = false;
+  bool doQuery4 = false;
+  bool doQuery8 = false;
+#endif //_WINRT
+
+  IDNSQueryPtr query1 = (doQuery1 ? IDNS::lookupA(testObject, "www." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query2 = (doQuery2 ? IDNS::lookupA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query3 = (doQuery3 ? IDNS::lookupAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query4 = (doQuery4 ? IDNS::lookupAAAA(testObject, "unittest2." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query5 = (doQuery5 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp", 5060, IDNS::SRVLookupType_LookupOnly): IDNSQueryPtr());
+  IDNSQueryPtr query6 = (doQuery6 ? IDNS::lookupA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query7 = (doQuery7 ? IDNS::lookupAorAAAA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query8 = (doQuery8 ? IDNS::lookupAorAAAA(testObject, "unittest." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query9 = (doQuery9 ? IDNS::lookupAAAA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
+  IDNSQueryPtr query10 = (doQuery10 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp") : IDNSQueryPtr());
+  IDNSQueryPtr query11 = (doQuery11 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "stun", "udp") : IDNSQueryPtr());
 
   TESTING_STDOUT() << "WAITING:      Waiting for DNS lookup to resolve (max wait is 60 seconds).\n";
 
@@ -315,7 +322,7 @@ void doTestDNS()
   ULONG factoryAorAAAA = 0;
   ULONG factorySRV = 0;
 
-  if (query)   { expectingTotal += 1; totalA += 1; totalAAAA += 0; totalSRV += 0; totalFailed += 0; factoryA += 1; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 0; }
+  if (query1)  { expectingTotal += 1; totalA += 1; totalAAAA += 0; totalSRV += 0; totalFailed += 0; factoryA += 1; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 0; }
   if (query2)  { expectingTotal += 1; totalA += 1; totalAAAA += 0; totalSRV += 0; totalFailed += 0; factoryA += 1; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 0; }
   if (query3)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
   if (query4)  { expectingTotal += 1; totalA += 0; totalAAAA += 1; totalSRV += 0; totalFailed += 0; factoryA += 0; factoryAAAA += 1; factoryAorAAAA += 0; factorySRV += 0; }
@@ -376,10 +383,10 @@ void doTestDNS()
   TESTING_EQUAL(totalSRV, testObject->getTotalSRVProcessed())
   TESTING_EQUAL(totalFailed, testObject->getTotalFailed())
 
-  if (query) {
-    TESTING_CHECK(!testObject->isFailed(query));
+  if (query1) {
+    TESTING_CHECK(!testObject->isFailed(query1));
 
-    IDNS::AResultPtr a1 = testObject->getA(query);
+    IDNS::AResultPtr a1 = testObject->getA(query1);
     TESTING_CHECK(a1)
 
     if (a1) {
@@ -658,7 +665,7 @@ void doTestDNS()
     }
   }
 
-  query.reset();
+  query1.reset();
   query2.reset();
   query3.reset();
   query4.reset();

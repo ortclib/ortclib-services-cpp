@@ -406,7 +406,7 @@ namespace ortc
           case Log::Fatal:           severity = "F:"; break;
         }
 
-        String result = String(inFilePath) + "(" + string(inLineNumber) + "): " + severity + " T" + currentThreadIDAsString() + ": " + current + getMessageString(params, prettyPrint) + (eol ? "\n" : "");
+        String result = String(inFilePath) + "(" + string(inLineNumber) + "): " + severity + " T" + currentThreadIDAsString() + ": " + current + " " + getMessageString(params, prettyPrint) + (eol ? "\n" : "");
         return result;
       }
 

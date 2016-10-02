@@ -280,6 +280,7 @@ namespace ortc
       {
         AutoRecursiveLock lock(mLock);
         mLastError = TURNSocketError_UserRequestedShutdown;
+        ZS_LOG_TRACE(log("api request to shutdown"));
         cancel(); // do a graceful shutdown
       }
 
@@ -497,6 +498,7 @@ namespace ortc
           // send the packet to the delegate which is interested in the data received
           delegate->handleTURNSocketReceivedPacket(mThisWeak.lock(), turnPacket->mPeerAddressList.front(), turnPacket->mData, turnPacket->mDataLength);
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
+          ZS_LOG_WARNING(Trace, log("delegate gone"));
           cancel();
           return true;
         }
@@ -565,6 +567,7 @@ namespace ortc
           // send the packet to the delegate which is interested in the data received
           delegate->handleTURNSocketReceivedPacket(mThisWeak.lock(), peerAddress, realBuffer, length);
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
+          ZS_LOG_WARNING(Trace, log("delegate gone"));
           cancel();
           return true;
         }
@@ -1012,7 +1015,7 @@ namespace ortc
             }
           }
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
-          ORTC_SERVICES_WIRE_LOG_WARNING(Detail, log("delegate gone"))
+          ZS_LOG_WARNING(Detail, log("delegate gone"))
           cancel();
           return;
         }
@@ -1093,7 +1096,7 @@ namespace ortc
           return;
         }
 
-        ZS_LOG_WARNING(Debug, log("TCP socket was closed (okay if socket was intentionally closed, e.g. during shutdown or due to non-use)") + server->toDebug());
+        ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("TCP socket was closed (okay if socket was intentionally closed, e.g. during shutdown or due to non-use)") + server->toDebug());
 
         server->mTCPSocket->close();
         server->mTCPSocket.reset();
@@ -1441,7 +1444,8 @@ namespace ortc
                 try {
                   bool wouldBlock = false;
                   server->mTCPSocket->connect(server->mServerIP, &wouldBlock);
-                } catch(Socket::Exceptions::Unspecified &) {
+                } catch(Socket::Exceptions::Unspecified &error) {
+                  ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("unexpected socket failure") + ZS_PARAM("error", error.errorCode()));
                   mLastError = TURNSocketError_UnexpectedSocketFailure;
                   cancel();
                   return;
@@ -2619,6 +2623,7 @@ namespace ortc
           mDelegate->onTURNSocketWriteReady(mThisWeak.lock());
           mActiveServer->mInformedWriteReady = true;
         } catch (ITURNSocketDelegateProxy::Exceptions::DelegateGone &) {
+          ZS_LOG_WARNING(Trace, log("delegate gone"));
           cancel();
         }
       }

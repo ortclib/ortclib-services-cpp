@@ -83,6 +83,4 @@
 // This should be set to value based on http://www.whatismyip.com/ to get your current IP address
 #define ORTC_SERVICE_TEST_WHAT_IS_MY_IP        "1.2.3.4"
 
-
-
 #endif //ORTC_SERVICE_TEST_CONFIG_H_934e33cf1d24510f40709eb6c69b8c45

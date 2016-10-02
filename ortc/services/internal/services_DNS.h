@@ -89,7 +89,7 @@ namespace ortc
         #pragma mark DNS => (internal)
         #pragma mark
 
-        static Log::Params log(const char *message);
+        static Log::Params slog(const char *message);
       };
 
       //-----------------------------------------------------------------------

@@ -1169,7 +1169,7 @@ namespace ortc
           mDefaultWeight(defaultWeight),
           mLookupType(lookupType)
         {
-          ZS_LOG_TRACE(log("created"))
+          ZS_LOG_TRACE(log("created") + ZS_PARAMIZE(name) + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol) + ZS_PARAMIZE(defaultPort) + ZS_PARAMIZE(defaultPriority) + ZS_PARAMIZE(defaultWeight) + ZS_PARAMIZE(lookupType));
         }
 
         //---------------------------------------------------------------------
@@ -2042,8 +2042,8 @@ namespace ortc
           mDefaultPriority(defaultPriority),
           mDefaultWeight(defaultWeight)
         {
-          ZS_LOG_TRACE(log("created"))
           mLookupTypeDebugName = (mServiceName.hasData() ? "SRV" : (mIncludeIPv4 ? (mIncludeIPv6 ? "A or AAAA" : "A") : (mIncludeIPv6 ? "AAAA" : NULL)));
+          ZS_LOG_TRACE(log("created") + ZS_PARAMIZE(name) + ZS_PARAMIZE(port) + ZS_PARAMIZE(includeIPv4) + ZS_PARAMIZE(includeIPv6) + ZS_PARAMIZE(serviceName) + ZS_PARAMIZE(protocol) + ZS_PARAMIZE(defaultPort) + ZS_PARAMIZE(defaultPriority) + ZS_PARAMIZE(defaultWeight) + ZS_PARAMIZE(mLookupTypeDebugName));
         }
 
       protected:
@@ -2090,6 +2090,8 @@ namespace ortc
 
               if (nullptr != response) {
                 AutoRecursiveLock lock(*pThis);
+
+                ZS_LOG_TRACE(slog(id, "found DNS records") + ZS_PARAM("total", response->Size));
 
                 for (size_t index = 0; index != response->Size; ++index) {
                   EndpointPair ^pair = response->GetAt(static_cast<unsigned int>(index));
@@ -2241,7 +2243,7 @@ namespace ortc
               }
 
             } catch (const task_canceled&) {
-              ZS_LOG_WARNING(Detail, slog(id, "task cancelled"))
+              ZS_LOG_WARNING(Detail, slog(id, "task cancelled"));
               if (pThis) {
                 pThis->cancel();
               }
@@ -2449,11 +2451,11 @@ namespace ortc
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv4()) {
-              ZS_LOG_DEBUG(log("A record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
+              ZS_LOG_DEBUG(slog("A record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
               temp->mA = result;
               result->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_ERROR(Debug, log("IPv6 record found for A record lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_ERROR(Debug, slog("IPv6 record found for A record lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               // DO NOT PUT IN RESOLUTION LIST
             }
           }
@@ -2461,7 +2463,7 @@ namespace ortc
           return temp;
         }
 
-        ZS_LOG_DEBUG(log("A lookup") + ZS_PARAM("name", name))
+        ZS_LOG_DEBUG(slog("A lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -2501,11 +2503,11 @@ namespace ortc
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv6()) {
-              ZS_LOG_DEBUG(log("AAAA record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
+              ZS_LOG_DEBUG(slog("AAAA record found (no resolve required)") + ZS_PARAM("ip", ip.string()))
               temp->mAAAA = result;
               result->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_ERROR(Debug, log("IPv4 record found for IPv6 lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_ERROR(Debug, slog("IPv4 record found for IPv6 lookup") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               // DO NOT PUT IN RESOLUTION LIST
             }
           }
@@ -2514,7 +2516,7 @@ namespace ortc
           return temp;
         }
 
-        ZS_LOG_DEBUG(log("AAAA lookup") + ZS_PARAM("name", name))
+        ZS_LOG_DEBUG(slog("AAAA lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -2557,11 +2559,11 @@ namespace ortc
             const IPAddress &ip = (*iter);
 
             if (ip.isIPv4()) {
-              ZS_LOG_DEBUG(log("A or AAAA record found A record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_DEBUG(slog("A or AAAA record found A record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               temp->mA = resultA;
               resultA->mIPAddresses.push_back(ip);
             } else {
-              ZS_LOG_DEBUG(log("A or AAAA record found AAAA record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_DEBUG(slog("A or AAAA record found AAAA record (no resolve required)") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
               temp->mAAAA = resultAAAA;
               resultAAAA->mIPAddresses.push_back(ip);
             }
@@ -2570,7 +2572,7 @@ namespace ortc
           return temp;
         }
 
-        ZS_LOG_DEBUG(log("A or AAAA lookup") + ZS_PARAM("name", name))
+        ZS_LOG_DEBUG(slog("A or AAAA lookup") + ZS_PARAM("name", name))
 
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -2649,9 +2651,9 @@ namespace ortc
               }
             }
             if (found) {
-              ZS_LOG_DEBUG(log("SRV record found SRV record (no resolve required") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_DEBUG(slog("SRV record found SRV record (no resolve required") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
             } else {
-              ZS_LOG_WARNING(Debug, log("SRV record found IP address but mismatch on A or AAAA resolution type") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
+              ZS_LOG_WARNING(Debug, slog("SRV record found IP address but mismatch on A or AAAA resolution type") + ZS_PARAM("input", name) + ZS_PARAM("result ip", ip.string()))
             }
           }
 
@@ -2664,7 +2666,7 @@ namespace ortc
           return temp;
         }
 
-        ZS_LOG_DEBUG(log("SRV lookup") + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("default port", defaultPort) + ZS_PARAM("type", (int)lookupType))
+        ZS_LOG_DEBUG(slog("SRV lookup") + ZS_PARAM("name", name) + ZS_PARAM("service", service) + ZS_PARAM("protocol", protocol) + ZS_PARAM("default port", defaultPort) + ZS_PARAM("type", (int)lookupType))
         
         StringList dnsList;
         if (internal::isDNSsList(name, dnsList)) {
@@ -2686,14 +2688,14 @@ namespace ortc
         if (protocolStr == "udp") {
           return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
-        ZS_LOG_WARNING(Trace, log("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
+        ZS_LOG_WARNING(Trace, slog("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
 #endif //WINRT
 
           return internal::DNSSRVQuery::create(delegate, name, service, protocol, defaultPort);
       }
       
       //-----------------------------------------------------------------------
-      Log::Params DNS::log(const char *message)
+      Log::Params DNS::slog(const char *message)
       {
         return Log::Params(message, "DNS");
       }
