@@ -150,6 +150,7 @@ namespace Testing
   void passed();
   void failed();
   void output();
+  void setup();
   void runAllTests();
 }
 

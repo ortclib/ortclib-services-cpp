@@ -40,6 +40,7 @@
 #include "config.h"
 #include "testing.h"
 
+#include <set>
 #include <list>
 #include <iostream>
 #include <algorithm>
@@ -472,6 +473,29 @@ void doTestICESocket()
 
   TESTING_STDOUT() << "WAITING:      Waiting for ICE testing to complete (max wait is 180 seconds).\n";
 
+  WORD port1 = 0;
+  WORD port2 = 0;
+  WORD port3 = 0;
+  WORD port4 = 0;
+
+  while (true)
+  {
+    port1 = static_cast<decltype(port1)>(5000 + (rand() % (65525 - 5000)));
+    port2 = static_cast<decltype(port2)>(5000 + (rand() % (65525 - 5000)));
+    port3 = static_cast<decltype(port3)>(5000 + (rand() % (65525 - 5000)));
+    port4 = static_cast<decltype(port4)>(5000 + (rand() % (65525 - 5000)));
+
+    std::set<decltype(port1)> checkUnique;
+    checkUnique.insert(port1);
+    checkUnique.insert(port2);
+    checkUnique.insert(port3);
+    checkUnique.insert(port4);
+
+    if (checkUnique.size() == 4) break;
+
+    TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
+  }
+
   // check to see if all DNS routines have resolved
   {
     ULONG step = 0;
@@ -484,16 +508,16 @@ void doTestICESocket()
       ULONG expecting = 0;
       switch (step) {
         case 0: {
-          testObject1 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER);
-          testObject2 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER);
+          testObject1 = TestICESocketCallback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST);
+          testObject2 = TestICESocketCallback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);
           break;
         }
         case 1: {
-          testObject1 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
-          testObject2 = TestICESocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true, false, false, true, false);
+          testObject1 = TestICESocketCallback::create(thread, port3, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true, false, false, true, false);
+          testObject2 = TestICESocketCallback::create(thread, port4, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true, false, false, true, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);

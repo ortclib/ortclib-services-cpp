@@ -34,6 +34,8 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
+#include <zsLib/String.h>
+
 #include <ortc/services/ITURNSocket.h>
 #include <ortc/services/STUNPacket.h>
 #include <ortc/services/ISTUNDiscovery.h>
@@ -43,9 +45,11 @@
 
 #include <list>
 #include <iostream>
+#include <set>
 
 namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
+using zsLib::String;
 using zsLib::IMessageQueue;
 using zsLib::ULONG;
 using zsLib::MessageQueueAssociator;
@@ -76,7 +80,7 @@ namespace ortc
       public:
         typedef zsLib::PUID PUID;
         typedef zsLib::BYTE BYTE;
-        typedef zsLib::BYTE WORD;
+        typedef zsLib::WORD WORD;
         typedef zsLib::ULONG ULONG;
         typedef zsLib::Milliseconds Milliseconds;
         typedef zsLib::IPAddress IPAddress;
@@ -539,15 +543,43 @@ void doTestTURNSocket()
 
   TESTING_INSTALL_LOGGER();
 
-  TESTING_SLEEP(1000)
+  TESTING_SLEEP(1000);
+
+  TESTING_CHECK(String("invalid") != String(ORTC_SERVICE_TEST_TURN_PASSWORD));
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
-  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
-  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
-  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), "bogus." ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
-  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
-  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
+  zsLib::WORD port1 = 0;
+  zsLib::WORD port2 = 0;
+  zsLib::WORD port3 = 0;
+  zsLib::WORD port4 = 0;
+  zsLib::WORD port5 = 0;
+
+  while (true)
+  {
+    port1 = static_cast<decltype(port1)>(5000 + (rand() % (65525 - 5000)));
+    port2 = static_cast<decltype(port2)>(5000 + (rand() % (65525 - 5000)));
+    port3 = static_cast<decltype(port3)>(5000 + (rand() % (65525 - 5000)));
+    port4 = static_cast<decltype(port4)>(5000 + (rand() % (65525 - 5000)));
+    port5 = static_cast<decltype(port5)>(5000 + (rand() % (65525 - 5000)));
+
+    std::set<decltype(port1)> checkUnique;
+    checkUnique.insert(port1);
+    checkUnique.insert(port2);
+    checkUnique.insert(port3);
+    checkUnique.insert(port4);
+    checkUnique.insert(port5);
+
+    if (checkUnique.size() == 5) break;
+
+    TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
+  }
+
+  TestTURNSocketCallbackPtr testObject1 = TestTURNSocketCallback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true);
+  TestTURNSocketCallbackPtr testObject2 = TestTURNSocketCallback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false);
+  TestTURNSocketCallbackPtr testObject3 = TestTURNSocketCallback::create(thread, port3, "bogus." ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false, false, false, false, true);
+  TestTURNSocketCallbackPtr testObject4 = TestTURNSocketCallback::create(thread, port4, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1, true);
+  TestTURNSocketCallbackPtr testObject5 = TestTURNSocketCallback::create(thread, port5, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2, false);
 
   TESTING_STDOUT() << "WAITING:      Waiting for TURN testing to complete (max wait is 180 seconds).\n";
 

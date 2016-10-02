@@ -33,6 +33,8 @@
 #include <zsLib/MessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
+#include <zsLib/String.h>
+
 #include <ortc/services/ISTUNDiscovery.h>
 
 #include "config.h"
@@ -46,6 +48,7 @@ namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc
 using zsLib::BYTE;
 using zsLib::WORD;
 using zsLib::ULONG;
+using zsLib::String;
 using zsLib::Socket;
 using zsLib::SocketPtr;
 using zsLib::IPAddress;
@@ -76,7 +79,7 @@ namespace ortc
         }
 
         void init(
-                  WORD port,
+                  WORD localPort,
                   const char *srvName,
                   bool resolveFirst
                   )
@@ -85,7 +88,7 @@ namespace ortc
           mSocket = Socket::createUDP();
 
           IPAddress any(IPAddress::anyV4());
-          any.setPort(port);
+          any.setPort(localPort);
 
           mSocket->bind(any);
           mSocket->setBlocking(false);
@@ -235,10 +238,15 @@ void doTestSTUNDiscovery()
 
   TESTING_INSTALL_LOGGER();
 
+  // MUST set the value before starting
+#ifdef ORTC_SERVICE_TEST_WHAT_IS_MY_IP
+  TESTING_CHECK(String("1.2.3.4") != String(ORTC_SERVICE_TEST_WHAT_IS_MY_IP));
+#endif //ORTC_SERVICE_TEST_WHAT_IS_MY_IP
+
   zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
 
-  TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, ORTC_SERVICE_TEST_STUN_SERVER, true);
-  TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, ORTC_SERVICE_TEST_STUN_SERVER, false);
+  TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true);
+  TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, ORTC_SERVICE_TEST_STUN_SERVER_HOST, false);
 
   TESTING_STDOUT() << "WAITING:      Waiting for STUN discovery to complete (max wait is 180 seconds).\n";
 

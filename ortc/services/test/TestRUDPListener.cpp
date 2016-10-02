@@ -209,7 +209,7 @@ using ortc::services::test::TestRUDPListenerCallbackPtr;
 void doTestRUDPListener()
 {
   if (!ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
-  if (ORTC_SERVICE_TEST_RUNNING_AS_CLIENT) return;
+  if (!ORTC_SERVICE_TEST_RUNNING_RUDP_REMOTE_SERVER) return;
 
   TESTING_INSTALL_LOGGER();
 

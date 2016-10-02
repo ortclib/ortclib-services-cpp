@@ -53,30 +53,35 @@
 #define ORTC_SERVICE_TEST_DO_STUN_TEST                             (true)
 #define ORTC_SERVICE_TEST_DO_TURN_TEST                             (true)
 #define ORTC_SERVICE_TEST_DO_RUDPICESOCKET_LOOPBACK_TEST           (true)
-#define ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST   (false)  // needs to be run manually do to launch two different versions requirement
+#define ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST   (true)
 #define ORTC_SERVICE_TEST_DO_TCP_MESSAGING_TEST                    (true)
 #define ORTC_SERVICE_TEST_DO_STUN_PACKET_TEST                      (true)
 
-#define ORTC_SERVICE_TEST_DNS_ZONE "dnstest.hookflash.me"
+#define ORTC_SERVICE_TEST_DNS_ZONE "test-dns.ortclib.org"
 
-// true = running as a client, false = running as a server
-#define ORTC_SERVICE_TEST_RUNNING_AS_CLIENT                        (true)
-#define ORTC_SERVICE_TEST_RUDP_SERVER_IP                           "192.168.2.220"
+// true = running RUDP client
+#define ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_CLIENT                (true)
+
+// mutually exclusive, either run locally or run remotely
+#define ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER                (true)
+#define ORTC_SERVICE_TEST_RUNNING_RUDP_REMOTE_SERVER               (false)
+
+#define ORTC_SERVICE_TEST_RUDP_SERVER_IP                           "127.0.0.1"  // if running remotely choose alternative IP
 #define ORTC_SERVICE_TEST_RUDP_SERVER_PORT                         50000
 
 #define ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS    (false)
 #define ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS (false)
 
-#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN   "dnstest.hookflash.me"
-#define ORTC_SERVICE_TEST_TURN_USERNAME        "toto"
-#define ORTC_SERVICE_TEST_TURN_PASSWORD        "toto"
+#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN   "test-turn.ortclib.org"
+#define ORTC_SERVICE_TEST_TURN_USERNAME        ("ortclib" "@" "hotmail.com")
+#define ORTC_SERVICE_TEST_TURN_PASSWORD        "invalid"
 
-#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1   "turn1.dnstest.hookflash.me"
-#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2   "turn2.dnstest.hookflash.me"
+#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_1   "test-turn1.ortclib.org"
+#define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN_VIA_A_RECORD_2   "test-turn2.ortclib.org"
 
-#define ORTC_SERVICE_TEST_STUN_SERVER         "stun.vline.com"
+#define ORTC_SERVICE_TEST_STUN_SERVER_HOST     "stun.l.google.com:19302"
 // This should be set to value based on http://www.whatismyip.com/ to get your current IP address
-#define ORTC_SERVICE_TEST_WHAT_IS_MY_IP        "174.91.34.228"
+#define ORTC_SERVICE_TEST_WHAT_IS_MY_IP        "1.2.3.4"
 
 
 

@@ -111,7 +111,7 @@ namespace Testing
     }
 
     if (ORTC_SERVICE_TEST_USE_TELNET_LOGGING) {
-      bool serverMode = (ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) && (!ORTC_SERVICE_TEST_RUNNING_AS_CLIENT);
+      bool serverMode = (ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) && (ORTC_SERVICE_TEST_RUNNING_RUDP_REMOTE_SERVER);
       ILogger::installTelnetLogger(serverMode ? ORTC_SERVICE_TEST_TELNET_SERVER_LOGGING_PORT : ORTC_SERVICE_TEST_TELNET_LOGGING_PORT, 60, true);
 
       for (int tries = 0; tries < 60; ++tries)
@@ -145,6 +145,35 @@ namespace Testing
 
     TESTING_STDOUT() << "REMOVED LOGGER...\n\n";
   }
+
+  class SetupInitializer
+  {
+  public:
+    SetupInitializer()
+    {
+      srand(static_cast<signed int>(time(NULL)));
+    }
+
+    ~SetupInitializer()
+    {
+      output();
+    }
+
+  private:
+    zsLib::SingletonManager::Initializer mInit;
+  };
+
+  static SetupInitializer &setupInitializer()
+  {
+    static SetupInitializer init;
+    return init;
+  }
+
+  void setup()
+  {
+    setupInitializer();
+  }
+
   
   void output()
   {

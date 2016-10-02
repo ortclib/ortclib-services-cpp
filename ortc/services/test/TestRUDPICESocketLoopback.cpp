@@ -43,6 +43,7 @@
 #include "config.h"
 #include "testing.h"
 
+#include <set>
 #include <list>
 #include <iostream>
 #include <algorithm>
@@ -623,6 +624,29 @@ void doTestRUDPICESocketLoopback()
 
   ZS_LOG_BASIC("WAITING:      Waiting for ICE testing to complete (max wait is 180 seconds).");
 
+  WORD port1 = 0;
+  WORD port2 = 0;
+  WORD port3 = 0;
+  WORD port4 = 0;
+
+  while (true)
+  {
+    port1 = static_cast<decltype(port1)>(5000 + (rand() % (65525 - 5000)));
+    port2 = static_cast<decltype(port2)>(5000 + (rand() % (65525 - 5000)));
+    port3 = static_cast<decltype(port3)>(5000 + (rand() % (65525 - 5000)));
+    port4 = static_cast<decltype(port4)>(5000 + (rand() % (65525 - 5000)));
+
+    std::set<decltype(port1)> checkUnique;
+    checkUnique.insert(port1);
+    checkUnique.insert(port2);
+    checkUnique.insert(port3);
+    checkUnique.insert(port4);
+
+    if (checkUnique.size() == 4) break;
+
+    TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
+  }
+
   // check to see if all DNS routines have resolved
   {
     ULONG step = 0;
@@ -636,8 +660,8 @@ void doTestRUDPICESocketLoopback()
       switch (step) {
         case 0: {
           expecting = 2;
-          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true);
-          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, false);
+          testObject1 = TestRUDPICESocketLoopback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true);
+          testObject2 = TestRUDPICESocketLoopback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);
@@ -645,8 +669,8 @@ void doTestRUDPICESocketLoopback()
         }
         case 1: {
           expecting = 2;
-          testObject1 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, true);
-          testObject2 = TestRUDPICESocketLoopback::create(thread, 5000 + (rand() % (65525 - 5000)), ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER, false);
+          testObject1 = TestRUDPICESocketLoopback::create(thread, port3, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true);
+          testObject2 = TestRUDPICESocketLoopback::create(thread, port4, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, ORTC_SERVICE_TEST_STUN_SERVER_HOST, false);
 
           testObject1->setRemote(testObject2);
           testObject2->setRemote(testObject1);

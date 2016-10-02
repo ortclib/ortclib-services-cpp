@@ -38,6 +38,7 @@
 #include <ortc/services/IICESocketSession.h>
 #include <ortc/services/IRUDPTransport.h>
 #include <ortc/services/IRUDPMessaging.h>
+#include <ortc/services/IRUDPListener.h>
 #include <ortc/services/ITransportStream.h>
 #include <ortc/services/IHelper.h>
 
@@ -65,6 +66,7 @@ using ortc::services::IICESocketSessionDelegate;
 using ortc::services::IRUDPMessaging;
 using ortc::services::IRUDPMessagingPtr;
 using ortc::services::IRUDPMessagingDelegate;
+using ortc::services::IRUDPListenerDelegate;
 using ortc::services::IHelper;
 using ortc::services::IICESocket;
 using ortc::services::IDNS;
@@ -78,7 +80,150 @@ namespace ortc
   {
     namespace test
     {
-      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketCallback)
+      ZS_DECLARE_CLASS_PTR(TestRUDPListenerCallback);
+      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketCallback);
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark TestRUDPListenerCallback 
+      #pragma mark
+
+      class TestRUDPListenerCallback : public zsLib::MessageQueueAssociator,
+                                       public IRUDPListenerDelegate,
+                                       public IRUDPMessagingDelegate,
+                                       public ITransportStreamWriterDelegate,
+                                       public ITransportStreamReaderDelegate
+      {
+      private:
+        //---------------------------------------------------------------------
+        TestRUDPListenerCallback(zsLib::IMessageQueuePtr queue) :
+          zsLib::MessageQueueAssociator(queue),
+          mReceiveStream(ITransportStream::create()->getReader()),
+          mSendStream(ITransportStream::create()->getWriter())
+        {
+        }
+
+        //---------------------------------------------------------------------
+        void init(WORD port)
+        {
+          AutoRecursiveLock lock(mLock);
+          mListener = IRUDPListener::create(getAssociatedMessageQueue(), mThisWeak.lock(), port);
+
+          mReceiveStream->notifyReaderReadyToRead();
+          mReceiveStreamSubscription = mReceiveStream->subscribe(mThisWeak.lock());
+        }
+
+      public:
+        //---------------------------------------------------------------------
+        static TestRUDPListenerCallbackPtr create(
+          zsLib::IMessageQueuePtr queue,
+          WORD port
+        )
+        {
+          TestRUDPListenerCallbackPtr pThis(new TestRUDPListenerCallback(queue));
+          pThis->mThisWeak = pThis;
+          pThis->init(port);
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        ~TestRUDPListenerCallback()
+        {
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onRUDPListenerStateChanged(
+          IRUDPListenerPtr listener,
+          RUDPListenerStates state
+        )
+        {
+          AutoRecursiveLock lock(mLock);
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onRUDPListenerChannelWaiting(IRUDPListenerPtr listener)
+        {
+          zsLib::AutoRecursiveLock lock(mLock);
+          mMessaging = IRUDPMessaging::acceptChannel(
+            getAssociatedMessageQueue(),
+            mListener,
+            mThisWeak.lock(),
+            mReceiveStream->getStream(),
+            mSendStream->getStream()
+          );
+
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onRUDPMessagingStateChanged(
+          IRUDPMessagingPtr session,
+          RUDPMessagingStates state
+        )
+        {
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
+        {
+          AutoRecursiveLock lock(mLock);
+          if (reader != mReceiveStream) return;
+
+          while (true) {
+            SecureByteBlockPtr buffer = mReceiveStream->read();
+            if (!buffer) return;
+
+            zsLib::String str = (CSTR)(buffer->BytePtr());
+            ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+              ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+              ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+              ZS_LOG_BASIC(zsLib::String("RECEIVED: \"") + str + "\"")
+              ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+              ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+              ZS_LOG_BASIC("-------------------------------------------------------------------------------")
+
+              zsLib::String add = "(SERVER->" + IHelper::randomString(10) + ")";
+
+            size_t messageSize = buffer->SizeInBytes() - sizeof(char);
+
+            size_t newMessageSize = messageSize + add.length();
+            SecureByteBlockPtr newBuffer(new SecureByteBlock(newMessageSize));
+
+            memcpy(newBuffer->BytePtr(), buffer->BytePtr(), messageSize);
+            memcpy(newBuffer->BytePtr() + messageSize, (const zsLib::BYTE *)(add.c_str()), add.length());
+
+            mSendStream->write(newBuffer);
+          }
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onTransportStreamWriterReady(ITransportStreamWriterPtr writer)
+        {
+          // IGNORED
+        }
+
+      private:
+        mutable zsLib::RecursiveLock mLock;
+        TestRUDPListenerCallbackWeakPtr mThisWeak;
+
+        IRUDPMessagingPtr mMessaging;
+        IRUDPListenerPtr mListener;
+
+        ITransportStreamReaderPtr mReceiveStream;
+        ITransportStreamWriterPtr mSendStream;
+
+        ITransportStreamReaderSubscriptionPtr mReceiveStreamSubscription;
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark TestRUDPListenerCallback 
+      #pragma mark
 
       class TestRUDPICESocketCallback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,
@@ -120,7 +265,7 @@ namespace ortc
           turnInfo->mTURNServerPassword = gPassword;
 
           IICESocket::STUNServerInfoPtr stunInfo = IICESocket::STUNServerInfo::create();
-          stunInfo->mSTUNServer = ORTC_SERVICE_TEST_STUN_SERVER;
+          stunInfo->mSTUNServer = ORTC_SERVICE_TEST_STUN_SERVER_HOST;
 
           turnServers.push_back(turnInfo);
           stunServers.push_back(stunInfo);
@@ -328,13 +473,17 @@ using ortc::services::test::TestRUDPICESocketCallbackPtr;
 void doTestRUDPICESocket()
 {
   if (!ORTC_SERVICE_TEST_DO_RUDPICESOCKET_CLIENT_TO_SERVER_TEST) return;
-  if (!ORTC_SERVICE_TEST_RUNNING_AS_CLIENT) return;
+  if ((!ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_CLIENT) &&
+      (!ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER)) return;
 
   TESTING_INSTALL_LOGGER();
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::MessageQueueThreadPtr threadClient(zsLib::MessageQueueThread::createBasic());
+  zsLib::MessageQueueThreadPtr threadServer(ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER ? zsLib::MessageQueueThread::createBasic() : zsLib::MessageQueueThreadPtr());
 
-  TestRUDPICESocketCallbackPtr testObject1 = TestRUDPICESocketCallback::create(thread, IPAddress(ORTC_SERVICE_TEST_RUDP_SERVER_IP, ORTC_SERVICE_TEST_RUDP_SERVER_PORT));
+  TestRUDPListenerCallbackPtr testObjectServer(ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER ? TestRUDPListenerCallback::create(threadServer, ORTC_SERVICE_TEST_RUDP_SERVER_PORT) : TestRUDPListenerCallbackPtr());
+
+  TestRUDPICESocketCallbackPtr testObjectClient1 = TestRUDPICESocketCallback::create(threadClient, IPAddress(ORTC_SERVICE_TEST_RUDP_SERVER_IP, ORTC_SERVICE_TEST_RUDP_SERVER_PORT));
 
   ZS_LOG_BASIC("WAITING:      Waiting for RUDP ICE socket testing to complete (max wait is 60 minutes).");
 
@@ -351,11 +500,11 @@ void doTestRUDPICESocket()
         break;
 
       if ((4*60 + 50) == totalWait) {
-        testObject1->shutdown();
+        testObjectClient1->shutdown();
       }
 
       found = 0;
-      if (testObject1->isShutdown()) ++found;
+      if (testObjectClient1->isShutdown()) ++found;
 
       if (found == expecting)
         break;
@@ -364,7 +513,8 @@ void doTestRUDPICESocket()
     TESTING_CHECK(found == expecting)
   }
 
-  testObject1.reset();
+  testObjectClient1.reset();
+  testObjectServer.reset();
 
   ZS_LOG_BASIC("WAITING:      All RUDP sockets have finished. Waiting for 'bogus' events to process (10 second wait).");
 
@@ -375,14 +525,17 @@ void doTestRUDPICESocket()
     IMessageQueue::size_type count = 0;
     do
     {
-      count = thread->getTotalUnprocessedMessages();
+      count = 0;
+      count += threadClient->getTotalUnprocessedMessages();
+      count += (threadServer ? threadServer->getTotalUnprocessedMessages() : 0);
       //    count += mThreadNeverCalled->getTotalUnprocessedMessages();
       if (0 != count)
         std::this_thread::yield();
 
     } while (count > 0);
 
-    thread->waitForShutdown();
+    threadClient->waitForShutdown();
+    if (threadServer) threadServer->waitForShutdown();
   }
   TESTING_UNINSTALL_LOGGER();
   zsLib::proxyDump();
