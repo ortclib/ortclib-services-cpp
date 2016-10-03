@@ -179,25 +179,25 @@ namespace ortc
         ULONG getTotalFailed() const
         {
           zsLib::AutoLock lock(mLock);
-          return mFailedResults.size();
+          return static_cast<ULONG>(mFailedResults.size());
         }
 
         ULONG getTotalAProcessed() const
         {
           zsLib::AutoLock lock(mLock);
-          return mAResults.size();
+          return static_cast<ULONG>(mAResults.size());
         }
 
         ULONG getTotalAAAAProcessed() const
         {
           zsLib::AutoLock lock(mLock);
-          return mAAAAResults.size();
+          return static_cast<ULONG>(mAAAAResults.size());
         }
 
         ULONG getTotalSRVProcessed() const
         {
           zsLib::AutoLock lock(mLock);
-          return mSRVResults.size();
+          return static_cast<ULONG>(mSRVResults.size());
         }
 
         bool isFailed(IDNSQueryPtr query) const
@@ -293,9 +293,9 @@ void doTestDNS()
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 1
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 2
 
-  bool doQuery3 = false;
-  bool doQuery4 = false;
-  bool doQuery8 = false;
+  doQuery3 = false;
+  doQuery4 = false;
+  doQuery8 = false;
 #endif //_WINRT
 
   IDNSQueryPtr query1 = (doQuery1 ? IDNS::lookupA(testObject, "www." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
