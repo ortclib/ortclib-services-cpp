@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:hfservices_ios.xcodeproj">
+      location = "self:ortclib.services-osx.xcodeproj">
    </FileRef>
 </Workspace>

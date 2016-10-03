@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:ortclib.services.Test-ios/ortclib.services.Test-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ortclib.services.Test-osx/ortclib.services.Test-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ortclib.services-osx/ortclib.services-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ortclib.services-ios/ortclib.services-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../idnkit/projects/xcode/idnkit-ios/idnkit-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../cryptopp/projects/xcode/cryptopp-ios/cryptopp-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../udns/projects/xcode/udns-ios/udns-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib/projects/xcode/zsLib-ios/zsLib-ios.xcodeproj">
+   </FileRef>
+</Workspace>

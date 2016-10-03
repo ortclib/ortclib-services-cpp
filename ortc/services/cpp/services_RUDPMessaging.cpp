@@ -454,7 +454,7 @@ namespace ortc
 
           // put the size of the message at the front
           BYTE *dest = buffer->BytePtr();
-          IHelper::setBE32(((DWORD *)dest[0]), static_cast<DWORD>(message->SizeInBytes()));
+          IHelper::setBE32(&(((DWORD *)dest)[0]), static_cast<DWORD>(message->SizeInBytes()));
           memcpy(&(dest[sizeof(DWORD)]), message->BytePtr(), message->SizeInBytes());
 
           ZS_LOG_TRACE(log("sending buffer") + ZS_PARAM("message size", message->SizeInBytes()))

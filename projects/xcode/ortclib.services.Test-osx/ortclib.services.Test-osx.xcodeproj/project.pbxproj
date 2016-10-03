@@ -1,0 +1,594 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		008A15271DA1A48300D1664A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14EE1DA1A48300D1664A /* main.cpp */; };
+		008A15281DA1A48300D1664A /* TestBackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14EF1DA1A48300D1664A /* TestBackOffTimer.cpp */; };
+		008A15291DA1A48300D1664A /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F01DA1A48300D1664A /* TestCanonicalXML.cpp */; };
+		008A152A1DA1A48300D1664A /* TestDH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F11DA1A48300D1664A /* TestDH.cpp */; };
+		008A152B1DA1A48300D1664A /* TestDNS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F21DA1A48300D1664A /* TestDNS.cpp */; settings = {COMPILER_FLAGS = "-Wno-unreachable-code"; }; };
+		008A152C1DA1A48300D1664A /* TestHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F31DA1A48300D1664A /* TestHelper.cpp */; };
+		008A152D1DA1A48300D1664A /* TestICESocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F41DA1A48300D1664A /* TestICESocket.cpp */; };
+		008A152E1DA1A48300D1664A /* testing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F51DA1A48300D1664A /* testing.cpp */; settings = {COMPILER_FLAGS = "-Wno-unreachable-code"; }; };
+		008A152F1DA1A48300D1664A /* TestRUDPICESocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F71DA1A48300D1664A /* TestRUDPICESocket.cpp */; settings = {COMPILER_FLAGS = "-Wno-unreachable-code"; }; };
+		008A15301DA1A48300D1664A /* TestRUDPICESocketLoopback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F81DA1A48300D1664A /* TestRUDPICESocketLoopback.cpp */; };
+		008A15311DA1A48300D1664A /* TestRUDPListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F91DA1A48300D1664A /* TestRUDPListener.cpp */; };
+		008A15321DA1A48300D1664A /* TestSTUNDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14FA1DA1A48300D1664A /* TestSTUNDiscovery.cpp */; };
+		008A15331DA1A48300D1664A /* TestSTUNPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14FB1DA1A48300D1664A /* TestSTUNPacket.cpp */; };
+		008A15341DA1A48300D1664A /* TestTCPMessagingLoopback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14FC1DA1A48300D1664A /* TestTCPMessagingLoopback.cpp */; };
+		008A15351DA1A48300D1664A /* TestTURNSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14FD1DA1A48300D1664A /* TestTURNSocket.cpp */; };
+		008A154E1DA1A7B000D1664A /* libcryptopp-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A15471DA1A79100D1664A /* libcryptopp-osx.a */; };
+		008A154F1DA1A7B000D1664A /* libudns-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A15411DA1A78900D1664A /* libudns-osx.a */; };
+		008A15501DA1A7B000D1664A /* libzsLib-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A153B1DA1A78000D1664A /* libzsLib-osx.a */; };
+		008A15531DA1A7B000D1664A /* libortclib.services-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A15521DA1A7B000D1664A /* libortclib.services-osx.a */; };
+		008A155D1DA1A93D00D1664A /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A155C1DA1A93D00D1664A /* libcurl.tbd */; };
+		008A155F1DA1A97F00D1664A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A155E1DA1A97F00D1664A /* CoreFoundation.framework */; };
+		008A15611DA1A9A200D1664A /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A15601DA1A9A200D1664A /* libresolv.9.tbd */; };
+		008A1D5D1DA1D2D500D1664A /* libidnkit-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A1D5A1DA1D2A900D1664A /* libidnkit-osx.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		008A153A1DA1A78000D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15361DA1A78000D1664A /* zsLib-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00FF086F1D9C1B2300462998;
+			remoteInfo = "zsLib-osx";
+		};
+		008A15401DA1A78900D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A153C1DA1A78900D1664A /* udns-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0022EA891D989CE2002FCECF;
+			remoteInfo = "udns-osx";
+		};
+		008A15461DA1A79100D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15421DA1A79100D1664A /* cryptopp-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 009BBC571D976DC400B6B633;
+			remoteInfo = "cryptopp-osx";
+		};
+		008A15481DA1A7A100D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15421DA1A79100D1664A /* cryptopp-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 009BBC561D976DC400B6B633;
+			remoteInfo = "cryptopp-osx";
+		};
+		008A154A1DA1A7A100D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A153C1DA1A78900D1664A /* udns-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0022EA881D989CE2002FCECF;
+			remoteInfo = "udns-osx";
+		};
+		008A154C1DA1A7A100D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15361DA1A78000D1664A /* zsLib-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 00FF086E1D9C1B2300462998;
+			remoteInfo = "zsLib-osx";
+		};
+		008A15581DA1A7BB00D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008A12511DA17F6000D1664A;
+			remoteInfo = "ortclib.services-osx";
+		};
+		008A155A1DA1A7C100D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008A12501DA17F6000D1664A;
+			remoteInfo = "ortclib.services-osx";
+		};
+		008A1D591DA1D2A900D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A1D551DA1D2A800D1664A /* idnkit-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008A15821DA1AA6D00D1664A;
+			remoteInfo = "idnkit-osx";
+		};
+		008A1D5B1DA1D2B000D1664A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008A1D551DA1D2A800D1664A /* idnkit-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008A15811DA1AA6D00D1664A;
+			remoteInfo = "idnkit-osx";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		008A14611DA1A42400D1664A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		008A14631DA1A42400D1664A /* ortclib.services.Test-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ortclib.services.Test-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
+		008A14ED1DA1A48300D1664A /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		008A14EE1DA1A48300D1664A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		008A14EF1DA1A48300D1664A /* TestBackOffTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestBackOffTimer.cpp; sourceTree = "<group>"; };
+		008A14F01DA1A48300D1664A /* TestCanonicalXML.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCanonicalXML.cpp; sourceTree = "<group>"; };
+		008A14F11DA1A48300D1664A /* TestDH.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDH.cpp; sourceTree = "<group>"; };
+		008A14F21DA1A48300D1664A /* TestDNS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestDNS.cpp; sourceTree = "<group>"; };
+		008A14F31DA1A48300D1664A /* TestHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestHelper.cpp; sourceTree = "<group>"; };
+		008A14F41DA1A48300D1664A /* TestICESocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestICESocket.cpp; sourceTree = "<group>"; };
+		008A14F51DA1A48300D1664A /* testing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testing.cpp; sourceTree = "<group>"; };
+		008A14F61DA1A48300D1664A /* testing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testing.h; sourceTree = "<group>"; };
+		008A14F71DA1A48300D1664A /* TestRUDPICESocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRUDPICESocket.cpp; sourceTree = "<group>"; };
+		008A14F81DA1A48300D1664A /* TestRUDPICESocketLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRUDPICESocketLoopback.cpp; sourceTree = "<group>"; };
+		008A14F91DA1A48300D1664A /* TestRUDPListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestRUDPListener.cpp; sourceTree = "<group>"; };
+		008A14FA1DA1A48300D1664A /* TestSTUNDiscovery.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSTUNDiscovery.cpp; sourceTree = "<group>"; };
+		008A14FB1DA1A48300D1664A /* TestSTUNPacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSTUNPacket.cpp; sourceTree = "<group>"; };
+		008A14FC1DA1A48300D1664A /* TestTCPMessagingLoopback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTCPMessagingLoopback.cpp; sourceTree = "<group>"; };
+		008A14FD1DA1A48300D1664A /* TestTURNSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTURNSocket.cpp; sourceTree = "<group>"; };
+		008A15361DA1A78000D1664A /* zsLib-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008A153C1DA1A78900D1664A /* udns-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "udns-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008A15421DA1A79100D1664A /* cryptopp-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cryptopp-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008A15521DA1A7B000D1664A /* libortclib.services-osx.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libortclib.services-osx.a"; path = "../../../../../../../../../../../Library/Developer/Xcode/DerivedData/ortclib.services-gxogsnqglugyybavczhewnbeeact/Build/Products/Debug/libortclib.services-osx.a"; sourceTree = "<group>"; };
+		008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ortclib.services-osx.xcodeproj"; path = "../ortclib.services-osx/ortclib.services-osx.xcodeproj"; sourceTree = "<group>"; };
+		008A155C1DA1A93D00D1664A /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
+		008A155E1DA1A97F00D1664A /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		008A15601DA1A9A200D1664A /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
+		008A1D551DA1D2A800D1664A /* idnkit-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "idnkit-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj"; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		008A14601DA1A42400D1664A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				008A15611DA1A9A200D1664A /* libresolv.9.tbd in Frameworks */,
+				008A155F1DA1A97F00D1664A /* CoreFoundation.framework in Frameworks */,
+				008A155D1DA1A93D00D1664A /* libcurl.tbd in Frameworks */,
+				008A15531DA1A7B000D1664A /* libortclib.services-osx.a in Frameworks */,
+				008A154E1DA1A7B000D1664A /* libcryptopp-osx.a in Frameworks */,
+				008A1D5D1DA1D2D500D1664A /* libidnkit-osx.a in Frameworks */,
+				008A154F1DA1A7B000D1664A /* libudns-osx.a in Frameworks */,
+				008A15501DA1A7B000D1664A /* libzsLib-osx.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		008A145A1DA1A42400D1664A = {
+			isa = PBXGroup;
+			children = (
+				008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */,
+				008A15421DA1A79100D1664A /* cryptopp-osx.xcodeproj */,
+				008A1D551DA1D2A800D1664A /* idnkit-osx.xcodeproj */,
+				008A153C1DA1A78900D1664A /* udns-osx.xcodeproj */,
+				008A15361DA1A78000D1664A /* zsLib-osx.xcodeproj */,
+				008A146D1DA1A48300D1664A /* ortc */,
+				008A14641DA1A42400D1664A /* Products */,
+				008A15511DA1A7B000D1664A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		008A14641DA1A42400D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A14631DA1A42400D1664A /* ortclib.services.Test-osx */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008A146D1DA1A48300D1664A /* ortc */ = {
+			isa = PBXGroup;
+			children = (
+				008A146E1DA1A48300D1664A /* services */,
+			);
+			name = ortc;
+			path = ../../../ortc;
+			sourceTree = "<group>";
+		};
+		008A146E1DA1A48300D1664A /* services */ = {
+			isa = PBXGroup;
+			children = (
+				008A14EC1DA1A48300D1664A /* test */,
+			);
+			path = services;
+			sourceTree = "<group>";
+		};
+		008A14EC1DA1A48300D1664A /* test */ = {
+			isa = PBXGroup;
+			children = (
+				008A14ED1DA1A48300D1664A /* config.h */,
+				008A14EE1DA1A48300D1664A /* main.cpp */,
+				008A14EF1DA1A48300D1664A /* TestBackOffTimer.cpp */,
+				008A14F01DA1A48300D1664A /* TestCanonicalXML.cpp */,
+				008A14F11DA1A48300D1664A /* TestDH.cpp */,
+				008A14F21DA1A48300D1664A /* TestDNS.cpp */,
+				008A14F31DA1A48300D1664A /* TestHelper.cpp */,
+				008A14F41DA1A48300D1664A /* TestICESocket.cpp */,
+				008A14F51DA1A48300D1664A /* testing.cpp */,
+				008A14F61DA1A48300D1664A /* testing.h */,
+				008A14F71DA1A48300D1664A /* TestRUDPICESocket.cpp */,
+				008A14F81DA1A48300D1664A /* TestRUDPICESocketLoopback.cpp */,
+				008A14F91DA1A48300D1664A /* TestRUDPListener.cpp */,
+				008A14FA1DA1A48300D1664A /* TestSTUNDiscovery.cpp */,
+				008A14FB1DA1A48300D1664A /* TestSTUNPacket.cpp */,
+				008A14FC1DA1A48300D1664A /* TestTCPMessagingLoopback.cpp */,
+				008A14FD1DA1A48300D1664A /* TestTURNSocket.cpp */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
+		008A15371DA1A78000D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A153B1DA1A78000D1664A /* libzsLib-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008A153D1DA1A78900D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A15411DA1A78900D1664A /* libudns-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008A15431DA1A79100D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A15471DA1A79100D1664A /* libcryptopp-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008A15511DA1A7B000D1664A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				008A15601DA1A9A200D1664A /* libresolv.9.tbd */,
+				008A155E1DA1A97F00D1664A /* CoreFoundation.framework */,
+				008A155C1DA1A93D00D1664A /* libcurl.tbd */,
+				008A15521DA1A7B000D1664A /* libortclib.services-osx.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		008A15551DA1A7BB00D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A15591DA1A7BB00D1664A /* libortclib.services-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008A1D561DA1D2A800D1664A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008A1D5A1DA1D2A900D1664A /* libidnkit-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		008A14621DA1A42400D1664A /* ortclib.services.Test-osx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 008A146A1DA1A42400D1664A /* Build configuration list for PBXNativeTarget "ortclib.services.Test-osx" */;
+			buildPhases = (
+				008A145F1DA1A42400D1664A /* Sources */,
+				008A14601DA1A42400D1664A /* Frameworks */,
+				008A14611DA1A42400D1664A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				008A1D5C1DA1D2B000D1664A /* PBXTargetDependency */,
+				008A155B1DA1A7C100D1664A /* PBXTargetDependency */,
+				008A15491DA1A7A100D1664A /* PBXTargetDependency */,
+				008A154B1DA1A7A100D1664A /* PBXTargetDependency */,
+				008A154D1DA1A7A100D1664A /* PBXTargetDependency */,
+			);
+			name = "ortclib.services.Test-osx";
+			productName = "ortclib.services.Test-osx";
+			productReference = 008A14631DA1A42400D1664A /* ortclib.services.Test-osx */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		008A145B1DA1A42400D1664A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = "Open Peer Foundation";
+				TargetAttributes = {
+					008A14621DA1A42400D1664A = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 008A145E1DA1A42400D1664A /* Build configuration list for PBXProject "ortclib.services.Test-osx" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 008A145A1DA1A42400D1664A;
+			productRefGroup = 008A14641DA1A42400D1664A /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 008A15431DA1A79100D1664A /* Products */;
+					ProjectRef = 008A15421DA1A79100D1664A /* cryptopp-osx.xcodeproj */;
+				},
+				{
+					ProductGroup = 008A1D561DA1D2A800D1664A /* Products */;
+					ProjectRef = 008A1D551DA1D2A800D1664A /* idnkit-osx.xcodeproj */;
+				},
+				{
+					ProductGroup = 008A15551DA1A7BB00D1664A /* Products */;
+					ProjectRef = 008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */;
+				},
+				{
+					ProductGroup = 008A153D1DA1A78900D1664A /* Products */;
+					ProjectRef = 008A153C1DA1A78900D1664A /* udns-osx.xcodeproj */;
+				},
+				{
+					ProductGroup = 008A15371DA1A78000D1664A /* Products */;
+					ProjectRef = 008A15361DA1A78000D1664A /* zsLib-osx.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				008A14621DA1A42400D1664A /* ortclib.services.Test-osx */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		008A153B1DA1A78000D1664A /* libzsLib-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-osx.a";
+			remoteRef = 008A153A1DA1A78000D1664A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008A15411DA1A78900D1664A /* libudns-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libudns-osx.a";
+			remoteRef = 008A15401DA1A78900D1664A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008A15471DA1A79100D1664A /* libcryptopp-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libcryptopp-osx.a";
+			remoteRef = 008A15461DA1A79100D1664A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008A15591DA1A7BB00D1664A /* libortclib.services-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libortclib.services-osx.a";
+			remoteRef = 008A15581DA1A7BB00D1664A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008A1D5A1DA1D2A900D1664A /* libidnkit-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libidnkit-osx.a";
+			remoteRef = 008A1D591DA1D2A900D1664A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		008A145F1DA1A42400D1664A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				008A15271DA1A48300D1664A /* main.cpp in Sources */,
+				008A152E1DA1A48300D1664A /* testing.cpp in Sources */,
+				008A15281DA1A48300D1664A /* TestBackOffTimer.cpp in Sources */,
+				008A15291DA1A48300D1664A /* TestCanonicalXML.cpp in Sources */,
+				008A152A1DA1A48300D1664A /* TestDH.cpp in Sources */,
+				008A152B1DA1A48300D1664A /* TestDNS.cpp in Sources */,
+				008A152D1DA1A48300D1664A /* TestICESocket.cpp in Sources */,
+				008A152C1DA1A48300D1664A /* TestHelper.cpp in Sources */,
+				008A152F1DA1A48300D1664A /* TestRUDPICESocket.cpp in Sources */,
+				008A15301DA1A48300D1664A /* TestRUDPICESocketLoopback.cpp in Sources */,
+				008A15311DA1A48300D1664A /* TestRUDPListener.cpp in Sources */,
+				008A15321DA1A48300D1664A /* TestSTUNDiscovery.cpp in Sources */,
+				008A15331DA1A48300D1664A /* TestSTUNPacket.cpp in Sources */,
+				008A15341DA1A48300D1664A /* TestTCPMessagingLoopback.cpp in Sources */,
+				008A15351DA1A48300D1664A /* TestTURNSocket.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		008A15491DA1A7A100D1664A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "cryptopp-osx";
+			targetProxy = 008A15481DA1A7A100D1664A /* PBXContainerItemProxy */;
+		};
+		008A154B1DA1A7A100D1664A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "udns-osx";
+			targetProxy = 008A154A1DA1A7A100D1664A /* PBXContainerItemProxy */;
+		};
+		008A154D1DA1A7A100D1664A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "zsLib-osx";
+			targetProxy = 008A154C1DA1A7A100D1664A /* PBXContainerItemProxy */;
+		};
+		008A155B1DA1A7C100D1664A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "ortclib.services-osx";
+			targetProxy = 008A155A1DA1A7C100D1664A /* PBXContainerItemProxy */;
+		};
+		008A1D5C1DA1D2B000D1664A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "idnkit-osx";
+			targetProxy = 008A1D5B1DA1D2B000D1664A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		008A14681DA1A42400D1664A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../..,
+					../../../..,
+					../../../../zsLib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		008A14691DA1A42400D1664A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../..,
+					../../../..,
+					../../../../zsLib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		008A146B1DA1A42400D1664A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		008A146C1DA1A42400D1664A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		008A145E1DA1A42400D1664A /* Build configuration list for PBXProject "ortclib.services.Test-osx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				008A14681DA1A42400D1664A /* Debug */,
+				008A14691DA1A42400D1664A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		008A146A1DA1A42400D1664A /* Build configuration list for PBXNativeTarget "ortclib.services.Test-osx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				008A146B1DA1A42400D1664A /* Debug */,
+				008A146C1DA1A42400D1664A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 008A145B1DA1A42400D1664A /* Project object */;
+}

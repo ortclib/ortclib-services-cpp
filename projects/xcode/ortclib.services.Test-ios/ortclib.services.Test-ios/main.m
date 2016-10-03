@@ -1,9 +1,9 @@
 //
 //  main.m
-//  hfservicesTest_ios
+//  ortclib.services.Test-ios
 //
-//  Created by Robin Raymond on 2014-11-17.
-//  Copyright (c) 2014 Hookflash Inc. All rights reserved.
+//  Created by Robin Raymond on 2016-10-02.
+//  Copyright © 2016 Open Peer Foundation. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

@@ -1257,26 +1257,6 @@ namespace ortc
         {
           AutoRecursiveLock lock(mLock);
           return mDidComplete;
-
-          // all the sub resolvers must be complete...
-          for (ResolverList::const_iterator iter = mResolvers.begin(); iter != mResolvers.end(); ++iter) {
-            if (*iter)
-              return false;   // at least one resolver is still active
-          }
-
-          if (mSRVLookup) {
-            if (!mSRVLookup->isComplete()) {
-              return false;
-            }
-          }
-
-          if (mBackupLookup) {
-            if (!mBackupLookup->isComplete()) {
-              return false;
-            }
-          }
-
-          return true;
         }
 
         //---------------------------------------------------------------------
