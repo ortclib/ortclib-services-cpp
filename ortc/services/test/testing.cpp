@@ -189,6 +189,8 @@ namespace Testing
 
     TESTING_INSTALL_LOGGER()
 
+    setup();
+
     TESTING_RUN_TEST_FUNC(doTestBackoffRetry)
     TESTING_RUN_TEST_FUNC(doTestCanonicalXML)
     TESTING_RUN_TEST_FUNC(doTestDH)
