@@ -11,3 +11,4 @@ ipch/
 Generated Files/
 *.opendb
 ortc/services/internal/services_ETWTracing.h
+contents.xcworkspacedata
