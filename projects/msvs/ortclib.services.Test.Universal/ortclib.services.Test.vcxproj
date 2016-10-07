@@ -107,7 +107,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -117,7 +118,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -127,7 +129,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,7 +140,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,7 +151,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -157,7 +162,8 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib\UWP;%(AdditionalLibraryDirectories);$(ProjectDir)..\..\..\..\..\..\webrtc\xplatform\webrtc\WEBRTC_BUILD\$(Configuration)\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WindowsApp.lib;%(AdditionalDependencies);webrtc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
