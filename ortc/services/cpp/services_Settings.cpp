@@ -32,6 +32,8 @@
 #include <ortc/services/internal/services_Settings.h>
 #include <ortc/services/internal/services.h>
 #include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services_HTTP.h>
+#include <ortc/services/internal/services_HTTP_WinRT.h>
 
 #include <ortc/services/IHelper.h>
 
@@ -661,6 +663,8 @@ namespace ortc
       void Settings::applyDefaults()
       {
         EventWriteOpServicesSettingApplyDefaults(__func__, mID);
+
+        IHTTPForSettings::applyDefaults();
 
         setBool(ORTC_SERVICES_SETTING_MESSAGE_QUEUE_MANAGER_PROCESS_APPLICATION_MESSAGE_QUEUE_ON_QUIT, false);
         setBool(ORTC_SERVICES_SETTING_FORCE_USE_TURN, false);

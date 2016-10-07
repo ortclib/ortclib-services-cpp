@@ -85,10 +85,7 @@ namespace ortc
   {
     namespace test
     {
-      static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
-      static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
-
-      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketLoopback)
+      ZS_DECLARE_CLASS_PTR(TestRUDPICESocketLoopback);
 
       class TestRUDPICESocketLoopback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,
@@ -145,8 +142,8 @@ namespace ortc
 
           IICESocket::TURNServerInfoPtr turnInfo = IICESocket::TURNServerInfo::create();
           turnInfo->mTURNServer = srvNameTURN;
-          turnInfo->mTURNServerUsername = gUsername;
-          turnInfo->mTURNServerPassword = gPassword;
+          turnInfo->mTURNServerUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
+          turnInfo->mTURNServerPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
 
           IICESocket::STUNServerInfoPtr stunInfo = IICESocket::STUNServerInfo::create();
           stunInfo->mSTUNServer = srvNameSTUN;

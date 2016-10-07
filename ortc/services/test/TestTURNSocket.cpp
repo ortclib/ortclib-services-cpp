@@ -35,10 +35,13 @@
 #include <zsLib/Socket.h>
 #include <zsLib/Timer.h>
 #include <zsLib/String.h>
+#include <zsLib/XML.h>
 
 #include <ortc/services/ITURNSocket.h>
 #include <ortc/services/STUNPacket.h>
 #include <ortc/services/ISTUNDiscovery.h>
+#include <ortc/services/IHTTP.h>
+#include <ortc/services/IHelper.h>
 
 #include "config.h"
 #include "testing.h"
@@ -49,6 +52,26 @@
 
 namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
 
+#if 0
+{
+  "iceServers": [
+    {
+      "urls": "stun:turn-eastasia-13-75-41-182.relayfirst.net:3478"
+    },
+    {
+      "urls": [
+        "turn:turn-eastasia-13-75-41-182.relayfirst.net:3478?transport=udp",
+        "turn:turn-eastasia-13-75-41-182.relayfirst.net:80?transport=tcp",
+        "turns:turn-eastasia-13-75-41-182.relayfirst.net:443?transport=tcp"
+      ],
+      "credential": "example-password",
+      "username": "example-username"
+    }
+  ],
+  "ttl": 86400
+}
+#endif //0
+
 using zsLib::String;
 using zsLib::IMessageQueue;
 using zsLib::ULONG;
@@ -58,6 +81,9 @@ using zsLib::ITimerDelegate;
 using zsLib::MessageQueueThread;
 using zsLib::Seconds;
 using zsLib::MessageQueueThreadPtr;
+using namespace zsLib::XML;
+
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::IHelper, UseServicesHelper);
 
 namespace ortc
 {
@@ -65,9 +91,6 @@ namespace ortc
   {
     namespace test
     {
-      static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
-      static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
-
       ZS_DECLARE_CLASS_PTR(TestTURNSocketCallback)
 
       class TestTURNSocketCallback : public MessageQueueAssociator,
@@ -75,10 +98,12 @@ namespace ortc
                                      public ITURNSocketDelegate,
                                      public IDNSDelegate,
                                      public ISocketDelegate,
-                                     public ITimerDelegate
+                                     public ITimerDelegate,
+                                     public IHTTPQueryDelegate
       {
       public:
         typedef zsLib::PUID PUID;
+        typedef zsLib::AutoPUID AutoPUID;
         typedef zsLib::BYTE BYTE;
         typedef zsLib::WORD WORD;
         typedef zsLib::ULONG ULONG;
@@ -92,66 +117,184 @@ namespace ortc
         typedef zsLib::Timer Timer;
         typedef zsLib::TimerPtr TimerPtr;
         typedef zsLib::RecursiveLock RecursiveLock;
+        typedef ITURNSocket::URIList URIList;
 
       private:
+        //---------------------------------------------------------------------
         TestTURNSocketCallback(IMessageQueuePtr queue) :
-          MessageQueueAssociator(queue),
-          mID(0),
-          mExpectConnected(false),
-          mExpectFailedToConnect(false),
-          mExpectGracefulShutdown(false),
-          mExpectErrorShutdown(false),
-          mConnected(false),
-          mFailedToConnect(false),
-          mGracefulShutdown(false),
-          mErrorShutdown(false),
-          mShutdownCalled(false),
-          mTotalReceived(0)
+          MessageQueueAssociator(queue)
         {
         }
 
-        void init(
-                  WORD port,
-                  const char *srvName,
-                  bool resolveFirst
-                  )
+        //---------------------------------------------------------------------
+        void init()
         {
           AutoRecursiveLock lock(mLock);
 
           mSocket = Socket::createUDP();
 
           IPAddress any(IPAddress::anyV4());
-          any.setPort(port);
+          any.setPort(mPort);
 
           mSocket->bind(any);
           mSocket->setBlocking(false);
           mSocket->setDelegate(mThisWeak.lock());
 
-          if (resolveFirst) {
-            mUDPSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "turn", "udp", 3478);
-            mTCPSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "turn", "tcp", 3478);
-            mSTUNSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), srvName, "stun", "udp", 3478);
-          } else {
+          step();
+        }
+
+        //---------------------------------------------------------------------
+        void step()
+        {
+          if (mUseAPICredentials) {
+            if (!mCredentialsQuery) {
+              String credentialURI = ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_GET_URI;
+              credentialURI.replaceAll(String("$ACCOUNT$"), String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_ACCOUNT));
+              credentialURI.replaceAll(String("$APIKEY$"), String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_APIKEY));
+              mCredentialsQuery = IHTTP::get(mThisWeak.lock(), "ORTC services test 1.0", credentialURI);
+              return;
+            }
+
+            if (!mCredentialsQuery->isComplete()) return;
+          }
+
+          bool doResolve = false;
+
+          if (mTURNUsername.isEmpty()) {
+            if (mUseAPICredentials) {
+              String credentials;
+              mCredentialsQuery->readDataAsString(credentials);
+
+              try {
+                auto doc = Document::createFromParsedJSON(credentials);
+                auto serversEl = doc->findFirstChildElementChecked("iceServers");
+
+                bool foundServer = false;
+
+                while (serversEl) {
+                  auto urlsEl = serversEl->findFirstChildElementChecked("urls");
+
+                  while (urlsEl) {
+                    auto url = UseServicesHelper::getElementTextAndDecode(urlsEl);
+                    auto typeStr = url.substr(0, strlen("turn:"));
+
+                    if (typeStr == "turn:") {
+
+                      auto questionPos = url.rfind("?");
+                      if (String::npos != questionPos) {
+                        String questionStr = url.substr(questionPos+1);
+                        auto equalPos = questionStr.find('=');
+                        if (String::npos != equalPos) {
+                          String nameStr = questionStr.substr(0, equalPos);
+                          String valueStr = questionStr.substr(equalPos + 1);
+
+                          if (nameStr == "transport") {
+                            String srvFiltered = url.substr(0, questionPos);
+                            srvFiltered = srvFiltered.substr(typeStr.length());
+
+                            if (valueStr == "udp") {
+                              mTURNUDPSRVName = srvFiltered;
+                            } else if (valueStr == "tcp") {
+                              mTURNTCPSRVName = srvFiltered;
+                            }
+                          }
+                        }
+                      }
+
+                      mTURNServers.push_back(url);
+                      foundServer = true;
+                    } else if (typeStr == "stun:") {
+                      mSTUNSRVName = url.substr(typeStr.length());
+                    }
+                    urlsEl = urlsEl->findNextSiblingElement("urls");
+                  }
+
+                  if (foundServer) {
+                    auto usernameEl = serversEl->findFirstChildElement("username");
+                    auto credentialsEl = serversEl->findFirstChildElement("credential");
+
+                    if (usernameEl) {
+                      mTURNUsername = UseServicesHelper::getElementTextAndDecode(usernameEl);
+                    }
+                    if (credentialsEl) {
+                      mTURNPassword = UseServicesHelper::getElementTextAndDecode(credentialsEl);
+                    }
+                  }
+
+                  serversEl = serversEl->findNextSiblingElement("iceServers");
+                }
+
+              } catch (const zsLib::XML::Exceptions::CheckFailed &) {
+                TESTING_STDOUT() << "FAILED TO OBTAIN SERVER CREDENTIALS!\n";
+                TESTING_CHECK(false);
+              }
+
+              if (mSTUNSRVName.isEmpty()) {
+                mSTUNSRVName = mSRVName;
+              }
+
+              TESTING_CHECK(mTURNServers.size() > 0);
+              TESTING_CHECK(mTURNUsername.hasData());
+              TESTING_CHECK(mTURNPassword.hasData());
+            } else {
+              mSTUNSRVName = mSRVName;
+              mTURNUDPSRVName = mSRVName;
+              mTURNTCPSRVName = mSRVName;
+
+              mTURNServers.push_back(mSRVName);
+              mTURNUsername = String(ORTC_SERVICE_TEST_TURN_USERNAME);
+              mTURNPassword = String(ORTC_SERVICE_TEST_TURN_PASSWORD);
+            }
+            doResolve = true;
+          }
+
+          if ((mResolveFirst) &&
+              (doResolve)) {
+            mUDPSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), mTURNUDPSRVName, "turn", "udp", 3478);
+            mTCPSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), mTURNTCPSRVName, "turn", "tcp", 3478);
+            mSTUNSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), mSTUNSRVName, "stun", "udp", 3478);
+          }
+
+          if (mUDPSRVQuery) return;
+          if (mTCPSRVQuery) return;
+          if (mSTUNSRVQuery) return;
+
+          if (!mDiscovery) {
             ISTUNDiscovery::CreationOptions stunOptions;
-            stunOptions.mServers.push_back(String(srvName));
+            if (mSTUNSRVResult) {
+              stunOptions.mSRV = mSTUNSRVResult;
+            }
+            else {
+              stunOptions.mServers.push_back(mSTUNSRVName);
+            }
 
             mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
+          }
 
+          if (!mTURNSocket) {
             ITURNSocket::CreationOptions turnOptions;
-            turnOptions.mServers.push_back(String(srvName));
-            turnOptions.mUsername = gUsername;
-            turnOptions.mPassword = gPassword;
-            turnOptions.mLookupType = IDNS::SRVLookupType_AutoLookupAndFallbackAll;
+            if ((mUDPSRVResult) ||
+                (mTCPSRVResult)) {
+              turnOptions.mSRVUDP = mUDPSRVResult;
+              turnOptions.mSRVTCP = mTCPSRVResult;
+            } else {
+              turnOptions.mServers = mTURNServers;
+            }
+            turnOptions.mUsername = mTURNUsername;
+            turnOptions.mPassword = mTURNPassword;
             turnOptions.mUseChannelBinding = true;
 
             mTURNSocket = ITURNSocket::create(getAssociatedMessageQueue(), mThisWeak.lock(), turnOptions);
             mID = mTURNSocket->getID();
           }
 
-          mTimer = Timer::create(mThisWeak.lock(), Milliseconds(rand()%400+200));
+          if (!mTimer) {
+            mTimer = Timer::create(mThisWeak.lock(), Milliseconds(rand() % 400 + 200));
+          }
         }
 
       public:
+        //---------------------------------------------------------------------
         static TestTURNSocketCallbackPtr create(
                                                 IMessageQueuePtr queue,
                                                 WORD port,
@@ -165,22 +308,37 @@ namespace ortc
         {
           TestTURNSocketCallbackPtr pThis(new TestTURNSocketCallback(queue));
           pThis->mThisWeak = pThis;
+          pThis->mUseAPICredentials = (String("invalid") != String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_APIKEY));
+          pThis->mPort = port;
+          pThis->mSRVName = String(srvName);
+          pThis->mResolveFirst = resolveFirst;
           pThis->mExpectConnected = expectConnected;
           pThis->mExpectGracefulShutdown = expectGracefulShutdown;
           pThis->mExpectErrorShutdown = expectErrorShutdown;
           pThis->mExpectFailedToConnect = expectFailedToConnect;
-          pThis->init(port, srvName, resolveFirst);
+          pThis->init();
           return pThis;
         }
 
+        //---------------------------------------------------------------------
         ~TestTURNSocketCallback()
         {
         }
 
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark IDNSDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr query)
         {
           TESTING_CHECK(query)
           TESTING_CHECK(query->hasResult())
+
           AutoRecursiveLock lock(mLock);
 
           if (query == mUDPSRVQuery) {
@@ -192,33 +350,22 @@ namespace ortc
             mTCPSRVQuery.reset();
           }
           if (query == mSTUNSRVQuery) {
-            ISTUNDiscovery::CreationOptions stunOptions;
-            stunOptions.mSRV = query->getSRV();
-            mDiscovery = ISTUNDiscovery::create(getAssociatedMessageQueue(), mThisWeak.lock(), stunOptions);
+            mSTUNSRVResult = query->getSRV();
             mSTUNSRVQuery.reset();
-            // do not allow the routine to continue in the case STUN SRV lookup completes otherwise the TURN server could get created twice
-            return;
           }
 
-          if ((!mUDPSRVResult) ||
-              (!mTCPSRVResult))
-            return;
-
-          TESTING_CHECK(!mUDPSRVQuery);
-          TESTING_CHECK(!mTCPSRVQuery);
-
-          ITURNSocket::CreationOptions turnOptions;
-          turnOptions.mSRVUDP = mUDPSRVResult;
-          turnOptions.mSRVTCP = mTCPSRVResult;
-          turnOptions.mUsername = gUsername;
-          turnOptions.mPassword = gPassword;
-          turnOptions.mUseChannelBinding = true;
-
-          mTURNSocket = ITURNSocket::create(getAssociatedMessageQueue(), mThisWeak.lock(), turnOptions);
-          mID = mTURNSocket->getID();
+          step();
         }
 
-        // ITURNSocketDelegate
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ISTUNDiscoveryDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         virtual void handleTURNSocketReceivedPacket(
                                                     ITURNSocketPtr socket,
                                                     IPAddress source,
@@ -243,6 +390,7 @@ namespace ortc
           TESTING_CHECK(false); // received unknown data from the socket
         }
 
+        //---------------------------------------------------------------------
         virtual void onSTUNDiscoverySendPacket(
                                                ISTUNDiscoveryPtr discovery,
                                                IPAddress destination,
@@ -261,6 +409,7 @@ namespace ortc
           mSocket->sendTo(destination, packet->BytePtr(), packet->SizeInBytes());
         }
 
+        //---------------------------------------------------------------------
         virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery)
         {
           AutoRecursiveLock lock(mLock);
@@ -271,9 +420,17 @@ namespace ortc
           TESTING_CHECK(mSocket)
 
           mSTUNDiscoveredIP = discovery->getMappedAddress();
-          mDiscovery.reset();
         }
 
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ITURNSocketDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         virtual bool notifyTURNSocketSendPacket(
                                                 ITURNSocketPtr socket,
                                                 IPAddress destination,
@@ -285,6 +442,7 @@ namespace ortc
           return 0 != mSocket->sendTo(destination, packet, packetLengthInBytes);
         }
 
+        //---------------------------------------------------------------------
         virtual void onTURNSocketStateChanged(
                                               ITURNSocketPtr socket,
                                               TURNSocketStates state
@@ -312,6 +470,7 @@ namespace ortc
           }
         }
 
+        //---------------------------------------------------------------------
         void onTURNSocketConnected(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
@@ -323,6 +482,7 @@ namespace ortc
           TESTING_CHECK(!mDiscoveredIP.isAddressEmpty())
         }
 
+        //---------------------------------------------------------------------
         void onTURNSocketFailedToConnect(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
@@ -331,6 +491,7 @@ namespace ortc
           mTURNSocket.reset();
         }
 
+        //---------------------------------------------------------------------
         void onTURNSocketShutdown(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
@@ -348,11 +509,21 @@ namespace ortc
           mTURNSocket.reset();
         }
 
+        //---------------------------------------------------------------------
         virtual void onTURNSocketWriteReady(ITURNSocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
         }
 
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ITURNSocketDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         virtual void onReadReady(SocketPtr socket)
         {
           AutoRecursiveLock lock(mLock);
@@ -375,6 +546,7 @@ namespace ortc
           if (mTURNSocket->handleSTUNPacket(ip, stun)) return;
         }
 
+        //---------------------------------------------------------------------
         virtual void onWriteReady(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
@@ -382,6 +554,7 @@ namespace ortc
           //          TESTING_CHECK(socket == mSocket);
         }
 
+        //---------------------------------------------------------------------
         virtual void onException(SocketPtr socket)
         {
           //          AutoLock lock(mLock);
@@ -389,6 +562,15 @@ namespace ortc
           //          TESTING_CHECK(socket == mSocket);
         }
 
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark ITimerDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         virtual void onTimer(TimerPtr timer)
         {
           AutoRecursiveLock lock(mLock);
@@ -422,6 +604,36 @@ namespace ortc
           mSentData.push_back(data);
         }
 
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark IHTTPQueryDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onHTTPReadDataAvailable(IHTTPQueryPtr query)
+        {
+        }
+
+        //---------------------------------------------------------------------
+        virtual void onHTTPCompleted(IHTTPQueryPtr query)
+        {
+          AutoRecursiveLock lock(mLock);
+          step();
+        }
+
+
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark (internal)
+        #pragma mark
+
+        //---------------------------------------------------------------------
         void shutdown()
         {
           AutoRecursiveLock lock(mLock);
@@ -434,27 +646,36 @@ namespace ortc
             mTimer->cancel();
             mTimer.reset();
           }
+          if (mDiscovery) {
+            mDiscovery->cancel();
+            mDiscovery.reset();
+          }
         }
 
+        //---------------------------------------------------------------------
         bool isComplete()
         {
           AutoRecursiveLock lock(mLock);
           return (!((mUDPSRVQuery) || (mTCPSRVQuery) || (mSTUNSRVQuery) || (mTURNSocket)));
         }
 
+        //---------------------------------------------------------------------
         PUID getID() const
         {
           AutoRecursiveLock lock(mLock);
           return mID;
         }
 
+        //---------------------------------------------------------------------
         IPAddress getIP()
         {
           AutoRecursiveLock lock(mLock);
           return mDiscoveredIP;
         }
 
-        void expectationsOkay() {
+        //---------------------------------------------------------------------
+        void expectationsOkay()
+        {
           AutoRecursiveLock lock(mLock);
 
           if (mExpectConnected) {
@@ -491,30 +712,53 @@ namespace ortc
         }
 
       private:
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark (data)
+        #pragma mark
+
         mutable RecursiveLock mLock;
-        PUID mID;
+        PUID mID {};
 
         TestTURNSocketCallbackWeakPtr mThisWeak;
 
-        bool mExpectConnected;
-        bool mExpectFailedToConnect;
-        bool mExpectGracefulShutdown;
-        bool mExpectErrorShutdown;
+        bool mUseAPICredentials {};
 
-        bool mConnected;
-        bool mFailedToConnect;
-        bool mGracefulShutdown;
-        bool mErrorShutdown;
+        bool mExpectConnected {};
+        bool mExpectFailedToConnect {};
+        bool mExpectGracefulShutdown {};
+        bool mExpectErrorShutdown {};
 
-        bool mShutdownCalled;
+        bool mConnected {};
+        bool mFailedToConnect {};
+        bool mGracefulShutdown {};
+        bool mErrorShutdown {};
+
+        bool mShutdownCalled {};
+
+        String mSRVName;
+        String mSTUNSRVName;
+        String mTURNUDPSRVName;
+        String mTURNTCPSRVName;
+        WORD mPort {};
+
+        URIList mTURNServers;
+        String mTURNUsername;
+        String mTURNPassword;
 
         SocketPtr mSocket;
+
+        bool mResolveFirst {};
         IDNSQueryPtr mSTUNSRVQuery;
         IDNSQueryPtr mUDPSRVQuery;
         IDNSQueryPtr mTCPSRVQuery;
 
         IDNS::SRVResultPtr mUDPSRVResult;
         IDNS::SRVResultPtr mTCPSRVResult;
+        IDNS::SRVResultPtr mSTUNSRVResult;
 
         ITURNSocketPtr mTURNSocket;
         ISTUNDiscoveryPtr mDiscovery;
@@ -522,9 +766,11 @@ namespace ortc
         IPAddress mDiscoveredIP;
         IPAddress mSTUNDiscoveredIP;
 
+        IHTTPQueryPtr mCredentialsQuery;
+
         TimerPtr mTimer;
 
-        ULONG mTotalReceived;
+        ULONG mTotalReceived {};
 
         typedef std::pair< std::shared_ptr<BYTE>, size_t> DataPair;
         typedef std::list<DataPair> DataList;
@@ -545,7 +791,12 @@ void doTestTURNSocket()
 
   TESTING_SLEEP(1000);
 
-  TESTING_CHECK(String("invalid") != String(ORTC_SERVICE_TEST_TURN_PASSWORD));
+  bool turnPasswordValid = (String("invalid") != String(ORTC_SERVICE_TEST_TURN_PASSWORD));
+  bool turnAPIKeyValid = (String("invalid") != String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_APIKEY));
+
+  // either direct username / password or API key is required to be valid (but not both)
+  TESTING_CHECK(!(turnPasswordValid && turnAPIKeyValid));
+  TESTING_CHECK(turnPasswordValid || turnAPIKeyValid);
 
   MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
 
@@ -575,11 +826,11 @@ void doTestTURNSocket()
     TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
   }
 
-  bool doTest1 = true;
+  bool doTest1 = false;
   bool doTest2 = false;
-  bool doTest3 = false;
+  bool doTest3 = (!turnAPIKeyValid);  // this test only works when not using APIKEY
   bool doTest4 = false;
-  bool doTest5 = false;
+  bool doTest5 = true;
 
   TestTURNSocketCallbackPtr testObject1 = (doTest1 ? TestTURNSocketCallback::create(thread, port1, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, true) : TestTURNSocketCallbackPtr());
   TestTURNSocketCallbackPtr testObject2 = (doTest2 ? TestTURNSocketCallback::create(thread, port2, ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN, false) : TestTURNSocketCallbackPtr());

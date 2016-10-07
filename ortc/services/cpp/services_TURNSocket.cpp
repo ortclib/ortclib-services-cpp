@@ -1985,13 +1985,26 @@ namespace ortc
               return true;
             }
             case STUNPacket::ErrorCode_UnknownAttribute:              {
+              bool tryWithoutAttributeAgain = false;
+
+              STUNPacketPtr newRequest = (requester->getRequest())->clone(true);
+
               if (response->hasUnknownAttribute(STUNPacket::Attribute_DontFragment)) {
-                ZS_LOG_WARNING(Detail, log("alloc failed (thus attempting again without DONT_FRAGMENT attribute)") + ZS_PARAM("server IP", server->mServerIP.string()))
+                ZS_LOG_WARNING(Detail, log("alloc failed (thus attempting again without DONT-FRAGMENT attribute)") + ZS_PARAM("server IP", server->mServerIP.string()));
 
                 // did not understand the don't fragment, try again without it
-                STUNPacketPtr newRequest = (requester->getRequest())->clone(true);
                 newRequest->mDontFragmentIncluded = false;
-                newRequest->mMobilityTicketIncluded = request->mMobilityTicketIncluded;
+                tryWithoutAttributeAgain = true;
+              }
+              if (response->hasUnknownAttribute(STUNPacket::Attribute_MobilityTicket)) {
+                ZS_LOG_WARNING(Detail, log("alloc failed (thus attempting again without MOBILITY-TICKET attribute)") + ZS_PARAM("server IP", server->mServerIP.string()));
+
+                // did not understand the don't fragment, try again without it
+                newRequest->mMobilityTicketIncluded = false;
+                tryWithoutAttributeAgain = true;
+              }
+
+              if (tryWithoutAttributeAgain) {
                 server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
                 EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate unknown attribute");
                 return true;

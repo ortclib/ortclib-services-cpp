@@ -34,6 +34,8 @@
 #include <ortc/services/internal/types.h>
 #include <ortc/services/IHTTP.h>
 
+#define ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS "ortc/services/http/default-timeout-in-seconds"
+
 #ifndef WINRT
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
@@ -55,6 +57,19 @@ namespace ortc
     namespace internal
     {
       class HTTPGlobalSafeReference;
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark IHTTPForSettings
+      #pragma mark
+
+      interaction IHTTPForSettings
+      {
+        static void applyDefaults();
+      };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

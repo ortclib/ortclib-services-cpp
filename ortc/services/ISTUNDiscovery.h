@@ -61,7 +61,7 @@ namespace ortc
         URIList mServers;                                                                  // will automatically perform a stun/udp lookup on the name passed in
         IDNS::SRVResultPtr mSRV;                                                          // which service to use to preform the STUN lookup (only stun/udp is supported)
         IDNS::SRVLookupTypes mLookupType {IDNS::SRVLookupType_AutoLookupAndFallbackAll};
-        Seconds mKeepWarmPingTime;
+        Seconds mKeepWarmPingTime {};
       };
 
       static ISTUNDiscoveryPtr create(

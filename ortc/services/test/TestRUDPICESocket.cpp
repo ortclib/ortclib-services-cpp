@@ -71,9 +71,6 @@ using ortc::services::IHelper;
 using ortc::services::IICESocket;
 using ortc::services::IDNS;
 
-static const char *gUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
-static const char *gPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
-
 namespace ortc
 {
   namespace services
@@ -261,8 +258,8 @@ namespace ortc
 
           IICESocket::TURNServerInfoPtr turnInfo = IICESocket::TURNServerInfo::create();
           turnInfo->mTURNServer = ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN;
-          turnInfo->mTURNServerUsername = gUsername;
-          turnInfo->mTURNServerPassword = gPassword;
+          turnInfo->mTURNServerUsername = ORTC_SERVICE_TEST_TURN_USERNAME;
+          turnInfo->mTURNServerPassword = ORTC_SERVICE_TEST_TURN_PASSWORD;
 
           IICESocket::STUNServerInfoPtr stunInfo = IICESocket::STUNServerInfo::create();
           stunInfo->mSTUNServer = ORTC_SERVICE_TEST_STUN_SERVER_HOST;

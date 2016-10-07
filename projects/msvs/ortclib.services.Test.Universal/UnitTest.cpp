@@ -101,6 +101,7 @@ namespace ortclib_services_Test
           }
         }
 
+#if 0
         TEST_METHOD(Test_ICESocket)
         {
           Testing::setup();
@@ -112,6 +113,7 @@ namespace ortclib_services_Test
             Assert::Fail(L"ICESocket retry tests have failed", LINE_INFO());
           }
         }
+#endif //0
 
         TEST_METHOD(Test_STUNDiscovery)
         {
@@ -149,6 +151,7 @@ namespace ortclib_services_Test
           }
         }
 
+#if 0
         TEST_METHOD(Test_RUDPICESocketLoopback)
         {
           Testing::setup();
@@ -184,6 +187,7 @@ namespace ortclib_services_Test
             Assert::Fail(L"RUDPICESocket retry tests have failed", LINE_INFO());
           }
         }
+#endif //0
 
         TEST_METHOD(Test_TCPMessagingLoopback)
         {

@@ -35,7 +35,9 @@
 #include <zsLib/types.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
+
 #include <ortc/services/ILogger.h>
+#include <ortc/services/ISettings.h>
 
 #include <iostream>
 
@@ -52,6 +54,7 @@ debugostream &getDebugCout()
 
 
 typedef ortc::services::ILogger ILogger;
+ZS_DECLARE_TYPEDEF_PTR(ortc::services::ISettings, UseSettings);
 
 void doTestBackoffRetry();
 void doTestCanonicalXML();
@@ -152,6 +155,7 @@ namespace Testing
     SetupInitializer()
     {
       srand(static_cast<signed int>(time(NULL)));
+      UseSettings::applyDefaults();
     }
 
     ~SetupInitializer()

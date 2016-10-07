@@ -83,6 +83,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark HTTP
+      #pragma mark
+
+      //-----------------------------------------------------------------------
+      void IHTTPForSettings::applyDefaults()
+      {
+        ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark HTTPGlobalSafeReference
       #pragma mark
 
@@ -695,6 +709,13 @@ namespace ortc
         if (0 != postDataLengthInBytes) {
           mPostData.CleanNew(postDataLengthInBytes);
           memcpy(mPostData.BytePtr(), postData, postDataLengthInBytes);
+        }
+
+        if (Milliseconds() == mTimeout) {
+          Seconds defaultTimeout(ISettings::getUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS));
+          if (Seconds() != defaultTimeout) {
+            mTimeout = zsLib::toMilliseconds(defaultTimeout);
+          }
         }
 
         EventWriteOpServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postDataLengthInBytes, postData, postDataMimeType, timeout.count());

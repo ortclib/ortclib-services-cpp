@@ -72,6 +72,10 @@
 #define ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_A_RECORDS    (false)
 #define ORTC_SERVICE_TEST_DNS_PROVIDER_RESOLVES_BOGUS_DNS_AAAA_RECORDS (false)
 
+#define ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_GET_URI  "https://api.relayfirst.net/v1/turnapi/urls-credentials/account/$ACCOUNT$/apikey/$APIKEY$"
+#define ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_ACCOUNT  "80c6d9c4-8be7-11e6-8b63-000d3a614821"
+#define ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_APIKEY   "invalid"
+
 #define ORTC_SERVICE_TEST_TURN_SERVER_DOMAIN   "test-turn.ortclib.org"
 #define ORTC_SERVICE_TEST_TURN_USERNAME        ("ortclib" "@" "hotmail.com")
 #define ORTC_SERVICE_TEST_TURN_PASSWORD        "invalid"
@@ -81,6 +85,6 @@
 
 #define ORTC_SERVICE_TEST_STUN_SERVER_HOST     "stun.l.google.com:19302"
 // This should be set to value based on http://www.whatismyip.com/ to get your current IP address
-#define ORTC_SERVICE_TEST_WHAT_IS_MY_IP        "1.2.3.4"
+#define ORTC_SERVICE_TEST_WHAT_IS_MY_IP       "1.2.3.4"
 
 #endif //ORTC_SERVICE_TEST_CONFIG_H_934e33cf1d24510f40709eb6c69b8c45

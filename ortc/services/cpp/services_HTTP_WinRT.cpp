@@ -71,6 +71,20 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
+      void IHTTPForSettings::applyDefaults()
+      {
+        ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
+      }
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark HTTP
+      #pragma mark
+
+      //-----------------------------------------------------------------------
       HTTP::HTTP(const make_private &) :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
@@ -512,6 +526,13 @@ namespace ortc
       void HTTP::HTTPQuery::go(Windows::Web::Http::HttpClient ^client)
       {
         Time timeout = zsLib::now() + mTimeout;
+        if (Milliseconds() == mTimeout) {
+          Seconds defaultTimeout(ISettings::getUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS));
+          if (Seconds() == defaultTimeout) {
+            defaultTimeout = Seconds(60*2);
+          }
+          timeout = zsLib::now() + defaultTimeout;
+        }
         mTimer = Timer::create(mThisWeak.lock(), timeout);
 
         if (ZS_IS_LOGGING(Debug)) {
