@@ -1982,6 +1982,7 @@ namespace ortc
       #pragma mark
 
       using Windows::Foundation::Collections::IVectorView;
+      using Windows::Foundation::IAsyncOperation;
       using namespace concurrency;
       using Windows::Networking::HostNameType;
 
@@ -1993,6 +1994,7 @@ namespace ortc
 
       public:
         typedef Windows::Networking::Sockets::DatagramSocket DatagramSocket;
+        typedef Windows::Networking::Sockets::StreamSocket StreamSocket;
         typedef Windows::Networking::HostName HostName;
         typedef Windows::Networking::EndpointPair EndpointPair;
 
@@ -2048,7 +2050,19 @@ namespace ortc
           }
           HostNameType debugtype = hostname->Type;
 
-          create_task(DatagramSocket::GetEndpointPairsAsync(hostname, serviceNameStr), mCancellationTokenSource.get_token())
+          IAsyncOperation< IVectorView<EndpointPair^> ^> ^lookupResult = nullptr;
+
+#ifdef HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+          if ("tcp" == mProtocol) {
+            lookupResult = StreamSocket::GetEndpointPairsAsync(hostname, serviceNameStr);
+          } else {
+#endif //HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+            lookupResult = DatagramSocket::GetEndpointPairsAsync(hostname, serviceNameStr);
+#ifdef HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+          }
+#endif //HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+
+          create_task(lookupResult, mCancellationTokenSource.get_token())
             .then([id, thisWeak](task<IVectorView<EndpointPair^>^> previousTask)
           {
             auto pThis = thisWeak.lock();
@@ -2152,7 +2166,7 @@ namespace ortc
                       srv = pThis->mSRV;
 
                       srv->mName = pThis->mName;
-                      srv->mProtocol = pThis->mProtocol; // WinRT only support UDP at this time!
+                      srv->mProtocol = pThis->mProtocol;
                       srv->mService = pThis->mServiceName;
                       srv->mTTL = 3600;       // no default TTL
                     }
@@ -2668,6 +2682,12 @@ namespace ortc
         if (protocolStr == "udp") {
           return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
+#ifdef HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+        if (protocolStr == "tcp") {
+          return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
+        }
+#endif //HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+
         ZS_LOG_WARNING(Trace, slog("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
 #endif //WINRT
 

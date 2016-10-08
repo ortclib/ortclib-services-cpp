@@ -826,7 +826,7 @@ void doTestTURNSocket()
     TESTING_STDOUT() << "WARNING:      Port conflict detected. Picking new port numbers.\n";
   }
 
-  bool doTest1 = false;
+  bool doTest1 = true;
   bool doTest2 = false;
   bool doTest3 = (!turnAPIKeyValid);  // this test only works when not using APIKEY
   bool doTest4 = false;
