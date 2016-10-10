@@ -288,6 +288,7 @@ void doTestDNS()
   bool doQuery9 = true;
   bool doQuery10 = true;
   bool doQuery11 = true;
+  bool doQuery12 = true;
 
 #ifdef WINRT
 #define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 1
@@ -309,6 +310,7 @@ void doTestDNS()
   IDNSQueryPtr query9 = (doQuery9 ? IDNS::lookupAAAA(testObject, "bogusbogus." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
   IDNSQueryPtr query10 = (doQuery10 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "udp") : IDNSQueryPtr());
   IDNSQueryPtr query11 = (doQuery11 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "stun", "udp") : IDNSQueryPtr());
+  IDNSQueryPtr query12 = (doQuery12 ? IDNS::lookupSRV(testObject, ORTC_SERVICE_TEST_DNS_ZONE, "sip", "tcp") : IDNSQueryPtr());
 
   TESTING_STDOUT() << "WAITING:      Waiting for DNS lookup to resolve (max wait is 60 seconds).\n";
 
@@ -341,6 +343,7 @@ void doTestDNS()
   }
   if (query10) { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 1; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 1; }
   if (query11) { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 1; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 1; }
+  if (query12) { expectingTotal += 1; totalA += 0; totalAAAA += 0; totalSRV += 1; totalFailed += 0; factoryA += 0; factoryAAAA += 0; factoryAorAAAA += 0; factorySRV += 1; }
 
   ULONG matchingTotal = 0;
 
@@ -665,6 +668,25 @@ void doTestDNS()
     }
   }
 
+  if (query12) {
+    IDNS::SRVResultPtr srv12 = testObject->getSRV(query12);
+    TESTING_CHECK(srv12)
+      if (srv12) {
+        // _sip._tcp.domain.com, 900, 10 0 5061 sip.
+#ifndef WINRT
+        TESTING_CHECK(srv12->mTTL <= 900);
+        TESTING_EQUAL(srv12->mRecords.front().mPriority, 10);
+        TESTING_EQUAL(srv12->mRecords.front().mWeight, 0);
+        TESTING_EQUAL(srv12->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
+        TESTING_CHECK(srv12->mRecords.front().mAResult->mTTL <= 900);
+#endif //ndef WINRT
+        TESTING_EQUAL(srv12->mRecords.front().mPort, 5061);
+        TESTING_EQUAL(srv12->mRecords.front().mAResult->mIPAddresses.front().string(), "173.239.150.198:5061");
+        TESTING_CHECK(!(srv12->mRecords.front().mAAAAResult));
+      }
+  }
+
+
   query1.reset();
   query2.reset();
   query3.reset();
@@ -676,6 +698,7 @@ void doTestDNS()
   query9.reset();
   query10.reset();
   query11.reset();
+  query12.reset();
   testObject.reset();
 
   // wait for shutdown

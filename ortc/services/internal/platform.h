@@ -63,6 +63,10 @@
 // WINRT does not support these features (but WIN32 does)
 #undef HAVE_GETADAPTERADDRESSES
 
+#if WINVER >= _WIN32_WINNT_WIN10
+#define HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
+#endif //WINVER >= _WIN32_WINNT_WIN10
+
 #if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 
 // WINRT phone has these defined
