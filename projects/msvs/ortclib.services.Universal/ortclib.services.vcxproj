@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\ifaddrs-android.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\platform.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_AllocatorWithNul.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Backgrounding.h" />
@@ -84,7 +87,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequester.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequesterManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_TCPMessaging.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_Tracing.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_TransportStream.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_TURNSocket.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_wire.h" />
@@ -111,8 +113,10 @@
     <ClInclude Include="..\..\..\ortc\services\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\ortc\services\internal\services_ETWTracing.man" />
-    <None Include="..\..\..\ortc\services\internal\services_ETWTracing.wprp" />
+    <None Include="..\..\..\ortc\services\cpp\services.events.json" />
+    <None Include="..\..\..\ortc\services\internal\services.events.jman" />
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.man" />
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.wprp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\ortc\services\cpp\ifaddrs-android.cc" />
@@ -276,7 +280,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -289,17 +293,17 @@
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -309,18 +313,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -329,7 +333,7 @@ echo.
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -342,17 +346,17 @@ echo.
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -362,18 +366,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm'">
@@ -382,7 +386,7 @@ echo.
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -395,17 +399,17 @@ echo.
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -415,18 +419,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm'">
@@ -435,7 +439,7 @@ echo.
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -448,17 +452,17 @@ echo.
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -468,18 +472,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -488,7 +492,7 @@ echo.
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -501,17 +505,17 @@ echo.
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -521,18 +525,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -541,7 +545,7 @@ echo.
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -554,17 +558,17 @@ echo.
     </Lib>
     <CustomBuildStep>
       <Command>echo Create manifest header file...
-mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man"
+mc.exe -um -r $(IntermediateOutputPath) -h "$(ProjectDir)..\..\..\ortc\services\internal" "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man"
 echo Create resource file...
-rc.exe $(IntermediateOutputPath)services_ETWTracing.rc
+rc.exe $(IntermediateOutputPath)services.events_win_etw.rc
 echo Create manifest resource dll...
-echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services_ETWTracing.dll /target:library /win32res:$(IntermediateOutputPath)services_ETWTracing.res
-link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services_ETWTracing.dll $(IntermediateOutputPath)services_ETWTracing.res
+echo If compiling to managed code resource DLL use: csc.exe /out:$(IntermediateOutputPath)services.events_win_etw.dll /target:library /win32res:$(IntermediateOutputPath)services.events_win_etw.res
+link -dll -noentry /MACHINE:$(PlatformTarget) -out:$(IntermediateOutputPath)services.events_win_etw.dll $(IntermediateOutputPath)services.events_win_etw.res
 echo Copy files to output directory...
-copy $(IntermediateOutputPath)services_ETWTracing.dll "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man" "$(OutDir)"
-copy "$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp" "$(OutDir)"
-icacls "$(OutDir)services_ETWTracing.dll" /grant Users:RX
+copy $(IntermediateOutputPath)services.events_win_etw.dll "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp" "$(OutDir)"
+icacls "$(OutDir)services.events_win_etw.dll" /grant Users:RX
 echo.
 echo Steps to register manifest file with for Windows Performance Recorder...
 echo.
@@ -574,18 +578,18 @@ echo 2) Change into the output directory, type:
 echo cd "$(OutDir)"
 echo.
 echo 3) To register the manifest, type:
-echo wevtutil.exe im services_ETWTracing.man /rf:"$(OutDir)services_ETWTracing.dll" /mf:"$(OutDir)services_ETWTracing.dll"
+echo wevtutil.exe im services.events_win_etw.man /rf:"$(OutDir)services.events_win_etw.dll" /mf:"$(OutDir)services.events_win_etw.dll"
 echo.
 echo 4) To unregister the manifest, type:
-echo wevtutil.exe um services_ETWTracing.man
+echo wevtutil.exe um services.events_win_etw.man
 echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.h;$(IntermediateOutputPath)services_ETWTracing.rc;$(IntermediateOutputPath)services_ETWTracing.res;$(IntermediateOutputPath)services_ETWTracing.dll;$(OutDir)services_ETWTracing.dll;$(OutDir)services_ETWTracing.man;$(OutDir)services_ETWTracing.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.man;$(ProjectDir)..\..\..\ortc\services\internal\services_ETWTracing.wprp;%(Inputs)</Inputs>
+      <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

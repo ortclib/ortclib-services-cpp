@@ -31,7 +31,7 @@
 
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services_HTTP.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 #include <ortc/services/IDNS.h>
 #include <ortc/services/IMessageQueueManager.h>
 #include <ortc/services/ISettings.h>
@@ -221,14 +221,14 @@ namespace ortc
 
         ServicesSetup()
         {
-          EventRegisterOrtcServices();
+          ZS_EVENTING_REGISTER(OrtcServices);
           zsLib::setup();
           initSubsystems();
         }
 
         ~ServicesSetup()
         {
-          EventUnregisterOrtcServices();
+          ZS_EVENTING_UNREGISTER(OrtcServices);
         }
       };
 

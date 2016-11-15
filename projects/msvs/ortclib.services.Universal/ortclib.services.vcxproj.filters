@@ -133,9 +133,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_TCPMessaging.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\internal\services_Tracing.h">
-      <Filter>ortc\services\internal</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_TransportStream.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
@@ -265,12 +262,27 @@
     <ClInclude Include="..\..\..\ortc\services\types.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\ortc\services\internal\services_ETWTracing.man">
+    <None Include="..\..\..\ortc\services\cpp\services.events.json">
+      <Filter>ortc\services\cpp</Filter>
+    </None>
+    <None Include="..\..\..\ortc\services\internal\services.events.jman">
       <Filter>ortc\services\internal</Filter>
     </None>
-    <None Include="..\..\..\ortc\services\internal\services_ETWTracing.wprp">
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.man">
+      <Filter>ortc\services\internal</Filter>
+    </None>
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.wprp">
       <Filter>ortc\services\internal</Filter>
     </None>
   </ItemGroup>

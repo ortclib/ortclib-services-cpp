@@ -31,7 +31,7 @@
 
 #include <ortc/services/internal/services_Settings.h>
 #include <ortc/services/internal/services.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 #include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/internal/services_HTTP_WinRT.h>
 
@@ -188,14 +188,26 @@ namespace ortc
             StoredSettingsMap::const_iterator found = mStored->find(key);
             if (found == mStored->end()) return String();
             auto result = (*found).second.second;
-            ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-            EventWriteOpServicesSettingGetString(__func__, mID, key, result);
+            ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result));
+            ///ServicesSettingGetString(__func__, mID, key, result);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetString, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          string, value, result
+                          );
             return result;
           }
         }
 
         auto result = delegate->getString(key);
-        EventWriteOpServicesSettingGetString(__func__, mID, key, result);
+        //ServicesSettingGetString(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetString, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      string, value, result
+                      );
         return result;
       }
 
@@ -214,17 +226,36 @@ namespace ortc
             try {
               auto result = Numeric<LONG>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
+              //ServicesSettingGetInt(__func__, mID, key, result);
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesSettingGetInt, os, Settings, Info,
+                            puid, id, mID,
+                            string, key, key,
+                            long, value, result
+                            );
+
               return result;
             } catch(const Numeric<LONG>::ValueOutOfRange &) {
             }
-            EventWriteOpServicesSettingGetInt(__func__, mID, key, 0);
+            //EventWriteOpServicesSettingGetInt(__func__, mID, key, 0);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetInt, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          long, value, 0
+                          );
             return 0;
           }
         }
 
         auto result = delegate->getInt(key);
-        EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
+        //EventWriteOpServicesSettingGetInt(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetInt, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      long, value, result
+                      );
         return result;
       }
 
@@ -242,18 +273,37 @@ namespace ortc
             if (found == mStored->end()) return 0;
             try {
               auto result = Numeric<ULONG>((*found).second.second);
-              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetUInt(__func__, mID, key, result);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result));
+              //ServicesSettingGetUInt(__func__, mID, key, result);
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesSettingGetUInt, os, Settings, Info,
+                            puid, id, mID,
+                            string, key, key,
+                            ulong, value, result
+                            );
               return result;
             } catch(const Numeric<ULONG>::ValueOutOfRange &) {
             }
-            EventWriteOpServicesSettingGetUInt(__func__, mID, key, 0);
+            //ServicesSettingGetUInt(__func__, mID, key, 0);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetUInt, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          ulong, value, 0
+                          );
+
             return 0;
           }
         }
 
         auto result = delegate->getUInt(key);
-        EventWriteOpServicesSettingGetUInt(__func__, mID, key, result);
+        //ServicesSettingGetUInt(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetUInt, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      ulong, value, result
+                      );
         return result;
       }
 
@@ -271,18 +321,37 @@ namespace ortc
             if (found == mStored->end()) return false;
             try {
               auto result = Numeric<bool>((*found).second.second);
-              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetBool(__func__, mID, key, result);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result));
+              //ServicesSettingGetBool(__func__, mID, key, result);
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesSettingGetBool, os, Settings, Info,
+                            puid, id, mID,
+                            string, key, key,
+                            bool, value, result
+                            );
+
               return result;
             } catch(const Numeric<bool>::ValueOutOfRange &) {
             }
-            EventWriteOpServicesSettingGetBool(__func__, mID, key, false);
+            //EventWriteOpServicesSettingGetBool(__func__, mID, key, false);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetBool, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          bool, value, false
+                          );
             return false;
           }
         }
 
         auto result = delegate->getBool(key);
-        EventWriteOpServicesSettingGetBool(__func__, mID, key, result);
+        //ServicesSettingGetBool(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetBool, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      bool, value, result
+                      );
         return result;
       }
 
@@ -301,17 +370,35 @@ namespace ortc
             try {
               auto result = Numeric<float>((*found).second.second);
               ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+              //ServicesSettingGetFloat(__func__, mID, key, result);
+                ZS_EVENTING_3(
+                              x, i, Debug, ServicesSettingGetFloat, os, Settings, Info,
+                              puid, id, mID,
+                              string, key, key,
+                              float, value, result
+                              );
               return result;
             } catch(const Numeric<float>::ValueOutOfRange &) {
             }
-            EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0f);
+            //ServicesSettingGetFloat(__func__, mID, key, 0.0f);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetFloat, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          float, value, 0
+                          );
             return 0;
           }
         }
 
         auto result = delegate->getFloat(key);
-        EventWriteOpServicesSettingGetFloat(__func__, mID, key, result);
+        //ServicesSettingGetFloat(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetFloat, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      float, value, result
+                      );
         return result;
       }
 
@@ -329,18 +416,36 @@ namespace ortc
             if (found == mStored->end()) return 0;
             try {
               auto result = Numeric<double>((*found).second.second);
-              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result))
-              EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
+              ZS_LOG_TRACE(log("get string") + ZS_PARAM("key", key) + ZS_PARAM("value", result));
+              //ServicesSettingGetDouble(__func__, mID, key, result);
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesSettingGetDouble, os, Settings, Info,
+                            puid, id, mID,
+                            string, key, key,
+                            double, value, result
+                            );
               return result;
             } catch(const Numeric<double>::ValueOutOfRange &) {
             }
-            EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0);
+            //EventWriteOpServicesSettingGetFloat(__func__, mID, key, 0.0);
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesSettingGetDouble, os, Settings, Info,
+                          puid, id, mID,
+                          string, key, key,
+                          double, value, 0
+                          );
             return 0;
           }
         }
 
         auto result = delegate->getDouble(key);
-        EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
+        //EventWriteOpServicesSettingGetDouble(__func__, mID, key, result);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingGetDouble, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      double, value, result
+                      );
         return result;
       }
 
@@ -350,7 +455,13 @@ namespace ortc
                                const char *value
                                )
       {
-        EventWriteOpServicesSettingSetString(__func__, mID, key, value);
+        //ServicesSettingSetString(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetString, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      string, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -374,7 +485,13 @@ namespace ortc
                             LONG value
                             )
       {
-        EventWriteOpServicesSettingSetInt(__func__, mID, key, value);
+        //ServicesSettingSetInt(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetInt, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      long, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -398,7 +515,13 @@ namespace ortc
                              ULONG value
                              )
       {
-        EventWriteOpServicesSettingSetUInt(__func__, mID, key, value);
+        //ServicesSettingSetUInt(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetUInt, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      ulong, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -422,7 +545,13 @@ namespace ortc
                              bool value
                              )
       {
-        EventWriteOpServicesSettingSetBool(__func__, mID, key, value);
+        //ServicesSettingSetBool(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetBool, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      bool, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -446,7 +575,13 @@ namespace ortc
                               float value
                               )
       {
-        EventWriteOpServicesSettingSetFloat(__func__, mID, key, value);
+        //ServicesSettingSetFloat(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetFloat, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      float, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -470,7 +605,13 @@ namespace ortc
                                double value
                                )
       {
-        EventWriteOpServicesSettingSetDouble(__func__, mID, key, value);
+        //ServicesSettingSetDouble(__func__, mID, key, value);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesSettingSetDouble, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key,
+                      float, value, value
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -491,7 +632,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void Settings::clear(const char *key)
       {
-        EventWriteOpServicesSettingClear(__func__, mID, key);
+        //ServicesSettingClear(__func__, mID, key);
+        ZS_EVENTING_2(
+                      x, i, Debug, ServicesSettingClear, os, Settings, Info,
+                      puid, id, mID,
+                      string, key, key
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -515,7 +661,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       bool Settings::apply(const char *jsonSettings)
       {
-        EventWriteOpServicesSettingApply(__func__, mID, jsonSettings);
+        //ServicesSettingApply(__func__, mID, jsonSettings);
+        ZS_EVENTING_2(
+                      x, i, Debug, ServicesSettingApply, os, Settings, Info,
+                      puid, id, mID,
+                      string, jsonSettings, jsonSettings
+                      );
 
         typedef std::list<ElementPtr> NestedList;
 
@@ -662,7 +813,11 @@ namespace ortc
       //-----------------------------------------------------------------------
       void Settings::applyDefaults()
       {
-        EventWriteOpServicesSettingApplyDefaults(__func__, mID);
+        //ServicesSettingApplyDefaults(__func__, mID);
+        ZS_EVENTING_1(
+                      x, i, Debug, ServicesSettingApplyDefaults, os, Settings, Info,
+                      puid, id, mID
+                      );
 
         IHTTPForSettings::applyDefaults();
 
@@ -706,7 +861,11 @@ namespace ortc
       //-----------------------------------------------------------------------
       void Settings::clearAll()
       {
-        EventWriteOpServicesSettingClearAll(__func__, mID);
+        //ServicesSettingClearAll(__func__, mID);
+        ZS_EVENTING_1(
+                      x, i, Debug, ServicesSettingClearAll, os, Settings, Info,
+                      puid, id, mID
+                      );
 
         ISettingsDelegatePtr delegate;
 
@@ -743,20 +902,38 @@ namespace ortc
               auto value = (*found).second.second;
               if (value.isEmpty()) goto not_found;
 
-              EventWriteOpServicesSettingVerifyExists(__func__, mID, key, true);
+              //ServicesSettingVerifyExists(__func__, mID, key, true);
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesSettingVerifyExists, os, Settings, Info,
+                            puid, id, mID,
+                            string, key, key,
+                            bool, exists, true
+                            );
               return;
             }
           }
 
           String result = delegate->getString(key);
           if (result.isEmpty()) goto not_found;
-          EventWriteOpServicesSettingVerifyExists(__func__, mID, key, true);
+          //ServicesSettingVerifyExists(__func__, mID, key, true);
+          ZS_EVENTING_3(
+                        x, i, Debug, ServicesSettingVerifyExists, os, Settings, Info,
+                        puid, id, mID,
+                        string, key, key,
+                        bool, exists, true
+                        );
           return;
         }
 
       not_found:
         {
-          EventWriteOpServicesSettingVerifyExists(__func__, mID, key, false);
+          //ServicesSettingVerifyExists(__func__, mID, key, false);
+          ZS_EVENTING_3(
+                        x, w, Basic, ServicesSettingVerifyExistsFailed, os, Settings, Info,
+                        puid, id, mID,
+                        string, key, key,
+                        bool, exists, false
+                        );
 
           ZS_LOG_WARNING(Basic, log("setting was not set") + ZS_PARAM("setting name", key))
 

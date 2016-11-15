@@ -32,7 +32,7 @@
 #include <ortc/services/internal/services_TURNSocket.h>
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services_wire.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/ISettings.h>
 #include <ortc/services/STUNPacket.h>
@@ -162,7 +162,7 @@ namespace ortc
 
         ZS_THROW_INVALID_USAGE_IF((mOptions.mServers.size() < 1) && (!mOptions.mSRVUDP) && (!mOptions.mSRVTCP));
 
-        EventWriteOpServicesTurnSocketCreate(
+        /*ServicesTurnSocketCreate(
                                              __func__,
                                              mID,
                                              mOptions.mServers.size() > 0 ? mOptions.mServers.front().c_str() : NULL,
@@ -173,6 +173,18 @@ namespace ortc
                                              mOptions.mLimitChannelToRangeStart,
                                              mOptions.mLimitChannelToRangeEnd
                                              );
+                                             */
+        ZS_EVENTING_8(
+                      x, i, Detail, ServicesTurnSocketCreate, os, TurnSocket, Start,
+                      puid, id, mID,
+                      string, firstServer, mOptions.mServers.size() > 0 ? mOptions.mServers.front().c_str() : NULL,
+                      string, username, mOptions.mUsername,
+                      string, password, mOptions.mPassword,
+                      enum, lookupType, zsLib::to_underlying(mOptions.mLookupType),
+                      bool, useChannelBinding, mOptions.mUseChannelBinding,
+                      word, limitChannelToRangeStart, mOptions.mLimitChannelToRangeStart,
+                      word, limitChannelToRangeEnd, mOptions.mLimitChannelToRangeEnd
+                      );
         ZS_THROW_INVALID_USAGE_IF(mOptions.mLimitChannelToRangeStart > mOptions.mLimitChannelToRangeEnd)
         ZS_LOG_DETAIL(log("created"))
       }
@@ -206,7 +218,8 @@ namespace ortc
         ZS_LOG_DETAIL(log("destroyed"))
         cancel();
 
-        EventWriteOpServicesTurnSocketDestroy(__func__, mID);
+        //ServicesTurnSocketDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesTurnSocketDestroy, os, TurnSocket, Stop, puid, id, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -292,7 +305,16 @@ namespace ortc
                                   bool bindChannelIfPossible
                                   )
       {
-        EventWriteOpServicesTurnSocketSendPacket(__func__, mID, destination.string(), bufferLengthInBytes, buffer, bindChannelIfPossible);
+        //ServicesTurnSocketSendPacket(__func__, mID, destination.string(), bufferLengthInBytes, buffer, bindChannelIfPossible);
+        ZS_EVENTING_5(
+                      x, i, Trace, ServicesTurnSocketSendPacket, os, TurnSocket, Send,
+                      puid, id, mID,
+                      string, destination, destination.string(),
+                      buffer, packet, buffer,
+                      size, size, bufferLengthInBytes,
+                      bool, bindChannelIfPossible, bindChannelIfPossible
+                      );
+
         ORTC_SERVICES_WIRE_LOG_TRACE(log("send packet") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
 
         if (destination.isAddressEmpty()) {
@@ -357,7 +379,16 @@ namespace ortc
 
                 // copy the entire buffer into the packet
                 memcpy(&((packet->BytePtr())[sizeof(DWORD)]), buffer, bufferLengthInBytes);
-                EventWriteOpServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr(), info->mChannelNumber);
+                //pServicesTurnSocketSendPacketViaChannel(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr(), info->mChannelNumber);
+                ZS_EVENTING_5(
+                              x, i, Trace, pServicesTurnSocketSendPacketViaChannel, os, TurnSocket, Send,
+                              puid, id, mID,
+                              string, destination, destination.string(),
+                              buffer, packet, packet->BytePtr(),
+                              size, size, packet->SizeInBytes(),
+                              word, channelNumber, info->mChannelNumber
+                              );
+
                 ORTC_SERVICES_WIRE_LOG_TRACE(log("sending packet via bound channel") + ZS_PARAM("channel", info->mChannelNumber) + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("bind channel", bindChannelIfPossible))
                 break;
               }
@@ -380,7 +411,13 @@ namespace ortc
                 mChannelIPMap[destination] = info;
                 mChannelNumberMap[freeChannelNumber] = info;
 
-                EventWriteOpServicesTurnSocketInstallChannelWake(__func__, mID, destination.string(), freeChannelNumber);
+                //ServicesTurnSocketInstallChannelWake(__func__, mID, destination.string(), freeChannelNumber);
+                ZS_EVENTING_3(
+                              x, i, Trace, ServicesTurnSocketInstallChannelWake, os, TurnSocket, Info,
+                              puid, id, mID,
+                              string, destination, destination.string(),
+                              word, freeChannelNumber, freeChannelNumber
+                              );
 
                 IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
               }
@@ -395,7 +432,15 @@ namespace ortc
 
           packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
 
-          EventWriteOpServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr());
+          //ServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr());
+          ZS_EVENTING_4(
+                        x, i, Trace, ServicesTurnSocketSendPacketViaStun, os, TurnSocket, Send,
+                        puid, id, mID,
+                        string, destination, destination.string(),
+                        buffer, packet, packet->BytePtr(),
+                        size, size, packet->SizeInBytes()
+                        );
+
           sendData->trace(__func__);
 
           // scope: we need to check if there is a permission set to be able to even contact this address
@@ -412,7 +457,13 @@ namespace ortc
 
               mPermissions[destination] = permission;
 
-              EventWriteOpServicesTurnSocketInstallPermissionWake(__func__, mID, destination.string());
+              //ServicesTurnSocketInstallPermissionWake(__func__, mID, destination.string());
+              ZS_EVENTING_2(
+                            x, i, Trace, ServicesTurnSocketInstallPermissionWake, os, TurnSocket, Send,
+                            puid, id, mID,
+                            string, destination, destination.string()
+                            );
+
 
               // since the permission isn't installed yet we can't send the data just yet... best kick start that permission now...
               (IWakeDelegateProxy::create(mThisWeak.lock()))->onWake();
@@ -492,7 +543,14 @@ namespace ortc
 
         // this is definately a TURN packet - handle the data within the packet...
 
-        EventWriteOpServicesTurnSocketReceivedStunPacketData(__func__, mID, turnPacket->mPeerAddressList.front().string(), turnPacket->mDataLength, turnPacket->mData);
+        //ServicesTurnSocketReceivedStunPacketData(__func__, mID, turnPacket->mPeerAddressList.front().string(), turnPacket->mDataLength, turnPacket->mData);
+        ZS_EVENTING_4(
+                      x, i, Trace, ServicesTurnSocketReceivedStunPacketData, os, TurnSocket, Send,
+                      puid, id, mID,
+                      string, firstPeerAddress, turnPacket->mPeerAddressList.front().string(),
+                      buffer, packet, turnPacket->mData,
+                      size, size, turnPacket->mDataLength
+                      );
 
         try {
           // send the packet to the delegate which is interested in the data received
@@ -561,7 +619,14 @@ namespace ortc
           peerAddress = info->mPeerAddress;
         }
 
-        EventWriteOpServicesTurnSocketReceivedChannelData(__func__, mID, peerAddress.string(), length, realBuffer);
+        //ServicesTurnSocketReceivedChannelData(__func__, mID, peerAddress.string(), length, realBuffer);
+        ZS_EVENTING_4(
+                      x, i, Trace, ServicesTurnSocketReceivedChannelData, os, TurnSocket, Receive,
+                      puid, id, mID,
+                      string, peerAddress, peerAddress.string(),
+                      buffer, packet, realBuffer,
+                      size, size, length
+                      );
 
         try {
           // send the packet to the delegate which is interested in the data received
@@ -651,7 +716,16 @@ namespace ortc
           }
         }
 
-        EventWriteOpServicesTurnSocketRequesterSendStunPacket(__func__, mID, requester->getID(), destination.string(), packet->SizeInBytes(), packet->BytePtr());
+        //ServicesTurnSocketRequesterSendStunPacket(__func__, mID, requester->getID(), destination.string(), packet->SizeInBytes(), packet->BytePtr());
+        ZS_EVENTING_5(
+                      x, i, Trace, ServicesTurnSocketRequesterSendStunPacket, os, TurnSocket, Send,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID(), 
+                      string, destination, destination.string(),
+                      buffer, packet, packet->BytePtr(),
+                      size, size, packet->SizeInBytes()
+                      );
+
 
         sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }
@@ -663,7 +737,13 @@ namespace ortc
                                                    STUNPacketPtr response
                                                    )
       {
-        EventWriteOpServicesTurnSocketRequesterReceivedStunResponse(__func__, mID, requester->getID(), fromIPAddress.string());
+        //ServicesTurnSocketRequesterReceivedStunResponse(__func__, mID, requester->getID(), fromIPAddress.string());
+        ZS_EVENTING_3(
+                      x, i, Trace, ServicesTurnSocketRequesterReceivedStunResponse, os, TurnSocket, Receive,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID(),
+                      string, fromIpAddress, fromIPAddress.string()
+                      );
         response->trace(__func__);
 
         // scope: we can't be in the middle of a lock while we call the handlePermissionRequester method
@@ -689,7 +769,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onSTUNRequesterTimedOut(ISTUNRequesterPtr requester)
       {
-        EventWriteOpServicesTurnSocketInternalRequesterTimedOutEventFired(__func__, mID, requester->getID());
+        //ServicesTurnSocketInternalRequesterTimedOutEvent(__func__, mID, requester->getID());
+        ZS_EVENTING_2(
+                      x, i, Trace, ServicesTurnSocketInternalRequesterTimedOutEvent, os, TurnSocket, InternalEvent,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID()
+                      );
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
@@ -793,7 +878,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onReadReady(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketInternalSocketReadReadyEventFired(__func__, mID, socket->getSocket());
+        //ServicesTurnSocketInternalSocketReadReadyEvent(__func__, mID, socket->getSocket());
+        ZS_EVENTING_2(
+                      x, i, Trace, ServicesTurnSocketInternalSocketReadReadyEvent, os, TurnSocket, InternalEvent,
+                      puid, id, mID,
+                      socket, socket, socket->getSocket()
+                      );
 
         try
         {
@@ -1024,7 +1114,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onWriteReady(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketInternalSocketWriteReadyEventFired(__func__, mID, socket->getSocket());
+        //ServicesTurnSocketInternalSocketWriteReadyEvent(__func__, mID, socket->getSocket());
+        ZS_EVENTING_2(
+                      x, i, Trace, ServicesTurnSocketInternalSocketWriteReadyEvent, os, TurnSocket, InternalEvent,
+                      puid, id, mID,
+                      socket, socket, socket->getSocket()
+                      );
 
         AutoRecursiveLock lock(mLock);
 
@@ -1064,7 +1159,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onException(SocketPtr socket)
       {
-        EventWriteOpServicesTurnSocketInternalSocketExceptionEventFired(__func__, mID, socket->getSocket());
+        //ServicesTurnSocketInternalSocketExceptionEvent(__func__, mID, socket->getSocket());
+        ZS_EVENTING_2(
+                      x, e, Trace, ServicesTurnSocketInternalSocketExceptionEvent, os, TurnSocket, InternalEvent,
+                      puid, id, mID,
+                      socket, socket, socket->getSocket()
+                      );
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
@@ -1127,7 +1227,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onTimer(TimerPtr timer)
       {
-        EventWriteOpServicesTurnSocketInternalTimerEventFired(__func__, mID, timer->getID());
+        //ServicesTurnSocketInternalTimerEvent(__func__, mID, timer->getID());
+        ZS_EVENTING_2(
+                      x, i, Trace, ServicesTurnSocketInternalTimerEvent, os, TurnSocket, InternalEvent,
+                      puid, id, mID,
+                      puid, timerId, timer->getID()
+                      );
 
         AutoRecursiveLock lock(mLock);
         if (isShutdown()) {
@@ -1205,7 +1310,14 @@ namespace ortc
             newRequest->mPeerAddressList.push_back(info->mPeerAddress);
             info->mChannelBindRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
 
-            EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)info->mChannelBindRequester) ? info->mChannelBindRequester->getID() : 0, "channel bind");
+            //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)info->mChannelBindRequester) ? info->mChannelBindRequester->getID() : 0, "channel bind");
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                          puid, id, mID,
+                          puid, requester, ((bool)info->mChannelBindRequester) ? info->mChannelBindRequester->getID() : 0,
+                          string, type, "channel bind"
+                          );
+
             return;
           }
         }
@@ -1225,7 +1337,8 @@ namespace ortc
                                                         IBackgroundingNotifierPtr notifier
                                                         )
       {
-        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
+        //ServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesTurnSocketInternalGoingToBackgroundingEvent, os, TurnSocket, InternalEvent, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1245,7 +1358,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
+        //ServicesTurnSocketInternalBackgroundingEvent(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesTurnSocketInternalBackgroundingNowEvent, os, TurnSocket, InternalEvent, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1260,7 +1374,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
+        //ServicesTurnSocketInternalBackgroundingEvent(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesTurnSocketInternalReturnFromBackgroundEvent, os, TurnSocket, InternalEvent, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -1296,7 +1411,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription)
       {
-        EventWriteOpServicesTurnSocketInternalBackgroundingEventFired(__func__, mID);
+        //ServicesTurnSocketInternalBackgroundingEvent(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesTurnSocketInternalBackgroundingApplicationWillQuitEvent, os, TurnSocket, InternalEvent, puid, id, mID);
 
         ZS_LOG_DEBUG("application will quit")
       }
@@ -1479,7 +1595,14 @@ namespace ortc
             allocRequest->mMobilityTicketIncluded = true;
             server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, allocRequest, STUNPacket::RFC_5766_TURN);
 
-            EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate");
+            //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate");
+            ZS_EVENTING_3(
+                          x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                          puid, id, mID,
+                          puid, requester, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0,
+                          string, type, "allocate"
+                          );
+
           }
         }
 
@@ -1715,7 +1838,13 @@ namespace ortc
             continue;
           }
 
-          EventWriteOpServicesTurnSocketUseNextServer(__func__, mID, result.string(), toggle);
+          //ServicesTurnSocketUseNextServer(__func__, mID, result.string(), toggle);
+          ZS_EVENTING_3(
+                        x, i, Debug, ServicesTurnSocketUseNextServer, os, TurnSocket, Info,
+                        puid, id, mID,
+                        string, server, result.string(),
+                        bool, toggle, toggle
+                        );
 
           ServerPtr server = Server::create();
           server->mIsUDP = toggle;
@@ -1744,7 +1873,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::cancel()
       {
-        EventWriteOpServicesTurnSocketCancel(__func__, mID);
+        //ServicesTurnSocketCancel(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesTurnSocketCancel, os, TurnSocket, Cancel, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);    // just in case
 
@@ -1849,7 +1979,13 @@ namespace ortc
               }
               mDeallocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, deallocRequest, STUNPacket::RFC_5766_TURN);
 
-              EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mDeallocateRequester) ? mDeallocateRequester->getID() : 0, "dealloc");
+              //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mDeallocateRequester) ? mDeallocateRequester->getID() : 0, "dealloc");
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                            puid, id, mID,
+                            puid, requester, ((bool)mDeallocateRequester) ? mDeallocateRequester->getID() : 0,
+                            string, type, "dealloc"
+                            );
 
               if (!mDeallocTimer) {
                 mDeallocTimer = Timer::create(mGracefulShutdownReference, Seconds(1));
@@ -1897,7 +2033,12 @@ namespace ortc
         ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(newState)) + ZS_PARAM("error", toString(mLastError)))
         mCurrentState = newState;
 
-        EventWriteOpServicesTurnSocketStateEventFired(__func__, mID, toString(mCurrentState));
+        //ServicesTurnSocketStateEvent(__func__, mID, toString(mCurrentState));
+        ZS_EVENTING_2(
+                      x, i, Detail, ServicesTurnSocketStateEvent, os, TurnSocket, StateEvent,
+                      puid, id, mID,
+                      string, state, toString(mCurrentState)
+                      );
 
         if (!mDelegate) return;
 
@@ -1981,7 +2122,14 @@ namespace ortc
               newRequest->mDontFragmentIncluded = request->mDontFragmentIncluded;
               newRequest->mMobilityTicketIncluded = false;
               server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
-              EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate mobility ticket forbidden");
+              //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate mobility ticket forbidden");
+              ZS_EVENTING_3(
+                            x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                            puid, id, mID,
+                            puid, requester, ((bool)mDeallocateRequester) ? mDeallocateRequester->getID() : 0,
+                            string, type, "allocate mobility ticket forbidden"
+                            );
+
               return true;
             }
             case STUNPacket::ErrorCode_UnknownAttribute:              {
@@ -2006,7 +2154,14 @@ namespace ortc
 
               if (tryWithoutAttributeAgain) {
                 server->mAllocateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), server->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
-                EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate unknown attribute");
+                //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, "allocate unknown attribute");
+                ZS_EVENTING_3(
+                              x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                              puid, id, mID,
+                              puid, requester, ((bool)server->mAllocateRequester) ? server->mAllocateRequester->getID() : 0, 
+                              string, type, "allocate unknown attribute"
+                              );
+
                 return true;
               }
               break;
@@ -2339,7 +2494,13 @@ namespace ortc
         permissionRequest->mCredentialMechanism = STUNPacket::CredentialMechanisms_LongTerm;
         mPermissionRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, permissionRequest, STUNPacket::RFC_5766_TURN);
 
-        EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mPermissionRequester) ? mPermissionRequester->getID() : 0, "permission");
+        //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mPermissionRequester) ? mPermissionRequester->getID() : 0, "permission");
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                      puid, id, mID,
+                      puid, requester, ((bool)mPermissionRequester) ? mPermissionRequester->getID() : 0,
+                      string, type, "permission"
+                      );
 
         // scope: remember which ones will become marked as having permission based on this request completing...
         {
@@ -2388,7 +2549,13 @@ namespace ortc
           newRequest->mMobilityTicketLength = mMobilityTicket->SizeInBytes();
         }
         mRefreshRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mActiveServer->mServerIP, newRequest, STUNPacket::RFC_5766_TURN);
-        EventWriteOpServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mRefreshRequester) ? mRefreshRequester->getID() : 0, "refresh");
+        //ServicesTurnSocketRequesterCreate(__func__, mID, ((bool)mRefreshRequester) ? mRefreshRequester->getID() : 0, "refresh");
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesTurnSocketRequesterCreate, os, TurnSocket, Info,
+                      puid, id, mID,
+                      puid, requester, ((bool)mRefreshRequester) ? mRefreshRequester->getID() : 0,
+                      string, type, "refresh"
+                      );
       }
       
       //-----------------------------------------------------------------------
@@ -2710,7 +2877,14 @@ namespace ortc
 
         if (!newRequest) return ISTUNRequesterPtr();
         auto result = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), requester->getServerIP(), newRequest, STUNPacket::RFC_5766_TURN, requester->getBackOffTimerPattern());
-        EventWriteOpServicesTurnSocketRequesterCreateReauth(__func__, mID, ((bool)result) ? result->getID() : 0, ((bool)requester) ? requester->getID() : 0);
+        //ServicesTurnSocketRequesterCreateReauth(__func__, mID, ((bool)result) ? result->getID() : 0, ((bool)requester) ? requester->getID() : 0);
+        ZS_EVENTING_3(
+                      x, i, Debug, ServicesTurnSocketRequesterCreateReauth, os, TurnSocket, Info,
+                      puid, id, mID,
+                      puid, newRequester, ((bool)result) ? result->getID() : 0,
+                      puid, oldRequester, ((bool)requester) ? requester->getID() : 0
+                      );
+
         return result;
       }
 

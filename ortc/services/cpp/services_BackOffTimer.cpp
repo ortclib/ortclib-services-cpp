@@ -32,7 +32,7 @@
 #include <ortc/services/internal/services_BackOffTimer.h>
 #include <ortc/services/internal/services_BackOffTimerPattern.h>
 #include <ortc/services/internal/services_MessageQueueManager.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IHelper.h>
 #include <ortc/services/ISettings.h>
@@ -94,7 +94,8 @@ namespace ortc
           mDefaultSubscription = mSubscriptions.subscribe(delegate, IHelper::getServiceQueue());
         }
 
-        EventWriteOpServicesBackOffTimerCreate(__func__, mID, ((bool)pattern) ? pattern->getID() : 0);
+        ZS_EVENTING_1(x, i, Detail, ServicesBackOffTimerCreate, os, BackOffTimer, Start, puid, id, ((bool)pattern) ? pattern->getID() : 0);
+        //ServicesBackOffTimerCreate(__func__, mID, ((bool)pattern) ? pattern->getID() : 0);
       }
 
       //-----------------------------------------------------------------------
@@ -110,9 +111,10 @@ namespace ortc
       BackOffTimer::~BackOffTimer()
       {
         mThisWeak.reset();
-        ZS_LOG_DETAIL(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"));
 
-        EventWriteOpServicesBackOffTimerDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesBackOffTimerDestroy, os, BackOffTimer, Stop, puid, id, mID);
+//ServicesBackOffTimerDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -257,7 +259,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttempting()
       {
-        EventWriteOpServicesBackOffTimerNotifyAttempting(__func__, mID);
+        //ServicesBackOffTimerNotifyAttempting(__func__, mID);
+        ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifyAttempting, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
         if (State_AttemptNow != mCurrentState) {
@@ -273,7 +276,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttemptFailed()
       {
-        EventWriteOpServicesBackOffTimerNotifyAttemptFailed(__func__, mID);
+        //ServicesBackOffTimerNotifyAttemptFailed(__func__, mID);
+        ZS_EVENTING_1(x, w, Trace, ServicesBackOffTimerNotifyAttemptFailed, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
         if (State_Attempting != mCurrentState) {
@@ -301,7 +305,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyTryAgainNow()
       {
-        EventWriteOpServicesBackOffTimerNotifyTryAgainNow(__func__, mID);
+//ServicesBackOffTimerNotifyTryAgainNow(__func__, mID);
+        ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifyTryAgainNow, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
         if (State_WaitingAfterAttemptFailure != mCurrentState) {
@@ -320,7 +325,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifySucceeded()
       {
-        EventWriteOpServicesBackOffTimerNotifySucceeded(__func__, mID);
+        //ServicesBackOffTimerNotifySucceeded(__func__, mID);
+        ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifySucceeded, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
 
@@ -428,7 +434,8 @@ namespace ortc
         mCurrentState = state;
         mLastStateChange = zsLib::now();
 
-        EventWriteOpServicesBackOffTimerStateChangedEventFired(__func__, mID, toString(state));
+//ServicesBackOffTimerStateChangedEvent(__func__, mID, toString(state));
+        ZS_EVENTING_2(x, i, Trace, ServicesBackOffTimerStateChangedEvent, os, BackOffTimer, Event, puid, id, mID, string, state, toString(state));
 
         auto pThis = mThisWeak.lock();
         if (pThis) {

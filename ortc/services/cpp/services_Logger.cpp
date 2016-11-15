@@ -30,7 +30,7 @@
  */
 
 #include <ortc/services/internal/services_Logger.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 #include <ortc/services/IBackgrounding.h>
 #include <ortc/services/IDNS.h>
 #include <ortc/services/IHelper.h>
@@ -1013,7 +1013,17 @@ namespace ortc
 #ifdef _WIN32
           OutputDebugStringW(output.wstring().c_str());
 #endif //_WIN32
-          EventWriteOpServicesDebugLogger(inSubsystem.getName(), Log::toString(inSeverity), Log::toString(inLevel), inFunction, inFilePath, inLineNumber, output);
+          //ServicesDebugLogger(inSubsystem.getName(), Log::toString(inSeverity), Log::toString(inLevel), inFunction, inFilePath, inLineNumber, output);
+          ZS_EVENTING_7(
+                        x, i, Trace, ServicesDebugLogger, os, DebugLogger, Info,
+                        string, subsystem, inSubsystem.getName(),
+                        string, severity, Log::toString(inSeverity),
+                        string, level, Log::toString(inLevel),
+                        string, function, inFunction,
+                        string, filePath, inFilePath,
+                        ulong, lineNumber, inLineNumber,
+                        string, output, output
+                        );
         }
 
       private:

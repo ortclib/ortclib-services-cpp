@@ -1,0 +1,157 @@
+{
+  "provider": {
+    "id": "48da0f57-3fd5-4f85-a9c2-7075b268ac3f",
+    "name": "OrtcServices",
+    "symbol": "OrtcServices",
+    "description": "ORTC Lib services library",
+    "resourceName": "Ortc.Services.events",
+    "aliases": {
+      "alias": [
+        {
+          "in": "i",
+          "out": "Info"
+        },
+        {
+          "in": "w",
+          "out": "Warning"
+        },
+        {
+          "in": "e",
+          "out": "Error"
+        },
+        {
+          "in": "f",
+          "out": "Fatal"
+        }
+      ]
+    },
+    "typedefs": {
+      "typedef": [
+        {
+          "name": "boolean",
+          "type": "bool"
+        },
+        {
+          "name": "puid",
+          "type": "ulong"
+        },
+        {
+          "name": "size_t",
+          "type": "uint64"
+        },
+        {
+          "name": "this",
+          "type": "pointer"
+        },
+        {
+          "name": "socket",
+          "type": "uint64"
+        },
+        {
+          "name": "enum",
+          "type": "uint64"
+        },
+        {
+          "name": "duration",
+          "type": "longlong"
+        },
+        {
+          "name": "buffer",
+          "type": "binary"
+        }
+      ]
+    }
+    "sources": {
+      "source": [
+        "ortc/services/cpp/services_BackOffTimer.cpp",
+        "ortc/services/cpp/services_BackOffTimerPattern.cpp",
+        "ortc/services/cpp/services_Cache.cpp",
+        "ortc/services/cpp/services_DNS.cpp",
+        "ortc/services/cpp/services_HTTP.cpp",
+        "ortc/services/cpp/services_HTTP_WinRT.cpp",
+        "ortc/services/cpp/services_Logger.cpp",
+        "ortc/services/cpp/services_Settings.cpp",
+        "ortc/services/cpp/services_STUNDiscovery.cpp",
+        "ortc/services/cpp/services_STUNPacket.cpp",
+        "ortc/services/cpp/services_STUNRequester.cpp",
+        "ortc/services/cpp/services_STUNRequesterManager.cpp",
+        "ortc/services/cpp/services_TURNSocket.cpp"
+      ]
+    },
+    "channels": {
+      "channel": [
+        {
+          "id": "os",
+          "name": "OrtcServices",
+          "type": "Debug"
+        }
+      ]
+    },
+    "tasks": {
+      "task": [
+        {
+          "name": "Stun"
+        },
+        {
+          "name": "StunRequester",
+          "opCodes": {
+            "opCode": [
+              { "name": "RetryNow" }
+            ]
+          }
+        },
+        {
+          "name": "StunRequesterManager"
+        },
+        {
+          "name": "StunDiscovery"
+        },
+        {
+          "name": "TurnSocket"
+        },
+        {
+          "name": "BackOffTimerPattern"
+        },
+        {
+          "name": "BackOffTimer"
+        },
+        {
+          "name": "Settings"
+        },
+        {
+          "name": "Cache"
+        },
+        {
+          "name": "Dns",
+          "opCodes": {
+            "opCode": [
+              { "name": "Lookup" }
+            ]
+          }
+        },
+        {
+          "name": "Http"
+        },
+        {
+          "name": "DebugLogger"
+        }
+      ]
+    },
+    "opCodes": {
+      "opCode": [
+        {
+          "name": "Cancel"
+        },
+        {
+          "name": "Event"
+        },
+        {
+          "name": "StateEvent"
+        },
+        {
+          "name": "InternalEvent"
+        }
+      ]
+    }
+  }
+}

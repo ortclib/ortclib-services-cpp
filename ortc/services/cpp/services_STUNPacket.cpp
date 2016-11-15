@@ -33,7 +33,7 @@
 #include <ortc/services/RUDPPacket.h>
 #include <ortc/services/IHelper.h>
 
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>
@@ -2300,70 +2300,177 @@ namespace ortc
     //-------------------------------------------------------------------------
     void STUNPacket::trace(const char *message) const
     {
-      EventWriteOpServicesStunPacket(
-                                     __func__,
-                                     message,
-                                     mLogObject,
-                                     mLogObjectID,
-                                     zsLib::to_underlying(mClass),
-                                     zsLib::to_underlying(mMethod),
-                                     mTotalRetries,
-                                     mErrorCode,
-                                     mReason,
-                                     mMagicCookie,
-                                     sizeof(mTransactionID),
-                                     &(mTransactionID[0]),
-                                     mUnknownAttributes.size(),
-                                     mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
-                                     mMappedAddress.string(),
-                                     mAlternateServer.string(),
-                                     mUsername,
-                                     mPassword,
-                                     mRealm,
-                                     mNonce,
-                                     mSoftware,
-                                     zsLib::to_underlying(mCredentialMechanism),
-                                     mMessageIntegrityMessageLengthInBytes,
-                                     sizeof(mMessageIntegrity),
-                                     &(mMessageIntegrity[0]),
-                                     mFingerprintIncluded,
-                                     mChannelNumber,
-                                     mLifetimeIncluded,
-                                     mLifetime,
-                                     mPeerAddressList.size(),
-                                     mPeerAddressList.size() > 0 ? mPeerAddressList.front().string().c_str() : (const char *)NULL,
-                                     mRelayedAddress.string(),
-                                     mDataLength,
-                                     mEvenPortIncluded,
-                                     mEvenPort,
-                                     mRequestedTransport,
-                                     mDontFragmentIncluded,
-                                     mReservationTokenIncluded,
-                                     sizeof(mReservationToken),
-                                     &(mReservationToken[0]),
-                                     mMobilityTicketIncluded,
-                                     mMobilityTicketLength,
-                                     mMobilityTicket.get(),
-                                     mPriorityIncluded,
-                                     mPriority,
-                                     mUseCandidateIncluded,
-                                     mIceControlledIncluded,
-                                     mIceControlled,
-                                     mIceControllingIncluded,
-                                     mIceControlling,
-                                     mNextSequenceNumber,
-                                     mMinimumRTTIncluded,
-                                     mMinimumRTT,
-                                     mConnectionInfo,
-                                     mGSNR,
-                                     mGSNFR,
-                                     mReliabilityFlagsIncluded,
-                                     mReliabilityFlags,
-                                     mACKVectorLength,
-                                     mACKVector.get(),
-                                     mLocalCongestionControl.size(),
-                                     mRemoteCongestionControl.size()
-                                     );
+      switch (guessRFC(RFC_AllowAll))
+      {
+        case RFC_3489_STUN:
+        case RFC_5389_STUN:
+        {
+          ZS_EVENTING_25(
+                         x, i, Insane, ServicesStunPacket, os, Stun, Info,
+                         string, message, message,
+                         string, logObject, mLogObject,
+                         puid, logObjectId, mLogObjectID,
+                         enum, class, zsLib::to_underlying(mClass),
+                         enum, method, zsLib::to_underlying(mMethod),
+                         ulong, totalRetries, mTotalRetries,
+                         word, errorCode, mErrorCode,
+                         string, reason, mReason,
+                         dword, magicCookie, mMagicCookie,
+                         buffer, transactionId, &(mTransactionID[0]),
+                         size, transactionIdSize, sizeof(mTransactionID),
+                         size_t, totalUnknownAttributes, mUnknownAttributes.size(),
+                         word, firstUnknownAttribute, mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
+                         string, mappedAddress, mMappedAddress.string(),
+                         string, alternativeAddress, mAlternateServer.string(),
+                         string, username, mUsername,
+                         string, password, mPassword,
+                         string, realm, mRealm,
+                         string, nonce, mNonce,
+                         string, software, mSoftware,
+                         enum, credentialMechanism, zsLib::to_underlying(mCredentialMechanism),
+                         size_t, messageIntegrityMessageLengthInBytes, mMessageIntegrityMessageLengthInBytes,
+                         buffer, messageIntegrity, &(mMessageIntegrity[0]),
+                         size, messageIntegritySize, sizeof(mMessageIntegrity),
+                         bool, fingerprintIncluded, mFingerprintIncluded
+                         );
+          break;
+        }
+        case RFC_5766_TURN:
+        {
+          ZS_EVENTING_COMPACT_42(
+                                 x, i, Insane, ServicesStunTurnPacket, os, Stun, Info,
+                                 string/message, message,
+                                 string/logObject, mLogObject,
+                                 puid/logObjectId, mLogObjectID,
+                                 enum/class, zsLib::to_underlying(mClass),
+                                 enum/method, zsLib::to_underlying(mMethod),
+                                 ulong/totalRetries, mTotalRetries,
+                                 word/errorCode, mErrorCode,
+                                 string/reason, mReason,
+                                 dword/magicCookie, mMagicCookie,
+                                 buffer/transactionId, &(mTransactionID[0]),
+                                 size/transactionIdSize, sizeof(mTransactionID),
+                                 size_t/totalUnknownAttributes, mUnknownAttributes.size(),
+                                 word/firstUnknownAttribute, mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
+                                 string/mappedAddress, mMappedAddress.string(),
+                                 string/alternativeAddress, mAlternateServer.string(),
+                                 string/username, mUsername,
+                                 string/password, mPassword,
+                                 string/realm, mRealm,
+                                 string/nonce, mNonce,
+                                 string/software, mSoftware,
+                                 enum/credentialMechanism, zsLib::to_underlying(mCredentialMechanism),
+                                 size_t/messageIntegrityMessageLengthInBytes, mMessageIntegrityMessageLengthInBytes,
+                                 buffer/messageIntegrity, &(mMessageIntegrity[0]),
+                                 size/messageIntegritySize, sizeof(mMessageIntegrity),
+                                 bool/fingerprintIncluded, mFingerprintIncluded,
+
+                                 word/channelNumber, mChannelNumber,
+                                 bool/lifetimeIncluded, mLifetimeIncluded,
+                                 dword/lifetime, mLifetime,
+                                 size_t/totalPeerAddressList, mPeerAddressList.size(),
+                                 string/firstPeerAddress, mPeerAddressList.size() > 0 ? mPeerAddressList.front().string().c_str() : (const char *)NULL,
+                                 string/relatedAddress, mRelayedAddress.string(),
+                                 size_t/dataLength, mDataLength,
+                                 bool/evenPortIncluded, mEvenPortIncluded,
+                                 bool/evenPort, mEvenPort,
+                                 byte/requestedTransport, mRequestedTransport,
+                                 bool/dontFragmentIncluded, mDontFragmentIncluded,
+                                 bool/reservationTokenIncluded, mReservationTokenIncluded,
+                                 buffer/reservationToken, &(mReservationToken[0]),
+                                 size/reservationTokenSize, sizeof(mReservationToken),
+                                 bool/mobilityTicketIncluded, mMobilityTicketIncluded,
+                                 buffer/mobilityTicket, mMobilityTicket.get(),
+                                 size/mobilityTicketLength, mMobilityTicketLength
+                                 );
+          break;
+        }
+        case RFC_5245_ICE:
+        {
+          ZS_EVENTING_COMPACT_32(
+                                 x, i, Insane, ServicesStunIcePacket, os, Stun, Info,
+                                 string/message, message,
+                                 string/logObject, mLogObject,
+                                 puid/logObjectId, mLogObjectID,
+                                 enum/class, zsLib::to_underlying(mClass),
+                                 enum/method, zsLib::to_underlying(mMethod),
+                                 ulong/totalRetries, mTotalRetries,
+                                 word/errorCode, mErrorCode,
+                                 string/reason, mReason,
+                                 dword/magicCookie, mMagicCookie,
+                                 buffer/transactionId, &(mTransactionID[0]),
+                                 size/transactionIdSize, sizeof(mTransactionID),
+                                 size_t/totalUnknownAttributes, mUnknownAttributes.size(),
+                                 word/firstUnknownAttribute, mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
+                                 string/mappedAddress, mMappedAddress.string(),
+                                 string/alternativeAddress, mAlternateServer.string(),
+                                 string/username, mUsername,
+                                 string/password, mPassword,
+                                 string/realm, mRealm,
+                                 string/nonce, mNonce,
+                                 string/software, mSoftware,
+                                 enum/credentialMechanism, zsLib::to_underlying(mCredentialMechanism),
+                                 size_t/messageIntegrityMessageLengthInBytes, mMessageIntegrityMessageLengthInBytes,
+                                 buffer/messageIntegrity, &(mMessageIntegrity[0]),
+                                 size/messageIntegritySize, sizeof(mMessageIntegrity),
+                                 bool/fingerprintIncluded, mFingerprintIncluded,
+
+                                 bool/priorityIncluded, mPriorityIncluded,
+                                 dword/priority, mPriority,
+                                 bool/useCandidateIncluded, mUseCandidateIncluded,
+                                 bool/iceControlledIncluded, mIceControlledIncluded,
+                                 qword/iceControlled, mIceControlled,
+                                 bool/iceControllingIncluded, mIceControllingIncluded,
+                                 qword/iceControlling, mIceControlling
+                                 );
+          break;
+        }
+        case RFC_draft_RUDP:
+        {
+          ZS_EVENTING_COMPACT_37(
+                                 x, i, Insane, ServicesStunRudpPacket, os, Stun, Info,
+                                 string/message, message,
+                                 string/logObject, mLogObject,
+                                 puid/logObjectId, mLogObjectID,
+                                 enum/class, zsLib::to_underlying(mClass),
+                                 enum/method, zsLib::to_underlying(mMethod),
+                                 ulong/totalRetries, mTotalRetries,
+                                 word/errorCode, mErrorCode,
+                                 string/reason, mReason,
+                                 dword/magicCookie, mMagicCookie,
+                                 buffer/transactionId, &(mTransactionID[0]),
+                                 size/transactionIdSize, sizeof(mTransactionID),
+                                 size_t/totalUnknownAttributes, mUnknownAttributes.size(),
+                                 word/firstUnknownAttribute, mUnknownAttributes.size() > 0 ? mUnknownAttributes.front() : 0,
+                                 string/mappedAddress, mMappedAddress.string(),
+                                 string/alternativeAddress, mAlternateServer.string(),
+                                 string/username, mUsername,
+                                 string/password, mPassword,
+                                 string/realm, mRealm,
+                                 string/nonce, mNonce,
+                                 string/software, mSoftware,
+                                 enum/credentialMechanism, zsLib::to_underlying(mCredentialMechanism),
+                                 size_t/messageIntegrityMessageLengthInBytes, mMessageIntegrityMessageLengthInBytes,
+                                 buffer/messageIntegrity, &(mMessageIntegrity[0]),
+                                 size/messageIntegritySize, sizeof(mMessageIntegrity),
+                                 bool/fingerprintIncluded, mFingerprintIncluded,
+
+                                 qword/nextSequenceNumber, mNextSequenceNumber,
+                                 bool/minimumRTTIncluded, mMinimumRTTIncluded,
+                                 dword/minimumRTT, mMinimumRTT,
+                                 string/connectionInfo, mConnectionInfo,
+                                 qword/dsnr, mGSNR,
+                                 qword/gsnr, mGSNFR,
+                                 bool/reliabilityFlagsIncluded, mReliabilityFlagsIncluded,
+                                 byte/reliabilityFlags, mReliabilityFlags,
+                                 buffer/ackVector, mACKVector.get(),
+                                 size/ackVectorSize, mACKVectorLength,
+                                 size_t/localCongestionControl, mLocalCongestionControl.size(),
+                                 size_t/remoteCongestionControl, mRemoteCongestionControl.size()
+                                 );
+          break;
+        }
+      }
     }
 
     //-------------------------------------------------------------------------

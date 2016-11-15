@@ -31,7 +31,7 @@
 
 #include <ortc/services/internal/services_STUNRequesterManager.h>
 #include <ortc/services/internal/services_STUNRequester.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 #include <ortc/services/IHelper.h>
 
 #include <zsLib/Exception.h>
@@ -102,9 +102,10 @@ namespace ortc
       STUNRequesterManager::STUNRequesterManager(const make_private &) :
         mID(zsLib::createPUID())
       {
-        EventWriteOpServicesStunRequesterManagerCreate(__func__, mID);
+        //ServicesStunRequesterManagerCreate(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, ServicesStunRequesterManagerCreate, os, StunRequesterManager, Start, puid, id, mID);
 
-        ZS_LOG_DETAIL(log("created"))
+        ZS_LOG_DETAIL(log("created"));
       }
 
       STUNRequesterManager::~STUNRequesterManager()
@@ -112,9 +113,10 @@ namespace ortc
         if(isNoop()) return;
         
         mThisWeak.reset();
-        ZS_LOG_DETAIL(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"));
 
-        EventWriteOpServicesStunRequesterManagerDestroy(__func__, mID);
+        //EventWriteOpServicesStunRequesterManagerDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Detail, EventWriteOpServicesStunRequesterManagerDestroy, os, StunRequesterManager, Stop, puid, id, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -165,7 +167,9 @@ namespace ortc
           return ISTUNRequesterPtr();
         }
 
-        EventWriteOpServicesStunRequesterManagerReceivedStunPacket(__func__, mID, fromIPAddress.string());
+        //ServicesStunRequesterManagerReceivedStunPacket(__func__, mID, fromIPAddress.string());
+        ZS_EVENTING_2(x, i, Detail, ServicesStunRequesterManagerReceivedStunPacket, os, StunRequesterManager, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
+
         stun->trace(__func__);
 
         QWORDPair key = getKey(stun);
@@ -232,9 +236,10 @@ namespace ortc
       {
         UseSTUNRequesterPtr requester = inRequester;
 
-        ZS_THROW_INVALID_USAGE_IF(!requester)
+        ZS_THROW_INVALID_USAGE_IF(!requester);
 
-        EventWriteOpServicesStunRequesterManagerMonitorStart(__func__, mID, requester->getID());
+        //ServicesStunRequesterManagerMonitorStart(__func__, mID, requester->getID());
+        ZS_EVENTING_2(x, i, Detail, ServicesStunRequesterManagerMonitorStart, os, StunRequesterManager, Start, puid, id, mID, puid, requesterId, requester->getID());
 
         QWORDPair key = getKey(request);
 
@@ -247,7 +252,8 @@ namespace ortc
       {
         UseSTUNRequester &requester = inRequester;
 
-        EventWriteOpServicesStunRequesterManagerMonitorStop(__func__, mID, requester.getID());
+        //StunRequesterManagerMonitorStop(__func__, mID, requester.getID());
+        ZS_EVENTING_2(x, i, Detail, StunRequesterManagerMonitorStop, os, StunRequesterManager, Stop, puid, id, mID, puid, requesterId, requester.getID());
 
         AutoRecursiveLock lock(mLock);
 

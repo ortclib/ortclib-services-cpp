@@ -30,7 +30,7 @@
  */
 
 #include <ortc/services/internal/services_STUNDiscovery.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 #include <ortc/services/ISTUNRequesterManager.h>
 #include <ortc/services/IHelper.h>
 
@@ -44,7 +44,7 @@
 #include <zsLib/Stringize.h>
 
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_stun) } }
 
 namespace ortc
 {
@@ -75,7 +75,12 @@ namespace ortc
 
         ZS_THROW_INVALID_USAGE_IF((!mOptions.mSRV) && (mOptions.mServers.size() < 1));
 
-        EventWriteOpServicesStunDiscoveryCreate(__func__, mID, mOptions.mKeepWarmPingTime.count());
+        //StunDiscoveryCreate(__func__, mID, mOptions.mKeepWarmPingTime.count());
+        ZS_EVENTING_2(
+                      x, i, Debug, StunDiscoveryCreate, os, StunDiscovery, Start,
+                      puid, id, mID,
+                      duration, keepWarmPingTime, mOptions.mKeepWarmPingTime.count()
+                      );
         ZS_LOG_DEBUG(log("created"))
       }
 
@@ -96,7 +101,8 @@ namespace ortc
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
         cancel();
-        EventWriteOpServicesStunDiscoveryDestroy(__func__, mID);
+        //StunDiscoveryDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, StunDiscoveryDestroy, os, StunDiscovery, Stop, puid, id, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -148,7 +154,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNDiscovery::cancel()
       {
-        EventWriteOpServicesStunDiscoveryCancel(__func__, mID);
+        //ServicesStunDiscoveryCancel(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesStunDiscoveryCancel, os, StunDiscovery, Cancel, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
         if (mSRVQuery) {
@@ -183,7 +190,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNDiscovery::onLookupCompleted(IDNSQueryPtr query)
       {
-        EventWriteOpServicesStunDiscoveryInternalLookupCompleteEventFired(__func__, mID, query->getID());
+        //StunDiscoveryInternalLookupCompleteEventFired(__func__, mID, query->getID());
+        ZS_EVENTING_2(x, i, Debug, StunDiscoveryInternalLookupCompleteEvent, os, StunDiscovery, InternalEvent, puid, id, mID, puid, queryId, query->getID());
 
         AutoRecursiveLock lock(mLock);
         if (query != mSRVQuery) return;
@@ -204,7 +212,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNDiscovery::onTimer(TimerPtr timer)
       {
-        EventWriteOpServicesStunDiscoveryInternalTimerEventFired(__func__, mID, timer->getID());
+        //ServicesStunDiscoveryInternalTimerEvent(__func__, mID, timer->getID());
+        ZS_EVENTING_2(x, i, Trace, ServicesStunDiscoveryInternalTimerEvent, os, StunDiscovery, InternalEvent, puid, id, mID, puid, timerId, timer->getID());
 
         AutoRecursiveLock lock(mLock);
 
@@ -240,7 +249,16 @@ namespace ortc
         if (requester != mSTUNRequester) return;
 
         try {
-          EventWriteOpServicesStunDiscoveryRequestSendPacket(__func__, mID, requester->getID(), destination.string(), ((bool)packet) ? packet->SizeInBytes() : 0, ((bool)packet) ? packet->BytePtr() : NULL);
+          //ServicesStunDiscoveryRequestSendPacket(__func__, mID, requester->getID(), destination.string(), ((bool)packet) ? packet->SizeInBytes() : 0, ((bool)packet) ? packet->BytePtr() : NULL);
+          ZS_EVENTING_5(
+                        x, i, Trace, ServicesStunDiscoveryRequestSendPacket, os, StunDiscovery, Send,
+                        puid, id, mID,
+                        puid, requesterId, requester->getID(),
+                        string, destinationIp, destination.string(),
+                        buffer, packet, ((bool)packet) ? packet->BytePtr() : NULL,
+                        size, size, ((bool)packet) ? packet->SizeInBytes() : 0
+                        );
+
           mDelegate->onSTUNDiscoverySendPacket(mThisWeak.lock(), mServer, packet);
         } catch(ISTUNDiscoveryDelegateProxy::Exceptions::DelegateGone &) {
           cancel(); return;
@@ -254,7 +272,15 @@ namespace ortc
                                                       STUNPacketPtr response
                                                       )
       {
-        EventWriteOpServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? sizeof(response->mTransactionID) : 0, ((bool)response) ? (&(response->mTransactionID[0])) : NULL);
+        //ServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? sizeof(response->mTransactionID) : 0, ((bool)response) ? (&(response->mTransactionID[0])) : NULL);
+        ZS_EVENTING_5(
+                      x, i, Trace, ServicesStunDiscoveryReceivedResponsePacket, os, StunDiscovery, Receive,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID(),
+                      string, sourceIp, fromIPAddress.string(),
+                      buffer, transactionId, ((bool)response) ? (&(response->mTransactionID[0])) : NULL,
+                      size, size, ((bool)response) ? sizeof(response->mTransactionID) : 0
+                      );
 
         AutoRecursiveLock lock(mLock);
 
@@ -264,7 +290,14 @@ namespace ortc
 
           // this was reporting as a successful reply but it's actually errored
           if (STUNPacket::Class_ErrorResponse != response->mClass) {
-            EventWriteOpServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
+            //ServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
+            ZS_EVENTING_3(
+                          x, e, Trace, ServicesStunDiscoveryError, os, StunDiscovery, Info,
+                          puid, id, mID,
+                          puid, requesterId, requester->getID(),
+                          word, errorCode, response->mErrorCode
+                          );
+
             return false; // handled the packet but its not valid so retry the request
           }
 
@@ -272,7 +305,13 @@ namespace ortc
             case STUNPacket::ErrorCode_TryAlternate:      {
               mServer = response->mAlternateServer;
 
-              EventWriteOpServicesStunDiscoveryErrorUseAlternativeServer(__func__, mID, requester->getID(), mServer.string());
+              //ServicesStunDiscoveryErrorUseAlternativeServer(__func__, mID, requester->getID(), mServer.string());
+              ZS_EVENTING_3(
+                            x, w, Trace, ServicesStunDiscoveryErrorUseAlternativeServer, os, StunDiscovery, Info,
+                            puid, id, mID,
+                            puid, requesterId, requester->getID(),
+                            string, server, mServer.string()
+                            );
 
               // make sure it has a valid port
               if (mServer.isPortEmpty()) {
@@ -296,7 +335,13 @@ namespace ortc
             case STUNPacket::ErrroCode_ServerError:
             default:                                      {
               // we should stop trying to contact this server
-              EventWriteOpServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
+              //ServicesStunDiscoveryError(__func__, mID, requester->getID(), response->mErrorCode);
+              ZS_EVENTING_3(
+                            x, e, Trace, ServicesStunDiscoveryError, os, StunDiscovery, Info,
+                            puid, id, mID,
+                            puid, requesterId, requester->getID(),
+                            word, errorCode, response->mErrorCode
+                            );
               mServer.clear();
               break;
             }
@@ -312,7 +357,14 @@ namespace ortc
         IPAddress oldMappedAddress = mMapppedAddress;
         mMapppedAddress = response->mMappedAddress;
 
-        EventWriteOpServicesStunDiscoveryFoundMappedAddress(__func__, mID, requester->getID(), mMapppedAddress.string(), oldMappedAddress.string());
+        //ServicesStunDiscoveryFoundMappedAddress(__func__, mID, requester->getID(), mMapppedAddress.string(), oldMappedAddress.string());
+        ZS_EVENTING_4(
+                      x, i, Trace, ServicesStunDiscoveryFoundMappedAddress, os, StunDiscovery, Info,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID(),
+                      string, mappedAddress, mMapppedAddress.string(),
+                      string, oldMappedAddress, oldMappedAddress.string()
+                      );
 
         if (oldMappedAddress != mMapppedAddress) {
           // we now have a reply, inform the delegate
@@ -340,7 +392,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNDiscovery::onSTUNRequesterTimedOut(ISTUNRequesterPtr requester)
       {
-        EventWriteOpServicesStunDiscoveryErrorTimeout(__func__, mID, requester->getID());
+        //ServicesStunDiscoveryErrorTimeout(__func__, mID, requester->getID());
+        ZS_EVENTING_2(
+                      x, e, Trace, ServicesStunDiscoveryErrorTimeout, os, StunDiscovery, Info,
+                      puid, id, mID,
+                      puid, requesterId, requester->getID()
+                      );
 
         AutoRecursiveLock lock(mLock);
         if (requester != mSTUNRequester) return;
@@ -453,7 +510,15 @@ namespace ortc
                                                   request,
                                                   ISTUNDiscovery::usingRFC()
                                                   );
-          EventWriteOpServicesStunDiscoveryRequestCreate(__func__, mID, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0, mServer.string(), sizeof(request->mTransactionID), (&(request->mTransactionID[0])));
+          //ServicesStunDiscoveryRequestCreate(__func__, mID, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0, mServer.string(), sizeof(request->mTransactionID), (&(request->mTransactionID[0])));
+          ZS_EVENTING_5(
+                        x, i, Trace, ServicesStunDiscoveryRequestCreate, os, StunDiscovery, Info,
+                        puid, id, mID,
+                        puid, requesterId, ((bool)mSTUNRequester) ? mSTUNRequester->getID() : 0,
+                        string, server, mServer.string(),
+                        buffer, transactionId, (&(request->mTransactionID[0])),
+                        size, size, sizeof(request->mTransactionID)
+                        );
         }
 
         // nothing more to do... sit back, relax and enjoy the ride!
@@ -484,7 +549,19 @@ namespace ortc
         ZS_LOG_DEBUG(log("performing next STUN server lookup") + ZS_PARAM("uri", uri));
 
         mSRVQuery = IDNS::lookupSRV(mThisWeak.lock(), uri, "stun", "udp", 3478, 10, 0, mOptions.mLookupType);
-        EventWriteOpServicesStunDiscoveryLookupSrv(__func__, mID, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0, uri.c_str(), "stun", "udp", 3478, 10, 0, zsLib::to_underlying(mOptions.mLookupType));
+        //ServicesStunDiscoveryLookupSrv(__func__, mID, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0, uri.c_str(), "stun", "udp", 3478, 10, 0, zsLib::to_underlying(mOptions.mLookupType));
+        ZS_EVENTING_9(
+                      x, i, Trace, ServicesStunDiscoveryLookupSrv, os, StunDiscovery, Info,
+                      puid, id, mID,
+                      puid, srvQueryId, ((bool)mSRVQuery) ? mSRVQuery->getID() : 0,
+                      string, uri, uri.c_str(),
+                      string, service, "stun",
+                      string, protocol, "udp",
+                      word, defaultPort, 3478,
+                      word, defaultPriority, 10,
+                      word, defaultWeight, 0,
+                      enum, lookupType, zsLib::to_underlying(mOptions.mLookupType)
+                      );
       }
 
       //-----------------------------------------------------------------------

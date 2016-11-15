@@ -32,7 +32,7 @@
 #include <ortc/services/IHTTP.h>
 #include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/internal/services_HTTP_WinRT.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #ifdef WINRT
 
@@ -311,7 +311,18 @@ namespace ortc
           memcpy(mPostData.BytePtr(), postData, postDataLengthInBytes);
         }
 
-        EventWriteOpServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postDataLengthInBytes, postData, postDataMimeType, timeout.count());
+        //ServicesHttpQueryCreate(__func__, mID, mIsPost, mUserAgent, mURL, postDataLengthInBytes, postData, postDataMimeType, timeout.count());
+        ZS_EVENTING_8(
+                      x, i, Debug, ServicesHttpQueryCreate, os, Http, Start,
+                      puid, id, mID,
+                      bool, isPost, mIsPost,
+                      string, userAgent, mUserAgent,
+                      string, url, mURL,
+                      buffer, postData, postData,
+                      size, postSize, postDataLengthInBytes,
+                      string, postDataMimeType, postDataMimeType,
+                      duration, timeout, timeout.count()
+                      );
       }
 
       //-----------------------------------------------------------------------
@@ -326,7 +337,8 @@ namespace ortc
         ZS_LOG_DEBUG(log("destroyed"))
         cancel();
 
-        EventWriteOpServicesHttpQueryDestroy(__func__, mID);
+        //ServicesHttpQueryDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryDestroy, os, Http, Stop, puid, id, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -340,8 +352,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::cancel()
       {
-        EventWriteOpServicesHttpQueryCancel(__func__, mID);
-        ZS_LOG_DEBUG(log("cancel called"))
+        //ServicesHttpQueryCancel(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCancel, os, Http, Cancel, puid, id, mID);
+        ZS_LOG_DEBUG(log("cancel called"));
 
         HTTPPtr outer = mOuter.lock();
 
@@ -419,7 +432,15 @@ namespace ortc
       {
         AutoRecursiveLock lock(*this);
         auto result = mHeader.Get(outResultData, bytesToRead);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
+        //ServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
+        ZS_EVENTING_5(
+                      x, i, Debug, ServicesHttpQueryReadHeader, os, Http, Receive,
+                      puid, id, mID,
+                      size_t, bytesToRead, bytesToRead,
+                      size_t, result, result,
+                      buffer, resultData, outResultData,
+                      size, bytesRead, result
+                      );
         return result;
       }
 
@@ -438,7 +459,12 @@ namespace ortc
 
         outHeader = (const char *)data.BytePtr();
         auto result = strlen(outHeader);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
+        //ServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
+        ZS_EVENTING_2(
+                      x, i, Debug, ServicesHttpQueryReadHeaderAsString, os, Http, Receive,
+                      puid, id, mID,
+                      string, header, outHeader
+                      );
         return result;
       }
 
@@ -457,7 +483,15 @@ namespace ortc
       {
         AutoRecursiveLock lock(*this);
         auto result = mBody.Get(outResultData, bytesToRead);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
+        //ServicesHttpQueryRead(__func__, mID, result, outResultData, bytesToRead);
+        ZS_EVENTING_4(
+                      x, i, Debug, ServicesHttpQueryRead, os, Http, Receive,
+                      puid, id, mID,
+                      size_t, bytesToRead, bytesToRead,
+                      buffer, data, outResultData,
+                      size, result, result
+                      );
+
         return result;
       }
 
@@ -476,7 +510,12 @@ namespace ortc
 
         outResultData = (const char *)data.BytePtr();
         auto result = strlen(outResultData);
-        EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
+        //EventWriteOpServicesHttpQueryRead(__func__, mID, result, data.BytePtr(), static_cast<size_t>(available));
+        ZS_EVENTING_2(
+                      x, i, Debug, ServicesHttpQueryReadAsString, os, Http, Receive,
+                      puid, id, mID,
+                      string, result, outResultData
+                      );
         return result;
       }
 

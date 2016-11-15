@@ -31,7 +31,7 @@
 
 #include <ortc/services/internal/services_STUNRequester.h>
 #include <ortc/services/internal/services_STUNRequesterManager.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IBackOffTimerPattern.h>
 #include <ortc/services/IHelper.h>
@@ -87,7 +87,14 @@ namespace ortc
           mBackOffTimerPattern->addNextRetryAfterFailureDuration(Milliseconds(1));
         }
 
-        EventWriteOpServicesStunRequesterCreate(__func__, mID, serverIP.string(), zsLib::to_underlying(usingRFC), mBackOffTimerPattern->getID());
+        //ServicesStunRequesterCreate(__func__, mID, serverIP.string(), zsLib::to_underlying(usingRFC), mBackOffTimerPattern->getID());
+        ZS_EVENTING_4(
+                      x, i, Debug, ServicesStunRequesterCreate, os, StunRequester, Start,
+                      puid, id, mID,
+                      string, serverIp, serverIP.string(),
+                      enum, usingRfc, zsLib::to_underlying(usingRFC),
+                      puid, backoffTimerPatterId, mBackOffTimerPattern->getID()
+                      );
       }
 
       //-----------------------------------------------------------------------
@@ -98,7 +105,8 @@ namespace ortc
         mThisWeak.reset();
         cancel();
 
-        EventWriteOpServicesStunRequesterDestroy(__func__, mID);
+        //ServicesStunRequesterDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesStunRequesterDestroy, os, StunRequester, Start, puid, id, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -164,7 +172,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNRequester::cancel()
       {
-        EventWriteOpServicesStunRequesterCancel(__func__, mID);
+        //ServicesStunRequesterCancel(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesStunRequesterCancel, os, StunRequester, Cancel, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -186,7 +195,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void STUNRequester::retryRequestNow()
       {
-        EventWriteOpServicesStunRequesterRetryNow(__func__, mID);
+        //ServicesStunRequesterRetryNow(__func__, mID);
+        ZS_EVENTING_1(x, i, Trace, ServicesStunRequesterRetryNow, os, StunRequester, RetryNow, puid, id, mID);
 
         AutoRecursiveLock lock(mLock);
 
@@ -242,7 +252,9 @@ namespace ortc
                                            STUNPacketPtr packet
                                            )
       {
-        EventWriteOpServicesStunRequesterReceivedStunPacket(__func__, mID, fromIPAddress.string());
+        //ServicesStunRequesterReceivedStunPacket(__func__, mID, fromIPAddress.string());
+        ZS_EVENTING_2(x, i, Debug, ServicesStunRequesterReceivedStunPacket, os, StunRequester, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
+
         packet->trace(__func__);
 
         ISTUNRequesterDelegatePtr delegate;
@@ -302,7 +314,14 @@ namespace ortc
                                                      IBackOffTimer::States state
                                                      )
       {
-        EventWriteOpServicesStunRequesterBackOffTimerStateEventFired(__func__, mID, timer->getID(), IBackOffTimer::toString(state), mTotalTries);
+        //ServicesStunRequesterBackOffTimerStateEvent(__func__, mID, timer->getID(), IBackOffTimer::toString(state), mTotalTries);
+        ZS_EVENTING_4(
+                      x, i, Trace, ServicesStunRequesterBackOffTimerStateEvent, os, StunRequester, InternalEvent,
+                      puid, id, mID,
+                      puid, timerId, timer->getID(),
+                      string, backoffTimerState, IBackOffTimer::toString(state),
+                      ulong, totalTries, mTotalTries
+                      );
 
         AutoRecursiveLock lock(mLock);
 
@@ -355,7 +374,14 @@ namespace ortc
           // send off the packet NOW
           SecureByteBlockPtr packet = mSTUNRequest->packetize(mUsingRFC);
 
-          EventWriteOpServicesStunRequesterSendPacket(__func__, mID, packet->SizeInBytes(), packet->BytePtr());
+          //ServicesStunRequesterSendPacket(__func__, mID, packet->SizeInBytes(), packet->BytePtr());
+          ZS_EVENTING_3(
+                        x, i, Trace, ServicesStunRequesterSendPacket, os, StunRequester, Send,
+                        puid, id, mID,
+                        binary, packet, packet->BytePtr(),
+                        size, size, packet->SizeInBytes()
+                        );
+
           mSTUNRequest->trace(__func__);
 
           try {

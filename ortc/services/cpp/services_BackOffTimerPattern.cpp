@@ -30,7 +30,7 @@
  */
 
 #include <ortc/services/internal/services_BackOffTimerPattern.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IHelper.h>
 #include <ortc/services/ISettings.h>
@@ -146,18 +146,30 @@ namespace ortc
           }
         }
 
-        EventWriteOpServicesBackOffTimerPatternCreate(
-                                                      __func__,
-                                                      mID,
-                                                      mMaxAttempts,
-                                                      mAttemptTimeoutVector.size(),
-                                                      mAttemptTimeoutVector.size() > 0 ? mAttemptTimeoutVector.front().count() : 0,
-                                                      mAttemptTimeoutMultiplier,
-                                                      mMaxAttemptTimeout.count(),
-                                                      mRetryVector.size(), mRetryVector.size() > 0 ? mRetryVector.front().count() : 0,
-                                                      mRetryMultiplier,
-                                                      mMaxRetry.count()
-                                                      );
+        //ServicesBackOffTimerPatternCreate(
+        //                                              __func__,
+        //                                              mID,
+                                                     //mMaxAttempts,
+        //                                              mAttemptTimeoutVector.size(),
+                                                      //mAttemptTimeoutVector.size() > 0 ? mAttemptTimeoutVector.front().count() : 0,
+        //                                              mAttemptTimeoutMultiplier,
+        //                                              mMaxAttemptTimeout.count(),
+        //                                              mRetryVector.size(), mRetryVector.size() > 0 ? mRetryVector.front().count() : 0,
+        //                                              mRetryMultiplier,
+        //                                              mMaxRetry.count()
+        //                                              );
+        ZS_EVENTING_9(
+                      x, i, Debug, ServicesBackOffTimerPatternCreate, os, BackOffTimerPattern, Start,
+                      puid, id, mID,
+                      size_t, maxAttempts, mMaxAttempts,
+                      size_t, attemptTimeoutVectorSize, mAttemptTimeoutVector.size(),
+                      duration, attemptTimeoutVectorFront, mAttemptTimeoutVector.size() > 0 ? mAttemptTimeoutVector.front().count() : 0,
+                      double, attemptTimeoutMultiplier, mAttemptTimeoutMultiplier,
+                      duration, maxAttemptTimeout, mMaxAttemptTimeout.count(),
+                      duration, retryVectorFront, mRetryVector.size() > 0 ? mRetryVector.front().count() : 0,
+                      double, retryMultiplier, mRetryMultiplier,
+                      duration, maxRetry, mMaxRetry.count()
+                      );
       }
 
       //-----------------------------------------------------------------------
@@ -184,7 +196,8 @@ namespace ortc
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
 
-        EventWriteOpServicesBackOffTimerPatternDestroy(__func__, mID);
+        ZS_EVENTING_1(x, i, Debug, ServicesBackOffTimerPatternDestroy, os, BackOffTimerPattern, Stop, puid, id, mID);
+        //ServicesBackOffTimerPatternDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -348,7 +361,9 @@ namespace ortc
         pCopy->mRetryMultiplier = mRetryMultiplier;
         pCopy->mMaxRetry = mMaxRetry;
 
-        EventWriteOpServicesBackOffTimerPatternClone(__func__, pCopy->mID, mID);
+        //ServicesBackOffTimerPatternClone(__func__, pCopy->mID, mID);
+
+        ZS_EVENTING_2(x, i, Debug, ServicesBackOffTimerPatternClone, os, BackOffTimerPattern, Info, puid, id, mID, puid, cloneID, pCopy->mID);
 
         pCopy->init();
 
@@ -389,7 +404,14 @@ namespace ortc
           if (mLastRetryDuration > mMaxRetry) mLastRetryDuration = mMaxRetry;
         }
 
-        EventWriteOpServicesBackOffTimerPatternNextAttempt(__func__, mID, mAttemptNumber, mLastAttemptTimeout.count(), mLastRetryDuration.count());
+//ServicesBackOffTimerPatternNextAttempt(__func__, mID, mAttemptNumber, mLastAttemptTimeout.count(), mLastRetryDuration.count());
+        ZS_EVENTING_4(
+                      x, i, Debug, ServicesBackOffTimerPatternNextAttempt, os, BackOffTimerPattern, Info,
+                      puid, id, mID,
+                      size_t, attemptNumber, mAttemptNumber,
+                      duration, lastAttemptTimeout, mLastAttemptTimeout.count(),
+                      duration, lastRetryDuration, mLastRetryDuration.count()
+                      );
       }
 
       //-----------------------------------------------------------------------

@@ -30,7 +30,7 @@
  */
 
 #include <ortc/services/internal/services_Cache.h>
-#include <ortc/services/internal/services_Tracing.h>
+#include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IHelper.h>
 
@@ -57,14 +57,14 @@ namespace ortc
       //-----------------------------------------------------------------------
       Cache::Cache(const make_private &)
       {
-        ZS_LOG_DETAIL(log("created"))
+        ZS_LOG_DETAIL(log("created"));
       }
 
       //-----------------------------------------------------------------------
       Cache::~Cache()
       {
         mThisWeak.reset();
-        ZS_LOG_DETAIL(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"));
       }
 
       //-----------------------------------------------------------------------
@@ -123,13 +123,15 @@ namespace ortc
         }
 
         if (!delegate) {
-          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath))
-          EventWriteOpServicesCacheFetch(__func__, mID, cookieNamePath, NULL);
+          ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath));
+          //ServicesCacheFetch(__func__, mID, cookieNamePath, NULL);
+          ZS_EVENTING_2(x, w, Debug, ServicesCacheFetchNoDelegate, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath);
           return String();
         }
 
         auto result = delegate->fetch(cookieNamePath);
-        EventWriteOpServicesCacheFetch(__func__, mID, cookieNamePath, result);
+        //ServicesCacheFetch(__func__, mID, cookieNamePath, result);
+        ZS_EVENTING_3(x, i, Debug, ServicesCacheFetch, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath, string, result, result);
         return result;
       }
 
@@ -140,7 +142,14 @@ namespace ortc
                         const char *str
                         )
       {
-        EventWriteOpServicesCacheStore(__func__, mID, cookieNamePath, zsLib::timeSinceEpoch<Seconds>(expires).count(), str);
+        //ServicesCacheStore(__func__, mID, cookieNamePath, zsLib::timeSinceEpoch<Seconds>(expires).count(), str);
+        ZS_EVENTING_4(
+                      x, i, Debug, ServicesCacheStore, os, Cache, Info,
+                      puid, id, mID,
+                      string, cookieNamePath, cookieNamePath,
+                      duration, expires, zsLib::timeSinceEpoch<Seconds>(expires).count(),
+                      string, value, str
+                      );
 
         if (!cookieNamePath) return;
         if (!str) {
@@ -170,7 +179,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void Cache::clear(const char *cookieNamePath)
       {
-        EventWriteOpServicesCacheClear(__func__, mID, cookieNamePath);
+        //ServicesCacheClear(__func__, mID, cookieNamePath);
+        ZS_EVENTING_2(x, i, Debug, ServicesCacheClear, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath);
 
         if (!cookieNamePath) return;
 
