@@ -124,13 +124,11 @@ namespace ortc
 
         if (!delegate) {
           ZS_LOG_WARNING(Debug, log("no cache installed (thus cannot fetch cookie)") + ZS_PARAM("cookie name", cookieNamePath));
-          //ServicesCacheFetch(__func__, mID, cookieNamePath, NULL);
           ZS_EVENTING_2(x, w, Debug, ServicesCacheFetchNoDelegate, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath);
           return String();
         }
 
         auto result = delegate->fetch(cookieNamePath);
-        //ServicesCacheFetch(__func__, mID, cookieNamePath, result);
         ZS_EVENTING_3(x, i, Debug, ServicesCacheFetch, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath, string, result, result);
         return result;
       }
@@ -142,7 +140,6 @@ namespace ortc
                         const char *str
                         )
       {
-        //ServicesCacheStore(__func__, mID, cookieNamePath, zsLib::timeSinceEpoch<Seconds>(expires).count(), str);
         ZS_EVENTING_4(
                       x, i, Debug, ServicesCacheStore, os, Cache, Info,
                       puid, id, mID,
@@ -179,7 +176,6 @@ namespace ortc
       //-----------------------------------------------------------------------
       void Cache::clear(const char *cookieNamePath)
       {
-        //ServicesCacheClear(__func__, mID, cookieNamePath);
         ZS_EVENTING_2(x, i, Debug, ServicesCacheClear, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath);
 
         if (!cookieNamePath) return;

@@ -5,7 +5,7 @@
   "name" : "OrtcServices",
   "symbol" : "OrtcServices",
   "description" : "ORTC Lib services library",
-  "resourceName" : "Ortc.Services.events",
+  "resourceName" : "ortc.Services.events",
   "typedefs" : {
    "typedef" : [
     {

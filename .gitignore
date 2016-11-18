@@ -4,11 +4,10 @@ projects/android/libs
 projects/android/obj
 [Dd]ebug/
 [Rr]elease/
-openpeer/services/internal/services_ETWTracing.h
 .vs/
 *.db
 ipch/
 Generated Files/
 *.opendb
-ortc/services/internal/services_ETWTracing.h
+ortc/services/internal/services.events_win_etw.h
 contents.xcworkspacedata

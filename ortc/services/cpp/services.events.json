@@ -4,7 +4,7 @@
     "name": "OrtcServices",
     "symbol": "OrtcServices",
     "description": "ORTC Lib services library",
-    "resourceName": "Ortc.Services.events",
+    "resourceName": "ortc.Services.events",
     "aliases": {
       "alias": [
         {
@@ -60,7 +60,7 @@
           "type": "binary"
         }
       ]
-    }
+    },
     "sources": {
       "source": [
         "ortc/services/cpp/services_BackOffTimer.cpp",

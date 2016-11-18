@@ -28,9 +28,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\internal\services_AllocatorWithNul.h">
-      <Filter>ortc\services\internal</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_Backgrounding.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>

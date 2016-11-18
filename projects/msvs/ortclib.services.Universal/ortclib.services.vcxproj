@@ -52,7 +52,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services.events_win.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_AllocatorWithNul.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Backgrounding.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimer.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimerPattern.h" />
@@ -321,7 +320,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
@@ -374,7 +373,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
@@ -427,7 +426,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
@@ -480,7 +479,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
@@ -533,7 +532,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>
@@ -586,7 +585,7 @@ echo.
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>$(ProjectDir)..\..\..\ortc\servicse\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
+      <Outputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.h;$(IntermediateOutputPath)services.events_win_etw.rc;$(IntermediateOutputPath)services.events_win_etw.res;$(IntermediateOutputPath)services.events_win_etw.dll;$(OutDir)services.events_win_etw.dll;$(OutDir)services.events_win_etw.man;$(OutDir)services.events_win_etw.wprp;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.man;$(ProjectDir)..\..\..\ortc\services\internal\services.events_win_etw.wprp;%(Inputs)</Inputs>

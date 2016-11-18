@@ -146,18 +146,6 @@ namespace ortc
           }
         }
 
-        //ServicesBackOffTimerPatternCreate(
-        //                                              __func__,
-        //                                              mID,
-                                                     //mMaxAttempts,
-        //                                              mAttemptTimeoutVector.size(),
-                                                      //mAttemptTimeoutVector.size() > 0 ? mAttemptTimeoutVector.front().count() : 0,
-        //                                              mAttemptTimeoutMultiplier,
-        //                                              mMaxAttemptTimeout.count(),
-        //                                              mRetryVector.size(), mRetryVector.size() > 0 ? mRetryVector.front().count() : 0,
-        //                                              mRetryMultiplier,
-        //                                              mMaxRetry.count()
-        //                                              );
         ZS_EVENTING_9(
                       x, i, Debug, ServicesBackOffTimerPatternCreate, os, BackOffTimerPattern, Start,
                       puid, id, mID,
@@ -197,7 +185,6 @@ namespace ortc
         ZS_LOG_DEBUG(log("destroyed"))
 
         ZS_EVENTING_1(x, i, Debug, ServicesBackOffTimerPatternDestroy, os, BackOffTimerPattern, Stop, puid, id, mID);
-        //ServicesBackOffTimerPatternDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -361,8 +348,6 @@ namespace ortc
         pCopy->mRetryMultiplier = mRetryMultiplier;
         pCopy->mMaxRetry = mMaxRetry;
 
-        //ServicesBackOffTimerPatternClone(__func__, pCopy->mID, mID);
-
         ZS_EVENTING_2(x, i, Debug, ServicesBackOffTimerPatternClone, os, BackOffTimerPattern, Info, puid, id, mID, puid, cloneID, pCopy->mID);
 
         pCopy->init();
@@ -404,7 +389,6 @@ namespace ortc
           if (mLastRetryDuration > mMaxRetry) mLastRetryDuration = mMaxRetry;
         }
 
-//ServicesBackOffTimerPatternNextAttempt(__func__, mID, mAttemptNumber, mLastAttemptTimeout.count(), mLastRetryDuration.count());
         ZS_EVENTING_4(
                       x, i, Debug, ServicesBackOffTimerPatternNextAttempt, os, BackOffTimerPattern, Info,
                       puid, id, mID,

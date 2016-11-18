@@ -95,7 +95,6 @@ namespace ortc
         }
 
         ZS_EVENTING_1(x, i, Detail, ServicesBackOffTimerCreate, os, BackOffTimer, Start, puid, id, ((bool)pattern) ? pattern->getID() : 0);
-        //ServicesBackOffTimerCreate(__func__, mID, ((bool)pattern) ? pattern->getID() : 0);
       }
 
       //-----------------------------------------------------------------------
@@ -114,7 +113,6 @@ namespace ortc
         ZS_LOG_DETAIL(log("destroyed"));
 
         ZS_EVENTING_1(x, i, Detail, ServicesBackOffTimerDestroy, os, BackOffTimer, Stop, puid, id, mID);
-//ServicesBackOffTimerDestroy(__func__, mID);
       }
 
       //-----------------------------------------------------------------------
@@ -259,7 +257,6 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttempting()
       {
-        //ServicesBackOffTimerNotifyAttempting(__func__, mID);
         ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifyAttempting, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
@@ -276,7 +273,6 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyAttemptFailed()
       {
-        //ServicesBackOffTimerNotifyAttemptFailed(__func__, mID);
         ZS_EVENTING_1(x, w, Trace, ServicesBackOffTimerNotifyAttemptFailed, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
@@ -305,7 +301,6 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifyTryAgainNow()
       {
-//ServicesBackOffTimerNotifyTryAgainNow(__func__, mID);
         ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifyTryAgainNow, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
@@ -325,7 +320,6 @@ namespace ortc
       //-----------------------------------------------------------------------
       void BackOffTimer::notifySucceeded()
       {
-        //ServicesBackOffTimerNotifySucceeded(__func__, mID);
         ZS_EVENTING_1(x, i, Trace, ServicesBackOffTimerNotifySucceeded, os, BackOffTimer, Info, puid, id, mID);
 
         AutoRecursiveLock lock(*this);
@@ -434,7 +428,6 @@ namespace ortc
         mCurrentState = state;
         mLastStateChange = zsLib::now();
 
-//ServicesBackOffTimerStateChangedEvent(__func__, mID, toString(state));
         ZS_EVENTING_2(x, i, Trace, ServicesBackOffTimerStateChangedEvent, os, BackOffTimer, Event, puid, id, mID, string, state, toString(state));
 
         auto pThis = mThisWeak.lock();

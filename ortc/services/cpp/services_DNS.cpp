@@ -701,7 +701,6 @@ namespace ortc
               }
               ZS_LOG_DEBUG(log("A record found") + ZS_PARAM("ip", ipAddress.string()))
             }
-            //ServicesDnsLookupSuccessEvent(__func__, mID, "A", mName);
             ZS_EVENTING_3(
                           x, i, Debug, ServicesDnsLookupSuccessEvent, os, Dns, Event,
                           puid, id, mID,
@@ -710,7 +709,6 @@ namespace ortc
                           );
             mA->trace(__func__);
           } else {
-            //ServicesDnsLookupFailedEventFired(__func__, mID, "A", mName);
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
                           puid, id, mID,
@@ -720,7 +718,6 @@ namespace ortc
             ZS_LOG_DEBUG(log("A record lookup failed") + ZS_PARAM("name", mName));
           }
 
-          //ServicesDnsLookupCompleteEvent(__func__, mID, "A", mName);
           ZS_EVENTING_3(
                         x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                         puid, id, mID,
@@ -808,7 +805,6 @@ namespace ortc
               }
               ZS_LOG_DEBUG(log("AAAA record found") + ZS_PARAM("ip", ipAddress.string()))
             }
-            //ServicesDnsLookupSuccessEvent(__func__, mID, "AAAA", mName);
             ZS_EVENTING_3(
                           x, i, Debug, ServicesDnsLookupSuccessEvent, os, Dns, Event,
                           puid, id, mID,
@@ -818,7 +814,6 @@ namespace ortc
 
             mAAAA->trace(__func__);
           } else {
-            //EventWriteOpServicesDnsLookupFailedEventFired(__func__, mID, "AAAA", mName);
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
                           puid, id, mID,
@@ -828,7 +823,6 @@ namespace ortc
             ZS_LOG_DEBUG(log("AAAA record lookup failed") + ZS_PARAM("name", mName));
           }
 
-          //EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "AAAA", mName);
           ZS_EVENTING_3(
                         x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                         puid, id, mID,
@@ -954,7 +948,6 @@ namespace ortc
                 ZS_LOG_DEBUG(log("SRV record found") + ZS_PARAM("name", srvRecord.mName) + ZS_PARAM("port", srvRecord.mPort) + ZS_PARAM("priority", srvRecord.mPriority) + ZS_PARAM("weight", srvRecord.mWeight))
               }
             }
-            //EventWriteOpServicesDnsLookupSuccessEventFired(__func__, mID, "SRV", mName);
             ZS_EVENTING_3(
                           x, i, Debug, ServicesDnsLookupSuccessEvent, os, Dns, Event,
                           puid, id, mID,
@@ -963,7 +956,6 @@ namespace ortc
                           );
             mSRV->trace(__func__);
           } else {
-            //EventWriteOpServicesDnsLookupFailedEventFired(__func__, mID, "SRV", mName);
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
                           puid, id, mID,
@@ -973,7 +965,6 @@ namespace ortc
             ZS_LOG_DEBUG(log("SRV record lookup failed") + ZS_PARAM("name", mName) + ZS_PARAM("service", mService) + ZS_PARAM("protocol", mProtocol))
           }
 
-          //EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "SRV", mName);
           ZS_EVENTING_3(
                         x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                         puid, id, mID,
@@ -1038,7 +1029,6 @@ namespace ortc
           mALookup = IDNS::lookupA(mThisWeak.lock(), name);
           mAAAALookup = IDNS::lookupAAAA(mThisWeak.lock(), name);
 
-          //ServicesDnsLookupResolverSubQuery(__func__, mID, "A or AAAA", name, ((bool)mALookup) ? mALookup->getID() : 0);
           ZS_EVENTING_4(
                         x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                         puid, id, mID,
@@ -1047,7 +1037,6 @@ namespace ortc
                         puid, relatedQueryId, ((bool)mALookup) ? mALookup->getID() : 0
                         );
 
-          //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "A or AAAA", name, ((bool)mAAAALookup) ? mAAAALookup->getID() : 0);
           ZS_EVENTING_4(
                         x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                         puid, id, mID,
@@ -1069,7 +1058,6 @@ namespace ortc
 
           if (!mDelegate) return;
 
-          //EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "A or AAAA", mName);
           ZS_EVENTING_3(
                         x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                         puid, id, mID,
@@ -1278,7 +1266,6 @@ namespace ortc
 
           mBackupLookup = backupQuery;
 
-          //ServicesDnsLookupResolverSubQuery(__func__, mID, "SRV", mOriginalName, ((bool)mSRVLookup) ? mSRVLookup->getID() : 0);
           ZS_EVENTING_4(
                         x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                         puid, id, mID,
@@ -1287,7 +1274,6 @@ namespace ortc
                         puid, relatedQueryId, ((bool)mSRVLookup) ? mSRVLookup->getID() : 0
                         );
 
-          //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, "SRV", mOriginalName, ((bool)mBackupLookup) ? mBackupLookup->getID() : 0);
           ZS_EVENTING_4(
                         x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                         puid, id, mID,
@@ -1490,7 +1476,6 @@ namespace ortc
               subQuery = IDNS::lookupAAAA(mThisWeak.lock(), (*iter).mName);
               queryType = "AAAA";
             }
-            //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, mID, queryType, record.mName, ((bool)subQuery) ? subQuery->getID() : 0);
             ZS_EVENTING_4(
                           x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                           puid, id, mID,
@@ -1601,7 +1586,6 @@ namespace ortc
 
           mResolvers.clear();
 
-          //EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, "SRV", mOriginalName);
           ZS_EVENTING_3(
                         x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                         puid, id, mID,
@@ -1821,7 +1805,6 @@ namespace ortc
               ZS_LOG_WARNING(Detail, pThis->log("lookupSRV returned NULL"))
               return DNSListQueryPtr();
             }
-            //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "SRV", name, query->getID());
             ZS_EVENTING_4(
                           x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                           puid, id, pThis->mID,
@@ -1858,7 +1841,6 @@ namespace ortc
               ZS_LOG_WARNING(Detail, pThis->log("lookupA returned NULL"))
               return DNSListQueryPtr();
             }
-            //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "A", name, query->getID());
             ZS_EVENTING_4(
                           x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                           puid, id, pThis->mID,
@@ -1894,7 +1876,6 @@ namespace ortc
               ZS_LOG_WARNING(Detail, pThis->log("lookupAAAA returned NULL"))
               return DNSListQueryPtr();
             }
-            //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "AAAA", name, query->getID());
             ZS_EVENTING_4(
                           x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                           puid, id, pThis->mID,
@@ -1930,7 +1911,6 @@ namespace ortc
               ZS_LOG_WARNING(Detail, pThis->log("lookupAorAAAA returned NULL"))
               return DNSListQueryPtr();
             }
-            //EventWriteOpServicesDnsLookupResolverSubQuery(__func__, pThis->mID, "A or AAAA", name, query->getID());
             ZS_EVENTING_4(
                           x, i, Debug, ServicesDnsLookupResolverSubQuery, os, Dns, Lookup,
                           puid, id, pThis->mID,
@@ -2213,7 +2193,6 @@ namespace ortc
 
               bool isSRV = pThis->mServiceName.hasData();
 
-              //EventWriteOpServicesDnsLookupSuccessEventFired(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
               ZS_EVENTING_3(
                             x, i, Debug, ServicesDnsLookupSuccessEvent, os, Dns, Event,
                             puid, id, pThis->mID,
@@ -2382,7 +2361,6 @@ namespace ortc
               }
             } catch (Platform::Exception ^ex) {
               if (pThis) {
-                //EventWriteOpServicesDnsLookupFailedEventFired(__func__, pThis->mID, pThis->mLookupTypeDebugName, pThis->mName);
                 ZS_EVENTING_3(
                               x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
                               puid, id, pThis->mID,
@@ -2445,7 +2423,6 @@ namespace ortc
           if (delegate) {
             ZS_LOG_TRACE(log("query completed"));
 
-            //EventWriteOpServicesDnsLookupCompleteEventFired(__func__, mID, mLookupTypeDebugName, mName);
             ZS_EVENTING_3(
                           x, i, Debug, ServicesDnsLookupCompleteEvent, os, Dns, Event,
                           puid, id, mID,
@@ -2924,7 +2901,6 @@ namespace ortc
     //-------------------------------------------------------------------------
     void IDNS::AResult::trace(const char *message)
     {
-      //ServicesDnsResultListBegin(__func__, message, mName, mTTL, mIPAddresses.size());
       ZS_EVENTING_4(
                     x, i, Trace, ServicesDnsResultListBegin, os, Dns, DC_Start,
                     string, message, message,
@@ -2934,7 +2910,6 @@ namespace ortc
                     );
 
       for (auto iter = mIPAddresses.begin(); iter != mIPAddresses.end(); ++iter) {
-//ServicesDnsResultListEntry(__func__, message, mName, mTTL, (*iter).string());
         ZS_EVENTING_4(
                       x, i, Trace, ServicesDnsResultListEntry, os, Dns, Info,
                       string, message, message,
@@ -2943,7 +2918,6 @@ namespace ortc
                       string, ipAddress, (*iter).string()
                       );
       }
-//ServicesDnsResultListEnd(__func__, message, mName);
       ZS_EVENTING_2(
                     x, i, Trace, ServicesDnsResultListEnd, os, Dns, DC_Stop,
                     string, message, message,
@@ -2962,7 +2936,6 @@ namespace ortc
     //-------------------------------------------------------------------------
     void IDNS::SRVResult::trace(const char *message)
     {
-      //ServicesDnsSrvResultListBegin(__func__, message, mName, mService, mProtocol, mTTL, mRecords.size());
       ZS_EVENTING_6(
                     x, i, Trace, ServicesDnsSrvResultListBegin, os, Dns, DC_Start,
                     string, message, message,
@@ -2974,7 +2947,6 @@ namespace ortc
                     );
       for (auto iter = mRecords.begin(); iter != mRecords.end(); ++iter) {
         auto &record = (*iter);
-        //ServicesDnsSrvResultListEntryBegin(__func__, message, record.mName, record.mPriority, record.mWeight, record.mPort, ((bool)record.mAResult) ? record.mAResult->mIPAddresses.size() : 0, ((bool)record.mAAAAResult) ? record.mAAAAResult->mIPAddresses.size() : 0);
         ZS_EVENTING_7(
                       x, i, Trace, ServicesDnsSrvResultListEntryBegin, os, Dns, DC_Start,
                       string, message, message,
@@ -2992,14 +2964,12 @@ namespace ortc
         if (record.mAAAAResult) {
           record.mAAAAResult->trace(message);
         }
-        //ServicesDnsSrvResultListEnd(__func__, message, record.mName);
         ZS_EVENTING_2(
                       x, i, Trace, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
                       string, message, message,
                       string, name, record.mName
                       );
       }
-      //ServicesDnsSrvResultListEnd(__func__, message, mName);
       ZS_EVENTING_2(
                     x, i, Trace, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
                     string, message, message,
@@ -3022,7 +2992,6 @@ namespace ortc
                                )
     {
       auto result = internal::IDNSFactory::singleton().lookupA(delegate, name);
-      //ServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "A", name);
       ZS_EVENTING_3(
                     x, i, Debug, ServicesDnsLookup, os, Dns, Lookup,
                     puid, id, ((bool)result) ? result->getID() : 0,
@@ -3039,7 +3008,6 @@ namespace ortc
                                   )
     {
       auto result = internal::IDNSFactory::singleton().lookupAAAA(delegate, name);
-      //EventWriteOpServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "AAAA", name);
       ZS_EVENTING_3(
                     x, i, Debug, ServicesDnsLookup, os, Dns, Lookup,
                     puid, id, ((bool)result) ? result->getID() : 0,
@@ -3056,7 +3024,6 @@ namespace ortc
                                      )
     {
       auto result = internal::IDNSFactory::singleton().lookupAorAAAA(delegate, name);
-      //EventWriteOpServicesDnsLookup(__func__, ((bool)result) ? result->getID() : 0, "A or AAAA", name);
       ZS_EVENTING_3(
                     x, i, Debug, ServicesDnsLookup, os, Dns, Lookup,
                     puid, id, ((bool)result) ? result->getID() : 0,
@@ -3079,7 +3046,6 @@ namespace ortc
                                  )
     {
       auto result = internal::IDNSFactory::singleton().lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
-      //ServicesDnsSrvLookup(__func__, ((bool)result) ? result->getID() : 0, name, service, protocol, defaultPort, defaultPriority, defaultWeight, zsLib::to_underlying(lookupType));
       ZS_EVENTING_7(
                     x, i, Debug, ServicesDnsSrvLookup, os, Dns, Lookup,
                     puid, id, ((bool)result) ? result->getID() : 0,

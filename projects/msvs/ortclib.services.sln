@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zsLib.Test", "..\..\..\zsLi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idnkit", "..\..\..\idnkit\projects\msvc\idnkit.Universal\idnkit.vcxproj", "{B236BF5A-561D-4720-BABF-F6119ADF5793}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zsLib.Eventing.Tool", "..\..\..\zsLib-eventing\projects\msvc\zsLib.Eventing.Tool.Universal\zsLib.Eventing.Tool.vcxproj", "{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -130,6 +132,18 @@ Global
 		{B236BF5A-561D-4720-BABF-F6119ADF5793}.Release|x64.Build.0 = Release|x64
 		{B236BF5A-561D-4720-BABF-F6119ADF5793}.Release|x86.ActiveCfg = Release|Win32
 		{B236BF5A-561D-4720-BABF-F6119ADF5793}.Release|x86.Build.0 = Release|Win32
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|ARM.ActiveCfg = Debug|ARM
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|ARM.Build.0 = Debug|ARM
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|x64.ActiveCfg = Debug|x64
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|x64.Build.0 = Debug|x64
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|x86.ActiveCfg = Debug|Win32
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Debug|x86.Build.0 = Debug|Win32
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|ARM.ActiveCfg = Release|ARM
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|ARM.Build.0 = Release|ARM
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|x64.ActiveCfg = Release|x64
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|x64.Build.0 = Release|x64
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|x86.ActiveCfg = Release|Win32
+		{C3D2D2B7-91F8-41A6-AF7F-DFEDFCF95ABD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
