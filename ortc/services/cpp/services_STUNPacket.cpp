@@ -2470,6 +2470,8 @@ namespace ortc
                                  );
           break;
         }
+        case RFC_AllowAll:
+          break;
       }
     }
 

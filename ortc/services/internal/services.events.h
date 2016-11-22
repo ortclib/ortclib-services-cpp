@@ -328,15 +328,13 @@ namespace zsLib {
 
 #define ZS_INTERNAL_EVENTING_EVENT_ServicesDnsResultListEnd(xSubsystem, xValue1, xValue2) \
   if (ZS_EVENTING_IS_LOGGING(Trace)) { \
-    BYTE xxOutputBuffer[0]; \
-    BYTE *xxPOutputBuffer = &(xxOutputBuffer[0]); \
     BYTE *xxIndirectBuffer[2]; \
     BYTE **xxPIndirectBuffer = &(xxIndirectBuffer[0]); \
     size_t xxIndirectSize[2]; \
     size_t *xxPIndirectSize = &(xxIndirectSize[0]); \
     zsLib::eventing::eventWriteBuffer(xxPIndirectBuffer, (xValue1), xxPIndirectSize); \
     zsLib::eventing::eventWriteBuffer(xxPIndirectBuffer, (xValue2), xxPIndirectSize); \
-    ZS_EVENTING_WRITE_EVENT_WITH_BUFFERS(zsLib::eventing::getEventHandleOrtcServices(), Informational, Trace, (ZS_GET_SUBSYSTEM()).getName(), __func__, __LINE__, 1023, &(xxOutputBuffer[0]), 0, &(xxIndirectBuffer[0]), &(xxIndirectSize[0]), 2); \
+    ZS_EVENTING_WRITE_EVENT_WITH_BUFFERS(zsLib::eventing::getEventHandleOrtcServices(), Informational, Trace, (ZS_GET_SUBSYSTEM()).getName(), __func__, __LINE__, 1023, NULL, 0, &(xxIndirectBuffer[0]), &(xxIndirectSize[0]), 2); \
   }
 
 #define ZS_INTERNAL_EVENTING_EVENT_ServicesDnsResultListEntry(xSubsystem, xValue1, xValue2, xValue3, xValue4) \
@@ -391,15 +389,13 @@ namespace zsLib {
 
 #define ZS_INTERNAL_EVENTING_EVENT_ServicesDnsSrvResultListEnd(xSubsystem, xValue1, xValue2) \
   if (ZS_EVENTING_IS_LOGGING(Trace)) { \
-    BYTE xxOutputBuffer[0]; \
-    BYTE *xxPOutputBuffer = &(xxOutputBuffer[0]); \
     BYTE *xxIndirectBuffer[2]; \
     BYTE **xxPIndirectBuffer = &(xxIndirectBuffer[0]); \
     size_t xxIndirectSize[2]; \
     size_t *xxPIndirectSize = &(xxIndirectSize[0]); \
     zsLib::eventing::eventWriteBuffer(xxPIndirectBuffer, (xValue1), xxPIndirectSize); \
     zsLib::eventing::eventWriteBuffer(xxPIndirectBuffer, (xValue2), xxPIndirectSize); \
-    ZS_EVENTING_WRITE_EVENT_WITH_BUFFERS(zsLib::eventing::getEventHandleOrtcServices(), Informational, Trace, (ZS_GET_SUBSYSTEM()).getName(), __func__, __LINE__, 1027, &(xxOutputBuffer[0]), 0, &(xxIndirectBuffer[0]), &(xxIndirectSize[0]), 2); \
+    ZS_EVENTING_WRITE_EVENT_WITH_BUFFERS(zsLib::eventing::getEventHandleOrtcServices(), Informational, Trace, (ZS_GET_SUBSYSTEM()).getName(), __func__, __LINE__, 1027, NULL, 0, &(xxIndirectBuffer[0]), &(xxIndirectSize[0]), 2); \
   }
 
 #define ZS_INTERNAL_EVENTING_EVENT_ServicesDnsSrvResultListEntryBegin(xSubsystem, xValue1, xValue2, xValue3, xValue4, xValue5, xValue6, xValue7) \
