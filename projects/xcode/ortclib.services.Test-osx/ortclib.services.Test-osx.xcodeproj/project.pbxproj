@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		008698D11DE3F81A009D669C /* libzsLib-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008698CE1DE3F7FB009D669C /* libzsLib-osx.a */; };
+		008698DA1DE3F84D009D669C /* libcryptopp-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008698D71DE3F842009D669C /* libcryptopp-osx.a */; };
+		008698E41DE3F877009D669C /* libzsLib-eventing-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008698E31DE3F877009D669C /* libzsLib-eventing-osx.a */; };
+		008698F51DE3F89E009D669C /* libudns-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008698EA1DE3F885009D669C /* libudns-osx.a */; };
+		008698F61DE3F8A9009D669C /* libidnkit-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008698F01DE3F88F009D669C /* libidnkit-osx.a */; };
 		008A15271DA1A48300D1664A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14EE1DA1A48300D1664A /* main.cpp */; };
 		008A15281DA1A48300D1664A /* TestBackOffTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14EF1DA1A48300D1664A /* TestBackOffTimer.cpp */; };
 		008A15291DA1A48300D1664A /* TestCanonicalXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A14F01DA1A48300D1664A /* TestCanonicalXML.cpp */; };
@@ -26,75 +31,85 @@
 		008A155D1DA1A93D00D1664A /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A155C1DA1A93D00D1664A /* libcurl.tbd */; };
 		008A155F1DA1A97F00D1664A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A155E1DA1A97F00D1664A /* CoreFoundation.framework */; };
 		008A15611DA1A9A200D1664A /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 008A15601DA1A9A200D1664A /* libresolv.9.tbd */; };
-		52C9DF5A1DA640F700A17A3A /* libcryptopp-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF431DA640C800A17A3A /* libcryptopp-osx.a */; };
-		52C9DF5B1DA640F700A17A3A /* libidnkit-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF461DA640C800A17A3A /* libidnkit-osx.a */; };
-		52C9DF5C1DA640F700A17A3A /* libudns-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF4C1DA640C800A17A3A /* libudns-osx.a */; };
-		52C9DF5D1DA640F700A17A3A /* libzsLib-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF4F1DA640C800A17A3A /* libzsLib-osx.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		008698CD1DE3F7FB009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698C91DE3F7FB009D669C /* zsLib-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00FF086F1D9C1B2300462998;
+			remoteInfo = "zsLib-osx";
+		};
+		008698CF1DE3F805009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698C91DE3F7FB009D669C /* zsLib-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 00FF086E1D9C1B2300462998;
+			remoteInfo = "zsLib-osx";
+		};
+		008698D61DE3F842009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698D21DE3F842009D669C /* cryptopp-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 009BBC571D976DC400B6B633;
+			remoteInfo = "cryptopp-osx";
+		};
+		008698D81DE3F846009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698D21DE3F842009D669C /* cryptopp-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 009BBC561D976DC400B6B633;
+			remoteInfo = "cryptopp-osx";
+		};
+		008698DF1DE3F86A009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698DB1DE3F86A009D669C /* zsLib-eventing-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008698371DE3F458009D669C;
+			remoteInfo = "zsLib-eventing-ios";
+		};
+		008698E11DE3F870009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698DB1DE3F86A009D669C /* zsLib-eventing-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008698361DE3F458009D669C;
+			remoteInfo = "zsLib-eventing-ios";
+		};
+		008698E91DE3F885009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698E51DE3F885009D669C /* udns-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0022EA891D989CE2002FCECF;
+			remoteInfo = "udns-osx";
+		};
+		008698EF1DE3F88F009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698EB1DE3F88F009D669C /* idnkit-osx.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008A15821DA1AA6D00D1664A;
+			remoteInfo = "idnkit-osx";
+		};
+		008698F11DE3F897009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698EB1DE3F88F009D669C /* idnkit-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008A15811DA1AA6D00D1664A;
+			remoteInfo = "idnkit-osx";
+		};
+		008698F31DE3F897009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008698E51DE3F885009D669C /* udns-osx.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0022EA881D989CE2002FCECF;
+			remoteInfo = "udns-osx";
+		};
 		008A15581DA1A7BB00D1664A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 008A12511DA17F6000D1664A;
 			remoteInfo = "ortclib.services-osx";
-		};
-		52C9DF421DA640C800A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF381DA640C700A17A3A /* cryptopp-osx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 009BBC571D976DC400B6B633;
-			remoteInfo = "cryptopp-osx";
-		};
-		52C9DF451DA640C800A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF351DA640C700A17A3A /* idnkit-osx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 008A15821DA1AA6D00D1664A;
-			remoteInfo = "idnkit-osx";
-		};
-		52C9DF4B1DA640C800A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF3B1DA640C700A17A3A /* udns-osx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0022EA891D989CE2002FCECF;
-			remoteInfo = "udns-osx";
-		};
-		52C9DF4E1DA640C800A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF3E1DA640C700A17A3A /* zsLib-osx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 00FF086F1D9C1B2300462998;
-			remoteInfo = "zsLib-osx";
-		};
-		52C9DF501DA640E300A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF351DA640C700A17A3A /* idnkit-osx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 008A15811DA1AA6D00D1664A;
-			remoteInfo = "idnkit-osx";
-		};
-		52C9DF521DA640E300A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF381DA640C700A17A3A /* cryptopp-osx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 009BBC561D976DC400B6B633;
-			remoteInfo = "cryptopp-osx";
-		};
-		52C9DF541DA640E300A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF3B1DA640C700A17A3A /* udns-osx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0022EA881D989CE2002FCECF;
-			remoteInfo = "udns-osx";
-		};
-		52C9DF561DA640E300A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DF3E1DA640C700A17A3A /* zsLib-osx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 00FF086E1D9C1B2300462998;
-			remoteInfo = "zsLib-osx";
 		};
 		52C9DF581DA640E300A17A3A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -118,6 +133,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		008698C91DE3F7FB009D669C /* zsLib-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008698D21DE3F842009D669C /* cryptopp-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cryptopp-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008698DB1DE3F86A009D669C /* zsLib-eventing-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-eventing-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib-eventing/projects/xcode/zsLib-eventing-ios/zsLib-eventing-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008698E31DE3F877009D669C /* libzsLib-eventing-osx.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libzsLib-eventing-osx.a"; path = "../../../../zsLib-eventing/projects/xcode/zsLib-eventing-osx/build/Debug/libzsLib-eventing-osx.a"; sourceTree = "<group>"; };
+		008698E51DE3F885009D669C /* udns-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "udns-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj"; sourceTree = "<absolute>"; };
+		008698EB1DE3F88F009D669C /* idnkit-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "idnkit-osx.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj"; sourceTree = "<absolute>"; };
 		008A14631DA1A42400D1664A /* ortclib.services.Test-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ortclib.services.Test-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
 		008A14ED1DA1A48300D1664A /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		008A14EE1DA1A48300D1664A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -141,10 +162,6 @@
 		008A155C1DA1A93D00D1664A /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
 		008A155E1DA1A97F00D1664A /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		008A15601DA1A9A200D1664A /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
-		52C9DF351DA640C700A17A3A /* idnkit-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "idnkit-osx.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DF381DA640C700A17A3A /* cryptopp-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cryptopp-osx.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DF3B1DA640C700A17A3A /* udns-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "udns-osx.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DF3E1DA640C700A17A3A /* zsLib-osx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-osx.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,10 +169,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52C9DF5A1DA640F700A17A3A /* libcryptopp-osx.a in Frameworks */,
-				52C9DF5B1DA640F700A17A3A /* libidnkit-osx.a in Frameworks */,
-				52C9DF5C1DA640F700A17A3A /* libudns-osx.a in Frameworks */,
-				52C9DF5D1DA640F700A17A3A /* libzsLib-osx.a in Frameworks */,
+				008698F61DE3F8A9009D669C /* libidnkit-osx.a in Frameworks */,
+				008698F51DE3F89E009D669C /* libudns-osx.a in Frameworks */,
+				008698E41DE3F877009D669C /* libzsLib-eventing-osx.a in Frameworks */,
+				008698DA1DE3F84D009D669C /* libcryptopp-osx.a in Frameworks */,
+				008698D11DE3F81A009D669C /* libzsLib-osx.a in Frameworks */,
 				008A15611DA1A9A200D1664A /* libresolv.9.tbd in Frameworks */,
 				008A155F1DA1A97F00D1664A /* CoreFoundation.framework in Frameworks */,
 				008A155D1DA1A93D00D1664A /* libcurl.tbd in Frameworks */,
@@ -166,14 +184,55 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		008698CA1DE3F7FB009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008698CE1DE3F7FB009D669C /* libzsLib-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008698D31DE3F842009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008698D71DE3F842009D669C /* libcryptopp-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008698DC1DE3F86A009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008698E01DE3F86A009D669C /* libzsLib-eventing-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008698E61DE3F885009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008698EA1DE3F885009D669C /* libudns-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008698EC1DE3F88F009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008698F01DE3F88F009D669C /* libidnkit-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		008A145A1DA1A42400D1664A = {
 			isa = PBXGroup;
 			children = (
-				52C9DF351DA640C700A17A3A /* idnkit-osx.xcodeproj */,
-				52C9DF381DA640C700A17A3A /* cryptopp-osx.xcodeproj */,
-				52C9DF3B1DA640C700A17A3A /* udns-osx.xcodeproj */,
-				52C9DF3E1DA640C700A17A3A /* zsLib-osx.xcodeproj */,
 				008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */,
+				008698EB1DE3F88F009D669C /* idnkit-osx.xcodeproj */,
+				008698E51DE3F885009D669C /* udns-osx.xcodeproj */,
+				008698DB1DE3F86A009D669C /* zsLib-eventing-ios.xcodeproj */,
+				008698D21DE3F842009D669C /* cryptopp-osx.xcodeproj */,
+				008698C91DE3F7FB009D669C /* zsLib-osx.xcodeproj */,
 				008A146D1DA1A48300D1664A /* ortc */,
 				008A14641DA1A42400D1664A /* Products */,
 				008A15511DA1A7B000D1664A /* Frameworks */,
@@ -232,6 +291,7 @@
 		008A15511DA1A7B000D1664A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				008698E31DE3F877009D669C /* libzsLib-eventing-osx.a */,
 				008A15601DA1A9A200D1664A /* libresolv.9.tbd */,
 				008A155E1DA1A97F00D1664A /* CoreFoundation.framework */,
 				008A155C1DA1A93D00D1664A /* libcurl.tbd */,
@@ -244,38 +304,6 @@
 			isa = PBXGroup;
 			children = (
 				008A15591DA1A7BB00D1664A /* libortclib.services-osx.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		52C9DF361DA640C700A17A3A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				52C9DF461DA640C800A17A3A /* libidnkit-osx.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		52C9DF391DA640C700A17A3A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				52C9DF431DA640C800A17A3A /* libcryptopp-osx.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		52C9DF3C1DA640C700A17A3A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				52C9DF4C1DA640C800A17A3A /* libudns-osx.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		52C9DF3F1DA640C700A17A3A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				52C9DF4F1DA640C800A17A3A /* libzsLib-osx.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -294,10 +322,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				52C9DF511DA640E300A17A3A /* PBXTargetDependency */,
-				52C9DF531DA640E300A17A3A /* PBXTargetDependency */,
-				52C9DF551DA640E300A17A3A /* PBXTargetDependency */,
-				52C9DF571DA640E300A17A3A /* PBXTargetDependency */,
+				008698F21DE3F897009D669C /* PBXTargetDependency */,
+				008698F41DE3F897009D669C /* PBXTargetDependency */,
+				008698E21DE3F870009D669C /* PBXTargetDependency */,
+				008698D91DE3F846009D669C /* PBXTargetDependency */,
+				008698D01DE3F805009D669C /* PBXTargetDependency */,
 				52C9DF591DA640E300A17A3A /* PBXTargetDependency */,
 			);
 			name = "ortclib.services.Test-osx";
@@ -332,24 +361,28 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 52C9DF391DA640C700A17A3A /* Products */;
-					ProjectRef = 52C9DF381DA640C700A17A3A /* cryptopp-osx.xcodeproj */;
+					ProductGroup = 008698D31DE3F842009D669C /* Products */;
+					ProjectRef = 008698D21DE3F842009D669C /* cryptopp-osx.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DF361DA640C700A17A3A /* Products */;
-					ProjectRef = 52C9DF351DA640C700A17A3A /* idnkit-osx.xcodeproj */;
+					ProductGroup = 008698EC1DE3F88F009D669C /* Products */;
+					ProjectRef = 008698EB1DE3F88F009D669C /* idnkit-osx.xcodeproj */;
 				},
 				{
 					ProductGroup = 008A15551DA1A7BB00D1664A /* Products */;
 					ProjectRef = 008A15541DA1A7BB00D1664A /* ortclib.services-osx.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DF3C1DA640C700A17A3A /* Products */;
-					ProjectRef = 52C9DF3B1DA640C700A17A3A /* udns-osx.xcodeproj */;
+					ProductGroup = 008698E61DE3F885009D669C /* Products */;
+					ProjectRef = 008698E51DE3F885009D669C /* udns-osx.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DF3F1DA640C700A17A3A /* Products */;
-					ProjectRef = 52C9DF3E1DA640C700A17A3A /* zsLib-osx.xcodeproj */;
+					ProductGroup = 008698DC1DE3F86A009D669C /* Products */;
+					ProjectRef = 008698DB1DE3F86A009D669C /* zsLib-eventing-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 008698CA1DE3F7FB009D669C /* Products */;
+					ProjectRef = 008698C91DE3F7FB009D669C /* zsLib-osx.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -360,39 +393,46 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		008698CE1DE3F7FB009D669C /* libzsLib-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-osx.a";
+			remoteRef = 008698CD1DE3F7FB009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008698D71DE3F842009D669C /* libcryptopp-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libcryptopp-osx.a";
+			remoteRef = 008698D61DE3F842009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008698E01DE3F86A009D669C /* libzsLib-eventing-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-eventing-ios.a";
+			remoteRef = 008698DF1DE3F86A009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008698EA1DE3F885009D669C /* libudns-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libudns-osx.a";
+			remoteRef = 008698E91DE3F885009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008698F01DE3F88F009D669C /* libidnkit-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libidnkit-osx.a";
+			remoteRef = 008698EF1DE3F88F009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		008A15591DA1A7BB00D1664A /* libortclib.services-osx.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = "libortclib.services-osx.a";
 			remoteRef = 008A15581DA1A7BB00D1664A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DF431DA640C800A17A3A /* libcryptopp-osx.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libcryptopp-osx.a";
-			remoteRef = 52C9DF421DA640C800A17A3A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DF461DA640C800A17A3A /* libidnkit-osx.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libidnkit-osx.a";
-			remoteRef = 52C9DF451DA640C800A17A3A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DF4C1DA640C800A17A3A /* libudns-osx.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libudns-osx.a";
-			remoteRef = 52C9DF4B1DA640C800A17A3A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DF4F1DA640C800A17A3A /* libzsLib-osx.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libzsLib-osx.a";
-			remoteRef = 52C9DF4E1DA640C800A17A3A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -423,25 +463,30 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		52C9DF511DA640E300A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "idnkit-osx";
-			targetProxy = 52C9DF501DA640E300A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF531DA640E300A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "cryptopp-osx";
-			targetProxy = 52C9DF521DA640E300A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF551DA640E300A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "udns-osx";
-			targetProxy = 52C9DF541DA640E300A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF571DA640E300A17A3A /* PBXTargetDependency */ = {
+		008698D01DE3F805009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "zsLib-osx";
-			targetProxy = 52C9DF561DA640E300A17A3A /* PBXContainerItemProxy */;
+			targetProxy = 008698CF1DE3F805009D669C /* PBXContainerItemProxy */;
+		};
+		008698D91DE3F846009D669C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "cryptopp-osx";
+			targetProxy = 008698D81DE3F846009D669C /* PBXContainerItemProxy */;
+		};
+		008698E21DE3F870009D669C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "zsLib-eventing-ios";
+			targetProxy = 008698E11DE3F870009D669C /* PBXContainerItemProxy */;
+		};
+		008698F21DE3F897009D669C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "idnkit-osx";
+			targetProxy = 008698F11DE3F897009D669C /* PBXContainerItemProxy */;
+		};
+		008698F41DE3F897009D669C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "udns-osx";
+			targetProxy = 008698F31DE3F897009D669C /* PBXContainerItemProxy */;
 		};
 		52C9DF591DA640E300A17A3A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

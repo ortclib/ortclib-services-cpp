@@ -45,10 +45,11 @@
 		0001AD671DA1EBCA00D807DA /* libortclib.services-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0001AD5A1DA1EAAD00D807DA /* libortclib.services-ios.a */; };
 		0001AD761DA1EC2000D807DA /* libortclib.services-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0001AD5A1DA1EAAD00D807DA /* libortclib.services-ios.a */; };
 		0001AD801DA1ED5800D807DA /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0001AD7F1DA1ED5800D807DA /* libcurl.a */; };
-		52C9DF071DA62BEF00A17A3A /* libcryptopp-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DEF81DA62B9500A17A3A /* libcryptopp-ios.a */; };
-		52C9DF081DA62BEF00A17A3A /* libidnkit-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DEFE1DA62B9A00A17A3A /* libidnkit-ios.a */; };
-		52C9DF091DA62BEF00A17A3A /* libudns-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DEF21DA62B9100A17A3A /* libudns-ios.a */; };
-		52C9DF0A1DA62BEF00A17A3A /* libzsLib-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DEEC1DA62B8C00A17A3A /* libzsLib-ios.a */; };
+		0086991F1DE3F937009D669C /* libcryptopp-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008699081DE3F8F8009D669C /* libcryptopp-ios.a */; };
+		008699201DE3F937009D669C /* libidnkit-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0086990B1DE3F8F8009D669C /* libidnkit-ios.a */; };
+		008699211DE3F937009D669C /* libudns-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0086990E1DE3F8F8009D669C /* libudns-ios.a */; };
+		008699221DE3F937009D669C /* libzsLib-eventing-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008699111DE3F8F8009D669C /* libzsLib-eventing-ios.a */; };
+		008699231DE3F937009D669C /* libzsLib-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 008699141DE3F8F8009D669C /* libzsLib-ios.a */; };
 		52C9DF0C1DA62C0400A17A3A /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF0B1DA62C0400A17A3A /* libz.tbd */; };
 		52C9DF0E1DA62C0E00A17A3A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF0D1DA62C0E00A17A3A /* Security.framework */; };
 		52C9DF101DA62C1C00A17A3A /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C9DF0F1DA62C1C00A17A3A /* libresolv.9.tbd */; };
@@ -84,86 +85,72 @@
 			remoteGlobalIDString = 008A13841DA1A13600D1664A;
 			remoteInfo = "ortclib.services-ios";
 		};
-		52C9DEEB1DA62B8C00A17A3A /* PBXContainerItemProxy */ = {
+		008699071DE3F8F8009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0067EE151D9C5B4E003BE1AC;
-			remoteInfo = "zsLib-ios";
-		};
-		52C9DEF11DA62B9100A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0022EA3D1D989A1F002FCECF;
-			remoteInfo = "udns-ios";
-		};
-		52C9DEF71DA62B9500A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */;
+			containerPortal = 008699001DE3F8F8009D669C /* cryptopp-ios.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 009BBA0A1D974F4400B6B633;
 			remoteInfo = "cryptopp-ios";
 		};
-		52C9DEFD1DA62B9A00A17A3A /* PBXContainerItemProxy */ = {
+		0086990A1DE3F8F8009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */;
+			containerPortal = 008698F71DE3F8F8009D669C /* idnkit-ios.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 0001A45F1DA1DD5F00D807DA;
 			remoteInfo = "idnkit-ios";
 		};
-		52C9DEFF1DA62BB000A17A3A /* PBXContainerItemProxy */ = {
+		0086990D1DE3F8F8009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0001A45E1DA1DD5F00D807DA;
-			remoteInfo = "idnkit-ios";
-		};
-		52C9DF011DA62BB000A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 009BBA091D974F4400B6B633;
-			remoteInfo = "cryptopp-ios";
-		};
-		52C9DF031DA62BB000A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0022EA3C1D989A1F002FCECF;
+			containerPortal = 008698FA1DE3F8F8009D669C /* udns-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0022EA3D1D989A1F002FCECF;
 			remoteInfo = "udns-ios";
 		};
-		52C9DF051DA62BB000A17A3A /* PBXContainerItemProxy */ = {
+		008699101DE3F8F8009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0067EE141D9C5B4E003BE1AC;
+			containerPortal = 008698FD1DE3F8F8009D669C /* zsLib-eventing-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008698371DE3F458009D669C;
+			remoteInfo = "zsLib-eventing-ios";
+		};
+		008699131DE3F8F8009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008699031DE3F8F8009D669C /* zsLib-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0067EE151D9C5B4E003BE1AC;
 			remoteInfo = "zsLib-ios";
 		};
-		52C9DF121DA6380900A17A3A /* PBXContainerItemProxy */ = {
+		008699151DE3F926009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */;
+			containerPortal = 008698F71DE3F8F8009D669C /* idnkit-ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0001A45E1DA1DD5F00D807DA;
 			remoteInfo = "idnkit-ios";
 		};
-		52C9DF141DA6380900A17A3A /* PBXContainerItemProxy */ = {
+		008699171DE3F926009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 009BBA091D974F4400B6B633;
-			remoteInfo = "cryptopp-ios";
-		};
-		52C9DF161DA6380900A17A3A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */;
+			containerPortal = 008698FA1DE3F8F8009D669C /* udns-ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0022EA3C1D989A1F002FCECF;
 			remoteInfo = "udns-ios";
 		};
-		52C9DF181DA6380900A17A3A /* PBXContainerItemProxy */ = {
+		008699191DE3F926009D669C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */;
+			containerPortal = 008698FD1DE3F8F8009D669C /* zsLib-eventing-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 008698361DE3F458009D669C;
+			remoteInfo = "zsLib-eventing-ios";
+		};
+		0086991B1DE3F926009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008699001DE3F8F8009D669C /* cryptopp-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 009BBA091D974F4400B6B633;
+			remoteInfo = "cryptopp-ios";
+		};
+		0086991D1DE3F926009D669C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 008699031DE3F8F8009D669C /* zsLib-ios.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 0067EE141D9C5B4E003BE1AC;
 			remoteInfo = "zsLib-ios";
@@ -203,10 +190,11 @@
 		0001ACC31DA1E77000D807DA /* TestTURNSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTURNSocket.cpp; sourceTree = "<group>"; };
 		0001AD551DA1EAAD00D807DA /* ortclib.services-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ortclib.services-ios.xcodeproj"; path = "../ortclib.services-ios/ortclib.services-ios.xcodeproj"; sourceTree = "<group>"; };
 		0001AD7F1DA1ED5800D807DA /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = "../../../../curl/curl/ios-dev/lib/libcurl.a"; sourceTree = "<group>"; };
-		52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-ios.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib/projects/xcode/zsLib-ios/zsLib-ios.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "udns-ios.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../udns/projects/xcode/udns-ios/udns-ios.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cryptopp-ios.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../cryptopp/projects/xcode/cryptopp-ios/cryptopp-ios.xcodeproj"; sourceTree = "<absolute>"; };
-		52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "idnkit-ios.xcodeproj"; path = "/Users/sergejjovanovic/Work/Projects/opticaltone/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../idnkit/projects/xcode/idnkit-ios/idnkit-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008698F71DE3F8F8009D669C /* idnkit-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "idnkit-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../idnkit/projects/xcode/idnkit-ios/idnkit-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008698FA1DE3F8F8009D669C /* udns-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "udns-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../udns/projects/xcode/udns-ios/udns-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008698FD1DE3F8F8009D669C /* zsLib-eventing-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-eventing-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib-eventing/projects/xcode/zsLib-eventing-ios/zsLib-eventing-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008699001DE3F8F8009D669C /* cryptopp-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cryptopp-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../cryptopp/projects/xcode/cryptopp-ios/cryptopp-ios.xcodeproj"; sourceTree = "<absolute>"; };
+		008699031DE3F8F8009D669C /* zsLib-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zsLib-ios.xcodeproj"; path = "/Users/robin/Documents/OpticalTone/Repos/ortclib/ortclib-sdk/ortc/xplatform/ortclib-services-cpp/projects/xcode/../../../zsLib/projects/xcode/zsLib-ios/zsLib-ios.xcodeproj"; sourceTree = "<absolute>"; };
 		52C9DF0B1DA62C0400A17A3A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		52C9DF0D1DA62C0E00A17A3A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		52C9DF0F1DA62C1C00A17A3A /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
@@ -221,10 +209,6 @@
 				52C9DF101DA62C1C00A17A3A /* libresolv.9.tbd in Frameworks */,
 				52C9DF0E1DA62C0E00A17A3A /* Security.framework in Frameworks */,
 				52C9DF0C1DA62C0400A17A3A /* libz.tbd in Frameworks */,
-				52C9DF071DA62BEF00A17A3A /* libcryptopp-ios.a in Frameworks */,
-				52C9DF081DA62BEF00A17A3A /* libidnkit-ios.a in Frameworks */,
-				52C9DF091DA62BEF00A17A3A /* libudns-ios.a in Frameworks */,
-				52C9DF0A1DA62BEF00A17A3A /* libzsLib-ios.a in Frameworks */,
 				0001AD761DA1EC2000D807DA /* libortclib.services-ios.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -233,6 +217,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0086991F1DE3F937009D669C /* libcryptopp-ios.a in Frameworks */,
+				008699201DE3F937009D669C /* libidnkit-ios.a in Frameworks */,
+				008699211DE3F937009D669C /* libudns-ios.a in Frameworks */,
+				008699221DE3F937009D669C /* libzsLib-eventing-ios.a in Frameworks */,
+				008699231DE3F937009D669C /* libzsLib-ios.a in Frameworks */,
 				0001AD801DA1ED5800D807DA /* libcurl.a in Frameworks */,
 				0001AD671DA1EBCA00D807DA /* libortclib.services-ios.a in Frameworks */,
 			);
@@ -244,11 +233,12 @@
 		0001ABF71DA1E18C00D807DA = {
 			isa = PBXGroup;
 			children = (
-				52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */,
-				52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */,
-				52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */,
-				52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */,
 				0001AD551DA1EAAD00D807DA /* ortclib.services-ios.xcodeproj */,
+				008698F71DE3F8F8009D669C /* idnkit-ios.xcodeproj */,
+				008698FA1DE3F8F8009D669C /* udns-ios.xcodeproj */,
+				008698FD1DE3F8F8009D669C /* zsLib-eventing-ios.xcodeproj */,
+				008699001DE3F8F8009D669C /* cryptopp-ios.xcodeproj */,
+				008699031DE3F8F8009D669C /* zsLib-ios.xcodeproj */,
 				0001AC331DA1E77000D807DA /* ortc */,
 				0001AC021DA1E18C00D807DA /* ortclib.services.Test-ios */,
 				0001AC1C1DA1E18C00D807DA /* ortclib.services.Test-iosTests */,
@@ -359,34 +349,42 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		52C9DEE81DA62B8C00A17A3A /* Products */ = {
+		008698F81DE3F8F8009D669C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				52C9DEEC1DA62B8C00A17A3A /* libzsLib-ios.a */,
+				0086990B1DE3F8F8009D669C /* libidnkit-ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		52C9DEEE1DA62B9100A17A3A /* Products */ = {
+		008698FB1DE3F8F8009D669C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				52C9DEF21DA62B9100A17A3A /* libudns-ios.a */,
+				0086990E1DE3F8F8009D669C /* libudns-ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		52C9DEF41DA62B9500A17A3A /* Products */ = {
+		008698FE1DE3F8F8009D669C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				52C9DEF81DA62B9500A17A3A /* libcryptopp-ios.a */,
+				008699111DE3F8F8009D669C /* libzsLib-eventing-ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		52C9DEFA1DA62B9A00A17A3A /* Products */ = {
+		008699011DE3F8F8009D669C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				52C9DEFE1DA62B9A00A17A3A /* libidnkit-ios.a */,
+				008699081DE3F8F8009D669C /* libcryptopp-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008699041DE3F8F8009D669C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008699141DE3F8F8009D669C /* libzsLib-ios.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -405,10 +403,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				52C9DF131DA6380900A17A3A /* PBXTargetDependency */,
-				52C9DF151DA6380900A17A3A /* PBXTargetDependency */,
-				52C9DF171DA6380900A17A3A /* PBXTargetDependency */,
-				52C9DF191DA6380900A17A3A /* PBXTargetDependency */,
 				0001AD6B1DA1EBF500D807DA /* PBXTargetDependency */,
 			);
 			name = "ortclib.services.Test-ios";
@@ -427,10 +421,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				52C9DF001DA62BB000A17A3A /* PBXTargetDependency */,
-				52C9DF021DA62BB000A17A3A /* PBXTargetDependency */,
-				52C9DF041DA62BB000A17A3A /* PBXTargetDependency */,
-				52C9DF061DA62BB000A17A3A /* PBXTargetDependency */,
+				008699161DE3F926009D669C /* PBXTargetDependency */,
+				008699181DE3F926009D669C /* PBXTargetDependency */,
+				0086991A1DE3F926009D669C /* PBXTargetDependency */,
+				0086991C1DE3F926009D669C /* PBXTargetDependency */,
+				0086991E1DE3F926009D669C /* PBXTargetDependency */,
 				0001AD5C1DA1EBBD00D807DA /* PBXTargetDependency */,
 				0001AC1B1DA1E18C00D807DA /* PBXTargetDependency */,
 			);
@@ -474,24 +469,28 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 52C9DEF41DA62B9500A17A3A /* Products */;
-					ProjectRef = 52C9DEF31DA62B9500A17A3A /* cryptopp-ios.xcodeproj */;
+					ProductGroup = 008699011DE3F8F8009D669C /* Products */;
+					ProjectRef = 008699001DE3F8F8009D669C /* cryptopp-ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DEFA1DA62B9A00A17A3A /* Products */;
-					ProjectRef = 52C9DEF91DA62B9A00A17A3A /* idnkit-ios.xcodeproj */;
+					ProductGroup = 008698F81DE3F8F8009D669C /* Products */;
+					ProjectRef = 008698F71DE3F8F8009D669C /* idnkit-ios.xcodeproj */;
 				},
 				{
 					ProductGroup = 0001AD561DA1EAAD00D807DA /* Products */;
 					ProjectRef = 0001AD551DA1EAAD00D807DA /* ortclib.services-ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DEEE1DA62B9100A17A3A /* Products */;
-					ProjectRef = 52C9DEED1DA62B9100A17A3A /* udns-ios.xcodeproj */;
+					ProductGroup = 008698FB1DE3F8F8009D669C /* Products */;
+					ProjectRef = 008698FA1DE3F8F8009D669C /* udns-ios.xcodeproj */;
 				},
 				{
-					ProductGroup = 52C9DEE81DA62B8C00A17A3A /* Products */;
-					ProjectRef = 52C9DEE71DA62B8C00A17A3A /* zsLib-ios.xcodeproj */;
+					ProductGroup = 008698FE1DE3F8F8009D669C /* Products */;
+					ProjectRef = 008698FD1DE3F8F8009D669C /* zsLib-eventing-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 008699041DE3F8F8009D669C /* Products */;
+					ProjectRef = 008699031DE3F8F8009D669C /* zsLib-ios.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -510,32 +509,39 @@
 			remoteRef = 0001AD591DA1EAAD00D807DA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		52C9DEEC1DA62B8C00A17A3A /* libzsLib-ios.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libzsLib-ios.a";
-			remoteRef = 52C9DEEB1DA62B8C00A17A3A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DEF21DA62B9100A17A3A /* libudns-ios.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libudns-ios.a";
-			remoteRef = 52C9DEF11DA62B9100A17A3A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		52C9DEF81DA62B9500A17A3A /* libcryptopp-ios.a */ = {
+		008699081DE3F8F8009D669C /* libcryptopp-ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = "libcryptopp-ios.a";
-			remoteRef = 52C9DEF71DA62B9500A17A3A /* PBXContainerItemProxy */;
+			remoteRef = 008699071DE3F8F8009D669C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		52C9DEFE1DA62B9A00A17A3A /* libidnkit-ios.a */ = {
+		0086990B1DE3F8F8009D669C /* libidnkit-ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = "libidnkit-ios.a";
-			remoteRef = 52C9DEFD1DA62B9A00A17A3A /* PBXContainerItemProxy */;
+			remoteRef = 0086990A1DE3F8F8009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0086990E1DE3F8F8009D669C /* libudns-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libudns-ios.a";
+			remoteRef = 0086990D1DE3F8F8009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008699111DE3F8F8009D669C /* libzsLib-eventing-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-eventing-ios.a";
+			remoteRef = 008699101DE3F8F8009D669C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008699141DE3F8F8009D669C /* libzsLib-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-ios.a";
+			remoteRef = 008699131DE3F8F8009D669C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -625,45 +631,30 @@
 			name = "ortclib.services-ios";
 			targetProxy = 0001AD6A1DA1EBF500D807DA /* PBXContainerItemProxy */;
 		};
-		52C9DF001DA62BB000A17A3A /* PBXTargetDependency */ = {
+		008699161DE3F926009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "idnkit-ios";
-			targetProxy = 52C9DEFF1DA62BB000A17A3A /* PBXContainerItemProxy */;
+			targetProxy = 008699151DE3F926009D669C /* PBXContainerItemProxy */;
 		};
-		52C9DF021DA62BB000A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "cryptopp-ios";
-			targetProxy = 52C9DF011DA62BB000A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF041DA62BB000A17A3A /* PBXTargetDependency */ = {
+		008699181DE3F926009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "udns-ios";
-			targetProxy = 52C9DF031DA62BB000A17A3A /* PBXContainerItemProxy */;
+			targetProxy = 008699171DE3F926009D669C /* PBXContainerItemProxy */;
 		};
-		52C9DF061DA62BB000A17A3A /* PBXTargetDependency */ = {
+		0086991A1DE3F926009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "zsLib-ios";
-			targetProxy = 52C9DF051DA62BB000A17A3A /* PBXContainerItemProxy */;
+			name = "zsLib-eventing-ios";
+			targetProxy = 008699191DE3F926009D669C /* PBXContainerItemProxy */;
 		};
-		52C9DF131DA6380900A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "idnkit-ios";
-			targetProxy = 52C9DF121DA6380900A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF151DA6380900A17A3A /* PBXTargetDependency */ = {
+		0086991C1DE3F926009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "cryptopp-ios";
-			targetProxy = 52C9DF141DA6380900A17A3A /* PBXContainerItemProxy */;
+			targetProxy = 0086991B1DE3F926009D669C /* PBXContainerItemProxy */;
 		};
-		52C9DF171DA6380900A17A3A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "udns-ios";
-			targetProxy = 52C9DF161DA6380900A17A3A /* PBXContainerItemProxy */;
-		};
-		52C9DF191DA6380900A17A3A /* PBXTargetDependency */ = {
+		0086991E1DE3F926009D669C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "zsLib-ios";
-			targetProxy = 52C9DF181DA6380900A17A3A /* PBXContainerItemProxy */;
+			targetProxy = 0086991D1DE3F926009D669C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

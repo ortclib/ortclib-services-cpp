@@ -8,33 +8,39 @@
       location = "group:ortclib.services.Test-osx/ortclib.services.Test-osx.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:ortclib.services-osx/ortclib.services-osx.xcodeproj">
-   </FileRef>
-   <FileRef
       location = "group:ortclib.services-ios/ortclib.services-ios.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj">
+      location = "group:ortclib.services-osx/ortclib.services-osx.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:../../../idnkit/projects/xcode/idnkit-ios/idnkit-ios.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:../../../cryptopp/projects/xcode/cryptopp-ios/cryptopp-ios.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj">
+      location = "group:../../../idnkit/projects/xcode/idnkit-osx/idnkit-osx.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:../../../udns/projects/xcode/udns-ios/udns-ios.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj">
+      location = "group:../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib-eventing/projects/xcode/zsLib-eventing-ios/zsLib-eventing-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib-eventing/projects/xcode/zsLib-eventing-osx/zsLib-eventing-osx.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../cryptopp/projects/xcode/cryptopp-ios/cryptopp-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../cryptopp/projects/xcode/cryptopp-osx/cryptopp-osx.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:../../../zsLib/projects/xcode/zsLib-ios/zsLib-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib/projects/xcode/zsLib-osx/zsLib-osx.xcodeproj">
    </FileRef>
 </Workspace>
