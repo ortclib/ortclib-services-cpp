@@ -6,7 +6,7 @@
   "symbol" : "OrtcServices",
   "description" : "ORTC Lib services library",
   "resourceName" : "ortc.Services.events",
-  "uniqueHash" : "76cf0947a4d1d603d0070eb3cf8ceb9d367e8e7d14e748d86db37f352a286d16",
+  "uniqueHash" : "36a99a8b40910215745d33c8decddacd688ebaad1177df0b417312575a2a7dd3",
   "typedefs" : {
    "typedef" : [
     {
@@ -168,7 +168,7 @@
     {
      "name" : "EventWriteOpServicesStunRequesterManagerDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "StunRequesterManager",
@@ -178,7 +178,7 @@
     {
      "name" : "ServicesBackOffTimerCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -188,7 +188,7 @@
     {
      "name" : "ServicesBackOffTimerDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -208,7 +208,7 @@
     {
      "name" : "ServicesBackOffTimerNotifyAttempting",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -218,7 +218,7 @@
     {
      "name" : "ServicesBackOffTimerNotifySucceeded",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -228,7 +228,7 @@
     {
      "name" : "ServicesBackOffTimerNotifyTryAgainNow",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -238,7 +238,7 @@
     {
      "name" : "ServicesBackOffTimerPatternClone",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "BackOffTimerPattern",
@@ -248,7 +248,7 @@
     {
      "name" : "ServicesBackOffTimerPatternCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "BackOffTimerPattern",
@@ -258,7 +258,7 @@
     {
      "name" : "ServicesBackOffTimerPatternDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "BackOffTimerPattern",
@@ -268,7 +268,7 @@
     {
      "name" : "ServicesBackOffTimerPatternNextAttempt",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "BackOffTimerPattern",
@@ -278,7 +278,7 @@
     {
      "name" : "ServicesBackOffTimerStateChangedEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "BackOffTimer",
@@ -288,7 +288,7 @@
     {
      "name" : "ServicesCacheClear",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Cache",
@@ -298,7 +298,7 @@
     {
      "name" : "ServicesCacheFetch",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Cache",
@@ -318,7 +318,7 @@
     {
      "name" : "ServicesCacheStore",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Cache",
@@ -328,7 +328,7 @@
     {
      "name" : "ServicesDebugLogger",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "DebugLogger",
@@ -338,7 +338,7 @@
     {
      "name" : "ServicesDnsLookup",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Dns",
@@ -348,7 +348,7 @@
     {
      "name" : "ServicesDnsLookupCompleteEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Dns",
@@ -368,7 +368,7 @@
     {
      "name" : "ServicesDnsLookupResolverSubQuery",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Dns",
@@ -378,7 +378,7 @@
     {
      "name" : "ServicesDnsLookupSuccessEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Dns",
@@ -388,7 +388,7 @@
     {
      "name" : "ServicesDnsResultListBegin",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -398,7 +398,7 @@
     {
      "name" : "ServicesDnsResultListEnd",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -408,7 +408,7 @@
     {
      "name" : "ServicesDnsResultListEntry",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -418,7 +418,7 @@
     {
      "name" : "ServicesDnsSrvLookup",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Dns",
@@ -428,7 +428,7 @@
     {
      "name" : "ServicesDnsSrvResultListBegin",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -438,7 +438,7 @@
     {
      "name" : "ServicesDnsSrvResultListEnd",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -448,7 +448,7 @@
     {
      "name" : "ServicesDnsSrvResultListEntryBegin",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "Dns",
@@ -458,7 +458,7 @@
     {
      "name" : "ServicesHttpQueryCancel",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -468,7 +468,7 @@
     {
      "name" : "ServicesHttpQueryCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -478,7 +478,7 @@
     {
      "name" : "ServicesHttpQueryDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -488,7 +488,7 @@
     {
      "name" : "ServicesHttpQueryRead",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -498,7 +498,7 @@
     {
      "name" : "ServicesHttpQueryReadAsString",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -508,7 +508,7 @@
     {
      "name" : "ServicesHttpQueryReadHeader",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -518,7 +518,7 @@
     {
      "name" : "ServicesHttpQueryReadHeaderAsString",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Http",
@@ -528,7 +528,7 @@
     {
      "name" : "ServicesSettingApply",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -538,7 +538,7 @@
     {
      "name" : "ServicesSettingApplyDefaults",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -548,7 +548,7 @@
     {
      "name" : "ServicesSettingClear",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -558,7 +558,7 @@
     {
      "name" : "ServicesSettingClearAll",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -568,7 +568,7 @@
     {
      "name" : "ServicesSettingGetBool",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -578,7 +578,7 @@
     {
      "name" : "ServicesSettingGetDouble",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -588,7 +588,7 @@
     {
      "name" : "ServicesSettingGetFloat",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -598,7 +598,7 @@
     {
      "name" : "ServicesSettingGetInt",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -608,7 +608,7 @@
     {
      "name" : "ServicesSettingGetString",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -618,7 +618,7 @@
     {
      "name" : "ServicesSettingGetUInt",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -628,7 +628,7 @@
     {
      "name" : "ServicesSettingSetBool",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -638,7 +638,7 @@
     {
      "name" : "ServicesSettingSetDouble",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -648,7 +648,7 @@
     {
      "name" : "ServicesSettingSetFloat",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -658,7 +658,7 @@
     {
      "name" : "ServicesSettingSetInt",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -668,7 +668,7 @@
     {
      "name" : "ServicesSettingSetString",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -678,7 +678,7 @@
     {
      "name" : "ServicesSettingSetUInt",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -688,7 +688,7 @@
     {
      "name" : "ServicesSettingVerifyExists",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "Settings",
@@ -708,7 +708,7 @@
     {
      "name" : "ServicesStunDiscoveryCancel",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -748,7 +748,7 @@
     {
      "name" : "ServicesStunDiscoveryFoundMappedAddress",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -758,7 +758,7 @@
     {
      "name" : "ServicesStunDiscoveryInternalTimerEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -768,7 +768,7 @@
     {
      "name" : "ServicesStunDiscoveryLookupSrv",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -778,7 +778,7 @@
     {
      "name" : "ServicesStunDiscoveryReceivedResponsePacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -788,7 +788,7 @@
     {
      "name" : "ServicesStunDiscoveryRequestCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -798,7 +798,7 @@
     {
      "name" : "ServicesStunDiscoveryRequestSendPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -808,7 +808,7 @@
     {
      "name" : "ServicesStunIcePacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Insane",
      "channel" : "os",
      "task" : "Stun",
@@ -818,7 +818,7 @@
     {
      "name" : "ServicesStunPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Insane",
      "channel" : "os",
      "task" : "Stun",
@@ -828,7 +828,7 @@
     {
      "name" : "ServicesStunRequesterBackOffTimerStateEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunRequester",
@@ -838,7 +838,7 @@
     {
      "name" : "ServicesStunRequesterCancel",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunRequester",
@@ -848,7 +848,7 @@
     {
      "name" : "ServicesStunRequesterCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunRequester",
@@ -858,7 +858,7 @@
     {
      "name" : "ServicesStunRequesterDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunRequester",
@@ -868,7 +868,7 @@
     {
      "name" : "ServicesStunRequesterManagerCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "StunRequesterManager",
@@ -878,7 +878,7 @@
     {
      "name" : "ServicesStunRequesterManagerMonitorStart",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "StunRequesterManager",
@@ -888,7 +888,7 @@
     {
      "name" : "ServicesStunRequesterManagerReceivedStunPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "StunRequesterManager",
@@ -898,7 +898,7 @@
     {
      "name" : "ServicesStunRequesterReceivedStunPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunRequester",
@@ -908,7 +908,7 @@
     {
      "name" : "ServicesStunRequesterRetryNow",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunRequester",
@@ -918,7 +918,7 @@
     {
      "name" : "ServicesStunRequesterSendPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "StunRequester",
@@ -928,7 +928,7 @@
     {
      "name" : "ServicesStunRudpPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Insane",
      "channel" : "os",
      "task" : "Stun",
@@ -938,7 +938,7 @@
     {
      "name" : "ServicesStunTurnPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Insane",
      "channel" : "os",
      "task" : "Stun",
@@ -948,7 +948,7 @@
     {
      "name" : "ServicesTurnSocketCancel",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -958,7 +958,7 @@
     {
      "name" : "ServicesTurnSocketCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -968,7 +968,7 @@
     {
      "name" : "ServicesTurnSocketDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -978,7 +978,7 @@
     {
      "name" : "ServicesTurnSocketInstallChannelWake",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -988,7 +988,7 @@
     {
      "name" : "ServicesTurnSocketInstallPermissionWake",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -998,7 +998,7 @@
     {
      "name" : "ServicesTurnSocketInternalBackgroundingApplicationWillQuitEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1008,7 +1008,7 @@
     {
      "name" : "ServicesTurnSocketInternalBackgroundingNowEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1018,7 +1018,7 @@
     {
      "name" : "ServicesTurnSocketInternalGoingToBackgroundingEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1028,7 +1028,7 @@
     {
      "name" : "ServicesTurnSocketInternalRequesterTimedOutEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1038,7 +1038,7 @@
     {
      "name" : "ServicesTurnSocketInternalReturnFromBackgroundEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1058,7 +1058,7 @@
     {
      "name" : "ServicesTurnSocketInternalSocketReadReadyEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1068,7 +1068,7 @@
     {
      "name" : "ServicesTurnSocketInternalSocketWriteReadyEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1078,7 +1078,7 @@
     {
      "name" : "ServicesTurnSocketInternalTimerEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1088,7 +1088,7 @@
     {
      "name" : "ServicesTurnSocketReceivedChannelData",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1098,7 +1098,7 @@
     {
      "name" : "ServicesTurnSocketReceivedStunPacketData",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1108,7 +1108,7 @@
     {
      "name" : "ServicesTurnSocketRequesterCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1118,7 +1118,7 @@
     {
      "name" : "ServicesTurnSocketRequesterCreateReauth",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1128,7 +1128,7 @@
     {
      "name" : "ServicesTurnSocketRequesterReceivedStunResponse",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1138,7 +1138,7 @@
     {
      "name" : "ServicesTurnSocketRequesterSendStunPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1148,7 +1148,7 @@
     {
      "name" : "ServicesTurnSocketSendPacket",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1158,7 +1158,7 @@
     {
      "name" : "ServicesTurnSocketSendPacketViaStun",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1168,7 +1168,7 @@
     {
      "name" : "ServicesTurnSocketStateEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1178,7 +1178,7 @@
     {
      "name" : "ServicesTurnSocketUseNextServer",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "TurnSocket",
@@ -1188,7 +1188,7 @@
     {
      "name" : "StunDiscoveryCreate",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -1198,7 +1198,7 @@
     {
      "name" : "StunDiscoveryDestroy",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -1208,7 +1208,7 @@
     {
      "name" : "StunDiscoveryInternalLookupCompleteEvent",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Debug",
      "channel" : "os",
      "task" : "StunDiscovery",
@@ -1218,7 +1218,7 @@
     {
      "name" : "StunRequesterManagerMonitorStop",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Detail",
      "channel" : "os",
      "task" : "StunRequesterManager",
@@ -1228,7 +1228,7 @@
     {
      "name" : "pServicesTurnSocketSendPacketViaChannel",
      "subsytem" : "x",
-     "severity" : "Info",
+     "severity" : "Informational",
      "level" : "Trace",
      "channel" : "os",
      "task" : "TurnSocket",
