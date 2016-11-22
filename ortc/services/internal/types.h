@@ -80,7 +80,7 @@ namespace ortc
       ZS_DECLARE_USING_PTR(zsLib, Thread)
       ZS_DECLARE_USING_PTR(zsLib, Event)
       ZS_DECLARE_USING_PTR(zsLib, Log)
-      ZS_DECLARE_USING_PTR(zsLib, ILogDelegate)
+      ZS_DECLARE_USING_PTR(zsLib, ILogOutputDelegate)
       ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
       ZS_DECLARE_USING_PTR(zsLib, MessageQueueThreadPool)
 

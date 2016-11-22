@@ -605,12 +605,12 @@ namespace ortc
       ZS_DECLARE_CLASS_PTR(LogLevelLogger)
 
       //-----------------------------------------------------------------------
-      class LogLevelLogger : public ILogDelegate
+      class LogLevelLogger : public ILogOutputDelegate
       {
         //---------------------------------------------------------------------
         void init()
         {
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
         }
 
       public:
@@ -719,12 +719,12 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(StdOutLogger)
 
-      class StdOutLogger : public ILogDelegate
+      class StdOutLogger : public ILogOutputDelegate
       {
         //---------------------------------------------------------------------
         void init()
         {
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
         }
 
       public:
@@ -765,7 +765,7 @@ namespace ortc
           AutoRecursiveLock lock(*locker);
           if ((reset) &&
               (logger)) {
-            Log::removeListener(logger->mThisWeak.lock());
+            Log::removeOutputListener(logger->mThisWeak.lock());
             logger.reset();
           }
 
@@ -777,7 +777,7 @@ namespace ortc
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark StdOutLogger => ILogDelegate
+        #pragma mark StdOutLogger => ILogOutputDelegate
         #pragma mark
 
         virtual void onNewSubsystem(Subsystem &)
@@ -826,13 +826,13 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(FileLogger)
 
-      class FileLogger : public ILogDelegate
+      class FileLogger : public ILogOutputDelegate
       {
         //---------------------------------------------------------------------
         void init(const char *fileName)
         {
           mFile.open(fileName, std::ios::out | std::ios::binary);
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
         }
 
       public:
@@ -863,7 +863,7 @@ namespace ortc
           AutoRecursiveLock lock(*locker);
           if ((reset) &&
               (logger)) {
-            Log::removeListener(logger->mThisWeak.lock());
+            Log::removeOutputListener(logger->mThisWeak.lock());
             logger.reset();
           }
           if (!logger) {
@@ -928,12 +928,12 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(DebuggerLogger)
 
-      class DebuggerLogger : public ILogDelegate
+      class DebuggerLogger : public ILogOutputDelegate
       {
         //---------------------------------------------------------------------
         void init()
         {
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
         }
 
       public:
@@ -1047,7 +1047,7 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(TelnetLogger)
 
-      class TelnetLogger : public ILogDelegate,
+      class TelnetLogger : public ILogOutputDelegate,
                            public MessageQueueAssociator,
                            public ISocketDelegate,
                            public IDNSDelegate,
@@ -1066,7 +1066,7 @@ namespace ortc
 
           mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
 
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
@@ -1098,7 +1098,7 @@ namespace ortc
 
           mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
-          Log::addListener(mThisWeak.lock());
+          Log::addOutputListener(mThisWeak.lock());
 
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
@@ -1167,7 +1167,7 @@ namespace ortc
 
           TelnetLoggerPtr pThis = mThisWeak.lock();
           if (pThis) {
-            Log::removeListener(mThisWeak.lock());
+            Log::removeOutputListener(mThisWeak.lock());
             mThisWeak.reset();
           }
 
