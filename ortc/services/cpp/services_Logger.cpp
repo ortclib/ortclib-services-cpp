@@ -93,6 +93,9 @@ namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
 #define ORTC_SERVICES_LOGGER_STDOUT_NAMESPACE "org.ortc.services.internal.StdOutLogger"
 #define ORTC_SERVICES_LOGGER_FILE_NAMESPACE "org.ortc.services.internal.FileLogger"
+#define ORTC_SERVICES_LOGGER_DEBUG_NAMESPACE "org.ortc.services.internal.DebugLogger"
+#define ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE "org.ortc.services.internal.TelnetLogger.incoming"
+#define ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE "org.ortc.services.internal.TelnetLogger.outgoing"
 
 namespace ortc
 {
@@ -170,7 +173,7 @@ namespace ortc
         //---------------------------------------------------------------------
         static LoggerReferencesHolderPtr create()
         {
-          auto pThis(make_shared<LoggerReferencesHolder>());
+          auto pThis(make_shared<LoggerReferencesHolder>(make_private{}));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -872,6 +875,10 @@ namespace ortc
       class StdOutLogger : public ILogOutputDelegate,
                            public ILoggerReferencesHolderDelegate
       {
+      protected:
+        struct make_private {};
+        
+      protected:
         //---------------------------------------------------------------------
         void init()
         {
@@ -880,6 +887,7 @@ namespace ortc
       public:
         //---------------------------------------------------------------------
         StdOutLogger(
+                     const make_private &,
                      bool colorizeOutput,
                      bool prettyPrint
                      ) :
@@ -893,7 +901,7 @@ namespace ortc
                                       bool prettyPrint
                                       )
         {
-          StdOutLoggerPtr pThis(make_shared<StdOutLogger>(colorizeOutput, prettyPrint));
+          StdOutLoggerPtr pThis(make_shared<StdOutLogger>(make_private{}, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -943,6 +951,7 @@ namespace ortc
         #pragma mark StdOutLogger => ILogOutputDelegate
         #pragma mark
 
+        //---------------------------------------------------------------------
         virtual void onNewSubsystem(Subsystem &) override
         {
         }
@@ -979,6 +988,12 @@ namespace ortc
         }
 
       protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark StdOutLogger => ILogOutputDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
         void getInfo(
                      bool &outColorize,
                      bool &outPrettyPrint
@@ -995,8 +1010,8 @@ namespace ortc
         #pragma mark
 
         StdOutLoggerWeakPtr mThisWeak;
-        bool mColorizeOutput;
-        bool mPrettyPrint;
+        bool mColorizeOutput {};
+        bool mPrettyPrint {};
       };
 
       //-----------------------------------------------------------------------
@@ -1012,23 +1027,15 @@ namespace ortc
       class FileLogger : public ILogOutputDelegate,
                          public ILoggerReferencesHolderDelegate
       {
+      protected:
+        struct make_private {};
+      protected:
+        
         //---------------------------------------------------------------------
         void init()
         {
           mFile.open(mFileName, std::ios::out | std::ios::binary);
         }
-
-      public:
-        //---------------------------------------------------------------------
-        FileLogger(
-                   const char *fileName,
-                   bool colorizeOutput,
-                   bool prettyPrint
-                   ) :
-          mFileName(fileName),
-          mColorizeOutput(colorizeOutput),
-          mPrettyPrint(prettyPrint)
-          {}
 
         //---------------------------------------------------------------------
         static FileLoggerPtr create(
@@ -1037,11 +1044,24 @@ namespace ortc
                                     bool prettyPrint
                                     )
         {
-          FileLoggerPtr pThis(make_shared<FileLogger>(colorizeOutput, prettyPrint));
+          FileLoggerPtr pThis(make_shared<FileLogger>(make_private{}, fileName, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
         }
+        
+      public:
+        //---------------------------------------------------------------------
+        FileLogger(
+                   const make_private &,
+                   const char *fileName,
+                   bool colorizeOutput,
+                   bool prettyPrint
+                   ) :
+          mFileName(fileName),
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(prettyPrint)
+          {}
 
         //---------------------------------------------------------------------
         static FileLoggerPtr singleton(
@@ -1090,6 +1110,7 @@ namespace ortc
         #pragma mark FileLogger => ILogDelegate
         #pragma mark
 
+        //---------------------------------------------------------------------
         virtual void onNewSubsystem(Subsystem &) override
         {
         }
@@ -1120,7 +1141,7 @@ namespace ortc
 
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark StdOutLogger => ILogOutputDelegate
+        #pragma mark FileLogger => ILogOutputDelegate
         #pragma mark
 
         //---------------------------------------------------------------------
@@ -1129,6 +1150,12 @@ namespace ortc
         }
 
       protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark FileLogger => (internal)
+        #pragma mark
+
+        //---------------------------------------------------------------------
         void getInfo(
                      String &outFileName,
                      bool &outColorize,
@@ -1148,8 +1175,8 @@ namespace ortc
 
         FileLoggerWeakPtr mThisWeak;
         String mFileName;
-        bool mColorizeOutput;
-        bool mPrettyPrint;
+        bool mColorizeOutput {};
+        bool mPrettyPrint {};
 
         std::ofstream mFile;
       };
@@ -1164,53 +1191,82 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(DebuggerLogger)
 
-      class DebuggerLogger : public ILogOutputDelegate
+      class DebuggerLogger : public ILogOutputDelegate,
+                             public ILoggerReferencesHolderDelegate
       {
+      protected:
+        struct make_private {};
+        
+      protected:
         //---------------------------------------------------------------------
         void init()
         {
-          Log::addOutputListener(mThisWeak.lock());
         }
 
-      public:
         //---------------------------------------------------------------------
-        DebuggerLogger(bool colorizeOutput) :
-          mColorizeOutput(colorizeOutput),
-          mPrettyPrint(colorizeOutput)
-          {}
-
-        //---------------------------------------------------------------------
-        static DebuggerLoggerPtr create(bool colorizeOutput)
+        static DebuggerLoggerPtr create(
+                                        bool colorizeOutput,
+                                        bool prettyPrint
+                                        )
         {
-          DebuggerLoggerPtr pThis(make_shared<DebuggerLogger>(colorizeOutput));
+          DebuggerLoggerPtr pThis(make_shared<DebuggerLogger>(make_private {}, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
         }
+        
+      public:
+        //---------------------------------------------------------------------
+        DebuggerLogger(
+                       const make_private &,
+                       bool colorizeOutput,
+                       bool prettyPrint
+                       ) :
+          mColorizeOutput(colorizeOutput),
+          mPrettyPrint(prettyPrint)
+          {}
 
         //---------------------------------------------------------------------
-        static DebuggerLoggerPtr singleton(bool colorizeOutput, bool reset = false)
+        static DebuggerLoggerPtr singleton(
+                                           bool colorizeOutput,
+                                           bool prettyPrint
+                                           )
         {
 #if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
-          static LoggerSingletonLazySharedPtr< DebuggerLogger > singleton;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return DebuggerLoggerPtr();
+          
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
 
-          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< DebuggerLogger >::lock(singleton);
-          LoggerReferenceHolder<DebuggerLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< DebuggerLogger >::logger(singleton));
-          DebuggerLoggerPtr &logger = holder->mLogger;
+          singleton->findLogger(ORTC_SERVICES_LOGGER_DEBUG_NAMESPACE, existingInfo);
+          
+          if (existingInfo.mHolderDelegate) {
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(FileLogger, existingInfo.mHolderDelegate);
+            
+            bool wasColorizedOutput {};
+            bool wasPrettyPrint {};
+            existingLogger->getInfo(wasColorizedOutput, wasPrettyPrint);
+            if ((colorizeOutput == wasColorizedOutput) &&
+                (wasPrettyPrint == prettyPrint)) return existingLogger;
+          }
 
-          AutoRecursiveLock lock(*locker);
-          if ((reset) &&
-              (logger)) {
-            Log::removeListener(logger->mThisWeak.lock());
-            logger.reset();
-          }
-          if (!logger) {
-            logger = DebuggerLogger::create(colorizeOutput);
-          }
-          return logger;
+          auto newLogger = create(colorizeOutput, prettyPrint);
+
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_DEBUG_NAMESPACE, newLogger, newLogger, true);
+
+          return newLogger;
 #else
           return DebuggerLoggerPtr();
 #endif //_WIN32
+        }
+        
+        //---------------------------------------------------------------------
+        static void stop()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+          
+          singleton->unregisterLogger(ORTC_SERVICES_LOGGER_DEBUG_NAMESPACE);
         }
 
         //---------------------------------------------------------------------
@@ -1219,7 +1275,7 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &)
+        virtual void onNewSubsystem(Subsystem &) override
         {
         }
 
@@ -1233,7 +1289,7 @@ namespace ortc
                            CSTR inFilePath,
                            ULONG inLineNumber,
                            const Log::Params &params
-                           )
+                           ) override
         {
 #ifdef __QNX__
 #ifndef NDEBUG
@@ -1262,6 +1318,32 @@ namespace ortc
                         );
         }
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DebuggerLogger => ILogOutputDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void notifyShutdown() override
+        {
+        }
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark DebuggerLogger => (internal)
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        void getInfo(
+                     bool &outColorize,
+                     bool &outPrettyPrint
+                     )
+        {
+          outColorize = mColorizeOutput;
+          outPrettyPrint = mPrettyPrint;
+        }
+        
       private:
         //---------------------------------------------------------------------
         #pragma mark
@@ -1269,8 +1351,8 @@ namespace ortc
         #pragma mark
 
         DebuggerLoggerWeakPtr mThisWeak;
-        bool mColorizeOutput;
-        bool mPrettyPrint;
+        bool mColorizeOutput {};
+        bool mPrettyPrint {};
       };
 
       //-----------------------------------------------------------------------
@@ -1283,7 +1365,9 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(TelnetLogger)
 
-      class TelnetLogger : public ILogOutputDelegate,
+      class TelnetLogger : public RecursiveLock,
+                           public ILogOutputDelegate,
+                           public ILoggerReferencesHolderDelegate,
                            public MessageQueueAssociator,
                            public ISocketDelegate,
                            public IDNSDelegate,
@@ -1291,18 +1375,20 @@ namespace ortc
                            public IWakeDelegate,
                            public IBackgroundingDelegate
       {
+      protected:
+        struct make_private {};
+        
+      protected:
         //---------------------------------------------------------------------
         void init(
                   USHORT listenPort,
-                  ULONG maxSecondsWaitForSocketToBeAvailable
+                  Seconds maxSecondsWaitForSocketToBeAvailable
                   )
         {
           mListenPort = listenPort;
-          mMaxWaitTimeForSocketToBeAvailable = Seconds(maxSecondsWaitForSocketToBeAvailable);
+          mMaxWaitTimeForSocketToBeAvailable = maxSecondsWaitForSocketToBeAvailable;
 
           mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE));
-
-          Log::addOutputListener(mThisWeak.lock());
 
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
@@ -1334,21 +1420,51 @@ namespace ortc
 
           mBackgroundingSubscription = IBackgrounding::subscribe(mThisWeak.lock(), ISettings::getUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE));
 
-          Log::addOutputListener(mThisWeak.lock());
-
           // do this from outside the stack to prevent this from happening during any kind of lock
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
+        }
+
+        //---------------------------------------------------------------------
+        static TelnetLoggerPtr create(
+                                      USHORT listenPort,
+                                      Seconds maxSecondsWaitForSocketToBeAvailable,
+                                      bool colorizeOutput,
+                                      bool prettyPrint
+                                      )
+        {
+          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(make_private{}, IHelper::getLoggerQueue(), ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, colorizeOutput, prettyPrint));
+          pThis->mThisWeak = pThis;
+          pThis->init(listenPort, maxSecondsWaitForSocketToBeAvailable);
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        static TelnetLoggerPtr create(
+                                      const char *serverHostWithPort,
+                                      bool colorizeOutput,
+                                      bool prettyPrint,
+                                      const char *sendStringUponConnection
+                                      )
+        {
+          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(make_private{}, IHelper::getLoggerQueue(), ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, colorizeOutput, prettyPrint));
+          pThis->mThisWeak = pThis;
+          pThis->init(serverHostWithPort, sendStringUponConnection);
+          return pThis;
         }
 
       public:
         //---------------------------------------------------------------------
         TelnetLogger(
+                     const make_private &,
                      IMessageQueuePtr queue,
-                     bool colorizeOutput
+                     const char *loggerNamespace,
+                     bool colorizeOutput,
+                     bool prettyPrint
                      ) :
           MessageQueueAssociator(queue),
+          mLoggerNamespace(loggerNamespace),
           mColorizeOutput(colorizeOutput),
-          mPrettyPrint(colorizeOutput),
+          mPrettyPrint(prettyPrint),
           mConnected(false),
           mListenPort(0),
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
@@ -1366,163 +1482,150 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool isColourizedOutput() const
+        static TelnetLoggerPtr singletonIncoming(
+                                                 WORD listenPort,
+                                                 Seconds maxSecondsWaitForSocketToBeAvailable,
+                                                 bool colorizeOutput,
+                                                 bool prettyPrint
+                                                 )
         {
-          return mColorizeOutput;
+#if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return FileLoggerPtr();
+          
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
+
+          singleton->findLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, existingInfo);
+          
+          if (existingInfo.mHolderDelegate) {
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(TelnetLogger, existingInfo.mHolderDelegate);
+
+            WORD oldListenPort {};
+            Seconds oldMaxWaitTime {};  // change in this value is not important
+            bool wasColorizedOutput {};
+            bool wasPrettyPrint {};
+            existingLogger->getInfo(oldListenPort, oldMaxWaitTime, wasColorizedOutput, wasPrettyPrint);
+            if ((oldListenPort == listenPort) &&
+                (colorizeOutput == wasColorizedOutput) &&
+                (wasPrettyPrint == prettyPrint)) return existingLogger;
+          }
+          
+          auto newLogger = create(listenPort, maxSecondsWaitForSocketToBeAvailable, colorizeOutput, prettyPrint);
+          
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, newLogger, newLogger, true);
+          
+          return newLogger;
+#else
+          return TelnetLoggerPtr();
+#endif //_WIN32
+        }
+        
+        //---------------------------------------------------------------------
+        static TelnetLoggerPtr singletonOutgoing(
+                                                 const char *serverHostWithPort,
+                                                 bool colorizeOutput,
+                                                 bool prettyPrint,
+                                                 const char *sendStringUponConnection
+                                                 )
+        {
+#if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return TelnetLoggerPtr();
+          
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
+          
+          singleton->findLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, existingInfo);
+          
+          if (existingInfo.mHolderDelegate) {
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(TelnetLogger, existingInfo.mHolderDelegate);
+            
+            String oldServerHostWithPort;
+            bool wasColorizedOutput {};
+            bool wasPrettyPrint {};
+            String oldStringUponConnection;
+            existingLogger->getInfo(oldServerHostWithPort, wasColorizedOutput, wasPrettyPrint, oldStringUponConnection);
+            if ((oldServerHostWithPort == String(serverHostWithPort)) &&
+                (colorizeOutput == wasColorizedOutput) &&
+                (wasPrettyPrint == prettyPrint) &&
+                (oldStringUponConnection == String(sendStringUponConnection))) return existingLogger;
+          }
+
+          auto newLogger = create(serverHostWithPort, colorizeOutput, prettyPrint, sendStringUponConnection);
+          
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, newLogger, newLogger, true);
+          
+          return newLogger;
+#else
+          return TelnetLoggerPtr();
+#endif //_WIN32
         }
 
         //---------------------------------------------------------------------
-        WORD getListenPort() const
+        static TelnetLoggerPtr singletonIncoming()
         {
-          return mListenPort;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return TelnetLoggerPtr();
+          
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
+          
+          singleton->findLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, existingInfo);
+          return ZS_DYNAMIC_PTR_CAST(TelnetLogger, existingInfo.mHolderDelegate);
         }
 
         //---------------------------------------------------------------------
-        String getServer() const
+        static TelnetLoggerPtr singletonOutgoing()
         {
-          return mOriginalServer;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return TelnetLoggerPtr();
+          
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
+          
+          singleton->findLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, existingInfo);
+          return ZS_DYNAMIC_PTR_CAST(TelnetLogger, existingInfo.mHolderDelegate);
+        }
+        
+        //---------------------------------------------------------------------
+        static void stopIncoming()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+          
+          singleton->unregisterLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE);
         }
 
         //---------------------------------------------------------------------
-        String getSendStringUponConnection() const
+        static void stopOutgoing()
         {
-          return mOriginalStringToSendUponConnection;
-        }
-
-        //---------------------------------------------------------------------
-        void close()
-        {
-          AutoRecursiveLock lock(mLock);
-
-          if (mClosed) {
-            // already closed
-            return;
-          }
-
-          mClosed = true;
-
-          TelnetLoggerPtr pThis = mThisWeak.lock();
-          if (pThis) {
-            Log::removeOutputListener(mThisWeak.lock());
-            mThisWeak.reset();
-          }
-
-          mBufferedList.clear();
-          mConnected = false;
-
-          if (mOutgoingServerQuery) {
-            mOutgoingServerQuery->cancel();
-            mOutgoingServerQuery.reset();
-          }
-
-          mServers.reset();
-
-          if (mTelnetSocket) {
-            mTelnetSocket->close();
-            mTelnetSocket.reset();
-          }
-          if (mListenSocket) {
-            mListenSocket->close();
-            mListenSocket.reset();
-          }
-          if (mRetryTimer) {
-            mRetryTimer->cancel();
-            mRetryTimer.reset();
-          }
-        }
-
-        //---------------------------------------------------------------------
-        bool isClosed()
-        {
-          AutoRecursiveLock lock(mLock);
-          return mClosed;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+          
+          singleton->unregisterLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE);
         }
 
         //---------------------------------------------------------------------
         bool isListening()
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           return (bool)mListenSocket;
         }
 
         //---------------------------------------------------------------------
         bool isConnected()
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           if (!mTelnetSocket) return false;
           if (isOutgoing()) return mConnected;
           return true;
         }
 
-        //---------------------------------------------------------------------
-        static TelnetLoggerPtr create(USHORT listenPort, ULONG maxSecondsWaitForSocketToBeAvailable, bool colorizeOutput)
-        {
-          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(IHelper::getLoggerQueue(), colorizeOutput));
-          pThis->mThisWeak = pThis;
-          pThis->init(listenPort, maxSecondsWaitForSocketToBeAvailable);
-          return pThis;
-        }
-
-        //---------------------------------------------------------------------
-        static TelnetLoggerPtr create(
-                                      const char *serverHostWithPort,
-                                      bool colorizeOutput,
-                                      const char *sendStringUponConnection
-                                      )
-        {
-          TelnetLoggerPtr pThis(make_shared<TelnetLogger>(IHelper::getLoggerQueue(), colorizeOutput));
-          pThis->mThisWeak = pThis;
-          pThis->init(serverHostWithPort, sendStringUponConnection);
-          return pThis;
-        }
-
-        //---------------------------------------------------------------------
-        static LoggerSingletonLazySharedPtr< TelnetLogger > &privateSingletonListener()
-        {
-          static LoggerSingletonLazySharedPtr< TelnetLogger > singleton;
-          return singleton;
-        }
-
-        //---------------------------------------------------------------------
-        static LoggerSingletonLazySharedPtr< TelnetLogger > &privateSingletonOutgoing()
-        {
-          static LoggerSingletonLazySharedPtr< TelnetLogger > singleton;
-          return singleton;
-        }
-        
-        //---------------------------------------------------------------------
-        static RecursiveLockPtr lockListener()
-        {
-          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< TelnetLogger >::lock(privateSingletonListener());
-          return locker;
-        }
-
-        //---------------------------------------------------------------------
-        static LoggerReferenceHolder<TelnetLogger>::HolderPtr singletonListener()
-        {
-          return (LoggerSingletonLazySharedPtr< TelnetLogger >::logger(privateSingletonListener()));
-        }
-
-        //---------------------------------------------------------------------
-        static RecursiveLockPtr lockOutgoing()
-        {
-          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< TelnetLogger >::lock(privateSingletonOutgoing());
-          return locker;
-        }
-
-        //---------------------------------------------------------------------
-        static LoggerReferenceHolder<TelnetLogger>::HolderPtr singletonOutgoing()
-        {
-          return (LoggerSingletonLazySharedPtr< TelnetLogger >::logger(privateSingletonOutgoing()));
-        }
-
+      protected:
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark TelnetLogger => ILogDelegate
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &)
+        virtual void onNewSubsystem(Subsystem &) override
         {
         }
 
@@ -1535,7 +1638,7 @@ namespace ortc
                            CSTR inFilePath,
                            ULONG inLineNumber,
                            const Log::Params &params
-                           )
+                           ) override
         {
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
@@ -1544,7 +1647,7 @@ namespace ortc
 
           // scope: quick exit is not logging
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
 
             if (!isConnected()) {
               Time tick = zsLib::now();
@@ -1564,7 +1667,7 @@ namespace ortc
             output = toRawJSON(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber);
           }
 
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           bool okayToSend = (isConnected()) && (mBufferedList.size() < 1);
           size_t sent = 0;
@@ -1596,9 +1699,25 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onReadReady(SocketPtr inSocket)
+        #pragma mark
+        #pragma mark DebuggerLogger => ILogOutputDelegate
+        #pragma mark
+        
+        //---------------------------------------------------------------------
+        virtual void notifyShutdown() override
         {
-          AutoRecursiveLock lock(mLock);
+          close();
+        }
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TelnetLogger => ISocketDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onReadReady(SocketPtr inSocket) override
+        {
+          AutoRecursiveLock lock(*this);
 
           if (inSocket == mListenSocket) {
             if (mTelnetSocket) {
@@ -1674,64 +1793,72 @@ namespace ortc
 
 
         //---------------------------------------------------------------------
-        virtual void onWriteReady(SocketPtr socket)
+        virtual void onWriteReady(SocketPtr socket) override
         {
-          AutoRecursiveLock lock(mLock);
-          if (socket != mTelnetSocket) return;
+          bool activate {false};
 
-          if (isOutgoing()) {
-            if (!mConnected) {
-              mConnected = true;
-              IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
-            }
-          }
+          {
+            AutoRecursiveLock lock(*this);
+            if (socket != mTelnetSocket) return;
 
-          if (!mStringToSendUponConnection.isEmpty()) {
-
-            size_t length = mStringToSendUponConnection.length();
-
-            BufferedData data;
-            std::shared_ptr<BYTE> buffer(new BYTE[length], std::default_delete<BYTE[]>());
-            memcpy(buffer.get(), mStringToSendUponConnection.c_str(), length);
-
-            data.first = buffer;
-            data.second = length;
-
-            mBufferedList.push_front(data);
-
-            mStringToSendUponConnection.clear();
-          }
-
-          while (mBufferedList.size() > 0) {
-            BufferedData &data = mBufferedList.front();
-            bool wouldBlock = false;
-            size_t sent = 0;
-
-            int errorCode = 0;
-            sent = mTelnetSocket->send(data.first.get(), data.second, &wouldBlock, 0, &errorCode);
-            if (!wouldBlock) {
-              if (0 != errorCode) {
-                onException(socket);
-                return;
+            if (isOutgoing()) {
+              if (!mConnected) {
+                activate = mConnected = true;
+                IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
               }
             }
 
-            if (sent == data.second) {
-              mBufferedList.pop_front();
-              continue;
+            if (!mStringToSendUponConnection.isEmpty()) {
+
+              size_t length = mStringToSendUponConnection.length();
+
+              BufferedData data;
+              std::shared_ptr<BYTE> buffer(new BYTE[length], std::default_delete<BYTE[]>());
+              memcpy(buffer.get(), mStringToSendUponConnection.c_str(), length);
+
+              data.first = buffer;
+              data.second = length;
+
+              mBufferedList.push_front(data);
+
+              mStringToSendUponConnection.clear();
             }
 
-            size_t length = (data.second - sent);
-            memmove(data.first.get(), data.first.get() + sent, length);
-            data.second = length;
-            break;
+            while (mBufferedList.size() > 0) {
+              BufferedData &data = mBufferedList.front();
+              bool wouldBlock = false;
+              size_t sent = 0;
+
+              int errorCode = 0;
+              sent = mTelnetSocket->send(data.first.get(), data.second, &wouldBlock, 0, &errorCode);
+              if (!wouldBlock) {
+                if (0 != errorCode) {
+                  onException(socket);
+                  return;
+                }
+              }
+
+              if (sent == data.second) {
+                mBufferedList.pop_front();
+                continue;
+              }
+
+              size_t length = (data.second - sent);
+              memmove(data.first.get(), data.first.get() + sent, length);
+              data.second = length;
+              break;
+            }
+          }
+          
+          if (activate) {
+            activateLogging();
           }
         }
 
         //---------------------------------------------------------------------
-        virtual void onException(SocketPtr inSocket)
+        virtual void onException(SocketPtr inSocket) override
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
           if (inSocket == mListenSocket) {
             mListenSocket->close();
             mListenSocket.reset();
@@ -1755,9 +1882,14 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onLookupCompleted(IDNSQueryPtr query)
+        #pragma mark
+        #pragma mark TelnetLogger => IDNSDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onLookupCompleted(IDNSQueryPtr query) override
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (query != mOutgoingServerQuery) return;
 
@@ -1787,36 +1919,51 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onWake()
+        #pragma mark
+        #pragma mark TelnetLogger => IWakeDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onWake() override
         {
           step();
         }
 
         //---------------------------------------------------------------------
-        virtual void onTimer(TimerPtr timer)
+        #pragma mark
+        #pragma mark TelnetLogger => ITimerDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onTimer(TimerPtr timer) override
         {
           step();
         }
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TelnetLogger => IBackgroundingDelegate
+        #pragma mark
 
         //---------------------------------------------------------------------
         virtual void onBackgroundingGoingToBackground(
                                                       IBackgroundingSubscriptionPtr subscription,
                                                       IBackgroundingNotifierPtr notifier
-                                                      ) {}
+                                                      ) override {}
 
         //---------------------------------------------------------------------
         virtual void onBackgroundingGoingToBackgroundNow(
                                                          IBackgroundingSubscriptionPtr subscription
-                                                         ) {}
+                                                         ) override {}
 
         //---------------------------------------------------------------------
         virtual void onBackgroundingReturningFromBackground(
                                                             IBackgroundingSubscriptionPtr subscription
-                                                            )
+                                                            ) override
         {
           SocketPtr socket;
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             socket = mTelnetSocket;
           }
 
@@ -1829,23 +1976,167 @@ namespace ortc
         //---------------------------------------------------------------------
         virtual void onBackgroundingApplicationWillQuit(
                                                         IBackgroundingSubscriptionPtr subscription
-                                                        )
+                                                        ) override
         {
           close();
         }
 
       protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark TelnetLogger => (internal)
+        #pragma mark
+        
+        //---------------------------------------------------------------------
+        void getIncomingInfo(
+                             WORD &outListenPort,
+                             Seconds &outMaxSecondsWaitForSocketToBeAvailable,
+                             bool &outColorize,
+                             bool &outPrettyPrint
+                             )
+        {
+          outListenPort = mListenPort;
+          outMaxSecondsWaitForSocketToBeAvailable = zsLib::toSeconds(mMaxWaitTimeForSocketToBeAvailable);
+          outColorize = mColorizeOutput;
+          outPrettyPrint = mPrettyPrint;
+        }
+        
+        //---------------------------------------------------------------------
+        void getOutgoingInfo(
+                             String &outServerHostWithPort,
+                             bool &outColorize,
+                             bool &outPrettyPrint,
+                             String &outSendStringUponConnection
+                             )
+        {
+          outServerHostWithPort = mOriginalServer;
+          outColorize = mColorizeOutput;
+          outPrettyPrint = mPrettyPrint;
+          outSendStringUponConnection = mStringToSendUponConnection;
+        }
+        
+        //---------------------------------------------------------------------
+        void activateLogging()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+          
+          {
+            AutoRecursiveLock lock(*this);
+            if (mNotifiedShutdown) return;
+          }
 
+          singleton->activateLogger(mLoggerNamespace);
+        }
+
+        //---------------------------------------------------------------------
+        void deactivateLogging()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+
+          {
+            AutoRecursiveLock lock(*this);
+            if (mNotifiedShutdown) return;
+          }
+          
+          singleton->deactivateLogger(mLoggerNamespace);
+        }
+
+#if 0
+        //---------------------------------------------------------------------
+        bool isColourizedOutput() const
+        {
+          return mColorizeOutput;
+        }
+        
+        //---------------------------------------------------------------------
+        bool isPrettyPrintOutput() const
+        {
+          return mPrettyPrint;
+        }
+        
+        //---------------------------------------------------------------------
+        WORD getListenPort() const
+        {
+          return mListenPort;
+        }
+        
+        //---------------------------------------------------------------------
+        String getServer() const
+        {
+          return mOriginalServer;
+        }
+        
+        //---------------------------------------------------------------------
+        String getSendStringUponConnection() const
+        {
+          return mOriginalStringToSendUponConnection;
+        }
+        
+#endif //0
+
+        //---------------------------------------------------------------------
+        void close()
+        {
+          deactivateLogging();
+
+          AutoRecursiveLock lock(*this);
+          
+          if (mClosed) {
+            // already closed
+            return;
+          }
+          
+          mClosed = true;
+          mNotifiedShutdown = true;
+          
+          TelnetLoggerPtr pThis = mThisWeak.lock();
+          if (pThis) {
+            mThisWeak.reset();
+          }
+          
+          mBufferedList.clear();
+          mConnected = false;
+          
+          if (mOutgoingServerQuery) {
+            mOutgoingServerQuery->cancel();
+            mOutgoingServerQuery.reset();
+          }
+          
+          mServers.reset();
+          
+          if (mTelnetSocket) {
+            mTelnetSocket->close();
+            mTelnetSocket.reset();
+          }
+          if (mListenSocket) {
+            mListenSocket->close();
+            mListenSocket.reset();
+          }
+          if (mRetryTimer) {
+            mRetryTimer->cancel();
+            mRetryTimer.reset();
+          }
+        }
+        
         //---------------------------------------------------------------------
         bool isOutgoing() const
         {
           return mOriginalServer.hasData();
         }
-
+        
         //---------------------------------------------------------------------
         bool isIncoming() const
         {
           return mOriginalServer.isEmpty();
+        }
+
+        //---------------------------------------------------------------------
+        bool isClosed()
+        {
+          AutoRecursiveLock lock(*this);
+          return mClosed;
         }
 
         //---------------------------------------------------------------------
@@ -1959,7 +2250,7 @@ namespace ortc
         //---------------------------------------------------------------------
         void handleConnectionFailure()
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (!mRetryTimer) {
             // offer a bit of buffering
@@ -1984,7 +2275,7 @@ namespace ortc
           if (isClosed()) return;
 
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
 
             if (Time() != mNextRetryTime) {
               if (zsLib::now() < mNextRetryTime) return;
@@ -2003,7 +2294,7 @@ namespace ortc
 
         step_complete:
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             if (mRetryTimer) {
               mRetryTimer->cancel();
               mRetryTimer.reset();
@@ -2024,7 +2315,7 @@ namespace ortc
           IDNSQueryPtr query;
 
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             if (mOutgoingServerQuery) return false;
 
             if (mServers) return true;
@@ -2038,7 +2329,7 @@ namespace ortc
 
           // DNS is not created during any kind of lock at all...
           {
-            AutoRecursiveLock lock(mLock);
+            AutoRecursiveLock lock(*this);
             mOutgoingServerQuery = query;
           }
 
@@ -2048,7 +2339,7 @@ namespace ortc
         //---------------------------------------------------------------------
         bool stepConnect()
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (mTelnetSocket) {
             return isConnected();
@@ -2094,7 +2385,7 @@ namespace ortc
         //---------------------------------------------------------------------
         bool stepListen()
         {
-          AutoRecursiveLock lock(mLock);
+          AutoRecursiveLock lock(*this);
 
           if (mListenSocket) return true;
 
@@ -2152,11 +2443,11 @@ namespace ortc
         #pragma mark TelnetLogger => (data)
         #pragma mark
 
-        mutable RecursiveLock mLock;
-
         TelnetLoggerWeakPtr mThisWeak;
-        bool mColorizeOutput;
-        bool mPrettyPrint;
+        bool mNotifiedShutdown {};
+        const char *mLoggerNamespace {};
+        bool mColorizeOutput {};
+        bool mPrettyPrint {};
 
         IBackgroundingSubscriptionPtr mBackgroundingSubscription;
 
@@ -2221,32 +2512,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     void ILogger::installFileLogger(const char *fileName, bool colorizeOutput)
     {
-      internal::FileLogger::singleton(fileName, colorizeOutput);
+      internal::FileLogger::singleton(fileName, colorizeOutput, colorizeOutput);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::installTelnetLogger(WORD listenPort, ULONG maxSecondsWaitForSocketToBeAvailable,  bool colorizeOutput)
+    void ILogger::installTelnetLogger(
+                                      WORD listenPort,
+                                      ULONG maxSecondsWaitForSocketToBeAvailable,
+                                      bool colorizeOutput
+                                      )
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
-      if (singleton) {
-        bool change = false;
-
-        change = change || (colorizeOutput != singleton->isColourizedOutput());
-        change = change || (listenPort != singleton->getListenPort());
-
-        change = change || (singleton->isClosed());
-
-        if (!change) return;
-
-        singleton->close();
-        singleton.reset();
-      }
-
-      singleton = internal::TelnetLogger::create(listenPort, maxSecondsWaitForSocketToBeAvailable, colorizeOutput);
+      internal::TelnetLogger::singletonIncoming(listenPort, Seconds(maxSecondsWaitForSocketToBeAvailable), colorizeOutput, colorizeOutput);
     }
 
     //-------------------------------------------------------------------------
@@ -2256,117 +2532,70 @@ namespace ortc
                                               const char *sendStringUponConnection
                                               )
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
-      if (singleton) {
-        bool change = false;
-
-        change = change || (colorizeOutput != singleton->isColourizedOutput());
-        change = change || (String(serverHostWithPort) != singleton->getServer());
-        change = change || (String(sendStringUponConnection) != singleton->getSendStringUponConnection());
-
-        change = change || (singleton->isClosed());
-
-        if (!change) return;
-
-        singleton->close();
-        singleton.reset();
-      }
-      singleton = internal::TelnetLogger::create(serverHostWithPort, colorizeOutput, sendStringUponConnection);
+      internal::TelnetLogger::singletonOutgoing(serverHostWithPort, colorizeOutput, colorizeOutput, sendStringUponConnection);
     }
 
     //-------------------------------------------------------------------------
     void ILogger::installDebuggerLogger(bool colorizeOutput)
     {
-      internal::DebuggerLogger::singleton(colorizeOutput);
+      internal::DebuggerLogger::singleton(colorizeOutput, colorizeOutput);
     }
 
     //-------------------------------------------------------------------------
     bool ILogger::isTelnetLoggerListening()
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
+      auto singleton = internal::TelnetLogger::singletonIncoming();
       if (!singleton) return false;
-
+      
       return singleton->isListening();
     }
 
     //-------------------------------------------------------------------------
     bool ILogger::isTelnetLoggerConnected()
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
+      auto singleton = internal::TelnetLogger::singletonIncoming();
       if (!singleton) return false;
-
+      
       return singleton->isConnected();
     }
 
     //-------------------------------------------------------------------------
     bool ILogger::isOutgoingTelnetLoggerConnected()
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
+      auto singleton = internal::TelnetLogger::singletonOutgoing();
       if (!singleton) return false;
-
+      
       return singleton->isConnected();
     }
 
     //-------------------------------------------------------------------------
     void ILogger::uninstallStdOutLogger()
     {
-      internal::StdOutLogger::singleton(false, false, true);
+      internal::StdOutLogger::stop();
     }
 
     //-------------------------------------------------------------------------
     void ILogger::uninstallFileLogger()
     {
-      internal::FileLogger::singleton(NULL, false, true);
+      internal::FileLogger::stop();
     }
 
     //-------------------------------------------------------------------------
     void ILogger::uninstallTelnetLogger()
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockListener());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonListener();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
-      if (singleton) {
-        singleton->close();
-        singleton.reset();
-      }
+      internal::TelnetLogger::stopIncoming();
     }
 
     //-------------------------------------------------------------------------
     void ILogger::uninstallOutgoingTelnetLogger()
     {
-      AutoRecursiveLock lock(*internal::TelnetLogger::lockOutgoing());
-
-      internal::LoggerReferenceHolder<internal::TelnetLogger>::HolderPtr holder = internal::TelnetLogger::singletonOutgoing();
-      internal::TelnetLoggerPtr &singleton = holder->mLogger;
-
-      if (singleton) {
-        singleton->close();
-        singleton.reset();
-      }
+      internal::TelnetLogger::stopOutgoing();
     }
 
     //-------------------------------------------------------------------------
     void ILogger::uninstallDebuggerLogger()
     {
-      internal::DebuggerLogger::singleton(false, true);
+      internal::DebuggerLogger::stop();
     }
 
     //-------------------------------------------------------------------------

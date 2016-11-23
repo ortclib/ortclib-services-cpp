@@ -26,6 +26,12 @@
       location = "group:../../../udns/projects/xcode/udns-osx/udns-osx.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:../../../zsLib-eventing/projects/xcode/zsLib-eventing-tool-ios/zsLib-eventing-tool-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:../../../zsLib-eventing/projects/xcode/zsLib-eventing-tool-osx/zsLib-eventing-tool-osx.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:../../../zsLib-eventing/projects/xcode/zsLib-eventing-ios/zsLib-eventing-ios.xcodeproj">
    </FileRef>
    <FileRef
