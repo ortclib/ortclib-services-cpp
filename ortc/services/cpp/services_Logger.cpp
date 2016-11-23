@@ -47,6 +47,7 @@
 #include <zsLib/Timer.h>
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
+#include <zsLib/Singleton.h>
 
 #include <iostream>
 #include <fstream>
@@ -90,6 +91,9 @@ namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 #define ORTC_SERVICES_SEQUENCE_COLOUR_FUNCTION           ORTC_SERVICES_SEQUENCE_COLOUR_RESET ORTC_SERVICES_SEQUENCE_ESCAPE "[36m"
 
 
+#define ORTC_SERVICES_LOGGER_STDOUT_NAMESPACE "org.ortc.services.internal.StdOutLogger"
+#define ORTC_SERVICES_LOGGER_FILE_NAMESPACE "org.ortc.services.internal.FileLogger"
+
 namespace ortc
 {
   namespace services
@@ -102,6 +106,263 @@ namespace ortc
 
     namespace internal
     {
+      ZS_DECLARE_INTERACTION_PTR(ILoggerReferencesHolderDelegate);
+      ZS_DECLARE_CLASS_PTR(LoggerReferencesHolder);
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ILoggerReferencesHolderDelegate
+      #pragma mark
+
+      interaction ILoggerReferencesHolderDelegate
+      {
+        virtual void notifyShutdown() = 0;
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
+      #pragma mark LoggerSingtonHolder
+      #pragma mark
+
+      class LoggerReferencesHolder : public RecursiveLock,
+                                     public ISingletonManagerDelegate
+      {
+      public:
+        struct LogDelegateInfo
+        {
+          bool mActivatedLogging {false};
+          ILogOutputDelegatePtr mLogOutputDelegate;
+          ILoggerReferencesHolderDelegatePtr mHolderDelegate;
+
+          LogDelegateInfo() {}
+
+          LogDelegateInfo(const LogDelegateInfo &info) :
+            mActivatedLogging(info.mActivatedLogging),
+            mLogOutputDelegate(info.mLogOutputDelegate),
+            mHolderDelegate(info.mHolderDelegate)
+          {
+          }
+
+          LogDelegateInfo(
+                          bool activatedLogging,
+                          ILogOutputDelegatePtr logOutputDelegate,
+                          ILoggerReferencesHolderDelegatePtr holderDelegate
+                          ) :
+            mActivatedLogging(activatedLogging),
+            mLogOutputDelegate(logOutputDelegate),
+            mHolderDelegate(holderDelegate)
+          {
+          }
+        };
+
+        typedef String LoggerName;
+        typedef std::map<LoggerName, LogDelegateInfo> LoggerMap;
+
+      protected:
+        struct make_private {};
+
+        //---------------------------------------------------------------------
+        static LoggerReferencesHolderPtr create()
+        {
+          auto pThis(make_shared<LoggerReferencesHolder>());
+          pThis->mThisWeak = pThis;
+          pThis->init();
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        void init()
+        {
+        }
+
+      public:
+        //---------------------------------------------------------------------
+        LoggerReferencesHolder(const make_private &)
+        {
+        }
+
+        //---------------------------------------------------------------------
+        ~LoggerReferencesHolder()
+        {
+          mThisWeak.reset();
+          notifySingletonCleanup();
+        }
+
+        //---------------------------------------------------------------------
+        static LoggerReferencesHolderPtr singleton()
+        {
+          AutoRecursiveLock lock(*IHelper::getGlobalLock());
+          static SingletonLazySharedPtr<LoggerReferencesHolder> singleton(LoggerReferencesHolder::create());
+
+          auto pThis(singleton.singleton());
+          static SingletonManager::Register registerSingleton("ortc.services.internal.LoggerReferencesHolder", pThis);
+
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        void registerLogger(
+                            const char *loggerNamespace,
+                            ILogOutputDelegatePtr logDelegate,
+                            ILoggerReferencesHolderDelegatePtr holderDelegate,
+                            bool activateLoggerNow
+                            )
+        {
+          String namespaceStr(loggerNamespace);
+
+          LogDelegateInfo previousInfo;
+
+          {
+            AutoRecursiveLock lock(*this);
+            auto found = mInstalledLoggers.find(namespaceStr);
+            if (found != mInstalledLoggers.end()) {
+              previousInfo = (*found).second;
+              mInstalledLoggers.erase(found);
+            }
+
+            mInstalledLoggers[namespaceStr] = LogDelegateInfo(activateLoggerNow, logDelegate, holderDelegate);
+          }
+          if ((previousInfo.mLogOutputDelegate) &&
+              (previousInfo.mActivatedLogging)) {
+            Log::removeOutputListener(previousInfo.mLogOutputDelegate);
+          }
+          if (previousInfo.mHolderDelegate) {
+            previousInfo.mHolderDelegate->notifyShutdown();
+          }
+
+          if (activateLoggerNow) {
+            Log::addOutputListener(logDelegate);
+          }
+        }
+
+        //---------------------------------------------------------------------
+        void unregisterLogger(const char *loggerNamespace)
+        {
+          String namespaceStr(loggerNamespace);
+
+          LogDelegateInfo previousInfo;
+
+          {
+            AutoRecursiveLock lock(*this);
+            auto found = mInstalledLoggers.find(namespaceStr);
+            if (found == mInstalledLoggers.end()) return;
+            previousInfo = (*found).second;
+            mInstalledLoggers.erase(found);
+          }
+
+          if ((previousInfo.mLogOutputDelegate) &&
+              (previousInfo.mActivatedLogging)) {
+            Log::removeOutputListener(previousInfo.mLogOutputDelegate);
+          }
+          if (previousInfo.mHolderDelegate) {
+            previousInfo.mHolderDelegate->notifyShutdown();
+          }
+        }
+
+        //---------------------------------------------------------------------
+        bool findLogger(
+                        const char *loggerNamespace,
+                        LogDelegateInfo &outInfo
+                        )
+        {
+          String namespaceStr(loggerNamespace);
+
+          AutoRecursiveLock lock(*this);
+          auto found = mInstalledLoggers.find(namespaceStr);
+          if (found == mInstalledLoggers.end()) return false;
+
+          outInfo = (*found).second;
+          return true;
+        }
+
+        //---------------------------------------------------------------------
+        bool activateLogger(const char *loggerNamespace)
+        {
+          String namespaceStr(loggerNamespace);
+
+          LogDelegateInfo previousInfo;
+
+          {
+            AutoRecursiveLock lock(*this);
+            auto found = mInstalledLoggers.find(namespaceStr);
+            if (found == mInstalledLoggers.end()) return false;
+            previousInfo = (*found).second;
+
+            if (previousInfo.mActivatedLogging) return true;
+            previousInfo.mActivatedLogging = true;
+          }
+
+          if (previousInfo.mActivatedLogging) {
+            Log::addOutputListener(previousInfo.mLogOutputDelegate);
+          }
+
+          return true;
+        }
+
+        //---------------------------------------------------------------------
+        bool deactivateLogger(const char *loggerNamespace)
+        {
+          String namespaceStr(loggerNamespace);
+
+          LogDelegateInfo previousInfo;
+
+          {
+            AutoRecursiveLock lock(*this);
+            auto found = mInstalledLoggers.find(namespaceStr);
+            if (found == mInstalledLoggers.end()) return false;
+            previousInfo = (*found).second;
+
+            if (!previousInfo.mActivatedLogging) return true;
+            previousInfo.mActivatedLogging = false;
+          }
+
+          if (previousInfo.mActivatedLogging) {
+            Log::removeOutputListener(previousInfo.mLogOutputDelegate);
+          }
+
+          return true;
+        }
+        
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark LoggerSingtonHolder
+        #pragma mark
+
+        virtual void notifySingletonCleanup() override
+        {
+          LoggerMap tempMap;
+          {
+            AutoRecursiveLock lock(*this);
+            tempMap = mInstalledLoggers;
+            mInstalledLoggers.clear();
+          }
+
+          for (auto iter = tempMap.begin(); iter != tempMap.end(); ++iter)
+          {
+            auto &info = (*iter).second;
+
+            if ((info.mLogOutputDelegate) &&
+                (info.mActivatedLogging)) {
+              Log::removeOutputListener(info.mLogOutputDelegate);
+            }
+            if (info.mHolderDelegate) {
+              info.mHolderDelegate->notifyShutdown();
+            }
+          }
+        }
+
+      protected:
+        LoggerReferencesHolderWeakPtr mThisWeak;
+        LoggerMap mInstalledLoggers;
+      };
+
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -506,6 +767,8 @@ namespace ortc
         return result;
       }
 
+#if 0
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -594,120 +857,7 @@ namespace ortc
         }
       };
 
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LogLevelLogger
-      #pragma mark
-
-      ZS_DECLARE_CLASS_PTR(LogLevelLogger)
-
-      //-----------------------------------------------------------------------
-      class LogLevelLogger : public ILogOutputDelegate
-      {
-        //---------------------------------------------------------------------
-        void init()
-        {
-          Log::addOutputListener(mThisWeak.lock());
-        }
-
-      public:
-        //---------------------------------------------------------------------
-        LogLevelLogger() :
-          mDefaultLogLevelSet(false),
-          mDefaultLogLevel(Log::None)
-        {}
-
-        //---------------------------------------------------------------------
-        static LogLevelLoggerPtr create()
-        {
-          LogLevelLoggerPtr pThis(make_shared<LogLevelLogger>());
-          pThis->mThisWeak = pThis;
-          pThis->init();
-          return pThis;
-        }
-
-        //---------------------------------------------------------------------
-        static LogLevelLoggerPtr singleton() {
-          static SingletonLazySharedPtr<LogLevelLogger> singleton(LogLevelLogger::create());
-          return singleton.singleton();
-        }
-
-        //---------------------------------------------------------------------
-        void setLogLevel(Log::Level level)
-        {
-          AutoRecursiveLock lock(mLock);
-
-          mLevels.clear();
-
-          mDefaultLogLevelSet = true;
-          mDefaultLogLevel = level;
-          for (SubsystemMap::iterator iter = mSubsystems.begin(); iter != mSubsystems.end(); ++iter) {
-            Subsystem * &subsystem = (*iter).second;
-            (*subsystem).setOutputLevel(level);
-          }
-        }
-
-        //---------------------------------------------------------------------
-        void setLogLevel(const char *component, Log::Level level)
-        {
-          AutoRecursiveLock lock(mLock);
-          mLevels[component] = level;
-
-          SubsystemMap::iterator found = mSubsystems.find(component);
-          if (found == mSubsystems.end()) return;
-
-          Subsystem * &subsystem = (*found).second;
-          (*subsystem).setOutputLevel(level);
-        }
-
-        //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &inSubsystem)
-        {
-          AutoRecursiveLock lock(mLock);
-
-          const char *name = inSubsystem.getName();
-          mSubsystems[name] = &(inSubsystem);
-
-          LevelMap::iterator found = mLevels.find(name);
-          if (found == mLevels.end()) {
-            if (!mDefaultLogLevelSet) return;
-            inSubsystem.setOutputLevel(mDefaultLogLevel);
-            return;
-          }
-
-          Log::Level level = (*found).second;
-          inSubsystem.setOutputLevel(level);
-        }
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark LogLevelLogger => ILogDelegate
-        #pragma mark
-
-        // ignored
-
-      private:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark LogLevelLogger => (data)
-        #pragma mark
-
-        LogLevelLoggerWeakPtr mThisWeak;
-
-        mutable RecursiveLock mLock;
-
-        typedef std::map<String, Subsystem *> SubsystemMap;
-        typedef std::map<String, Log::Level> LevelMap;
-
-        SubsystemMap mSubsystems;
-        LevelMap mLevels;
-
-        bool mDefaultLogLevelSet;
-        Log::Level mDefaultLogLevel;
-      };
+#endif //0
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -719,12 +869,12 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(StdOutLogger)
 
-      class StdOutLogger : public ILogOutputDelegate
+      class StdOutLogger : public ILogOutputDelegate,
+                           public ILoggerReferencesHolderDelegate
       {
         //---------------------------------------------------------------------
         void init()
         {
-          Log::addOutputListener(mThisWeak.lock());
         }
 
       public:
@@ -752,27 +902,40 @@ namespace ortc
         //---------------------------------------------------------------------
         static StdOutLoggerPtr singleton(
                                          bool colorizeOutput,
-                                         bool prettyPrint,
-                                         bool reset = false
+                                         bool prettyPrint
                                          )
         {
-          static LoggerSingletonLazySharedPtr< StdOutLogger > singleton;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return StdOutLoggerPtr();
 
-          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< StdOutLogger >::lock(singleton);
-          LoggerReferenceHolder<StdOutLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< StdOutLogger >::logger(singleton));
-          StdOutLoggerPtr &logger = holder->mLogger;
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
 
-          AutoRecursiveLock lock(*locker);
-          if ((reset) &&
-              (logger)) {
-            Log::removeOutputListener(logger->mThisWeak.lock());
-            logger.reset();
+          singleton->findLogger(ORTC_SERVICES_LOGGER_STDOUT_NAMESPACE, existingInfo);
+
+          if (existingInfo.mHolderDelegate) {
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(StdOutLogger, existingInfo.mHolderDelegate);
+
+            bool wasColorizedOutput {};
+            bool wasPrettyPrint {};
+            existingLogger->getInfo(wasColorizedOutput, wasPrettyPrint);
+            if ((colorizeOutput == wasColorizedOutput) &&
+                (wasPrettyPrint == prettyPrint)) return existingLogger;
           }
 
-          if (!logger) {
-            logger = StdOutLogger::create(colorizeOutput, prettyPrint);
-          }
-          return logger;
+          auto newLogger = create(colorizeOutput, prettyPrint);
+
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_STDOUT_NAMESPACE, newLogger, newLogger, true);
+
+          return newLogger;
+        }
+
+        //---------------------------------------------------------------------
+        static void stop()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+
+          singleton->unregisterLogger(ORTC_SERVICES_LOGGER_STDOUT_NAMESPACE);
         }
 
         //---------------------------------------------------------------------
@@ -780,7 +943,7 @@ namespace ortc
         #pragma mark StdOutLogger => ILogOutputDelegate
         #pragma mark
 
-        virtual void onNewSubsystem(Subsystem &)
+        virtual void onNewSubsystem(Subsystem &) override
         {
         }
 
@@ -794,7 +957,7 @@ namespace ortc
                            CSTR inFilePath,
                            ULONG inLineNumber,
                            const Log::Params &params
-                           )
+                           ) override
         {
           if (mColorizeOutput) {
             std::cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
@@ -803,6 +966,26 @@ namespace ortc
             std::cout << toBWString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
             std::cout.flush();
           }
+        }
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark StdOutLogger => ILogOutputDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void notifyShutdown() override
+        {
+        }
+
+      protected:
+        void getInfo(
+                     bool &outColorize,
+                     bool &outPrettyPrint
+                     )
+        {
+          outColorize = mColorizeOutput;
+          outPrettyPrint = mPrettyPrint;
         }
 
       private:
@@ -826,50 +1009,80 @@ namespace ortc
 
       ZS_DECLARE_CLASS_PTR(FileLogger)
 
-      class FileLogger : public ILogOutputDelegate
+      class FileLogger : public ILogOutputDelegate,
+                         public ILoggerReferencesHolderDelegate
       {
         //---------------------------------------------------------------------
-        void init(const char *fileName)
+        void init()
         {
-          mFile.open(fileName, std::ios::out | std::ios::binary);
-          Log::addOutputListener(mThisWeak.lock());
+          mFile.open(mFileName, std::ios::out | std::ios::binary);
         }
 
       public:
         //---------------------------------------------------------------------
-        FileLogger(bool colorizeOutput) :
+        FileLogger(
+                   const char *fileName,
+                   bool colorizeOutput,
+                   bool prettyPrint
+                   ) :
+          mFileName(fileName),
           mColorizeOutput(colorizeOutput),
-          mPrettyPrint(colorizeOutput)
+          mPrettyPrint(prettyPrint)
           {}
 
         //---------------------------------------------------------------------
-        static FileLoggerPtr create(const char *fileName, bool colorizeOutput)
+        static FileLoggerPtr create(
+                                    const char *fileName,
+                                    bool colorizeOutput,
+                                    bool prettyPrint
+                                    )
         {
-          FileLoggerPtr pThis(make_shared<FileLogger>(colorizeOutput));
+          FileLoggerPtr pThis(make_shared<FileLogger>(colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
-          pThis->init(fileName);
+          pThis->init();
           return pThis;
         }
 
         //---------------------------------------------------------------------
-        static FileLoggerPtr singleton(const char *fileName, bool colorizeOutput, bool reset = false)
+        static FileLoggerPtr singleton(
+                                       const char *fileName,
+                                       bool colorizeOutput,
+                                       bool prettyPrint
+                                       )
         {
-          static LoggerSingletonLazySharedPtr< FileLogger > singleton;
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return FileLoggerPtr();
 
-          RecursiveLockPtr locker = LoggerSingletonLazySharedPtr< FileLogger >::lock(singleton);
-          LoggerReferenceHolder<FileLogger>::HolderPtr holder = (LoggerSingletonLazySharedPtr< FileLogger >::logger(singleton));
-          FileLoggerPtr &logger = holder->mLogger;
+          LoggerReferencesHolder::LogDelegateInfo existingInfo;
 
-          AutoRecursiveLock lock(*locker);
-          if ((reset) &&
-              (logger)) {
-            Log::removeOutputListener(logger->mThisWeak.lock());
-            logger.reset();
+          singleton->findLogger(ORTC_SERVICES_LOGGER_FILE_NAMESPACE, existingInfo);
+
+          if (existingInfo.mHolderDelegate) {
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(FileLogger, existingInfo.mHolderDelegate);
+
+            String oldFileName;
+            bool wasColorizedOutput {};
+            bool wasPrettyPrint {};
+            existingLogger->getInfo(oldFileName, wasColorizedOutput, wasPrettyPrint);
+            if ((oldFileName == fileName) &&
+                (colorizeOutput == wasColorizedOutput) &&
+                (wasPrettyPrint == prettyPrint)) return existingLogger;
           }
-          if (!logger) {
-            logger = FileLogger::create(fileName, colorizeOutput);
-          }
-          return logger;
+
+          auto newLogger = create(fileName, colorizeOutput, prettyPrint);
+
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_FILE_NAMESPACE, newLogger, newLogger, true);
+
+          return newLogger;
+        }
+
+        //---------------------------------------------------------------------
+        static void stop()
+        {
+          auto singleton = LoggerReferencesHolder::singleton();
+          if (!singleton) return;
+
+          singleton->unregisterLogger(ORTC_SERVICES_LOGGER_FILE_NAMESPACE);
         }
 
         //---------------------------------------------------------------------
@@ -877,7 +1090,7 @@ namespace ortc
         #pragma mark FileLogger => ILogDelegate
         #pragma mark
 
-        virtual void onNewSubsystem(Subsystem &)
+        virtual void onNewSubsystem(Subsystem &) override
         {
         }
 
@@ -891,7 +1104,7 @@ namespace ortc
                            CSTR inFilePath,
                            ULONG inLineNumber,
                            const Log::Params &params
-                           )
+                           ) override
         {
           if (mFile.is_open()) {
             String output;
@@ -905,6 +1118,28 @@ namespace ortc
           }
         }
 
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark StdOutLogger => ILogOutputDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void notifyShutdown() override
+        {
+        }
+
+      protected:
+        void getInfo(
+                     String &outFileName,
+                     bool &outColorize,
+                     bool &outPrettyPrint
+                     )
+        {
+          outFileName = mFileName;
+          outColorize = mColorizeOutput;
+          outPrettyPrint = mPrettyPrint;
+        }
+
       private:
         //---------------------------------------------------------------------
         #pragma mark
@@ -912,6 +1147,7 @@ namespace ortc
         #pragma mark
 
         FileLoggerWeakPtr mThisWeak;
+        String mFileName;
         bool mColorizeOutput;
         bool mPrettyPrint;
 
@@ -2136,17 +2372,13 @@ namespace ortc
     //-------------------------------------------------------------------------
     void ILogger::setLogLevel(Log::Level logLevel)
     {
-      internal::LogLevelLoggerPtr logger = internal::LogLevelLogger::singleton();
-      if (!logger) return;
-      logger->setLogLevel(logLevel);
+      zsLib::Log::setOutputLevelByName(NULL, logLevel);
     }
 
     //-------------------------------------------------------------------------
     void ILogger::setLogLevel(const char *component, Log::Level logLevel)
     {
-      internal::LogLevelLoggerPtr logger = internal::LogLevelLogger::singleton();
-      if (!logger) return;
-      logger->setLogLevel(component, logLevel);
+      zsLib::Log::setOutputLevelByName(component, logLevel);
     }
 
   }

@@ -450,7 +450,7 @@
 					};
 					0001AC181DA1E18C00D807DA = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = QE9E5R8GUP;
+						DevelopmentTeam = C5T7YV48QM;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 0001ABFF1DA1E18C00D807DA;
 					};
@@ -809,7 +809,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = QE9E5R8GUP;
+				DEVELOPMENT_TEAM = C5T7YV48QM;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "ortclib.services.Test-iosTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -823,7 +823,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = QE9E5R8GUP;
+				DEVELOPMENT_TEAM = C5T7YV48QM;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "ortclib.services.Test-iosTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
