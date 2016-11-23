@@ -63,19 +63,19 @@
     },
     "sources": {
       "source": [
-        "ortc/services/cpp/services_BackOffTimer.cpp",
-        "ortc/services/cpp/services_BackOffTimerPattern.cpp",
-        "ortc/services/cpp/services_Cache.cpp",
-        "ortc/services/cpp/services_DNS.cpp",
-        "ortc/services/cpp/services_HTTP.cpp",
-        "ortc/services/cpp/services_HTTP_WinRT.cpp",
-        "ortc/services/cpp/services_Logger.cpp",
-        "ortc/services/cpp/services_Settings.cpp",
-        "ortc/services/cpp/services_STUNDiscovery.cpp",
-        "ortc/services/cpp/services_STUNPacket.cpp",
-        "ortc/services/cpp/services_STUNRequester.cpp",
-        "ortc/services/cpp/services_STUNRequesterManager.cpp",
-        "ortc/services/cpp/services_TURNSocket.cpp"
+        "services_BackOffTimer.cpp",
+        "services_BackOffTimerPattern.cpp",
+        "services_Cache.cpp",
+        "services_DNS.cpp",
+        "services_HTTP.cpp",
+        "services_HTTP_WinRT.cpp",
+        "services_Logger.cpp",
+        "services_Settings.cpp",
+        "services_STUNDiscovery.cpp",
+        "services_STUNPacket.cpp",
+        "services_STUNRequester.cpp",
+        "services_STUNRequesterManager.cpp",
+        "services_TURNSocket.cpp"
       ]
     },
     "channels": {
