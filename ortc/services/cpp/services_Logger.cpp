@@ -2060,39 +2060,6 @@ namespace ortc
           singleton->deactivateLogger(mLoggerNamespace);
         }
 
-#if 0
-        //---------------------------------------------------------------------
-        bool isColourizedOutput() const
-        {
-          return mColorizeOutput;
-        }
-        
-        //---------------------------------------------------------------------
-        bool isPrettyPrintOutput() const
-        {
-          return mPrettyPrint;
-        }
-        
-        //---------------------------------------------------------------------
-        WORD getListenPort() const
-        {
-          return mListenPort;
-        }
-        
-        //---------------------------------------------------------------------
-        String getServer() const
-        {
-          return mOriginalServer;
-        }
-        
-        //---------------------------------------------------------------------
-        String getSendStringUponConnection() const
-        {
-          return mOriginalStringToSendUponConnection;
-        }
-        
-#endif //0
-
         //---------------------------------------------------------------------
         void close()
         {
