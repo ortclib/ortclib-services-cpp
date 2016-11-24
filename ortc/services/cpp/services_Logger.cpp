@@ -299,11 +299,11 @@ namespace ortc
 
             if (previousInfo.mActivatedLogging) return true;
             previousInfo.mActivatedLogging = true;
+
+            mInstalledLoggers[namespaceStr] = previousInfo;
           }
 
-          if (previousInfo.mActivatedLogging) {
-            Log::addOutputListener(previousInfo.mLogOutputDelegate);
-          }
+          Log::addOutputListener(previousInfo.mLogOutputDelegate);
 
           return true;
         }
@@ -322,12 +322,12 @@ namespace ortc
             previousInfo = (*found).second;
 
             if (!previousInfo.mActivatedLogging) return true;
+
             previousInfo.mActivatedLogging = false;
+            mInstalledLoggers[namespaceStr] = previousInfo;
           }
 
-          if (previousInfo.mActivatedLogging) {
-            Log::removeOutputListener(previousInfo.mLogOutputDelegate);
-          }
+          Log::removeOutputListener(previousInfo.mLogOutputDelegate);
 
           return true;
         }
@@ -1241,7 +1241,7 @@ namespace ortc
           singleton->findLogger(ORTC_SERVICES_LOGGER_DEBUG_NAMESPACE, existingInfo);
           
           if (existingInfo.mHolderDelegate) {
-            auto existingLogger = ZS_DYNAMIC_PTR_CAST(FileLogger, existingInfo.mHolderDelegate);
+            auto existingLogger = ZS_DYNAMIC_PTR_CAST(DebuggerLogger, existingInfo.mHolderDelegate);
             
             bool wasColorizedOutput {};
             bool wasPrettyPrint {};
@@ -1491,7 +1491,7 @@ namespace ortc
         {
 #if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
           auto singleton = LoggerReferencesHolder::singleton();
-          if (!singleton) return FileLoggerPtr();
+          if (!singleton) return TelnetLoggerPtr();
           
           LoggerReferencesHolder::LogDelegateInfo existingInfo;
 
@@ -1504,7 +1504,7 @@ namespace ortc
             Seconds oldMaxWaitTime {};  // change in this value is not important
             bool wasColorizedOutput {};
             bool wasPrettyPrint {};
-            existingLogger->getInfo(oldListenPort, oldMaxWaitTime, wasColorizedOutput, wasPrettyPrint);
+            existingLogger->getIncomingInfo(oldListenPort, oldMaxWaitTime, wasColorizedOutput, wasPrettyPrint);
             if ((oldListenPort == listenPort) &&
                 (colorizeOutput == wasColorizedOutput) &&
                 (wasPrettyPrint == prettyPrint)) return existingLogger;
@@ -1512,7 +1512,7 @@ namespace ortc
           
           auto newLogger = create(listenPort, maxSecondsWaitForSocketToBeAvailable, colorizeOutput, prettyPrint);
           
-          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, newLogger, newLogger, true);
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, newLogger, newLogger, false);
           
           return newLogger;
 #else
@@ -1543,7 +1543,7 @@ namespace ortc
             bool wasColorizedOutput {};
             bool wasPrettyPrint {};
             String oldStringUponConnection;
-            existingLogger->getInfo(oldServerHostWithPort, wasColorizedOutput, wasPrettyPrint, oldStringUponConnection);
+            existingLogger->getOutgoingInfo(oldServerHostWithPort, wasColorizedOutput, wasPrettyPrint, oldStringUponConnection);
             if ((oldServerHostWithPort == String(serverHostWithPort)) &&
                 (colorizeOutput == wasColorizedOutput) &&
                 (wasPrettyPrint == prettyPrint) &&
@@ -1552,7 +1552,7 @@ namespace ortc
 
           auto newLogger = create(serverHostWithPort, colorizeOutput, prettyPrint, sendStringUponConnection);
           
-          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, newLogger, newLogger, true);
+          singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, newLogger, newLogger, false);
           
           return newLogger;
 #else
@@ -1717,80 +1717,88 @@ namespace ortc
         //---------------------------------------------------------------------
         virtual void onReadReady(SocketPtr inSocket) override
         {
-          AutoRecursiveLock lock(*this);
+          bool activate {false};
 
-          if (inSocket == mListenSocket) {
-            if (mTelnetSocket) {
-              mTelnetSocket->close();
-              mTelnetSocket.reset();
-            }
+          {
+            AutoRecursiveLock lock(*this);
 
-            IPAddress ignored;
-            int noThrowError = 0;
-            mTelnetSocket = mListenSocket->accept(ignored, NULL, &noThrowError);
-            if (!mTelnetSocket)
-              return;
+            if (inSocket == mListenSocket) {
+              if (mTelnetSocket) {
+                mTelnetSocket->close();
+                mTelnetSocket.reset();
+              }
 
-            try {
+              IPAddress ignored;
+              int noThrowError = 0;
+              mTelnetSocket = mListenSocket->accept(ignored, NULL, &noThrowError);
+              if (!mTelnetSocket)
+                return;
+
+              try {
 #ifndef __QNX__
-              mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
+                mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::IgnoreSigPipe, true);
 #endif //ndef __QNX__
-            } catch(Socket::Exceptions::UnsupportedSocketOption &) {
+              } catch (Socket::Exceptions::UnsupportedSocketOption &) {
+              }
+
+              mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
+              mTelnetSocket->setDelegate(mThisWeak.lock());
+              activate = mConnected = true;
             }
 
-            mTelnetSocket->setOptionFlag(Socket::SetOptionFlag::NonBlocking, true);
-            mTelnetSocket->setDelegate(mThisWeak.lock());
-          }
+            if (inSocket == mTelnetSocket) {
+              char buffer[1024 + 1];
+              memset(&(buffer[0]), 0, sizeof(buffer));
+              size_t length = 0;
 
-          if (inSocket == mTelnetSocket) {
-            char buffer[1024+1];
-            memset(&(buffer[0]), 0, sizeof(buffer));
-            size_t length = 0;
+              bool wouldBlock = false;
+              int errorCode = 0;
+              length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer) - sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
 
-            bool wouldBlock = false;
-            int errorCode = 0;
-            length = mTelnetSocket->receive((BYTE *)(&(buffer[0])), sizeof(buffer)-sizeof(buffer[0]), &wouldBlock, 0, &errorCode);
+              if (wouldBlock)
+                return;
 
-            if (wouldBlock)
-              return;
-
-            if ((length < 1) ||
+              if ((length < 1) ||
                 (0 != errorCode)) {
-              onException(inSocket);
-              return;
-            }
-
-            mCommand += (CSTR)(&buffer[0]);
-            if (mCommand.size() > (sizeof(buffer)*3)) {
-              mCommand.clear();
-            }
-            while (true) {
-              const char *posLineFeed = strchr(mCommand, '\n');
-              const char *posCarrageReturn = strchr(mCommand, '\r');
-
-              if ((NULL == posLineFeed) &&
-                  (NULL == posCarrageReturn)) {
+                onException(inSocket);
                 return;
               }
 
-              if (NULL == posCarrageReturn)
-                posCarrageReturn = posLineFeed;
-              if (NULL == posLineFeed)
-                posLineFeed = posCarrageReturn;
+              mCommand += (CSTR)(&buffer[0]);
+              if (mCommand.size() > (sizeof(buffer) * 3)) {
+                mCommand.clear();
+              }
+              while (true) {
+                const char *posLineFeed = strchr(mCommand, '\n');
+                const char *posCarrageReturn = strchr(mCommand, '\r');
 
-              if (posCarrageReturn < posLineFeed)
-                posLineFeed = posCarrageReturn;
+                if ((NULL == posLineFeed) &&
+                  (NULL == posCarrageReturn)) {
+                  return;
+                }
 
-              String command = mCommand.substr(0, (posLineFeed - mCommand.c_str()));
-              mCommand = mCommand.substr((posLineFeed - mCommand.c_str()) + 1);
+                if (NULL == posCarrageReturn)
+                  posCarrageReturn = posLineFeed;
+                if (NULL == posLineFeed)
+                  posLineFeed = posCarrageReturn;
 
-              if (command.size() > 0) {
-                handleCommand(command);
+                if (posCarrageReturn < posLineFeed)
+                  posLineFeed = posCarrageReturn;
+
+                String command = mCommand.substr(0, (posLineFeed - mCommand.c_str()));
+                mCommand = mCommand.substr((posLineFeed - mCommand.c_str()) + 1);
+
+                if (command.size() > 0) {
+                  handleCommand(command);
+                }
               }
             }
           }
-        }
 
+          if (activate) {
+            activateLogging();
+          }
+        }
 
         //---------------------------------------------------------------------
         virtual void onWriteReady(SocketPtr socket) override
@@ -1858,24 +1866,33 @@ namespace ortc
         //---------------------------------------------------------------------
         virtual void onException(SocketPtr inSocket) override
         {
-          AutoRecursiveLock lock(*this);
-          if (inSocket == mListenSocket) {
-            mListenSocket->close();
-            mListenSocket.reset();
+          bool deactivate = false;
 
-            handleConnectionFailure();
-          }
+          {
+            AutoRecursiveLock lock(*this);
+            if (inSocket == mListenSocket) {
+              mListenSocket->close();
+              mListenSocket.reset();
 
-          if (inSocket == mTelnetSocket) {
-            mBufferedList.clear();
-            mConnected = false;
-
-            if (mTelnetSocket) {
-              mTelnetSocket->close();
-              mTelnetSocket.reset();
+              handleConnectionFailure();
             }
 
-            handleConnectionFailure();
+            if (inSocket == mTelnetSocket) {
+              mBufferedList.clear();
+              mConnected = false;
+              deactivate = true;
+
+              if (mTelnetSocket) {
+                mTelnetSocket->close();
+                mTelnetSocket.reset();
+              }
+
+              handleConnectionFailure();
+            }
+          }
+
+          if (deactivate) {
+            deactivateLogging();
           }
 
           IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
