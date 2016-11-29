@@ -38,14 +38,12 @@
     <ClInclude Include="..\..\..\ortc\services\IDHPublicKey.h" />
     <ClInclude Include="..\..\..\ortc\services\IDNS.h" />
     <ClInclude Include="..\..\..\ortc\services\IEncryptor.h" />
-    <ClInclude Include="..\..\..\ortc\services\IFactory.h" />
     <ClInclude Include="..\..\..\ortc\services\IHelper.h" />
     <ClInclude Include="..\..\..\ortc\services\IHTTP.h" />
     <ClInclude Include="..\..\..\ortc\services\IICESocket.h" />
     <ClInclude Include="..\..\..\ortc\services\IICESocketSession.h" />
     <ClInclude Include="..\..\..\ortc\services\ILogger.h" />
     <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h" />
-    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\ifaddrs-android.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\platform.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services.events.h" />
@@ -72,7 +70,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_IRUDPChannelStream.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Logger.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_MessageLayerSecurityChannel.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_MessageQueueManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Reachability.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPrivateKey.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPublicKey.h" />
@@ -81,7 +78,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPListener.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPTransport.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_Settings.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNDiscovery.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequester.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequesterManager.h" />
@@ -97,14 +93,12 @@
     <ClInclude Include="..\..\..\ortc\services\IRUDPListener.h" />
     <ClInclude Include="..\..\..\ortc\services\IRUDPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\IRUDPTransport.h" />
-    <ClInclude Include="..\..\..\ortc\services\ISettings.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNDiscovery.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNRequester.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNRequesterManager.h" />
     <ClInclude Include="..\..\..\ortc\services\ITCPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\ITransportStream.h" />
     <ClInclude Include="..\..\..\ortc\services\ITURNSocket.h" />
-    <ClInclude Include="..\..\..\ortc\services\IWakeDelegate.h" />
     <ClInclude Include="..\..\..\ortc\services\RUDPPacket.h" />
     <ClInclude Include="..\..\..\ortc\services\RUDPProtocol.h" />
     <ClInclude Include="..\..\..\ortc\services\services.h" />
@@ -138,7 +132,6 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Logger.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageLayerSecurityChannel.cpp" />
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageQueueManager.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Reachability.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPrivateKey.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPublicKey.cpp" />
@@ -149,14 +142,6 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPPacket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPTransport.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_services.cpp" />
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_Settings.cpp">
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4068;4290</DisableSpecificWarnings>
-    </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNDiscovery.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNPacket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequester.cpp" />
@@ -278,7 +263,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -331,7 +316,7 @@ echo.
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -384,7 +369,7 @@ echo.
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -437,7 +422,7 @@ echo.
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -490,7 +475,7 @@ echo.
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -543,7 +528,7 @@ echo.
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

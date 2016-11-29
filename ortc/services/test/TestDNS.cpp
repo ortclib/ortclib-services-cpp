@@ -30,7 +30,7 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <ortc/services/IDNS.h>
 #include <ortc/services/ISTUNDiscovery.h>
@@ -273,7 +273,7 @@ void doTestDNS()
 
   ortc::services::internal::DNSFactory::override(overrideFactory);
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr thread(zsLib::IMessageQueueThread::createBasic());
 
   TestDNSCallbackPtr testObject = TestDNSCallback::create(thread);
 

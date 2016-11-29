@@ -35,9 +35,9 @@
 #include <ortc/services/internal/services_IRUDPChannelStream.h>
 #include <ortc/services/IRUDPChannel.h>
 #include <ortc/services/ISTUNRequester.h>
-#include <ortc/services/IWakeDelegate.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/IWakeDelegate.h>
 
 #include <map>
 
@@ -395,7 +395,7 @@ namespace ortc
         #pragma mark RUDPChannel => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
       protected:
         //---------------------------------------------------------------------
@@ -456,7 +456,7 @@ namespace ortc
         ISTUNRequesterPtr mShutdownRequest;
         bool mSTUNRequestPreviouslyTimedOut {};    // if true then no need issue a "close" STUN request if a STUN request has previously timed out
 
-        TimerPtr mTimer;
+        ITimerPtr mTimer;
 
         IRUDPChannelStream::Shutdown mShutdownDirection;
 

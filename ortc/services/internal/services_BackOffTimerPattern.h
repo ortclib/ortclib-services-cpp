@@ -34,11 +34,9 @@
 #include <ortc/services/IBackOffTimer.h>
 #include <ortc/services/internal/types.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #include <vector>
-
-#define ORTC_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES "ortc/services/backoff-timer-max-constructor-failures"
 
 namespace ortc
 {

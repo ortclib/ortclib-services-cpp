@@ -181,7 +181,6 @@ namespace ortc
         mLastSentData(zsLib::now()),
         mLastReceivedData(zsLib::now())
       {
-        IHelper::setTimerThreadPriority();
         ZS_LOG_DETAIL(log("created"))
       }
 
@@ -1304,7 +1303,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::onTimer(TimerPtr timer)
+      void RUDPChannel::onTimer(ITimerPtr timer)
       {
         AutoRecursiveLock lock(mLock);
         if (!mStream) return;
@@ -1531,7 +1530,7 @@ namespace ortc
         if (mStream) {
           // we need to create a timer now we have a stream
           if (!mTimer) {
-            mTimer = Timer::create(mThisWeak.lock(), Seconds(20));  // fire ever 20 seconds
+            mTimer = ITimer::create(mThisWeak.lock(), Seconds(20));  // fire ever 20 seconds
             (ITimerDelegateProxy::create(mThisWeak.lock()))->onTimer(mTimer);
           }
 

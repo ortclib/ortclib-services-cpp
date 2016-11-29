@@ -31,14 +31,14 @@
 
 #include <ortc/services/internal/services_BackOffTimer.h>
 #include <ortc/services/internal/services_BackOffTimerPattern.h>
-#include <ortc/services/internal/services_MessageQueueManager.h>
 #include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IHelper.h>
-#include <ortc/services/ISettings.h>
 
-#include <zsLib/XML.h>
+#include <zsLib/IMessageQueueManager.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/Numeric.h>
+#include <zsLib/XML.h>
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
@@ -51,6 +51,8 @@ namespace ortc
       using services::IHelper;
       using zsLib::Numeric;
 
+      ZS_DECLARE_CLASS_PTR(BackOffTimerSettingsDefaults);
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -58,6 +60,52 @@ namespace ortc
       #pragma mark
       #pragma mark (helpers)
       #pragma mark
+
+
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageLayerSecurityChannelSettingsDefaults
+      #pragma mark
+
+      class BackOffTimerSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~BackOffTimerSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static BackOffTimerSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<BackOffTimerSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static BackOffTimerSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<BackOffTimerSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES, 100);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installBackOffTimerSettingsDefaults()
+      {
+        BackOffTimerSettingsDefaults::singleton();
+      }
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -343,7 +391,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void BackOffTimer::onTimer(TimerPtr timer)
+      void BackOffTimer::onTimer(ITimerPtr timer)
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer", timer->getID()))
 
@@ -454,7 +502,7 @@ namespace ortc
         if (!pThis) return;
         if (DurationType() == timeout) return;
 
-        mTimer = Timer::create(pThis, zsLib::now() + timeout);
+        mTimer = ITimer::create(pThis, zsLib::now() + timeout);
 
         ZS_LOG_TRACE(debug("creating timer") + ZS_PARAM("timer id", mTimer->getID()) + ZS_PARAM("timeout", timeout))
       }

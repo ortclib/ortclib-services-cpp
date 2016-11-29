@@ -40,7 +40,7 @@
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #include <ppltasks.h>
 
@@ -221,7 +221,7 @@ namespace ortc
           #pragma mark HTTP::HTTPQuery => friend ITimerDelegate
           #pragma mark
 
-          void onTimer(TimerPtr onTimer);
+          void onTimer(ITimerPtr onTimer);
 
           //-------------------------------------------------------------------
           #pragma mark
@@ -280,7 +280,7 @@ namespace ortc
 
           concurrency::cancellation_token_source mCancellationTokenSource;
           Windows::Web::Http::HttpStatusCode mStatusCode;
-          TimerPtr mTimer;
+          ITimerPtr mTimer;
         };
 
       protected:

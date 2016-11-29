@@ -34,8 +34,6 @@
 #include <ortc/services/IBackgrounding.h>
 #include <ortc/services/IDNS.h>
 #include <ortc/services/IHelper.h>
-#include <ortc/services/ISettings.h>
-#include <ortc/services/IWakeDelegate.h>
 
 #include <cryptopp/osrng.h>
 
@@ -43,8 +41,10 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
 #include <zsLib/Socket.h>
-#include <zsLib/MessageQueueThread.h>
-#include <zsLib/Timer.h>
+#include <zsLib/IMessageQueueThread.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/ISettings.h>
+#include <zsLib/IWakeDelegate.h>
 #include <zsLib/XML.h>
 #include <zsLib/Numeric.h>
 #include <zsLib/Singleton.h>
@@ -111,6 +111,52 @@ namespace ortc
     {
       ZS_DECLARE_INTERACTION_PTR(ILoggerReferencesHolderDelegate);
       ZS_DECLARE_CLASS_PTR(LoggerReferencesHolder);
+      ZS_DECLARE_CLASS_PTR(LoggerSettingsDefaults);
+
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark LoggerSettingsDefaults
+      #pragma mark
+
+      class LoggerSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~LoggerSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static LoggerSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<LoggerSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static LoggerSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<LoggerSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE, 6);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installLoggerSettingsDefaults()
+      {
+        LoggerSettingsDefaults::singleton();
+      }
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -952,21 +998,21 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &) override
+        virtual void notifyNewSubsystem(Subsystem &) override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void onLog(
-                           const Subsystem &inSubsystem,
-                           Log::Severity inSeverity,
-                           Log::Level inLevel,
-                           CSTR inFunction,
-                           CSTR inFilePath,
-                           ULONG inLineNumber,
-                           const Log::Params &params
-                           ) override
+        virtual void notifyLog(
+                               const Subsystem &inSubsystem,
+                               Log::Severity inSeverity,
+                               Log::Level inLevel,
+                               CSTR inFunction,
+                               CSTR inFilePath,
+                               ULONG inLineNumber,
+                               const Log::Params &params
+                               ) override
         {
           if (mColorizeOutput) {
             std::cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
@@ -1111,21 +1157,21 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &) override
+        virtual void notifyNewSubsystem(Subsystem &) override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void onLog(
-                           const Subsystem &inSubsystem,
-                           Log::Severity inSeverity,
-                           Log::Level inLevel,
-                           CSTR inFunction,
-                           CSTR inFilePath,
-                           ULONG inLineNumber,
-                           const Log::Params &params
-                           ) override
+        virtual void notifyLog(
+                               const Subsystem &inSubsystem,
+                               Log::Severity inSeverity,
+                               Log::Level inLevel,
+                               CSTR inFunction,
+                               CSTR inFilePath,
+                               ULONG inLineNumber,
+                               const Log::Params &params
+                               ) override
         {
           if (mFile.is_open()) {
             String output;
@@ -1275,21 +1321,21 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &) override
+        virtual void notifyNewSubsystem(Subsystem &) override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void onLog(
-                           const Subsystem &inSubsystem,
-                           Log::Severity inSeverity,
-                           Log::Level inLevel,
-                           CSTR inFunction,
-                           CSTR inFilePath,
-                           ULONG inLineNumber,
-                           const Log::Params &params
-                           ) override
+        virtual void notifyLog(
+                               const Subsystem &inSubsystem,
+                               Log::Severity inSeverity,
+                               Log::Level inLevel,
+                               CSTR inFunction,
+                               CSTR inFilePath,
+                               ULONG inLineNumber,
+                               const Log::Params &params
+                               ) override
         {
 #ifdef __QNX__
 #ifndef NDEBUG
@@ -1470,8 +1516,6 @@ namespace ortc
           mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
           mBacklogDataUntil(zsLib::now() + Seconds(ORTC_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
         {
-          IHelper::setSocketThreadPriority();
-          IHelper::setTimerThreadPriority();
         }
 
         //---------------------------------------------------------------------
@@ -1625,20 +1669,20 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onNewSubsystem(Subsystem &) override
+        virtual void notifyNewSubsystem(Subsystem &) override
         {
         }
 
         //---------------------------------------------------------------------
-        virtual void onLog(
-                           const Subsystem &inSubsystem,
-                           Log::Severity inSeverity,
-                           Log::Level inLevel,
-                           CSTR inFunction,
-                           CSTR inFilePath,
-                           ULONG inLineNumber,
-                           const Log::Params &params
-                           ) override
+        virtual void notifyLog(
+                               const Subsystem &inSubsystem,
+                               Log::Severity inSeverity,
+                               Log::Level inLevel,
+                               CSTR inFunction,
+                               CSTR inFilePath,
+                               ULONG inLineNumber,
+                               const Log::Params &params
+                               ) override
         {
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
@@ -1952,7 +1996,7 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onTimer(TimerPtr timer) override
+        virtual void onTimer(ITimerPtr timer) override
         {
           step();
         }
@@ -2242,7 +2286,7 @@ namespace ortc
 
             mRetryWaitTime = Seconds(1);
             mNextRetryTime = zsLib::now();
-            mRetryTimer = Timer::create(mThisWeak.lock(), Seconds(1));
+            mRetryTimer = ITimer::create(mThisWeak.lock(), Seconds(1));
             return;
           }
 
@@ -2453,7 +2497,7 @@ namespace ortc
         Time mStartListenTime;
         Milliseconds mMaxWaitTimeForSocketToBeAvailable {};
 
-        TimerPtr mRetryTimer;
+        ITimerPtr mRetryTimer;
         Time mNextRetryTime;
         Milliseconds mRetryWaitTime {};
 

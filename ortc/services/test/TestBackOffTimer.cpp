@@ -30,8 +30,9 @@
  */
 
 #include <ortc/services/IBackOffTimer.h>
-#include <ortc/services/ISettings.h>
 
+#include <zsLib/IMessageQueueThread.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/String.h>
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Log.h>
@@ -50,13 +51,13 @@ using zsLib::Time;
 using zsLib::MessageQueueAssociator;
 using namespace ortc::services::test;
 
-ZS_DECLARE_USING_PTR(zsLib, MessageQueueThread)
+ZS_DECLARE_USING_PTR(zsLib, IMessageQueueThread)
 ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
 
 ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimer, UseBackOffTimer)
 ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimerDelegate, UseBackOffTimerDelegate)
 ZS_DECLARE_TYPEDEF_PTR(ortc::services::IBackOffTimerPattern, UseBackOffTimerPattern)
-ZS_DECLARE_TYPEDEF_PTR(ortc::services::ISettings, UseSettings)
+ZS_DECLARE_TYPEDEF_PTR(zsLib::ISettings, UseSettings)
 
 template <typename duration_type>
 static void timeCheck(
@@ -206,7 +207,7 @@ static void testRetry4()
   TESTING_CHECK(backoff->haveAllAttemptsFailed())
 }
 
-static void testRetry5(MessageQueueThreadPtr queue)
+static void testRetry5(IMessageQueueThreadPtr queue)
 {
   ZS_DECLARE_CLASS_PTR(BackoffDelegate)
 
@@ -324,7 +325,7 @@ void doTestBackoffRetry()
 
   TESTING_INSTALL_LOGGER();
 
-  MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
+  IMessageQueueThreadPtr thread(IMessageQueueThread::createBasic());
 
   UseSettings::clearAll();
   UseSettings::applyDefaults();

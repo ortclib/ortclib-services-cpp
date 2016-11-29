@@ -254,8 +254,6 @@ namespace ortc
         mTotalSendingPeriodWithoutIssues(Milliseconds(0)),
         mForceACKOfSentPacketsRequestID(0)
       {
-        IHelper::setTimerThreadPriority();
-
         ZS_LOG_DETAIL(log("created"))
         if (mCalculatedRTT < mMinimumRTT)
           mCalculatedRTT = mMinimumRTT;
@@ -792,7 +790,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::onTimer(TimerPtr timer)
+      void RUDPChannelStream::onTimer(ITimerPtr timer)
       {
         ZS_LOG_TRACE(log("tick") + ZS_PARAM("timer ID", timer->getID()))
 
@@ -1507,7 +1505,7 @@ namespace ortc
             Milliseconds burstDuration = mCalculatedRTT / ((int)mAvailableBurstBatons);
 
             // all available bursts should happen in one RTT
-            mBurstTimer = Timer::create(mThisWeak.lock(), burstDuration);
+            mBurstTimer = ITimer::create(mThisWeak.lock(), burstDuration);
             if (burstDuration < Milliseconds(ORTC_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS)) {
               burstDuration = Milliseconds(ORTC_SERVICES_RUDP_MINIMUM_BURST_TIMER_IN_MILLISECONDS);
             }
@@ -1528,7 +1526,7 @@ namespace ortc
             Milliseconds ensureDuration = (mCalculatedRTT*3)/2;
 
             // The timer is set to fire at 1.5 x calculated RTT
-            mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer = Timer::create(mThisWeak.lock(), ensureDuration, false);
+            mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer = ITimer::create(mThisWeak.lock(), ensureDuration, false);
 
             ZS_LOG_TRACE(log("starting ensure timer to make sure packets get acked") + ZS_PARAM("timer ID", mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer->getID()) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()) + ZS_PARAM("ensure duration (ms)", ensureDuration) + ZS_PARAM("calculated RTT (ms)", mCalculatedRTT))
           }
@@ -1558,7 +1556,7 @@ namespace ortc
 
         if (addBatonsTimer) {
           if (!mAddToAvailableBurstBatonsTimer) {
-            mAddToAvailableBurstBatonsTimer = Timer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
+            mAddToAvailableBurstBatonsTimer = ITimer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
             ZS_LOG_TRACE(log("creating a new add to available batons timer") + ZS_PARAM("timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("frozen", mBandwidthIncreaseFrozen) + ZS_PARAM("available batons", mAvailableBurstBatons) + ZS_PARAM("write size", writeBuffers) + ZS_PARAM("sending size", mSendingPackets.size()))
           }
         } else {
@@ -1672,7 +1670,7 @@ namespace ortc
                     mAddToAvailableBurstBatonsTimer->cancel();
                     mAddToAvailableBurstBatonsTimer.reset();
 
-                    mAddToAvailableBurstBatonsTimer = Timer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
+                    mAddToAvailableBurstBatonsTimer = ITimer::create(mThisWeak.lock(), mAddToAvailableBurstBatonsDuation);
                     ZS_LOG_TRACE(log("add to available batons timer is set too small based on calculated RTT") + ZS_PARAM("old timer ID", oldTimerID) + ZS_PARAM("new timer ID", mAddToAvailableBurstBatonsTimer->getID()) + ZS_PARAM("duration milliseconds (ms)", mAddToAvailableBurstBatonsDuation))
                   }
                 }

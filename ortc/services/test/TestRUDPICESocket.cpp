@@ -30,10 +30,10 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <ortc/services/IICESocket.h>
 #include <ortc/services/IICESocketSession.h>
 #include <ortc/services/IRUDPTransport.h>
@@ -475,8 +475,8 @@ void doTestRUDPICESocket()
 
   TESTING_INSTALL_LOGGER();
 
-  zsLib::MessageQueueThreadPtr threadClient(zsLib::MessageQueueThread::createBasic());
-  zsLib::MessageQueueThreadPtr threadServer(ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER ? zsLib::MessageQueueThread::createBasic() : zsLib::MessageQueueThreadPtr());
+  zsLib::IMessageQueueThreadPtr threadClient(zsLib::IMessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr threadServer(ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER ? zsLib::IMessageQueueThread::createBasic() : zsLib::IMessageQueueThreadPtr());
 
   TestRUDPListenerCallbackPtr testObjectServer(ORTC_SERVICE_TEST_RUNNING_RUDP_LOCAL_SERVER ? TestRUDPListenerCallback::create(threadServer, ORTC_SERVICE_TEST_RUDP_SERVER_PORT) : TestRUDPListenerCallbackPtr());
 

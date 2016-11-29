@@ -38,8 +38,7 @@
 
 #include <ortc/services/internal/services_Helper.h>
 
-#include <ortc/services/ISettings.h>
-
+#include <zsLib/ISettings.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
@@ -88,8 +87,6 @@ namespace ortc
       HTTP::HTTP(const make_private &) :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
-        IHelper::setSocketThreadPriority();
-
         mHTTPClient = ref new HttpClient();
         if (!mHTTPClient) {
           ZS_LOG_ERROR(Basic, log("create to create HTTP client object"))
@@ -521,7 +518,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::onTimer(TimerPtr onTimer)
+      void HTTP::HTTPQuery::onTimer(ITimerPtr onTimer)
       {
         ZS_LOG_TRACE(log("on timer called"))
         cancel();
@@ -565,7 +562,7 @@ namespace ortc
           }
           timeout = zsLib::now() + defaultTimeout;
         }
-        mTimer = Timer::create(mThisWeak.lock(), timeout);
+        mTimer = ITimer::create(mThisWeak.lock(), timeout);
 
         if (ZS_IS_LOGGING(Debug)) {
           ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))

@@ -36,9 +36,9 @@
 #endif //_WIN32
 
 #include <zsLib/types.h>
+#include <zsLib/eventing/types.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
-#include <zsLib/MessageQueueThread.h>
 #include <zsLib/Singleton.h>
 
 // special case where CryptoPP extension class is needed
@@ -49,6 +49,7 @@ namespace ortc
   namespace services
   {
     using std::make_shared;
+    using std::size_t;
 
     namespace internal
     {
@@ -89,10 +90,8 @@ namespace ortc
     using zsLib::Singleton;
     using zsLib::Optional;
 
-    typedef zsLib::ThreadPriorities ThreadPriorities;
-
-    ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock)
-    ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock)
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock);
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock);
 
     class SharedRecursiveLock
     {
@@ -130,90 +129,87 @@ namespace ortc
       bool mSet;
     };
 
-    ZS_DECLARE_USING_PTR(zsLib, Socket)
-    ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate)
-    ZS_DECLARE_USING_PTR(zsLib, IMessageQueue)
+    ZS_DECLARE_USING_PTR(zsLib, Socket);
+    ZS_DECLARE_USING_PTR(zsLib, ISocketDelegate);
+    ZS_DECLARE_USING_PTR(zsLib, IMessageQueue);
 
-    ZS_DECLARE_USING_PTR(zsLib::XML, Element)
-    ZS_DECLARE_USING_PTR(zsLib::XML, Document)
-    ZS_DECLARE_USING_PTR(zsLib::XML, Text)
+    ZS_DECLARE_USING_PTR(zsLib::XML, Element);
+    ZS_DECLARE_USING_PTR(zsLib::XML, Document);
+    ZS_DECLARE_USING_PTR(zsLib::XML, Text);
 
     typedef CryptoPP::SecBlock<byte, CryptoPP::AllocatorWithNul<byte> > SecureByteBlockWithNulAllocator;
-    ZS_DECLARE_TYPEDEF_PTR(SecureByteBlockWithNulAllocator, SecureByteBlock)
+    ZS_DECLARE_TYPEDEF_PTR(SecureByteBlockWithNulAllocator, SecureByteBlock);
 
-    ZS_DECLARE_INTERACTION_PTR(IBackgrounding)
-    ZS_DECLARE_INTERACTION_PTR(IBackgroundingNotifier)
-    ZS_DECLARE_INTERACTION_PTR(IBackgroundingQuery)
-    ZS_DECLARE_INTERACTION_PTR(IBackOffTimerPattern)
-    ZS_DECLARE_INTERACTION_PTR(IBackOffTimer)
-    ZS_DECLARE_INTERACTION_PTR(ICache)
-    ZS_DECLARE_INTERACTION_PTR(ICacheDelegate)
-    ZS_DECLARE_INTERACTION_PTR(ICanonicalXML)
-    ZS_DECLARE_INTERACTION_PTR(IDHKeyDomain)
-    ZS_DECLARE_INTERACTION_PTR(IDHPrivateKey)
-    ZS_DECLARE_INTERACTION_PTR(IDHPublicKey)
-    ZS_DECLARE_INTERACTION_PTR(IDecryptor)
-    ZS_DECLARE_INTERACTION_PTR(IDNS)
-    ZS_DECLARE_INTERACTION_PTR(IDNSQuery)
-    ZS_DECLARE_INTERACTION_PTR(IEncryptor)
-    ZS_DECLARE_INTERACTION_PTR(IHelper)
-    ZS_DECLARE_INTERACTION_PTR(IICESocket)
-    ZS_DECLARE_INTERACTION_PTR(IICESocketSession)
-    ZS_DECLARE_INTERACTION_PTR(IHTTP)
-    ZS_DECLARE_INTERACTION_PTR(IHTTPQuery)
-    ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel)
-    ZS_DECLARE_INTERACTION_PTR(IMessageQueueManager)
-    ZS_DECLARE_INTERACTION_PTR(IReachability)
-    ZS_DECLARE_INTERACTION_PTR(IRSAPrivateKey)
-    ZS_DECLARE_INTERACTION_PTR(IRSAPublicKey)
-    ZS_DECLARE_INTERACTION_PTR(IRUDPListener)
-    ZS_DECLARE_INTERACTION_PTR(IRUDPMessaging)
-    ZS_DECLARE_INTERACTION_PTR(IRUDPChannel)
-    ZS_DECLARE_INTERACTION_PTR(IRUDPTransport)
-    ZS_DECLARE_INTERACTION_PTR(ISettings)
-    ZS_DECLARE_INTERACTION_PTR(ISettingsDelegate)
-    ZS_DECLARE_INTERACTION_PTR(ISTUNDiscovery)
-    ZS_DECLARE_INTERACTION_PTR(ISTUNRequester)
-    ZS_DECLARE_INTERACTION_PTR(ITCPMessaging)
-    ZS_DECLARE_INTERACTION_PTR(ITransportStream)
-    ZS_DECLARE_INTERACTION_PTR(ITransportStreamReader)
-    ZS_DECLARE_INTERACTION_PTR(ITransportStreamWriter)
-    ZS_DECLARE_INTERACTION_PTR(ITURNSocket)
+    ZS_DECLARE_INTERACTION_PTR(IBackgrounding);
+    ZS_DECLARE_INTERACTION_PTR(IBackgroundingNotifier);
+    ZS_DECLARE_INTERACTION_PTR(IBackgroundingQuery);
+    ZS_DECLARE_INTERACTION_PTR(IBackOffTimerPattern);
+    ZS_DECLARE_INTERACTION_PTR(IBackOffTimer);
+    ZS_DECLARE_INTERACTION_PTR(ICache);
+    ZS_DECLARE_INTERACTION_PTR(ICacheDelegate);
+    ZS_DECLARE_INTERACTION_PTR(ICanonicalXML);
+    ZS_DECLARE_INTERACTION_PTR(IDHKeyDomain);
+    ZS_DECLARE_INTERACTION_PTR(IDHPrivateKey);
+    ZS_DECLARE_INTERACTION_PTR(IDHPublicKey);
+    ZS_DECLARE_INTERACTION_PTR(IDecryptor);
+    ZS_DECLARE_INTERACTION_PTR(IDNS);
+    ZS_DECLARE_INTERACTION_PTR(IDNSQuery);
+    ZS_DECLARE_INTERACTION_PTR(IEncryptor);
+    ZS_DECLARE_INTERACTION_PTR(IHelper);
+    ZS_DECLARE_INTERACTION_PTR(IICESocket);
+    ZS_DECLARE_INTERACTION_PTR(IICESocketSession);
+    ZS_DECLARE_INTERACTION_PTR(IHTTP);
+    ZS_DECLARE_INTERACTION_PTR(IHTTPQuery);
+    ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel);
+    ZS_DECLARE_INTERACTION_PTR(IReachability);
+    ZS_DECLARE_INTERACTION_PTR(IRSAPrivateKey);
+    ZS_DECLARE_INTERACTION_PTR(IRSAPublicKey);
+    ZS_DECLARE_INTERACTION_PTR(IRUDPListener);
+    ZS_DECLARE_INTERACTION_PTR(IRUDPMessaging);
+    ZS_DECLARE_INTERACTION_PTR(IRUDPChannel);
+    ZS_DECLARE_INTERACTION_PTR(IRUDPTransport);
+    ZS_DECLARE_INTERACTION_PTR(ISettingsDelegate);
+    ZS_DECLARE_INTERACTION_PTR(ISTUNDiscovery);
+    ZS_DECLARE_INTERACTION_PTR(ISTUNRequester);
+    ZS_DECLARE_INTERACTION_PTR(ITCPMessaging);
+    ZS_DECLARE_INTERACTION_PTR(ITransportStream);
+    ZS_DECLARE_INTERACTION_PTR(ITransportStreamReader);
+    ZS_DECLARE_INTERACTION_PTR(ITransportStreamWriter);
+    ZS_DECLARE_INTERACTION_PTR(ITURNSocket);
 
-    ZS_DECLARE_INTERACTION_PROXY(IBackgroundingDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IBackgroundingCompletionDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IBackOffTimerDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IDNSDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IICESocketDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IICESocketSessionDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IHTTPQueryDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IMessageLayerSecurityChannelDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IReachabilityDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IRUDPListenerDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IRUDPMessagingDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IRUDPTransportDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ISTUNDiscoveryDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ISTUNRequesterDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ITCPMessagingDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamReaderDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamWriterDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(ITURNSocketDelegate)
-    ZS_DECLARE_INTERACTION_PROXY(IWakeDelegate)
+    ZS_DECLARE_INTERACTION_PROXY(IBackgroundingDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IBackgroundingCompletionDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IBackOffTimerDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IDNSDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IICESocketDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IICESocketSessionDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IHTTPQueryDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IMessageLayerSecurityChannelDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IReachabilityDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPListenerDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPMessagingDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPChannelDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IRUDPTransportDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ISTUNDiscoveryDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ISTUNRequesterDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ITCPMessagingDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamReaderDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ITransportStreamWriterDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(ITURNSocketDelegate);
 
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackgroundingSubscription, IBackgroundingDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackOffTimerSubscription, IBackOffTimerDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSubscription, IICESocketDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSessionSubscription, IICESocketSessionDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IMessageLayerSecurityChannelSubscription, IMessageLayerSecurityChannelDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IReachabilitySubscription, IReachabilityDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IRUDPTransportSubscription, IRUDPTransportDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITCPMessagingSubscription, ITCPMessagingDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamReaderSubscription, ITransportStreamReaderDelegate)
-    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamWriterSubscription, ITransportStreamWriterDelegate)
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackgroundingSubscription, IBackgroundingDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IBackOffTimerSubscription, IBackOffTimerDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSubscription, IICESocketDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IICESocketSessionSubscription, IICESocketSessionDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IMessageLayerSecurityChannelSubscription, IMessageLayerSecurityChannelDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IReachabilitySubscription, IReachabilityDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(IRUDPTransportSubscription, IRUDPTransportDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITCPMessagingSubscription, ITCPMessagingDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamReaderSubscription, ITransportStreamReaderDelegate);
+    ZS_DECLARE_INTERACTION_PROXY_SUBSCRIPTION(ITransportStreamWriterSubscription, ITransportStreamWriterDelegate);
 
-    ZS_DECLARE_STRUCT_PTR(RUDPPacket)
-    ZS_DECLARE_STRUCT_PTR(STUNPacket)
+    ZS_DECLARE_STRUCT_PTR(RUDPPacket);
+    ZS_DECLARE_STRUCT_PTR(STUNPacket);
 
     namespace internal
     {

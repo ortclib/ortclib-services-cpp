@@ -30,7 +30,7 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/String.h>
@@ -243,7 +243,7 @@ void doTestSTUNDiscovery()
   TESTING_CHECK(String("1.2.3.4") != String(ORTC_SERVICE_TEST_WHAT_IS_MY_IP));
 #endif //ORTC_SERVICE_TEST_WHAT_IS_MY_IP
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr thread(zsLib::IMessageQueueThread::createBasic());
 
   TestSTUNDiscoveryCallbackPtr testObject = TestSTUNDiscoveryCallback::create(thread, 45123, ORTC_SERVICE_TEST_STUN_SERVER_HOST, true);
   TestSTUNDiscoveryCallbackPtr testObject2 = TestSTUNDiscoveryCallback::create(thread, 45127, ORTC_SERVICE_TEST_STUN_SERVER_HOST, false);

@@ -206,11 +206,11 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark STUNDiscovery => IDNSDelegate
+      #pragma mark STUNDiscovery => ITimerDelegate
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::onTimer(TimerPtr timer)
+      void STUNDiscovery::onTimer(ITimerPtr timer)
       {
         //ServicesStunDiscoveryInternalTimerEvent(__func__, mID, timer->getID());
         ZS_EVENTING_2(x, i, Trace, ServicesStunDiscoveryInternalTimerEvent, os, StunDiscovery, InternalEvent, puid, id, mID, puid, timerId, timer->getID());
@@ -384,7 +384,7 @@ namespace ortc
 
         if (!mKeepWarmPingTimer) {
           ZS_LOG_TRACE(log("setup server ping timer") + ZS_PARAM("keep alive (s)", mOptions.mKeepWarmPingTime));
-          mKeepWarmPingTimer = Timer::create(mThisWeak.lock(), zsLib::now() + mOptions.mKeepWarmPingTime);
+          mKeepWarmPingTimer = ITimer::create(mThisWeak.lock(), zsLib::now() + mOptions.mKeepWarmPingTime);
         }
         return true;
       }

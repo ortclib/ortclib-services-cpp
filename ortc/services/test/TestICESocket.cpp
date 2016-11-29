@@ -30,10 +30,10 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <ortc/services/IICESocket.h>
 #include <ortc/services/IICESocketSession.h>
 
@@ -130,7 +130,7 @@ namespace ortc
                                           port
                                           );
 
-          mTimer = zsLib::Timer::create(mThisWeak.lock(), zsLib::Milliseconds(rand()%400+200));
+          mTimer = zsLib::ITimer::create(mThisWeak.lock(), zsLib::Milliseconds(rand()%400+200));
         }
 
       public:
@@ -282,7 +282,7 @@ namespace ortc
           zsLib::AutoRecursiveLock lock(getLock());
         }
 
-        virtual void onTimer(zsLib::TimerPtr timer)
+        virtual void onTimer(zsLib::ITimerPtr timer)
         {
           zsLib::AutoRecursiveLock lock(getLock());
           if (timer != mTimer) return;
@@ -427,7 +427,7 @@ namespace ortc
 
         TestICESocketCallbackWeakPtr mRemote;
 
-        zsLib::TimerPtr mTimer;
+        zsLib::ITimerPtr mTimer;
 
         IICESocketPtr mICESocket;
         SessionList mSessions;
@@ -461,7 +461,7 @@ void doTestICESocket()
 
   TESTING_SLEEP(1000)
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr thread(zsLib::IMessageQueueThread::createBasic());
 
   TestICESocketCallbackPtr testObject1;
   TestICESocketCallbackPtr testObject2;

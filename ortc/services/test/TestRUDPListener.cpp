@@ -30,10 +30,10 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <ortc/services/IRUDPListener.h>
 #include <ortc/services/IRUDPMessaging.h>
 #include <ortc/services/IHelper.h>
@@ -213,7 +213,7 @@ void doTestRUDPListener()
 
   TESTING_INSTALL_LOGGER();
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr thread(zsLib::IMessageQueueThread::createBasic());
 
   TestRUDPListenerCallbackPtr testObject1 = TestRUDPListenerCallback::create(thread, ORTC_SERVICE_TEST_RUDP_SERVER_PORT);
 

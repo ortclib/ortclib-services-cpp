@@ -34,7 +34,7 @@
 #include <ortc/services/IBackOffTimer.h>
 #include <ortc/services/internal/types.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #include <vector>
 
@@ -133,7 +133,7 @@ namespace ortc
         #pragma mark BackOffTimer => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer) override;
+        virtual void onTimer(ITimerPtr timer) override;
 
       protected:
         //---------------------------------------------------------------------
@@ -170,7 +170,7 @@ namespace ortc
 
         size_t mAttemptNumber {0};
 
-        TimerPtr mTimer;
+        ITimerPtr mTimer;
       };
 
       //-----------------------------------------------------------------------

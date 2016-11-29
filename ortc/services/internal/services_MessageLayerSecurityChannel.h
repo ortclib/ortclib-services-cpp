@@ -35,9 +35,9 @@
 #include <ortc/services/internal/types.h>
 
 #include <ortc/services/ITransportStream.h>
-#include <ortc/services/IWakeDelegate.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/IWakeDelegate.h>
 
 #include <list>
 #include <map>
@@ -220,7 +220,7 @@ namespace ortc
         #pragma mark MessageLayerSecurityChannel => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
       protected:
         //---------------------------------------------------------------------
@@ -333,7 +333,7 @@ namespace ortc
         KeyMap mSendKeys;
 
         bool mChangeKey {};
-        TimerPtr mChangeSendingKeyTimer;
+        ITimerPtr mChangeSendingKeyTimer;
       };
 
       //-----------------------------------------------------------------------

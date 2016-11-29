@@ -34,7 +34,7 @@
 #include <ortc/services/IBackgrounding.h>
 #include <ortc/services/internal/types.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #define ORTC_STACK_SETTING_BACKGROUNDING_PHASE_TIMEOUT "ortc/services/backgrounding-phase-$phase$-timeout-in-seconds"
 
@@ -118,7 +118,7 @@ namespace ortc
         #pragma mark Backgrounding => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -327,7 +327,7 @@ namespace ortc
 
         size_t mTotalNotifiersCreated;
 
-        TimerPtr mTimer;
+        ITimerPtr mTimer;
       };
 
       //-----------------------------------------------------------------------

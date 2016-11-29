@@ -34,6 +34,8 @@
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/ICache.h>
 
+#include <zsLib/eventing/IHasher.h>
+
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
 #include <zsLib/helpers.h>
@@ -73,7 +75,7 @@ namespace ortc
       //-----------------------------------------------------------------------
       static String getGenericCookieName(const String &name, int flags, const char *type)
       {
-        String hash = IHelper::convertToHex(*IHelper::hash(name + ":" + string(flags)));
+        String hash = IHelper::convertToHex(*IHasher::hash(name + ":" + string(flags)));
         return String(ORTC_SERVICES_DNSMONITOR_CACHE_NAMESPACE) + type + "/" + hash;
       }
 
@@ -415,8 +417,6 @@ namespace ortc
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mCtx(NULL)
       {
-        IHelper::setSocketThreadPriority();
-        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------
@@ -501,7 +501,7 @@ namespace ortc
           mSocket->setBlocking(false);
           mSocket->setDelegate(mThisWeak.lock());
 
-          mTimer = Timer::create(mThisWeak.lock(), Seconds(1), true);
+          mTimer = ITimer::create(mThisWeak.lock(), Seconds(1), true);
         }
         else {
           dns_free(mCtx);
@@ -904,7 +904,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::onTimer(TimerPtr timer)
+      void DNSMonitor::onTimer(ITimerPtr timer)
       {
         AutoRecursiveLock lock(*this);
         if (NULL == mCtx)

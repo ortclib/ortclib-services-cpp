@@ -38,31 +38,29 @@
 #include <ortc/services/IDNS.h>
 #include <ortc/services/ITURNSocket.h>
 #include <ortc/services/ISTUNDiscovery.h>
-#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/types.h>
 #include <zsLib/IPAddress.h>
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Socket.h>
 #include <zsLib/XML.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/IWakeDelegate.h>
 #include <zsLib/Log.h>
 
 #include <list>
 #include <tuple>
 
-#define ORTC_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "ortc/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS  "ortc/services/turn-candidates-must-remain-alive-after-ice-wake-up-in-seconds"
 
-#define ORTC_SERVICES_SETTING_FORCE_USE_TURN                                "ortc/services/debug/force-packets-over-turn"
-#define ORTC_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS          "ortc/services/debug/only-allow-data-sent-to-specific-ips"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_FORCE_USE_TURN                     "ortc/services/debug/force-packets-over-turn"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS          "ortc/services/debug/only-allow-data-sent-to-specific-ips"
 
-#define ORTC_SERVICES_SETTING_INTERFACE_NAME_ORDER                          "ortc/services/interface-name-order"
-#define ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_NAME_ORDER                          "ortc/services/interface-name-order"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_SUPPORT_IPV6             "ortc/services/support-ipv6"
 
-#define ORTC_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS        "ortc/services/max-ice-socket-rebind-attempt-duration-in-seconds"
+#define ORTC_SERVICES_SETTING_ICE_SOCKET_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS        "ortc/services/max-ice-socket-rebind-attempt-duration-in-seconds"
 #define ORTC_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE "ortc/services/ice-socket-fail-when-no-local-ips"
-
-#define ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6                        "ortc/services/support-ipv6"
 
 namespace ortc
 {
@@ -168,7 +166,7 @@ namespace ortc
 
         typedef std::map<RouteTuple, UseICESocketSessionPtr, RouteLess> QuickRouteMap;
 
-        typedef Helper::IPAddressMap IPAddressMap;
+        typedef IHelper::IPAddressSet IPAddressSet;
 
         struct TURNInfo
         {
@@ -179,7 +177,7 @@ namespace ortc
 
           Time              mTURNRetryAfter;
           Milliseconds      mTURNRetryDuration;
-          TimerPtr          mTURNRetryTimer;
+          ITimerPtr          mTURNRetryTimer;
 
           CandidatePtr      mRelay;
 
@@ -402,7 +400,7 @@ namespace ortc
         #pragma mark ICESocket => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -559,7 +557,7 @@ namespace ortc
         LocalSocketSTUNDiscoveryMap mSocketSTUNs;
         LocalSocketMap              mSockets;
 
-        TimerPtr            mRebindTimer;
+        ITimerPtr           mRebindTimer;
         Time                mRebindAttemptStartTime;
         bool                mRebindCheckNow {};
 
@@ -579,7 +577,7 @@ namespace ortc
         DWORD               mLastCandidateCRC;
 
         bool                mForceUseTURN;
-        IPAddressMap        mRestrictedIPs;
+        IPAddressSet        mRestrictedIPs;
 
         InterfaceNameToOrderMap mInterfaceOrders;
 

@@ -30,10 +30,10 @@
  */
 
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <zsLib/String.h>
 #include <zsLib/XML.h>
 
@@ -78,9 +78,9 @@ using zsLib::ULONG;
 using zsLib::MessageQueueAssociator;
 using zsLib::ISocketDelegate;
 using zsLib::ITimerDelegate;
-using zsLib::MessageQueueThread;
+using zsLib::IMessageQueueThread;
 using zsLib::Seconds;
-using zsLib::MessageQueueThreadPtr;
+using zsLib::IMessageQueueThreadPtr;
 using namespace zsLib::XML;
 
 ZS_DECLARE_TYPEDEF_PTR(ortc::services::IHelper, UseServicesHelper);
@@ -114,8 +114,8 @@ namespace ortc
         typedef zsLib::MessageQueueAssociator MessageQueueAssociator;
         typedef zsLib::IMessageQueuePtr IMessageQueuePtr;
         typedef zsLib::AutoRecursiveLock AutoRecursiveLock;
-        typedef zsLib::Timer Timer;
-        typedef zsLib::TimerPtr TimerPtr;
+        typedef zsLib::ITimer ITimer;
+        typedef zsLib::ITimerPtr ITimerPtr;
         typedef zsLib::RecursiveLock RecursiveLock;
         typedef ITURNSocket::URIList URIList;
 
@@ -289,7 +289,7 @@ namespace ortc
           }
 
           if (!mTimer) {
-            mTimer = Timer::create(mThisWeak.lock(), Milliseconds(rand() % 400 + 200));
+            mTimer = ITimer::create(mThisWeak.lock(), Milliseconds(rand() % 400 + 200));
           }
         }
 
@@ -571,7 +571,7 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onTimer(TimerPtr timer)
+        virtual void onTimer(ITimerPtr timer)
         {
           AutoRecursiveLock lock(mLock);
           if (timer != mTimer) return;
@@ -768,7 +768,7 @@ namespace ortc
 
         IHTTPQueryPtr mCredentialsQuery;
 
-        TimerPtr mTimer;
+        ITimerPtr mTimer;
 
         ULONG mTotalReceived {};
 
@@ -798,7 +798,7 @@ void doTestTURNSocket()
   TESTING_CHECK(!(turnPasswordValid && turnAPIKeyValid));
   TESTING_CHECK(turnPasswordValid || turnAPIKeyValid);
 
-  MessageQueueThreadPtr thread(MessageQueueThread::createBasic());
+  IMessageQueueThreadPtr thread(IMessageQueueThread::createBasic());
 
   zsLib::WORD port1 = 0;
   zsLib::WORD port2 = 0;

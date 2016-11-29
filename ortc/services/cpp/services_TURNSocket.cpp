@@ -34,10 +34,10 @@
 #include <ortc/services/internal/services_wire.h>
 #include <ortc/services/internal/services.events.h>
 
-#include <ortc/services/ISettings.h>
 #include <ortc/services/STUNPacket.h>
 #include <ortc/services/ISTUNRequesterManager.h>
 
+#include <zsLib/ISettings.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
@@ -74,6 +74,8 @@ namespace ortc
       typedef TURNSocket::IPAddressList IPAddressList;
 
       using zsLib::ISocketDelegateProxy;
+
+      ZS_DECLARE_CLASS_PTR(TURNSocketSettingsDefaults);
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -122,6 +124,54 @@ namespace ortc
         return "UNDEFINED";
       }
 
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark TURNSocketSettingsDefaults
+      #pragma mark
+
+      class TURNSocketSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~TURNSocketSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static TURNSocketSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<TURNSocketSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static TURNSocketSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<TURNSocketSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_TCP, false);
+          ISettings::setBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_UDP, false);
+          ISettings::setUInt(ORTC_SERVICES_SETTING_TURN_SOCKET_BACKGROUNDING_PHASE, 4);
+          ISettings::setString(ORTC_SERVICES_SETTING_TURN_SOCKET_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS, "");
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installTURNSocketSettingsDefaults()
+      {
+        TURNSocketSettingsDefaults::singleton();
+      }
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -144,8 +194,8 @@ namespace ortc
         mOptions(options),
         mLastSentDataToServer(zsLib::now()),
         mLastRefreshTimerWasSentAt(zsLib::now()),
-        mForceTURNUseUDP(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP)),
-        mForceTURNUseTCP(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP))
+        mForceTURNUseUDP(ISettings::getBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_UDP)),
+        mForceTURNUseTCP(ISettings::getBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_TCP))
       {
         mOptions.mSRVUDP = IDNS::cloneSRV(mOptions.mSRVUDP);
         mOptions.mSRVTCP = IDNS::cloneSRV(mOptions.mSRVTCP);
@@ -192,18 +242,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TURNSocket::init()
       {
-        IHelper::setSocketThreadPriority();
-        IHelper::setTimerThreadPriority();
-
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
 
-        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
+        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_TURN_SOCKET_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
         mBackgroundingSubscription = IBackgrounding::subscribe(
                                                                mThisWeak.lock(),
-                                                               ISettings::getUInt(ORTC_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE)
+                                                               ISettings::getUInt(ORTC_SERVICES_SETTING_TURN_SOCKET_BACKGROUNDING_PHASE)
                                                                );
 
         step();
@@ -1225,7 +1272,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TURNSocket::onTimer(TimerPtr timer)
+      void TURNSocket::onTimer(ITimerPtr timer)
       {
         //ServicesTurnSocketInternalTimerEvent(__func__, mID, timer->getID());
         ZS_EVENTING_2(
@@ -1614,7 +1661,7 @@ namespace ortc
 
         // we know the relay address... make sure we have a timer setup to do refresh before the expiry
         if (!mRefreshTimer) {
-          mRefreshTimer = Timer::create(mThisWeak.lock(), Seconds(10));
+          mRefreshTimer = ITimer::create(mThisWeak.lock(), Seconds(10));
         }
 
         // scope: we need to make sure all permissions are installed
@@ -1637,7 +1684,7 @@ namespace ortc
 
         // we need to refresh permissions every 4 minutes
         if (!mPermissionTimer) {
-          mPermissionTimer = Timer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS));  // refresh permissions every 4 minutes
+          mPermissionTimer = ITimer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_TURN_PERMISSION_RETRY_IN_SECONDS));  // refresh permissions every 4 minutes
         }
 
         // finally we need to make sure all channels are created imemdiately
@@ -1851,7 +1898,7 @@ namespace ortc
           server->mServerIP = result;
           server->mActivateAfter = activateAfter;
 
-          server->mActivationTimer = Timer::create(mThisWeak.lock(), activateAfter);
+          server->mActivationTimer = ITimer::create(mThisWeak.lock(), activateAfter);
           mActivationTimers[server->mActivationTimer->getID()] = server->mActivationTimer;
 
           activateAfter += Seconds(ORTC_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS);
@@ -1988,7 +2035,7 @@ namespace ortc
                             );
 
               if (!mDeallocTimer) {
-                mDeallocTimer = Timer::create(mGracefulShutdownReference, Seconds(1));
+                mDeallocTimer = ITimer::create(mGracefulShutdownReference, Seconds(1));
               }
             }
 
@@ -2608,7 +2655,7 @@ namespace ortc
           for (ChannelNumberMap::iterator iter = mChannelNumberMap.begin(); iter != mChannelNumberMap.end(); ++iter) {
             ChannelInfoPtr info = (*iter).second;
             if (! (info->mRefreshTimer)) {
-              info->mRefreshTimer = Timer::create(mThisWeak.lock(), Seconds(9*10)); // channel bindings last for 10 minutes so refresh at 9 minutes
+              info->mRefreshTimer = ITimer::create(mThisWeak.lock(), Seconds(9*10)); // channel bindings last for 10 minutes so refresh at 9 minutes
             }
 
             if ((!info->mBound) &&

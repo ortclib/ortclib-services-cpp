@@ -32,10 +32,10 @@
 #include <ortc/services/internal/services_TCPMessaging.h>
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/IHTTP.h>
-#include <ortc/services/ISettings.h>
 
 #include <cryptopp/queue.h>
 
+#include <zsLib/ISettings.h>
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 #include <zsLib/helpers.h>
@@ -50,11 +50,13 @@ namespace ortc
   namespace services
   {
     using zsLib::DWORD;
-    using zsLib::Timer;
+    using zsLib::ITimer;
     using zsLib::ISocketDelegateProxy;
 
     namespace internal
     {
+      ZS_DECLARE_CLASS_PTR(TCPMessagingSettingsDefaults);
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -62,6 +64,52 @@ namespace ortc
       #pragma mark
       #pragma mark (helpers)
       #pragma mark
+
+
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark TCPMessagingSettingsDefaults
+      #pragma mark
+
+      class TCPMessagingSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~TCPMessagingSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static TCPMessagingSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<TCPMessagingSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static TCPMessagingSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<TCPMessagingSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE, 5);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installTCPMessagingSettingsDefaults()
+      {
+        TCPMessagingSettingsDefaults::singleton();
+      }
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -90,9 +138,6 @@ namespace ortc
         mSendingQueue(make_shared<ByteQueue>()),
         mReceivingQueue(make_shared<ByteQueue>())
       {
-        IHelper::setSocketThreadPriority();
-        IHelper::setTimerThreadPriority();
-
         ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
         ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)
@@ -278,7 +323,7 @@ namespace ortc
         if ((!mLingerTimer) &&
             (pThis)) {
           if (lingerTime >= Seconds(0)) {
-            mLingerTimer = Timer::create(mThisWeak.lock(), lingerTime, false);
+            mLingerTimer = ITimer::create(mThisWeak.lock(), lingerTime, false);
           }
         }
 
@@ -511,7 +556,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::onTimer(TimerPtr timer)
+      void TCPMessaging::onTimer(ITimerPtr timer)
       {
         AutoRecursiveLock lock(getLock());
 

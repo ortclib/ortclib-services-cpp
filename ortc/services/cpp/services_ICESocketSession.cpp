@@ -39,9 +39,9 @@
 #include <ortc/services/internal/services_wire.h>
 
 #include <ortc/services/IICESocket.h>
-#include <ortc/services/ISettings.h>
 #include <ortc/services/ISTUNRequester.h>
 
+#include <zsLib/ISettings.h>
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
@@ -67,6 +67,8 @@ namespace ortc
   {
     namespace internal
     {
+      ZS_DECLARE_CLASS_PTR(ICESocketSessionSettingsDefaults);
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -151,6 +153,51 @@ namespace ortc
         return true;
       }
 
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ICESocketSessionSettingsDefaults
+      #pragma mark
+
+      class ICESocketSessionSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~ICESocketSessionSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static ICESocketSessionSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<ICESocketSessionSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static ICESocketSessionSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<ICESocketSessionSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE, 4);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installICESocketSessionSettingsDefaults()
+      {
+        ICESocketSessionSettingsDefaults::singleton();
+      }
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -224,8 +271,6 @@ namespace ortc
         mLastReceivedDataOrSTUN(zsLib::now()),
         mKeepAliveDuration(Seconds(ORTC_SERVICES_ICESOCKETSESSION_DEFAULT_KEEPALIVE_INDICATION_TIME_IN_SECONDS))
       {
-        IHelper::setTimerThreadPriority();
-
         ZS_LOG_BASIC(log("created"))
 
         mLocalUsernameFrag = getSocket()->getUsernameFrag();
@@ -1336,7 +1381,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::onTimer(TimerPtr timer)
+      void ICESocketSession::onTimer(ITimerPtr timer)
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) return;
@@ -2037,7 +2082,7 @@ namespace ortc
 
           ZS_LOG_DEBUG(log("creating activate timer"))
 
-          mActivateTimer = Timer::create(mThisWeak.lock(), Milliseconds(ORTC_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
+          mActivateTimer = ITimer::create(mThisWeak.lock(), Milliseconds(ORTC_SERVICES_ICESOCKETSESSION_ACTIVATE_TIMER_IN_MS)); // this will cause candidates to start searching right away
           return true;
         }
 
@@ -2090,7 +2135,7 @@ namespace ortc
         if (!mNominated) {
           if (mStepTimer) return true;
 
-          mStepTimer = Timer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS)); // this will cause candidates to start searching right away
+          mStepTimer = ITimer::create(mThisWeak.lock(), Seconds(ORTC_SERVICES_ICESOCKETSESSION_STEP_TIMER_IN_SECONDS)); // this will cause candidates to start searching right away
           return true;
         }
 
@@ -2110,7 +2155,7 @@ namespace ortc
         if (needed) {
           if (mExpectingDataTimer) return true;
 
-          mExpectingDataTimer = Timer::create(mThisWeak.lock(), mExpectSTUNOrDataWithinDuration); // this will cause candidates to start searching right away
+          mExpectingDataTimer = ITimer::create(mThisWeak.lock(), mExpectSTUNOrDataWithinDuration); // this will cause candidates to start searching right away
 
           return true;
         }
@@ -2131,7 +2176,7 @@ namespace ortc
         if (needed) {
           if (mKeepAliveTimer) return true;
 
-          mKeepAliveTimer = Timer::create(mThisWeak.lock(), mKeepAliveDuration); // this will cause candidates to start searching right away
+          mKeepAliveTimer = ITimer::create(mThisWeak.lock(), mKeepAliveDuration); // this will cause candidates to start searching right away
 
           return true;
         }

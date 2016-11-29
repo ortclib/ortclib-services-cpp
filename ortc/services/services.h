@@ -49,7 +49,6 @@
 #include <ortc/services/IICESocketSession.h>
 #include <ortc/services/ILogger.h>
 #include <ortc/services/IMessageLayerSecurityChannel.h>
-#include <ortc/services/IMessageQueueManager.h>
 #include <ortc/services/IReachability.h>
 #include <ortc/services/IRSAPrivateKey.h>
 #include <ortc/services/IRSAPublicKey.h>
@@ -57,14 +56,12 @@
 #include <ortc/services/IRUDPListener.h>
 #include <ortc/services/IRUDPMessaging.h>
 #include <ortc/services/IRUDPTransport.h>
-#include <ortc/services/ISettings.h>
 #include <ortc/services/ISTUNDiscovery.h>
 #include <ortc/services/ISTUNRequester.h>
 #include <ortc/services/ISTUNRequesterManager.h>
 #include <ortc/services/ITCPMessaging.h>
 #include <ortc/services/ITransportStream.h>
 #include <ortc/services/ITURNSocket.h>
-#include <ortc/services/IWakeDelegate.h>
 #include <ortc/services/STUNPacket.h>
 #include <ortc/services/RUDPPacket.h>
 #include <ortc/services/RUDPProtocol.h>

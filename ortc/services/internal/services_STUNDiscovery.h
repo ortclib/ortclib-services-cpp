@@ -37,7 +37,7 @@
 #include <ortc/services/ISTUNRequester.h>
 
 #include <zsLib/MessageQueueAssociator.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 namespace ortc
 {
@@ -122,7 +122,7 @@ namespace ortc
         #pragma mark STUNDiscovery => IDNSDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer) override;
+        virtual void onTimer(ITimerPtr timer) override;
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -179,7 +179,7 @@ namespace ortc
 
         IPAddressList mPreviouslyContactedServers;
 
-        TimerPtr mKeepWarmPingTimer;
+        ITimerPtr mKeepWarmPingTimer;
       };
 
       //-----------------------------------------------------------------------

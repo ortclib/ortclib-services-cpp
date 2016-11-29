@@ -34,10 +34,10 @@
 #include <ortc/services/ITransportStream.h>
 #include <ortc/services/IHelper.h>
 
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 #include <zsLib/Exception.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 
@@ -113,7 +113,7 @@ namespace ortc
           mListenSocket->listen();
           mListenSocket->setDelegate(mThisWeak.lock());
 
-          mTimer = zsLib::Timer::create(mThisWeak.lock(), zsLib::Milliseconds(rand()%400+200));
+          mTimer = zsLib::ITimer::create(mThisWeak.lock(), zsLib::Milliseconds(rand()%400+200));
 
           mClientMessaging = ITCPMessaging::connect(mThisWeak.lock(), mClientReceiveStream->getStream(), mClientSendStream->getStream(), mHasChannelNumbers, serverIP);
         }
@@ -278,7 +278,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onTimer(zsLib::TimerPtr timer)
+        virtual void onTimer(zsLib::ITimerPtr timer)
         {
           AutoRecursiveLock lock(mLock);
           if (timer != mTimer) return;
@@ -357,7 +357,7 @@ namespace ortc
 
         bool mHasChannelNumbers;
 
-        zsLib::TimerPtr mTimer;
+        zsLib::ITimerPtr mTimer;
 
         SocketPtr mListenSocket;
 
@@ -400,7 +400,7 @@ void doTestTCPMessagingLoopback()
 
   TESTING_INSTALL_LOGGER();
 
-  zsLib::MessageQueueThreadPtr thread(zsLib::MessageQueueThread::createBasic());
+  zsLib::IMessageQueueThreadPtr thread(zsLib::IMessageQueueThread::createBasic());
 
   TestTCPMessagingLoopbackPtr testObject1;
   TestTCPMessagingLoopbackPtr testObject2;

@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="ortc">
       <UniqueIdentifier>{ff3dd779-a8c5-4f5a-a042-13da2a7013c9}</UniqueIdentifier>
     </Filter>
@@ -88,9 +84,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_MessageLayerSecurityChannel.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\internal\services_MessageQueueManager.h">
-      <Filter>ortc\services\internal</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_Reachability.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
@@ -113,9 +106,6 @@
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPTransport.h">
-      <Filter>ortc\services\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\internal\services_Settings.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNDiscovery.h">
@@ -175,9 +165,6 @@
     <ClInclude Include="..\..\..\ortc\services\IEncryptor.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\IFactory.h">
-      <Filter>ortc\services</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\IHelper.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
@@ -194,9 +181,6 @@
       <Filter>ortc\services</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h">
-      <Filter>ortc\services</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\IReachability.h">
@@ -220,9 +204,6 @@
     <ClInclude Include="..\..\..\ortc\services\IRUDPTransport.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\ISettings.h">
-      <Filter>ortc\services</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\ISTUNDiscovery.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
@@ -239,9 +220,6 @@
       <Filter>ortc\services</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\ITURNSocket.h">
-      <Filter>ortc\services</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\IWakeDelegate.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\RUDPPacket.h">
@@ -344,9 +322,6 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageLayerSecurityChannel.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageQueueManager.cpp">
-      <Filter>ortc\services\cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Reachability.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
@@ -375,9 +350,6 @@
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_services.cpp">
-      <Filter>ortc\services\cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_Settings.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNDiscovery.cpp">

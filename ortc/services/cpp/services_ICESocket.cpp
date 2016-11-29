@@ -37,10 +37,12 @@
 
 #include <ortc/services/ISTUNRequesterManager.h>
 #include <ortc/services/IHTTP.h>
-#include <ortc/services/ISettings.h>
 
+#include <ortc/services/IHTTP.h>
+#include <zsLib/eventing/IHasher.h>
 #include <zsLib/Exception.h>
 #include <zsLib/helpers.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/Numeric.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/SafeInt.h>
@@ -98,6 +100,8 @@ namespace ortc
 
     namespace internal
     {
+      ZS_DECLARE_CLASS_PTR(ICESocketSettingsDefaults);
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -137,6 +141,58 @@ namespace ortc
           case IICESocket::Type_Relayed:          return candidate.mRelatedIP;
         }
         return (candidate.mRelatedIP.isEmpty() ? candidate.mIPAddress : candidate.mRelatedIP);
+      }
+
+      
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark ICESocketSettingsDefaults
+      #pragma mark
+
+      class ICESocketSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~ICESocketSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static ICESocketSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<ICESocketSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static ICESocketSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<ICESocketSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setBool(ORTC_SERVICES_SETTING_ICE_SOCKET_FORCE_USE_TURN, false);
+          ISettings::setBool(ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_SUPPORT_IPV6, false);
+          ISettings::setUInt(ORTC_SERVICES_SETTING_ICE_SOCKET_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS, 60);
+          ISettings::setBool(ORTC_SERVICES_SETTING_ICE_SOCKET_NO_LOCAL_IPS_CAUSES_SOCKET_FAILURE, false);
+          ISettings::setString(ORTC_SERVICES_SETTING_ICE_SOCKET_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS, "");
+          ISettings::setString(ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_NAME_ORDER, "lo;en;pdp_ip;stf;gif;bbptp;p2p");
+          ISettings::setUInt(ORTC_SERVICES_SETTING_ICE_SOCKET_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS, 60 * 5);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installICESocketSettingsDefaults()
+      {
+        ICESocketSettingsDefaults::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -180,17 +236,14 @@ namespace ortc
 
         mLastCandidateCRC(0),
 
-        mForceUseTURN(ISettings::getBool(ORTC_SERVICES_SETTING_FORCE_USE_TURN)),
-        mSupportIPv6(ISettings::getBool(ORTC_SERVICES_SETTING_INTERFACE_SUPPORT_IPV6)),
+        mForceUseTURN(ISettings::getBool(ORTC_SERVICES_SETTING_ICE_SOCKET_FORCE_USE_TURN)),
+        mSupportIPv6(ISettings::getBool(ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_SUPPORT_IPV6)),
 
-        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS)))
+        mMaxRebindAttemptDuration(Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_ICE_SOCKET_MAX_REBIND_ATTEMPT_DURATION_IN_SECONDS)))
       {
-        IHelper::setSocketThreadPriority();
-        IHelper::setTimerThreadPriority();
-
         ZS_LOG_BASIC(log("created"))
 
-        String networkOrder = ISettings::getString(ORTC_SERVICES_SETTING_INTERFACE_NAME_ORDER);
+        String networkOrder = ISettings::getString(ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_NAME_ORDER);
         if (networkOrder.hasData()) {
           IHelper::SplitMap split;
           IHelper::split(networkOrder, split, ';');
@@ -219,7 +272,7 @@ namespace ortc
         AutoRecursiveLock lock(*this);
         ZS_LOG_DETAIL(log("init"))
 
-        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
+        String restricted = ISettings::getString(ORTC_SERVICES_SETTING_ICE_SOCKET_ONLY_ALLOW_DATA_SENT_TO_SPECIFIC_IPS);
         Helper::parseIPs(restricted, mRestrictedIPs);
 
         step();
@@ -367,7 +420,7 @@ namespace ortc
 
         mTURNLastUsed = zsLib::now();
 
-        mTURNShutdownIfNotUsedBy = Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS));
+        mTURNShutdownIfNotUsedBy = Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_ICE_SOCKET_TURN_CANDIDATES_MUST_REMAIN_ALIVE_AFTER_ICE_WAKE_UP_IN_SECONDS));
         mTURNShutdownIfNotUsedBy = (mTURNShutdownIfNotUsedBy > minimumTimeCandidatesMustRemainValidWhileNotUsed ? mTURNShutdownIfNotUsedBy : minimumTimeCandidatesMustRemainValidWhileNotUsed);
 
         step();
@@ -951,7 +1004,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void ICESocket::onTimer(TimerPtr timer)
+      void ICESocket::onTimer(ITimerPtr timer)
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer ID", timer->getID()))
 
@@ -1507,7 +1560,7 @@ namespace ortc
           String usernameFrag = (mFoundation ? mFoundation->getUsernameFrag() : mUsernameFrag);
 
           // algorithm to ensure that two candidates with same foundation IP / type end up with same foundation value
-          localSocket->mLocal->mFoundation = IHelper::convertToHex(*IHelper::hash("foundation:" + usernameFrag + ":" + bindIP.string(false) + ":" + toString(localSocket->mLocal->mType), IHelper::HashAlgorthm_MD5));;
+          localSocket->mLocal->mFoundation = IHelper::convertToHex(*IHasher::hash("foundation:" + usernameFrag + ":" + bindIP.string(false) + ":" + toString(localSocket->mLocal->mType), IHasher::md5()));;
 
           mSocketLocalIPs[bindIP] = localSocket;
           mSockets[socket] = localSocket;
@@ -1524,7 +1577,7 @@ namespace ortc
         }
 
         if (!mRebindTimer) {
-          mRebindTimer = Timer::create(mThisWeak.lock(), Seconds(mSockets.size() > 0 ? ORTC_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS : ORTC_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS));
+          mRebindTimer = ITimer::create(mThisWeak.lock(), Seconds(mSockets.size() > 0 ? ORTC_SERVICES_REBIND_TIMER_WHEN_HAS_SOCKETS_IN_SECONDS : ORTC_SERVICES_REBIND_TIMER_WHEN_NO_SOCKETS_IN_SECONDS));
         }
 
         if (!mMonitoringWriteReady) {
@@ -1639,7 +1692,7 @@ namespace ortc
 
             stunInfo->mReflexive->mIPAddress = stunInfo->mSTUNDiscovery->getMappedAddress();
             String usernameFrag = (mFoundation ? mFoundation->getUsernameFrag() : mUsernameFrag);
-            stunInfo->mReflexive->mFoundation = IHelper::convertToHex(*IHelper::hash("foundation:" + usernameFrag + ":" + stunInfo->mReflexive->mIPAddress.string(false) + ":" + toString(stunInfo->mReflexive->mType), IHelper::HashAlgorthm_MD5));;
+            stunInfo->mReflexive->mFoundation = IHelper::convertToHex(*IHasher::hash("foundation:" + usernameFrag + ":" + stunInfo->mReflexive->mIPAddress.string(false) + ":" + toString(stunInfo->mReflexive->mType), IHasher::md5()));;
 
             ZS_LOG_DEBUG(log("stun discovery complete") + ZS_PARAM("base IP", string(localSocket->mLocal->mIPAddress)) + ZS_PARAM("discovered", string(stunInfo->mReflexive->mIPAddress)))
           }
@@ -1741,7 +1794,7 @@ namespace ortc
                     turnInfo->mServerIP = turnInfo->mTURNSocket->getActiveServerIP();
 
                     String usernameFrag = (mFoundation ? mFoundation->getUsernameFrag() : mUsernameFrag);
-                    turnInfo->mRelay->mFoundation = IHelper::convertToHex(*IHelper::hash("foundation:" + usernameFrag + ":" + turnInfo->mRelay->mIPAddress.string(false) + ":" + toString(turnInfo->mRelay->mType), IHelper::HashAlgorthm_MD5));;
+                    turnInfo->mRelay->mFoundation = IHelper::convertToHex(*IHasher::hash("foundation:" + usernameFrag + ":" + turnInfo->mRelay->mIPAddress.string(false) + ":" + toString(turnInfo->mRelay->mType), IHasher::md5()));;
 
                     // remember newly discovered relay IP address mapping
                     localSocket->mTURNRelayIPs[turnInfo->mRelay->mIPAddress] = turnInfo;
@@ -1969,7 +2022,7 @@ namespace ortc
                   }
 
                   ZS_LOG_DEBUG(log("must wait to retry logging into TURN server") + ZS_PARAM("wait time (ms)", waitTime) + ZS_PARAM("retry duration (ms)", turnInfo->mTURNRetryDuration) + ZS_PARAM("retry after", turnInfo->mTURNRetryAfter))
-                  turnInfo->mTURNRetryTimer = Timer::create(mThisWeak.lock(), waitTime, false);
+                  turnInfo->mTURNRetryTimer = ITimer::create(mThisWeak.lock(), waitTime, false);
                 }
               }
             }

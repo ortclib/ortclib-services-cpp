@@ -49,7 +49,7 @@
         },
         {
           "name": "enum",
-          "type": "uint64"
+          "type": "int64"
         },
         {
           "name": "duration",
@@ -70,7 +70,6 @@
         "services_HTTP.cpp",
         "services_HTTP_WinRT.cpp",
         "services_Logger.cpp",
-        "services_Settings.cpp",
         "services_STUNDiscovery.cpp",
         "services_STUNPacket.cpp",
         "services_STUNRequester.cpp",

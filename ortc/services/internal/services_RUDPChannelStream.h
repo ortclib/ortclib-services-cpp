@@ -36,7 +36,7 @@
 
 #include <ortc/services/ITransportStream.h>
 
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <zsLib/Exception.h>
 
 #include <map>
@@ -197,7 +197,7 @@ namespace ortc
         #pragma mark RUDPChannelStream => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -363,14 +363,14 @@ namespace ortc
         // congestion control parameters
         ULONG mAvailableBurstBatons;                            // how many "batons" (aka relay style batons) are available for sending new bursts right now
 
-        TimerPtr mBurstTimer;                                   // this timer will be used to consume the available batons until they are gone (the timer will be cancelled when there is no more available batons or there is no more data to send)
+        ITimerPtr mBurstTimer;                                   // this timer will be used to consume the available batons until they are gone (the timer will be cancelled when there is no more available batons or there is no more data to send)
 
         // If there is no burst timer and no "batons" available then when this
         // timer fires an external ACK must be delivered to ensure that data
         // has in fact been delivered to the other side.
-        TimerPtr mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer;
+        ITimerPtr mEnsureDataHasArrivedWhenNoMoreBurstBatonsAvailableTimer;
 
-        TimerPtr mAddToAvailableBurstBatonsTimer;               // add to the batons available when this timer fires (this timer is only active as long as there is data to send)
+        ITimerPtr mAddToAvailableBurstBatonsTimer;               // add to the batons available when this timer fires (this timer is only active as long as there is data to send)
         Milliseconds mAddToAvailableBurstBatonsDuation {};      // every time there is new congestion this duration is doubled
 
         ULONG mPacketsPerBurst;                                 // how many packets to deliver in a single burst

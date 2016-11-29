@@ -30,11 +30,11 @@
  */
 
 #include <ortc/services/internal/services_Reachability.h>
-#include <ortc/services/internal/services_MessageQueueManager.h>
 
 #include <ortc/services/IHelper.h>
-#include <ortc/services/ISettings.h>
 
+#include <zsLib/IMessageQueueManager.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/XML.h>
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }

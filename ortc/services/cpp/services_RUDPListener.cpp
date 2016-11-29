@@ -216,8 +216,6 @@ namespace ortc
         mBindPort(port),
         mRealm(realm ? realm : "")
       {
-        IHelper::setSocketThreadPriority();
-
         CryptoPP::AutoSeededRandomPool rng;
         rng.GenerateBlock(&(mMagic[0]), sizeof(mMagic));
 

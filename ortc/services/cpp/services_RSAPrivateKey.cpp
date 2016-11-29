@@ -34,6 +34,7 @@
 #include <ortc/services/ICache.h>
 #include <ortc/services/IHelper.h>
 
+#include <zsLib/eventing/IHasher.h>
 #include <zsLib/Log.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
@@ -77,7 +78,7 @@ namespace ortc
       //-----------------------------------------------------------------------
       static String getCookieName(const SecureByteBlock &buffer)
       {
-        String keyHash = IHelper::convertToHex(*IHelper::hash(buffer, IHelper::HashAlgorthm_SHA256));
+        String keyHash = IHelper::convertToHex(*IHasher::hash(buffer, IHasher::sha256()));
 
         String cookieName = ORTC_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_NAMESPACE + keyHash;
 

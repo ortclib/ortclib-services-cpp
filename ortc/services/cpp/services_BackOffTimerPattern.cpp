@@ -33,10 +33,10 @@
 #include <ortc/services/internal/services.events.h>
 
 #include <ortc/services/IHelper.h>
-#include <ortc/services/ISettings.h>
 
-#include <zsLib/XML.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/Numeric.h>
+#include <zsLib/XML.h>
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 

@@ -50,7 +50,6 @@
 #include <ortc/services/internal/services_ICESocketSession.h>
 #include <ortc/services/internal/services_Logger.h>
 #include <ortc/services/internal/services_MessageLayerSecurityChannel.h>
-#include <ortc/services/internal/services_MessageQueueManager.h>
 #include <ortc/services/internal/services_Reachability.h>
 #include <ortc/services/internal/services_RSAPrivateKey.h>
 #include <ortc/services/internal/services_RSAPublicKey.h>
@@ -59,7 +58,6 @@
 #include <ortc/services/internal/services_RUDPListener.h>
 #include <ortc/services/internal/services_RUDPMessaging.h>
 #include <ortc/services/internal/services_RUDPTransport.h>
-#include <ortc/services/internal/services_Settings.h>
 #include <ortc/services/internal/services_STUNDiscovery.h>
 #include <ortc/services/internal/services_STUNRequester.h>
 #include <ortc/services/internal/services_STUNRequesterManager.h>

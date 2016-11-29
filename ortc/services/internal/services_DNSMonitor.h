@@ -37,7 +37,7 @@
 #include <udns/udns.h>
 #include <zsLib/Socket.h>
 #include <zsLib/Proxy.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #define ORTC_SERVICE_INTERNAL_DNS_TEMP_FAILURE_BACKLIST_IN_SECONDS (15)
 #define ORTC_SERVICE_INTERNAL_DNS_OTHER_FAILURE_BACKLIST_IN_SECONDS ((60)*2)
@@ -182,7 +182,7 @@ namespace ortc
         virtual void onException(SocketPtr socket);
 
         // ITimerDelegate
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         // other
       public:
@@ -193,7 +193,7 @@ namespace ortc
 
         DNSMonitorWeakPtr mThisWeak;
         SocketPtr mSocket;
-        TimerPtr mTimer;
+        ITimerPtr mTimer;
 
         dns_ctx *mCtx;
 

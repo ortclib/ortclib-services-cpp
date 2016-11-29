@@ -38,8 +38,9 @@
 #include <ortc/services/IDHPrivateKey.h>
 #include <ortc/services/IDHPublicKey.h>
 #include <ortc/services/ICache.h>
-#include <ortc/services/ISettings.h>
 
+#include <zsLib/eventing/IHasher.h>
+#include <zsLib/ISettings.h>
 #include <zsLib/Log.h>
 #include <zsLib/XML.h>
 #include <zsLib/helpers.h>
@@ -65,9 +66,9 @@ namespace ortc
 
     namespace internal
     {
-      typedef zsLib::XML::Exceptions::CheckFailed CheckFailed;
+      ZS_DECLARE_CLASS_PTR(MessageLayerSecurityChannelSettingsDefaults);
 
-      ZS_DECLARE_TYPEDEF_PTR(services::ISettings, UseSettings)
+      typedef zsLib::XML::Exceptions::CheckFailed CheckFailed;
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -141,7 +142,7 @@ namespace ortc
         SecureByteBlockPtr iv = IHelper::convertFromHex(hexSalt);
         SecureByteBlockPtr input = IHelper::convertFromBase64(base64Value);
 
-        SecureByteBlockPtr key = IHelper::hmac(*IHelper::hmacKeyFromPassphrase(passphrase), "keying:" + nonce, IHelper::HashAlgorthm_SHA256);
+        SecureByteBlockPtr key = IHasher::hash("keying:" + nonce, IHasher::hmacSHA256(*IHasher::hmacKeyFromPassphrase(passphrase)));
 
         if ((IHelper::isEmpty(iv)) || (IHelper::isEmpty(key)) || (IHelper::isEmpty(input))) {
           ZS_LOG_WARNING(Debug, String("missing vital information required to be able to decrypt value"))
@@ -162,16 +163,62 @@ namespace ortc
 
         //hex(`<salt>`) + ":" + base64(encrypt(`<encrypted-value>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
 
-        SecureByteBlockPtr iv = IHelper::random(IHelper::getHashDigestSize(IHelper::HashAlgorthm_MD5));
+        SecureByteBlockPtr iv = IHelper::random(IHasher::md5DigestSize());
         String hexSalt = IHelper::convertToHex(*iv);
 
-        SecureByteBlockPtr key = IHelper::hmac(*IHelper::hmacKeyFromPassphrase(passphrase), "keying:" + nonce, IHelper::HashAlgorthm_SHA256);
+        SecureByteBlockPtr key = IHasher::hash("keying:" + nonce, IHasher::hmacSHA256(*IHasher::hmacKeyFromPassphrase(passphrase)));
 
         SecureByteBlockPtr output = IHelper::encrypt(*key, *iv, value);
 
         return IHelper::convertToHex(*iv) + ":" + IHelper::convertToBase64(*output);
       }
       
+
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark MessageLayerSecurityChannelSettingsDefaults
+      #pragma mark
+
+      class MessageLayerSecurityChannelSettingsDefaults : public ISettingsApplyDefaultsDelegate
+      {
+      public:
+        //-----------------------------------------------------------------------
+        ~MessageLayerSecurityChannelSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static MessageLayerSecurityChannelSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<MessageLayerSecurityChannelSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static MessageLayerSecurityChannelSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<MessageLayerSecurityChannelSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER, 60 * 60);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installMessageLayerSecurityChannelSettingsDefaults()
+      {
+        MessageLayerSecurityChannelSettingsDefaults::singleton();
+      }
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -886,7 +933,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::onTimer(TimerPtr timer)
+      void MessageLayerSecurityChannel::onTimer(ITimerPtr timer)
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer id", timer->getID()))
@@ -1157,9 +1204,9 @@ namespace ortc
             // decode the packet
             KeyInfo &keyInfo = (*found).second;
 
-            ZS_LOG_INSANE(log("decrypting key to use") + keyInfo.toDebug(algorithm))
+            ZS_LOG_INSANE(log("decrypting key to use") + keyInfo.toDebug(algorithm));
 
-            size_t integritySize = IHelper::getHashDigestSize(IHelper::HashAlgorthm_SHA1);
+            size_t integritySize = IHasher::sha1DigestSize();
 
             // must be greater in size than the hash algorithm
             if (remaining <= integritySize) {
@@ -1181,7 +1228,7 @@ namespace ortc
 
             SecureByteBlockPtr output = IHelper::decrypt(*(keyInfo.mSendKey), *(keyInfo.mNextIV), input);
 
-            String hashDecryptedBuffer = IHelper::convertToHex(*IHelper::hash(*output));
+            String hashDecryptedBuffer = IHelper::convertToHex(*IHasher::hash(*output));
 
             if (!output) {
               ZS_LOG_ERROR(Detail, log("unable to decrypte buffer"))
@@ -1197,10 +1244,10 @@ namespace ortc
 
             String hexIV = IHelper::convertToHex(*keyInfo.mNextIV);
 
-            SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + IHelper::convertToHex(*IHelper::hash(*output)) + ":" + hexIV).c_str());
+            SecureByteBlockPtr calculatedIntegrity = IHasher::hash(("integrity:" + IHelper::convertToHex(*IHasher::hash(*output)) + ":" + hexIV).c_str(), IHasher::hmacSHA1(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase))));
 
             if (ZS_IS_LOGGING(Debug)) {
-              String hashEncryptedBuffer = IHelper::convertToHex(*IHelper::hash(input));
+              String hashEncryptedBuffer = IHelper::convertToHex(*IHasher::hash(input));
               ZS_LOG_DEBUG(log("received data from wire") + ZS_PARAM("keying index", algorithm) + ZS_PARAM("buffer size", streamBuffer->SizeInBytes()) + ZS_PARAM("encrypted size", input.SizeInBytes()) + ZS_PARAM("decrypted size", output->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("calculated integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("received integrity", IHelper::convertToHex(*integrity)) + ZS_PARAM("integrity passphrase", keyInfo.mIntegrityPassphrase) + ZS_PARAM("decrypted data hash", hashDecryptedBuffer) + ZS_PARAM("encrypted data hash", hashEncryptedBuffer))
             }
 
@@ -1212,7 +1259,7 @@ namespace ortc
             }
 
             // calculate the next IV and remember the integrity field
-            keyInfo.mNextIV = IHelper::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
+            keyInfo.mNextIV = IHasher::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
             keyInfo.mLastIntegrity = calculatedIntegrity;
 
             mReceiveStreamDecoded->write(output, streamHeader);
@@ -1496,7 +1543,7 @@ namespace ortc
                 String proof = getElementTextAndDecode(encodingEl->findFirstChildElementChecked("proof"));
 
                 // hex(hmac(`<external-passphrase>`, "keying:" + `<nonce>`))
-                String calculatedProof = IHelper::convertToHex(*IHelper::hmac(*IHelper::hmacKeyFromPassphrase(mReceivePassphrase), "keying:" + nonce));
+                String calculatedProof = IHelper::convertToHex(*IHasher::hash("keying:" + nonce, IHasher::hmacSHA1(*IHasher::hmacKeyFromPassphrase(mReceivePassphrase))));
 
                 if (proof != calculatedProof) {
                   ZS_LOG_ERROR(Detail, log("keying encoding not using expecting passphrase") + ZS_PARAM("encoding proof", proof) + ZS_PARAM("expecting proof", calculatedProof) + ZS_PARAM("using passphrase", mReceivePassphrase))
@@ -1510,12 +1557,12 @@ namespace ortc
 
             // scope: check if nonce seen before
             {
-              String hashNonce = IHelper::convertToHex(*IHelper::hash(nonce));
+              String hashNonce = IHelper::convertToHex(*IHasher::hash(nonce));
               String nonceNamespace = ORTC_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE + hashNonce;
 
               String result = ICache::fetch(nonceNamespace);
               if (result.hasData()) {
-                ZS_LOG_ERROR(Detail, log("keying encoding seen previously") + ZS_PARAM("nonce", nonce) + ZS_PARAM("nonce namespace", nonceNamespace))
+                ZS_LOG_ERROR(Detail, log("keying encoding seen previously") + ZS_PARAM("nonce", nonce) + ZS_PARAM("nonce namespace", nonceNamespace));
                 setError(IHTTP::HTTPStatusCode_Forbidden, "keyhing encoding information was seen previously");
                 goto receive_error_out;
               }
@@ -1708,7 +1755,7 @@ namespace ortc
 
         if ((!mChangeSendingKeyTimer) &&
             (KeyingType_KeyAgreement == mSendKeyingType)) {
-          mChangeSendingKeyTimer = Timer::create(mThisWeak.lock(), Seconds(UseSettings::getUInt(ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER)));
+          mChangeSendingKeyTimer = ITimer::create(mThisWeak.lock(), Seconds(ISettings::getUInt(ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER)));
         }
 
         // create initial encryption offer (hint: it won't change)
@@ -1739,7 +1786,7 @@ namespace ortc
             encodingEl->adoptAsLastChild(createElementWithText("type", "passphrase"));
             encodingEl->adoptAsLastChild(createElementWithText("algorithm", ORTC_SERVICES_MESSAGE_LAYER_SECURITY_DEFAULT_CRYPTO_ALGORITHM));
 
-            String calculatedProof = IHelper::convertToHex(*IHelper::hmac(*IHelper::hmacKeyFromPassphrase(mSendPassphrase), "keying:" + nonce));
+            String calculatedProof = IHelper::convertToHex(*IHasher::hash("keying:" + nonce, IHasher::hmacSHA1(*IHasher::hmacKeyFromPassphrase(mSendPassphrase))));
 
             encodingEl->adoptAsLastChild(createElementWithText("proof", calculatedProof));
             break;
@@ -1842,8 +1889,8 @@ namespace ortc
             KeyInfo key;
 
             key.mIntegrityPassphrase = IHelper::randomString((20*8/5));
-            key.mSendKey = IHelper::hash(*IHelper::random(32), IHelper::HashAlgorthm_SHA256);
-            key.mNextIV = IHelper::hash(*IHelper::random(16), IHelper::HashAlgorthm_MD5);
+            key.mSendKey = IHasher::hash(*IHelper::random(32), IHasher::sha256());
+            key.mNextIV = IHasher::hash(*IHelper::random(16), IHasher::md5());
 
             ElementPtr keyEl = Element::create("key");
             keyEl->adoptAsLastChild(createElementWithNumber("index", string(index)));
@@ -1896,7 +1943,7 @@ namespace ortc
           ElementPtr canonicalJSONEl = IHelper::cloneAsCanonicalJSON(elementToSign);
           std::unique_ptr<char[]> elementAsJSON = generator->write(canonicalJSONEl);
 
-          SecureByteBlockPtr elementHash = IHelper::hash(elementAsJSON.get(), IHelper::HashAlgorthm_SHA1);
+          SecureByteBlockPtr elementHash = IHasher::hash(elementAsJSON.get(), IHasher::sha1());
 
           ElementPtr signatureEl = Element::create("signature");
 
@@ -1959,12 +2006,12 @@ namespace ortc
 
           String hexIV = IHelper::convertToHex(*keyInfo.mNextIV);
 
-          String hashDecryptedBuffer = IHelper::convertToHex(*IHelper::hash(*buffer));
+          String hashDecryptedBuffer = IHelper::convertToHex(*IHasher::hash(*buffer));
 
-          SecureByteBlockPtr calculatedIntegrity = IHelper::hmac(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase)), ("integrity:" + hashDecryptedBuffer + ":" + hexIV).c_str());
+          SecureByteBlockPtr calculatedIntegrity = IHasher::hash(("integrity:" + hashDecryptedBuffer + ":" + hexIV).c_str(), IHasher::hmacSHA1(*(IHelper::convertToBuffer(keyInfo.mIntegrityPassphrase))));
 
           // calculate the next IV and remember the integrity field
-          keyInfo.mNextIV = IHelper::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
+          keyInfo.mNextIV = IHasher::hash(hexIV + ":" + IHelper::convertToHex(*calculatedIntegrity));
           keyInfo.mLastIntegrity = calculatedIntegrity;
 
           SecureByteBlockPtr output(make_shared<SecureByteBlock>(sizeof(DWORD) + calculatedIntegrity->SizeInBytes() + encrypted->SizeInBytes()));
@@ -1983,8 +2030,8 @@ namespace ortc
           }
 
           if (ZS_IS_LOGGING(Debug)) {
-            String hashEncryptedBuffer = IHelper::convertToHex(*IHelper::hash(*encrypted));
-            ZS_LOG_DEBUG(log("sending data on wire") + ZS_PARAM("keying index", index) + ZS_PARAM("buffer size", output->SizeInBytes()) + ZS_PARAM("decrypted size", buffer->SizeInBytes()) + ZS_PARAM("encrypted size", encrypted->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("integrity passphrase", keyInfo.mIntegrityPassphrase) + ZS_PARAM("decrypted data hash", hashDecryptedBuffer) + ZS_PARAM("encrypted data hash", hashEncryptedBuffer))
+            String hashEncryptedBuffer = IHelper::convertToHex(*IHasher::hash(*encrypted));
+            ZS_LOG_DEBUG(log("sending data on wire") + ZS_PARAM("keying index", index) + ZS_PARAM("buffer size", output->SizeInBytes()) + ZS_PARAM("decrypted size", buffer->SizeInBytes()) + ZS_PARAM("encrypted size", encrypted->SizeInBytes()) + ZS_PARAM("key", IHelper::convertToHex(*(keyInfo.mSendKey))) + ZS_PARAM("iv", hexIV) + ZS_PARAM("integrity", IHelper::convertToHex(*calculatedIntegrity)) + ZS_PARAM("integrity passphrase", keyInfo.mIntegrityPassphrase) + ZS_PARAM("decrypted data hash", hashDecryptedBuffer) + ZS_PARAM("encrypted data hash", hashEncryptedBuffer));
           }
           mSendStreamEncoded->write(output, header);
         }

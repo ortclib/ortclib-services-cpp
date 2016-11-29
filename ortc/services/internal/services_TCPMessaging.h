@@ -36,7 +36,7 @@
 #include <ortc/services/internal/types.h>
 
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 
 #include <list>
 #include <map>
@@ -159,7 +159,7 @@ namespace ortc
         #pragma mark TCPMessaging => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -231,7 +231,7 @@ namespace ortc
         bool mTCPWriteReady {};
         IPAddress mRemoteIP;
         SocketPtr mSocket;
-        TimerPtr mLingerTimer;
+        ITimerPtr mLingerTimer;
 
         ByteQueuePtr mSendingQueue;
         ByteQueuePtr mReceivingQueue;

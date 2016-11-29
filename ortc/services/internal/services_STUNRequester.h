@@ -38,7 +38,7 @@
 #include <ortc/services/IBackOffTimer.h>
 
 #include <zsLib/MessageQueueAssociator.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
 #include <zsLib/Proxy.h>
 
 namespace ortc

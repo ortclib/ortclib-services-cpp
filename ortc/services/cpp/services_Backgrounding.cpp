@@ -30,11 +30,12 @@
  */
 
 #include <ortc/services/internal/services_Backgrounding.h>
-#include <ortc/services/internal/services_MessageQueueManager.h>
+
 
 #include <ortc/services/IHelper.h>
-#include <ortc/services/ISettings.h>
 
+#include <zsLib/ISettings.h>
+#include <zsLib/IMessageQueueManager.h>
 #include <zsLib/XML.h>
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
@@ -80,7 +81,6 @@ namespace ortc
         mTotalNotifiersCreated(0)
       {
         ZS_LOG_DETAIL(log("created"))
-        IHelper::setTimerThreadPriority();
       }
 
       //-----------------------------------------------------------------------
@@ -317,7 +317,7 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      void Backgrounding::onTimer(TimerPtr timer)
+      void Backgrounding::onTimer(ITimerPtr timer)
       {
         ZS_LOG_DEBUG(log("on timer") + ZS_PARAM("timer", timer->getID()))
 
@@ -467,7 +467,7 @@ namespace ortc
         }
 
         // block until all other non-application threads are done
-        IMessageQueueManagerForBackgrounding::blockUntilDone();
+        IMessageQueueManager::blockUntilDone();
       }
 
       //-----------------------------------------------------------------------
@@ -655,7 +655,7 @@ namespace ortc
         ZS_LOG_DETAIL(log("notified going to background") + ZS_PARAM("backgrounding id", mCurrentBackgroundingID) + ZS_PARAM("phase", mCurrentPhase) + ZS_PARAM("total", mTotalWaiting) + ZS_PARAM("timeout", secondsUntilTimeout))
 
         if (0 != secondsUntilTimeout) {
-          mTimer = Timer::create(mThisWeak.lock(), Seconds(secondsUntilTimeout), false);  // fires only once
+          mTimer = ITimer::create(mThisWeak.lock(), Seconds(secondsUntilTimeout), false);  // fires only once
           ZS_LOG_DEBUG(log("created timeout timer") + ZS_PARAM("id", mTimer->getID()))
         }
       }

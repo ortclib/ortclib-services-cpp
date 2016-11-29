@@ -38,11 +38,11 @@
 #include <ortc/services/ITURNSocket.h>
 #include <ortc/services/ISTUNRequester.h>
 #include <ortc/services/IDNS.h>
-#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/MessageQueueAssociator.h>
 #include <zsLib/Socket.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/IWakeDelegate.h>
 
 #define ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES ((1 << (sizeof(WORD)*8)) - 1)
 
@@ -50,11 +50,11 @@
 #include <map>
 #include <utility>
 
-#define ORTC_SERVICES_SETTING_TURN_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-turn"
+#define ORTC_SERVICES_SETTING_TURN_SOCKET_BACKGROUNDING_PHASE "ortc/services/backgrounding-phase-turn"
 
-#define ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_UDP "ortc/services/debug/force-turn-to-use-udp"
-#define ORTC_SERVICES_SETTING_FORCE_TURN_TO_USE_TCP "ortc/services/debug/force-turn-to-use-tcp"
-#define ORTC_SERVICES_SETTING_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "ortc/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
+#define ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_UDP "ortc/services/debug/force-turn-to-use-udp"
+#define ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_TCP "ortc/services/debug/force-turn-to-use-tcp"
+#define ORTC_SERVICES_SETTING_TURN_SOCKET_ONLY_ALLOW_TURN_TO_RELAY_DATA_TO_SPECIFIC_IPS "ortc/services/debug/only-allow-turn-to-relay-data-sent-to-specific-ips"
 
 namespace ortc
 {
@@ -103,10 +103,10 @@ namespace ortc
         typedef std::map<IPAddress, ChannelInfoPtr, CompareIP> ChannelIPMap;
         typedef std::map<WORD, ChannelInfoPtr> ChannelNumberMap;
 
-        typedef Helper::IPAddressMap IPAddressMap;
+        typedef IHelper::IPAddressSet IPAddressSet;
 
         typedef PUID TimerID;
-        typedef std::map<TimerID, TimerPtr> TimerMap;
+        typedef std::map<TimerID, ITimerPtr> TimerMap;
 
       public:
         TURNSocket(
@@ -221,7 +221,7 @@ namespace ortc
         #pragma mark TURNSocket => ITimer
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -341,7 +341,7 @@ namespace ortc
           bool mIsConnected {};
           bool mInformedWriteReady {};
 
-          TimerPtr mActivationTimer;
+          ITimerPtr mActivationTimer;
           Time mActivateAfter {};
 
           ISTUNRequesterPtr mAllocateRequester;
@@ -401,7 +401,7 @@ namespace ortc
           WORD mChannelNumber;
           IPAddress mPeerAddress;
           Time mLastSentDataAt;
-          TimerPtr mRefreshTimer;
+          ITimerPtr mRefreshTimer;
           ISTUNRequesterPtr mChannelBindRequester;
         };
 
@@ -444,18 +444,18 @@ namespace ortc
 
         SecureByteBlockPtr mMobilityTicket;
 
-        TimerPtr mRefreshTimer;
+        ITimerPtr mRefreshTimer;
         Time mLastSentDataToServer {};
         Time mLastRefreshTimerWasSentAt {};
 
         ISTUNRequesterPtr mDeallocateRequester;
-        TimerPtr mDeallocTimer;
+        ITimerPtr mDeallocTimer;
 
         ServerList mServers;
         TimerMap mActivationTimers;
 
         PermissionMap mPermissions;
-        TimerPtr mPermissionTimer;
+        ITimerPtr mPermissionTimer;
         ISTUNRequesterPtr mPermissionRequester;
         ULONG mPermissionRequesterMaxCapacity {};
 
@@ -464,7 +464,7 @@ namespace ortc
 
         bool          mForceTURNUseTCP {};
         bool          mForceTURNUseUDP {};
-        IPAddressMap  mRestrictedIPs;
+        IPAddressSet  mRestrictedIPs;
       };
 
       //-----------------------------------------------------------------------

@@ -38,14 +38,13 @@
 
 #include <ortc/services/internal/services_Helper.h>
 
-#include <ortc/services/ISettings.h>
-
+#include <zsLib/ISettings.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 #include <zsLib/Log.h>
 #include <zsLib/Event.h>
 #include <zsLib/XML.h>
-#include <zsLib/MessageQueueThread.h>
+#include <zsLib/IMessageQueueThread.h>
 
 #include <thread>
 

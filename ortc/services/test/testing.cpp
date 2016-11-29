@@ -35,9 +35,9 @@
 #include <zsLib/types.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
+#include <zsLib/ISettings.h>
 
 #include <ortc/services/ILogger.h>
-#include <ortc/services/ISettings.h>
 
 #include <iostream>
 
@@ -54,7 +54,7 @@ debugostream &getDebugCout()
 
 
 typedef ortc::services::ILogger ILogger;
-ZS_DECLARE_TYPEDEF_PTR(ortc::services::ISettings, UseSettings);
+ZS_DECLARE_TYPEDEF_PTR(zsLib::ISettings, UseSettings);
 
 void doTestBackoffRetry();
 void doTestCanonicalXML();

@@ -37,10 +37,10 @@
 #include <ortc/services/IBackgrounding.h>
 #include <ortc/services/ISTUNRequester.h>
 
-#include <ortc/services/IWakeDelegate.h>
 
 #include <zsLib/types.h>
-#include <zsLib/Timer.h>
+#include <zsLib/ITimer.h>
+#include <zsLib/IWakeDelegate.h>
 #include <zsLib/MessageQueueAssociator.h>
 
 #include <list>
@@ -309,7 +309,7 @@ namespace ortc
         #pragma mark ICESocketSession => ITimerDelegate
         #pragma mark
 
-        virtual void onTimer(TimerPtr timer);
+        virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -407,10 +407,10 @@ namespace ortc
         String mRemoteUsernameFrag;
         String mRemotePassword;
 
-        TimerPtr mActivateTimer;
-        TimerPtr mKeepAliveTimer;
-        TimerPtr mExpectingDataTimer;
-        TimerPtr mStepTimer;
+        ITimerPtr mActivateTimer;
+        ITimerPtr mKeepAliveTimer;
+        ITimerPtr mExpectingDataTimer;
+        ITimerPtr mStepTimer;
 
         ICEControls mControl;
         QWORD mConflictResolver;

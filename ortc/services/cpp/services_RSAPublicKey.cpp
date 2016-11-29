@@ -33,6 +33,7 @@
 #include <ortc/services/internal/services_RSAPrivateKey.h>
 #include <ortc/services/internal/services_Helper.h>
 
+#include <zsLib/eventing/IHasher.h>
 #include <zsLib/XML.h>
 #include <zsLib/Log.h>
 #include <zsLib/Stringize.h>
@@ -153,7 +154,7 @@ namespace ortc
         try
         {
           pThis->mPublicKey.Load(byteQueue);
-          pThis->mFingerprint = IHelper::convertToHex(*IHelper::hash(buffer));
+          pThis->mFingerprint = IHelper::convertToHex(*IHasher::hash(buffer));
           if (!pThis->mPublicKey.Validate(rng, 3)) {
             ZS_LOG_ERROR(Basic, pThis->log("failed to load an existing public key"))
             return RSAPublicKeyPtr();
@@ -236,7 +237,7 @@ namespace ortc
           GeneratorPtr generator = Generator::createJSONGenerator();
           std::unique_ptr<char[]> signedElAsJSON = generator->write(canonicalSigned);
 
-          SecureByteBlockPtr actualDigest = IHelper::hash((const char *)(signedElAsJSON.get()), IHelper::HashAlgorthm_SHA1);
+          SecureByteBlockPtr actualDigest = IHasher::hash((const char *)(signedElAsJSON.get()), IHasher::sha1());
 
           if (0 != IHelper::compare(*actualDigest, *IHelper::convertFromBase64(signatureDigestAsString))) {
             ZS_LOG_WARNING(Detail, log("digest values did not match") + ZS_PARAM("signature digest", signatureDigestAsString) + ZS_PARAM("actual digest", IHelper::convertToBase64(*actualDigest)))

@@ -35,6 +35,7 @@
 #include <ortc/services/IHelper.h>
 
 #include <zsLib/XML.h>
+#include <zsLib/eventing/IHasher.h>
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
 
@@ -139,7 +140,7 @@ namespace ortc
       //-----------------------------------------------------------------------
       String DHPublicKey::getFingerprint() const
       {
-        return IHelper::convertToHex(*IHelper::hmac(mEphemeralPublicKey, mStaticPublicKey));
+        return IHelper::convertToHex(*IHasher::hash(mStaticPublicKey, IHasher::hmacSHA1(mEphemeralPublicKey)));
       }
 
       //-----------------------------------------------------------------------
