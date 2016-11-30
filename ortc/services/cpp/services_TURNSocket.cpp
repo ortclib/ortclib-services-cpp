@@ -929,7 +929,7 @@ namespace ortc
         ZS_EVENTING_2(
                       x, i, Trace, ServicesTurnSocketInternalSocketReadReadyEvent, os, TurnSocket, InternalEvent,
                       puid, id, mID,
-                      socket, socket, socket->getSocket()
+                      socket, socket, static_cast<uint64_t>(socket->getSocket())
                       );
 
         try
@@ -1165,7 +1165,7 @@ namespace ortc
         ZS_EVENTING_2(
                       x, i, Trace, ServicesTurnSocketInternalSocketWriteReadyEvent, os, TurnSocket, InternalEvent,
                       puid, id, mID,
-                      socket, socket, socket->getSocket()
+                      socket, socket, static_cast<uint64_t>(socket->getSocket())
                       );
 
         AutoRecursiveLock lock(mLock);
@@ -1210,7 +1210,7 @@ namespace ortc
         ZS_EVENTING_2(
                       x, e, Trace, ServicesTurnSocketInternalSocketExceptionEvent, os, TurnSocket, InternalEvent,
                       puid, id, mID,
-                      socket, socket, socket->getSocket()
+                      socket, socket, static_cast<uint64_t>(socket->getSocket())
                       );
 
         AutoRecursiveLock lock(mLock);

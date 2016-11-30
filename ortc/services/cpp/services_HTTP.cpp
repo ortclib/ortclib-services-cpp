@@ -130,9 +130,7 @@ namespace ortc
         mShouldShutdown(false),
         mMultiCurl(NULL)
       {
-        IHelper::setSocketThreadPriority();
-
-        ZS_LOG_DETAIL(log("created"))
+        ZS_LOG_DETAIL(log("created"));
       }
 
       //-----------------------------------------------------------------------
@@ -146,7 +144,7 @@ namespace ortc
         if (isNoop()) return;
 
         mThisWeak.reset();
-        ZS_LOG_DETAIL(log("destroyed"))
+        ZS_LOG_DETAIL(log("destroyed"));
         cancel();
       }
 

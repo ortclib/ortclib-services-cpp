@@ -390,12 +390,11 @@
 		0001ABF81DA1E18C00D807DA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = "Open Peer Foundation";
 				TargetAttributes = {
 					0001ABFF1DA1E18C00D807DA = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = QE9E5R8GUP;
 						ProvisioningStyle = Automatic;
 					};
 					0001AC181DA1E18C00D807DA = {
@@ -621,6 +620,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -647,6 +647,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
+					"../../../../zsLib-eventing",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LIBRARY_SEARCH_PATHS = "../../../../curl/curl/ios-dev/lib";
@@ -675,6 +676,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -696,6 +698,7 @@
 					../../..,
 					../../../..,
 					../../../../zsLib,
+					"../../../../zsLib-eventing",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LIBRARY_SEARCH_PATHS = "../../../../curl/curl/ios-dev/lib";
@@ -710,7 +713,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = QE9E5R8GUP;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "ortclib.services.Test-ios/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.ortclib.ortclib-services-Test-ios";
@@ -722,7 +725,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = QE9E5R8GUP;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "ortclib.services.Test-ios/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.ortclib.ortclib-services-Test-ios";
