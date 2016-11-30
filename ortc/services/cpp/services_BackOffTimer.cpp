@@ -67,7 +67,7 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       #pragma mark
-      #pragma mark MessageLayerSecurityChannelSettingsDefaults
+      #pragma mark BackOffTimerSettingsDefaults
       #pragma mark
 
       class BackOffTimerSettingsDefaults : public ISettingsApplyDefaultsDelegate
