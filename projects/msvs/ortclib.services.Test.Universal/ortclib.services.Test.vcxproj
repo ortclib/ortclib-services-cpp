@@ -375,6 +375,9 @@
     <ProjectReference Include="..\..\..\..\udns\projects\msvs\udns.Universal\udns.vcxproj">
       <Project>{6c13dfe2-3aa7-40b9-919c-5e95e47fc321}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\zsLib-eventing\projects\msvc\zsLib.Eventing.Universal\zsLib.Eventing.vcxproj">
+      <Project>{a19b7d13-a6ee-43bb-a913-aeb34f91bf98}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\zsLib\projects\msvs\zsLib.Universal\zsLib.vcxproj">
       <Project>{55555c53-504f-4237-abc0-b2f59558a0e9}</Project>
     </ProjectReference>
