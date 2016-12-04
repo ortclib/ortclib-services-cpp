@@ -37,6 +37,8 @@
 
 #include <cryptopp/osrng.h>
 
+#include <zsLib/eventing/IRemoteEventing.h>
+
 #include <zsLib/Stringize.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Log.h>
@@ -112,6 +114,7 @@ namespace ortc
       ZS_DECLARE_INTERACTION_PTR(ILoggerReferencesHolderDelegate);
       ZS_DECLARE_CLASS_PTR(LoggerReferencesHolder);
       ZS_DECLARE_CLASS_PTR(LoggerSettingsDefaults);
+      ZS_DECLARE_CLASS_PTR(RemoteEventing);
 
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
@@ -815,98 +818,6 @@ namespace ortc
 
         return result;
       }
-
-#if 0
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LoggerReferenceHolder<T>
-      #pragma mark
-
-      template <typename T>
-      struct LoggerReferenceHolder
-      {
-        ZS_DECLARE_TYPEDEF_PTR(T, Logger)
-        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, Holder)
-
-        LoggerPtr mLogger;
-      };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LoggerSingletonAndLockHolder<T>
-      #pragma mark
-
-      template <typename T>
-      class LoggerSingletonAndLockHolder
-      {
-      public:
-        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, ReferenceHolder)
-        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonAndLockHolder<T>, Self)
-        ZS_DECLARE_TYPEDEF_PTR(SingletonLazySharedPtr< Self >, SingletonLazySelf)
-
-        LoggerSingletonAndLockHolder() :
-          mLock(make_shared<RecursiveLock>()),
-          mSingleton(make_shared<ReferenceHolder>())
-        {
-        }
-
-        RecursiveLockPtr lock() {return mLock;}
-        ReferenceHolderPtr reference() {return mSingleton;}
-
-      protected:
-        RecursiveLockPtr mLock;
-        ReferenceHolderPtr mSingleton;
-      };
-
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LoggerSingletonLazySharedPtr<T>
-      #pragma mark
-
-      template <typename T>
-      class LoggerSingletonLazySharedPtr : SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >
-      {
-      public:
-        ZS_DECLARE_TYPEDEF_PTR(LoggerReferenceHolder<T>, ReferenceHolder)
-        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonAndLockHolder<T>, Holder)
-        ZS_DECLARE_TYPEDEF_PTR(LoggerSingletonLazySharedPtr<T>, SingletonLazySelf)
-
-      public:
-        LoggerSingletonLazySharedPtr() :
-          SingletonLazySharedPtr< LoggerSingletonAndLockHolder<T> >(make_shared<Holder>())
-        {
-        }
-
-        static RecursiveLockPtr lock(SingletonLazySelf &singleton)
-        {
-          HolderPtr result = singleton.singleton();
-          if (!result) {
-            return make_shared<RecursiveLock>();
-          }
-          return result->lock();
-        }
-
-        static ReferenceHolderPtr logger(SingletonLazySelf &singleton)
-        {
-          HolderPtr result = singleton.singleton();
-          if (!result) {
-            return make_shared<ReferenceHolder>();
-          }
-          return result->reference();
-        }
-      };
-
-#endif //0
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -2517,9 +2428,373 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark Logger
+      #pragma mark RemoteEventing
       #pragma mark
 
+      class RemoteEventing : public MessageQueueAssociator,
+                             public IDNSDelegate,
+                             public zsLib::eventing::IRemoteEventingDelegate
+      {
+      protected:
+        struct make_private {};
+
+        ZS_DECLARE_TYPEDEF_PTR(zsLib::eventing::IRemoteEventingTypes, IRemoteEventingTypes);
+        ZS_DECLARE_TYPEDEF_PTR(zsLib::eventing::IRemoteEventing, IRemoteEventing);
+        ZS_DECLARE_STRUCT_PTR(SingletonHolder);
+        friend struct SingletonHolder;
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark RemoteEventing::SingletonHolder
+        #pragma mark
+
+        struct SingletonHolder : public ISingletonManagerDelegate
+        {
+          mutable RecursiveLock mLock;
+          RemoteEventingPtr mCurrent;
+          WORD mListenPort {63311};
+          String mServerAddress;
+          String mSharedSecret;
+
+          //-------------------------------------------------------------------
+          virtual void notifySingletonCleanup() override
+          {
+            AutoRecursiveLock lock(mLock);
+            if (!mCurrent) return;
+            mCurrent->cancel();
+          }
+        };
+
+        //---------------------------------------------------------------------
+        static SingletonHolderPtr singletonHolder()
+        {
+          static SingletonLazySharedPtr<SingletonHolder> info(make_shared<SingletonHolder>());
+          static SingletonManager::Register reg("org.ortc.services.RemoteEventing", info.singleton());
+          return info.singleton();
+        }
+
+      protected:
+        //---------------------------------------------------------------------
+        static RemoteEventingPtr create(
+                                        WORD listenPort,
+                                        const String &sharedSecret,
+                                        Seconds maxSecondsWaitForSocketToBeAvailable
+                                        )
+        {
+          if (0 == listenPort) listenPort = IRemoteEventingTypes::Port_Default;
+          auto pThis(make_shared<RemoteEventing>(make_private{}, IHelper::getLoggerQueue(), listenPort, String(), sharedSecret, maxSecondsWaitForSocketToBeAvailable));
+          pThis->mThisWeak = pThis;
+          pThis->init();
+          return pThis;
+        }
+
+        //---------------------------------------------------------------------
+        static RemoteEventingPtr create(
+                                        const String &serverAddress,
+                                        const String &sharedSecret
+                                        )
+        {
+          auto pThis(make_shared<RemoteEventing>(make_private{}, IHelper::getLoggerQueue(), 0, serverAddress, sharedSecret));
+          pThis->mThisWeak = pThis;
+          pThis->init();
+          return pThis;
+        }
+
+      public:
+        //---------------------------------------------------------------------
+        RemoteEventing(
+                       const make_private &,
+                       IMessageQueuePtr queue,
+                       WORD listenPort,
+                       const String &serverAddress,
+                       const String &sharedSecret,
+                       Seconds maxSecondsWaitForSocketToBeAvailable = Seconds()
+                       ) :
+          MessageQueueAssociator(queue),
+          mListenPort(listenPort),
+          mServerAddress(serverAddress),
+          mSharedSecret(sharedSecret),
+          mMaxSecondsWaitForSocketToBeAvailable(maxSecondsWaitForSocketToBeAvailable)
+        {
+        }
+
+        //---------------------------------------------------------------------
+        ~RemoteEventing()
+        {
+          mThisWeak.reset();
+          cancel();
+        }
+
+        //---------------------------------------------------------------------
+        void init()
+        {
+          AutoRecursiveLock lock(mLock);
+          if (mServerAddress.hasData()) {
+            mServerLookup = IDNS::lookupAorAAAA(mThisWeak.lock(), mServerAddress);
+          }
+        }
+
+      public:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark RemoteEventing (friends)
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        static void installEventingListener(
+                                            WORD listenPort,
+                                            const char *sharedSecret,
+                                            Seconds maxSecondsWaitForSocketToBeAvailable
+                                            )
+        {
+          String sharedSecretStr(sharedSecret);
+
+          auto holder = singletonHolder();
+          if (!holder) return;
+
+          RemoteEventingPtr pThis;
+
+          {
+            AutoRecursiveLock lock(holder->mLock);
+            if (holder->mCurrent) {
+              if ((holder->mSharedSecret == sharedSecretStr) &&
+                  (holder->mServerAddress.isEmpty()) &&
+                  (listenPort == holder->mListenPort)) {
+                // no change needed
+                return;
+              }
+
+              pThis = holder->mCurrent;
+              holder->mCurrent.reset();
+            }
+          }
+
+          if (pThis) pThis->cancel();
+          pThis.reset();
+
+          pThis = create(listenPort, String(sharedSecret), maxSecondsWaitForSocketToBeAvailable);
+
+          {
+            AutoRecursiveLock lock(holder->mLock);
+            holder->mCurrent = pThis;
+            holder->mSharedSecret = String(sharedSecret);
+            holder->mServerAddress.clear();
+            holder->mListenPort = listenPort;
+          }
+        }
+
+        //---------------------------------------------------------------------
+        static void uninstallEventingListener()
+        {
+          auto holder = singletonHolder();
+          if (!holder) return;
+
+          RemoteEventingPtr pThis;
+
+          {
+            AutoRecursiveLock lock(holder->mLock);
+            if (!holder->mCurrent) return;
+            if (holder->mServerAddress.hasData()) return; // connecting, not listening
+
+            pThis = holder->mCurrent;
+            holder->mCurrent.reset();
+          }
+
+          pThis->cancel();
+          pThis.reset();
+        }
+
+        //---------------------------------------------------------------------
+        static void connectToEventingServer(
+                                            const char *serverAddress,
+                                            const char *sharedSecret
+                                            )
+        {
+          String serverAddressStr(serverAddress);
+          String sharedSecretStr(sharedSecret);
+
+          auto holder = singletonHolder();
+          if (!holder) return;
+
+          RemoteEventingPtr pThis;
+
+          {
+            AutoRecursiveLock lock(holder->mLock);
+            if (holder->mCurrent) {
+              if ((holder->mSharedSecret == sharedSecretStr) &&
+                  (serverAddressStr == holder->mServerAddress)) {
+                // no change needed
+                return;
+              }
+
+              pThis = holder->mCurrent;
+              holder->mCurrent.reset();
+            }
+
+            if (pThis) pThis->cancel();
+            pThis.reset();
+
+            pThis = create(String(serverAddress), String(sharedSecret));
+
+            {
+              AutoRecursiveLock lock(holder->mLock);
+              holder->mCurrent = pThis;
+              holder->mSharedSecret = String(sharedSecret);
+              holder->mServerAddress = String(serverAddress);
+              holder->mListenPort = 0;
+            }
+          }
+        }
+
+        //---------------------------------------------------------------------
+        static void disconnectEventingServer()
+        {
+          auto holder = singletonHolder();
+          if (!holder) return;
+
+          RemoteEventingPtr pThis;
+
+          {
+            AutoRecursiveLock lock(holder->mLock);
+            if (!holder->mCurrent) return;
+            if (holder->mServerAddress.isEmpty()) return; // connecting, not listening
+
+            pThis = holder->mCurrent;
+            holder->mCurrent.reset();
+          }
+
+          pThis->cancel();
+          pThis.reset();
+        }
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark RemoteEventing::IDNSQueryDelegate
+        #pragma mark
+
+        virtual void onLookupCompleted(IDNSQueryPtr query) override
+        {
+          AutoRecursiveLock lock(mLock);
+          if (query != mServerLookup) return;
+
+          mAResult = query->getA();
+          mAAAAResult = query->getAAAA();
+
+          mServerLookup->cancel();
+          mServerLookup.reset();
+          step();
+        }
+      
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark RemoteEventing::IRemoteEventingDelegate
+        #pragma mark
+
+        virtual void onRemoteEventingStateChanged(
+                                                  IRemoteEventingPtr connection,
+                                                  States state
+                                                  ) override
+        {
+          AutoRecursiveLock lock(mLock);
+          step();
+        }
+
+      protected:
+        //---------------------------------------------------------------------
+        void cancel()
+        {
+          AutoRecursiveLock lock(mLock);
+          mClosed = true;
+
+          if (mServerLookup) {
+            mServerLookup->cancel();
+            mServerLookup.reset();
+          }
+
+          if (mRemote) {
+            mRemote->shutdown();
+            mRemote.reset();
+          }
+        }
+
+        //---------------------------------------------------------------------
+        void step()
+        {
+          if (mClosed) {
+            cancel();
+            return;
+          }
+
+          if (mRemote) {
+            if (IRemoteEventingTypes::State_Shutdown != mRemote->getState()) return;
+            mRemote.reset();
+            if (mServerAddress.isEmpty()) {
+              cancel();
+              return;
+            }
+          }
+
+          if (mServerAddress.hasData()) {
+            if (mServerLookup) {
+              if (!mServerLookup->isComplete()) return;
+            }
+
+            IPAddress useIP;
+            if (mAResult) {
+              if (mAResult->mIPAddresses.size() > 0) {
+                useIP = mAResult->mIPAddresses.front();
+                mAResult->mIPAddresses.pop_front();
+              }
+            }
+            if (useIP.isAddressEmpty()) {
+              if (mAAAAResult) {
+                if (mAAAAResult->mIPAddresses.size() > 0) {
+                  useIP = mAAAAResult->mIPAddresses.front();
+                  mAAAAResult->mIPAddresses.pop_front();
+                }
+              }
+            }
+
+            if (useIP.isAddressEmpty()) {
+              cancel();
+              return;
+            }
+
+            if (0 == useIP.getPort()) useIP.setPort(IRemoteEventingTypes::Port_Default);
+            mRemote = IRemoteEventing::connectToRemote(mThisWeak.lock(), useIP, mSharedSecret);
+            if (!mRemote) {
+              cancel();
+              return;
+            }
+            return;
+          }
+
+          mRemote = IRemoteEventing::listenForRemote(mThisWeak.lock(), mListenPort, mSharedSecret, mMaxSecondsWaitForSocketToBeAvailable);
+          if (!mRemote) {
+            cancel();
+            return;
+          }
+        }
+
+      protected:
+        mutable RecursiveLock mLock;
+        AutoPUID mID;
+        RemoteEventingWeakPtr mThisWeak;
+
+        bool mClosed {};
+
+        WORD mListenPort {};
+        Seconds mMaxSecondsWaitForSocketToBeAvailable {};
+        String mServerAddress;
+        String mSharedSecret;
+
+        IDNSQueryPtr mServerLookup;
+        IDNS::AResultPtr mAResult;
+        IDNS::AAAAResultPtr mAAAAResult;
+
+        IRemoteEventingPtr mRemote;
+      };
 
     }
 
@@ -2546,11 +2821,11 @@ namespace ortc
     //-------------------------------------------------------------------------
     void ILogger::installTelnetLogger(
                                       WORD listenPort,
-                                      ULONG maxSecondsWaitForSocketToBeAvailable,
+                                      Seconds maxSecondsWaitForSocketToBeAvailable,
                                       bool colorizeOutput
                                       )
     {
-      internal::TelnetLogger::singletonIncoming(listenPort, Seconds(maxSecondsWaitForSocketToBeAvailable), colorizeOutput, colorizeOutput);
+      internal::TelnetLogger::singletonIncoming(listenPort, maxSecondsWaitForSocketToBeAvailable, colorizeOutput, colorizeOutput);
     }
 
     //-------------------------------------------------------------------------
@@ -2624,6 +2899,37 @@ namespace ortc
     void ILogger::uninstallDebuggerLogger()
     {
       internal::DebuggerLogger::stop();
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::installEventingListener(
+                                          WORD listenPort,
+                                          const char *sharedSecret,
+                                          Seconds maxSecondsWaitForSocketToBeAvailable
+                                          )
+    {
+      internal::RemoteEventing::installEventingListener(listenPort, sharedSecret, maxSecondsWaitForSocketToBeAvailable);
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::uninstallEventingListener()
+    {
+      internal::RemoteEventing::uninstallEventingListener();
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::connectToEventingServer(
+                                          const char *serverAddress,
+                                          const char *sharedSecret
+                                          )
+    {
+      internal::RemoteEventing::connectToEventingServer(serverAddress, sharedSecret);
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::disconnectEventingServer()
+    {
+      internal::RemoteEventing::disconnectEventingServer();
     }
 
     //-------------------------------------------------------------------------

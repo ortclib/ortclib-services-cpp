@@ -53,7 +53,7 @@ namespace ortc
       static void installFileLogger(const char *fileName, bool colorizeOutput);
       static void installTelnetLogger(
                                       WORD listenPort,
-                                      ULONG maxSecondsWaitForSocketToBeAvailable,
+                                      Seconds maxSecondsWaitForSocketToBeAvailable,
                                       bool colorizeOutput
                                       );
       static void installOutgoingTelnetLogger(
@@ -72,6 +72,19 @@ namespace ortc
       static void uninstallTelnetLogger();
       static void uninstallOutgoingTelnetLogger();
       static void uninstallDebuggerLogger();
+
+      static void installEventingListener(
+                                          WORD listenPort,
+                                          const char *sharedSecret,
+                                          Seconds maxSecondsWaitForSocketToBeAvailable
+                                          );
+      static void uninstallEventingListener();
+
+      static void connectToEventingServer(
+                                          const char *serverAddress,
+                                          const char *sharedSecret
+                                          );
+      static void disconnectEventingServer();
 
       static void setLogLevel(Log::Level logLevel);
       static void setLogLevel(const char *component, Log::Level logLevel);
