@@ -93,8 +93,8 @@
         },
         {
           "name": "StunRequester",
-          "opCodes": {
-            "opCode": [
+          "opcodes": {
+            "opcode": [
               { "name": "RetryNow" }
             ]
           }
@@ -122,8 +122,8 @@
         },
         {
           "name": "Dns",
-          "opCodes": {
-            "opCode": [
+          "opcodes": {
+            "opcode": [
               { "name": "Lookup" }
             ]
           }
@@ -136,8 +136,8 @@
         }
       ]
     },
-    "opCodes": {
-      "opCode": [
+    "opcodes": {
+      "opcode": [
         {
           "name": "Cancel"
         },
