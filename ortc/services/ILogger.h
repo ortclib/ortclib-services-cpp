@@ -73,21 +73,24 @@ namespace ortc
       static void uninstallOutgoingTelnetLogger();
       static void uninstallDebuggerLogger();
 
+      static void setLogLevel(Log::Level logLevel);
+      static void setLogLevel(const char *component, Log::Level logLevel);
+
       static void installEventingListener(
-                                          WORD listenPort,
-                                          const char *sharedSecret,
-                                          Seconds maxSecondsWaitForSocketToBeAvailable
-                                          );
+        WORD listenPort,
+        const char *sharedSecret,
+        Seconds maxSecondsWaitForSocketToBeAvailable
+      );
       static void uninstallEventingListener();
 
       static void connectToEventingServer(
-                                          const char *serverAddress,
-                                          const char *sharedSecret
-                                          );
+        const char *serverAddress,
+        const char *sharedSecret
+      );
       static void disconnectEventingServer();
 
-      static void setLogLevel(Log::Level logLevel);
-      static void setLogLevel(const char *component, Log::Level logLevel);
+      static void setEventingLevel(Log::Level logLevel);
+      static void setEventingLevel(const char *component, Log::Level logLevel);
     };
   }
 }

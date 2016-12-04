@@ -2902,6 +2902,18 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
+    void ILogger::setLogLevel(Log::Level logLevel)
+    {
+      zsLib::Log::setOutputLevelByName(NULL, logLevel);
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::setLogLevel(const char *component, Log::Level logLevel)
+    {
+      zsLib::Log::setOutputLevelByName(component, logLevel);
+    }
+
+    //-------------------------------------------------------------------------
     void ILogger::installEventingListener(
                                           WORD listenPort,
                                           const char *sharedSecret,
@@ -2933,15 +2945,15 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setLogLevel(Log::Level logLevel)
+    void ILogger::setEventingLevel(Log::Level logLevel)
     {
-      zsLib::Log::setOutputLevelByName(NULL, logLevel);
+      zsLib::Log::setEventingLevelByName(NULL, logLevel);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setLogLevel(const char *component, Log::Level logLevel)
+    void ILogger::setEventingLevel(const char *component, Log::Level logLevel)
     {
-      zsLib::Log::setOutputLevelByName(component, logLevel);
+      zsLib::Log::setEventingLevelByName(component, logLevel);
     }
 
   }
