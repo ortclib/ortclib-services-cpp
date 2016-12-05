@@ -2433,7 +2433,8 @@ namespace ortc
 
       class RemoteEventing : public MessageQueueAssociator,
                              public IDNSDelegate,
-                             public zsLib::eventing::IRemoteEventingDelegate
+                             public zsLib::eventing::IRemoteEventingDelegate,
+                             public zsLib::IWakeDelegate
       {
       protected:
         struct make_private {};
@@ -2532,6 +2533,7 @@ namespace ortc
           if (mServerAddress.hasData()) {
             mServerLookup = IDNS::lookupAorAAAA(mThisWeak.lock(), mServerAddress);
           }
+          IWakeDelegateProxy::create(mThisWeak.lock())->onWake();
         }
 
       public:
@@ -2685,12 +2687,25 @@ namespace ortc
           mServerLookup.reset();
           step();
         }
-      
+
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark RemoteEventing::IWakeDelegate
+        #pragma mark
+
+        //---------------------------------------------------------------------
+        virtual void onWake()
+        {
+          AutoRecursiveLock lock(mLock);
+          step();
+        }
+
         //---------------------------------------------------------------------
         #pragma mark
         #pragma mark RemoteEventing::IRemoteEventingDelegate
         #pragma mark
 
+        //---------------------------------------------------------------------
         virtual void onRemoteEventingStateChanged(
                                                   IRemoteEventingPtr connection,
                                                   States state
