@@ -232,7 +232,7 @@ namespace ortc
           installTCPMessagingSettingsDefaults();
           installLoggerSettingsDefaults();
           installHelperSettingsDefaults();
-          //installMessageLayerSecurityChannelSettingsDefaults();
+          installMessageLayerSecurityChannelSettingsDefaults();
           installBackOffTimerSettingsDefaults();
         }
 
