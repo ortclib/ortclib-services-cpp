@@ -46,6 +46,18 @@ namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_tcp_m
 namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_transport_stream) } }
 namespace ortc { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_wire) } } }
 
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_dns, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_http, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_ice, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_stun, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_turn, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_rudp, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_mls, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_tcp_messaging, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_transport_stream, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_wire, Debug);
+
 namespace ortc
 {
   namespace services

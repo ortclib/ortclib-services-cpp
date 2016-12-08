@@ -63,6 +63,7 @@
     },
     "sources": {
       "source": [
+        "services_services.cpp",
         "services_BackOffTimer.cpp",
         "services_BackOffTimerPattern.cpp",
         "services_Cache.cpp",
