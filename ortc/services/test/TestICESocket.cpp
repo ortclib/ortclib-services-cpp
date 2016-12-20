@@ -85,18 +85,7 @@ namespace ortc
 
       private:
         TestICESocketCallback(zsLib::IMessageQueuePtr queue) :
-          zsLib::MessageQueueAssociator(queue),
-          mExpectConnected(false),
-          mExpectGracefulShutdown(false),
-          mExpectErrorShutdown(false),
-          mExpectedSessionConnected(false),
-          mExpectedSessionClosed(false),
-          mConnected(false),
-          mGracefulShutdown(false),
-          mErrorShutdown(false),
-          mShutdownCalled(false),
-          mSessionConnected(false),
-          mSessionClosed(false)
+          zsLib::MessageQueueAssociator(queue)
         {
         }
 
@@ -432,19 +421,19 @@ namespace ortc
         IICESocketPtr mICESocket;
         SessionList mSessions;
 
-        bool mExpectConnected;
-        bool mExpectGracefulShutdown;
-        bool mExpectErrorShutdown;
-        bool mExpectedSessionConnected;
-        bool mExpectedSessionClosed;
+        bool mExpectConnected {};
+        bool mExpectGracefulShutdown {};
+        bool mExpectErrorShutdown {};
+        bool mExpectedSessionConnected {};
+        bool mExpectedSessionClosed {};
 
-        bool mConnected;
-        bool mGracefulShutdown;
-        bool mErrorShutdown;
-        bool mSessionConnected;
-        bool mSessionClosed;
+        bool mConnected {};
+        bool mGracefulShutdown {};
+        bool mErrorShutdown {};
+        bool mSessionConnected {};
+        bool mSessionClosed {};
 
-        bool mShutdownCalled;
+        bool mShutdownCalled {};
       };
     }
   }

@@ -629,12 +629,16 @@ namespace ortc
         if (!mGracefulShutdownReference) mGracefulShutdownReference = mThisWeak.lock();
 
         setState(RUDPTransportState_ShuttingDown);
+        bool iceSessionClosed = false;
+        if (mICESession) {
+          iceSessionClosed = (IICESocketSession::ICESocketSessionState_Shutdown == mICESession->getState());
+        }
 
         for (SessionMap::iterator iter = mLocalChannelNumberSessions.begin(); iter != mLocalChannelNumberSessions.end(); ++iter) {
-
-          switch (mLastError) {
-            case IICESocketSession::ICESocketSessionShutdownReason_None:    (*iter).second->shutdown(); break;
-            default:                                                        (*iter).second->shutdownFromTimeout(); break;
+          if ((IICESocketSession::ICESocketSessionShutdownReason_None == mLastError) && (!iceSessionClosed)) {
+            (*iter).second->shutdown();
+          } else {
+            (*iter).second->shutdownFromTimeout();
           }
         }
 

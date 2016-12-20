@@ -315,7 +315,7 @@ namespace ortc
 
         IRUDPChannelStreamDelegatePtr mDelegate;
 
-        RUDPChannelStreamStates mCurrentState;
+        RUDPChannelStreamStates mCurrentState {RUDPChannelStreamState_Connected};
         WORD mLastError {};
         String mLastErrorReason;
 
@@ -326,7 +326,7 @@ namespace ortc
 
         ByteQueuePtr mPendingReceiveData;
 
-        bool mDidReceiveWriteReady;
+        bool mDidReceiveWriteReady {true};
 
         WORD mSendingChannelNumber;
         WORD mReceivingChannelNumber;
@@ -343,7 +343,7 @@ namespace ortc
 
         QWORD mWaitToSendUntilReceivedRemoteSequenceNumber {};
 
-        Shutdown mShutdownState;
+        Shutdown mShutdownState {IRUDPChannel::Shutdown_None};
 
         bool mDuplicateReceived {};
         bool mECNReceived {};
@@ -361,7 +361,7 @@ namespace ortc
         ULONG mTotalPacketsToResend {};
 
         // congestion control parameters
-        ULONG mAvailableBurstBatons;                            // how many "batons" (aka relay style batons) are available for sending new bursts right now
+        ULONG mAvailableBurstBatons {1};                         // how many "batons" (aka relay style batons) are available for sending new bursts right now
 
         ITimerPtr mBurstTimer;                                   // this timer will be used to consume the available batons until they are gone (the timer will be cancelled when there is no more available batons or there is no more data to send)
 
@@ -377,10 +377,10 @@ namespace ortc
 
         bool mBandwidthIncreaseFrozen {};                       // the bandwidth increase routine is currently frozen because an insufficient time without issues has not occurerd
         Time mStartedSendingAtTime;                             // when did the sending activate again (so when the final ACK comes in the total duration can be calculated)
-        Milliseconds mTotalSendingPeriodWithoutIssues{};        // how long has there been a successful period of sending without and sending difficulties
+        Milliseconds mTotalSendingPeriodWithoutIssues {};       // how long has there been a successful period of sending without and sending difficulties
 
         QWORD mForceACKOfSentPacketsAtSendingSequnceNumber {};  // when the ACK reply comes back we can be sure of the state of lost packets up to this sequence number
-        PUID mForceACKOfSentPacketsRequestID;                   // the identification of the request that is causing the force
+        PUID mForceACKOfSentPacketsRequestID {};                // the identification of the request that is causing the force
         bool mForceACKNextTimePossible {};                      // force an ACK at the next possibel interval
       };
 

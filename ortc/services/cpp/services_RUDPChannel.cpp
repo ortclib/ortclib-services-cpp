@@ -165,7 +165,6 @@ namespace ortc
         mCurrentState(RUDPChannelState_Connecting),
         mMasterDelegate(IRUDPChannelDelegateForSessionAndListenerProxy::createWeak(queue, master)),
         mRemoteIP(remoteIP),
-        mShutdownDirection(IRUDPChannel::Shutdown_None),
         mLocalUsernameFrag(localUsernameFrag),
         mLocalPassword(localPassword),
         mRemoteUsernameFrag(remoteUsernameFrag),
@@ -176,8 +175,8 @@ namespace ortc
         mRemoteSequenceNumber(remoteSequenceNumber),
         mMinimumRTT(minimumRTT),
         mLifetime(lifetime),
-        mLocalChannelInfo(localChannelInfo ? localChannelInfo : ""),
-        mRemoteChannelInfo(remoteChannelInfo ? remoteChannelInfo : ""),
+        mLocalChannelInfo(localChannelInfo),
+        mRemoteChannelInfo(remoteChannelInfo),
         mLastSentData(zsLib::now()),
         mLastReceivedData(zsLib::now())
       {

@@ -213,11 +213,11 @@ namespace ortc
         mutable RecursiveLock mLock;
         RUDPListenerWeakPtr mThisWeak;
         IRUDPListenerDelegatePtr mDelegate;
-        PUID mID;
+        AutoPUID mID;
 
         RUDPListenerPtr mGracefulShutdownReference;
 
-        RUDPListenerStates mCurrentState;
+        RUDPListenerStates mCurrentState {RUDPListenerState_Listening};
 
         WORD mBindPort;
 

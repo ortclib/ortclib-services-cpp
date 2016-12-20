@@ -74,11 +74,7 @@ namespace ortc
       Backgrounding::Backgrounding(const make_private &) :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
-        mCurrentBackgroundingID(zsLib::createPUID()),
-        mLargestPhase(0),
-        mTotalWaiting(0),
-        mCurrentPhase(0),
-        mTotalNotifiersCreated(0)
+        mCurrentBackgroundingID(zsLib::createPUID())
       {
         ZS_LOG_DETAIL(log("created"))
       }
@@ -673,9 +669,9 @@ namespace ortc
                                         const make_private &,
                                         ExchangedNotifierPtr notifier
                                         ) :
-        mBackgroundingID(notifier->getID()),
         SharedRecursiveLock(*(notifier->getOuter())),
         mOuter(notifier->getOuter()),
+        mBackgroundingID(notifier->getID()),
         mPhase(notifier->getPhase())
       {
       }

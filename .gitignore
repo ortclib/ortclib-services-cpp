@@ -16,3 +16,13 @@ ortc/services/internal/services.events.jman
 ortc/services/internal/services.events_win_etw.wprp
 ortc/services/internal/services.events_win_etw.man
 ortc/services/internal/contents.xcworkspacedata
+
+# codelite
+.build-debug/
+.build-release/
+.codelite/
+projects/linux/codelite/Makefile
+projects/linux/codelite/ortclib-services-cpp/*.mk
+projects/linux/codelite/ortclib-services-cpp/*.txt
+projects/linux/codelite/ortclib-services-cpp-Test/*.mk
+projects/linux/codelite/ortclib-services-cpp-Test/*.txt

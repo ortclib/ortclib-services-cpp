@@ -1561,10 +1561,14 @@ namespace ortc
     String STUNPacket::toString(RFCs value)
     {
       String result;
-      addMore(result, "RFC-3489 STUN", RFC_3489_STUN, value);
-      addMore(result, "RFC-5389 STUN", RFC_5389_STUN, value);
-      addMore(result, "RFC-5766 TURN", RFC_5766_TURN, value);
-      addMore(result, "RFC-3489 ICE", RFC_5245_ICE, value);
+      if (RFC_AllowAll == value) {
+        addMore(result, "RFC Allow All",  RFC_AllowAll, value);
+        return result;
+      }
+      addMore(result, "RFC-3489 STUN",  RFC_3489_STUN, value);
+      addMore(result, "RFC-5389 STUN",  RFC_5389_STUN, value);
+      addMore(result, "RFC-5766 TURN",  RFC_5766_TURN, value);
+      addMore(result, "RFC-5245 ICE",   RFC_5245_ICE, value);
       addMore(result, "RFC-draft RUDP", RFC_draft_RUDP, value);
       return result;
     }
@@ -2500,7 +2504,7 @@ namespace ortc
       if (hasAttribute(STUNPacket::Attribute_UnknownAttribute)) {
         ElementPtr unknownsEl = Element::create("unknowns");
         UnknownAttributeList::const_iterator iter = mUnknownAttributes.begin();
-        for (bool first = true; iter != mUnknownAttributes.end(); ++iter, first = false) {
+        for (; iter != mUnknownAttributes.end(); ++iter) {
           IHelper::debugAppend(unknownsEl, "unknown", string(*iter));
         }
         IHelper::debugAppend(resultEl, unknownsEl);
@@ -2547,7 +2551,7 @@ namespace ortc
       if (hasAttribute(STUNPacket::Attribute_XORPeerAddress)) {
         ElementPtr peersEl = Element::create("peer addresses");
         PeerAddressList::const_iterator iter = mPeerAddressList.begin();
-        for (bool first = true; iter != mPeerAddressList.end(); ++iter, first = false) {
+        for (; iter != mPeerAddressList.end(); ++iter) {
           IHelper::debugAppend(peersEl, "peer address", (*iter).string());
         }
         IHelper::debugAppend(resultEl, peersEl);
@@ -2656,8 +2660,7 @@ namespace ortc
         if (mLocalCongestionControl.size() > 0)
         {
           ElementPtr localEl = Element::create("congestion local");
-          CongestionControlList::const_iterator iter = mLocalCongestionControl.begin();
-          for (bool first = true; iter != mLocalCongestionControl.end(); ++iter, first = false) {
+          for (auto iter = mLocalCongestionControl.begin(); iter != mLocalCongestionControl.end(); ++iter) {
             IHelper::debugAppend(localEl, "value", string(((UINT)*iter)));
           }
           IHelper::debugAppend(resultEl, localEl);
@@ -2665,8 +2668,7 @@ namespace ortc
         if (mRemoteCongestionControl.size() > 0)
         {
           ElementPtr remoteEL = Element::create("congestion remote");
-          CongestionControlList::const_iterator iter = mRemoteCongestionControl.begin();
-          for (bool first = true; iter != mRemoteCongestionControl.end(); ++iter, first = false) {
+          for (auto iter = mRemoteCongestionControl.begin(); iter != mRemoteCongestionControl.end(); ++iter) {
             IHelper::debugAppend(remoteEL, "value", string(((UINT)*iter)));
           }
           IHelper::debugAppend(resultEl, remoteEL);

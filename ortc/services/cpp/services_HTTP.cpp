@@ -696,11 +696,7 @@ namespace ortc
         mURL(url),
         mMimeType(postDataMimeType),
         mTimeout(timeout),
-        mErrorBuffer(CURL_ERROR_SIZE),
-        mCurl(NULL),
-        mResponseCode(0),
-        mHeaders(NULL),
-        mResultCode(CURLE_OK)
+        mErrorBuffer(CURL_ERROR_SIZE)
       {
         ZS_LOG_DEBUG(log("created"))
         if (0 != postDataLengthInBytes) {

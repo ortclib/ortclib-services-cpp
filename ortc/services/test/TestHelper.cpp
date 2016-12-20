@@ -138,7 +138,7 @@ static void testDomainValidation()
 
     TESTING_EQUAL(validated, validateDomains[loop].mWillValidate)
     if (validated != validateDomains[loop].mWillValidate) {
-      TESTING_EQUAL(domain, "failed")
+      TESTING_EQUAL(String(domain), "failed");
     }
   }
   

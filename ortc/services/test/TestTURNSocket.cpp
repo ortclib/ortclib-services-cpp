@@ -852,6 +852,7 @@ void doTestTURNSocket()
     ULONG found = 0;
     ULONG lastFound = 0;
     ULONG totalWait = 0;
+    bool okayToStop = false;
 
     do
     {
@@ -870,6 +871,10 @@ void doTestTURNSocket()
       if (120 == totalWait) {
         if (testObject5) testObject5->shutdown();
       }
+      
+      if (125 == totalWait) {
+        okayToStop = true;
+      }
 
       found = 0;
 
@@ -883,7 +888,7 @@ void doTestTURNSocket()
         TESTING_STDOUT() << "FOUND:        [" << found << "].\n";
       }
 
-    } while(found < expecting);
+    } while ((found < expecting) || (!okayToStop));
 
     TESTING_EQUAL(found, expecting);
   }

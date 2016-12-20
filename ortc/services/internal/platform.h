@@ -100,7 +100,7 @@
 #endif //__APPPLE__
 
 
-#ifdef _LINUX
+#ifdef __unix__
 
 // Linux has these options
 #define HAVE_SYS_TYPES_H 1
@@ -115,4 +115,4 @@
 #undef HAVE_IFADDRS_H
 
 #endif //_ANDROID
-#endif //_LINUX
+#endif //__unix__

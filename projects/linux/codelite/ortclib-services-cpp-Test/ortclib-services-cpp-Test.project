@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="ortclib-services-cpp-Test" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src">
+    <File Name="main.c" ExcludeProjConfig="Debug;Release"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="ortc">
+    <VirtualDirectory Name="services">
+      <VirtualDirectory Name="test">
+        <File Name="../../../../ortc/services/test/TestBackOffTimer.cpp"/>
+        <File Name="../../../../ortc/services/test/TestCanonicalXML.cpp"/>
+        <File Name="../../../../ortc/services/test/TestDH.cpp"/>
+        <File Name="../../../../ortc/services/test/TestDNS.cpp"/>
+        <File Name="../../../../ortc/services/test/TestHelper.cpp"/>
+        <File Name="../../../../ortc/services/test/TestICESocket.cpp"/>
+        <File Name="../../../../ortc/services/test/TestRUDPICESocket.cpp"/>
+        <File Name="../../../../ortc/services/test/TestRUDPICESocketLoopback.cpp"/>
+        <File Name="../../../../ortc/services/test/TestRUDPListener.cpp"/>
+        <File Name="../../../../ortc/services/test/TestSTUNDiscovery.cpp"/>
+        <File Name="../../../../ortc/services/test/TestSTUNPacket.cpp"/>
+        <File Name="../../../../ortc/services/test/TestTCPMessagingLoopback.cpp"/>
+        <File Name="../../../../ortc/services/test/TestTURNSocket.cpp"/>
+        <File Name="../../../../ortc/services/test/config.h"/>
+        <File Name="../../../../ortc/services/test/main.cpp"/>
+        <File Name="../../../../ortc/services/test/testing.cpp"/>
+        <File Name="../../../../ortc/services/test/testing.h"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="cryptopp"/>
+    <Project Name="idnkit"/>
+    <Project Name="ortclib-services-cpp"/>
+    <Project Name="udns"/>
+    <Project Name="zsLib"/>
+    <Project Name="zsLib-eventing"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="cryptopp"/>
+    <Project Name="idnkit"/>
+    <Project Name="ortclib-services-cpp"/>
+    <Project Name="udns"/>
+    <Project Name="zsLib"/>
+    <Project Name="zsLib-eventing"/>
+  </Dependencies>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0;-std=c++11;-Wall;-Wno-unknown-pragmas;-Wno-documentation;-Wno-unused-local-typedefs;-Wno-pragmas" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../../.."/>
+        <IncludePath Value="../../../../../zsLib"/>
+        <IncludePath Value="../../../../../zsLib-eventing"/>
+        <IncludePath Value="../../../../.."/>
+        <IncludePath Value="../../../../../idnkit/idnkit/include"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../projects/linux/codelite/ortclib-services-cpp/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../zsLib/projects/linux/codelite/zsLib/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../cryptopp/projects/linux/codelite/cryptopp/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../udns/projects/linux/codelite/udns/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../idnkit/projects/linux/codelite/idnkit/$(IntermediateDirectory)"/>
+        <Library Value="uuid"/>
+        <Library Value="curl"/>
+        <Library Value="pthread"/>
+        <Library Value="ortclib-services-cpp"/>
+        <Library Value="zsLib"/>
+        <Library Value="zsLib-eventing"/>
+        <Library Value="cryptopp"/>
+        <Library Value="udns"/>
+        <Library Value="idnkit"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O2;-std=c++11;-Wall;-Wno-unknown-pragmas;-Wno-documentation;-Wno-unused-local-typedefs;-Wno-pragmas" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../../.."/>
+        <IncludePath Value="../../../../../zsLib"/>
+        <IncludePath Value="../../../../../zsLib-eventing"/>
+        <IncludePath Value="../../../../.."/>
+        <IncludePath Value="../../../../../idnkit/idnkit/include"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../projects/linux/codelite/ortclib-services-cpp/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../zsLib/projects/linux/codelite/zsLib/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../cryptopp/projects/linux/codelite/cryptopp/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../udns/projects/linux/codelite/udns/$(IntermediateDirectory)"/>
+        <LibraryPath Value="../../../../../idnkit/projects/linux/codelite/idnkit/$(IntermediateDirectory)"/>
+        <Library Value="uuid"/>
+        <Library Value="curl"/>
+        <Library Value="pthread"/>
+        <Library Value="ortclib-services-cpp"/>
+        <Library Value="zsLib"/>
+        <Library Value="zsLib-eventing"/>
+        <Library Value="cryptopp"/>
+        <Library Value="udns"/>
+        <Library Value="idnkit"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

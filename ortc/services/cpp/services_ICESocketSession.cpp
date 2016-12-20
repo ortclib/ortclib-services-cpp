@@ -829,6 +829,7 @@ namespace ortc
                   request->mIceControlledIncluded = true;
                   request->mIceControlled = mConflictResolver;
                 }
+                request->mFingerprintIncluded = true;
 
                 // activate the pair search now...
                 found->mRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), found->mRemote.mIPAddress, request, STUNPacket::RFC_5245_ICE);
@@ -1375,6 +1376,7 @@ namespace ortc
           request->mIceControlling = mConflictResolver;
           request->mPriorityIncluded = true;
           request->mPriority = mNominated->mLocal.mPriority;
+          request->mFingerprintIncluded = true;
         }
 
         mAliveCheckRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mNominated->mRemote.mIPAddress, request, (isICE ? STUNPacket::RFC_5245_ICE : STUNPacket::RFC_5389_STUN));
@@ -1445,6 +1447,7 @@ namespace ortc
                 request->mIceControlledIncluded = true;
                 request->mIceControlled = mConflictResolver;
               }
+              request->mFingerprintIncluded = true;
             }
 
             // activate the pair search now...
@@ -2300,6 +2303,7 @@ namespace ortc
           request->mPriorityIncluded = true;
           request->mPriority = mPendingNominatation->mLocal.mPriority;
           request->mUseCandidateIncluded = true;
+          request->mFingerprintIncluded = true;
 
           // form a new request
           mNominateRequester = ISTUNRequester::create(getAssociatedMessageQueue(), mThisWeak.lock(), mPendingNominatation->mRemote.mIPAddress, request, STUNPacket::RFC_5245_ICE);

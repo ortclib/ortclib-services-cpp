@@ -311,14 +311,17 @@ namespace ortc
         virtual void onICESocketStateChanged(
                                              IICESocketPtr socket,
                                              ICESocketStates state
-                                             )
+                                             ) override
         {
           zsLib::AutoRecursiveLock lock(mLock);
           if (socket != mSocket) return;
 
           switch (state) {
+            case IICESocket::ICESocketState_Sleeping:
             case IICESocket::ICESocketState_Ready:
             {
+              if (mSocketSession) break;  // already created
+              
               IICESocket::CandidateList candidates;
               IICESocket::Candidate candidate;
               candidate.mType = IICESocket::Type_Local;
@@ -352,7 +355,7 @@ namespace ortc
         }
         
         //---------------------------------------------------------------------
-        virtual void onICESocketCandidatesChanged(IICESocketPtr socket)
+        virtual void onICESocketCandidatesChanged(IICESocketPtr socket) override
         {
           // ignored
         }
@@ -361,7 +364,7 @@ namespace ortc
         virtual void onRUDPTransportStateChanged(
                                                  IRUDPTransportPtr session,
                                                  RUDPTransportStates state
-                                                 )
+                                                 ) override
         {
           zsLib::AutoRecursiveLock lock(mLock);
           if (IRUDPTransport::RUDPTransportState_Ready == state) {
@@ -380,7 +383,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onRUDPTransportChannelWaiting(IRUDPTransportPtr session)
+        virtual void onRUDPTransportChannelWaiting(IRUDPTransportPtr session) override
         {
         }
 
@@ -388,7 +391,7 @@ namespace ortc
         virtual void onRUDPMessagingStateChanged(
                                                  IRUDPMessagingPtr session,
                                                  RUDPMessagingStates state
-                                                 )
+                                                 ) override
         {
           zsLib::AutoRecursiveLock lock(mLock);
 
@@ -401,7 +404,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
+        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader) override
         {
           zsLib::AutoRecursiveLock lock(mLock);
           if (reader != mReceiveStream) return;
@@ -434,7 +437,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onTransportStreamWriterReady(ITransportStreamWriterPtr reader)
+        virtual void onTransportStreamWriterReady(ITransportStreamWriterPtr reader) override
         {
           // IGNORED
         }

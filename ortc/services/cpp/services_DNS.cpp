@@ -526,8 +526,8 @@ namespace ortc
                  DNSMonitorPtr monitor,
                  IDNSDelegatePtr delegate
                  ) :
-          mMonitor(monitor),
           SharedRecursiveLock(monitor ? *monitor : SharedRecursiveLock::create()),
+          mMonitor(monitor),
           mObjectName("DNSQuery")
         {
           ZS_THROW_INVALID_USAGE_IF(!delegate)

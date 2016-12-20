@@ -305,10 +305,10 @@ namespace ortc
           SecureByteBlock mPostData;
           SecureByteBlock mErrorBuffer;
 
-          CURL *mCurl;
-          long mResponseCode;
-          CURLcode mResultCode;
-          struct curl_slist *mHeaders;
+          CURL *mCurl {NULL};
+          long mResponseCode {0};
+          CURLcode mResultCode {CURLE_OK};
+          struct curl_slist *mHeaders {NULL};
 
           ByteQueue mHeader;
           ByteQueue mBody;

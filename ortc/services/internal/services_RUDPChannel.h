@@ -458,7 +458,7 @@ namespace ortc
 
         ITimerPtr mTimer;
 
-        IRUDPChannelStream::Shutdown mShutdownDirection;
+        IRUDPChannelStream::Shutdown mShutdownDirection {IRUDPChannel::Shutdown_None};
 
         IPAddress mRemoteIP;
 

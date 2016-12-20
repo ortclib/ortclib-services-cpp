@@ -42,7 +42,7 @@
 #include <zsLib/Singleton.h>
 
 // special case where CryptoPP extension class is needed
-#include <cryptopp/AllocatorWithNul.h>
+#include <cryptopp/allocatorwithnul.h>
 
 namespace ortc
 {

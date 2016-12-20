@@ -462,8 +462,8 @@ namespace ortc
         ChannelIPMap mChannelIPMap;
         ChannelNumberMap mChannelNumberMap;
 
-        bool          mForceTURNUseTCP {};
         bool          mForceTURNUseUDP {};
+        bool          mForceTURNUseTCP {};
         IPAddressSet  mRestrictedIPs;
       };
 

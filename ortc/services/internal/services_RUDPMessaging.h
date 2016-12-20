@@ -196,7 +196,7 @@ namespace ortc
         mutable RecursiveLock mLock;
         RUDPMessagingWeakPtr mThisWeak;
 
-        RUDPMessagingStates mCurrentState;
+        RUDPMessagingStates mCurrentState {RUDPMessagingState_Connecting};
         WORD mLastError {};
         String mLastErrorReason;
 

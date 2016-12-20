@@ -105,23 +105,7 @@ namespace ortc
         TestRUDPICESocketLoopback(zsLib::IMessageQueuePtr queue) :
           zsLib::MessageQueueAssociator(queue),
           mReceiveStream(ITransportStream::create()->getReader()),
-          mSendStream(ITransportStream::create()->getWriter()),
-          mExpectConnected(false),
-          mExpectGracefulShutdown(false),
-          mExpectErrorShutdown(false),
-          mExpectSessionConnected(false),
-          mExpectSessionClosed(false),
-          mIssueConnect(false),
-          mConnected(false),
-          mGracefulShutdown(false),
-          mErrorShutdown(false),
-          mShutdownCalled(false),
-          mSessionConnected(false),
-          mSessionClosed(false),
-          mExpectMessagingConnected(false),
-          mExpectMessagingShutdown(false),
-          mMessagingConnected(false),
-          mMessagingShutdown(false)
+          mSendStream(ITransportStream::create()->getWriter())
         {
         }
 
@@ -254,7 +238,7 @@ namespace ortc
         virtual void onRUDPTransportStateChanged(
                                                  IRUDPTransportPtr session,
                                                  RUDPTransportStates state
-                                                 )
+                                                 ) override
         {
           zsLib::AutoRecursiveLock lock(getLock());
 
@@ -574,25 +558,25 @@ namespace ortc
         RUDPSessionList mRUDPSessions;
         MessagingList mMessaging;
 
-        bool mExpectConnected;
-        bool mExpectGracefulShutdown;
-        bool mExpectErrorShutdown;
-        bool mExpectSessionConnected;
-        bool mExpectSessionClosed;
-        bool mExpectMessagingConnected;
-        bool mExpectMessagingShutdown;
+        bool mExpectConnected {};
+        bool mExpectGracefulShutdown {};
+        bool mExpectErrorShutdown {};
+        bool mExpectSessionConnected {};
+        bool mExpectSessionClosed {};
+        bool mExpectMessagingConnected {};
+        bool mExpectMessagingShutdown {};
 
-        bool mIssueConnect;
+        bool mIssueConnect {};
 
-        bool mConnected;
-        bool mGracefulShutdown;
-        bool mErrorShutdown;
-        bool mSessionConnected;
-        bool mSessionClosed;
-        bool mMessagingConnected;
-        bool mMessagingShutdown;
+        bool mConnected {};
+        bool mGracefulShutdown {};
+        bool mErrorShutdown {};
+        bool mSessionConnected {};
+        bool mSessionClosed {};
+        bool mMessagingConnected {};
+        bool mMessagingShutdown {};
 
-        bool mShutdownCalled;
+        bool mShutdownCalled {};
       };
     }
   }
@@ -709,10 +693,10 @@ void doTestRUDPICESocketLoopback()
               testObject2->createSessionFromRemoteCandidates(IICESocket::ICEControl_Controlling);
             }
 
-			if (50 == totalWait) {
-				testObject1->shutdown();
-				testObject2->shutdown();
-			}
+            if (50 == totalWait) {
+              testObject1->shutdown();
+              testObject2->shutdown();
+            }
             break;
           }
         }

@@ -166,12 +166,12 @@ namespace ortc
         STUNDiscoveryWeakPtr mThisWeak;
 
         AutoPUID mID;
+        ISTUNDiscoveryDelegatePtr mDelegate;
 
         CreationOptions mOptions;
 
         IDNSQueryPtr mSRVQuery;
 
-        ISTUNDiscoveryDelegatePtr mDelegate;
         ISTUNRequesterPtr mSTUNRequester;
 
         IPAddress mServer;

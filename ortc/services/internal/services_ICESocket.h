@@ -619,7 +619,6 @@ namespace ortc
 }
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IICESocketForICESocketSession)
-ZS_DECLARE_PROXY_TYPEDEF(zsLib::IMessageQueuePtr, IMessageQueuePtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::ICESocketSessionPtr, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocket, IICESocket)

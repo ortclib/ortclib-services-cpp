@@ -1422,10 +1422,8 @@ namespace ortc
           mLoggerNamespace(loggerNamespace),
           mColorizeOutput(colorizeOutput),
           mPrettyPrint(prettyPrint),
-          mConnected(false),
-          mListenPort(0),
-          mMaxWaitTimeForSocketToBeAvailable(Seconds(60)),
-          mBacklogDataUntil(zsLib::now() + Seconds(ORTC_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS))
+          mBacklogDataUntil(zsLib::now() + Seconds(ORTC_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS)),
+          mMaxWaitTimeForSocketToBeAvailable(Seconds(60))
         {
         }
 
@@ -1444,7 +1442,6 @@ namespace ortc
                                                  bool prettyPrint
                                                  )
         {
-#if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
           
@@ -1470,9 +1467,6 @@ namespace ortc
           singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, newLogger, newLogger, false);
           
           return newLogger;
-#else
-          return TelnetLoggerPtr();
-#endif //_WIN32
         }
         
         //---------------------------------------------------------------------
@@ -1483,7 +1477,6 @@ namespace ortc
                                                  const char *sendStringUponConnection
                                                  )
         {
-#if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
           
@@ -1510,9 +1503,6 @@ namespace ortc
           singleton->registerLogger(ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, newLogger, newLogger, false);
           
           return newLogger;
-#else
-          return TelnetLoggerPtr();
-#endif //_WIN32
         }
 
         //---------------------------------------------------------------------
@@ -2405,14 +2395,14 @@ namespace ortc
         BufferedDataList mBufferedList;
 
         WORD mListenPort {};
-        Time mStartListenTime;
+        Time mStartListenTime {};
         Milliseconds mMaxWaitTimeForSocketToBeAvailable {};
 
         ITimerPtr mRetryTimer;
-        Time mNextRetryTime;
+        Time mNextRetryTime {};
         Milliseconds mRetryWaitTime {};
 
-        bool mConnected {};
+        bool mConnected {false};
         IDNSQueryPtr mOutgoingServerQuery;
         String mStringToSendUponConnection;
 
@@ -2420,7 +2410,7 @@ namespace ortc
         IDNS::SRVResultPtr mServers;
 
         String mOriginalServer;
-        String mOriginalStringToSendUponConnection;
+        String mOriginalStringToSendUponConnection;        
       };
 
       //-----------------------------------------------------------------------
@@ -2513,9 +2503,9 @@ namespace ortc
                        ) :
           MessageQueueAssociator(queue),
           mListenPort(listenPort),
+          mMaxSecondsWaitForSocketToBeAvailable(maxSecondsWaitForSocketToBeAvailable),
           mServerAddress(serverAddress),
-          mSharedSecret(sharedSecret),
-          mMaxSecondsWaitForSocketToBeAvailable(maxSecondsWaitForSocketToBeAvailable)
+          mSharedSecret(sharedSecret)
         {
         }
 

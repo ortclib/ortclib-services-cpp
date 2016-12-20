@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="ortclib-services-cpp" Database="">
+  <Project Name="zsLib" Path="../../../../zsLib/projects/linux/codelite/zsLib/zsLib.project" Active="No"/>
+  <Project Name="cryptopp" Path="../../../../cryptopp/projects/linux/codelite/cryptopp/cryptopp.project" Active="No"/>
+  <Project Name="zsLib-eventing" Path="../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing/zsLib-eventing.project" Active="No"/>
+  <Project Name="udns" Path="../../../../udns/projects/linux/codelite/udns/udns.project" Active="No"/>
+  <Project Name="idnkit" Path="../../../../idnkit/projects/linux/codelite/idnkit/idnkit.project"/>
+  <Project Name="ortclib-services-cpp" Path="ortclib-services-cpp/ortclib-services-cpp.project"/>
+  <Project Name="zsLib-eventing-tool" Path="../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing-tool/zsLib-eventing-tool.project" Active="No"/>
+  <Project Name="zsLib-eventing-tool-compiler" Path="../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing-tool-compiler/zsLib-eventing-tool-compiler.project" Active="No"/>
+  <Project Name="ortclib-services-cpp-Test" Path="ortclib-services-cpp-Test/ortclib-services-cpp-Test.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="zsLib" ConfigName="Debug"/>
+      <Project Name="cryptopp" ConfigName="Debug"/>
+      <Project Name="zsLib-eventing" ConfigName="Debug"/>
+      <Project Name="udns" ConfigName="Debug"/>
+      <Project Name="idnkit" ConfigName="Debug"/>
+      <Project Name="ortclib-services-cpp" ConfigName="Debug"/>
+      <Project Name="zsLib-eventing-tool" ConfigName="Debug"/>
+      <Project Name="zsLib-eventing-tool-compiler" ConfigName="Debug"/>
+      <Project Name="ortclib-services-cpp-Test" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="no">
+      <Environment/>
+      <Project Name="zsLib" ConfigName="Release"/>
+      <Project Name="cryptopp" ConfigName="Release"/>
+      <Project Name="zsLib-eventing" ConfigName="Release"/>
+      <Project Name="udns" ConfigName="Release"/>
+      <Project Name="idnkit" ConfigName="Release"/>
+      <Project Name="ortclib-services-cpp" ConfigName="Release"/>
+      <Project Name="zsLib-eventing-tool" ConfigName="Release"/>
+      <Project Name="zsLib-eventing-tool-compiler" ConfigName="Release"/>
+      <Project Name="ortclib-services-cpp-Test" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

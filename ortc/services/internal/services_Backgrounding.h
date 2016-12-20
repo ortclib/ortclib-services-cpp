@@ -302,8 +302,8 @@ namespace ortc
           virtual size_t totalBackgroundingSubscribersStillPending() const;
 
         protected:
-          PUID mBackgroundingID;
           BackgroundingWeakPtr mOuter;
+          PUID mBackgroundingID;
         };
 
       protected:
@@ -315,17 +315,17 @@ namespace ortc
         AutoPUID mID;
         BackgroundingWeakPtr mThisWeak;
 
-        Phase mLargestPhase;
+        Phase mLargestPhase {};
 
         PhaseSubscriptionMap mPhaseSubscriptions;
 
         PUID mCurrentBackgroundingID;
-        Phase mCurrentPhase;
-        size_t mTotalWaiting;
+        Phase mCurrentPhase {};
+        size_t mTotalWaiting {};
         IBackgroundingCompletionDelegatePtr mNotifyWhenReady;
         QueryPtr mQuery;
 
-        size_t mTotalNotifiersCreated;
+        size_t mTotalNotifiersCreated {};
 
         ITimerPtr mTimer;
       };

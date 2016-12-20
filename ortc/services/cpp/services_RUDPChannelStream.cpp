@@ -236,8 +236,6 @@ namespace ortc
         MessageQueueAssociator(queue),
         mDelegate(IRUDPChannelStreamDelegateProxy::createWeak(queue, delegate)),
         mPendingReceiveData(make_shared<ByteQueue>()),
-        mDidReceiveWriteReady(true),
-        mCurrentState(RUDPChannelStreamState_Connected),
         mSendingChannelNumber(sendingChannelNumber),
         mReceivingChannelNumber(receivingChannelNumber),
         mMinimumRTT(Milliseconds(minimumNegotiatedRTTInMilliseconds)),
@@ -245,14 +243,10 @@ namespace ortc
         mNextSequenceNumber(nextSequenceNumberToUseForSending),
         mGSNR(nextSequenberNumberExpectingToReceive-1),
         mGSNFR(nextSequenberNumberExpectingToReceive-1),
-        mShutdownState(IRUDPChannel::Shutdown_None),
         mLastDeliveredReadData(zsLib::now()),
-        mAvailableBurstBatons(1),
         mAddToAvailableBurstBatonsDuation(Milliseconds(ORTC_SERVICES_RUDP_DEFAULT_CALCULATE_RTT_IN_MILLISECONDS)),
         mPacketsPerBurst(ORTC_SERVICES_DEFAULT_PACKETS_PER_BURST),
-        mStartedSendingAtTime(zsLib::now()),
-        mTotalSendingPeriodWithoutIssues(Milliseconds(0)),
-        mForceACKOfSentPacketsRequestID(0)
+        mStartedSendingAtTime(zsLib::now())
       {
         ZS_LOG_DETAIL(log("created"))
         if (mCalculatedRTT < mMinimumRTT)

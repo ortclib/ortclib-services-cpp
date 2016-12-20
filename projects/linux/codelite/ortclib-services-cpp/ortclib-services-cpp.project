@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="ortclib-services-cpp" InternalType="Library">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="ortc">
+    <VirtualDirectory Name="services">
+      <VirtualDirectory Name="cpp">
+        <File Name="../../../../ortc/services/cpp/ifaddrs-android.cc"/>
+        <File Name="../../../../ortc/services/cpp/services.events.json"/>
+        <File Name="../../../../ortc/services/cpp/services_BackOffTimer.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_BackOffTimerPattern.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Backgrounding.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Cache.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_CanonicalXML.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_DHKeyDomain.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_DHPrivateKey.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_DHPublicKey.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_DNS.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_DNSMonitor.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Decryptor.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Encryptor.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_HTTP.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_HTTP_WinRT.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Helper.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_ICESocket.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_ICESocketSession.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Logger.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_MessageLayerSecurityChannel.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RSAPrivateKey.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RSAPublicKey.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPChannel.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPChannelStream.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPListener.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPMessaging.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPPacket.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_RUDPTransport.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_Reachability.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_STUNDiscovery.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_STUNPacket.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_STUNRequester.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_STUNRequesterManager.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_TCPMessaging.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_TURNSocket.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_TransportStream.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_services.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_wire.cpp"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="internal">
+        <File Name="../../../../ortc/services/internal/ifaddrs-android.h"/>
+        <File Name="../../../../ortc/services/internal/platform.h"/>
+        <File Name="../../../../ortc/services/internal/services.h"/>
+        <File Name="../../../../ortc/services/internal/services_BackOffTimer.h"/>
+        <File Name="../../../../ortc/services/internal/services_BackOffTimerPattern.h"/>
+        <File Name="../../../../ortc/services/internal/services_Backgrounding.h"/>
+        <File Name="../../../../ortc/services/internal/services_Cache.h"/>
+        <File Name="../../../../ortc/services/internal/services_CanonicalXML.h"/>
+        <File Name="../../../../ortc/services/internal/services_DHKeyDomain.h"/>
+        <File Name="../../../../ortc/services/internal/services_DHPrivateKey.h"/>
+        <File Name="../../../../ortc/services/internal/services_DHPublicKey.h"/>
+        <File Name="../../../../ortc/services/internal/services_DNS.h"/>
+        <File Name="../../../../ortc/services/internal/services_DNSMonitor.h"/>
+        <File Name="../../../../ortc/services/internal/services_Decryptor.h"/>
+        <File Name="../../../../ortc/services/internal/services_Encryptor.h"/>
+        <File Name="../../../../ortc/services/internal/services_HTTP.h"/>
+        <File Name="../../../../ortc/services/internal/services_HTTP_WinRT.h"/>
+        <File Name="../../../../ortc/services/internal/services_Helper.h"/>
+        <File Name="../../../../ortc/services/internal/services_ICESocket.h"/>
+        <File Name="../../../../ortc/services/internal/services_ICESocketSession.h"/>
+        <File Name="../../../../ortc/services/internal/services_IRUDPChannelStream.h"/>
+        <File Name="../../../../ortc/services/internal/services_Logger.h"/>
+        <File Name="../../../../ortc/services/internal/services_MessageLayerSecurityChannel.h"/>
+        <File Name="../../../../ortc/services/internal/services_RSAPrivateKey.h"/>
+        <File Name="../../../../ortc/services/internal/services_RSAPublicKey.h"/>
+        <File Name="../../../../ortc/services/internal/services_RUDPChannel.h"/>
+        <File Name="../../../../ortc/services/internal/services_RUDPChannelStream.h"/>
+        <File Name="../../../../ortc/services/internal/services_RUDPListener.h"/>
+        <File Name="../../../../ortc/services/internal/services_RUDPMessaging.h"/>
+        <File Name="../../../../ortc/services/internal/services_RUDPTransport.h"/>
+        <File Name="../../../../ortc/services/internal/services_Reachability.h"/>
+        <File Name="../../../../ortc/services/internal/services_STUNDiscovery.h"/>
+        <File Name="../../../../ortc/services/internal/services_STUNRequester.h"/>
+        <File Name="../../../../ortc/services/internal/services_STUNRequesterManager.h"/>
+        <File Name="../../../../ortc/services/internal/services_TCPMessaging.h"/>
+        <File Name="../../../../ortc/services/internal/services_TURNSocket.h"/>
+        <File Name="../../../../ortc/services/internal/services_TransportStream.h"/>
+        <File Name="../../../../ortc/services/internal/services_wire.h"/>
+        <File Name="../../../../ortc/services/internal/types.h"/>
+        <File Name="../../../../ortc/services/internal/services.events.h"/>
+        <File Name="../../../../ortc/services/internal/services.events.jman"/>
+        <File Name="../../../../ortc/services/internal/services.events_win.h"/>
+        <File Name="../../../../ortc/services/internal/services.events_win_etw.man"/>
+        <File Name="../../../../ortc/services/internal/services.events_win_etw.wprp"/>
+      </VirtualDirectory>
+      <File Name="../../../../ortc/services/IBackOffTimer.h"/>
+      <File Name="../../../../ortc/services/IBackOffTimerPattern.h"/>
+      <File Name="../../../../ortc/services/IBackgrounding.h"/>
+      <File Name="../../../../ortc/services/ICache.h"/>
+      <File Name="../../../../ortc/services/ICanonicalXML.h"/>
+      <File Name="../../../../ortc/services/IDHKeyDomain.h"/>
+      <File Name="../../../../ortc/services/IDHPrivateKey.h"/>
+      <File Name="../../../../ortc/services/IDHPublicKey.h"/>
+      <File Name="../../../../ortc/services/IDNS.h"/>
+      <File Name="../../../../ortc/services/IDecryptor.h"/>
+      <File Name="../../../../ortc/services/IEncryptor.h"/>
+      <File Name="../../../../ortc/services/IHTTP.h"/>
+      <File Name="../../../../ortc/services/IHelper.h"/>
+      <File Name="../../../../ortc/services/IICESocket.h"/>
+      <File Name="../../../../ortc/services/IICESocketSession.h"/>
+      <File Name="../../../../ortc/services/ILogger.h"/>
+      <File Name="../../../../ortc/services/IMessageLayerSecurityChannel.h"/>
+      <File Name="../../../../ortc/services/IRSAPrivateKey.h"/>
+      <File Name="../../../../ortc/services/IRSAPublicKey.h"/>
+      <File Name="../../../../ortc/services/IRUDPChannel.h"/>
+      <File Name="../../../../ortc/services/IRUDPListener.h"/>
+      <File Name="../../../../ortc/services/IRUDPMessaging.h"/>
+      <File Name="../../../../ortc/services/IRUDPTransport.h"/>
+      <File Name="../../../../ortc/services/IReachability.h"/>
+      <File Name="../../../../ortc/services/ISTUNDiscovery.h"/>
+      <File Name="../../../../ortc/services/ISTUNRequester.h"/>
+      <File Name="../../../../ortc/services/ISTUNRequesterManager.h"/>
+      <File Name="../../../../ortc/services/ITCPMessaging.h"/>
+      <File Name="../../../../ortc/services/ITURNSocket.h"/>
+      <File Name="../../../../ortc/services/ITransportStream.h"/>
+      <File Name="../../../../ortc/services/RUDPPacket.h"/>
+      <File Name="../../../../ortc/services/RUDPProtocol.h"/>
+      <File Name="../../../../ortc/services/STUNPacket.h"/>
+      <File Name="../../../../ortc/services/services.h"/>
+      <File Name="../../../../ortc/services/types.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-std=c++11;-Wall;-Wno-unknown-pragmas;-Wno-documentation;-Wno-unused-local-typedefs;-Wno-pragmas" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../../.."/>
+        <IncludePath Value="../../../../../zsLib"/>
+        <IncludePath Value="../../../../../zsLib-eventing"/>
+        <IncludePath Value="../../../../.."/>
+        <IncludePath Value="../../../../../idnkit/idnkit/include"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-std=c++11;-Wall;-Wno-unknown-pragmas;-Wno-documentation;-Wno-unused-local-typedefs;-Wno-pragmas" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../../.."/>
+        <IncludePath Value="../../../../../zsLib"/>
+        <IncludePath Value="../../../../../zsLib-eventing"/>
+        <IncludePath Value="../../../../.."/>
+        <IncludePath Value="../../../../../idnkit/idnkit/include"/>
+        <Preprocessor Value="NDEBUG=1"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

@@ -543,11 +543,11 @@ void doTestDNS()
     IDNS::SRVResultPtr srv3 = testObject->getSRV(query11);
     TESTING_CHECK(srv3)
 
-    const char *first = "stun." ORTC_SERVICE_TEST_DNS_ZONE;
-    const char *second = "stun." ORTC_SERVICE_TEST_DNS_ZONE;
+    const char *first = "test-stun1." ORTC_SERVICE_TEST_DNS_ZONE;
+    const char *second = "test-stun2." ORTC_SERVICE_TEST_DNS_ZONE;
 
-    const char *firstWIP = "54.242.132.131:3478";
-    const char *secondWIP = "174.129.96.12:3478";
+    const char *firstWIP = "216.93.246.14:3478";
+    const char *secondWIP = "216.93.246.16:3478";
 
     if (srv3->mRecords.size() > 0) {
       if (srv3->mRecords.front().mAResult) {
@@ -566,17 +566,22 @@ void doTestDNS()
     IDNS::SRVResultPtr clone = IDNS::cloneSRV(srv3);  // keep a cloned copy
     IDNS::SRVResultPtr clone2 = IDNS::cloneSRV(srv3);  // keep a second cloned copy
 
-    TESTING_CHECK(clone)
-    TESTING_CHECK(clone2)
+    TESTING_CHECK(clone);
+    TESTING_CHECK(clone2);
 
-    if (srv3) {
+    if ((srv3) && (clone)) {
 #ifndef WINRT
-      TESTING_CHECK(srv3->mTTL <= 900)
+      TESTING_CHECK(srv3->mTTL <= 900);
 #endif //ndef WINRT
-      TESTING_EQUAL(clone->mTTL, srv3->mTTL)
+      TESTING_EQUAL(clone->mTTL, srv3->mTTL);
 
-      TESTING_EQUAL(srv3->mRecords.size(), 1)
-      TESTING_EQUAL(clone->mRecords.size(), srv3->mRecords.size())
+#ifndef WINRT
+      TESTING_EQUAL(srv3->mRecords.size(), 2);
+#else
+      TESTING_EQUAL(srv3->mRecords.size(), 1);
+#endif //ndef WINRT
+
+      TESTING_EQUAL(clone->mRecords.size(), srv3->mRecords.size());
 
       if (srv3->mRecords.size() > 0) {
         // _stun._udp.domain.com, 900, 10 0 3478 216.93.246.14 // order is unknown, could be either order
@@ -588,47 +593,67 @@ void doTestDNS()
 #endif //ndef WINRT
         TESTING_EQUAL(srv3->mRecords.front().mPort, 3478);
 
-        TESTING_CHECK(srv3->mRecords.front().mAResult)
+        TESTING_CHECK(srv3->mRecords.front().mAResult);
 
         if (srv3->mRecords.front().mAResult) {
 #ifndef WINRT
           TESTING_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
 #endif //ndef WINRT
-          TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 2)
+          TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 1);
           if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
             TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
-            srv3->mRecords.front().mAResult->mIPAddresses.pop_front();  // check the next record now
+            TESTING_CHECK(!(srv3->mRecords.front().mAAAAResult));
+            srv3->mRecords.pop_front();  // check the next record now
           }
-          TESTING_CHECK(!(srv3->mRecords.front().mAAAAResult));
 
-          if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-            TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+          if (srv3->mRecords.size() > 0) {
+            TESTING_CHECK(srv3->mRecords.front().mAResult);
+            if (srv3->mRecords.front().mAResult) {
+#ifndef WINRT
+              TESTING_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
+#endif //ndef WINRT
+              TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 1);
+              if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
+                TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+                TESTING_CHECK(!(srv3->mRecords.front().mAAAAResult));
+              }
+            }
           }
         }
 
         // test cloning of SRV record
+        if (clone->mRecords.size() > 0) {
 #ifndef WINRT
-        TESTING_EQUAL(clone->mRecords.front().mPriority, 10);
-        TESTING_EQUAL(clone->mRecords.front().mWeight, 0);
-        TESTING_EQUAL(clone->mRecords.front().mName, first);
+          TESTING_EQUAL(clone->mRecords.front().mPriority, 10);
+          TESTING_EQUAL(clone->mRecords.front().mWeight, 0);
+          TESTING_EQUAL(clone->mRecords.front().mName, first);
 #endif //ndef WINRT
-        TESTING_EQUAL(clone->mRecords.front().mPort, 3478);
+          TESTING_EQUAL(clone->mRecords.front().mPort, 3478);
 
-        TESTING_CHECK(clone->mRecords.front().mAResult)
+          TESTING_CHECK(clone->mRecords.front().mAResult);
 
-        if (clone->mRecords.front().mAResult) {
+          if (clone->mRecords.front().mAResult) {
 #ifndef WINRT
-          TESTING_CHECK(clone->mRecords.front().mAResult->mTTL <= 900);
+            TESTING_CHECK(clone->mRecords.front().mAResult->mTTL <= 900);
 #endif //ndef WINRT
-          TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 2)
+            TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 1);
 
-          if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-            TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
-            clone->mRecords.front().mAResult->mIPAddresses.pop_front();  // check the next record now
-          }
-          TESTING_CHECK(!(clone->mRecords.front().mAAAAResult));
-          if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
-            TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+            if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
+              TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
+              TESTING_CHECK(!(clone->mRecords.front().mAAAAResult));
+              clone->mRecords.pop_front();  // check the next record now
+            }
+
+            if (clone->mRecords.size() > 0) {            
+              TESTING_CHECK(clone->mRecords.front().mAResult);
+              if (clone->mRecords.front().mAResult) {
+                TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 1);
+                if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
+                  TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
+                  TESTING_CHECK(!(clone->mRecords.front().mAAAAResult));
+                }
+              }
+            }
           }
         }
       }
@@ -662,9 +687,9 @@ void doTestDNS()
 #endif //ndef WINRT
 
       extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
-      TESTING_CHECK(!extract)
-      TESTING_CHECK(!extractedA)
-      TESTING_CHECK(!extractedAAAA)
+      TESTING_CHECK(!extract);
+      TESTING_CHECK(!extractedA);
+      TESTING_CHECK(!extractedAAAA);
     }
   }
 

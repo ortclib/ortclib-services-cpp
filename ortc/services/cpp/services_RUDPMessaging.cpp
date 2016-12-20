@@ -72,13 +72,12 @@ namespace ortc
                                    size_t maxMessageSizeInBytes
                                    ) :
         MessageQueueAssociator(queue),
-        mCurrentState(RUDPMessagingState_Connecting),
         mDelegate(IRUDPMessagingDelegateProxy::createWeak(queue, delegate)),
-        mMaxMessageSizeInBytes(maxMessageSizeInBytes),
         mOuterReceiveStream(receiveStream->getWriter()),
         mOuterSendStream(sendStream->getReader()),
         mWireReceiveStream(ITransportStream::create()->getReader()),
-        mWireSendStream(ITransportStream::create()->getWriter())
+        mWireSendStream(ITransportStream::create()->getWriter()),
+        mMaxMessageSizeInBytes(maxMessageSizeInBytes)
       {
         ZS_LOG_DETAIL(log("created"))
       }

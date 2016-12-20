@@ -1179,7 +1179,7 @@ namespace ortc
 
           const BYTE *buffer = streamBuffer->BytePtr();
 
-          DWORD algorithm = ntohl(((DWORD *)buffer)[0]);
+          DWORD algorithm = IHelper::getBE32(&(buffer[0]));
 
           const BYTE *source = (const BYTE *)(&(((DWORD *)buffer)[1]));
           SecureByteBlock::size_type remaining = streamBuffer->SizeInBytes() - sizeof(DWORD);
@@ -1724,7 +1724,7 @@ namespace ortc
 
           SecureByteBlockPtr buffer(make_shared<SecureByteBlock>(sizeof(DWORD) + (outputLength * sizeof(char))));
 
-          ((DWORD *)(buffer->BytePtr()))[0] = htonl(0);
+          IHelper::setBE32(buffer->BytePtr(), 0);
 
           BYTE *dest = (buffer->BytePtr() + sizeof(DWORD));
 
@@ -2016,7 +2016,7 @@ namespace ortc
 
           SecureByteBlockPtr output(make_shared<SecureByteBlock>(sizeof(DWORD) + calculatedIntegrity->SizeInBytes() + encrypted->SizeInBytes()));
 
-          ((DWORD *)output->BytePtr())[0] = htonl(index);
+          IHelper::setBE32(output->BytePtr(), static_cast<DWORD>(index));
 
           BYTE *integrityPos = (output->BytePtr() + sizeof(DWORD));
           BYTE *outputPos = (integrityPos + calculatedIntegrity->SizeInBytes());

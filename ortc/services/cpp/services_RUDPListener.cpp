@@ -210,11 +210,9 @@ namespace ortc
                                  const char *realm
                                  ) :
         MessageQueueAssociator(queue),
-        mID(zsLib::createPUID()),
-        mCurrentState(RUDPListenerState_Listening),
         mDelegate(IRUDPListenerDelegateProxy::createWeak(delegate)),
         mBindPort(port),
-        mRealm(realm ? realm : "")
+        mRealm(realm)
       {
         CryptoPP::AutoSeededRandomPool rng;
         rng.GenerateBlock(&(mMagic[0]), sizeof(mMagic));

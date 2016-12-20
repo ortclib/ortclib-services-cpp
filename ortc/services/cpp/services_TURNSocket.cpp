@@ -2791,7 +2791,7 @@ namespace ortc
             informWriteReady();
           }
           if (!wasRoom) {
-            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange??)"))
+            ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("another case of send packet failed as there was not enough buffer space (but yet it seemed to have been sent - strange!?)"))
           }
           return wasRoom;
         }
