@@ -9,7 +9,7 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-	<ProjectConfiguration Include="Debug|x64">
+    <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
@@ -30,7 +30,6 @@
     <ClInclude Include="..\..\..\ortc\services\IDHPublicKey.h" />
     <ClInclude Include="..\..\..\ortc\services\IDNS.h" />
     <ClInclude Include="..\..\..\ortc\services\IEncryptor.h" />
-    <ClInclude Include="..\..\..\ortc\services\IFactory.h" />
     <ClInclude Include="..\..\..\ortc\services\IHelper.h" />
     <ClInclude Include="..\..\..\ortc\services\IHTTP.h" />
     <ClInclude Include="..\..\..\ortc\services\IICESocket.h" />
@@ -64,7 +63,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_IRUDPChannelStream.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Logger.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_MessageLayerSecurityChannel.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_MessageQueueManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Reachability.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPrivateKey.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPublicKey.h" />
@@ -73,7 +71,6 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPListener.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPTransport.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_Settings.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNDiscovery.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequester.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequesterManager.h" />
@@ -89,14 +86,12 @@
     <ClInclude Include="..\..\..\ortc\services\IRUDPListener.h" />
     <ClInclude Include="..\..\..\ortc\services\IRUDPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\IRUDPTransport.h" />
-    <ClInclude Include="..\..\..\ortc\services\ISettings.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNDiscovery.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNRequester.h" />
     <ClInclude Include="..\..\..\ortc\services\ISTUNRequesterManager.h" />
     <ClInclude Include="..\..\..\ortc\services\ITCPMessaging.h" />
     <ClInclude Include="..\..\..\ortc\services\ITransportStream.h" />
     <ClInclude Include="..\..\..\ortc\services\ITURNSocket.h" />
-    <ClInclude Include="..\..\..\ortc\services\IWakeDelegate.h" />
     <ClInclude Include="..\..\..\ortc\services\RUDPPacket.h" />
     <ClInclude Include="..\..\..\ortc\services\RUDPProtocol.h" />
     <ClInclude Include="..\..\..\ortc\services\services.h" />
@@ -130,7 +125,6 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Logger.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageLayerSecurityChannel.cpp" />
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageQueueManager.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Reachability.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPrivateKey.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPublicKey.cpp" />
@@ -141,10 +135,6 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPPacket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPTransport.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_services.cpp" />
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_Settings.cpp">
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4068;4290</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4068;4290</DisableSpecificWarnings>
-    </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNDiscovery.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNPacket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequester.cpp" />
@@ -228,7 +218,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -243,7 +233,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -260,7 +250,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -279,7 +269,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
       <PreprocessorDefinitions>NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -290,9 +280,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
