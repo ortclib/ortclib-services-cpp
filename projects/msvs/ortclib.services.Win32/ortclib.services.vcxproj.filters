@@ -1,0 +1,383 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ortc">
+      <UniqueIdentifier>{ff3dd779-a8c5-4f5a-a042-13da2a7013c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ortc\services">
+      <UniqueIdentifier>{599b6f8d-9e53-4526-b97a-3d8648a6102d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ortc\services\cpp">
+      <UniqueIdentifier>{46504267-035e-4bec-a3cb-a9dcf3814a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ortc\services\internal">
+      <UniqueIdentifier>{392c73df-8ad2-4571-b6a1-ebf520cec119}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\ortc\services\internal\ifaddrs-android.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\platform.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Backgrounding.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimer.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimerPattern.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Cache.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_CanonicalXML.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Decryptor.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHKeyDomain.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHPrivateKey.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHPublicKey.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DNS.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DNSMonitor.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Encryptor.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Helper.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinRT.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocketSession.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_IRUDPChannelStream.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Logger.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_MessageLayerSecurityChannel.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Reachability.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPrivateKey.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPublicKey.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPChannel.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPChannelStream.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPListener.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPMessaging.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPTransport.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNDiscovery.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequester.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequesterManager.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TCPMessaging.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TransportStream.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TURNSocket.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_wire.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\types.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IBackgrounding.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IBackOffTimer.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IBackOffTimerPattern.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ICache.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ICanonicalXML.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IDecryptor.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IDHKeyDomain.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IDHPrivateKey.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IDHPublicKey.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IDNS.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IEncryptor.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IHelper.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IHTTP.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IICESocket.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IICESocketSession.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ILogger.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IReachability.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRSAPrivateKey.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRSAPublicKey.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRUDPChannel.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRUDPListener.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRUDPMessaging.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\IRUDPTransport.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ISTUNDiscovery.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ISTUNRequester.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ISTUNRequesterManager.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ITCPMessaging.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ITransportStream.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\ITURNSocket.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\RUDPPacket.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\RUDPProtocol.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\services.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\STUNPacket.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\types.h">
+      <Filter>ortc\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\ortc\services\cpp\services.events.json">
+      <Filter>ortc\services\cpp</Filter>
+    </None>
+    <None Include="..\..\..\ortc\services\internal\services.events.jman">
+      <Filter>ortc\services\internal</Filter>
+    </None>
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.man">
+      <Filter>ortc\services\internal</Filter>
+    </None>
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.wprp">
+      <Filter>ortc\services\internal</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\ortc\services\cpp\ifaddrs-android.cc">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Backgrounding.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_BackOffTimer.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_BackOffTimerPattern.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Cache.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_CanonicalXML.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Decryptor.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHKeyDomain.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHPrivateKey.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHPublicKey.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DNS.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DNSMonitor.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Encryptor.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Helper.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinRT.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Logger.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageLayerSecurityChannel.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Reachability.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPrivateKey.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPublicKey.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPChannel.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPChannelStream.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPListener.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPMessaging.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPPacket.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPTransport.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_services.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNDiscovery.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNPacket.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequester.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequesterManager.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TCPMessaging.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TransportStream.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TURNSocket.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_wire.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

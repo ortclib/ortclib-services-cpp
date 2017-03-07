@@ -1,0 +1,286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\ortc\services\IBackgrounding.h" />
+    <ClInclude Include="..\..\..\ortc\services\IBackOffTimer.h" />
+    <ClInclude Include="..\..\..\ortc\services\IBackOffTimerPattern.h" />
+    <ClInclude Include="..\..\..\ortc\services\ICache.h" />
+    <ClInclude Include="..\..\..\ortc\services\ICanonicalXML.h" />
+    <ClInclude Include="..\..\..\ortc\services\IDecryptor.h" />
+    <ClInclude Include="..\..\..\ortc\services\IDHKeyDomain.h" />
+    <ClInclude Include="..\..\..\ortc\services\IDHPrivateKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\IDHPublicKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\IDNS.h" />
+    <ClInclude Include="..\..\..\ortc\services\IEncryptor.h" />
+    <ClInclude Include="..\..\..\ortc\services\IHelper.h" />
+    <ClInclude Include="..\..\..\ortc\services\IHTTP.h" />
+    <ClInclude Include="..\..\..\ortc\services\IICESocket.h" />
+    <ClInclude Include="..\..\..\ortc\services\IICESocketSession.h" />
+    <ClInclude Include="..\..\..\ortc\services\ILogger.h" />
+    <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h" />
+    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\ifaddrs-android.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\platform.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Backgrounding.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimer.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_BackOffTimerPattern.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Cache.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_CanonicalXML.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Decryptor.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHKeyDomain.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHPrivateKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DHPublicKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DNS.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_DNSMonitor.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Encryptor.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Helper.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinRT.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocketSession.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_IRUDPChannelStream.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Logger.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_MessageLayerSecurityChannel.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_Reachability.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPrivateKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RSAPublicKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPChannel.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPChannelStream.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPListener.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPMessaging.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_RUDPTransport.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNDiscovery.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequester.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_STUNRequesterManager.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TCPMessaging.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TransportStream.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_TURNSocket.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_wire.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\types.h" />
+    <ClInclude Include="..\..\..\ortc\services\IReachability.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRSAPrivateKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRSAPublicKey.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRUDPChannel.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRUDPListener.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRUDPMessaging.h" />
+    <ClInclude Include="..\..\..\ortc\services\IRUDPTransport.h" />
+    <ClInclude Include="..\..\..\ortc\services\ISTUNDiscovery.h" />
+    <ClInclude Include="..\..\..\ortc\services\ISTUNRequester.h" />
+    <ClInclude Include="..\..\..\ortc\services\ISTUNRequesterManager.h" />
+    <ClInclude Include="..\..\..\ortc\services\ITCPMessaging.h" />
+    <ClInclude Include="..\..\..\ortc\services\ITransportStream.h" />
+    <ClInclude Include="..\..\..\ortc\services\ITURNSocket.h" />
+    <ClInclude Include="..\..\..\ortc\services\RUDPPacket.h" />
+    <ClInclude Include="..\..\..\ortc\services\RUDPProtocol.h" />
+    <ClInclude Include="..\..\..\ortc\services\services.h" />
+    <ClInclude Include="..\..\..\ortc\services\STUNPacket.h" />
+    <ClInclude Include="..\..\..\ortc\services\types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\ortc\services\cpp\services.events.json" />
+    <None Include="..\..\..\ortc\services\internal\services.events.jman" />
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.man" />
+    <None Include="..\..\..\ortc\services\internal\services.events_win_etw.wprp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\ortc\services\cpp\ifaddrs-android.cc" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Backgrounding.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_BackOffTimer.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_BackOffTimerPattern.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Cache.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_CanonicalXML.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Decryptor.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHKeyDomain.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHPrivateKey.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DHPublicKey.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DNS.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_DNSMonitor.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Encryptor.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Helper.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinRT.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Logger.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_MessageLayerSecurityChannel.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_Reachability.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPrivateKey.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RSAPublicKey.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPChannel.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPChannelStream.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPListener.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPMessaging.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPPacket.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_RUDPTransport.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_services.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNDiscovery.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNPacket.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequester.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_STUNRequesterManager.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TCPMessaging.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TransportStream.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_TURNSocket.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_wire.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{51152297-1963-433D-B1AC-3D77A99B5184}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ortclibservices</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)Build\Intermediate\Win32\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Build\Output\Win32\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(SolutionDir)Build\Intermediate\Win32\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Build\Output\Win32\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(SolutionDir)Build\Intermediate\Win32_x64\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Build\Output\Win32_x64\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(SolutionDir)Build\Intermediate\Win32_x64\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Build\Output\Win32_x64\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
