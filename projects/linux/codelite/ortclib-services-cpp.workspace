@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="ortclib-services-cpp" Database="">
+<CodeLite_Workspace Name="ortclib-services-cpp" Database="" Version="10.0.0">
   <Project Name="zsLib" Path="../../../../zsLib/projects/linux/codelite/zsLib/zsLib.project" Active="No"/>
   <Project Name="cryptopp" Path="../../../../cryptopp/projects/linux/codelite/cryptopp/cryptopp.project" Active="No"/>
   <Project Name="zsLib-eventing" Path="../../../../zsLib-eventing/projects/linux/codelite/zsLib-eventing/zsLib-eventing.project" Active="No"/>
