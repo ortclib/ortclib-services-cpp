@@ -410,7 +410,7 @@ namespace ortc
 
         do
         {
-          UseRUDPChannelPtr session;
+          UseRUDPChannelPtr useSession;
 
           // scope: next we attempt to see if there is already a session that handles this IP/channel pairing
           {
@@ -422,7 +422,7 @@ namespace ortc
 
             SessionMap::iterator found = mRemoteChannelNumberSessions.find(stun->mChannelNumber);
             if (found != mRemoteChannelNumberSessions.end()) {
-              session = (*found).second;
+              useSession = (*found).second;
             } else {
               if (remoteUsernameFrag != mICESession->getRemoteUsernameFrag()) {
                 ZS_LOG_TRACE(log("the request remote username frag does not match (thus ignoring - might be for another session)") + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("expected remote username frag", mICESession->getRemoteUsernameFrag()))
@@ -431,8 +431,8 @@ namespace ortc
             }
           }
 
-          if (session) {
-            bool handled = session->handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
+          if (useSession) {
+            bool handled = useSession->handleSTUN(stun, response, localUsernameFrag, remoteUsernameFrag);
             if ((handled) && (!response)) return true;
           } else {
             bool handled =  handleUnknownChannel(stun, response);
@@ -456,8 +456,8 @@ namespace ortc
         } while (false);  // using as a scope rather than as a loop
 
         if (response) {
-          IICESocketSessionPtr session = getICESession();
-          if (!session) return false;
+          IICESocketSessionPtr useSession = getICESession();
+          if (!useSession) return false;
 
           SecureByteBlockPtr packetized = response->packetize(STUNPacket::RFC_draft_RUDP);
 
