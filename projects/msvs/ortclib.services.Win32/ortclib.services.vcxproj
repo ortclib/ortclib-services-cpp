@@ -36,7 +36,6 @@
     <ClInclude Include="..\..\..\ortc\services\IICESocketSession.h" />
     <ClInclude Include="..\..\..\ortc\services\ILogger.h" />
     <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h" />
-    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\ifaddrs-android.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\platform.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services.events.h" />
