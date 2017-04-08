@@ -75,6 +75,8 @@
 #undef HAVE_IPHLPAPI_H
 #endif //defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 
+#elif defined(WIN32_RX64)
+#undef HAVE_IPHLPAPI_H
 #endif //WINRT
 
 #endif //_WIN32
