@@ -273,7 +273,7 @@ namespace ortc
       internal::ServicesSetup::singleton();
     }
 
-#ifdef WINRT
+#if defined(WINRT) || defined(WIN32_RX64)
     //-----------------------------------------------------------------------
     void IHelper::setup(Windows::UI::Core::CoreDispatcher ^dispatcher)
     {

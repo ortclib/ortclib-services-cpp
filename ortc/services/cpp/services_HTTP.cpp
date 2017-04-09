@@ -1312,7 +1312,11 @@ namespace ortc
                                       )
       {
         if (this) {}
+#ifndef WIN32_RX64
         return HTTP::get(delegate, userAgent, url, timeout);
+#else
+        return IHTTPQueryPtr();
+#endif //ndef WIN32_RX64
       }
 
       //-----------------------------------------------------------------------
@@ -1327,7 +1331,11 @@ namespace ortc
                                        )
       {
         if (this) {}
+#ifndef WIN32_RX64
         return HTTP::post(delegate, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);
+#else
+        return IHTTPQueryPtr();
+#endif //ndef WIN32_RX64
       }
 
     }
