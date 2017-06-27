@@ -160,9 +160,9 @@ namespace ortc
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY, "high");
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY, "high");
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_LOGGER_THREAD_PRIORITY, "normal");
-#ifndef WINRT
+#ifndef WINUWP
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY, "normal");
-#endif //ndef WINRT
+#endif //ndef WINUWP
         }
       };
 
@@ -273,14 +273,14 @@ namespace ortc
       internal::ServicesSetup::singleton();
     }
 
-#ifdef WINRT
+#ifdef WINUWP
     //-----------------------------------------------------------------------
     void IHelper::setup(Windows::UI::Core::CoreDispatcher ^dispatcher)
     {
       zsLib::eventing::IHelper::setup(dispatcher);
       internal::ServicesSetup::singleton();
     }
-#endif //WINRT
+#endif //WINUWP
 
     //-------------------------------------------------------------------------
     IMessageQueuePtr IHelper::getServicePoolQueue()

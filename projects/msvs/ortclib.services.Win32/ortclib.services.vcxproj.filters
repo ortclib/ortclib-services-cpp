@@ -66,7 +66,7 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinRT.h">
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinUWP.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h">
@@ -310,7 +310,7 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinRT.cpp">
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinUWP.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp">

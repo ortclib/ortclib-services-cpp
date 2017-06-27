@@ -31,10 +31,10 @@
 
 #include <ortc/services/IHTTP.h>
 #include <ortc/services/internal/services_HTTP.h>
-#include <ortc/services/internal/services_HTTP_WinRT.h>
+#include <ortc/services/internal/services_HTTP_WinUWP.h>
 #include <ortc/services/internal/services.events.h>
 
-#ifdef WINRT
+#ifdef WINUWP
 
 #include <ortc/services/internal/services_Helper.h>
 
@@ -761,4 +761,4 @@ namespace ortc
   }
 }
 
-#endif //WINRT
+#endif //WINUWP

@@ -34,7 +34,7 @@
 #include <ortc/services/internal/types.h>
 #include <ortc/services/IHTTP.h>
 
-#ifdef WINRT
+#ifdef WINUWP
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
@@ -303,5 +303,5 @@ namespace ortc
   }
 }
 
-#endif //WINRT
+#endif //WINUWP
 

@@ -69,9 +69,9 @@
 #include <Iphlpapi.h>
 #endif //HAVE_IPHLPAPI_H
 
-#ifdef WINRT
+#ifdef WINUWP
 using namespace Windows::Networking::Connectivity;
-#endif //WINRT
+#endif //WINUWP
 
 
 #define ORTC_SERVICES_ICESOCKET_BUFFER_SIZE  (1 << (sizeof(WORD)*8))
@@ -2129,10 +2129,10 @@ namespace ortc
           goto sort_now;
         }
 
-#if defined(WINRT) && !defined(HAVE_GETADAPTERADDRESSES)
+#if defined(WINUWP) && !defined(HAVE_GETADAPTERADDRESSES)
         // http://stackoverflow.com/questions/10336521/query-local-ip-address
 
-        // Use WinRT GetHostNames to search for IP addresses
+        // Use WinUWP GetHostNames to search for IP addresses
         {
           typedef std::map<String, bool> HostNameMap;
           typedef std::list<ConnectionProfile ^> ConnectionProfileList;
@@ -2249,7 +2249,7 @@ namespace ortc
           }
         }
 
-#endif //defined(WINRT) && !defined(HAVE_GETADAPTERADDRESSES)
+#endif //defined(WINUWP) && !defined(HAVE_GETADAPTERADDRESSES)
 
 #ifdef HAVE_GETADAPTERADDRESSES
         // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365915(v=vs.85).aspx

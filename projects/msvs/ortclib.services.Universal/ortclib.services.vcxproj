@@ -64,7 +64,7 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_Encryptor.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Helper.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h" />
-    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinRT.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinUWP.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocketSession.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_IRUDPChannelStream.h" />
@@ -127,7 +127,7 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Encryptor.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Helper.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp" />
-    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinRT.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinUWP.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Logger.cpp" />

@@ -22,7 +22,7 @@
 		008A142F1DA1A18500D1664A /* services_Encryptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A01DA1A18500D1664A /* services_Encryptor.cpp */; };
 		008A14301DA1A18500D1664A /* services_Helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A11DA1A18500D1664A /* services_Helper.cpp */; };
 		008A14311DA1A18500D1664A /* services_HTTP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A21DA1A18500D1664A /* services_HTTP.cpp */; settings = {COMPILER_FLAGS = "-Wno-undefined-bool-conversion"; }; };
-		008A14321DA1A18500D1664A /* services_HTTP_WinRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A31DA1A18500D1664A /* services_HTTP_WinRT.cpp */; };
+		008A14321DA1A18500D1664A /* services_HTTP_WinUWP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A31DA1A18500D1664A /* services_HTTP_WinUWP.cpp */; };
 		008A14331DA1A18500D1664A /* services_ICESocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A41DA1A18500D1664A /* services_ICESocket.cpp */; settings = {COMPILER_FLAGS = "-Wno-undefined-bool-conversion"; }; };
 		008A14341DA1A18500D1664A /* services_ICESocketSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A51DA1A18500D1664A /* services_ICESocketSession.cpp */; settings = {COMPILER_FLAGS = "-Wno-undefined-bool-conversion"; }; };
 		008A14351DA1A18500D1664A /* services_Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 008A13A61DA1A18500D1664A /* services_Logger.cpp */; };
@@ -81,7 +81,7 @@
 		008A13A01DA1A18500D1664A /* services_Encryptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Encryptor.cpp; sourceTree = "<group>"; };
 		008A13A11DA1A18500D1664A /* services_Helper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Helper.cpp; sourceTree = "<group>"; };
 		008A13A21DA1A18500D1664A /* services_HTTP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_HTTP.cpp; sourceTree = "<group>"; };
-		008A13A31DA1A18500D1664A /* services_HTTP_WinRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_HTTP_WinRT.cpp; sourceTree = "<group>"; };
+		008A13A31DA1A18500D1664A /* services_HTTP_WinUWP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_HTTP_WinUWP.cpp; sourceTree = "<group>"; };
 		008A13A41DA1A18500D1664A /* services_ICESocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_ICESocket.cpp; sourceTree = "<group>"; };
 		008A13A51DA1A18500D1664A /* services_ICESocketSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_ICESocketSession.cpp; sourceTree = "<group>"; };
 		008A13A61DA1A18500D1664A /* services_Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = services_Logger.cpp; sourceTree = "<group>"; };
@@ -138,7 +138,7 @@
 		008A13DF1DA1A18500D1664A /* services_Encryptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_Encryptor.h; sourceTree = "<group>"; };
 		008A13E21DA1A18500D1664A /* services_Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_Helper.h; sourceTree = "<group>"; };
 		008A13E31DA1A18500D1664A /* services_HTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_HTTP.h; sourceTree = "<group>"; };
-		008A13E41DA1A18500D1664A /* services_HTTP_WinRT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_HTTP_WinRT.h; sourceTree = "<group>"; };
+		008A13E41DA1A18500D1664A /* services_HTTP_WinUWP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_HTTP_WinUWP.h; sourceTree = "<group>"; };
 		008A13E51DA1A18500D1664A /* services_ICESocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_ICESocket.h; sourceTree = "<group>"; };
 		008A13E61DA1A18500D1664A /* services_ICESocketSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_ICESocketSession.h; sourceTree = "<group>"; };
 		008A13E71DA1A18500D1664A /* services_IRUDPChannelStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = services_IRUDPChannelStream.h; sourceTree = "<group>"; };
@@ -278,7 +278,7 @@
 				008A13A01DA1A18500D1664A /* services_Encryptor.cpp */,
 				008A13A11DA1A18500D1664A /* services_Helper.cpp */,
 				008A13A21DA1A18500D1664A /* services_HTTP.cpp */,
-				008A13A31DA1A18500D1664A /* services_HTTP_WinRT.cpp */,
+				008A13A31DA1A18500D1664A /* services_HTTP_WinUWP.cpp */,
 				008A13A41DA1A18500D1664A /* services_ICESocket.cpp */,
 				008A13A51DA1A18500D1664A /* services_ICESocketSession.cpp */,
 				008A13A61DA1A18500D1664A /* services_Logger.cpp */,
@@ -330,7 +330,7 @@
 				008A13DF1DA1A18500D1664A /* services_Encryptor.h */,
 				008A13E21DA1A18500D1664A /* services_Helper.h */,
 				008A13E31DA1A18500D1664A /* services_HTTP.h */,
-				008A13E41DA1A18500D1664A /* services_HTTP_WinRT.h */,
+				008A13E41DA1A18500D1664A /* services_HTTP_WinUWP.h */,
 				008A13E51DA1A18500D1664A /* services_ICESocket.h */,
 				008A13E61DA1A18500D1664A /* services_ICESocketSession.h */,
 				008A13E71DA1A18500D1664A /* services_IRUDPChannelStream.h */,
@@ -429,7 +429,7 @@
 				008A142F1DA1A18500D1664A /* services_Encryptor.cpp in Sources */,
 				008A14301DA1A18500D1664A /* services_Helper.cpp in Sources */,
 				008A14311DA1A18500D1664A /* services_HTTP.cpp in Sources */,
-				008A14321DA1A18500D1664A /* services_HTTP_WinRT.cpp in Sources */,
+				008A14321DA1A18500D1664A /* services_HTTP_WinUWP.cpp in Sources */,
 				008A14331DA1A18500D1664A /* services_ICESocket.cpp in Sources */,
 				008A14341DA1A18500D1664A /* services_ICESocketSession.cpp in Sources */,
 				008A14351DA1A18500D1664A /* services_Logger.cpp in Sources */,

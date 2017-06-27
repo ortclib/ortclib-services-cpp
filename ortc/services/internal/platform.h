@@ -44,8 +44,8 @@
 #ifdef _WIN32
 
 #ifdef __cplusplus_winrt
-#undef WINRT
-#define WINRT
+#undef WINUWP
+#define WINUWP
 #endif //__cplusplus_winrt
 
 
@@ -56,11 +56,11 @@
 #define HAVE_SPRINTF_S 1
 #define HAVE_GETADAPTERADDRESSES 1
 
-#ifdef WINRT
+#ifdef WINUWP
 
-// WINRT has these defined
+// WINUWP has these defined
 
-// WINRT does not support these features (but WIN32 does)
+// WINUWP does not support these features (but WIN32 does)
 #undef HAVE_GETADAPTERADDRESSES
 
 #if WINVER >= _WIN32_WINNT_WIN10
@@ -69,13 +69,13 @@
 
 #if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 
-// WINRT phone has these defined
+// WINUWP phone has these defined
 
-// WINRT phone odes not support these features (but WINRT does)
+// WINUWP phone odes not support these features (but WINUWP does)
 #undef HAVE_IPHLPAPI_H
 #endif //defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 
-#endif //WINRT
+#endif //WINUWP
 
 #endif //_WIN32
 

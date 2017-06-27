@@ -64,9 +64,9 @@ namespace ortc
       typedef std::list<String> StringList;
 
       static void setup();
-#ifdef WINRT
+#ifdef WINUWP
       static void setup(Windows::UI::Core::CoreDispatcher ^dispatcher);
-#endif //WINRT
+#endif //WINUWP
 
       static IMessageQueuePtr getServicePoolQueue();
       static IMessageQueuePtr getServiceQueue();

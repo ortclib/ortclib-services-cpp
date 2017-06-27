@@ -69,7 +69,7 @@
         "services_Cache.cpp",
         "services_DNS.cpp",
         "services_HTTP.cpp",
-        "services_HTTP_WinRT.cpp",
+        "services_HTTP_WinUWP.cpp",
         "services_Logger.cpp",
         "services_STUNDiscovery.cpp",
         "services_STUNPacket.cpp",

@@ -290,14 +290,14 @@ void doTestDNS()
   bool doQuery11 = true;
   bool doQuery12 = true;
 
-#ifdef WINRT
-#define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 1
-#define WARNING_WINRT_DOES_NOT_RESOLVE_AAAA 2
+#ifdef WINUWP
+#define WARNING_WINUWP_DOES_NOT_RESOLVE_AAAA 1
+#define WARNING_WINUWP_DOES_NOT_RESOLVE_AAAA 2
 
   doQuery3 = false;
   doQuery4 = false;
   doQuery8 = false;
-#endif //_WINRT
+#endif //_WINUWP
 
   IDNSQueryPtr query1 = (doQuery1 ? IDNS::lookupA(testObject, "www." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
   IDNSQueryPtr query2 = (doQuery2 ? IDNS::lookupA(testObject, "sip." ORTC_SERVICE_TEST_DNS_ZONE) : IDNSQueryPtr());
@@ -394,9 +394,9 @@ void doTestDNS()
 
     if (a1) {
       // www.domain.com, 1800 TTL and IP = 199.204.138.90
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(a1->mTTL <= 1800);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(a1->mIPAddresses.front().string(), "199.204.138.90");
     }
   }
@@ -408,9 +408,9 @@ void doTestDNS()
     TESTING_CHECK(a2)
     if (a2) {
       // sip.domain.com, 900, IP = 173.239.150.198
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(a2->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(a2->mIPAddresses.front().string(), "173.239.150.198");
     }
   }
@@ -423,9 +423,9 @@ void doTestDNS()
 
     if (aaaa1) {
       // unittest.domain.com, 900, [2001:0:5ef5:79fb:8:fcb:a142:26ed]
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(aaaa1->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(aaaa1->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
     }
   }
@@ -436,9 +436,9 @@ void doTestDNS()
     TESTING_CHECK(aaaa2)
     if (aaaa2) {
       // unittest2.domain.com, 900, fe80::2c71:60ff:fe00:1c54
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(aaaa2->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(aaaa2->mIPAddresses.front().string(), zsLib::IPAddress("fe80::2c71:60ff:fe00:1c54").string());
     }
   }
@@ -449,12 +449,12 @@ void doTestDNS()
     TESTING_CHECK(srv1)
     if (srv1) {
       // _sip._udp.domain.com, 900, 10 0 5060 sip.
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(srv1->mTTL <= 900);
       TESTING_EQUAL(srv1->mRecords.front().mPriority, 10);
       TESTING_EQUAL(srv1->mRecords.front().mWeight, 0);
       TESTING_EQUAL(srv1->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(srv1->mRecords.front().mPort, 5060);
       TESTING_EQUAL(srv1->mRecords.front().mAResult->mIPAddresses.front().string(), zsLib::IPAddress("173.239.150.198:5060").string());
       TESTING_CHECK(!(srv1->mRecords.front().mAAAAResult));
@@ -482,9 +482,9 @@ void doTestDNS()
     TESTING_CHECK(a3)
     if (a3) {
       // sip.domain.com 900, IP = 173.239.150.198
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(a3->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(a3->mIPAddresses.front().string(), "173.239.150.198");
     }
     IDNS::AAAAResultPtr aaaa4 = testObject->getAAAA(query7);
@@ -497,9 +497,9 @@ void doTestDNS()
     TESTING_CHECK(aaaa3)
     if (aaaa3) {
       // unittest.domain.com, 900, [2001:0:5ef5:79fb:8:fcb:a142:26ed]
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(aaaa3->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(aaaa3->mIPAddresses.front().string(), zsLib::IPAddress("2001:0:5ef5:79fb:8:fcb:a142:26ed").string());
     }
 
@@ -526,13 +526,13 @@ void doTestDNS()
     TESTING_CHECK(srv2)
     if (srv2) {
       // _sip._udp.domain.com, 900, 10 0 5060 sip.
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(srv2->mTTL <= 900);
       TESTING_EQUAL(srv2->mRecords.front().mPriority, 10);
       TESTING_EQUAL(srv2->mRecords.front().mWeight, 0);
       TESTING_EQUAL(srv2->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
       TESTING_CHECK(srv2->mRecords.front().mAResult->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(srv2->mRecords.front().mPort, 5060);
       TESTING_EQUAL(srv2->mRecords.front().mAResult->mIPAddresses.front().string(), "173.239.150.198:5060");
       TESTING_CHECK(!(srv2->mRecords.front().mAAAAResult));
@@ -570,35 +570,35 @@ void doTestDNS()
     TESTING_CHECK(clone2);
 
     if ((srv3) && (clone)) {
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_CHECK(srv3->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
       TESTING_EQUAL(clone->mTTL, srv3->mTTL);
 
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_EQUAL(srv3->mRecords.size(), 2);
 #else
       TESTING_EQUAL(srv3->mRecords.size(), 1);
-#endif //ndef WINRT
+#endif //ndef WINUWP
 
       TESTING_EQUAL(clone->mRecords.size(), srv3->mRecords.size());
 
       if (srv3->mRecords.size() > 0) {
         // _stun._udp.domain.com, 900, 10 0 3478 216.93.246.14 // order is unknown, could be either order
         // _stun._udp.domain.com, 900, 10 0 3478 216.93.246.16
-#ifndef WINRT
+#ifndef WINUWP
         TESTING_EQUAL(srv3->mRecords.front().mPriority, 10);
         TESTING_EQUAL(srv3->mRecords.front().mWeight, 0);
         TESTING_EQUAL(srv3->mRecords.front().mName, first);
-#endif //ndef WINRT
+#endif //ndef WINUWP
         TESTING_EQUAL(srv3->mRecords.front().mPort, 3478);
 
         TESTING_CHECK(srv3->mRecords.front().mAResult);
 
         if (srv3->mRecords.front().mAResult) {
-#ifndef WINRT
+#ifndef WINUWP
           TESTING_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
           TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 1);
           if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
             TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), firstWIP);
@@ -609,9 +609,9 @@ void doTestDNS()
           if (srv3->mRecords.size() > 0) {
             TESTING_CHECK(srv3->mRecords.front().mAResult);
             if (srv3->mRecords.front().mAResult) {
-#ifndef WINRT
+#ifndef WINUWP
               TESTING_CHECK(srv3->mRecords.front().mAResult->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
               TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.size(), 1);
               if (srv3->mRecords.front().mAResult->mIPAddresses.size() > 0) {
                 TESTING_EQUAL(srv3->mRecords.front().mAResult->mIPAddresses.front().string(), secondWIP);
@@ -623,19 +623,19 @@ void doTestDNS()
 
         // test cloning of SRV record
         if (clone->mRecords.size() > 0) {
-#ifndef WINRT
+#ifndef WINUWP
           TESTING_EQUAL(clone->mRecords.front().mPriority, 10);
           TESTING_EQUAL(clone->mRecords.front().mWeight, 0);
           TESTING_EQUAL(clone->mRecords.front().mName, first);
-#endif //ndef WINRT
+#endif //ndef WINUWP
           TESTING_EQUAL(clone->mRecords.front().mPort, 3478);
 
           TESTING_CHECK(clone->mRecords.front().mAResult);
 
           if (clone->mRecords.front().mAResult) {
-#ifndef WINRT
+#ifndef WINUWP
             TESTING_CHECK(clone->mRecords.front().mAResult->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
             TESTING_EQUAL(clone->mRecords.front().mAResult->mIPAddresses.size(), 1);
 
             if (clone->mRecords.front().mAResult->mIPAddresses.size() > 0) {
@@ -672,9 +672,9 @@ void doTestDNS()
       TESTING_EQUAL(extractedIP.string(), firstWIP);
       TESTING_CHECK(extractedA);
       TESTING_CHECK(!extractedAAAA);
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_EQUAL(extractedA->mName, first);
-#endif //ndef WINRT
+#endif //ndef WINUWP
 
       extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
       TESTING_CHECK(extract);
@@ -682,9 +682,9 @@ void doTestDNS()
       TESTING_EQUAL(extractedIP.string(), secondWIP);
       TESTING_CHECK(extractedA);
       TESTING_CHECK(!extractedAAAA);
-#ifndef WINRT
+#ifndef WINUWP
       TESTING_EQUAL(extractedA->mName, second);
-#endif //ndef WINRT
+#endif //ndef WINUWP
 
       extract = IDNS::extractNextIP(clone2, extractedIP, &extractedA, &extractedAAAA);
       TESTING_CHECK(!extract);
@@ -698,13 +698,13 @@ void doTestDNS()
     TESTING_CHECK(srv12)
       if (srv12) {
         // _sip._tcp.domain.com, 900, 10 0 5061 sip.
-#ifndef WINRT
+#ifndef WINUWP
         TESTING_CHECK(srv12->mTTL <= 900);
         TESTING_EQUAL(srv12->mRecords.front().mPriority, 10);
         TESTING_EQUAL(srv12->mRecords.front().mWeight, 0);
         TESTING_EQUAL(srv12->mRecords.front().mName, "sip." ORTC_SERVICE_TEST_DNS_ZONE);
         TESTING_CHECK(srv12->mRecords.front().mAResult->mTTL <= 900);
-#endif //ndef WINRT
+#endif //ndef WINUWP
         TESTING_EQUAL(srv12->mRecords.front().mPort, 5061);
         TESTING_EQUAL(srv12->mRecords.front().mAResult->mIPAddresses.front().string(), "173.239.150.198:5061");
         TESTING_CHECK(!(srv12->mRecords.front().mAAAAResult));

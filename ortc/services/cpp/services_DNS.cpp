@@ -43,9 +43,9 @@
 #include <zsLib/Log.h>
 #include <zsLib/Numeric.h>
 
-#ifdef WINRT
+#ifdef WINUWP
 #include <ppltasks.h>
-#endif //WINRT
+#endif //WINUWP
 
 namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_dns) } }
 
@@ -70,9 +70,9 @@ namespace ortc
       ZS_DECLARE_CLASS_PTR(DNSInstantResultQuery)
       ZS_DECLARE_CLASS_PTR(DNSListQuery)
 
-#ifdef WINRT
-      ZS_DECLARE_CLASS_PTR(DNSWinRT)
-#endif //WINRT
+#ifdef WINUWP
+      ZS_DECLARE_CLASS_PTR(DNSWinUWP)
+#endif //WINUWP
       
 
       //-----------------------------------------------------------------------
@@ -1436,7 +1436,7 @@ namespace ortc
           for (IDNS::SRVResult::SRVRecordList::iterator iter = mSRVResult->mRecords.begin(); iter != mSRVResult->mRecords.end(); ++iter) {
             SRVResult::SRVRecord &record =(*iter);
 
-            // see if it already has resolve IPs (WinRT will resolve IP addresses natively)
+            // see if it already has resolve IPs (WinUWP will resolve IP addresses natively)
             if ((record.mAResult) ||
                 (record.mAAAAResult)) {
               mResolvers.push_back(IDNSQueryPtr()); // push back an empty resolver since the list must be exactly the same length but the resovler will be treated as if it has completed
@@ -2085,13 +2085,13 @@ namespace ortc
         DNSQueryList mQueries;
       };
 
-#ifdef WINRT
+#ifdef WINUWP
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
-      #pragma mark DNSWinRT
+      #pragma mark DNSWinUWP
       #pragma mark
 
       using Windows::Foundation::Collections::IVectorView;
@@ -2099,7 +2099,7 @@ namespace ortc
       using namespace concurrency;
       using Windows::Networking::HostNameType;
 
-      class DNSWinRT : public SharedRecursiveLock,
+      class DNSWinUWP : public SharedRecursiveLock,
         public IDNSQuery
       {
       protected:
@@ -2113,7 +2113,7 @@ namespace ortc
 
       public:
         //--------------------------------------------------------------------
-        DNSWinRT(
+        DNSWinUWP(
                  const make_private &,
                  IDNSDelegatePtr delegate,
                  const char *name,
@@ -2376,7 +2376,7 @@ namespace ortc
 
       public:
         //--------------------------------------------------------------------
-        ~DNSWinRT()
+        ~DNSWinUWP()
         {
           mThisWeak.reset();
           ZS_LOG_TRACE(log("destroyed"))
@@ -2384,7 +2384,7 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        static DNSWinRTPtr create(
+        static DNSWinUWPPtr create(
           IDNSDelegatePtr delegate,
           const char *name,
           WORD port,
@@ -2397,7 +2397,7 @@ namespace ortc
           WORD defaultWeight
           )
         {
-          DNSWinRTPtr pThis(make_shared<DNSWinRT>(make_private{}, delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
+          DNSWinUWPPtr pThis(make_shared<DNSWinUWP>(make_private{}, delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -2481,7 +2481,7 @@ namespace ortc
         //--------------------------------------------------------------------
         Log::Params log(const char *message) const
         {
-          ElementPtr objectEl = Element::create("services::DNSWinRT");
+          ElementPtr objectEl = Element::create("services::DNSWinUWP");
           IHelper::debugAppend(objectEl, "id", mID);
           return Log::Params(message, objectEl);
         }
@@ -2489,7 +2489,7 @@ namespace ortc
         //--------------------------------------------------------------------
         static Log::Params slog(PUID id, const char *message)
         {
-          ElementPtr objectEl = Element::create("services::DNSWinRT");
+          ElementPtr objectEl = Element::create("services::DNSWinUWP");
           IHelper::debugAppend(objectEl, "id", id);
           return Log::Params(message, objectEl);
         }
@@ -2499,7 +2499,7 @@ namespace ortc
         {
           AutoRecursiveLock lock(*this);
 
-          ElementPtr resultEl = Element::create("services::DNSWinRT");
+          ElementPtr resultEl = Element::create("services::DNSWinUWP");
 
           IHelper::debugAppend(resultEl, "id", mID);
 
@@ -2521,7 +2521,7 @@ namespace ortc
 
       protected:
         AutoPUID mID;
-        DNSWinRTWeakPtr mThisWeak;
+        DNSWinUWPWeakPtr mThisWeak;
 
         IDNSDelegatePtr mDelegate;
 
@@ -2541,7 +2541,7 @@ namespace ortc
 
         concurrency::cancellation_token_source mCancellationTokenSource;
       };
-#endif //WINRT
+#endif //WINUWP
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -2595,11 +2595,11 @@ namespace ortc
         WORD port = 0;
         String strName = extractPort(name, port);
 
-#ifdef WINRT
-        return internal::DNSWinRT::create(delegate, strName, port, true, false, NULL, NULL, 0, 0, 0);
+#ifdef WINUWP
+        return internal::DNSWinUWP::create(delegate, strName, port, true, false, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAQuery::create(delegate, strName, port);
-#endif //WINRT
+#endif //WINUWP
       }
 
       //-----------------------------------------------------------------------
@@ -2648,11 +2648,11 @@ namespace ortc
         WORD port = 0;
         String strName = extractPort(name, port);
 
-#ifdef WINRT
-        return internal::DNSWinRT::create(delegate, strName, port, false, true, NULL, NULL, 0, 0, 0);
+#ifdef WINUWP
+        return internal::DNSWinUWP::create(delegate, strName, port, false, true, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAAAAQuery::create(delegate, strName, port);
-#endif //WINRT
+#endif //WINUWP
       }
 
       //-----------------------------------------------------------------------
@@ -2701,14 +2701,14 @@ namespace ortc
           return internal::DNSListQuery::createAorAAAA(delegate, dnsList);
         }
 
-#ifdef WINRT
+#ifdef WINUWP
         WORD port = 0;
         String strName = extractPort(name, port);
 
-        return internal::DNSWinRT::create(delegate, strName, port, true, true, NULL, NULL, 0, 0, 0);
+        return internal::DNSWinUWP::create(delegate, strName, port, true, true, NULL, NULL, 0, 0, 0);
 #else
         return internal::DNSAorAAAAQuery::create(delegate, name);
-#endif //WINRT
+#endif //WINUWP
       }
 
       //-----------------------------------------------------------------------
@@ -2805,19 +2805,19 @@ namespace ortc
           return internal::DNSSRVResolverQuery::create(delegate, strName, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
         }
 
-#ifdef WINRT
+#ifdef WINUWP
         String protocolStr(protocol);
         if (protocolStr == "udp") {
-          return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
+          return internal::DNSWinUWP::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
 #ifdef HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
         if (protocolStr == "tcp") {
-          return internal::DNSWinRT::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
+          return internal::DNSWinUWP::create(delegate, strName, port, shouldResolveAWhenAnIP(lookupType), shouldResolveAAAAWhenAnIP(lookupType), service, protocol, defaultPort, defaultPriority, defaultWeight);
         }
 #endif //HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
 
-        ZS_LOG_WARNING(Trace, slog("WinRT does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
-#endif //WINRT
+        ZS_LOG_WARNING(Trace, slog("WinUWP does not support non-UDP SRV lookups at this time") + ZS_PARAMIZE(service) + ZS_PARAMIZE(protocol))
+#endif //WINUWP
 
           return internal::DNSSRVQuery::create(delegate, name, service, protocol, defaultPort);
       }

@@ -36,7 +36,7 @@
 
 #define ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS "ortc/services/http/default-timeout-in-seconds"
 
-#ifndef WINRT
+#ifndef WINUWP
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
@@ -352,7 +352,7 @@ namespace ortc
   {
     namespace internal
     {
-#endif //ndef WINRT
+#endif //ndef WINUWP
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------

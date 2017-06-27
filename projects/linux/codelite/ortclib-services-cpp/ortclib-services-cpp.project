@@ -25,7 +25,7 @@
         <File Name="../../../../ortc/services/cpp/services_Decryptor.cpp"/>
         <File Name="../../../../ortc/services/cpp/services_Encryptor.cpp"/>
         <File Name="../../../../ortc/services/cpp/services_HTTP.cpp"/>
-        <File Name="../../../../ortc/services/cpp/services_HTTP_WinRT.cpp"/>
+        <File Name="../../../../ortc/services/cpp/services_HTTP_WinUWP.cpp"/>
         <File Name="../../../../ortc/services/cpp/services_Helper.cpp"/>
         <File Name="../../../../ortc/services/cpp/services_ICESocket.cpp"/>
         <File Name="../../../../ortc/services/cpp/services_ICESocketSession.cpp"/>
@@ -67,7 +67,7 @@
         <File Name="../../../../ortc/services/internal/services_Decryptor.h"/>
         <File Name="../../../../ortc/services/internal/services_Encryptor.h"/>
         <File Name="../../../../ortc/services/internal/services_HTTP.h"/>
-        <File Name="../../../../ortc/services/internal/services_HTTP_WinRT.h"/>
+        <File Name="../../../../ortc/services/internal/services_HTTP_WinUWP.h"/>
         <File Name="../../../../ortc/services/internal/services_Helper.h"/>
         <File Name="../../../../ortc/services/internal/services_ICESocket.h"/>
         <File Name="../../../../ortc/services/internal/services_ICESocketSession.h"/>
