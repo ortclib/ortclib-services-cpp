@@ -36,7 +36,7 @@
 
 #define ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS "ortc/services/http/default-timeout-in-seconds"
 
-#ifndef WINRT
+#if !defined(WINRT) && !defined(WIN32_RX64)
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
