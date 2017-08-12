@@ -183,9 +183,6 @@
     <ClInclude Include="..\..\..\ortc\services\IMessageLayerSecurityChannel.h">
       <Filter>ortc\services</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ortc\services\IMessageQueueManager.h">
-      <Filter>ortc\services</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\ortc\services\IReachability.h">
       <Filter>ortc\services</Filter>
     </ClInclude>

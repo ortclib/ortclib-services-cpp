@@ -63,6 +63,41 @@
 			remoteGlobalIDString = 0001ABFF1DA1E18C00D807DA;
 			remoteInfo = "ortclib.services.Test-ios";
 		};
+		00216CAB1E96D1CE008204EA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52BA73E11E64E18E00CAF5AE /* cryptopp-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 009BBA0A1D974F4400B6B633;
+			remoteInfo = "cryptopp-ios";
+		};
+		004B3FD21E96D04A005E96CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0001AD551DA1EAAD00D807DA /* ortclib.services-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008A13851DA1A13600D1664A;
+			remoteInfo = "ortclib.services-ios";
+		};
+		008433561E96CF80001690DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52BA73D51E64E18300CAF5AE /* zsLib-eventing-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 008698371DE3F458009D669C;
+			remoteInfo = "zsLib-eventing-ios";
+		};
+		008433591E96CF80001690DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52BA73CF1E64E17F00CAF5AE /* zsLib-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0067EE151D9C5B4E003BE1AC;
+			remoteInfo = "zsLib-ios";
+		};
+		0084335E1E96CF80001690DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52BA73DB1E64E18800CAF5AE /* udns-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0022EA3D1D989A1F002FCECF;
+			remoteInfo = "udns-ios";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -260,6 +295,46 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		00216CA81E96D1CE008204EA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00216CAC1E96D1CE008204EA /* libcryptopp-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		004B3FC91E96D04A005E96CB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				004B3FD31E96D04A005E96CB /* libortclib.services-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008433511E96CF80001690DD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				008433571E96CF80001690DD /* libzsLib-eventing-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		008433531E96CF80001690DD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0084335A1E96CF80001690DD /* libzsLib-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0084335B1E96CF80001690DD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0084335F1E96CF80001690DD /* libudns-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -331,6 +406,28 @@
 			mainGroup = 0001ABF71DA1E18C00D807DA;
 			productRefGroup = 0001AC011DA1E18C00D807DA /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 00216CA81E96D1CE008204EA /* Products */;
+					ProjectRef = 52BA73E11E64E18E00CAF5AE /* cryptopp-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 004B3FC91E96D04A005E96CB /* Products */;
+					ProjectRef = 0001AD551DA1EAAD00D807DA /* ortclib.services-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 0084335B1E96CF80001690DD /* Products */;
+					ProjectRef = 52BA73DB1E64E18800CAF5AE /* udns-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 008433511E96CF80001690DD /* Products */;
+					ProjectRef = 52BA73D51E64E18300CAF5AE /* zsLib-eventing-ios.xcodeproj */;
+				},
+				{
+					ProductGroup = 008433531E96CF80001690DD /* Products */;
+					ProjectRef = 52BA73CF1E64E17F00CAF5AE /* zsLib-ios.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				0001ABFF1DA1E18C00D807DA /* ortclib.services.Test-ios */,
@@ -338,6 +435,44 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		00216CAC1E96D1CE008204EA /* libcryptopp-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libcryptopp-ios.a";
+			remoteRef = 00216CAB1E96D1CE008204EA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		004B3FD31E96D04A005E96CB /* libortclib.services-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libortclib.services-ios.a";
+			remoteRef = 004B3FD21E96D04A005E96CB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		008433571E96CF80001690DD /* libzsLib-eventing-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-eventing-ios.a";
+			remoteRef = 008433561E96CF80001690DD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0084335A1E96CF80001690DD /* libzsLib-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzsLib-ios.a";
+			remoteRef = 008433591E96CF80001690DD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0084335F1E96CF80001690DD /* libudns-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libudns-ios.a";
+			remoteRef = 0084335E1E96CF80001690DD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0001ABFE1DA1E18C00D807DA /* Resources */ = {

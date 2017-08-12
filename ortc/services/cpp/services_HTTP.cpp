@@ -617,9 +617,9 @@ namespace ortc
                 }
 
                 CURLMsg *msg = NULL;
-                int handleCount = 0;
+                int handleCountIgnored = 0;
 
-                while ((msg = curl_multi_info_read(mMultiCurl, &handleCount)))
+                while ((msg = curl_multi_info_read(mMultiCurl, &handleCountIgnored)))
                 {
                   if (CURLMSG_DONE == msg->msg) {
                     HTTPCurlMap::iterator found = mCurlMap.find(msg->easy_handle);

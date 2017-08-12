@@ -2611,16 +2611,18 @@ namespace ortc
           RemoteEventingPtr pThis;
 
           {
-            AutoRecursiveLock lock(holder->mLock);
-            if (holder->mCurrent) {
-              if ((holder->mSharedSecret == sharedSecretStr) &&
-                  (serverAddressStr == holder->mServerAddress)) {
-                // no change needed
-                return;
-              }
+            {
+              AutoRecursiveLock lock(holder->mLock);
+              if (holder->mCurrent) {
+                if ((holder->mSharedSecret == sharedSecretStr) &&
+                    (serverAddressStr == holder->mServerAddress)) {
+                  // no change needed
+                  return;
+                }
 
-              pThis = holder->mCurrent;
-              holder->mCurrent.reset();
+                pThis = holder->mCurrent;
+                holder->mCurrent.reset();
+              }
             }
 
             if (pThis) pThis->cancel();
@@ -2684,7 +2686,7 @@ namespace ortc
         #pragma mark
 
         //---------------------------------------------------------------------
-        virtual void onWake()
+        virtual void onWake() override
         {
           AutoRecursiveLock lock(mLock);
           step();

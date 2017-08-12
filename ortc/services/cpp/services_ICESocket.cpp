@@ -1885,8 +1885,8 @@ namespace ortc
                 {
                   TURNInfoMap::iterator currentTurnCheckIter = turnCheckIter; ++turnCheckIter;
 
-                  TURNInfoPtr &turnInfo = (*currentTurnCheckIter).second;
-                  if (turnInfo->mTURNSocket) goto found_turn_connection;
+                  TURNInfoPtr &checkTurnInfo = (*currentTurnCheckIter).second;
+                  if (checkTurnInfo->mTURNSocket) goto found_turn_connection;
                 }
 
                 goto did_not_find_turn_connection;

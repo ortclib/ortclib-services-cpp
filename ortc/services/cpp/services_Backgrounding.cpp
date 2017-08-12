@@ -115,7 +115,7 @@ namespace ortc
         class GracefulAlert
         {
         public:
-          GracefulAlert(BackgroundingPtr singleton) : mSingleton(singleton) {}
+          GracefulAlert(BackgroundingPtr singletonValue) : mSingleton(singletonValue) {}
           ~GracefulAlert() {mSingleton->notifyApplicationWillQuit();}
 
         protected:

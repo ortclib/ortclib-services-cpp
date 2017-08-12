@@ -343,18 +343,18 @@ namespace ortc
             {
               ElementPtr aEl = recordEl->findFirstChildElement("a");
               if (aEl) {
-                IDNS::AResultPtr result = make_shared<IDNS::AResult>();
-                fill(*result, aEl);
-                record.mAResult = result;
+                IDNS::AResultPtr resultA = make_shared<IDNS::AResult>();
+                fill(*resultA, aEl);
+                record.mAResult = resultA;
               }
             }
             // scope: aaaa
             {
               ElementPtr aaaaEl = recordEl->findFirstChildElement("aaaa");
               if (aaaaEl) {
-                IDNS::AAAAResultPtr result = make_shared<IDNS::AAAAResult>();
-                fill(*result, aaaaEl);
-                record.mAAAAResult = result;
+                IDNS::AAAAResultPtr resultAAAA = make_shared<IDNS::AAAAResult>();
+                fill(*resultAAAA, aaaaEl);
+                record.mAAAAResult = resultAAAA;
               }
             }
 
