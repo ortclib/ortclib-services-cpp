@@ -1,0 +1,174 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("compiler") {
+    cflags_cc = [ "-std=c++11" ]
+    cflags_cc += [
+        "-g",
+        "-Wall",
+        "-Wno-unknown-pragmas",
+        "-Wno-documentation",
+        "-Wno-unused-local-typedefs",
+        "-Wno-pragmas",
+    ]
+#cflags_cc -= [ "-std=gnu++11" ]
+}
+
+
+config("ortclib-services_config") {
+
+    include_dirs = [ 
+        ".",
+        "../../../../../ortc/xplatform/zsLib/zsLib",
+        "../../../../../ortc/xplatform/zsLib",
+        "../../../../../ortc/xplatform/zsLib-eventing",
+        "../../../../../ortc/xplatform/idnkit/idnkit/include",
+        "../../../../../ortc/xplatform",
+        "../../../../../ortc/xplatform/ortclib-services-cpp",
+        "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services",
+        "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services/internal",
+        "../../../../../ortc/xplatform/cryptopp",
+
+]
+}
+
+static_library("ortclib-services") {
+
+  configs += [ 
+               ":compiler", 
+               ":ortclib-services_config",
+             ]
+  
+  sources = [
+
+    "ortc/services/IBackgrounding.h",
+    "ortc/services/IBackOffTimer.h",
+    "ortc/services/IBackOffTimerPattern.h",
+    "ortc/services/ICache.h",
+    "ortc/services/ICanonicalXML.h",
+    "ortc/services/IDecryptor.h",
+    "ortc/services/IDHKeyDomain.h",
+    "ortc/services/IDHPrivateKey.h",
+    "ortc/services/IDHPublicKey.h",
+    "ortc/services/IDNS.h",
+    "ortc/services/IEncryptor.h",
+    "ortc/services/IHelper.h",
+    "ortc/services/IHTTP.h",
+    "ortc/services/IICESocket.h",
+    "ortc/services/IICESocketSession.h",
+    "ortc/services/ILogger.h",
+    "ortc/services/IMessageLayerSecurityChannel.h",
+    "ortc/services/IMessageQueueManager.h",
+    "ortc/services/internal/ifaddrs-android.h",
+    "ortc/services/internal/platform.h",
+    "ortc/services/internal/services.events.h",
+    "ortc/services/internal/services.events_win.h",
+    "ortc/services/internal/services.events_win_etw.h",
+    "ortc/services/internal/services.h",
+    "ortc/services/internal/services_Backgrounding.h",
+    "ortc/services/internal/services_BackOffTimer.h",
+    "ortc/services/internal/services_BackOffTimerPattern.h",
+    "ortc/services/internal/services_Cache.h",
+    "ortc/services/internal/services_CanonicalXML.h",
+    "ortc/services/internal/services_Decryptor.h",
+    "ortc/services/internal/services_DHKeyDomain.h",
+    "ortc/services/internal/services_DHPrivateKey.h",
+    "ortc/services/internal/services_DHPublicKey.h",
+    "ortc/services/internal/services_DNS.h",
+    "ortc/services/internal/services_DNSMonitor.h",
+    "ortc/services/internal/services_Encryptor.h",
+    "ortc/services/internal/services_Helper.h",
+    "ortc/services/internal/services_HTTP.h",
+    "ortc/services/internal/services_HTTP_WinUWP.h",
+    "ortc/services/internal/services_ICESocket.h",
+    "ortc/services/internal/services_ICESocketSession.h",
+    "ortc/services/internal/services_IRUDPChannelStream.h",
+    "ortc/services/internal/services_Logger.h",
+    "ortc/services/internal/services_MessageLayerSecurityChannel.h",
+    "ortc/services/internal/services_Reachability.h",
+    "ortc/services/internal/services_RSAPrivateKey.h",
+    "ortc/services/internal/services_RSAPublicKey.h",
+    "ortc/services/internal/services_RUDPChannel.h",
+    "ortc/services/internal/services_RUDPChannelStream.h",
+    "ortc/services/internal/services_RUDPListener.h",
+    "ortc/services/internal/services_RUDPMessaging.h",
+    "ortc/services/internal/services_RUDPTransport.h",
+    "ortc/services/internal/services_STUNDiscovery.h",
+    "ortc/services/internal/services_STUNRequester.h",
+    "ortc/services/internal/services_STUNRequesterManager.h",
+    "ortc/services/internal/services_TCPMessaging.h",
+    "ortc/services/internal/services_TransportStream.h",
+    "ortc/services/internal/services_TURNSocket.h",
+    "ortc/services/internal/services_wire.h",
+    "ortc/services/internal/types.h",
+    "ortc/services/IReachability.h",
+    "ortc/services/IRSAPrivateKey.h",
+    "ortc/services/IRSAPublicKey.h",
+    "ortc/services/IRUDPChannel.h",
+    "ortc/services/IRUDPListener.h",
+    "ortc/services/IRUDPMessaging.h",
+    "ortc/services/IRUDPTransport.h",
+    "ortc/services/ISTUNDiscovery.h",
+    "ortc/services/ISTUNRequester.h",
+    "ortc/services/ISTUNRequesterManager.h",
+    "ortc/services/ITCPMessaging.h",
+    "ortc/services/ITransportStream.h",
+    "ortc/services/ITURNSocket.h",
+    "ortc/services/RUDPPacket.h",
+    "ortc/services/RUDPProtocol.h",
+    "ortc/services/services.h",
+    "ortc/services/STUNPacket.h",
+    "ortc/services/types.h",
+    "ortc/services/cpp/ifaddrs-android.cc",
+    "ortc/services/cpp/services_Backgrounding.cpp",
+    "ortc/services/cpp/services_BackOffTimer.cpp",
+    "ortc/services/cpp/services_BackOffTimerPattern.cpp",
+    "ortc/services/cpp/services_Cache.cpp",
+    "ortc/services/cpp/services_CanonicalXML.cpp",
+    "ortc/services/cpp/services_Decryptor.cpp",
+    "ortc/services/cpp/services_DHKeyDomain.cpp",
+    "ortc/services/cpp/services_DHPrivateKey.cpp",
+    "ortc/services/cpp/services_DHPublicKey.cpp",
+    "ortc/services/cpp/services_DNS.cpp",
+    "ortc/services/cpp/services_DNSMonitor.cpp",
+    "ortc/services/cpp/services_Encryptor.cpp",
+    "ortc/services/cpp/services_Helper.cpp",
+    "ortc/services/cpp/services_HTTP.cpp",
+    "ortc/services/cpp/services_HTTP_WinUWP.cpp",
+    "ortc/services/cpp/services_ICESocket.cpp",
+    "ortc/services/cpp/services_ICESocketSession.cpp",
+    "ortc/services/cpp/services_Logger.cpp",
+    "ortc/services/cpp/services_MessageLayerSecurityChannel.cpp",
+    "ortc/services/cpp/services_Reachability.cpp",
+    "ortc/services/cpp/services_RSAPrivateKey.cpp",
+    "ortc/services/cpp/services_RSAPublicKey.cpp",
+    "ortc/services/cpp/services_RUDPChannel.cpp",
+    "ortc/services/cpp/services_RUDPChannelStream.cpp",
+    "ortc/services/cpp/services_RUDPListener.cpp",
+    "ortc/services/cpp/services_RUDPMessaging.cpp",
+    "ortc/services/cpp/services_RUDPPacket.cpp",
+    "ortc/services/cpp/services_RUDPTransport.cpp",
+    "ortc/services/cpp/services_services.cpp",
+    "ortc/services/cpp/services_STUNDiscovery.cpp",
+    "ortc/services/cpp/services_STUNPacket.cpp",
+    "ortc/services/cpp/services_STUNRequester.cpp",
+    "ortc/services/cpp/services_STUNRequesterManager.cpp",
+    "ortc/services/cpp/services_TCPMessaging.cpp",
+    "ortc/services/cpp/services_TransportStream.cpp",
+    "ortc/services/cpp/services_TURNSocket.cpp",
+    "ortc/services/cpp/services_wire.cpp",
+
+  ]
+
+  defines = [
+    "_LIB",
+    "USE_ETW",
+    "_UNICODE",
+    "UNICODE",
+  ]
+
+  if (is_win) {
+    defines += [ "WEBRTC_WIN", ]
+  }
+}
