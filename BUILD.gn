@@ -12,6 +12,8 @@ config("compiler") {
         "-Wno-unused-local-typedefs",
         "-Wno-pragmas",
     ]
+
+
 #cflags_cc -= [ "-std=gnu++11" ]
 }
 
@@ -22,6 +24,7 @@ config("ortclib-services_config") {
         ".",
         "../../../../../ortc/xplatform/zsLib/zsLib",
         "../../../../../ortc/xplatform/zsLib",
+        "../../../../../ortc/xplatform/zsLib/zsLib/extras",
         "../../../../../ortc/xplatform/zsLib-eventing",
         "../../../../../ortc/xplatform/idnkit/idnkit/include",
         "../../../../../ortc/xplatform",
@@ -39,6 +42,12 @@ static_library("ortclib-services") {
                ":compiler", 
                ":ortclib-services_config",
              ]
+
+  configs -= [ "//build/config/compiler:no_rtti" ]
+  if (!is_win) {
+    configs -= [ "//build/config/gcc:no_exceptions" ]
+  }
+  configs -= [ "//build/config/compiler:chromium_code" ]
   
   sources = [
 
@@ -62,9 +71,9 @@ static_library("ortclib-services") {
     "ortc/services/IMessageQueueManager.h",
     "ortc/services/internal/ifaddrs-android.h",
     "ortc/services/internal/platform.h",
-    "ortc/services/internal/services.events.h",
-    "ortc/services/internal/services.events_win.h",
-    "ortc/services/internal/services.events_win_etw.h",
+#    "ortc/services/internal/services.events.h",
+#    "ortc/services/internal/services.events_win.h",
+#    "ortc/services/internal/services.events_win_etw.h",
     "ortc/services/internal/services.h",
     "ortc/services/internal/services_Backgrounding.h",
     "ortc/services/internal/services_BackOffTimer.h",
