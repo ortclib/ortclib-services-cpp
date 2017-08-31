@@ -3,18 +3,13 @@
 # found in the LICENSE file.
 
 config("compiler") {
-    cflags_cc = [ "-std=c++11" ]
+#    cflags_cc = [ "-std=c++11" ]
+
+    cflags_cc = [ "-g" ]
     cflags_cc += [
-        "-g",
         "-Wall",
-        "-Wno-unknown-pragmas",
-        "-Wno-documentation",
-        "-Wno-unused-local-typedefs",
-        "-Wno-pragmas",
     ]
-
-
-#cflags_cc -= [ "-std=gnu++11" ]
+#    cflags_cc -= [ "-std=gnu++11" ]
 }
 
 
@@ -32,7 +27,7 @@ config("ortclib-services_config") {
         "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services",
         "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services/internal",
         "../../../../../ortc/xplatform/cryptopp",
-
+        "/usr/include",
 ]
 }
 
@@ -71,9 +66,9 @@ static_library("ortclib-services") {
     "ortc/services/IMessageQueueManager.h",
     "ortc/services/internal/ifaddrs-android.h",
     "ortc/services/internal/platform.h",
-#    "ortc/services/internal/services.events.h",
-#    "ortc/services/internal/services.events_win.h",
-#    "ortc/services/internal/services.events_win_etw.h",
+    "ortc/services/internal/services.events.h",
+    "ortc/services/internal/services.events_win.h",
+    "ortc/services/internal/services.events_win_etw.h",
     "ortc/services/internal/services.h",
     "ortc/services/internal/services_Backgrounding.h",
     "ortc/services/internal/services_BackOffTimer.h",

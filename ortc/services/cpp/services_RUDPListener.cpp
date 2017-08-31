@@ -217,7 +217,8 @@ namespace ortc
         CryptoPP::AutoSeededRandomPool rng;
         rng.GenerateBlock(&(mMagic[0]), sizeof(mMagic));
 
-        ZS_LOG_BASIC(log("started") + ZS_PARAM("compiled date", __DATE__) + ZS_PARAM("time", __TIME__))
+        //tmp commented out the following line, revisit when zsLib is fixed 
+        //ZS_LOG_BASIC(log("started") + ZS_PARAM("compiled date", __DATE__) + ZS_PARAM("time", __TIME__))
       }
 
       //-----------------------------------------------------------------------
