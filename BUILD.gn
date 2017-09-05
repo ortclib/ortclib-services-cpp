@@ -2,14 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-config("compiler") {
-#    cflags_cc = [ "-std=c++11" ]
+import("//ortc/zsLib-eventing/zslib_eventing_tool.gni")
 
+config("compiler") {
+  if (!is_win) {
     cflags_cc = [ "-g" ]
     cflags_cc += [
         "-Wall",
     ]
-#    cflags_cc -= [ "-std=gnu++11" ]
+  }
 }
 
 
@@ -165,6 +166,8 @@ static_library("ortclib-services") {
 
   ]
 
+  deps = [ ":services_events" ]
+  
   defines = [
     "_LIB",
     "USE_ETW",
@@ -175,4 +178,19 @@ static_library("ortclib-services") {
   if (is_win) {
     defines += [ "WEBRTC_WIN", ]
   }
+}
+
+compile_single_event_macro("services_events") {
+  
+  deps = [ 
+    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
+  ]
+  
+  sources = [
+    "ortc/services/cpp/services.events.json",
+  ]
+  outputs = [
+    "$target_gen_dir/services.events.jman",
+  ]
+    
 }
