@@ -166,7 +166,10 @@ static_library("ortclib-services") {
 
   ]
 
-  deps = [ ":services_events" ]
+  deps = [ 
+    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
+    ":services_events" 
+  ]
   
   defines = [
     "_LIB",
@@ -181,10 +184,6 @@ static_library("ortclib-services") {
 }
 
 compile_single_event_macro("services_events") {
-  
-  deps = [ 
-    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
-  ]
   
   sources = [
     "ortc/services/cpp/services.events.json",
