@@ -45,6 +45,11 @@ static_library("ortclib-services") {
   }
   configs -= [ "//build/config/compiler:chromium_code" ]
   
+  deps = [ 
+    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
+    ":services_events" 
+  ]
+  
   sources = [
 
     "ortc/services/IBackgrounding.h",
@@ -164,11 +169,6 @@ static_library("ortclib-services") {
     "ortc/services/cpp/services_TURNSocket.cpp",
     "ortc/services/cpp/services_wire.cpp",
 
-  ]
-
-  deps = [ 
-    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
-    ":services_events" 
   ]
   
   defines = [
