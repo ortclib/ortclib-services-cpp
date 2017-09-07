@@ -189,7 +189,10 @@ compile_single_event_macro("services_events") {
     "ortc/services/cpp/services.events.json",
   ]
   outputs = [
-    "$target_gen_dir/services.events.jman",
+    "$target_gen_dir/ortc/services/internal/services.events.jman",
   ]
     
+  eventOutput = [
+    "ortc/services/internal/services.events.jman",
+  ]
 }
