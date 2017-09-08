@@ -35,20 +35,15 @@ config("ortclib-services_config") {
 static_library("ortclib-services") {
 
   configs += [ 
-               ":compiler", 
-               ":ortclib-services_config",
-             ]
+    ":compiler", 
+    ":ortclib-services_config",
+  ]
 
   configs -= [ "//build/config/compiler:no_rtti" ]
+  configs -= [ "//build/config/compiler:chromium_code" ]
   if (!is_win) {
     configs -= [ "//build/config/gcc:no_exceptions" ]
   }
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  
-  deps = [ 
-    "//ortc/zsLib-eventing:zslib-eventing-tool-compiler",
-    ":services_events" 
-  ]
   
   sources = [
 
@@ -178,9 +173,13 @@ static_library("ortclib-services") {
     "UNICODE",
   ]
 
-  if (is_win) {
+  if (is_win) {configs -= [ "//build/config/compiler:chromium_code" ]
     defines += [ "WEBRTC_WIN", ]
   }
+
+  deps = [ 
+    ":services_events",
+  ]
 }
 
 compile_single_event_macro("services_events") {
