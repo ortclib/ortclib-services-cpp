@@ -173,7 +173,8 @@ static_library("ortclib-services") {
     "UNICODE",
   ]
 
-  if (is_win) {configs -= [ "//build/config/compiler:chromium_code" ]
+  if (is_win) {
+    #configs -= [ "//build/config/compiler:chromium_code" ]
     defines += [ "WEBRTC_WIN", ]
   }
 
