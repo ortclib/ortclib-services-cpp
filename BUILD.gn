@@ -8,28 +8,24 @@ config("compiler") {
   if (!is_win) {
     cflags_cc = [ "-g" ]
     cflags_cc += [
-        "-Wall",
-    ]
+            "-Wall",
+            "-std=c++11",
+        ]
   }
 }
 
-
 config("ortclib-services_config") {
 
-    include_dirs = [ 
-        ".",
-        "../../../../../ortc/xplatform/zsLib/zsLib",
-        "../../../../../ortc/xplatform/zsLib",
-        "../../../../../ortc/xplatform/zsLib/zsLib/extras",
-        "../../../../../ortc/xplatform/zsLib-eventing",
-        "../../../../../ortc/xplatform/idnkit/idnkit/include",
-        "../../../../../ortc/xplatform",
-        "../../../../../ortc/xplatform/ortclib-services-cpp",
-        "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services",
-        "../../../../../ortc/xplatform/ortclib-services-cpp/ortc/services/internal",
-        "../../../../../ortc/xplatform/cryptopp",
-        "/usr/include",
-]
+  include_dirs = [ 
+      ".",
+      "..",
+      "../zsLib",
+      "../zsLib/zsLib/extras",
+      "../zsLib-eventing",
+      "../idnkit/idnkit/include",
+      "../cryptopp",
+      "/usr/include",
+  ]
 }
 
 static_library("ortclib-services") {
@@ -38,6 +34,9 @@ static_library("ortclib-services") {
     ":compiler", 
     ":ortclib-services_config",
   ]
+
+  #Warning: This is excluded because OF __DATE__ and __TIME__
+  configs -= [ "//build/config/compiler:compiler" ]
 
   configs -= [ "//build/config/compiler:no_rtti" ]
   configs -= [ "//build/config/compiler:chromium_code" ]
