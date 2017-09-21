@@ -10,6 +10,7 @@ config("compiler") {
     cflags_cc += [
             "-Wall",
             "-std=c++11",
+            "-fPIC",
         ]
   }
 }
@@ -179,6 +180,8 @@ static_library("ortclib-services") {
 
   deps = [ 
     ":services_events",
+    "//ortc/zsLib:zslib",
+    "//ortc/cryptopp",
   ]
 }
 
