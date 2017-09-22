@@ -13,11 +13,21 @@ config("compiler") {
             "-fPIC",
         ]
   }
+
+  if  (is_win) {
+      cflags_cc = [
+        "/WX-",
+        "/FS",
+        "/wd4068",
+        "/wd4290",
+      ]
+  }
+
 }
 
 config("ortclib-services_config") {
 
-  include_dirs = [ 
+  include_dirs = [
       ".",
       "..",
       "../zsLib",
@@ -25,8 +35,20 @@ config("ortclib-services_config") {
       "../zsLib-eventing",
       "../idnkit/idnkit/include",
       "../cryptopp",
-      "/usr/include",
   ]
+
+  if  (is_linux) {
+    include_dirs += [
+      "/usr/include",
+    ]
+  }
+
+  if  (!is_winuwp) {
+    include_dirs += [
+      "../curl/include",
+    ]
+  }
+
 }
 
 static_library("ortclib-services") {
