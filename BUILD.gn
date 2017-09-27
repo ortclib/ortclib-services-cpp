@@ -58,15 +58,13 @@ static_library("ortclib-services") {
     ":ortclib-services_config",
   ]
 
-  #Warning: This is excluded because OF __DATE__ and __TIME__
-  configs -= [ "//build/config/compiler:compiler" ]
-
   configs -= [ "//build/config/compiler:no_rtti" ]
   configs -= [ "//build/config/compiler:chromium_code" ]
   if (!is_win) {
     configs -= [ "//build/config/gcc:no_exceptions" ]
   }
   
+   
   sources = [
 
     "ortc/services/IBackgrounding.h",
