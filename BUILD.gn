@@ -203,6 +203,9 @@ static_library("ortclib-services") {
     "//ortc/zsLib:zslib",
     "//ortc/cryptopp",
   ]
+
+  # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
+  configs -= [ "//build/config/clang:find_bad_constructs" ]
 }
 
 compile_single_event_macro("services_events") {

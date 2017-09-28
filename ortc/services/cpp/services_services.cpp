@@ -78,5 +78,23 @@ namespace ortc
         ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services::wire, ortc_services_wire));
       }
     }
+
+    //-------------------------------------------------------------------------
+    SharedRecursiveLock::SharedRecursiveLock(const SharedRecursiveLock &source) :
+      mLock(source.mLock)
+    {
+    }
+
+    //-------------------------------------------------------------------------
+    SharedRecursiveLock::SharedRecursiveLock(RecursiveLockPtr shared) : 
+      mLock(shared)
+    {
+    }
+
+    //-------------------------------------------------------------------------
+    SharedRecursiveLock::~SharedRecursiveLock()
+    {
+    }
+
   }
 }

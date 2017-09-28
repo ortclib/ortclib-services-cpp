@@ -98,8 +98,10 @@ namespace ortc
     public:
       static SharedRecursiveLock create() {return SharedRecursiveLock(make_shared<RecursiveLock>());}
 
-      SharedRecursiveLock(const SharedRecursiveLock &source) : mLock(source.mLock) {}
-      SharedRecursiveLock(RecursiveLockPtr shared) : mLock(shared) {}
+      SharedRecursiveLock() = delete;
+      SharedRecursiveLock(const SharedRecursiveLock &source);
+      SharedRecursiveLock(RecursiveLockPtr shared);
+      ~SharedRecursiveLock();
 
       RecursiveLock &lock() const {return *mLock;}
 
@@ -109,7 +111,6 @@ namespace ortc
       void setLock(RecursiveLockPtr replacement) {mLock = replacement;}
 
     private:
-      SharedRecursiveLock() {}  // illegal
       mutable RecursiveLockPtr mLock;
     };
 
