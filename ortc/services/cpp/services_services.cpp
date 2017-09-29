@@ -29,6 +29,9 @@
 
  */
 
+
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 #include <ortc/services/services.h>
 #include <ortc/services/internal/services.h>
 
@@ -98,3 +101,32 @@ namespace ortc
 
   }
 }
+
+
+
+
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IBackgroundingDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IBackgroundingCompletionDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IBackOffTimerDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IDNSDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IHTTPQueryDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IICESocketDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IICESocketSessionDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IMessageLayerSecurityChannelDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IReachabilityDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IRUDPChannelDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IRUDPListenerDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IRUDPMessagingDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::IRUDPTransportDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ISTUNDiscoveryDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ISTUNRequesterDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ITCPMessagingDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ITransportStreamWriterDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ITransportStreamReaderDelegate)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::ITURNSocketDelegate)
+
+
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::internal::IICESocketForICESocketSession)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::internal::IRUDPChannelDelegateForSessionAndListener)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::internal::IRUDPChannelStreamAsync)
+ZS_DECLARE_PROXY_IMPLEMENT(ortc::services::internal::IRUDPChannelStreamDelegate)

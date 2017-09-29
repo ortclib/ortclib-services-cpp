@@ -240,11 +240,11 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onICESocketSessionStateChanged, IICESock
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IICESocketSessionPtr)
 
   // notify each subscription of the received packet
-  virtual void handleICESocketSessionReceivedPacket(
-                                                    IICESocketSessionPtr session,
-                                                    const BYTE *buffer,
-                                                    size_t bufferLengthInBytes
-                                                    )
+  void handleICESocketSessionReceivedPacket(
+                                            IICESocketSessionPtr session,
+                                            const BYTE *buffer,
+                                            size_t bufferLengthInBytes
+                                            ) override
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegateTypePtr, DelegateTypeProxy)
     for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )
@@ -260,12 +260,12 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IIC
   }
 
   // notify each subscription of the received stun packet until one claims to handle the packet
-  virtual bool handleICESocketSessionReceivedSTUNPacket(
-                                                        IICESocketSessionPtr session,
-                                                        STUNPacketPtr stun,
-                                                        const String &localUsernameFrag,
-                                                        const String &remoteUsernameFrag
-                                                        )
+  bool handleICESocketSessionReceivedSTUNPacket(
+                                                IICESocketSessionPtr session,
+                                                STUNPacketPtr stun,
+                                                const String &localUsernameFrag,
+                                                const String &remoteUsernameFrag
+                                                ) override
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegatePtr, DelegateProxy)
     for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )

@@ -207,10 +207,10 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingSubscriptio
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
 
   // notify each subscription of their backgrounding object
-  virtual void onBackgroundingGoingToBackground(
-                                                IBackgroundingSubscriptionPtr ignoreSubscription, // will be bogus
-                                                IBackgroundingNotifierPtr notifier
-                                                )
+  void onBackgroundingGoingToBackground(
+                                        IBackgroundingSubscriptionPtr ignoreSubscription, // will be bogus
+                                        IBackgroundingNotifierPtr notifier
+                                        ) override
   {
     ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_TYPES_AND_VALUES(SubscriptionsMap, subscriptions, SubscriptionsMapKeyType, DelegateTypePtr, DelegateTypeProxy)
     for (SubscriptionsMap::iterator iter_doNotUse = subscriptions.begin(); iter_doNotUse != subscriptions.end(); )

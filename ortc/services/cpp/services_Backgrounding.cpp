@@ -110,8 +110,6 @@ namespace ortc
           ZS_LOG_WARNING(Detail, slog("singleton gone"))
         }
 
-        ZS_DECLARE_CLASS_PTR(GracefulAlert)
-
         class GracefulAlert
         {
         public:
@@ -828,10 +826,12 @@ namespace ortc
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) {
-        ZS_DECLARE_CLASS_PTR(BogusQuery)
 
         class BogusQuery : public IBackgroundingQuery
         {
+        public:
+          typedef std::shared_ptr<BogusQuery> BogusQueryPtr;
+
         protected:
           struct make_private {};
         public:
@@ -848,7 +848,7 @@ namespace ortc
           zsLib::AutoPUID mID;
         };
 
-        BogusQueryPtr query = BogusQuery::create();
+        auto query = BogusQuery::create();
         if (readyDelegate) {
           IBackgroundingCompletionDelegateProxy::create(readyDelegate)->onBackgroundingReady(query);
         }

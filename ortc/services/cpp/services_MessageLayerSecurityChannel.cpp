@@ -159,8 +159,6 @@ namespace ortc
                                                   const SecureByteBlock &value
                                                   )
       {
-        typedef IHelper::SplitMap SplitMap;
-
         //hex(`<salt>`) + ":" + base64(encrypt(`<encrypted-value>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
 
         SecureByteBlockPtr iv = IHelper::random(IHasher::md5DigestSize());
