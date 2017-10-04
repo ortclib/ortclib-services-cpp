@@ -71,6 +71,7 @@ namespace ortc
                                    IRUDPTransportDelegatePtr delegate
                                    ) :
         MessageQueueAssociator(queue),
+        mSubscriptions(decltype(mSubscriptions)::create()),
         mCurrentState(RUDPTransportState_Pending),
         mICESession(iceSession)
       {

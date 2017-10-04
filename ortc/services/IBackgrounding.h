@@ -206,6 +206,15 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IBackgroundingDelegate, ort
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
 
+#ifndef ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
+  void onBackgroundingGoingToBackground(
+                                        IBackgroundingSubscriptionPtr ignoreSubscription, // will be bogus
+                                        IBackgroundingNotifierPtr notifier
+                                        ) override;
+
+#else // ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
   // notify each subscription of their backgrounding object
   void onBackgroundingGoingToBackground(
                                         IBackgroundingSubscriptionPtr ignoreSubscription, // will be bogus
@@ -229,6 +238,9 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingNotifierPtr
       }
     }
   }
+
+#endif // ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)

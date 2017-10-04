@@ -218,6 +218,8 @@ namespace ortc
 
         SharedRecursiveLock(SharedRecursiveLock::create()),
 
+        mSubscriptions(decltype(mSubscriptions)::create()),
+
         mCurrentState(ICESocketState_Pending),
 
         mFoundation(ICESocket::convert(foundationSocket)),

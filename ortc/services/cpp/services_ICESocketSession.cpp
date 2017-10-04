@@ -262,6 +262,7 @@ namespace ortc
         SharedRecursiveLock(*inSocket),
         mICESocket(inSocket),
         mCurrentState(ICESocketSessionState_Pending),
+        mSubscriptions(decltype(mSubscriptions)::create()),
         mFoundation(foundation),
         mRemoteUsernameFrag(remoteUsernameFrag),
         mRemotePassword(remotePassword),

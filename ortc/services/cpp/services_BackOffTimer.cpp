@@ -125,6 +125,7 @@ namespace ortc
         MessageQueueAssociator(IHelper::getServicePoolQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mPattern(UsePatternPtr(BackOffTimerPattern::convert(pattern))->clone()),
+        mSubscriptions(decltype(mSubscriptions)::create()),
         mLastStateChange(zsLib::now())
       {
         ZS_LOG_DETAIL(log("created"))

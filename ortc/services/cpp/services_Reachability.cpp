@@ -78,6 +78,7 @@ namespace ortc
       Reachability::Reachability(const make_private &) :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
+        mSubscriptions(decltype(mSubscriptions)::create()),
         mLastState(InterfaceType_None)
       {
         ZS_LOG_DETAIL(log("created"))

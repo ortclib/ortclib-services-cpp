@@ -239,6 +239,22 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketSession::ICESoc
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onICESocketSessionStateChanged, IICESocketSessionPtr, ICESocketSessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IICESocketSessionPtr)
 
+#ifndef ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
+  void handleICESocketSessionReceivedPacket(
+                                            IICESocketSessionPtr session,
+                                            const BYTE *buffer,
+                                            size_t bufferLengthInBytes
+                                            ) override;
+
+  bool handleICESocketSessionReceivedSTUNPacket(
+                                                IICESocketSessionPtr session,
+                                                STUNPacketPtr stun,
+                                                const String &localUsernameFrag,
+                                                const String &remoteUsernameFrag
+                                                ) override;
+
+#else // ndef ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
   // notify each subscription of the received packet
   void handleICESocketSessionReceivedPacket(
                                             IICESocketSessionPtr session,
@@ -281,6 +297,7 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionNominationChanged, IIC
     }
     return false;
   }
+#endif //ndef ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketSessionWriteReady, IICESocketSessionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

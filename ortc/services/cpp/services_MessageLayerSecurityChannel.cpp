@@ -239,6 +239,8 @@ namespace ortc
         zsLib::MessageQueueAssociator(queue),
         SharedRecursiveLock(SharedRecursiveLock::create()),
 
+        mSubscriptions(decltype(mSubscriptions)::create()),
+
         mCurrentState(SessionState_Pending),
 
         mLocalContextID(contextID),

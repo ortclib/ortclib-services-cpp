@@ -72,7 +72,9 @@ namespace ortc
                                        ITransportStreamWriterDelegatePtr writerDelegate,
                                        ITransportStreamReaderDelegatePtr readerDelegate
                                        ) :
-        zsLib::MessageQueueAssociator(queue)
+        zsLib::MessageQueueAssociator(queue),
+        mWriterSubscriptions(decltype(mWriterSubscriptions)::create()),
+        mReaderSubscriptions(decltype(mReaderSubscriptions)::create())
       {
         ZS_LOG_DEBUG(log("created"))
         if (writerDelegate) {

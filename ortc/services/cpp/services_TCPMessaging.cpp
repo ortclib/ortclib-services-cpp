@@ -130,6 +130,7 @@ namespace ortc
                                  size_t maxMessageSizeInBytes
                                  ) :
         zsLib::MessageQueueAssociator(queue),
+        mSubscriptions(decltype(mSubscriptions)::create()),
         mCurrentState(SessionState_Pending),
         mReceiveStream(receiveStream->getWriter()),
         mSendStream(sendStream->getReader()),
@@ -738,7 +739,7 @@ namespace ortc
       //-----------------------------------------------------------------------
       void TCPMessaging::sendDataNow()
       {
-        typedef ITransportStream::StreamHeader StreamHeader;
+        //typedef ITransportStream::StreamHeader StreamHeader;
         typedef ITransportStream::StreamHeaderPtr StreamHeaderPtr;
 
         if (isShutdown()) return;
