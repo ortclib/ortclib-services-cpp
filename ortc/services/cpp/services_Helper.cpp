@@ -64,7 +64,10 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/hmac.h>
 
+#ifndef _WIN32
 #include <idn/api.h>
+#include <Windows.h>
+#endif //ndef _WIN32
 
 #define ORTC_SERVICES_SERVICE_THREAD_POOL_NAME "org.ortclib.services.serviceThreadPool"
 #define ORTC_SERVICES_SERVICE_THREAD_NAME "org.ortclib.services.serviceThread"
@@ -178,6 +181,7 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
 
+#ifndef _WIN32
       class IDNHelper
       {
       public:
@@ -205,6 +209,7 @@ namespace ortc
           return Log::Params(message, "services::IDNHelper");
         }
       };
+#endif //ndef _WIN32
 
 
       //-----------------------------------------------------------------------
@@ -225,7 +230,9 @@ namespace ortc
         {
           initSubsystems();
           ZS_EVENTING_REGISTER(OrtcServices);
+#ifndef _WIN32
           IDNHelper::singleton();
+#endif //ndef _WIN32
           //installICESocketSettingsDefaults();
           //installICESocketSessionSettingsDefaults();
           installTURNSocketSettingsDefaults();
@@ -555,17 +562,51 @@ namespace ortc
     //-----------------------------------------------------------------------
     String IHelper::convertIDNToUTF8(const String &idnStr)
     {
+#ifndef _WIN32
       internal::IDNHelper::singleton();
+#endif //ndef _WIN32
 
       if (idnStr.isEmpty()) return String();
 
-      size_t length = idnStr.length();
+#ifdef _WIN32
+      std::wstring wstr(idnStr.wstring());
+      auto result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
 
-      char outputBuffer[1024] {};
+      wchar_t outputBuffer[1024]{};
+      std::unique_ptr<wchar_t[]> overflowBuffer;
+
+      wchar_t *destStr = &(outputBuffer[0]);
+      size_t destLength = (sizeof(outputBuffer) / sizeof(wchar_t)) - 1;
+
+      if (0 == result) {
+        ZS_LOG_ERROR(Detail, internal::Helper::slog("idn to utf8 convert failed") + ZS_PARAM("input idn", idnStr) + ZS_PARAM("error", GetLastError()));
+        return String();
+      }
+
+      if (result > destLength) {
+        overflowBuffer = std::unique_ptr<wchar_t[]>(new wchar_t[(result) + 1]{});
+        destStr = overflowBuffer.get();
+        destLength = result;
+      }
+
+      memset(destStr, 0, sizeof(wchar_t)*(destLength + 1));
+      result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), destStr, destLength);
+
+      if (0 == result) {
+        ZS_LOG_ERROR(Detail, internal::Helper::slog("idn to utf8 convert failed") + ZS_PARAM("input idn", idnStr) + ZS_PARAM("error", GetLastError()));
+        return String();
+      }
+
+      return String(destStr);
+
+#else //_WIN32
+      char outputBuffer[1024]{};
       std::unique_ptr<char[]> overflowBuffer;
 
       char *destStr = &(outputBuffer[0]);
       size_t destLength = (sizeof(outputBuffer) / sizeof(char)) - 1;
+
+      size_t length = idnStr.length();
 
       if (length * ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO > destLength) {
         overflowBuffer = std::unique_ptr<char[]>(new char[(length*ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO)+1] {});
@@ -581,15 +622,50 @@ namespace ortc
       }
 
       return String((const char *)destStr);
+#endif // _WIN32
     }
 
     //-----------------------------------------------------------------------
     String IHelper::convertUTF8ToIDN(const String &utf8Str)
     {
+#ifndef _WIN32
       internal::IDNHelper::singleton();
+#endif //ndef _WIN32
 
       if (utf8Str.isEmpty()) return String();
 
+#ifdef _WIN32
+      std::wstring wstr(utf8Str.wstring());
+      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
+
+      wchar_t outputBuffer[1024]{};
+      std::unique_ptr<wchar_t[]> overflowBuffer;
+
+      wchar_t *destStr = &(outputBuffer[0]);
+      size_t destLength = (sizeof(outputBuffer) / sizeof(wchar_t)) - 1;
+
+      if (0 == result) {
+        ZS_LOG_ERROR(Detail, internal::Helper::slog("utf8 to idn convert failed") + ZS_PARAM("input idn", utf8Str) + ZS_PARAM("error", GetLastError()));
+        return String();
+      }
+
+      if (result > destLength) {
+        overflowBuffer = std::unique_ptr<wchar_t[]>(new wchar_t[(result)+1]{});
+        destStr = overflowBuffer.get();
+        destLength = result;
+      }
+
+      memset(destStr, 0, sizeof(wchar_t)*(destLength + 1));
+      result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), destStr, destLength);
+
+      if (0 == result) {
+        ZS_LOG_ERROR(Detail, internal::Helper::slog("utf8 to idn convert failed") + ZS_PARAM("input idn", utf8Str) + ZS_PARAM("error", GetLastError()));
+        return String();
+      }
+
+      return String(destStr);
+
+#else //_WIN32
       size_t length = utf8Str.length();
 
       char outputBuffer[1024] {};
@@ -613,14 +689,27 @@ namespace ortc
 
       String result((const char *)destStr);
       return result;
+#endif //_WIN32
     }
 
     //-----------------------------------------------------------------------
     bool IHelper::isValidDomain(const String &inDomain)
     {
+#ifndef _WIN32
       internal::IDNHelper::singleton();
+#endif // _WIN32
 
       if (inDomain.isEmpty()) return false;
+
+#ifdef _WIN32
+      std::wstring wstr(inDomain.wstring());
+      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
+
+      if (0 == result) {
+        ZS_LOG_ERROR(Detail, internal::Helper::slog("idn convert failed") + ZS_PARAM("input utf8", inDomain) + ZS_PARAM("error", GetLastError()));
+        return false;
+      }
+#else //_WIN32
 
       idn_result_t status = idn_checkname(IDN_CHECK_LOOKUP & (~IDN_UNICODECONV), inDomain.c_str());
 
@@ -628,6 +717,7 @@ namespace ortc
         ZS_LOG_ERROR(Detail, internal::Helper::slog("idn convert failed") + ZS_PARAM("input utf8", inDomain) + ZS_PARAM("status", status))
         return false;
       }
+#endif //_WIN32
 
       String domain(inDomain ? convertUTF8ToIDN(inDomain) : String());
 //        std::regex exp("^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$");
