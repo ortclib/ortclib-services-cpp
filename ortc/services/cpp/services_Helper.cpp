@@ -66,6 +66,7 @@
 
 #ifndef _WIN32
 #include <idn/api.h>
+#else
 #include <Windows.h>
 #endif //ndef _WIN32
 
