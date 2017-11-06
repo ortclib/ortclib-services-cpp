@@ -29,6 +29,8 @@
 
  */
 
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 #include <ortc/services/internal/services_TransportStream.h>
 #include <ortc/services/internal/services_Helper.h>
 
