@@ -29,6 +29,8 @@
 
  */
 
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 #include <ortc/services/internal/services_BackOffTimer.h>
 #include <ortc/services/internal/services_BackOffTimerPattern.h>
 #include <ortc/services/internal/services.events.h>

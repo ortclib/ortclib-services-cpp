@@ -29,6 +29,8 @@
 
  */
 
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 #include <ortc/services/internal/services_TURNSocket.h>
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services_wire.h>
