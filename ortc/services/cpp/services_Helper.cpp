@@ -32,6 +32,7 @@
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/internal/services.events.h>
+#include <ortc/services/internal/services.events.jman.h>
 #include <ortc/services/IDNS.h>
 
 #include <zsLib/eventing/IHasher.h>

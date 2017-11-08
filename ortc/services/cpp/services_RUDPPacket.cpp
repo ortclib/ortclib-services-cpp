@@ -35,13 +35,13 @@
 #include <zsLib/Exception.h>
 #include <zsLib/Stringize.h>
 
-#if (defined _LINUX || defined __QNX__)
+#if (defined __linux__ || defined __QNX__)
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#endif //_LINUX
+#endif //__linux__
 
 #define ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES (12)
 
