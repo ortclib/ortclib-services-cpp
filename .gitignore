@@ -13,6 +13,7 @@ ortc/services/internal/services.events_win_etw.h
 ortc/services/internal/services.events_win.h
 ortc/services/internal/services.events.h
 ortc/services/internal/services.events.jman
+ortc/services/internal/services.events.jman.h
 ortc/services/internal/services.events_win_etw.wprp
 ortc/services/internal/services.events_win_etw.man
 ortc/services/internal/contents.xcworkspacedata
