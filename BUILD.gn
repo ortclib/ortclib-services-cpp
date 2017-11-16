@@ -44,11 +44,16 @@ config("ortclib-services_config") {
   }
 
   if  (!is_winuwp) {
-    include_dirs += [
-      "../curl/include",
-    ]
+    if (is_win) {
+      include_dirs += [
+        "../curl/include",
+      ]
+    } else {
+      include_dirs += [
+        "../curl/curl",
+      ]
+    }
   }
-
 }
 
 static_library("ortclib-services") {
