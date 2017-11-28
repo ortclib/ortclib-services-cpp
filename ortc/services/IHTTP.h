@@ -157,31 +157,76 @@ namespace ortc
       static bool isRedirection(HTTPStatusCodes httpStatusCode);
       static bool isError(HTTPStatusCodes httpStatusCode, bool noneIsError = false);
 
-      static IHTTPQueryPtr get(
-                               IHTTPQueryDelegatePtr delegate,
-                               const char *userAgent,
-                               const char *url,
-                               Milliseconds timeout = Milliseconds()
-                               );
+      enum Verbs
+      {
+        Verb_First,
 
-      static IHTTPQueryPtr post(
-                                IHTTPQueryDelegatePtr delegate,
-                                const char *userAgent,
-                                const char *url,
-                                const char *postData,
-                                const char *postDataMimeType = NULL,
-                                Milliseconds timeout = Milliseconds()
-                                );
+        Verb_Get = Verb_First,
+        Verb_Post,
 
-      static IHTTPQueryPtr post(
-                                IHTTPQueryDelegatePtr delegate,
-                                const char *userAgent,
-                                const char *url,
-                                const BYTE *postData,
-                                size_t postDataLengthInBytes,
-                                const char *postDataMimeType = NULL,
-                                Milliseconds timeout = Milliseconds()
-                                );
+        Verb_Last = Verb_Post,
+      };
+
+      static const char *toString(Verbs verb);
+      static Verbs toVerb(const char *verb) throw (InvalidArgument);
+
+      struct QueryInfo
+      {
+        Verbs verb_ {Verb_Get};
+        String userAgent_;
+        String url_;
+        Milliseconds timeout_ {};
+
+        String postDataMimeType_;
+
+        // one of the following must be set for post request
+        SecureByteBlockPtr postData_;
+        String postDataAsString_;
+
+        QueryInfo();
+        QueryInfo(const QueryInfo &source);
+
+        QueryInfo &operator=(const QueryInfo &source);
+
+        void trace(Log::Level level = Log::Trace) const;
+      };
+
+      static IHTTPQueryPtr query(
+                                 IHTTPQueryDelegatePtr delegate,
+                                 const QueryInfo &info
+                                 );
+
+    };
+
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    #pragma mark
+    #pragma mark IHTTPOverride
+    #pragma mark
+
+    interaction IHTTPOverride
+    {
+      static void install(IHTTPOverrideDelegatePtr delegate);
+      static void uninstall();
+
+      static void notifyHeaderData(
+                                   IHTTPQueryPtr query,
+                                   const BYTE *buffer,
+                                   size_t sizeInBytes
+                                   ) throw (InvalidArgument);
+
+      static void notifyBodyData(
+                                 IHTTPQueryPtr query,
+                                 const BYTE *buffer,
+                                 size_t sizeInBytes
+                                 ) throw (InvalidArgument);
+
+      static void notifyComplete(
+                                 IHTTPQueryPtr query,
+                                 IHTTP::HTTPStatusCodes status = IHTTP::HTTPStatusCode_OK
+                                 ) throw (InvalidArgument);
     };
 
     //-------------------------------------------------------------------------
@@ -227,6 +272,17 @@ namespace ortc
       virtual void onHTTPReadDataAvailable(IHTTPQueryPtr query) = 0;
       virtual void onHTTPCompleted(IHTTPQueryPtr query) = 0;
     };
+
+    interaction IHTTPOverrideDelegate
+    {
+      ZS_DECLARE_TYPEDEF_PTR(IHTTP::QueryInfo, QueryInfo);
+
+      virtual void onHTTPOverrideQuery(
+                                       IHTTPQueryPtr query,
+                                       QueryInfo info
+                                       ) = 0;
+      virtual void onHTTPOverrideQueryCancelled(IHTTPQueryPtr query) = 0;
+    };
   }
 }
 
@@ -234,4 +290,11 @@ ZS_DECLARE_PROXY_BEGIN(ortc::services::IHTTPQueryDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTPQueryPtr, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onHTTPReadDataAvailable, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_METHOD_1(onHTTPCompleted, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_END()
+
+ZS_DECLARE_PROXY_BEGIN(ortc::services::IHTTPOverrideDelegate)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTPQueryPtr, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTP::QueryInfo, QueryInfo)
+ZS_DECLARE_PROXY_METHOD_2(onHTTPOverrideQuery, IHTTPQueryPtr, QueryInfo)
+ZS_DECLARE_PROXY_METHOD_1(onHTTPOverrideQueryCancelled, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_END()

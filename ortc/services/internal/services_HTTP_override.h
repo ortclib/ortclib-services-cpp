@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2014, Hookflash Inc.
+ Copyright (c) 2017, Optical Tone Inc.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,15 +34,12 @@
 #include <ortc/services/internal/types.h>
 #include <ortc/services/IHTTP.h>
 
-#ifdef HAVE_HTTP_WINUWP
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
 #include <cryptopp/queue.h>
 
 #include <zsLib/ITimer.h>
-
-#include <ppltasks.h>
 
 namespace ortc
 {
@@ -55,28 +52,42 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       #pragma mark
+      #pragma mark IHTTPForSettings
+      #pragma mark
+
+      interaction IHTTPOverrideForSettings
+      {
+        static void applyDefaults();
+      };
+
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      //-----------------------------------------------------------------------
+      #pragma mark
       #pragma mark HTTP
       #pragma mark
 
-      class HTTP : public Noop,
-                   public SharedRecursiveLock,
-                   public IHTTP
+      class HTTPOverride : public Noop,
+                           public SharedRecursiveLock,
+                           public IHTTP,
+                           public IHTTPOverride
       {
       protected:
         struct make_private {};
 
       public:
-        friend interaction IHTTPFactory;
+        friend interaction IHTTPOverride;
 
-        ZS_DECLARE_CLASS_PTR(HTTPQuery)
+        ZS_DECLARE_CLASS_PTR(HTTPQuery);
 
         friend class HTTPQuery;
 
       public:
-        HTTP(const make_private &);
+        HTTPOverride(const make_private &);
 
       protected:
-        HTTP(Noop) :
+        HTTPOverride(Noop) :
           Noop(true),
           SharedRecursiveLock(SharedRecursiveLock::create())
         {}
@@ -84,18 +95,43 @@ namespace ortc
         void init();
 
       public:
-        ~HTTP();
+        ~HTTPOverride();
 
-      protected:
+    public:
         //---------------------------------------------------------------------
         #pragma mark
-        #pragma mark HTTP => IHTTP
+        #pragma mark HTTP => IHTTPFactory
         #pragma mark
 
         static HTTPQueryPtr query(
                                   IHTTPQueryDelegatePtr delegate,
                                   const QueryInfo &query
                                   );
+
+      protected:
+        //---------------------------------------------------------------------
+        #pragma mark
+        #pragma mark HTTP => IHTTPOverride
+        #pragma mark
+
+        static void install(IHTTPOverrideDelegatePtr override);
+
+        static void notifyHeaderData(
+                                     IHTTPQueryPtr query,
+                                     const BYTE *buffer,
+                                     size_t sizeInBytes
+                                     ) throw (InvalidArgument);
+
+        static void notifyBodyData(
+                                   IHTTPQueryPtr query,
+                                   const BYTE *buffer,
+                                   size_t sizeInBytes
+                                   ) throw (InvalidArgument);
+
+        static void notifyComplete(
+                                   IHTTPQueryPtr query,
+                                   IHTTP::HTTPStatusCodes status = IHTTP::HTTPStatusCode_OK
+                                   ) throw (InvalidArgument);
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -110,11 +146,8 @@ namespace ortc
         #pragma mark HTTP => (internal)
         #pragma mark
 
-        static HTTPPtr singleton();
-        static HTTPPtr create();
-
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
+        static HTTPOverridePtr singleton();
+        static HTTPOverridePtr create();
 
         void cancel();
 
@@ -144,7 +177,7 @@ namespace ortc
         public:
           HTTPQuery(
                     const make_private &,
-                    HTTPPtr outer,
+                    HTTPOverridePtr outer,
                     IHTTPQueryDelegatePtr delegate,
                     const QueryInfo &query
                     );
@@ -160,7 +193,7 @@ namespace ortc
           #pragma mark HTTP::HTTPQuery => IHTTPQuery
           #pragma mark
 
-          virtual PUID getID() const {return mID;}
+          virtual PUID getID() const {return id_;}
 
           virtual void cancel();
 
@@ -198,15 +231,26 @@ namespace ortc
           #pragma mark
 
           static HTTPQueryPtr create(
-                                     HTTPPtr outer,
+                                     HTTPOverridePtr outer,
                                      IHTTPQueryDelegatePtr delegate,
                                      const QueryInfo &query
                                      );
 
           // (duplicate) PUID getID() const;
 
-          void go(Windows::Web::Http::HttpClient ^client);
-          void notifyComplete(Windows::Web::Http::HttpStatusCode result);
+          void go(IHTTPOverrideDelegatePtr override);
+
+          void notifyHeaderData(
+                                const BYTE *buffer,
+                                size_t sizeInBytes
+                                );
+
+          void notifyBodyData(
+                              const BYTE *buffer,
+                              size_t sizeInBytes
+                              );
+
+          void notifyComplete(IHTTP::HTTPStatusCodes result);
 
         protected:
           //-------------------------------------------------------------------
@@ -214,30 +258,26 @@ namespace ortc
           #pragma mark HTTP::HTTPQuery => (internal)
           #pragma mark
 
-          Log::Params log(const char *message) const;
-          static Log::Params slogQuery(PUID id, const char *message);
-          void notifyComplete(Windows::Web::Http::HttpResponseMessage ^response);
-
         protected:
           //-------------------------------------------------------------------
           #pragma mark
           #pragma mark HTTP::HTTPQuery => (data)
           #pragma mark
 
-          AutoPUID mID;
-          HTTPQueryWeakPtr mThisWeak;
+          AutoPUID id_;
+          HTTPQueryWeakPtr thisWeak_;
 
-          HTTPWeakPtr mOuter;
-          IHTTPQueryDelegatePtr mDelegate;
+          HTTPOverrideWeakPtr outer_;
+          IHTTPOverrideDelegatePtr override_;
+          IHTTPQueryDelegatePtr delegate_;
 
-          QueryInfo mQuery;
+          QueryInfo query_;
 
-          ByteQueue mHeader;
-          ByteQueue mBody;
+          ByteQueue header_;
+          ByteQueue body_;
 
-          concurrency::cancellation_token_source mCancellationTokenSource;
-          Windows::Web::Http::HttpStatusCode mStatusCode;
-          ITimerPtr mTimer;
+          IHTTP::HTTPStatusCodes statusCode_ {HTTPStatusCode_None};
+          ITimerPtr timer_;
         };
 
       protected:
@@ -246,19 +286,16 @@ namespace ortc
         #pragma mark HTTP => (data)
         #pragma mark
 
-        AutoPUID mID;
-        HTTPWeakPtr mThisWeak;
+        AutoPUID id_;
+        HTTPOverrideWeakPtr thisWeak_;
 
         typedef PUID QueryID;
         typedef std::map<QueryID, HTTPQueryWeakPtr> HTTPQueryMap;
-        HTTPQueryMap mQueries;
+        HTTPQueryMap queries_;
 
-        Windows::Web::Http::HttpClient ^mHTTPClient;
+        IHTTPOverrideDelegatePtr override_;
       };
 
     }
   }
 }
-
-#endif //HAVE_HTTP_WINUWP
-

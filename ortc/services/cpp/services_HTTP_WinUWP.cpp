@@ -32,9 +32,10 @@
 #include <ortc/services/IHTTP.h>
 #include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/internal/services_HTTP_WinUWP.h>
+#include <ortc/services/internal/services_HTTP_override.h>
 #include <ortc/services/internal/services.events.h>
 
-#ifdef WINUWP
+#ifdef HAVE_HTTP_WINUWP
 
 #include <ortc/services/internal/services_Helper.h>
 
@@ -61,6 +62,8 @@ namespace ortc
   {
     namespace internal
     {
+      ZS_DECLARE_CLASS_PTR(HTTPSettingsDefaults);
+
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -69,10 +72,50 @@ namespace ortc
       #pragma mark HTTP
       #pragma mark
 
-      //-----------------------------------------------------------------------
-      void IHTTPForSettings::applyDefaults()
+
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      #pragma mark
+      #pragma mark HTTPSettingsDefaults
+      #pragma mark
+
+      class HTTPSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
-        ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
+      public:
+        //-----------------------------------------------------------------------
+        ~HTTPSettingsDefaults()
+        {
+          ISettings::removeDefaults(*this);
+        }
+
+        //-----------------------------------------------------------------------
+        static HTTPSettingsDefaultsPtr singleton()
+        {
+          static SingletonLazySharedPtr<HTTPSettingsDefaults> singleton(create());
+          return singleton.singleton();
+        }
+
+        //-----------------------------------------------------------------------
+        static HTTPSettingsDefaultsPtr create()
+        {
+          auto pThis(make_shared<HTTPSettingsDefaults>());
+          ISettings::installDefaults(pThis);
+          return pThis;
+        }
+
+        //-----------------------------------------------------------------------
+        virtual void notifySettingsApplyDefaults() override
+        {
+          ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
+        }
+      };
+
+      //-------------------------------------------------------------------------
+      void installHttpSettingsDefaults()
+      {
+        HelperSettingsDefaults::singleton();
       }
 
       //-----------------------------------------------------------------------
@@ -119,39 +162,15 @@ namespace ortc
       #pragma mark
 
       //-----------------------------------------------------------------------
-      HTTP::HTTPQueryPtr HTTP::get(
-                                   IHTTPQueryDelegatePtr delegate,
-                                   const char *userAgent,
-                                   const char *url,
-                                   Milliseconds timeout
-                                   )
+      HTTP::HTTPQueryPtr HTTP::query(
+                                     IHTTPQueryDelegatePtr delegate,
+                                     const QueryInfo &info
+                                     )
       {
         HTTPPtr pThis = singleton();
-        HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, false, userAgent, url, NULL, 0, NULL, timeout);
+        HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, info);
         if (!pThis) {
-          query->notifyComplete(HttpStatusCode::FailedDependency); // singleton gone so cannot perform CURL operation at this time
-          return query;
-        } else {
-          pThis->monitorBegin(query);
-        }
-        return query;
-      }
-
-      //-----------------------------------------------------------------------
-      HTTP::HTTPQueryPtr HTTP::post(
-                                    IHTTPQueryDelegatePtr delegate,
-                                    const char *userAgent,
-                                    const char *url,
-                                    const BYTE *postData,
-                                    size_t postDataLengthInBytes,
-                                    const char *postDataMimeType,
-                                    Milliseconds timeout
-                                    )
-      {
-        HTTPPtr pThis = singleton();
-        HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, true, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout);
-        if (!pThis) {
-          query->notifyComplete(HttpStatusCode::FailedDependency); // singleton gone so cannot perform CURL operation at this time
+          query->notifyComplete(HttpStatusCode::FailedDependency); // singleton gone so cannot perform HTTP operation at this time
           return query;
         } else {
           pThis->monitorBegin(query);
@@ -282,43 +301,25 @@ namespace ortc
                                  const make_private &,
                                  HTTPPtr outer,
                                  IHTTPQueryDelegatePtr delegate,
-                                 bool isPost,
-                                 const char *userAgent,
-                                 const char *url,
-                                 const BYTE *postData,
-                                 size_t postDataLengthInBytes,
-                                 const char *postDataMimeType,
-                                 Milliseconds timeout
+                                 const QueryInfo &query
                                  ) :
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         MessageQueueAssociator(IHelper::getServiceQueue()),
         mOuter(outer),
         mDelegate(IHTTPQueryDelegateProxy::create(Helper::getServiceQueue(), delegate)),
-        mIsPost(isPost),
-        mUserAgent(userAgent),
-        mURL(url),
-        mMimeType(postDataMimeType),
-        mTimeout(timeout),
+        mQuery(query),
         mStatusCode(HttpStatusCode::None)
       {
-        ZS_LOG_DEBUG(log("created"))
+        ZS_LOG_DEBUG(log("created"));
 
-        if (0 != postDataLengthInBytes) {
-          mPostData.CleanNew(postDataLengthInBytes);
-          memcpy(mPostData.BytePtr(), postData, postDataLengthInBytes);
+        if (!mQuery.postData_) {
+          if (mQuery.postDataAsString_.hasData()) {
+            mQuery.postData_ = make_shared<SecureByteBlock>((const BYTE *)mQuery.postDataAsString_.c_str(), mQuery.postDataAsString_.length());
+          }
         }
-
-        ZS_EVENTING_8(
-                      x, i, Debug, ServicesHttpQueryCreate, os, Http, Start,
-                      puid, id, mID,
-                      bool, isPost, mIsPost,
-                      string, userAgent, mUserAgent,
-                      string, url, mURL,
-                      buffer, postData, postData,
-                      size, postSize, postDataLengthInBytes,
-                      string, postDataMimeType, postDataMimeType,
-                      duration, timeout, timeout.count()
-                      );
+ 
+        ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCreate, os, Http, Start, puid, id, mID);
+        mQuery.trace(Log::Debug);
       }
 
       //-----------------------------------------------------------------------
@@ -536,16 +537,10 @@ namespace ortc
       HTTP::HTTPQueryPtr HTTP::HTTPQuery::create(
                                                  HTTPPtr outer,
                                                  IHTTPQueryDelegatePtr delegate,
-                                                 bool isPost,
-                                                 const char *userAgent,
-                                                 const char *url,
-                                                 const BYTE *postData,
-                                                 size_t postDataLengthInBytes,
-                                                 const char *postDataMimeType,
-                                                 Milliseconds timeout
+                                                 const QueryInfo &query
                                                  )
       {
-        HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private{}, outer, delegate, isPost, userAgent, url, postData, postDataLengthInBytes, postDataMimeType, timeout));
+        HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private{}, outer, delegate, query));
         pThis->mThisWeak = pThis;
         pThis->init();
         return pThis;
@@ -554,8 +549,8 @@ namespace ortc
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::go(Windows::Web::Http::HttpClient ^client)
       {
-        Time timeout = zsLib::now() + mTimeout;
-        if (Milliseconds() == mTimeout) {
+        Time timeout = zsLib::now() + mQuery.timeout_;
+        if (Milliseconds() == mQuery.timeout_) {
           Seconds defaultTimeout(ISettings::getUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS));
           if (Seconds() == defaultTimeout) {
             defaultTimeout = Seconds(60*2);
@@ -565,29 +560,30 @@ namespace ortc
         mTimer = ITimer::create(mThisWeak.lock(), timeout);
 
         if (ZS_IS_LOGGING(Debug)) {
-          ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))
-          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("URL", mURL))
-          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("method", (mIsPost ? "POST" : "GET")))
-          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("user agent", mUserAgent))
-          if ((mIsPost) &&
-            (mPostData.size() > 0)) {
-            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("content type", mMimeType))
-              ZS_LOG_BASIC(log("INFO") + ZS_PARAM("posted length", mPostData.size()))
+          ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"));
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("URL", mQuery.url_))
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("method", IHTTP::toString(mQuery.verb_)));
+          ZS_LOG_BASIC(log("INFO") + ZS_PARAM("user agent", mQuery.userAgent_));
+          if ((Verb_Post == mQuery.verb_) &&
+              (mQuery.postData_) &&
+              (mQuery.postData_->SizeInBytes() > 0)) {
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("content type", mQuery.postDataMimeType_));
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("posted length", mQuery.postData_->SizeInBytes()));
           }
-          if (Milliseconds() != mTimeout) {
-            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mTimeout))
+          if (Milliseconds() != mQuery.timeout_) {
+            ZS_LOG_BASIC(log("INFO") + ZS_PARAM("timeout (ms)", mQuery.timeout_))
           }
 
           if (ZS_IS_LOGGING(Trace)) {
-            ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))
-              if (mIsPost) {
-                if (mPostData.size() > 0) {
-                  String base64 = IHelper::convertToBase64(mPostData);
-                  ZS_LOG_BASIC(log("POST DATA") + ZS_PARAM("wire out", base64)) // safe to cast BYTE * as const char * because buffer is NUL terminated
-                }
-              }
+            ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"));
+            if ((Verb_Post == mQuery.verb_) &&
+                (mQuery.postData_) &&
+                (mQuery.postData_->SizeInBytes() > 0)) {
+                String base64 = IHelper::convertToBase64(*mQuery.postData_);
+                ZS_LOG_BASIC(log("POST DATA") + ZS_PARAM("wire out", base64)); // safe to cast BYTE * as const char * because buffer is NUL terminated
+            }
           }
-          ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"))
+          ZS_LOG_BASIC(log("------------------------------------HTTP INFO----------------------------------"));
         }
 
         if (!client) {
@@ -595,20 +591,21 @@ namespace ortc
           return;
         }
 
-        HttpRequestMessage ^request = ref new HttpRequestMessage(mIsPost ? HttpMethod::Post : HttpMethod::Get, ref new Uri(ref new Platform::String(mURL.wstring().c_str())));
+        HttpRequestMessage ^request = ref new HttpRequestMessage(Verb_Post == mQuery.verb_ ? HttpMethod::Post : HttpMethod::Get, ref new Uri(ref new Platform::String(mQuery.url_.wstring().c_str())));
 
-        if (mUserAgent.hasData()) {
-          auto success = request->Headers->UserAgent->TryParseAdd(ref new Platform::String(mUserAgent.wstring().c_str()));
+        if (mQuery.userAgent_.hasData()) {
+          auto success = request->Headers->UserAgent->TryParseAdd(ref new Platform::String(mQuery.userAgent_.wstring().c_str()));
           if (!success) {
-            ZS_LOG_WARNING(Detail, log("could not set user agent") + ZS_PARAMIZE(mUserAgent))
+            ZS_LOG_WARNING(Detail, log("could not set user agent") + ZS_PARAMIZE(mQuery.userAgent_))
           }
         }
-        if (mMimeType.hasData()) {
-          request->Headers->Insert("Content-Type", ref new Platform::String(mMimeType.wstring().c_str()));
+        if (mQuery.postDataMimeType_.hasData()) {
+          request->Headers->Insert("Content-Type", ref new Platform::String(mQuery.postDataMimeType_.wstring().c_str()));
         }
-        if (mPostData.SizeInBytes() > 0) {
+        if ((mQuery.postData_) &&
+            (mQuery.postData_->SizeInBytes() > 0)) {
           DataWriter ^writer = ref new DataWriter();
-          writer->WriteBytes(Platform::ArrayReference<BYTE>(mPostData.BytePtr(), static_cast<unsigned int>(mPostData.SizeInBytes())));
+          writer->WriteBytes(Platform::ArrayReference<BYTE>(mQuery.postData_->BytePtr(), static_cast<unsigned int>(mQuery.postData_->SizeInBytes())));
           IBuffer ^buffer = writer->DetachBuffer();
 
           request->Content = ref new HttpBufferContent(buffer);
@@ -761,4 +758,4 @@ namespace ortc
   }
 }
 
-#endif //WINUWP
+#endif //HAVE_HTTP_WINUWP

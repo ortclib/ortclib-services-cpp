@@ -35,8 +35,9 @@
 #include <ortc/services/IHTTP.h>
 
 #define ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS "ortc/services/http/default-timeout-in-seconds"
+#define ORTC_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "ortc/services/http-thread-priority"
 
-#ifndef WINUWP
+#ifdef HAVE_HTTP_CURL
 #include <zsLib/IPAddress.h>
 #include <zsLib/Socket.h>
 #include <cryptopp/secblock.h>
@@ -47,8 +48,6 @@
 #endif //_WIN32
 
 #include <curl/curl.h>
-
-#define ORTC_SERVICES_SETTING_HELPER_HTTP_THREAD_PRIORITY "ortc/services/http-thread-priority"
 
 namespace ortc
 {
@@ -114,22 +113,10 @@ namespace ortc
         #pragma mark HTTP => IHTTP
         #pragma mark
 
-        static HTTPQueryPtr get(
-                                IHTTPQueryDelegatePtr delegate,
-                                const char *userAgent,
-                                const char *url,
-                                Milliseconds timeout
-                                );
-
-        static HTTPQueryPtr post(
-                                 IHTTPQueryDelegatePtr delegate,
-                                 const char *userAgent,
-                                 const char *url,
-                                 const BYTE *postData,
-                                 size_t postDataLengthInBytes,
-                                 const char *postDataMimeType,
-                                 Milliseconds timeout
-                                 );
+        static HTTPQueryPtr query(
+                                  IHTTPQueryDelegatePtr delegate,
+                                  const QueryInfo &info
+                                  );
 
         //---------------------------------------------------------------------
         #pragma mark
@@ -183,13 +170,7 @@ namespace ortc
                     const make_private &,
                     HTTPPtr outer,
                     IHTTPQueryDelegatePtr delegate,
-                    bool isPost,
-                    const char *userAgent,
-                    const char *url,
-                    const BYTE *postData,
-                    size_t postDataLengthInBytes,
-                    const char *postDataMimeType,
-                    Milliseconds timeout
+                    const QueryInfo &query
                     );
 
         protected:
@@ -236,13 +217,7 @@ namespace ortc
           static HTTPQueryPtr create(
                                      HTTPPtr outer,
                                      IHTTPQueryDelegatePtr delegate,
-                                     bool isPost,
-                                     const char *userAgent,
-                                     const char *url,
-                                     const BYTE *postData,
-                                     size_t postDataLengthInBytes,
-                                     const char *postDataMimeType,
-                                     Milliseconds timeout
+                                     const QueryInfo &query
                                      );
 
           // (duplicate) PUID getID() const;
@@ -296,13 +271,7 @@ namespace ortc
           HTTPWeakPtr mOuter;
           IHTTPQueryDelegatePtr mDelegate;
 
-          bool mIsPost;
-          String mUserAgent;
-          String mURL;
-          String mMimeType;
-          Milliseconds mTimeout;
-
-          SecureByteBlock mPostData;
+          QueryInfo mQuery;
           SecureByteBlock mErrorBuffer;
 
           CURL *mCurl {NULL};
@@ -352,7 +321,7 @@ namespace ortc
   {
     namespace internal
     {
-#endif //ndef WINUWP
+#endif //HAVE_HTTP_CURL
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
@@ -366,22 +335,12 @@ namespace ortc
       {
         static IHTTPFactory &singleton();
 
-        virtual IHTTPQueryPtr get(
-                                  IHTTPQueryDelegatePtr delegate,
-                                  const char *userAgent,
-                                  const char *url,
-                                  Milliseconds timeout
-                                  );
+        ZS_DECLARE_TYPEDEF_PTR(IHTTP::QueryInfo, QueryInfo);
 
-        virtual IHTTPQueryPtr post(
-                                   IHTTPQueryDelegatePtr delegate,
-                                   const char *userAgent,
-                                   const char *url,
-                                   const BYTE *postData,
-                                   size_t postDataLengthInBytes,
-                                   const char *postDataMimeType,
-                                   Milliseconds timeout
-                                   );
+        virtual IHTTPQueryPtr query(
+                                    IHTTPQueryDelegatePtr delegate,
+                                    const QueryInfo &query
+                                    );
       };
 
       class HTTPFactory : public IFactory<IHTTPFactory> {};

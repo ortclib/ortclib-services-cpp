@@ -124,6 +124,7 @@ namespace ortc
       ZS_DECLARE_CLASS_PTR(ICESocket);
       ZS_DECLARE_CLASS_PTR(ICESocketSession);
       ZS_DECLARE_CLASS_PTR(HTTP);
+      ZS_DECLARE_CLASS_PTR(HTTPOverride);
       ZS_DECLARE_CLASS_PTR(MessageLayerSecurityChannel);
       ZS_DECLARE_CLASS_PTR(Reachability);
       ZS_DECLARE_CLASS_PTR(RSAPrivateKey);

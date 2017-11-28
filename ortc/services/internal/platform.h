@@ -1,6 +1,7 @@
 /*
 
  Copyright (c) 2014, Hookflash Inc.
+ Copyright (c) 2017, Optical Tone Ltd.
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,6 +40,13 @@
 #undef HAVE_SPRINTF_S
 #undef HAVE_GETADAPTERADDRESSES
 #undef HAVE_GETIFADDRS
+#undef HAVE_HTTP_CURL
+#undef HAVE_HTTP_WINUWP
+
+// can externally define that CURL is available
+#ifdef ORTC_SERVICES_HAVE_CURL
+#define HAVE_HTTP_CURL
+#endif //ORTC_SERVICES_HAVE_CURL
 
 
 #ifdef _WIN32
@@ -62,6 +70,9 @@
 
 // WINUWP does not support these features (but WIN32 does)
 #undef HAVE_GETADAPTERADDRESSES
+
+// WINUWP does have HTTP WINUWP API
+#define HAVE_HTTP_WINUWP
 
 #if WINVER >= _WIN32_WINNT_WIN10
 #define HAVE_STREAMSOCKET_GETENDPOINTPAIRSASYNC
@@ -106,6 +117,7 @@
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_IFADDRS_H 1
 #define HAVE_GETIFADDRS 1
+#define HAVE_HTTP_CURL 1
 
 #ifdef _ANDROID
 
@@ -116,3 +128,10 @@
 
 #endif //_ANDROID
 #endif //__unix__
+
+
+// cannot have both HAVE_HTTP_WINUWP and HAVE_HTTP_CURL enabled
+#ifdef HAVE_HTTP_WINUWP
+#undef HAVE_HTTP_CURL
+#undef HAVE_HTTP_OVERRIDE
+#endif //HAVE_HTTP_WINUWP

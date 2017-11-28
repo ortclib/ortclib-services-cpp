@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <ortc/services/internal/platform.h>
 #include <ortc/services/internal/types.h>
 #include <ortc/services/internal/services_Backgrounding.h>
 #include <ortc/services/internal/services_BackOffTimer.h>

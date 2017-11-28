@@ -27,6 +27,8 @@
 
 //Downloaded from https://code.google.com/p/libjingle/source/browse/trunk/talk/base/?r=273
 
+#include <ortc/services/internal/types.h>
+
 #if defined(ANDROID)
 #include <ortc/services/internal/ifaddrs-android.h>
 #include <stdlib.h>

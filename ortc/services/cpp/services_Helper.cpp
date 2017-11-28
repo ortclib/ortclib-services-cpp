@@ -30,9 +30,9 @@
  */
 
 #include <ortc/services/internal/services_Helper.h>
-#include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/internal/services.events.h>
 #include <ortc/services/internal/services.events.jman.h>
+#include <ortc/services/internal/services_HTTP.h>
 #include <ortc/services/IDNS.h>
 
 #include <zsLib/eventing/IHasher.h>
@@ -110,6 +110,8 @@ namespace ortc
       void installLoggerSettingsDefaults();
       void installMessageLayerSecurityChannelSettingsDefaults();
       void installBackOffTimerSettingsDefaults();
+      void installHttpSettingsDefaults();
+      void installHttpOverrideSettingsDefaults();
 
 
       //-----------------------------------------------------------------------
@@ -243,6 +245,10 @@ namespace ortc
           installHelperSettingsDefaults();
           installMessageLayerSecurityChannelSettingsDefaults();
           installBackOffTimerSettingsDefaults();
+#if defined(HAVE_HTTP_CURL) || defined(HAVE_HTTP_WINUWP)
+          installHttpSettingsDefaults();
+#endif // defined(HAVE_HTTP_CURL) || defined(HAVE_HTTP_WINUWP)
+          installHttpOverrideSettingsDefaults();
         }
 
         ~ServicesSetup()

@@ -37,6 +37,7 @@
 
 #include <zsLib/types.h>
 #include <zsLib/eventing/types.h>
+#include <zsLib/Exception.h>
 #include <zsLib/Proxy.h>
 #include <zsLib/ProxySubscriptions.h>
 #include <zsLib/Singleton.h>
@@ -89,6 +90,8 @@ namespace ortc
     using zsLib::Log;
     using zsLib::Singleton;
     using zsLib::Optional;
+
+    typedef zsLib::Exceptions::InvalidArgument InvalidArgument;
 
     ZS_DECLARE_TYPEDEF_PTR(zsLib::RecursiveLock, RecursiveLock);
     ZS_DECLARE_TYPEDEF_PTR(zsLib::AutoRecursiveLock, AutoRecursiveLock);
@@ -160,6 +163,7 @@ namespace ortc
     ZS_DECLARE_INTERACTION_PTR(IICESocket);
     ZS_DECLARE_INTERACTION_PTR(IICESocketSession);
     ZS_DECLARE_INTERACTION_PTR(IHTTP);
+    ZS_DECLARE_INTERACTION_PTR(IHTTPOverride);
     ZS_DECLARE_INTERACTION_PTR(IHTTPQuery);
     ZS_DECLARE_INTERACTION_PTR(IMessageLayerSecurityChannel);
     ZS_DECLARE_INTERACTION_PTR(IReachability);
@@ -185,6 +189,7 @@ namespace ortc
     ZS_DECLARE_INTERACTION_PROXY(IICESocketDelegate);
     ZS_DECLARE_INTERACTION_PROXY(IICESocketSessionDelegate);
     ZS_DECLARE_INTERACTION_PROXY(IHTTPQueryDelegate);
+    ZS_DECLARE_INTERACTION_PROXY(IHTTPOverrideDelegate);
     ZS_DECLARE_INTERACTION_PROXY(IMessageLayerSecurityChannelDelegate);
     ZS_DECLARE_INTERACTION_PROXY(IReachabilityDelegate);
     ZS_DECLARE_INTERACTION_PROXY(IRUDPListenerDelegate);
