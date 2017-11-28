@@ -115,7 +115,7 @@ namespace ortc
       //-------------------------------------------------------------------------
       void installHttpSettingsDefaults()
       {
-        HelperSettingsDefaults::singleton();
+        HTTPSettingsDefaults::singleton();
       }
 
       //-----------------------------------------------------------------------
