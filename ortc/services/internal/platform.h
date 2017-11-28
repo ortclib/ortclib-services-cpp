@@ -117,7 +117,6 @@
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_IFADDRS_H 1
 #define HAVE_GETIFADDRS 1
-#define HAVE_HTTP_CURL 1
 
 #ifdef _ANDROID
 
