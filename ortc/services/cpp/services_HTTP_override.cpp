@@ -37,6 +37,7 @@
 
 #include <ortc/services/internal/services_Helper.h>
 
+#include <zsLib/IMessageQueueManager.h>
 #include <zsLib/ISettings.h>
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
@@ -49,6 +50,8 @@ namespace ortc
 {
   namespace services
   {
+    ZS_DECLARE_TYPEDEF_PTR(zsLib::IMessageQueueManager, UseMessageQueueManager);
+
     namespace internal
     {
       ZS_DECLARE_CLASS_PTR(HTTPOverrideSettingsDefaults);
@@ -336,7 +339,7 @@ namespace ortc
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         MessageQueueAssociator(IHelper::getServiceQueue()),
         outer_(outer),
-        delegate_(IHTTPQueryDelegateProxy::create(Helper::getServiceQueue(), delegate)),
+        delegate_(IHTTPQueryDelegateProxy::create(UseMessageQueueManager::getMessageQueueForGUIThread(), delegate)),
         query_(query)
       {
         if (!query_.postData_) {
@@ -597,7 +600,7 @@ namespace ortc
         }
         timer_ = ITimer::create(thisWeak_.lock(), timeout);
 
-        overrideDelegate = IHTTPOverrideDelegateProxy::create(IHelper::getServiceQueue(), overrideDelegate);
+        overrideDelegate = IHTTPOverrideDelegateProxy::create(UseMessageQueueManager::getMessageQueueForGUIThread(), overrideDelegate);
         override_ = overrideDelegate;
 
         if (!overrideDelegate) {
