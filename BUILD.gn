@@ -33,13 +33,14 @@ config("ortclib-services_config") {
       "../zsLib",
       "../zsLib/zsLib/extras",
       "../zsLib-eventing",
-      "../idnkit/idnkit/include",
-      "../cryptopp",
+      "../../third_party",
   ]
 
   if  (is_linux) {
     include_dirs += [
       "/usr/include",
+      "../../third_party/idnkit/idnkit/include",
+      "../../third_party/cryptopp",
     ]
   }
 
@@ -208,7 +209,7 @@ static_library("ortclib-services") {
   deps = [ 
     ":services_events",
     "//ortc/zsLib:zslib",
-    "//ortc/cryptopp",
+    "//third_party/cryptopp",
   ]
 
   # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
