@@ -15,12 +15,17 @@ config("compiler") {
   }
 
   if  (is_win) {
-      cflags_cc = [
-        "/WX-",
-        "/FS",
-        "/wd4068",
-        "/wd4290",
-      ]
+    cflags_cc = [
+      "/WX-",
+      "/FS",
+      "/wd4068",
+      "/wd4290",
+    ]
+    
+    if (!is_winuwp)
+    {
+      cflags_cc += ["/EHsc"]
+    }
   }
 
 }
