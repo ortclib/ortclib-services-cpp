@@ -44,6 +44,8 @@ config("ortclib-services_config") {
     ]
   }
 
+  is_ortclib_services_curl_defined = false
+  if (is_ortclib_services_curl_defined) {
   if  (!is_winuwp) {
     if (is_win) {
       include_dirs += [
@@ -54,6 +56,7 @@ config("ortclib-services_config") {
         "../curl/curl",
       ]
     }
+  }
   }
 }
 
