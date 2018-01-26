@@ -60,7 +60,7 @@
 
 //#define ORTC_SERVICES_HTTP_ALLOW_BEAST
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_http) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_http) } }
 
 #ifdef HAVE_HTTP_CURL
 
@@ -715,7 +715,7 @@ namespace ortc
         }
 
         ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCreate, os, Http, Start, puid, id, mID);
-        mQuery.trace(Log::Debug);
+        ZS_EVENTING_TRACE_OBJECT(Debug, mQuery, "http query info");
       }
 
       //-----------------------------------------------------------------------
@@ -1348,21 +1348,24 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void IHTTP::QueryInfo::trace(Log::Level level) const
+    void IHTTP::QueryInfo::trace(
+                                 const char *func,
+                                 const char *message
+                                 ) const
     {
-      if (ZS_EVENTING_IS_LOGGING_VALUE(level)) {
-        ZS_EVENTING_8(
-                      x, i, Basic, HttpQueryInfoTrace, os, Http, Info,
-                      string, verb, toString(verb_),
-                      string, userAgent, userAgent_,
-                      string, url, url_,
-                      duration, timeout, timeout_.count(),
-                      buffer, postData, postData_ ? postData_->BytePtr() : NULL,
-                      size, postSize, postData_ ? postData_->SizeInBytes() : 0,
-                      string, postDataAsString, postDataAsString_,
-                      string, postDataMimeType, postDataMimeType_
-                      );
-      }
+      ZS_EVENTING_10(
+                     x, i, Basic, HttpQueryInfoTrace, os, Http, Info,
+                     string, func, func,
+                     string, message, message,
+                     string, verb, toString(verb_),
+                     string, userAgent, userAgent_,
+                     string, url, url_,
+                     duration, timeout, timeout_.count(),
+                     buffer, postData, postData_ ? postData_->BytePtr() : NULL,
+                     size, postSize, postData_ ? postData_->SizeInBytes() : 0,
+                     string, postDataAsString, postDataAsString_,
+                     string, postDataMimeType, postDataMimeType_
+                     );
     }
 
     //-------------------------------------------------------------------------

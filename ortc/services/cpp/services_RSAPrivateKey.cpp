@@ -47,7 +47,7 @@
 #define ORTC_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_VALUE "1"
 #define ORTC_SERVICES_RSAPRIVATEKEY_PRIVATE_KEY_VALIDATION_CACHE_STORAGE_DURATION_IN_HOURS ((24)*365)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services) } }
 
 namespace ortc
 {

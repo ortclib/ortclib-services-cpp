@@ -42,7 +42,7 @@
 #include <zsLib/Stringize.h>
 
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_transport_stream) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_transport_stream) } }
 
 namespace ortc
 {

@@ -44,7 +44,7 @@
 
 #define ORTC_SERVICES_RUDPCHANNEL_DEFAULT_LIFETIME_IN_SECONDS (10*60)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_rudp) } }
 
 namespace ortc
 {

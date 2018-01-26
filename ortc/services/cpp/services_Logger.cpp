@@ -69,7 +69,7 @@
 #endif //ndef NDEBUG
 #endif //__QNX__
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_logger) } }
 
 #define ORTC_SERVICES_DEFAULT_OUTGOING_TELNET_PORT (59999)
 #define ORTC_SERVICES_MAX_TELNET_LOGGER_PENDING_CONNECTIONBACKLOG_TIME_SECONDS (60)
@@ -2949,6 +2949,18 @@ namespace ortc
     void ILogger::disconnectEventingServer()
     {
       internal::RemoteEventing::disconnectEventingServer();
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::setDefaultEventingLevel(Log::Level logLevel)
+    {
+      zsLib::Log::setDefaultEventingLevelByName(NULL, logLevel);
+    }
+
+    //-------------------------------------------------------------------------
+    void ILogger::setDefaultEventingLevel(const char *component, Log::Level logLevel)
+    {
+      zsLib::Log::setDefaultEventingLevelByName(component, logLevel);
     }
 
     //-------------------------------------------------------------------------

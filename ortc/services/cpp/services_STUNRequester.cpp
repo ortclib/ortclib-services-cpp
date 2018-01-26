@@ -44,7 +44,7 @@
 
 #define ORTC_SERVICES_STUN_REQUESTER_DEFAULT_BACKOFF_TIMER_MAX_ATTEMPTS (6)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_stun) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_stun) } }
 
 namespace ortc
 {
@@ -255,7 +255,7 @@ namespace ortc
         //ServicesStunRequesterReceivedStunPacket(__func__, mID, fromIPAddress.string());
         ZS_EVENTING_2(x, i, Debug, ServicesStunRequesterReceivedStunPacket, os, StunRequester, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
 
-        packet->trace(__func__);
+        ZS_EVENTING_TRACE_OBJECT(Trace, *packet, "stun requester handle packet");
 
         ISTUNRequesterDelegatePtr delegate;
 
@@ -382,7 +382,7 @@ namespace ortc
                         size, size, packet->SizeInBytes()
                         );
 
-          mSTUNRequest->trace(__func__);
+          ZS_EVENTING_TRACE_OBJECT(Trace, *mSTUNRequest, "stun requester send packet");
 
           try {
             ++mTotalTries;

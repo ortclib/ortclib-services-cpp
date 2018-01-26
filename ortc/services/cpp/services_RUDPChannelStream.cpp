@@ -68,7 +68,7 @@
 #endif //ORTC_INDUCE_FAKE_PACKET_LOSS
 
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_rudp) } }
 
 namespace ortc
 {

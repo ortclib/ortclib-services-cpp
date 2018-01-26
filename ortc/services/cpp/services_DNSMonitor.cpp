@@ -44,7 +44,7 @@
 
 #define ORTC_SERVICES_DNSMONITOR_CACHE_NAMESPACE "https://meta.ortclib.org/caching/dns/"
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_dns) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_dns) } }
 
 namespace ortc
 {

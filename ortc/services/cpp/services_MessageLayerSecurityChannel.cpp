@@ -56,7 +56,7 @@
 #define ORTC_SERVICES_MLS_COOKIE_NONCE_CACHE_NAMESPACE "https://meta.ortclib.org/caching/mls/nonce/"
 
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_mls) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_mls) } }
 
 namespace ortc
 {

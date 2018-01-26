@@ -59,7 +59,7 @@
 
 #define ORTC_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS (10)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_ice) } }
 
 namespace ortc
 {

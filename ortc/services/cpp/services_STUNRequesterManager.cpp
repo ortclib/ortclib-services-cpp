@@ -40,7 +40,7 @@
 #include <zsLib/helpers.h>
 #include <zsLib/Stringize.h>
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_stun) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_stun) } }
 
 namespace ortc
 {
@@ -167,10 +167,9 @@ namespace ortc
           return ISTUNRequesterPtr();
         }
 
-        //ServicesStunRequesterManagerReceivedStunPacket(__func__, mID, fromIPAddress.string());
-        ZS_EVENTING_2(x, i, Detail, ServicesStunRequesterManagerReceivedStunPacket, os, StunRequesterManager, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
+        ZS_EVENTING_2(x, i, Debug, ServicesStunRequesterManagerReceivedStunPacket, os, StunRequesterManager, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
 
-        stun->trace(__func__);
+        ZS_EVENTING_TRACE_OBJECT(Trace, *stun, "stun requester manager handle stun packet");
 
         QWORDPair key = getKey(stun);
 

@@ -44,7 +44,7 @@
 #include "config.h"
 #include "testing.h"
 
-namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(ortc_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_DECLARE_SUBSYSTEM(org_ortc_services_test) } } }
 
 using zsLib::BYTE;
 using zsLib::WORD;

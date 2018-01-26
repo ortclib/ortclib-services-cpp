@@ -36,7 +36,7 @@
 
 #include <zsLib/XML.h>
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services) } }
 
 namespace ortc
 {

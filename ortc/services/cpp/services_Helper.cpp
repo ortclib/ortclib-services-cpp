@@ -77,7 +77,7 @@
 
 #define ORTC_SERVICES_HELPER_UNICODE_CHAR_TO_PUNY_CODE_CHARACTOR_RATIO (6)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services) } }
 
 namespace ortc
 {

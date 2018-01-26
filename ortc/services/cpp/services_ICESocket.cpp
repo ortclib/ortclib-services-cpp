@@ -87,7 +87,7 @@ using namespace Windows::Networking::Connectivity;
 #define ORTC_SERVICES_ICESOCKET_LOCAL_PREFERENCE_MAX (0xFFFF)
 
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_ice) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_ice) } }
 
 namespace ortc
 {

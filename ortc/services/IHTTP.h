@@ -188,7 +188,10 @@ namespace ortc
 
         QueryInfo &operator=(const QueryInfo &source);
 
-        void trace(Log::Level level = Log::Trace) const;
+        void trace(
+                   const char *func = NULL,
+                   const char *message = NULL
+                   ) const;
       };
 
       static IHTTPQueryPtr query(

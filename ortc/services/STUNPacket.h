@@ -284,7 +284,10 @@ namespace ortc
       Log::Params log(const char *message) const;
       Log::Params debug(const char *message) const;
       ElementPtr toDebug() const;
-      void trace(const char *message) const;
+      void trace(
+                 const char *func,
+                 const char *message
+                 ) const;
 
       bool isLegal(RFCs rfc) const;
       RFCs guessRFC(RFCs allowedRFCs) const;

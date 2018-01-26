@@ -64,7 +64,7 @@
 
 #define ORTC_SERVICES_TURN_ACTIVATE_NEXT_SERVER_IN_SECONDS (4)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_turn) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_turn) } }
 
 namespace ortc
 {
@@ -209,23 +209,11 @@ namespace ortc
           mOptions.mSRVUDP.reset();
         }
 
-        if (mOptions.mSRVUDP) mOptions.mSRVUDP->trace(__func__);
-        if (mOptions.mSRVTCP) mOptions.mSRVTCP->trace(__func__);
+        ZS_EVENTING_TRACE_OBJECT_PTR(Debug, mOptions.mSRVUDP, "turn socket options SRV UDP");
+        ZS_EVENTING_TRACE_OBJECT_PTR(Debug, mOptions.mSRVTCP, "turn socket options SRV TCP");
 
         ZS_THROW_INVALID_USAGE_IF((mOptions.mServers.size() < 1) && (!mOptions.mSRVUDP) && (!mOptions.mSRVTCP));
 
-        /*ServicesTurnSocketCreate(
-                                             __func__,
-                                             mID,
-                                             mOptions.mServers.size() > 0 ? mOptions.mServers.front().c_str() : NULL,
-                                             mOptions.mUsername,
-                                             mOptions.mPassword,
-                                             zsLib::to_underlying(mOptions.mLookupType),
-                                             mOptions.mUseChannelBinding,
-                                             mOptions.mLimitChannelToRangeStart,
-                                             mOptions.mLimitChannelToRangeEnd
-                                             );
-                                             */
         ZS_EVENTING_8(
                       x, i, Detail, ServicesTurnSocketCreate, os, TurnSocket, Start,
                       puid, id, mID,
@@ -460,7 +448,6 @@ namespace ortc
                 mChannelIPMap[destination] = info;
                 mChannelNumberMap[freeChannelNumber] = info;
 
-                //ServicesTurnSocketInstallChannelWake(__func__, mID, destination.string(), freeChannelNumber);
                 ZS_EVENTING_3(
                               x, i, Trace, ServicesTurnSocketInstallChannelWake, os, TurnSocket, Info,
                               puid, id, mID,
@@ -481,7 +468,6 @@ namespace ortc
 
           packet = sendData->packetize(STUNPacket::RFC_5766_TURN);
 
-          //ServicesTurnSocketSendPacketViaStun(__func__, mID, destination.string(), packet->SizeInBytes(), packet->BytePtr());
           ZS_EVENTING_4(
                         x, i, Trace, ServicesTurnSocketSendPacketViaStun, os, TurnSocket, Send,
                         puid, id, mID,
@@ -490,7 +476,7 @@ namespace ortc
                         size, size, packet->SizeInBytes()
                         );
 
-          sendData->trace(__func__);
+          ZS_EVENTING_TRACE_OBJECT(Insane, *sendData, "turn socket sending data");
 
           // scope: we need to check if there is a permission set to be able to even contact this address
           {
@@ -786,14 +772,13 @@ namespace ortc
                                                    STUNPacketPtr response
                                                    )
       {
-        //ServicesTurnSocketRequesterReceivedStunResponse(__func__, mID, requester->getID(), fromIPAddress.string());
         ZS_EVENTING_3(
                       x, i, Trace, ServicesTurnSocketRequesterReceivedStunResponse, os, TurnSocket, Receive,
                       puid, id, mID,
                       puid, requesterId, requester->getID(),
                       string, fromIpAddress, fromIPAddress.string()
                       );
-        response->trace(__func__);
+        ZS_EVENTING_TRACE_OBJECT(Trace, *response, "turn socket handle stun requester response");
 
         // scope: we can't be in the middle of a lock while we call the handlePermissionRequester method
         {

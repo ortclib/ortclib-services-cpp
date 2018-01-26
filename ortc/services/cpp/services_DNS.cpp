@@ -47,7 +47,7 @@
 #include <ppltasks.h>
 #endif //WINUWP
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_dns) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_dns) } }
 
 namespace ortc
 {
@@ -707,7 +707,7 @@ namespace ortc
                           string, lookupType, "A",
                           string, name, mName
                           );
-            mA->trace(__func__);
+            ZS_EVENTING_TRACE_OBJECT(Debug, *mA, "DNS A record found");
           } else {
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
@@ -812,7 +812,7 @@ namespace ortc
                           string, name, mName
                           );
 
-            mAAAA->trace(__func__);
+            ZS_EVENTING_TRACE_OBJECT(Debug, *mAAAA, "DNS AAAA record found");
           } else {
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
@@ -954,7 +954,7 @@ namespace ortc
                           string, lookupType, "SRV",
                           string, name, mName
                           );
-            mSRV->trace(__func__);
+            ZS_EVENTING_TRACE_OBJECT(Debug, *mSRV, "DNS SRV record found");
           } else {
             ZS_EVENTING_3(
                           x, e, Debug, ServicesDnsLookupFailedEvent, os, Dns, Event,
@@ -2899,10 +2899,14 @@ namespace ortc
     #pragma mark
 
     //-------------------------------------------------------------------------
-    void IDNS::AResult::trace(const char *message)
+    void IDNS::AResult::trace(
+                              const char *func,
+                              const char *message
+                              )
     {
-      ZS_EVENTING_4(
-                    x, i, Trace, ServicesDnsResultListBegin, os, Dns, DC_Start,
+      ZS_EVENTING_5(
+                    x, i, Basic, ServicesDnsResultListBegin, os, Dns, DC_Start,
+                    string, func, func,
                     string, message, message,
                     string, name, mName,
                     uint, ttl, mTTL,
@@ -2910,16 +2914,18 @@ namespace ortc
                     );
 
       for (auto iter = mIPAddresses.begin(); iter != mIPAddresses.end(); ++iter) {
-        ZS_EVENTING_4(
-                      x, i, Trace, ServicesDnsResultListEntry, os, Dns, Info,
+        ZS_EVENTING_5(
+                      x, i, Basic, ServicesDnsResultListEntry, os, Dns, Info,
+                      string, func, func,
                       string, message, message,
                       string, name, mName,
                       uint, ttl, mTTL,
                       string, ipAddress, (*iter).string()
                       );
       }
-      ZS_EVENTING_2(
-                    x, i, Trace, ServicesDnsResultListEnd, os, Dns, DC_Stop,
+      ZS_EVENTING_3(
+                    x, i, Basic, ServicesDnsResultListEnd, os, Dns, DC_Stop,
+                    string, func, func,
                     string, message, message,
                     string, name, mName
                     );
@@ -2934,10 +2940,14 @@ namespace ortc
     #pragma mark
 
     //-------------------------------------------------------------------------
-    void IDNS::SRVResult::trace(const char *message)
+    void IDNS::SRVResult::trace(
+                                const char *func,
+                                const char *message
+                                )
     {
-      ZS_EVENTING_6(
-                    x, i, Trace, ServicesDnsSrvResultListBegin, os, Dns, DC_Start,
+      ZS_EVENTING_7(
+                    x, i, Basic, ServicesDnsSrvResultListBegin, os, Dns, DC_Start,
+                    string, func, func,
                     string, message, message,
                     string, name, mName,
                     string, service, mService,
@@ -2947,8 +2957,9 @@ namespace ortc
                     );
       for (auto iter = mRecords.begin(); iter != mRecords.end(); ++iter) {
         auto &record = (*iter);
-        ZS_EVENTING_7(
-                      x, i, Trace, ServicesDnsSrvResultListEntryBegin, os, Dns, DC_Start,
+        ZS_EVENTING_8(
+                      x, i, Basic, ServicesDnsSrvResultListEntryBegin, os, Dns, DC_Start,
+                      string, func, func,
                       string, message, message,
                       string, name, record.mName,
                       word, priority, record.mPriority,
@@ -2959,19 +2970,21 @@ namespace ortc
                       );
 
         if (record.mAResult) {
-          record.mAResult->trace(message);
+          record.mAResult->trace(func, message);
         }
         if (record.mAAAAResult) {
-          record.mAAAAResult->trace(message);
+          record.mAAAAResult->trace(func, message);
         }
-        ZS_EVENTING_2(
-                      x, i, Trace, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
+        ZS_EVENTING_3(
+                      x, i, Basic, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
+                      string, func, func,
                       string, message, message,
                       string, name, record.mName
                       );
       }
-      ZS_EVENTING_2(
-                    x, i, Trace, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
+      ZS_EVENTING_3(
+                    x, i, Basic, ServicesDnsSrvResultListEnd, os, Dns, DC_Stop,
+                    string, func, func,
                     string, message, message,
                     string, name, mName
                     );

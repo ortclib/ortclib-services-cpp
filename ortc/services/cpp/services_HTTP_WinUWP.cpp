@@ -54,7 +54,7 @@ using Windows::Storage::Streams::DataReader;
 using Windows::Storage::Streams::DataWriter;
 using Windows::Foundation::Uri;
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_http) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_http) } }
 
 namespace ortc
 {
@@ -319,7 +319,7 @@ namespace ortc
         }
  
         ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCreate, os, Http, Start, puid, id, mID);
-        mQuery.trace(Log::Debug);
+        ZS_EVENTING_TRACE_OBJECT(Debug, mQuery, "http query uwp info");
       }
 
       //-----------------------------------------------------------------------

@@ -66,7 +66,10 @@ namespace ortc
         UINT   mTTL {};
         IPAddressList mIPAddresses;
 
-        void trace(const char *message);
+        void trace(
+                   const char *func = NULL,
+                   const char *message = NULL
+                   );
       };
 
       ZS_DECLARE_TYPEDEF_PTR(AResult, AAAAResult)
@@ -94,7 +97,10 @@ namespace ortc
         UINT   mTTL {};
         SRVRecordList mRecords;
 
-        void trace(const char *message);
+        void trace(
+                   const char *func = NULL,
+                   const char *message = NULL
+                   );
       };
 
       enum SRVLookupTypes {

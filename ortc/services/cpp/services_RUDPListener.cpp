@@ -61,7 +61,7 @@
 
 #define ORTC_SERVICES_RUDPLISTENER_MAX_ATTEMPTS_TO_FIND_FREE_CHANNEL_NUMBER (5)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_rudp) } }
 
 namespace ortc
 {

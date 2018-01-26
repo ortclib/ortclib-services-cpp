@@ -41,7 +41,7 @@
 
 #include <iostream>
 
-namespace ortc { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_test) } } }
+namespace ortc { namespace services { namespace test { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_test) } } }
 
 
 #ifdef _WIN32

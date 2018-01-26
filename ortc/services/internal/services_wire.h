@@ -35,15 +35,15 @@
 
 #include <zsLib/Log.h>
 
-namespace ortc { namespace services { namespace wire { ZS_DECLARE_FORWARD_SUBSYSTEM(ortc_services_wire) } } }
+namespace ortc { namespace services { namespace wire { ZS_DECLARE_FORWARD_SUBSYSTEM(org_ortc_services_wire) } } }
 
-#define ORTC_SERVICES_WIRE_IS_LOGGING(xLevel) ZS_IS_SUBSYSTEM_LOGGING(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xLevel)
+#define ORTC_SERVICES_WIRE_IS_LOGGING(xLevel) ZS_IS_SUBSYSTEM_LOGGING(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xLevel)
 
-#define ORTC_SERVICES_WIRE_LOG_BASIC(xMsg)    ZS_LOG_SUBSYSTEM_BASIC(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xMsg)
-#define ORTC_SERVICES_WIRE_LOG_DETAIL(xMsg)   ZS_LOG_SUBSYSTEM_DETAIL(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xMsg)
-#define ORTC_SERVICES_WIRE_LOG_DEBUG(xMsg)    ZS_LOG_SUBSYSTEM_DEBUG(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xMsg)
-#define ORTC_SERVICES_WIRE_LOG_TRACE(xMsg)    ZS_LOG_SUBSYSTEM_TRACE(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xMsg)
-#define ORTC_SERVICES_WIRE_LOG_INSANE(xMsg)   ZS_LOG_SUBSYSTEM_INSANE(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xMsg)
+#define ORTC_SERVICES_WIRE_LOG_BASIC(xMsg)    ZS_LOG_SUBSYSTEM_BASIC(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xMsg)
+#define ORTC_SERVICES_WIRE_LOG_DETAIL(xMsg)   ZS_LOG_SUBSYSTEM_DETAIL(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xMsg)
+#define ORTC_SERVICES_WIRE_LOG_DEBUG(xMsg)    ZS_LOG_SUBSYSTEM_DEBUG(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xMsg)
+#define ORTC_SERVICES_WIRE_LOG_TRACE(xMsg)    ZS_LOG_SUBSYSTEM_TRACE(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xMsg)
+#define ORTC_SERVICES_WIRE_LOG_INSANE(xMsg)   ZS_LOG_SUBSYSTEM_INSANE(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xMsg)
 
-#define ORTC_SERVICES_WIRE_LOG_WARNING(xLevel, xMsg)  ZS_LOG_SUBSYSTEM_WARNING(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xLevel, xMsg)
-#define ORTC_SERVICES_WIRE_LOG_ERROR(xLevel, xMsg)    ZS_LOG_SUBSYSTEM_ERROR(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, ortc_services_wire), xLevel, xMsg)
+#define ORTC_SERVICES_WIRE_LOG_WARNING(xLevel, xMsg)  ZS_LOG_SUBSYSTEM_WARNING(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xLevel, xMsg)
+#define ORTC_SERVICES_WIRE_LOG_ERROR(xLevel, xMsg)    ZS_LOG_SUBSYSTEM_ERROR(ZS_GET_OTHER_SUBSYSTEM(::ortc::services::wire, org_ortc_services_wire), xLevel, xMsg)

@@ -45,7 +45,7 @@
 
 #define ORTC_SERVICES_TCPMESSAGING_DEFAULT_RECEIVE_SIZE_IN_BYTES (64*1024)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_tcp_messaging) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_tcp_messaging) } }
 
 namespace ortc
 {

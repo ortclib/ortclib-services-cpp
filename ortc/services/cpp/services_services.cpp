@@ -37,29 +37,31 @@
 
 #include <zsLib/Log.h>
 
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_dns) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_http) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_ice) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_stun) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_turn) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_rudp) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_mls) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_tcp_messaging) } }
-namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_transport_stream) } }
-namespace ortc { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(ortc_services_wire) } } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_dns) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_http) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_ice) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_logger) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_stun) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_turn) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_mls) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_tcp_messaging) } }
+namespace ortc { namespace services { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_transport_stream) } }
+namespace ortc { namespace services { namespace wire { ZS_IMPLEMENT_SUBSYSTEM(org_ortc_services_wire) } } }
 
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_dns, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_http, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_ice, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_stun, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_turn, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_rudp, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_mls, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_tcp_messaging, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_transport_stream, Debug);
-ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(ortc_services_wire, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_dns, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_http, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_ice, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_logger, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_stun, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_turn, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_rudp, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_mls, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_tcp_messaging, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_transport_stream, Debug);
+ZS_EVENTING_SUBSYSTEM_DEFAULT_LEVEL(org_ortc_services_wire, Debug);
 
 namespace ortc
 {
@@ -69,16 +71,16 @@ namespace ortc
     {
       void initSubsystems()
       {
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_http));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_ice));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_turn));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_turn));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_rudp));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_mls));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_tcp_messaging));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, ortc_services_transport_stream));
-        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services::wire, ortc_services_wire));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_http));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_ice));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_turn));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_rudp));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_mls));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_tcp_messaging));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_transport_stream));
+        ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services::wire, org_ortc_services_wire));
       }
     }
 

@@ -34,5 +34,5 @@
 
 #include <zsLib/Log.h>
 
-namespace ortc { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(ortc_services_wire) } } }
+namespace ortc { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(org_ortc_services_wire) } } }
 

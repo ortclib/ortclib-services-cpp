@@ -66,7 +66,7 @@
 #define ORTC_STUN_MAX_UTF8_UNICODE_ENCODED_CHAR       (6)
 
 
-namespace ortc { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(ortc_services_wire) } } }
+namespace ortc { namespace services { namespace wire { ZS_DECLARE_SUBSYSTEM(org_ortc_services_wire) } } }
 
 using namespace ortc::services::wire;
 
@@ -2302,15 +2302,19 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void STUNPacket::trace(const char *message) const
+    void STUNPacket::trace(
+                           const char *func,
+                           const char *message
+                           ) const
     {
       switch (guessRFC(RFC_AllowAll))
       {
         case RFC_3489_STUN:
         case RFC_5389_STUN:
         {
-          ZS_EVENTING_25(
-                         x, i, Insane, ServicesStunPacket, os, Stun, Info,
+          ZS_EVENTING_26(
+                         x, i, Basic, ServicesStunPacket, os, Stun, Info,
+                         string, func, func,
                          string, message, message,
                          string, logObject, mLogObject,
                          puid, logObjectId, mLogObjectID,
@@ -2341,8 +2345,9 @@ namespace ortc
         }
         case RFC_5766_TURN:
         {
-          ZS_EVENTING_COMPACT_42(
-                                 x, i, Insane, ServicesStunTurnPacket, os, Stun, Info,
+          ZS_EVENTING_COMPACT_43(
+                                 x, i, Basic, ServicesStunTurnPacket, os, Stun, Info,
+                                 string/func, func,
                                  string/message, message,
                                  string/logObject, mLogObject,
                                  puid/logObjectId, mLogObjectID,
@@ -2391,8 +2396,9 @@ namespace ortc
         }
         case RFC_5245_ICE:
         {
-          ZS_EVENTING_COMPACT_32(
-                                 x, i, Insane, ServicesStunIcePacket, os, Stun, Info,
+          ZS_EVENTING_COMPACT_33(
+                                 x, i, Basic, ServicesStunIcePacket, os, Stun, Info,
+                                 string/func, func,
                                  string/message, message,
                                  string/logObject, mLogObject,
                                  puid/logObjectId, mLogObjectID,
@@ -2418,7 +2424,6 @@ namespace ortc
                                  buffer/messageIntegrity, &(mMessageIntegrity[0]),
                                  size/messageIntegritySize, sizeof(mMessageIntegrity),
                                  bool/fingerprintIncluded, mFingerprintIncluded,
-
                                  bool/priorityIncluded, mPriorityIncluded,
                                  dword/priority, mPriority,
                                  bool/useCandidateIncluded, mUseCandidateIncluded,
@@ -2431,8 +2436,9 @@ namespace ortc
         }
         case RFC_draft_RUDP:
         {
-          ZS_EVENTING_COMPACT_37(
-                                 x, i, Insane, ServicesStunRudpPacket, os, Stun, Info,
+          ZS_EVENTING_COMPACT_38(
+                                 x, i, Basic, ServicesStunRudpPacket, os, Stun, Info,
+                                 string/func, func,
                                  string/message, message,
                                  string/logObject, mLogObject,
                                  puid/logObjectId, mLogObjectID,
@@ -2458,7 +2464,6 @@ namespace ortc
                                  buffer/messageIntegrity, &(mMessageIntegrity[0]),
                                  size/messageIntegritySize, sizeof(mMessageIntegrity),
                                  bool/fingerprintIncluded, mFingerprintIncluded,
-
                                  qword/nextSequenceNumber, mNextSequenceNumber,
                                  bool/minimumRTTIncluded, mMinimumRTTIncluded,
                                  dword/minimumRTT, mMinimumRTT,

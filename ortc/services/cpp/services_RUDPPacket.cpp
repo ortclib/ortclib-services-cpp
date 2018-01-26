@@ -45,7 +45,7 @@
 
 #define ORTC_SERVICES_MINIMUM_PACKET_LENGTH_IN_BYTES (12)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_rudp) } }
 
 namespace ortc
 {

@@ -46,7 +46,7 @@
 #define ORTC_SERVICES_RUDPMESSAGING_RECYCLE_BUFFER_SIZE ((1 << (sizeof(WORD)*8)) + sizeof(DWORD))
 #define ORTC_SERVICES_RUDPMESSAGING_MAX_RECYLCE_BUFFERS (100)
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services_rudp) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services_rudp) } }
 
 namespace ortc
 {

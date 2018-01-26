@@ -89,6 +89,8 @@ namespace ortc
       );
       static void disconnectEventingServer();
 
+      static void setDefaultEventingLevel(Log::Level logLevel);
+      static void setDefaultEventingLevel(const char *component, Log::Level logLevel);
       static void setEventingLevel(Log::Level logLevel);
       static void setEventingLevel(const char *component, Log::Level logLevel);
     };

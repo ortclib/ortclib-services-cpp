@@ -47,7 +47,7 @@
 #define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_6144    "https://meta.ortclib.org/dh/modp/6144"
 #define ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_8192    "https://meta.ortclib.org/dh/modp/8192"
 
-namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(ortc_services) } }
+namespace ortc { namespace services { ZS_DECLARE_SUBSYSTEM(org_ortc_services) } }
 
 namespace ortc
 {
