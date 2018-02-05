@@ -39,13 +39,13 @@ config("ortclib-services_config") {
       "../zsLib/zsLib/extras",
       "../zsLib-eventing",
       "../../third_party",
+      "../../third_party/idnkit/idnkit/include",
+      "../../third_party/cryptopp",
   ]
 
   if  (is_linux) {
     include_dirs += [
       "/usr/include",
-      "../../third_party/idnkit/idnkit/include",
-      "../../third_party/cryptopp",
     ]
   }
 
