@@ -118,14 +118,15 @@
 #define HAVE_IFADDRS_H 1
 #define HAVE_GETIFADDRS 1
 
-#ifdef _ANDROID
+#ifdef ANDROID
 
 // Android supports these additional features
 
 // Android does not support these features
 #undef HAVE_IFADDRS_H
+#undef HAVE_GETIFADDRS
 
-#endif //_ANDROID
+#endif //ANDROID
 #endif //__unix__
 
 

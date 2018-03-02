@@ -34,6 +34,7 @@
 #include <ortc/services/internal/services_TURNSocket.h>
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services_wire.h>
+#include <ortc/services/internal/platform.h>
 
 #include <ortc/services/ISTUNRequesterManager.h>
 #include <ortc/services/IHTTP.h>
