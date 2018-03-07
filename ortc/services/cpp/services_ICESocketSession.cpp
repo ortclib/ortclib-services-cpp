@@ -28,7 +28,7 @@
  either expressed or implied, of the FreeBSD Project.
 
  */
-
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
 #ifdef _WIN32
 #define NOMINMAX
 #endif //WIN32

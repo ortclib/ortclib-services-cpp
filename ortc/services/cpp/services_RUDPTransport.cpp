@@ -28,6 +28,7 @@
  either expressed or implied, of the FreeBSD Project.
 
  */
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
 
 #include <ortc/services/internal/services_RUDPTransport.h>
 #include <ortc/services/internal/services_RUDPChannel.h>

@@ -29,6 +29,8 @@
 
  */
 
+#define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
+
 #include <ortc/services/internal/services_Reachability.h>
 
 #include <ortc/services/IHelper.h>
