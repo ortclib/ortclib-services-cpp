@@ -62,7 +62,7 @@
 #include <ifaddrs.h>
 #endif //HAVE_IFADDRS_H
 
-#ifdef _ANDROID
+#ifdef ANDROID
 #include <ortc/services/internal/ifaddrs-android.h>
 #else
 #endif

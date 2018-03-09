@@ -1280,7 +1280,7 @@ namespace ortc
 
               size_t bytesRead = getFromWriteBuffer(&(temp[0]), availableBytes);
               newPacket->mData = &(temp[0]);
-#ifdef _ANDROID
+#ifdef ANDROID
 			  newPacket->mDataLengthInBytes = bytesRead;
 #else
               newPacket->mDataLengthInBytes = static_cast<decltype(newPacket->mDataLengthInBytes)>(bytesRead);
