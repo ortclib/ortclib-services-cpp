@@ -22,7 +22,7 @@ config("compiler") {
       "/wd4290",
     ]
     
-    if (!is_target_winuwp)
+    if (current_os != "winuwp")
     {
       cflags_cc += ["/EHsc"]
     }
@@ -49,7 +49,7 @@ config("ortclib-services_config") {
     ]
   }
 
-  if  (!is_target_winuwp) {
+  if  (current_os != "winuwp") {
     if (is_win) {
       include_dirs += [
         "../curl/include",
