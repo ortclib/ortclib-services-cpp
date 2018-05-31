@@ -214,8 +214,13 @@ static_library("ortclib-services") {
   deps = [ 
     ":services_events",
     "//third_party/ortc/zsLib:zslib",
-    "//third_party/cryptopp",
   ]
+  
+  if (is_win && (current_os != "winuwp")) {
+    deps += [ "//third_party/cryptopp(//build/toolchain/win:$current_cpu)", ]
+  } else {
+    deps += [ "//third_party/cryptopp", ]
+  }
 
   # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
   if(is_linux) {
