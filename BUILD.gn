@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//ortc/zsLib-eventing/zslib_eventing_tool.gni")
+import("//third_party/ortc/zsLib-eventing/zslib_eventing_tool.gni")
 
 config("compiler") {
   if (!is_win) {
@@ -35,12 +35,12 @@ config("ortclib-services_config") {
   include_dirs = [
       ".",
       "..",
+      "../../",
       "../zsLib",
       "../zsLib/zsLib/extras",
       "../zsLib-eventing",
-      "../../third_party",
-      "../../third_party/idnkit/idnkit/include",
-      "../../third_party/cryptopp",
+      "../../idnkit/idnkit/include",
+      "../../cryptopp",
   ]
 
   if  (is_linux) {
@@ -213,7 +213,7 @@ static_library("ortclib-services") {
 
   deps = [ 
     ":services_events",
-    "//ortc/zsLib:zslib",
+    "//third_party/ortc/zsLib:zslib",
     "//third_party/cryptopp",
   ]
 
