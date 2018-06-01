@@ -25,6 +25,9 @@ config("compiler") {
     if (current_os != "winuwp")
     {
       cflags_cc += ["/EHsc"]
+      defines = [
+        "CRYPTOPP_IGNORE_CALNG_LIMITATION",
+      ]
     }
   }
 
