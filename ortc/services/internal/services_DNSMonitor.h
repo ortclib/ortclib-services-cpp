@@ -82,7 +82,7 @@ namespace ortc
         {
           typedef DNSMonitor::QueryID QueryID;
 
-          virtual void setQueryID(QueryID queryID) = 0;
+          virtual void setQueryID(QueryID queryID) noexcept = 0;
 
           virtual void onCancel() = 0;
 
@@ -100,11 +100,11 @@ namespace ortc
 
           ResultList mPendingResults;
 
-          CacheInfo() : mPendingQuery(NULL) {};
+          CacheInfo() noexcept : mPendingQuery(NULL) {};
 
-          virtual void onAResult(struct dns_rr_a4 *record, int status) {}
-          virtual void onAAAAResult(struct dns_rr_a6 *record, int status) {}
-          virtual void onSRVResult(struct dns_rr_srv *record, int status) {}
+          virtual void onAResult(ZS_MAYBE_USED() struct dns_rr_a4 *record, ZS_MAYBE_USED() int status) { ZS_MAYBE_USED(record); ZS_MAYBE_USED(status); }
+          virtual void onAAAAResult(ZS_MAYBE_USED() struct dns_rr_a6 *record, ZS_MAYBE_USED() int status) { ZS_MAYBE_USED(record); ZS_MAYBE_USED(status); }
+          virtual void onSRVResult(ZS_MAYBE_USED() struct dns_rr_srv *record, ZS_MAYBE_USED() int status) { ZS_MAYBE_USED(record); ZS_MAYBE_USED(status); }
         };
 
         struct ACacheInfo : public CacheInfo
@@ -117,7 +117,7 @@ namespace ortc
           virtual void onAResult(struct dns_rr_a4 *record, int status);
           virtual void onAAAAResult(struct dns_rr_a6 *record, int status);
 
-          ACacheInfo() : CacheInfo(), mFlags(0) {};
+          ACacheInfo() noexcept : CacheInfo(), mFlags(0) {};
         };
 
         struct SRVCacheInfo : public CacheInfo
@@ -129,7 +129,7 @@ namespace ortc
 
           IDNS::SRVResultPtr mResult;
 
-          SRVCacheInfo() : CacheInfo(), mFlags(0) {};
+          SRVCacheInfo() noexcept : CacheInfo(), mFlags(0) {};
 
           virtual void onSRVResult(struct dns_rr_srv *record, int status);
         };
@@ -144,37 +144,37 @@ namespace ortc
         DNSMonitor(
                    const make_private &,
                    IMessageQueuePtr queue
-                   );
+                   ) noexcept;
       protected:
-        void init();
-        static DNSMonitorPtr create(IMessageQueuePtr queue);
+        void init() noexcept;
+        static DNSMonitorPtr create(IMessageQueuePtr queue) noexcept;
 
       public:
-        ~DNSMonitor();
+        ~DNSMonitor() noexcept;
 
-        static DNSMonitorPtr singleton();
+        static DNSMonitorPtr singleton() noexcept;
 
-        static Log::Params slog(const char *message);
+        static Log::Params slog(const char *message) noexcept;
 
       protected:
-        void createDNSContext();
-        void cleanIfNoneOutstanding();
+        void createDNSContext() noexcept;
+        void cleanIfNoneOutstanding() noexcept;
 
-        CacheInfoPtr done(QueryID queryID);
+        CacheInfoPtr done(QueryID queryID) noexcept;
         void cancel(
                     QueryID queryID,
                     IResultPtr query
-                    );
-        void submitAQuery(const char *name, int flags, IResultPtr result);
-        void submitAAAAQuery(const char *name, int flags, IResultPtr result);
-        void submitSRVQuery(const char *name, const char *service, const char *protocol, int flags, IResultPtr result);
+                    ) noexcept;
+        void submitAQuery(const char *name, int flags, IResultPtr result) noexcept;
+        void submitAAAAQuery(const char *name, int flags, IResultPtr result) noexcept;
+        void submitSRVQuery(const char *name, const char *service, const char *protocol, int flags, IResultPtr result) noexcept;
 
-        void submitAOrAAAAQuery(bool aMode, const char *name, int flags, IResultPtr result);
+        void submitAOrAAAAQuery(bool aMode, const char *name, int flags, IResultPtr result) noexcept;
 
         // UDNS callback routines
-        static void dns_query_a4(struct dns_ctx *ctx, struct dns_rr_a4 *result, void *data);
-        static void dns_query_a6(struct dns_ctx *ctx, struct dns_rr_a6 *result, void *data);
-        static void dns_query_srv(struct dns_ctx *ctx, struct dns_rr_srv *result, void *data);
+        static void dns_query_a4(struct dns_ctx *ctx, struct dns_rr_a4 *result, void *data) noexcept;
+        static void dns_query_a6(struct dns_ctx *ctx, struct dns_rr_a6 *result, void *data) noexcept;
+        static void dns_query_srv(struct dns_ctx *ctx, struct dns_rr_srv *result, void *data) noexcept;
 
         // ISocketDelegate
         virtual void onReadReady(SocketPtr socket);
@@ -186,7 +186,7 @@ namespace ortc
 
         // other
       public:
-        Log::Params log(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
 
       private:
         AutoPUID mID;

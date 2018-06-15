@@ -56,9 +56,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery
-      #pragma mark
+      //
+      // STUNDiscovery
+      //
 
       //-----------------------------------------------------------------------
       STUNDiscovery::STUNDiscovery(
@@ -66,14 +66,14 @@ namespace ortc
                                    IMessageQueuePtr queue,
                                    ISTUNDiscoveryDelegatePtr delegate,
                                    const CreationOptions &options
-                                   ) :
+                                   ) noexcept :
         MessageQueueAssociator(queue),
         mDelegate(ISTUNDiscoveryDelegateProxy::createWeak(queue, delegate)),
         mOptions(options)
       {
         mOptions.mSRV = IDNS::cloneSRV(mOptions.mSRV);
 
-        ZS_THROW_INVALID_USAGE_IF((!mOptions.mSRV) && (mOptions.mServers.size() < 1));
+        ZS_ASSERT(!((!mOptions.mSRV) && (mOptions.mServers.size() < 1)));
 
         //StunDiscoveryCreate(__func__, mID, mOptions.mKeepWarmPingTime.count());
         ZS_EVENTING_2(
@@ -85,7 +85,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::init()
+      void STUNDiscovery::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -94,7 +94,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      STUNDiscovery::~STUNDiscovery()
+      STUNDiscovery::~STUNDiscovery() noexcept
       {
         if (isNoop()) return;
         
@@ -106,7 +106,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      STUNDiscoveryPtr STUNDiscovery::convert(ISTUNDiscoveryPtr object)
+      STUNDiscoveryPtr STUNDiscovery::convert(ISTUNDiscoveryPtr object) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(STUNDiscovery, object);
       }
@@ -115,12 +115,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery => ISTUNDiscovery
-      #pragma mark
+      //
+      // STUNDiscovery => ISTUNDiscovery
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr STUNDiscovery::toDebug(STUNDiscoveryPtr discovery)
+      ElementPtr STUNDiscovery::toDebug(STUNDiscoveryPtr discovery) noexcept
       {
         if (!discovery) return ElementPtr();
         return discovery->toDebug();
@@ -131,10 +131,10 @@ namespace ortc
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
                                              const CreationOptions &options
-                                             )
+                                             ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!queue)
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
+        ZS_ASSERT(queue);
+        ZS_ASSERT(delegate);
 
         STUNDiscoveryPtr pThis(make_shared<STUNDiscovery>(make_private {}, queue, delegate, options));
         pThis->mThisWeak = pThis;
@@ -143,7 +143,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool STUNDiscovery::isComplete() const
+      bool STUNDiscovery::isComplete() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!mDelegate) return true;
@@ -152,7 +152,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::cancel()
+      void STUNDiscovery::cancel() noexcept
       {
         //ServicesStunDiscoveryCancel(__func__, mID);
         ZS_EVENTING_1(x, i, Debug, ServicesStunDiscoveryCancel, os, StunDiscovery, Cancel, puid, id, mID);
@@ -173,7 +173,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress STUNDiscovery::getMappedAddress() const
+      IPAddress STUNDiscovery::getMappedAddress() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mMapppedAddress;
@@ -183,9 +183,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery => IDNSDelegate
-      #pragma mark
+      //
+      // STUNDiscovery => IDNSDelegate
+      //
 
       //-----------------------------------------------------------------------
       void STUNDiscovery::onLookupCompleted(IDNSQueryPtr query)
@@ -205,9 +205,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery => ITimerDelegate
-      #pragma mark
+      //
+      // STUNDiscovery => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void STUNDiscovery::onTimer(ITimerPtr timer)
@@ -234,9 +234,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery => ISTUNRequesterDelegate
-      #pragma mark
+      //
+      // STUNDiscovery => ISTUNRequesterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void STUNDiscovery::onSTUNRequesterSendPacket(
@@ -270,7 +270,7 @@ namespace ortc
                                                       ISTUNRequesterPtr requester,
                                                       IPAddress fromIPAddress,
                                                       STUNPacketPtr response
-                                                      )
+                                                      ) noexcept
       {
         //ServicesStunDiscoveryReceivedResponsePacket(__func__, mID, requester->getID(), fromIPAddress.string(), ((bool)response) ? sizeof(response->mTransactionID) : 0, ((bool)response) ? (&(response->mTransactionID[0])) : NULL);
         ZS_EVENTING_5(
@@ -414,12 +414,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery => (internal)
-      #pragma mark
+      //
+      // STUNDiscovery => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params STUNDiscovery::log(const char *message) const
+      Log::Params STUNDiscovery::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("STUNDiscovery");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -427,7 +427,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr STUNDiscovery::toDebug() const
+      ElementPtr STUNDiscovery::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("ortc::services::STUNDiscovery");
 
@@ -449,7 +449,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::step()
+      void STUNDiscovery::step() noexcept
       {
         if (!mDelegate) return;                                                 // if there is no delegate then the request has completed or is cancelled
         if (mSRVQuery) return;                                                  // if an outstanding SRV lookup is being done then do nothing
@@ -525,13 +525,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool STUNDiscovery::hasContactedServerBefore(const IPAddress &server)
+      bool STUNDiscovery::hasContactedServerBefore(const IPAddress &server) noexcept
       {
         return mPreviouslyContactedServers.end() != find(mPreviouslyContactedServers.begin(), mPreviouslyContactedServers.end(), server);
       }
 
       //-----------------------------------------------------------------------
-      void STUNDiscovery::performNextLookup()
+      void STUNDiscovery::performNextLookup() noexcept
       {
         if (mOptions.mSRV) return;
         if (mOptions.mServers.size() < 1) return;
@@ -568,12 +568,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNDiscoveryFactory
-      #pragma mark
+      //
+      // ISTUNDiscoveryFactory
+      //
 
       //-----------------------------------------------------------------------
-      ISTUNDiscoveryFactory &ISTUNDiscoveryFactory::singleton()
+      ISTUNDiscoveryFactory &ISTUNDiscoveryFactory::singleton() noexcept
       {
         return STUNDiscoveryFactory::singleton();
       }
@@ -583,7 +583,7 @@ namespace ortc
                                                      IMessageQueuePtr queue,
                                                      ISTUNDiscoveryDelegatePtr delegate,
                                                      const CreationOptions &options
-                                                     )
+                                                     ) noexcept
       {
         if (this) {}
         return STUNDiscovery::create(queue, delegate, options);
@@ -595,12 +595,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNDiscovery
-    #pragma mark
+    //
+    // ISTUNDiscovery
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr ISTUNDiscovery::toDebug(ISTUNDiscoveryPtr discovery)
+    ElementPtr ISTUNDiscovery::toDebug(ISTUNDiscoveryPtr discovery) noexcept
     {
       return internal::STUNDiscovery::toDebug(internal::STUNDiscovery::convert(discovery));
     }
@@ -610,13 +610,13 @@ namespace ortc
                                              IMessageQueuePtr queue,
                                              ISTUNDiscoveryDelegatePtr delegate,
                                              const CreationOptions &options
-                                             )
+                                             ) noexcept
     {
       return internal::ISTUNDiscoveryFactory::singleton().create(queue, delegate, options);
     }
 
     //-------------------------------------------------------------------------
-    STUNPacket::RFCs ISTUNDiscovery::usingRFC()
+    STUNPacket::RFCs ISTUNDiscovery::usingRFC() noexcept
     {
       return STUNPacket::RFC_5389_STUN;
     }
@@ -625,7 +625,7 @@ namespace ortc
     bool ISTUNDiscovery::handleSTUNPacket(
                                           IPAddress fromIPAddress,
                                           STUNPacketPtr stun
-                                          )
+                                          ) noexcept
     {
       ISTUNRequesterPtr requester = ISTUNRequesterManager::handleSTUNPacket(fromIPAddress, stun);
       return (bool)requester;
@@ -636,7 +636,7 @@ namespace ortc
                                       IPAddress fromIPAddress,
                                       BYTE *packet,
                                       size_t packetLengthInBytes
-                                      )
+                                      ) noexcept
     {
       ISTUNRequesterPtr requester = ISTUNRequesterManager::handlePacket(fromIPAddress, packet, packetLengthInBytes, ISTUNDiscovery::usingRFC());
       return (bool)requester;

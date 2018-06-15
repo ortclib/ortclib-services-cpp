@@ -76,15 +76,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helper)
-      #pragma mark
+      //
+      // (helper)
+      //
 
       //-----------------------------------------------------------------------
       String convertToHex(
                           const BYTE *buffer,
                           size_t bufferLengthInBytes
-                          )
+                          ) noexcept
       {
         std::string output;
         HexEncoder encoder(new StringSink(output));
@@ -97,7 +97,7 @@ namespace ortc
       void convertFromHex(
                           const String &input,
                           SecureByteBlock &output
-                          )
+                          ) noexcept
       {
         ByteQueue queue;
         queue.Put((BYTE *)input.c_str(), input.size());
@@ -121,7 +121,7 @@ namespace ortc
                             STUNPacketPtr &stun,
                             const BYTE *magic,
                             size_t magicLengthInBytes
-                            )
+                            ) noexcept
       {
         MD5 md5;
 
@@ -137,7 +137,7 @@ namespace ortc
         md5.Update((const BYTE *)((CSTR)":"), strlen(":"));
         md5.Update(magic, magicLengthInBytes);
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(key) != md5.DigestSize())
+        ZS_ASSERT(sizeof(key) == md5.DigestSize());
         md5.Final(&(key[0]));
 
         memcpy(hashOut, &(key[0]), sizeof(key));
@@ -149,7 +149,7 @@ namespace ortc
                         STUNPacketPtr &stun,
                         const BYTE *magic,
                         size_t magicLengthInBytes
-                        )
+                        ) noexcept
       {
         String nonce = stun->mNonce;
 
@@ -177,7 +177,7 @@ namespace ortc
                          STUNPacketPtr &stun,
                          const BYTE *magic,
                          size_t magicLengthInBytes
-                         )
+                         ) noexcept
       {
         BYTE output[sizeof(time_t) + 16];
         memset(&(output[0]), 0, sizeof(output));
@@ -197,9 +197,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener
-      #pragma mark
+      //
+      // RUDPListener
+      //
 
       //-----------------------------------------------------------------------
       RUDPListener::RUDPListener(
@@ -208,7 +208,7 @@ namespace ortc
                                  IRUDPListenerDelegatePtr delegate,
                                  WORD port,
                                  const char *realm
-                                 ) :
+                                 ) noexcept :
         MessageQueueAssociator(queue),
         mDelegate(IRUDPListenerDelegateProxy::createWeak(delegate)),
         mBindPort(port),
@@ -221,14 +221,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::init()
+      void RUDPListener::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
         bindUDP();
       }
 
       //-----------------------------------------------------------------------
-      RUDPListener::~RUDPListener()
+      RUDPListener::~RUDPListener() noexcept
       {
         if(isNoop()) return;
         
@@ -241,9 +241,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener => IRUDPListener
-      #pragma mark
+      //
+      // RUDPListener => IRUDPListener
+      //
 
       //-----------------------------------------------------------------------
       RUDPListenerPtr RUDPListener::create(
@@ -251,7 +251,7 @@ namespace ortc
                                            IRUDPListenerDelegatePtr delegate,
                                            WORD port,
                                            const char *realm
-                                           )
+                                           ) noexcept
       {
         RUDPListenerPtr pThis(make_shared<RUDPListener>(make_private{}, queue, delegate, port, realm));
         pThis->mThisWeak = pThis;
@@ -260,7 +260,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress RUDPListener::getListenerIP()
+      IPAddress RUDPListener::getListenerIP() noexcept
       {
         AutoRecursiveLock lock(mLock);
         try {
@@ -271,14 +271,14 @@ namespace ortc
         return IPAddress();
       }
 
-      IRUDPListener::RUDPListenerStates RUDPListener::getState() const
+      IRUDPListener::RUDPListenerStates RUDPListener::getState() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mCurrentState;
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::shutdown()
+      void RUDPListener::shutdown() noexcept
       {
         AutoRecursiveLock lock(mLock);
         cancel();
@@ -289,10 +289,10 @@ namespace ortc
                                                   IRUDPChannelDelegatePtr delegate,
                                                   ITransportStreamPtr receiveStream,
                                                   ITransportStreamPtr sendStream
-                                                  )
+                                                  ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         AutoRecursiveLock lock(mLock);
         if (mPendingSessions.size() < 1) return IRUDPChannelPtr();
@@ -308,9 +308,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener => ISocketDelegate
-      #pragma mark
+      //
+      // RUDPListener => ISocketDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPListener::onReadReady(SocketPtr socket)
@@ -493,9 +493,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener => IRUDPChannelDelegateForSessionAndListener
-      #pragma mark
+      //
+      // RUDPListener => IRUDPChannelDelegateForSessionAndListener
+      //
 
       //-----------------------------------------------------------------------
       void RUDPListener::onRUDPChannelStateChanged(
@@ -539,7 +539,7 @@ namespace ortc
                                                      const IPAddress &remoteIP,
                                                      const BYTE *packet,
                                                      size_t packetLengthInBytes
-                                                     )
+                                                     ) noexcept
       {
         AutoRecursiveLock lock(mLock);
         return sendTo(remoteIP, packet, packetLengthInBytes);
@@ -549,12 +549,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener => (internal)
-      #pragma mark
+      //
+      // RUDPListener => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPListener::log(const char *message) const
+      Log::Params RUDPListener::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RUDPListener");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -562,14 +562,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::fix(STUNPacketPtr stun) const
+      void RUDPListener::fix(STUNPacketPtr stun) const noexcept
       {
         stun->mLogObject = "RUDPListener";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::cancel()
+      void RUDPListener::cancel() noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -610,7 +610,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPListener::setState(RUDPListenerStates state)
+      void RUDPListener::setState(RUDPListenerStates state) noexcept
       {
         if (mCurrentState == state) return;
 
@@ -631,7 +631,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPListener::bindUDP()
+      bool RUDPListener::bindUDP() noexcept
       {
         mUDPSocket = Socket::createUDP();
 
@@ -657,7 +657,7 @@ namespace ortc
       bool RUDPListener::sendTo(
                                 const IPAddress &destination,
                                 STUNPacketPtr stun
-                                )
+                                ) noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -671,9 +671,9 @@ namespace ortc
                                 const IPAddress &destination,
                                 const BYTE *buffer,
                                 size_t bufferLengthInBytes
-                                )
+                                ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!buffer)
+        ZS_ASSERT(buffer);
         if (isShutdown()) return false;
         if (0 == bufferLengthInBytes) return false;
 
@@ -684,7 +684,6 @@ namespace ortc
           return (bytesSent == bufferLengthInBytes);
         } catch(Socket::Exceptions::Unspecified &) {
           ZS_LOG_ERROR(Detail, log("sendTo exception") + ZS_PARAM("destination", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes))
-          return false;
         }
         return false;
       }
@@ -694,7 +693,7 @@ namespace ortc
                                       const IPAddress &remoteIP,
                                       STUNPacketPtr &stun,
                                       STUNPacketPtr &response
-                                      )
+                                      ) noexcept
       {
         if (STUNPacket::Class_Indication == stun->mClass) return false;             // we don't perform nonce checks here on indications here
         if (STUNPacket::Method_ReliableChannelOpen != stun->mMethod) return false;  // only going to respond to reliable channel open requests for the nonce
@@ -720,7 +719,7 @@ namespace ortc
                                               const IPAddress &remoteIP,
                                               STUNPacketPtr &stun,
                                               STUNPacketPtr &response
-                                              )
+                                              ) noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!mDelegate) return false;
@@ -841,12 +840,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener::CompareChannelPair
-      #pragma mark
+      //
+      // RUDPListener::CompareChannelPair
+      //
 
       //-----------------------------------------------------------------------
-      bool RUDPListener::CompareChannelPair::operator()(const ChannelPair &op1, const ChannelPair &op2) const
+      bool RUDPListener::CompareChannelPair::operator()(const ChannelPair &op1, const ChannelPair &op2) const noexcept
       {
         if (op1.first < op2.first)
           return true;
@@ -862,12 +861,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPListenerFactory
-      #pragma mark
+      //
+      // IRUDPListenerFactory
+      //
 
       //-----------------------------------------------------------------------
-      IRUDPListenerFactory &IRUDPListenerFactory::singleton()
+      IRUDPListenerFactory &IRUDPListenerFactory::singleton() noexcept
       {
         return RUDPListenerFactory::singleton();
       }
@@ -878,7 +877,7 @@ namespace ortc
                                                    IRUDPListenerDelegatePtr delegate,
                                                    WORD port,
                                                    const char *realm
-                                                   )
+                                                   ) noexcept
       {
         if (this) {}
         return RUDPListener::create(queue, delegate, port, realm);
@@ -892,7 +891,7 @@ namespace ortc
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    const char *IRUDPListener::toString(RUDPListenerStates state)
+    const char *IRUDPListener::toString(RUDPListenerStates state) noexcept
     {
       switch (state)
       {
@@ -909,7 +908,7 @@ namespace ortc
                                            IRUDPListenerDelegatePtr delegate,
                                            WORD port,
                                            const char *realm
-                                           )
+                                           ) noexcept
     {
       return internal::IRUDPListenerFactory::singleton().create(queue, delegate, port, realm);
     }

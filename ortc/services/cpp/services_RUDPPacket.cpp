@@ -59,15 +59,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      String convertToHex(const BYTE *buffer, size_t bufferLengthInBytes);
+      String convertToHex(const BYTE *buffer, size_t bufferLengthInBytes) noexcept;
 
       //-----------------------------------------------------------------------
-      static size_t dwordBoundary(size_t length) {
+      static size_t dwordBoundary(size_t length) noexcept {
         if (0 == (length % sizeof(DWORD)))
           return length;
         return length + (sizeof(DWORD) - (length % sizeof(DWORD)));
@@ -117,9 +117,9 @@ namespace ortc
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    #pragma mark
-    #pragma mark RUDPPacket
-    #pragma mark
+    //
+    // RUDPPacket
+    //
 
     //-------------------------------------------------------------------------
     RUDPPacketPtr RUDPPacket::create()
@@ -420,7 +420,7 @@ namespace ortc
           return false; // why would you do this?? give us a vector size of "0"?? seems rather silly to me...
 
         // this is a special case where we need to allocate the first BYTE for the first time
-        ioVectorState.mVector[0] = vectorState;
+        ioVectorState.mVector[0] = static_cast<BYTE>(vectorState);
         ioVectorState.mVector[0] |= 1;          // now has a RLE of 1
         if (vectorState != VectorState_NotReceived)
           ioVectorState.mXORedParityToNow = internal::logicalXOR(ioVectorState.mXORedParityToNow, packetParityIfReceived);
@@ -437,7 +437,7 @@ namespace ortc
 
         // there is room, grab the next BYTE and use it
         ++(ioVectorState.mVector);  // point to the next position in the vector
-        ioVectorState.mVector[0] = vectorState;
+        ioVectorState.mVector[0] = static_cast<BYTE>(vectorState);
         ioVectorState.mVector[0] |= 1;          // now has a RLE of 1
         if (vectorState != VectorState_NotReceived)
           ioVectorState.mXORedParityToNow = internal::logicalXOR(ioVectorState.mXORedParityToNow, packetParityIfReceived);

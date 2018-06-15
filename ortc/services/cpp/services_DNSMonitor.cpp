@@ -58,12 +58,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static Log::Params slog(const char *message)
+      static Log::Params slog(const char *message) noexcept
       {
         DNSMonitorPtr singleton = DNSMonitor::singleton();
         if (!singleton) {
@@ -73,7 +73,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static String getGenericCookieName(const String &name, int flags, const char *type)
+      static String getGenericCookieName(const String &name, int flags, const char *type) noexcept
       {
         String hash = IHelper::convertToHex(*IHasher::hash(name + ":" + string(flags)));
         return String(ORTC_SERVICES_DNSMONITOR_CACHE_NAMESPACE) + type + "/" + hash;
@@ -84,13 +84,13 @@ namespace ortc
                                   const String &name,
                                   IDNS::SRVLookupTypes lookupType,
                                   int flags
-                                  )
+                                  ) noexcept
       {
         return getGenericCookieName(name, flags, IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa");
       }
 
       //-----------------------------------------------------------------------
-      static String getAAAACookieName(const String &name, int flags)
+      static String getAAAACookieName(const String &name, int flags) noexcept
       {
         return getGenericCookieName(name, flags, "aaaa");
       }
@@ -101,7 +101,7 @@ namespace ortc
                                      const String &service,
                                      const String &protocol,
                                      int flags
-                                     )
+                                     ) noexcept
       {
         return getGenericCookieName(name + ":" + service + ":" + protocol, flags, "srv");
       }
@@ -110,7 +110,7 @@ namespace ortc
       static ElementPtr toElement(
                                   const IDNS::AResult &result,
                                   const char *elementName
-                                  )
+                                  ) noexcept
       {
         ElementPtr typeEl = Element::create(elementName);
         ElementPtr ipsEl = Element::create("ips");
@@ -138,7 +138,7 @@ namespace ortc
                         const IDNS::AResult &info,
                         int flags,
                         const Time &expires
-                        )
+                        ) noexcept
       {
         const char *elementName = IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa";
         String cookieName = getCookieName(name, lookupType, flags);
@@ -154,12 +154,13 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       static void store(
-                        const String &name,
+                        ZS_MAYBE_USED() const String &name,
                         const IDNS::SRVResult &info,
                         int flags,
                         const Time &expires
-                        )
+                        ) noexcept
       {
+        ZS_MAYBE_USED(name);
         String cookieName = getSRVCookieName(info.mName, info.mService, info.mProtocol, flags);
 
         ElementPtr srvEl = Element::create("srv");
@@ -207,7 +208,7 @@ namespace ortc
       static String getText(
                             ElementPtr parentEl,
                             const char *name
-                            )
+                            ) noexcept
       {
         ElementPtr childEl = parentEl->findFirstChildElement(name);
         if (!childEl) return String();
@@ -221,7 +222,7 @@ namespace ortc
       static RESULTTYPE convertNoThrow(
                                        ElementPtr parentEl,
                                        const char *name
-                                       )
+                                       ) noexcept
       {
         RESULTTYPE value = 0;
 
@@ -239,9 +240,9 @@ namespace ortc
       static void fill(
                        IDNS::AResult &result,
                        ElementPtr typeEl
-                       )
+                       ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!typeEl)
+        ZS_ASSERT(typeEl);
 
         result.mName = getText(typeEl, "name");
         result.mTTL = convertNoThrow<UINT>(typeEl, "ttl");
@@ -274,7 +275,7 @@ namespace ortc
                                     IDNS::SRVLookupTypes lookupType,
                                     int flags,
                                     Time &outExpires
-                                    )
+                                    ) noexcept
       {
         const char *elementName = IDNS::SRVLookupType_AutoLookupA == lookupType ? "a" : "aaaa";
         String cookieName = getCookieName(name, lookupType, flags);
@@ -311,7 +312,7 @@ namespace ortc
                                       const String &protocol,
                                       int flags,
                                       Time &outExpires
-                                      )
+                                      ) noexcept
       {
         String cookieName = getSRVCookieName(name, service, protocol, flags);
         String dataStr = ICache::fetch(cookieName);
@@ -383,7 +384,7 @@ namespace ortc
                         const String &name,
                         IDNS::SRVLookupTypes lookupType,
                         int flags
-                        )
+                        ) noexcept
       {
         String cookieName = getCookieName(name, lookupType, flags);
         ICache::clear(cookieName);
@@ -395,7 +396,7 @@ namespace ortc
                         const String &service,
                         const String &protocol,
                         int flags
-                        )
+                        ) noexcept
       {
         ICache::clear(getSRVCookieName(name, service, protocol, flags));
       }
@@ -404,15 +405,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSMonitor
-      #pragma mark
+      //
+      // DNSMonitor
+      //
 
       //-----------------------------------------------------------------------
       DNSMonitor::DNSMonitor(
                              const make_private &,
                              IMessageQueuePtr queue
-                             ) :
+                             ) noexcept :
         MessageQueueAssociator(queue),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mCtx(NULL)
@@ -420,12 +421,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::init()
+      void DNSMonitor::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      DNSMonitor::~DNSMonitor()
+      DNSMonitor::~DNSMonitor() noexcept
       {
         for (PendingQueriesMap::iterator iter = mPendingQueries.begin(); iter != mPendingQueries.end(); ++iter)
         {
@@ -448,7 +449,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DNSMonitorPtr DNSMonitor::create(IMessageQueuePtr queue)
+      DNSMonitorPtr DNSMonitor::create(IMessageQueuePtr queue) noexcept
       {
         DNSMonitorPtr pThis(make_shared<DNSMonitor>(make_private{}, queue));
         pThis->mThisWeak = pThis;
@@ -457,7 +458,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DNSMonitorPtr DNSMonitor::singleton()
+      DNSMonitorPtr DNSMonitor::singleton() noexcept
       {
         AutoRecursiveLock lock(*Helper::getGlobalLock());
         static SingletonLazySharedPtr<DNSMonitor> singleton(DNSMonitor::create(Helper::getServiceQueue()));
@@ -469,13 +470,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DNSMonitor::slog(const char *message)
+      Log::Params DNSMonitor::slog(const char *message) noexcept
       {
         return Log::Params(message, "DNSMonitor");
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::createDNSContext()
+      void DNSMonitor::createDNSContext() noexcept
       {
         if (NULL != mCtx)
           return;
@@ -486,7 +487,7 @@ namespace ortc
         dns_reset(&dns_defctx);
 
         mCtx = dns_new(NULL);
-        ZS_THROW_BAD_STATE_IF(NULL == mCtx)
+        ZS_ASSERT(mCtx);
 
         dns_init(mCtx, 0);  // do open ourselves...
 
@@ -510,7 +511,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::cleanIfNoneOutstanding()
+      void DNSMonitor::cleanIfNoneOutstanding() noexcept
       {
         if (mPendingQueries.size() > 0) return;   // still outstanding queries
 
@@ -529,7 +530,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DNSMonitor::CacheInfoPtr DNSMonitor::done(QueryID queryID)
+      DNSMonitor::CacheInfoPtr DNSMonitor::done(QueryID queryID) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -548,7 +549,7 @@ namespace ortc
       void DNSMonitor::cancel(
                               QueryID queryID,
                               IResultPtr result
-                              )
+                              ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -595,19 +596,19 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void DNSMonitor::submitAQuery(const char *inName, int flags, IResultPtr result)
+      void DNSMonitor::submitAQuery(const char *inName, int flags, IResultPtr result) noexcept 
       {
         submitAOrAAAAQuery(true, inName, flags, result);
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::submitAAAAQuery(const char *inName, int flags, IResultPtr result)
+      void DNSMonitor::submitAAAAQuery(const char *inName, int flags, IResultPtr result) noexcept
       {
         submitAOrAAAAQuery(false, inName, flags, result);
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::submitAOrAAAAQuery(bool aMode, const char *inName, int flags, IResultPtr result)
+      void DNSMonitor::submitAOrAAAAQuery(bool aMode, const char *inName, int flags, IResultPtr result) noexcept
       {
         AutoRecursiveLock lock(*this);
         createDNSContext();
@@ -692,7 +693,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::submitSRVQuery(const char *inName, const char *inService, const char *inProtocol, int flags, IResultPtr result)
+      void DNSMonitor::submitSRVQuery(const char *inName, const char *inService, const char *inProtocol, int flags, IResultPtr result) noexcept
       {
         AutoRecursiveLock lock(*this);
         createDNSContext();
@@ -767,7 +768,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::dns_query_a4(struct dns_ctx *ctx, struct dns_rr_a4 *record, void *data)
+      void DNSMonitor::dns_query_a4(struct dns_ctx *ctx, struct dns_rr_a4 *record, void *data) noexcept
       {
         QueryID queryID = (QueryID)((PTRNUMBER)data);
 
@@ -795,7 +796,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::dns_query_a6(struct dns_ctx *ctx, struct dns_rr_a6 *record, void *data)
+      void DNSMonitor::dns_query_a6(struct dns_ctx *ctx, struct dns_rr_a6 *record, void *data) noexcept
       {
         QueryID queryID = (QueryID)((PTRNUMBER)data);
 
@@ -823,7 +824,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void DNSMonitor::dns_query_srv(struct dns_ctx *ctx, struct dns_rr_srv *record, void *data)
+      void DNSMonitor::dns_query_srv(struct dns_ctx *ctx, struct dns_rr_srv *record, void *data) noexcept
       {
         QueryID queryID = (QueryID)((PTRNUMBER)data);
 
@@ -915,7 +916,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DNSMonitor::log(const char *message) const
+      Log::Params DNSMonitor::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("DNSMonitor");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -926,9 +927,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSMonitor::ACacheInfo
-      #pragma mark
+      //
+      // DNSMonitor::ACacheInfo
+      //
 
       //-----------------------------------------------------------------------
       void DNSMonitor::ACacheInfo::onAResult(struct dns_rr_a4 *record, int status)
@@ -998,9 +999,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSMonitor::SRCCacheInfo
-      #pragma mark
+      //
+      // DNSMonitor::SRCCacheInfo
+      //
 
       //-----------------------------------------------------------------------
       void DNSMonitor::SRVCacheInfo::onSRVResult(struct dns_rr_srv *record, int status)

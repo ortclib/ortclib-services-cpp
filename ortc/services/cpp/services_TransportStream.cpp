@@ -54,18 +54,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream
-      #pragma mark
+      //
+      // TransportStream
+      //
 
       //-----------------------------------------------------------------------
       TransportStream::TransportStream(
@@ -73,7 +73,7 @@ namespace ortc
                                        IMessageQueuePtr queue,
                                        ITransportStreamWriterDelegatePtr writerDelegate,
                                        ITransportStreamReaderDelegatePtr readerDelegate
-                                       ) :
+                                       ) noexcept :
         zsLib::MessageQueueAssociator(queue),
         mWriterSubscriptions(decltype(mWriterSubscriptions)::create()),
         mReaderSubscriptions(decltype(mReaderSubscriptions)::create())
@@ -88,12 +88,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TransportStream::init()
+      void TransportStream::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      TransportStream::~TransportStream()
+      TransportStream::~TransportStream() noexcept
       {
         ZS_LOG_DEBUG(log("destroyed"))
         mThisWeak.reset();
@@ -101,7 +101,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TransportStreamPtr TransportStream::convert(ITransportStreamPtr stream)
+      TransportStreamPtr TransportStream::convert(ITransportStreamPtr stream) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(TransportStream, stream);
       }
@@ -110,12 +110,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream => ITransportStream
-      #pragma mark
+      //
+      // TransportStream => ITransportStream
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr TransportStream::toDebug(ITransportStreamPtr stream)
+      ElementPtr TransportStream::toDebug(ITransportStreamPtr stream) noexcept
       {
         if (!stream) return ElementPtr();
 
@@ -127,7 +127,7 @@ namespace ortc
       TransportStreamPtr TransportStream::create(
                                                  ITransportStreamWriterDelegatePtr writerDelegate,
                                                  ITransportStreamReaderDelegatePtr readerDelegate
-                                                 )
+                                                 ) noexcept
       {
         TransportStreamPtr pThis(make_shared<TransportStream>(make_private {}, IHelper::getServiceQueue(), writerDelegate, readerDelegate));
         pThis->mThisWeak = pThis;
@@ -136,19 +136,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ITransportStreamWriterPtr TransportStream::getWriter() const
+      ITransportStreamWriterPtr TransportStream::getWriter() const noexcept
       {
         return mThisWeak.lock();
       }
 
       //-----------------------------------------------------------------------
-      ITransportStreamReaderPtr TransportStream::getReader() const
+      ITransportStreamReaderPtr TransportStream::getReader() const noexcept
       {
         return mThisWeak.lock();
       }
 
       //-----------------------------------------------------------------------
-      void TransportStream::cancel()
+      void TransportStream::cancel() noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -169,12 +169,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream => ITransportStreamWriter
-      #pragma mark
+      //
+      // TransportStream => ITransportStreamWriter
+      //
 
       //-----------------------------------------------------------------------
-      ITransportStreamWriterSubscriptionPtr TransportStream::subscribe(ITransportStreamWriterDelegatePtr originalDelegate)
+      ITransportStreamWriterSubscriptionPtr TransportStream::subscribe(ITransportStreamWriterDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -203,14 +203,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ITransportStreamPtr TransportStream::getStream() const
+      ITransportStreamPtr TransportStream::getStream() const noexcept
       {
         AutoRecursiveLock lock(getLock());
         return mThisWeak.lock();
       }
 
       //-----------------------------------------------------------------------
-      bool TransportStream::isWriterReady() const
+      bool TransportStream::isWriterReady() const noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) return false;
@@ -222,9 +222,9 @@ namespace ortc
                                   const BYTE *inBuffer,
                                   size_t bufferLengthInBytes,
                                   StreamHeaderPtr header
-                                  )
+                                  ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!inBuffer)
+        ZS_ASSERT(inBuffer);
 
         AutoRecursiveLock lock(getLock());
 
@@ -251,9 +251,9 @@ namespace ortc
       void TransportStream::write(
                                   SecureByteBlockPtr bufferToAdopt,
                                   StreamHeaderPtr header
-                                  )
+                                  ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!bufferToAdopt)
+        ZS_ASSERT(bufferToAdopt);
 
         AutoRecursiveLock lock(getLock());
 
@@ -289,7 +289,7 @@ namespace ortc
                                   WORD value,
                                   StreamHeaderPtr header,
                                   Endians endian
-                                  )
+                                  ) noexcept
       {
         BYTE buffer[sizeof(WORD)] = {0,0};
         if (endian == Endian_Big)
@@ -308,7 +308,7 @@ namespace ortc
                                   DWORD value,
                                   StreamHeaderPtr header,
                                   Endians endian
-                                  )
+                                  ) noexcept
       {
         BYTE buffer[sizeof(DWORD)] = {0,0,0,0};
         if (endian == Endian_Big)
@@ -327,7 +327,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TransportStream::block(bool block)
+      void TransportStream::block(bool block) noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -383,12 +383,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream => ITransportStreamReader
-      #pragma mark
+      //
+      // TransportStream => ITransportStreamReader
+      //
 
       //-----------------------------------------------------------------------
-      ITransportStreamReaderSubscriptionPtr TransportStream::subscribe(ITransportStreamReaderDelegatePtr originalDelegate)
+      ITransportStreamReaderSubscriptionPtr TransportStream::subscribe(ITransportStreamReaderDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -417,7 +417,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TransportStream::notifyReaderReadyToRead()
+      void TransportStream::notifyReaderReadyToRead() noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (isShutdown()) {
@@ -429,7 +429,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::getNextReadSizeInBytes() const
+      size_t TransportStream::getNextReadSizeInBytes() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -448,7 +448,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TransportStream::StreamHeaderPtr TransportStream::getNextReadHeader() const
+      TransportStream::StreamHeaderPtr TransportStream::getNextReadHeader() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -465,14 +465,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::getTotalReadBuffersAvailable() const
+      size_t TransportStream::getTotalReadBuffersAvailable() const noexcept
       {
         AutoRecursiveLock lock(getLock());
         return mBuffers.size();
       }
       
       //-----------------------------------------------------------------------
-      size_t TransportStream::getTotalReadSizeAvailableInBytes() const
+      size_t TransportStream::getTotalReadSizeAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -493,9 +493,9 @@ namespace ortc
                                    BYTE *outBuffer,
                                    size_t bufferLengthInBytes,
                                    StreamHeaderPtr *outHeader
-                                   )
+                                   ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!outBuffer)
+        ZS_ASSERT(outBuffer);
 
         if (outHeader) {
           *outHeader = StreamHeaderPtr();
@@ -582,7 +582,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr TransportStream::read(StreamHeaderPtr *outHeader)
+      SecureByteBlockPtr TransportStream::read(StreamHeaderPtr *outHeader) noexcept
       {
         if (outHeader) {
           *outHeader = StreamHeaderPtr();
@@ -630,7 +630,7 @@ namespace ortc
                                        WORD &outResult,
                                        StreamHeaderPtr *outHeader,
                                        Endians endian
-                                       )
+                                       ) noexcept
       {
         outResult = 0;
 
@@ -650,7 +650,7 @@ namespace ortc
                                         DWORD &outResult,
                                         StreamHeaderPtr *outHeader,
                                         Endians endian
-                                        )
+                                        ) noexcept
       {
         outResult = 0;
 
@@ -671,10 +671,10 @@ namespace ortc
                                    size_t bufferLengthInBytes,
                                    StreamHeaderPtr *outHeader,
                                    size_t offsetInBytes
-                                   )
+                                   ) noexcept
       {
         if (0 != bufferLengthInBytes) {
-          ZS_THROW_INVALID_ARGUMENT_IF(!outBuffer)
+          ZS_ASSERT(outBuffer);
         }
 
         if (outHeader) {
@@ -728,7 +728,7 @@ namespace ortc
             continue;
           }
 
-          ZS_THROW_BAD_STATE_IF(offsetInBytes > 0)
+          ZS_ASSERT(offsetInBytes < 1);
 
           if (!didHeader) {
             if (outHeader) {
@@ -756,7 +756,7 @@ namespace ortc
             break;
           }
 
-          ZS_THROW_BAD_STATE_IF(0 != available)
+          ZS_ASSERT(0 == available);
           ++iter;
         }
 
@@ -767,9 +767,10 @@ namespace ortc
       SecureByteBlockPtr TransportStream::peek(
                                                size_t bufferLengthInBytes,
                                                StreamHeaderPtr *outHeader,
-                                               size_t offsetInBytes
-                                               )
+                                               ZS_MAYBE_USED() size_t offsetInBytes
+                                               ) noexcept
       {
+        ZS_MAYBE_USED(offsetInBytes);
         if (0 == bufferLengthInBytes) {
           // peeking next buffer
           if (mBuffers.size() > 0) {
@@ -807,7 +808,7 @@ namespace ortc
                                        StreamHeaderPtr *outHeader,
                                        size_t offsetInBytes,
                                        Endians endian
-                                       )
+                                       ) noexcept
       {
         outResult = 0;
 
@@ -828,7 +829,7 @@ namespace ortc
                                         StreamHeaderPtr *outHeader,
                                         size_t offsetInBytes,
                                         Endians endian
-                                        )
+                                        ) noexcept
       {
         outResult = 0;
 
@@ -844,7 +845,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t TransportStream::skip(size_t offsetInBytes)
+      size_t TransportStream::skip(size_t offsetInBytes) noexcept
       {
         ZS_LOG_TRACE(log("skip called") + ZS_PARAM("skip", offsetInBytes))
 
@@ -898,18 +899,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream  => (internal)
-      #pragma mark
+      //
+      // TransportStream  => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      RecursiveLock &TransportStream::getLock() const
+      RecursiveLock &TransportStream::getLock() const noexcept
       {
         return mLock;
       }
 
       //-----------------------------------------------------------------------
-      Log::Params TransportStream::log(const char *message) const
+      Log::Params TransportStream::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("TransportStream");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -917,13 +918,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params TransportStream::debug(const char *message) const
+      Log::Params TransportStream::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr TransportStream::toDebug() const
+      ElementPtr TransportStream::toDebug() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -950,7 +951,7 @@ namespace ortc
       void TransportStream::notifySubscribers(
                                               bool afterRead,
                                               bool afterWrite
-                                              )
+                                              ) noexcept
       {
         if (afterRead) {
           mReaderReady = true;          // reader must be ready if read was called
@@ -989,12 +990,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITransportStreamFactory
-      #pragma mark
+      //
+      // ITransportStreamFactory
+      //
 
       //-----------------------------------------------------------------------
-      ITransportStreamFactory &ITransportStreamFactory::singleton()
+      ITransportStreamFactory &ITransportStreamFactory::singleton() noexcept
       {
         return TransportStreamFactory::singleton();
       }
@@ -1003,7 +1004,7 @@ namespace ortc
       TransportStreamPtr ITransportStreamFactory::create(
                                                          ITransportStreamWriterDelegatePtr writerDelegate,
                                                          ITransportStreamReaderDelegatePtr readerDelegate
-                                                         )
+                                                         ) noexcept
       {
         if (this) {}
         return internal::TransportStream::create(writerDelegate, readerDelegate);
@@ -1019,22 +1020,23 @@ namespace ortc
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IStreamTransport
-    #pragma mark
+    //
+    // IStreamTransport
+    //
 
     //-----------------------------------------------------------------------
-    const char *ITransportStream::toString(Endians endian)
+    const char *ITransportStream::toString(Endians endian) noexcept
     {
       switch (endian) {
         case Endian_Big:    return "big";
         case Endian_Little: return "little";
       }
+      ZS_ASSERT_FAIL("unknown endian");
       return "UNDEFINED";
     }
 
     //-----------------------------------------------------------------------
-    ElementPtr ITransportStream::toDebug(ITransportStreamPtr stream)
+    ElementPtr ITransportStream::toDebug(ITransportStreamPtr stream) noexcept
     {
       return internal::TransportStream::toDebug(stream);
     }
@@ -1043,7 +1045,7 @@ namespace ortc
     ITransportStreamPtr ITransportStream::create(
                                                  ITransportStreamWriterDelegatePtr writerDelegate,
                                                  ITransportStreamReaderDelegatePtr readerDelegate
-                                                 )
+                                                 ) noexcept
     {
       return internal::ITransportStreamFactory::singleton().create(writerDelegate, readerDelegate);
     }

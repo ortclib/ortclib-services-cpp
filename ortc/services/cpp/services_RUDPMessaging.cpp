@@ -58,9 +58,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => IRUDPMessaging
-      #pragma mark
+      //
+      // RUDPMessaging => IRUDPMessaging
+      //
 
       //-----------------------------------------------------------------------
       RUDPMessaging::RUDPMessaging(
@@ -70,7 +70,7 @@ namespace ortc
                                    ITransportStreamPtr receiveStream,
                                    ITransportStreamPtr sendStream,
                                    size_t maxMessageSizeInBytes
-                                   ) :
+                                   ) noexcept :
         MessageQueueAssociator(queue),
         mDelegate(IRUDPMessagingDelegateProxy::createWeak(queue, delegate)),
         mOuterReceiveStream(receiveStream->getWriter()),
@@ -83,7 +83,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::init()
+      void RUDPMessaging::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
         mWireReceiveStreamSubscription = mWireReceiveStream->subscribe(mThisWeak.lock());
@@ -94,7 +94,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPMessaging::~RUDPMessaging()
+      RUDPMessaging::~RUDPMessaging() noexcept
       {
         if(isNoop()) return;
         
@@ -104,7 +104,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPMessagingPtr RUDPMessaging::convert(IRUDPMessagingPtr messaging)
+      RUDPMessagingPtr RUDPMessaging::convert(IRUDPMessagingPtr messaging) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPMessaging, messaging);
       }
@@ -112,12 +112,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => IRUDPMessaging
-      #pragma mark
+      //
+      // RUDPMessaging => IRUDPMessaging
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPMessaging::toDebug(IRUDPMessagingPtr messaging)
+      ElementPtr RUDPMessaging::toDebug(IRUDPMessagingPtr messaging) noexcept
       {
         if (!messaging) return ElementPtr();
 
@@ -133,12 +133,12 @@ namespace ortc
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
                                                     size_t maxMessageSizeInBytes
-                                                    )
+                                                    ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!listener)
-        ZS_THROW_INVALID_ARGUMENT_IF(!delegate)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(listener);
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
@@ -164,12 +164,12 @@ namespace ortc
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
                                                     size_t maxMessageSizeInBytes
-                                                    )
+                                                    ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!session)
-        ZS_THROW_INVALID_ARGUMENT_IF(!delegate)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(session);
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
@@ -196,12 +196,12 @@ namespace ortc
                                                   ITransportStreamPtr receiveStream,
                                                   ITransportStreamPtr sendStream,
                                                   size_t maxMessageSizeInBytes
-                                                  )
+                                                  ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!session)
-        ZS_THROW_INVALID_ARGUMENT_IF(!delegate)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(session);
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         RUDPMessagingPtr pThis(make_shared<RUDPMessaging>(make_private {}, queue, delegate, receiveStream, sendStream, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
@@ -223,7 +223,7 @@ namespace ortc
       IRUDPMessaging::RUDPMessagingStates RUDPMessaging::getState(
                                                                   WORD *outLastErrorCode,
                                                                   String *outLastErrorReason
-                                                                  ) const
+                                                                  ) const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -232,14 +232,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::shutdown()
+      void RUDPMessaging::shutdown() noexcept
       {
         AutoRecursiveLock lock(mLock);
         cancel();
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::shutdownDirection(Shutdown state)
+      void RUDPMessaging::shutdownDirection(Shutdown state) noexcept
       {
         IRUDPChannelPtr channel = getChannel();
         if (!channel) return;
@@ -247,14 +247,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes)
+      void RUDPMessaging::setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept
       {
         AutoRecursiveLock lock(mLock);
         mMaxMessageSizeInBytes = maxMessageSizeInBytes;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress RUDPMessaging::getConnectedRemoteIP()
+      IPAddress RUDPMessaging::getConnectedRemoteIP() noexcept
       {
         IRUDPChannelPtr channel = getChannel();
         if (!channel) return IPAddress();
@@ -262,7 +262,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String RUDPMessaging::getRemoteConnectionInfo()
+      String RUDPMessaging::getRemoteConnectionInfo() noexcept
       {
         IRUDPChannelPtr channel = getChannel();
         if (!channel) return String();
@@ -273,9 +273,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => IRUDPChannelDelegate
-      #pragma mark
+      //
+      // RUDPMessaging => IRUDPChannelDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPMessaging::onRDUPChannelStateChanged(
@@ -325,9 +325,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => ITransportStreamWriterDelegate
-      #pragma mark
+      //
+      // RUDPMessaging => ITransportStreamWriterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPMessaging::onTransportStreamWriterReady(ITransportStreamWriterPtr writer)
@@ -349,9 +349,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => ITransportStreamReaderDelegate
-      #pragma mark
+      //
+      // RUDPMessaging => ITransportStreamReaderDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPMessaging::onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
@@ -365,12 +365,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging => (internal)
-      #pragma mark
+      //
+      // RUDPMessaging => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPMessaging::log(const char *message) const
+      Log::Params RUDPMessaging::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RUDPMessaging");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -378,13 +378,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPMessaging::debug(const char *message) const
+      Log::Params RUDPMessaging::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPMessaging::toDebug() const
+      ElementPtr RUDPMessaging::toDebug() const noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -423,7 +423,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::step()
+      void RUDPMessaging::step() noexcept
       {
         if (isShutdown()) {
           ZS_LOG_DEBUG(log("step forwarding to cancel"))
@@ -439,7 +439,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPMessaging::stepSendData()
+      bool RUDPMessaging::stepSendData() noexcept
       {
         if (!mInformedWireSendReady) {
           ZS_LOG_TRACE(log("wire has not informed it's ready to send data"))
@@ -464,7 +464,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPMessaging::stepReceiveData()
+      bool RUDPMessaging::stepReceiveData() noexcept
       {
         if (!mInformedOuterReceiveReady) {
           ZS_LOG_TRACE(log("outer has not informed it's ready to receive data"))
@@ -509,7 +509,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::cancel()
+      void RUDPMessaging::cancel() noexcept
       {
         AutoRecursiveLock lock(mLock);  // just in case
 
@@ -544,7 +544,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::setState(RUDPMessagingStates state)
+      void RUDPMessaging::setState(RUDPMessagingStates state) noexcept
       {
         if (state == mCurrentState) return;
         ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
@@ -564,7 +564,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPMessaging::setError(WORD errorCode, const char *inReason)
+      void RUDPMessaging::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason);
         if (reason.isEmpty()) {
@@ -589,7 +589,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IRUDPChannelPtr RUDPMessaging::getChannel() const
+      IRUDPChannelPtr RUDPMessaging::getChannel() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mChannel;
@@ -599,12 +599,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPMessagingFactory
-      #pragma mark
+      //
+      // IRUDPMessagingFactory
+      //
 
       //-------------------------------------------------------------------------
-      IRUDPMessagingFactory &IRUDPMessagingFactory::singleton()
+      IRUDPMessagingFactory &IRUDPMessagingFactory::singleton() noexcept
       {
         return RUDPMessagingFactory::singleton();
       }
@@ -617,7 +617,7 @@ namespace ortc
                                                             ITransportStreamPtr receiveStream,
                                                             ITransportStreamPtr sendStream,
                                                             size_t maxMessageSizeInBytes
-                                                            )
+                                                            ) noexcept
       {
         if (this) {}
         return RUDPMessaging::acceptChannel(queue, listener, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
@@ -631,7 +631,7 @@ namespace ortc
                                                             ITransportStreamPtr receiveStream,
                                                             ITransportStreamPtr sendStream,
                                                             size_t maxMessageSizeInBytes
-                                                            )
+                                                            ) noexcept
       {
         if (this) {}
         return RUDPMessaging::acceptChannel(queue, session, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
@@ -646,7 +646,7 @@ namespace ortc
                                                           ITransportStreamPtr receiveStream,
                                                           ITransportStreamPtr sendStream,
                                                           size_t maxMessageSizeInBytes
-                                                          )
+                                                          ) noexcept
       {
         if (this) {}
         return RUDPMessaging::openChannel(queue, session, delegate, connectionInfo, receiveStream, sendStream, maxMessageSizeInBytes);
@@ -658,12 +658,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPMessaging
-    #pragma mark
+    //
+    // IRUDPMessaging
+    //
 
     //-------------------------------------------------------------------------
-    const char *IRUDPMessaging::toString(RUDPMessagingStates state)
+    const char *IRUDPMessaging::toString(RUDPMessagingStates state) noexcept
     {
       switch (state) {
         case IRUDPMessaging::RUDPMessagingState_Connecting:   return "Connecting";
@@ -671,17 +671,18 @@ namespace ortc
         case IRUDPMessaging::RUDPMessagingState_ShuttingDown: return "Shutting down";
         case IRUDPMessaging::RUDPMessagingState_Shutdown:     return "Shutdown";
       }
+      ZS_ASSERT_FAIL("unknown rudp messaging state");
       return "UNDEFINED";
     }
 
     //-------------------------------------------------------------------------
-    const char *IRUDPMessaging::toString(RUDPMessagingShutdownReasons reason)
+    const char *IRUDPMessaging::toString(RUDPMessagingShutdownReasons reason) noexcept
     {
       return IRUDPChannel::toString((IRUDPChannel::RUDPChannelShutdownReasons)reason);
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IRUDPMessaging::toDebug(IRUDPMessagingPtr messaging)
+    ElementPtr IRUDPMessaging::toDebug(IRUDPMessagingPtr messaging) noexcept
     {
       return internal::RUDPMessaging::toDebug(messaging);
     }
@@ -694,7 +695,7 @@ namespace ortc
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
                                                     size_t maxMessageSizeInBytes
-                                                    )
+                                                    ) noexcept
     {
       return internal::IRUDPMessagingFactory::singleton().acceptChannel(queue, listener, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
     }
@@ -707,7 +708,7 @@ namespace ortc
                                                     ITransportStreamPtr receiveStream,
                                                     ITransportStreamPtr sendStream,
                                                     size_t maxMessageSizeInBytes
-                                                    )
+                                                    ) noexcept
     {
       return internal::IRUDPMessagingFactory::singleton().acceptChannel(queue, session, delegate, receiveStream, sendStream, maxMessageSizeInBytes);
     }
@@ -721,7 +722,7 @@ namespace ortc
                                                   ITransportStreamPtr receiveStream,
                                                   ITransportStreamPtr sendStream,
                                                   size_t maxMessageSizeInBytes
-                                                  )
+                                                  ) noexcept
     {
       return internal::IRUDPMessagingFactory::singleton().openChannel(queue, session, delegate, connectionInfo, receiveStream, sendStream, maxMessageSizeInBytes);
     }

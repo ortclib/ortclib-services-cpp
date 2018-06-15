@@ -108,12 +108,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static bool isEqual(const IICESocket::Candidate &candidate1, const IICESocket::Candidate &candidate2)
+      static bool isEqual(const IICESocket::Candidate &candidate1, const IICESocket::Candidate &candidate2) noexcept
       {
         if (candidate1.mType != candidate2.mType) return false;
         if (candidate1.mPriority != candidate2.mPriority) return false;
@@ -125,7 +125,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      static IICESocket::Types normalize(IICESocket::Types transport)
+      static IICESocket::Types normalize(IICESocket::Types transport) noexcept
       {
         if (transport == ICESocket::Type_Relayed)
           return ICESocket::Type_Relayed;
@@ -133,7 +133,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static IPAddress getViaLocalIP(const ICESocket::Candidate &candidate)
+      static IPAddress getViaLocalIP(const ICESocket::Candidate &candidate) noexcept
       {
         switch (candidate.mType) {
           case IICESocket::Type_Unknown:          break;
@@ -150,28 +150,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSettingsDefaults
-      #pragma mark
+      //
+      // ICESocketSettingsDefaults
+      //
 
       class ICESocketSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~ICESocketSettingsDefaults()
+        ~ICESocketSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static ICESocketSettingsDefaultsPtr singleton()
+        static ICESocketSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<ICESocketSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static ICESocketSettingsDefaultsPtr create()
+        static ICESocketSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<ICESocketSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -179,7 +179,7 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setBool(ORTC_SERVICES_SETTING_ICE_SOCKET_FORCE_USE_TURN, false);
           ISettings::setBool(ORTC_SERVICES_SETTING_ICE_SOCKET_INTERFACE_SUPPORT_IPV6, false);
@@ -192,7 +192,7 @@ namespace ortc
       };
 
       //-------------------------------------------------------------------------
-      void installICESocketSettingsDefaults()
+      void installICESocketSettingsDefaults() noexcept
       {
         ICESocketSettingsDefaults::singleton();
       }
@@ -201,9 +201,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket
-      #pragma mark
+      //
+      // ICESocket
+      //
 
       //-----------------------------------------------------------------------
       ICESocket::ICESocket(
@@ -215,7 +215,7 @@ namespace ortc
                            bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
                            WORD port,
                            IICESocketPtr foundationSocket
-                           ) :
+                           ) noexcept :
         MessageQueueAssociator(queue),
 
         SharedRecursiveLock(SharedRecursiveLock::create()),
@@ -271,7 +271,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::init()
+      void ICESocket::init() noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_DETAIL(log("init"))
@@ -283,7 +283,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      ICESocket::~ICESocket()
+      ICESocket::~ICESocket() noexcept
       {
         if (isNoop()) return;
 
@@ -293,13 +293,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ICESocketPtr ICESocket::convert(IICESocketPtr socket)
+      ICESocketPtr ICESocket::convert(IICESocketPtr socket) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(ICESocket, socket);
       }
 
       //-----------------------------------------------------------------------
-      ICESocketPtr ICESocket::convert(ForICESocketSessionPtr socket)
+      ICESocketPtr ICESocket::convert(ForICESocketSessionPtr socket) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(ICESocket, socket);
       }
@@ -308,12 +308,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => IICESocket
-      #pragma mark
+      //
+      // ICESocket => IICESocket
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr ICESocket::toDebug(IICESocketPtr socket)
+      ElementPtr ICESocket::toDebug(IICESocketPtr socket) noexcept
       {
         if (!socket) return ElementPtr();
 
@@ -330,7 +330,7 @@ namespace ortc
                                      WORD port,
                                      bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
                                      IICESocketPtr foundationSocket
-                                     )
+                                     ) noexcept
       {
         ICESocketPtr pThis(make_shared<ICESocket>(
                                                   make_private{},
@@ -347,7 +347,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IICESocketSubscriptionPtr ICESocket::subscribe(IICESocketDelegatePtr originalDelegate)
+      IICESocketSubscriptionPtr ICESocket::subscribe(IICESocketDelegatePtr originalDelegate) noexcept
       {
         ZS_LOG_DETAIL(log("subscribing to socket state"))
 
@@ -380,7 +380,7 @@ namespace ortc
       IICESocket::ICESocketStates ICESocket::getState(
                                                       WORD *outLastErrorCode,
                                                       String *outLastErrorReason
-                                                      ) const
+                                                      ) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -389,21 +389,21 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String ICESocket::getUsernameFrag() const
+      String ICESocket::getUsernameFrag() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mUsernameFrag;
       }
 
       //-----------------------------------------------------------------------
-      String ICESocket::getPassword() const
+      String ICESocket::getPassword() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mPassword;
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::shutdown()
+      void ICESocket::shutdown() noexcept
       {
         ZS_LOG_DETAIL(log("shutdown requested"))
 
@@ -412,7 +412,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed)
+      void ICESocket::wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -434,7 +434,7 @@ namespace ortc
       void ICESocket::getLocalCandidates(
                                          CandidateList &outCandidates,
                                          String *outLocalCandidateVersion
-                                         )
+                                         ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -481,7 +481,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String ICESocket::getLocalCandidatesVersion() const
+      String ICESocket::getLocalCandidatesVersion() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return string(mLastCandidateCRC);
@@ -491,16 +491,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => IICESocketForICESocketSession
-      #pragma mark
+      //
+      // ICESocket => IICESocketForICESocketSession
+      //
 
       //-----------------------------------------------------------------------
-      bool ICESocket::attach(ICESocketSessionPtr inSession)
+      bool ICESocket::attach(ICESocketSessionPtr inSession) noexcept
       {
         UseICESocketSessionPtr session = inSession;
 
-        ZS_THROW_INVALID_ARGUMENT_IF(!session)
+        ZS_ASSERT(session);
 
         AutoRecursiveLock lock(*this);
 
@@ -524,7 +524,7 @@ namespace ortc
                              const BYTE *buffer,
                              size_t bufferLengthInBytes,
                              bool isUserData
-                             )
+                             ) noexcept
       {
         if (isShutdown()) {
           ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("cannot send packet via ICE socket as it is already shutdown") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true : false) + ZS_PARAM("buffer length", bufferLengthInBytes) << ZS_PARAM("user data", isUserData))
@@ -603,7 +603,7 @@ namespace ortc
                                const IPAddress &viaIP,
                                const IPAddress &viaLocalIP,
                                const IPAddress &source
-                               )
+                               ) noexcept
       {
         removeRoute(session);
         RouteTuple tuple(viaIP, viaLocalIP, source);
@@ -611,7 +611,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::removeRoute(ICESocketSessionPtr inSession)
+      void ICESocket::removeRoute(ICESocketSessionPtr inSession) noexcept
       {
         for (QuickRouteMap::iterator iter = mRoutes.begin(); iter != mRoutes.end(); ) {
           QuickRouteMap::iterator current = iter; ++iter;
@@ -624,7 +624,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::onICESocketSessionClosed(PUID sessionID)
+      void ICESocket::onICESocketSessionClosed(PUID sessionID) noexcept
       {
         ZS_LOG_DETAIL(log("notified ICE session closed") + ZS_PARAM("session id", sessionID))
 
@@ -645,12 +645,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ISocketDelegate
-      #pragma mark
+      //
+      // ICESocket => ISocketDelegate
+      //
 
       //-----------------------------------------------------------------------
-      void ICESocket::monitorWriteReadyOnAllSessions(bool monitor)
+      void ICESocket::monitorWriteReadyOnAllSessions(bool monitor) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -814,16 +814,17 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ITURNSocketDelegate
-      #pragma mark
+      //
+      // ICESocket => ITURNSocketDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocket::onTURNSocketStateChanged(
                                                ITURNSocketPtr socket,
-                                               TURNSocketStates state
+                                               ZS_MAYBE_USED() TURNSocketStates state
                                                )
       {
+        ZS_MAYBE_USED(state);
         AutoRecursiveLock lock(*this);
         ZS_LOG_DEBUG(log("turn socket state changed"))
         step();
@@ -835,7 +836,7 @@ namespace ortc
                                                      IPAddress source,
                                                      const BYTE *packet,
                                                      size_t packetLengthInBytes
-                                                     )
+                                                     ) noexcept
       {
         // WARNING: This method cannot be called within a lock as it calls delegates synchronously.
         CandidatePtr viaCandidate;
@@ -850,7 +851,7 @@ namespace ortc
           LocalSocketPtr &localSocket = (*found).second;
 
           TURNInfoSocketMap::iterator foundInfo = localSocket->mTURNSockets.find(socket);
-          ZS_THROW_BAD_STATE_IF(foundInfo == localSocket->mTURNSockets.end()) // dangling TURN socket reference must not happen
+          ZS_ASSERT(foundInfo != localSocket->mTURNSockets.end()); // dangling TURN socket reference must not happen
 
           viaCandidate = (*foundInfo).second->mRelay;
           viaLocalCandidate = localSocket->mLocal;
@@ -865,7 +866,7 @@ namespace ortc
                                                  IPAddress destination,
                                                  const BYTE *packet,
                                                  size_t packetLengthInBytes
-                                                 )
+                                                 ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -932,9 +933,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ISTUNDiscoveryDelegate
-      #pragma mark
+      //
+      // ICESocket => ISTUNDiscoveryDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocket::onSTUNDiscoverySendPacket(
@@ -987,9 +988,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ITimerDelegate
-      #pragma mark
+      //
+      // ICESocket => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocket::onWake()
@@ -1003,9 +1004,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ITimerDelegate
-      #pragma mark
+      //
+      // ICESocket => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocket::onTimer(ITimerPtr timer)
@@ -1049,9 +1050,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => ITimerDelegate
-      #pragma mark
+      //
+      // ICESocket => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocket::onLookupCompleted(IDNSQueryPtr query)
@@ -1066,12 +1067,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket => (internal)
-      #pragma mark
+      //
+      // ICESocket => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params ICESocket::log(const char *message) const
+      Log::Params ICESocket::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("ICESocket");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -1079,13 +1080,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params ICESocket::debug(const char *message) const
+      Log::Params ICESocket::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr ICESocket::toDebug() const
+      ElementPtr ICESocket::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -1143,7 +1144,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::cancel()
+      void ICESocket::cancel() noexcept
       {
         if (isShutdown()) {
           ZS_LOG_DEBUG(log("already cancelled"))
@@ -1225,7 +1226,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::setState(ICESocketStates state)
+      void ICESocket::setState(ICESocketStates state) noexcept
       {
         if (mCurrentState == state) return;
 
@@ -1241,7 +1242,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::setError(WORD errorCode, const char *inReason)
+      void ICESocket::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -1260,7 +1261,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::step()
+      void ICESocket::step() noexcept
       {
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -1292,7 +1293,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::stepResolveLocalIPs()
+      bool ICESocket::stepResolveLocalIPs() noexcept
       {
         ZS_LOG_TRACE(log("resolve local IPs"))
 
@@ -1436,7 +1437,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::stepBind()
+      bool ICESocket::stepBind() noexcept
       {
         if (mSockets.size() > 0) {
           if (!mRebindCheckNow) {
@@ -1623,7 +1624,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::stepSTUN()
+      bool ICESocket::stepSTUN() noexcept
       {
         ZS_LOG_TRACE(log("step STUN"))
 
@@ -1706,7 +1707,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::stepTURN()
+      bool ICESocket::stepTURN() noexcept
       {
         Time tick = zsLib::now();
 
@@ -2048,7 +2049,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::stepCandidates()
+      bool ICESocket::stepCandidates() noexcept
       {
         DWORD crcValue = 0;
 
@@ -2105,7 +2106,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::getLocalIPs(IPAddressList &outIPs)
+      bool ICESocket::getLocalIPs(IPAddressList &outIPs) noexcept
       {
         typedef Sorter::DataList DataList;
 
@@ -2271,12 +2272,12 @@ namespace ortc
         {
           ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_FRIENDLY_NAME;
 
-          DWORD dwSize = 0;
+          //DWORD dwSize = 0;
           DWORD dwRetVal = 0;        
 
           ULONG family = AF_UNSPEC;
 
-          LPVOID lpMsgBuf = NULL;
+          //LPVOID lpMsgBuf = NULL;
 
           PIP_ADAPTER_ADDRESSES pAddresses = NULL;
 
@@ -2296,7 +2297,7 @@ namespace ortc
           do {
 
             pAddresses = (IP_ADAPTER_ADDRESSES *) MALLOC(outBufLen);
-            ZS_THROW_BAD_STATE_IF(NULL == pAddresses)
+            ZS_ASSERT(NULL != pAddresses);
 
             dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
 
@@ -2473,7 +2474,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::stopSTUNAndTURN(LocalSocketPtr localSocket)
+      void ICESocket::stopSTUNAndTURN(LocalSocketPtr localSocket) noexcept
       {
         for (TURNInfoMap::iterator infoIter = localSocket->mTURNInfos.begin(); infoIter != localSocket->mTURNInfos.end();)
         {
@@ -2519,7 +2520,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocket::closeIfTURNGone(LocalSocketPtr localSocket)
+      bool ICESocket::closeIfTURNGone(LocalSocketPtr localSocket) noexcept
       {
         if (localSocket->mTURNSockets.size() > 0) {
           ZS_LOG_DEBUG(log("turn socket(s) still pending") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()) + ZS_PARAM("total TURN sockets remaining", localSocket->mTURNInfos.size()))
@@ -2531,7 +2532,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::hardClose(LocalSocketPtr localSocket)
+      void ICESocket::hardClose(LocalSocketPtr localSocket) noexcept
       {
         if (localSocket->mSocket) {
           ZS_LOG_WARNING(Detail, log("performing hard shutdown on socket") + ZS_PARAM("local candidate", localSocket->mLocal->toDebug()))
@@ -2541,7 +2542,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::clearRelated(LocalSocketPtr localSocket)
+      void ICESocket::clearRelated(LocalSocketPtr localSocket) noexcept
       {
         stopSTUNAndTURN(localSocket);
 
@@ -2587,7 +2588,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void ICESocket::clearTURN(ITURNSocketPtr turn)
+      void ICESocket::clearTURN(ITURNSocketPtr turn) noexcept
       {
         if (!turn) return;
         LocalSocketTURNSocketMap::iterator found = mSocketTURNs.find(turn);
@@ -2597,7 +2598,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::clearSTUN(ISTUNDiscoveryPtr stun)
+      void ICESocket::clearSTUN(ISTUNDiscoveryPtr stun) noexcept
       {
         if (!stun) return;
         LocalSocketSTUNDiscoveryMap::iterator found = mSocketSTUNs.find(stun);
@@ -2613,7 +2614,7 @@ namespace ortc
                                            const IPAddress &source,
                                            const BYTE *buffer,
                                            size_t bufferLengthInBytes
-                                           )
+                                           ) noexcept
       {
         // WARNING: DO NOT CALL THIS METHOD WHILE INSIDE A LOCK AS IT COULD
         //          ** DEADLOCK **. This method calls delegates synchronously.
@@ -2796,15 +2797,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket::TURNInfo
-      #pragma mark
+      //
+      // ICESocket::TURNInfo
+      //
 
       //-----------------------------------------------------------------------
       ICESocket::TURNInfo::TURNInfo(
                                     WORD componentID,
                                     ULONG nextLocalPreference
-                                    ) :
+                                    ) noexcept :
         mTURNRetryDuration(Milliseconds(ORTC_SERVICES_TURN_DEFAULT_RETRY_AFTER_DURATION_IN_MILLISECONDS))
       {
         mRelay = make_shared<Candidate>();
@@ -2818,15 +2819,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket::STUNInfo
-      #pragma mark
+      //
+      // ICESocket::STUNInfo
+      //
 
       //-----------------------------------------------------------------------
       ICESocket::STUNInfo::STUNInfo(
                                     WORD componentID,
                                     ULONG nextLocalPreference
-                                    )
+                                    ) noexcept
       {
         mReflexive = make_shared<Candidate>();
         mReflexive->mLocalPreference = (decltype(mReflexive->mLocalPreference))nextLocalPreference;
@@ -2836,7 +2837,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::LocalSocket::clearSTUN(ISTUNDiscoveryPtr stunDiscovery)
+      void ICESocket::LocalSocket::clearSTUN(ISTUNDiscoveryPtr stunDiscovery) noexcept
       {
         STUNInfoDiscoveryMap::iterator found = mSTUNDiscoveries.find(stunDiscovery);
         if (found == mSTUNDiscoveries.end()) return;
@@ -2855,15 +2856,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket::LocalSocket
-      #pragma mark
+      //
+      // ICESocket::LocalSocket
+      //
 
       //-----------------------------------------------------------------------
       ICESocket::LocalSocket::LocalSocket(
                                           WORD componentID,
                                           ULONG localPreference
-                                          )
+                                          ) noexcept
       {
         mLocal = make_shared<Candidate>();
         mLocal->mType = ICESocket::Type_Local;
@@ -2872,14 +2873,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::LocalSocket::updateLocalPreference(ULONG localPreference)
+      void ICESocket::LocalSocket::updateLocalPreference(ULONG localPreference) noexcept
       {
         mLocal->mLocalPreference = (decltype(mLocal->mLocalPreference)) localPreference;
         mLocal->mPriority = ((1 << 24)*(static_cast<DWORD>(mLocal->mType))) + ((1 << 8)*(static_cast<DWORD>(mLocal->mLocalPreference))) + (256 - mLocal->mComponentID);
       }
 
       //-----------------------------------------------------------------------
-      void ICESocket::LocalSocket::clearTURN(ITURNSocketPtr turnSocket)
+      void ICESocket::LocalSocket::clearTURN(ITURNSocketPtr turnSocket) noexcept
       {
         TURNInfoSocketMap::iterator found = mTURNSockets.find(turnSocket);
         if (found == mTURNSockets.end()) return;
@@ -2903,12 +2904,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketFactory::Sorter
-      #pragma mark
+      //
+      // IICESocketFactory::Sorter
+      //
 
       //-----------------------------------------------------------------------
-      bool ICESocket::Sorter::compareLocalIPs(const Data &data1, const Data &data2)
+      bool ICESocket::Sorter::compareLocalIPs(const Data &data1, const Data &data2) noexcept
       {
         if (data1.mOrderIndex < data2.mOrderIndex) return true;
         if (data1.mOrderIndex > data2.mOrderIndex) return false;
@@ -2931,7 +2932,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ICESocket::Sorter::Data ICESocket::Sorter::prepare(const IPAddress &ip)
+      ICESocket::Sorter::Data ICESocket::Sorter::prepare(const IPAddress &ip) noexcept
       {
         Data data;
         data.mIP = ip;
@@ -2942,7 +2943,7 @@ namespace ortc
       ICESocket::Sorter::Data ICESocket::Sorter::prepare(
                                                          const char *hostName,
                                                          const IPAddress &ip
-                                                         )
+                                                         ) noexcept
       {
         Data data;
         data.mHostName = String(hostName);
@@ -2956,7 +2957,7 @@ namespace ortc
                                                          const IPAddress &ip,
                                                          const char *name,
                                                          const InterfaceNameToOrderMap &prefs
-                                                         )
+                                                         ) noexcept
       {
         return prepare(hostName, ip, name, 0, prefs);
       }
@@ -2966,7 +2967,7 @@ namespace ortc
                                                          const IPAddress &ip,
                                                          const char *name,
                                                          const InterfaceNameToOrderMap &prefs
-                                                         )
+                                                         ) noexcept
       {
         return prepare(ip, name, 0, prefs);
       }
@@ -2977,7 +2978,7 @@ namespace ortc
                                                          const char *name,
                                                          ULONG metric,
                                                          const InterfaceNameToOrderMap &prefs
-                                                         )
+                                                         ) noexcept
       {
         return prepare(NULL, ip, name, metric, prefs);
       }
@@ -2989,7 +2990,7 @@ namespace ortc
                                                          const char *name,
                                                          ULONG metric,
                                                          const InterfaceNameToOrderMap &prefs
-                                                         )
+                                                         ) noexcept
       {
         Data data;
 
@@ -3055,7 +3056,7 @@ namespace ortc
       void ICESocket::Sorter::sort(
                                    DataList &ioDataList,
                                    IPAddressList &outIPs
-                                   )
+                                   ) noexcept
       {
         ioDataList.sort(Sorter::compareLocalIPs);
         for (DataList::iterator iter = ioDataList.begin(); iter != ioDataList.end(); ++iter) {
@@ -3068,12 +3069,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketFactory
-      #pragma mark
+      //
+      // IICESocketFactory
+      //
 
       //-----------------------------------------------------------------------
-      IICESocketFactory &IICESocketFactory::singleton()
+      IICESocketFactory &IICESocketFactory::singleton() noexcept
       {
         return ICESocketFactory::singleton();
       }
@@ -3087,7 +3088,7 @@ namespace ortc
                                              WORD port,
                                              bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
                                              IICESocketPtr foundationSocket
-                                             )
+                                             ) noexcept
       {
         if (this) {}
         return internal::ICESocket::create(queue, delegate, turnServers, stunServers, port, firstWORDInAnyPacketWillNotConflictWithTURNChannels, foundationSocket);
@@ -3099,26 +3100,27 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocket
-    #pragma mark
+    //
+    // IICESocket
+    //
 
     //-------------------------------------------------------------------------
-    const char *IICESocket::toString(ICESocketStates states)
+    const char *IICESocket::toString(ICESocketStates states) noexcept
     {
       switch (states) {
-        case ICESocketState_Pending:     return "Preparing";
-        case ICESocketState_Ready:         return "Ready";
-        case ICESocketState_GoingToSleep:  return "Going to sleep";
-        case ICESocketState_Sleeping:      return "Sleeping";
-        case ICESocketState_ShuttingDown:  return "Shutting down";
-        case ICESocketState_Shutdown:      return "Shutdown";
+        case ICESocketState_Pending:      return "Preparing";
+        case ICESocketState_Ready:        return "Ready";
+        case ICESocketState_GoingToSleep: return "Going to sleep";
+        case ICESocketState_Sleeping:     return "Sleeping";
+        case ICESocketState_ShuttingDown: return "Shutting down";
+        case ICESocketState_Shutdown:     return "Shutdown";
       }
+      ZS_ASSERT_FAIL("ICE socket state is not known");
       return "UNDEFINED";
     }
 
     //-------------------------------------------------------------------------
-    const char *IICESocket::toString(Types type)
+    const char *IICESocket::toString(Types type) noexcept
     {
       switch (type) {
         case Type_Unknown:          return "unknown";
@@ -3136,7 +3138,7 @@ namespace ortc
                              const CandidateList &inNewCandidatesList,
                              CandidateList &outAddedCandidates,
                              CandidateList &outRemovedCandidates
-                             )
+                             ) noexcept
     {
       outAddedCandidates.clear();
       outRemovedCandidates.clear();
@@ -3187,7 +3189,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *IICESocket::toString(ICEControls control)
+    const char *IICESocket::toString(ICEControls control) noexcept
     {
       switch (control) {
         case ICEControl_Controlling:      return "Controlling";
@@ -3197,7 +3199,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IICESocket::toDebug(IICESocketPtr socket)
+    ElementPtr IICESocket::toDebug(IICESocketPtr socket) noexcept
     {
       return internal::ICESocket::toDebug(socket);
     }
@@ -3211,7 +3213,7 @@ namespace ortc
                                      WORD port,
                                      bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
                                      IICESocketPtr foundationSocket
-                                     )
+                                     ) noexcept
     {
       return internal::IICESocketFactory::singleton().create(
                                                              queue,
@@ -3227,19 +3229,19 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocket::Candidate
-    #pragma mark
+    //
+    // IICESocket::Candidate
+    //
 
     //-------------------------------------------------------------------------
-    IICESocket::CandidatePtr IICESocket::Candidate::create()
+    IICESocket::CandidatePtr IICESocket::Candidate::create() noexcept
     {
       CandidatePtr pThis(make_shared<Candidate>());
       return pThis;
     }
 
     //-------------------------------------------------------------------------
-    bool IICESocket::Candidate::hasData() const
+    bool IICESocket::Candidate::hasData() const noexcept
     {
       return ((IICESocket::Type_Unknown != mType) ||
               (mFoundation.hasData()) ||
@@ -3250,7 +3252,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IICESocket::Candidate::toDebug() const
+    ElementPtr IICESocket::Candidate::toDebug() const noexcept
     {
       ElementPtr resultEl = Element::create("IICESocket::Candidate");
 
@@ -3269,18 +3271,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocket::TURNServerInfo
-    #pragma mark
+    //
+    // IICESocket::TURNServerInfo
+    //
 
     //-------------------------------------------------------------------------
-    IICESocket::TURNServerInfoPtr IICESocket::TURNServerInfo::create()
+    IICESocket::TURNServerInfoPtr IICESocket::TURNServerInfo::create() noexcept
     {
       return make_shared<TURNServerInfo>();
     }
 
     //-------------------------------------------------------------------------
-    bool IICESocket::TURNServerInfo::hasData() const
+    bool IICESocket::TURNServerInfo::hasData() const noexcept
     {
       return (mTURNServer.hasData()) ||
              (mTURNServerUsername.hasData()) ||
@@ -3290,7 +3292,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IICESocket::TURNServerInfo::toDebug() const
+    ElementPtr IICESocket::TURNServerInfo::toDebug() const noexcept
     {
       ElementPtr resultEl = Element::create("IICESocket::TURNServerInfo");
 
@@ -3307,25 +3309,25 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocket::STUNServerInfo
-    #pragma mark
+    //
+    // IICESocket::STUNServerInfo
+    //
 
     //-------------------------------------------------------------------------
-    IICESocket::STUNServerInfoPtr IICESocket::STUNServerInfo::create()
+    IICESocket::STUNServerInfoPtr IICESocket::STUNServerInfo::create() noexcept
     {
       return make_shared<STUNServerInfo>();
     }
 
     //-------------------------------------------------------------------------
-    bool IICESocket::STUNServerInfo::hasData() const
+    bool IICESocket::STUNServerInfo::hasData() const noexcept
     {
       return (mSTUNServer.hasData()) ||
              (mSRVSTUNServerUDP);
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IICESocket::STUNServerInfo::toDebug() const
+    ElementPtr IICESocket::STUNServerInfo::toDebug() const noexcept
     {
       ElementPtr resultEl = Element::create("IICESocket::STUNServerInfo");
 

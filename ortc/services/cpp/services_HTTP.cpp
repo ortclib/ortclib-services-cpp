@@ -85,28 +85,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPSettingsDefaults
-      #pragma mark
+      //
+      // HTTPSettingsDefaults
+      //
 
       class HTTPSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~HTTPSettingsDefaults()
+        ~HTTPSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static HTTPSettingsDefaultsPtr singleton()
+        static HTTPSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<HTTPSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static HTTPSettingsDefaultsPtr create()
+        static HTTPSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<HTTPSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -114,14 +114,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installHttpSettingsDefaults()
+      void installHttpSettingsDefaults() noexcept
       {
         HTTPSettingsDefaults::singleton();
       }
@@ -130,19 +130,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPGlobalSafeReference
-      #pragma mark
+      //
+      // HTTPGlobalSafeReference
+      //
 
       class HTTPGlobalSafeReference
       {
       public:
-        HTTPGlobalSafeReference(HTTPPtr reference) :
+        HTTPGlobalSafeReference(HTTPPtr reference) noexcept :
           mSafeReference(reference)
         {
         }
 
-        ~HTTPGlobalSafeReference()
+        ~HTTPGlobalSafeReference() noexcept
         {
           mSafeReference->cancel();
           mSafeReference.reset();
@@ -155,12 +155,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP
-      #pragma mark
+      //
+      // HTTP
+      //
 
       //-----------------------------------------------------------------------
-      HTTP::HTTP(const make_private &) :
+      HTTP::HTTP(const make_private &) noexcept :
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mShouldShutdown(false),
         mMultiCurl(NULL)
@@ -169,12 +169,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::init()
+      void HTTP::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTP::~HTTP()
+      HTTP::~HTTP() noexcept
       {
         if (isNoop()) return;
 
@@ -187,15 +187,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => IHTTP
-      #pragma mark
+      //
+      // HTTP => IHTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQueryPtr HTTP::query(
                                      IHTTPQueryDelegatePtr delegate,
                                      const QueryInfo &info
-                                     )
+                                     ) noexcept
       {
         HTTPPtr pThis = singleton();
         HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, info);
@@ -212,20 +212,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => friend HTTPQuery
-      #pragma mark
+      //
+      // HTTP => friend HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => (internal)
-      #pragma mark
+      //
+      // HTTP => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      HTTPPtr HTTP::singleton()
+      HTTPPtr HTTP::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<HTTP> singleton(HTTP::create());
@@ -237,7 +237,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      HTTPPtr HTTP::create()
+      HTTPPtr HTTP::create() noexcept
       {
         HTTPPtr pThis(make_shared<HTTP>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -246,7 +246,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::log(const char *message) const
+      Log::Params HTTP::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("HTTP");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -254,13 +254,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::slog(const char *message)
+      Log::Params HTTP::slog(const char *message) noexcept
       {
         return Log::Params(message, "HTTP");
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::cancel()
+      void HTTP::cancel() noexcept
       {
         ThreadPtr thread;
         {
@@ -284,7 +284,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::wakeUp()
+      void HTTP::wakeUp() noexcept
       {
         int errorCode = 0;
 
@@ -313,7 +313,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::createWakeUpSocket()
+      void HTTP::createWakeUpSocket() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -364,7 +364,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::processWaiting()
+      void HTTP::processWaiting() noexcept
       {
         for (EventList::iterator iter = mWaitingForRebuildList.begin(); iter != mWaitingForRebuildList.end(); ++iter)
         {
@@ -459,7 +459,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::monitorBegin(HTTPQueryPtr query)
+      void HTTP::monitorBegin(HTTPQueryPtr query) noexcept
       {
         EventPtr event;
 
@@ -492,7 +492,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::monitorEnd(HTTPQueryPtr query)
+      void HTTP::monitorEnd(HTTPQueryPtr query) noexcept
       {
         EventPtr event;
         {
@@ -512,7 +512,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::operator()()
+      void HTTP::operator()() noexcept
       {
         zsLib::debugSetCurrentThreadName("org.ortclib.services.http");
 
@@ -682,9 +682,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery
-      #pragma mark
+      //
+      // HTTP::HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQuery::HTTPQuery(
@@ -692,7 +692,7 @@ namespace ortc
                                  HTTPPtr outer,
                                  IHTTPQueryDelegatePtr delegate,
                                  const QueryInfo &query
-                                 ) :
+                                 ) noexcept :
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         mOuter(outer),
         mDelegate(IHTTPQueryDelegateProxy::create(Helper::getServiceQueue(), delegate)),
@@ -719,12 +719,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::init()
+      void HTTP::HTTPQuery::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTP::HTTPQuery::~HTTPQuery()
+      HTTP::HTTPQuery::~HTTPQuery() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
@@ -737,12 +737,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => IHTTPQuery
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => IHTTPQuery
+      //
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::cancel()
+      void HTTP::HTTPQuery::cancel() noexcept
       {
         ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCancel, os, Http, Cancel, puid, id, mID);
 
@@ -792,7 +792,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTP::HTTPQuery::isComplete() const
+      bool HTTP::HTTPQuery::isComplete() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!mDelegate) return true;
@@ -800,7 +800,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTP::HTTPQuery::wasSuccessful() const
+      bool HTTP::HTTPQuery::wasSuccessful() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (mDelegate) return false;
@@ -810,14 +810,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IHTTP::HTTPStatusCodes HTTP::HTTPQuery::getStatusCode() const
+      IHTTP::HTTPStatusCodes HTTP::HTTPQuery::getStatusCode() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return IHTTP::toStatusCode((WORD)mResponseCode);
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const
+      size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mHeader.MaxRetrievable());
@@ -827,7 +827,7 @@ namespace ortc
       size_t HTTP::HTTPQuery::readHeader(
                                          BYTE *outResultData,
                                          size_t bytesToRead
-                                         )
+                                         ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = mHeader.Get(outResultData, bytesToRead);
@@ -843,7 +843,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::readHeaderAsString(String &outHeader)
+      size_t HTTP::HTTPQuery::readHeaderAsString(String &outHeader) noexcept
       {
         outHeader.clear();
 
@@ -866,7 +866,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::getReadDataAvailableInBytes() const
+      size_t HTTP::HTTPQuery::getReadDataAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mBody.MaxRetrievable());
@@ -876,7 +876,7 @@ namespace ortc
       size_t HTTP::HTTPQuery::readData(
                                        BYTE *outResultData,
                                        size_t bytesToRead
-                                       )
+                                       ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = mBody.Get(outResultData, bytesToRead);
@@ -891,7 +891,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::readDataAsString(String &outResultData)
+      size_t HTTP::HTTPQuery::readDataAsString(String &outResultData) noexcept
       {
         outResultData.clear();
 
@@ -917,16 +917,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => friend HTTP
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => friend HTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQueryPtr HTTP::HTTPQuery::create(
                                                  HTTPPtr outer,
                                                  IHTTPQueryDelegatePtr delegate,
                                                  const QueryInfo &query
-                                                 )
+                                                 ) noexcept
       {
         HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private {}, outer, delegate, query));
         pThis->mThisWeak = pThis;
@@ -935,7 +935,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::prepareCurl()
+      void HTTP::HTTPQuery::prepareCurl() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -1056,7 +1056,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::cleanupCurl()
+      void HTTP::HTTPQuery::cleanupCurl() noexcept
       {
         AutoRecursiveLock lock(*this);
         mOuter.reset();
@@ -1065,14 +1065,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      CURL *HTTP::HTTPQuery::getCURL() const
+      CURL *HTTP::HTTPQuery::getCURL() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mCurl;
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::notifyComplete(CURLcode result)
+      void HTTP::HTTPQuery::notifyComplete(CURLcode result) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -1114,12 +1114,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => (internal)
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::HTTPQuery::log(const char *message) const
+      Log::Params HTTP::HTTPQuery::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("HTTPQuery");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -1132,7 +1132,7 @@ namespace ortc
                                           size_t size,
                                           size_t nmemb,
                                           void *userdata
-                                          )
+                                          ) noexcept
       {
         HTTPQueryPtr pThis = ((HTTPQuery *)userdata)->mThisWeak.lock();
 
@@ -1190,7 +1190,7 @@ namespace ortc
                                         size_t size,
                                         size_t nmemb,
                                         void *userdata
-                                        )
+                                        ) noexcept
       {
         HTTPQueryPtr pThis = ((HTTPQuery *)userdata)->mThisWeak.lock();
 
@@ -1233,7 +1233,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static Log::Params slogQuery(const char *message, PUID id)
+      static Log::Params slogQuery(const char *message, PUID id) noexcept
       {
         ElementPtr objectEl = Element::create("HTTPQuery");
         IHelper::debugAppend(objectEl, "id", id);
@@ -1247,7 +1247,7 @@ namespace ortc
                                  char *data,
                                  size_t size,
                                  void *userdata
-                                 )
+                                 ) noexcept
       {
         const char *typeStr = "UNKNOWN";
         switch (type) {
@@ -1283,12 +1283,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IHTTPFactory
-      #pragma mark
+      //
+      // IHTTPFactory
+      //
 
       //-----------------------------------------------------------------------
-      IHTTPFactory &IHTTPFactory::singleton()
+      IHTTPFactory &IHTTPFactory::singleton() noexcept
       {
         return HTTPFactory::singleton();
       }
@@ -1297,7 +1297,7 @@ namespace ortc
       IHTTPQueryPtr IHTTPFactory::query(
                                         IHTTPQueryDelegatePtr delegate,
                                         const QueryInfo &query
-                                        )
+                                        ) noexcept
       {
         if (this) {}
 #if defined(HAVE_HTTP_CURL) || defined(HAVE_HTTP_WINUWP)
@@ -1313,17 +1313,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTP::QueryInfo
-    #pragma mark
+    //
+    // IHTTP::QueryInfo
+    //
 
     //-------------------------------------------------------------------------
-    IHTTP::QueryInfo::QueryInfo()
+    IHTTP::QueryInfo::QueryInfo() noexcept
     {      
     }
 
     //-------------------------------------------------------------------------
-    IHTTP::QueryInfo::QueryInfo(const QueryInfo &source) :
+    IHTTP::QueryInfo::QueryInfo(const QueryInfo &source) noexcept :
       verb_(source.verb_),
       userAgent_(source.userAgent_),
       url_(source.url_),
@@ -1335,7 +1335,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IHTTP::QueryInfo &IHTTP::QueryInfo::operator=(const QueryInfo &source)
+    IHTTP::QueryInfo &IHTTP::QueryInfo::operator=(const QueryInfo &source) noexcept
     {
       verb_ = source.verb_;
       userAgent_ = source.userAgent_;
@@ -1351,7 +1351,7 @@ namespace ortc
     void IHTTP::QueryInfo::trace(
                                  const char *func,
                                  const char *message
-                                 ) const
+                                 ) const noexcept
     {
       ZS_EVENTING_10(
                      x, i, Basic, HttpQueryInfoTrace, os, Http, Info,
@@ -1372,18 +1372,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTP
-    #pragma mark
+    //
+    // IHTTP
+    //
 
     //-------------------------------------------------------------------------
-    IHTTP::HTTPStatusCodes IHTTP::toStatusCode(WORD statusCode)
+    IHTTP::HTTPStatusCodes IHTTP::toStatusCode(WORD statusCode) noexcept
     {
       return (HTTPStatusCodes)statusCode;
     }
 
     //-------------------------------------------------------------------------
-    const char *IHTTP::toString(HTTPStatusCodes httpStatusCode)
+    const char *IHTTP::toString(HTTPStatusCodes httpStatusCode) noexcept
     {
       switch (httpStatusCode)
       {
@@ -1473,7 +1473,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool IHTTP::isPending(HTTPStatusCodes httpStatusCode, bool noneIsPending)
+    bool IHTTP::isPending(HTTPStatusCodes httpStatusCode, bool noneIsPending) noexcept
     {
       if (noneIsPending) {
         if (HTTPStatusCode_None == httpStatusCode) {
@@ -1484,14 +1484,14 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool IHTTP::isInformational(HTTPStatusCodes httpStatusCode)
+    bool IHTTP::isInformational(HTTPStatusCodes httpStatusCode) noexcept
     {
       return ((httpStatusCode >= HTTPStatusCode_InformationalStart) &&
               (httpStatusCode <= HTTPStatusCode_InformationalEnd));
     }
 
     //-------------------------------------------------------------------------
-    bool IHTTP::isSuccess(HTTPStatusCodes httpStatusCode, bool noneIsSuccess)
+    bool IHTTP::isSuccess(HTTPStatusCodes httpStatusCode, bool noneIsSuccess) noexcept
     {
       if (noneIsSuccess) {
         if (HTTPStatusCode_None == httpStatusCode) {
@@ -1503,14 +1503,14 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool IHTTP::isRedirection(HTTPStatusCodes httpStatusCode)
+    bool IHTTP::isRedirection(HTTPStatusCodes httpStatusCode) noexcept
     {
       return ((httpStatusCode >= HTTPStatusCode_RedirectionStart) &&
               (httpStatusCode <= HTTPStatusCode_RedirectionEnd));
     }
 
     //-------------------------------------------------------------------------
-    bool IHTTP::isError(HTTPStatusCodes httpStatusCode, bool noneIsError)
+    bool IHTTP::isError(HTTPStatusCodes httpStatusCode, bool noneIsError) noexcept
     {
       if (noneIsError) {
         if (HTTPStatusCode_None == httpStatusCode) {
@@ -1521,17 +1521,18 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *IHTTP::toString(Verbs verb)
+    const char *IHTTP::toString(Verbs verb) noexcept
     {
       switch (verb) {
         case Verb_Get:  return "GET";
         case Verb_Post: return "POST";
       }
+      ZS_ASSERT_FAIL("unknown verb");
       return "UNKNOWN";
     }
 
     //-------------------------------------------------------------------------
-    IHTTP::Verbs IHTTP::toVerb(const char *verb) throw (InvalidArgument)
+    IHTTP::Verbs IHTTP::toVerb(const char *verb) noexcept(false)
     {
       String str(verb);
       for (IHTTP::Verbs index = IHTTP::Verb_First; index <= IHTTP::Verb_Last; index = static_cast<IHTTP::Verbs>(static_cast<std::underlying_type<IHTTP::Verbs>::type>(index) + 1)) {
@@ -1546,7 +1547,7 @@ namespace ortc
     IHTTPQueryPtr IHTTP::query(
                                IHTTPQueryDelegatePtr delegate,
                                const QueryInfo &query
-                               )
+                               ) noexcept
     {
       return internal::IHTTPFactory::singleton().query(delegate, query);
     }

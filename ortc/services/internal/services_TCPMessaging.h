@@ -53,9 +53,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging
-      #pragma mark
+      //
+      // TCPMessaging
+      //
 
       class TCPMessaging : public Noop,
                            public zsLib::MessageQueueAssociator,
@@ -81,27 +81,27 @@ namespace ortc
                      ITransportStreamPtr sendStream,
                      bool framesHaveChannelNumber,
                      size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                     );
+                     ) noexcept;
 
       protected:
-        TCPMessaging(Noop) :
+        TCPMessaging(Noop) noexcept :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()) {}
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~TCPMessaging();
+        ~TCPMessaging() noexcept;
 
-        static TCPMessagingPtr convert(ITCPMessagingPtr messaging);
+        static TCPMessagingPtr convert(ITCPMessagingPtr messaging) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => ITCPMessaging
-        #pragma mark
+        //
+        // TCPMessaging => ITCPMessaging
+        //
 
-        static ElementPtr toDebug(ITCPMessagingPtr messaging);
+        static ElementPtr toDebug(ITCPMessagingPtr messaging) noexcept;
 
         static TCPMessagingPtr accept(
                                       ITCPMessagingDelegatePtr delegate,
@@ -110,7 +110,7 @@ namespace ortc
                                       bool framesHaveChannelNumber,
                                       SocketPtr socket,
                                       size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                      );
+                                      ) noexcept;
 
         static TCPMessagingPtr connect(
                                        ITCPMessagingDelegatePtr delegate,
@@ -119,91 +119,91 @@ namespace ortc
                                        bool framesHaveChannelNumber,
                                        IPAddress remoteIP,
                                        size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                       );
+                                       ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual ITCPMessagingSubscriptionPtr subscribe(ITCPMessagingDelegatePtr delegate);
+        ITCPMessagingSubscriptionPtr subscribe(ITCPMessagingDelegatePtr delegate) noexcept override;
 
-        virtual void enableKeepAlive(bool enable = true);
+        void enableKeepAlive(bool enable = true) noexcept override;
 
-        virtual void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS));
+        void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) noexcept override;
 
-        virtual SessionStates getState(
-                                       WORD *outLastErrorCode = NULL,
-                                       String *outLastErrorReason = NULL
-                                       ) const;
+        SessionStates getState(
+                               WORD *outLastErrorCode = NULL,
+                               String *outLastErrorReason = NULL
+                               ) const noexcept override;
 
-        virtual IPAddress getRemoteIP() const;
+        IPAddress getRemoteIP() const noexcept override;
 
-        virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes);
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => ITransportStreamReaderDelegate
-        #pragma mark
-
-        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader);
+        void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => ISocketDelegate
-        #pragma mark
+        //
+        // TCPMessaging => ITransportStreamReaderDelegate
+        //
 
-        virtual void onReadReady(SocketPtr socket);
-        virtual void onWriteReady(SocketPtr socket);
-        virtual void onException(SocketPtr socket);
+        void onTransportStreamReaderReady(ITransportStreamReaderPtr reader) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => ITimerDelegate
-        #pragma mark
+        //
+        // TCPMessaging => ISocketDelegate
+        //
 
-        virtual void onTimer(ITimerPtr timer);
+        void onReadReady(SocketPtr socket) override;
+        void onWriteReady(SocketPtr socket) override;
+        void onException(SocketPtr socket) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => IBackgroundingDelegate
-        #pragma mark
+        //
+        // TCPMessaging => ITimerDelegate
+        //
 
-        virtual void onBackgroundingGoingToBackground(
-                                                      IBackgroundingSubscriptionPtr subscription,
-                                                      IBackgroundingNotifierPtr notifier
-                                                      ) {}
+        void onTimer(ITimerPtr timer) override;
 
-        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription) {}
+        //---------------------------------------------------------------------
+        //
+        // TCPMessaging => IBackgroundingDelegate
+        //
 
-        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
+        void onBackgroundingGoingToBackground(
+                                              IBackgroundingSubscriptionPtr subscription,
+                                              IBackgroundingNotifierPtr notifier
+                                              ) override {}
 
-        virtual void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription) {}
+        void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription) override {}
+
+        void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription) override;
+
+        void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription) override {}
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => (internal)
-        #pragma mark
+        //
+        // TCPMessaging => (internal)
+        //
 
-        bool isShuttingdown() const {return SessionState_ShuttingDown == mCurrentState;}
-        bool isShutdown() const {return SessionState_Shutdown == mCurrentState;}
+        bool isShuttingdown() const noexcept {return SessionState_ShuttingDown == mCurrentState;}
+        bool isShutdown() const noexcept {return SessionState_Shutdown == mCurrentState;}
 
-        RecursiveLock &getLock() const;
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        RecursiveLock &getLock() const noexcept;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void setState(SessionStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void setState(SessionStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        void cancel();
-        void sendDataNow();
-        bool sendQueuedData(size_t &outSent);
+        void cancel() noexcept;
+        void sendDataNow() noexcept;
+        bool sendQueuedData(size_t &outSent) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TCPMessaging => (data)
-        #pragma mark
+        //
+        // TCPMessaging => (data)
+        //
 
         AutoPUID mID;
         mutable RecursiveLock mLock;
@@ -241,13 +241,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITCPMessagingFactory
-      #pragma mark
+      //
+      // ITCPMessagingFactory
+      //
 
       interaction ITCPMessagingFactory
       {
-        static ITCPMessagingFactory &singleton();
+        static ITCPMessagingFactory &singleton() noexcept;
 
         virtual TCPMessagingPtr accept(
                                        ITCPMessagingDelegatePtr delegate,
@@ -256,7 +256,7 @@ namespace ortc
                                        bool framesHaveChannelNumber,
                                        SocketPtr socket,
                                        size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                       );
+                                       ) noexcept;
 
         virtual TCPMessagingPtr connect(
                                         ITCPMessagingDelegatePtr delegate,
@@ -265,7 +265,7 @@ namespace ortc
                                         bool framesHaveChannelNumber,
                                         IPAddress remoteIP,
                                         size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                        );
+                                        ) noexcept;
       };
 
       class TCPMessagingFactory : public IFactory<ITCPMessagingFactory> {};

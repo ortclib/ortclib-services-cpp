@@ -46,9 +46,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPListener
-    #pragma mark
+    //
+    // IRUDPListener
+    //
 
     interaction IRUDPListener
     {
@@ -59,39 +59,39 @@ namespace ortc
         RUDPListenerState_Shutdown,
       };
 
-      static const char *toString(RUDPListenerStates state);
+      static const char *toString(RUDPListenerStates state) noexcept;
 
       static IRUDPListenerPtr create(
                                      IMessageQueuePtr queue,
                                      IRUDPListenerDelegatePtr delegate,
                                      WORD port = 0,
                                      const char *realm = ORTC_SERVICES_IRUDPLISTENER_DEFAULT_REALM
-                                     );
+                                     ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual IPAddress getListenerIP() = 0;
+      virtual IPAddress getListenerIP() noexcept = 0;
 
-      virtual RUDPListenerStates getState() const = 0;
+      virtual RUDPListenerStates getState() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Close the socket and cause all sessions to become closed.
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
       virtual IRUDPChannelPtr acceptChannel(
                                             IRUDPChannelDelegatePtr delegate,
                                             ITransportStreamPtr receiveStream,
                                             ITransportStreamPtr sendStream
-                                            ) = 0;
+                                            ) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPListenerDelegate
-    #pragma mark
+    //
+    // IRUDPListenerDelegate
+    //
 
     interaction IRUDPListenerDelegate
     {
@@ -110,6 +110,6 @@ namespace ortc
 }
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPListenerDelegate)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPListenerStateChanged, ortc::services::IRUDPListenerPtr, ortc::services::IRUDPListenerDelegate::RUDPListenerStates)
-ZS_DECLARE_PROXY_METHOD_1(onRUDPListenerChannelWaiting, ortc::services::IRUDPListenerPtr)
+ZS_DECLARE_PROXY_METHOD(onRUDPListenerStateChanged, ortc::services::IRUDPListenerPtr, ortc::services::IRUDPListenerDelegate::RUDPListenerStates)
+ZS_DECLARE_PROXY_METHOD(onRUDPListenerChannelWaiting, ortc::services::IRUDPListenerPtr)
 ZS_DECLARE_PROXY_END()

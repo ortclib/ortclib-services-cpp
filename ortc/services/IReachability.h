@@ -41,9 +41,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IReachability
-    #pragma mark
+    //
+    // IReachability
+    //
 
     interaction IReachability
     {
@@ -59,32 +59,32 @@ namespace ortc
         InterfaceType_Other     = 0x00001000,
       };
 
-      static String toString(InterfaceTypes interfaceTypes);
+      static String toString(InterfaceTypes interfaceTypes) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug element containing internal object state
-      static ElementPtr toDebug();
+      static ElementPtr toDebug() noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to the reachability state
-      static IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate);
+      static IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate) noexcept;
 
 
       //-----------------------------------------------------------------------
       // PURPOSE: Indicate the subscribers the network reachability state
       // PARAMS:  interfaceTypes - which networks are reachable
-      static void notifyReachability(InterfaceTypes interfaceTypes);
+      static void notifyReachability(InterfaceTypes interfaceTypes) noexcept;
 
-      virtual ~IReachability() {}  // needed to ensure virtual table is created in order to use dynamic cast
+      virtual ~IReachability() noexcept {}  // needed to ensure virtual table is created in order to use dynamic cast
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IReachabilityDelegate
-    #pragma mark
+    //
+    // IReachabilityDelegate
+    //
 
     interaction IReachabilityDelegate
     {
@@ -103,17 +103,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IReachabilitySubscription
-    #pragma mark
+    //
+    // IReachabilitySubscription
+    //
 
     interaction IReachabilitySubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
   }
 }
@@ -121,11 +121,11 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IReachabilityDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
-ZS_DECLARE_PROXY_METHOD_2(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
+ZS_DECLARE_PROXY_METHOD(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IReachabilityDelegate, ortc::services::IReachabilitySubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IReachabilitySubscriptionPtr, IReachabilitySubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IReachabilityDelegate::InterfaceTypes, InterfaceTypes)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onReachabilityChanged, IReachabilitySubscriptionPtr, InterfaceTypes)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

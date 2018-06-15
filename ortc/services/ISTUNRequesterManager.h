@@ -42,9 +42,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNRequesterManager
-    #pragma mark
+    //
+    // ISTUNRequesterManager
+    //
 
     interaction ISTUNRequesterManager
     {
@@ -60,7 +60,7 @@ namespace ortc
                                             const BYTE *packet,
                                             size_t packetLengthInBytes,
                                             const STUNPacket::ParseOptions &options
-                                            );
+                                            ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: If the STUN object was a response to any of the STUNRequester
@@ -72,7 +72,7 @@ namespace ortc
       static ISTUNRequesterPtr handleSTUNPacket(
                                                 IPAddress fromIPAddress,
                                                 STUNPacketPtr stun
-                                                );
+                                                ) noexcept;
     };
   }
 }

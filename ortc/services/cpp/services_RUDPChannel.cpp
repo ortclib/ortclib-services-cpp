@@ -61,12 +61,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static String sequenceToString(QWORD value)
+      static String sequenceToString(QWORD value) noexcept
       {
         return string(value) + " (" + string(value & 0xFFFFFF) + ")";
       }
@@ -75,9 +75,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelForRUDPTransport
-      #pragma mark
+      //
+      // IRUDPChannelForRUDPTransport
+      //
 
       //-----------------------------------------------------------------------
       ForRUDPTransportPtr IRUDPChannelForRUDPTransport::createForRUDPTransportIncoming(
@@ -91,7 +91,7 @@ namespace ortc
                                                                                        const char *remotePassword,
                                                                                        STUNPacketPtr channelOpenPacket,
                                                                                        STUNPacketPtr &outResponse
-                                                                                       )
+                                                                                       ) noexcept
       {
         return IRUDPChannelFactory::singleton().createForRUDPTransportIncoming(queue, master, remoteIP, incomingChannelNumber, localUsernameFrag, localPassword, remoteUsernameFrag, remotePassword, channelOpenPacket, outResponse);
       }
@@ -110,7 +110,7 @@ namespace ortc
                                                                                        const char *connectionInfo,
                                                                                        ITransportStreamPtr receiveStream,
                                                                                        ITransportStreamPtr sendStream
-                                                                                       )
+                                                                                       ) noexcept
       {
         return IRUDPChannelFactory::singleton().createForRUDPTransportOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUsernameFrag, localPassword, remoteUsernameFrag, remotePassword, connectionInfo, receiveStream, sendStream);
       }
@@ -119,9 +119,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelForRUDPListener
-      #pragma mark
+      //
+      // IRUDPChannelForRUDPListener
+      //
 
       ForRUDPListenerPtr IRUDPChannelForRUDPListener::createForListener(
                                                                         IMessageQueuePtr queue,
@@ -130,7 +130,7 @@ namespace ortc
                                                                         WORD incomingChannelNumber,
                                                                         STUNPacketPtr channelOpenPacket,
                                                                         STUNPacketPtr &outResponse
-                                                                        )
+                                                                        ) noexcept
       {
         return IRUDPChannelFactory::singleton().createForListener(queue, master, remoteIP, incomingChannelNumber, channelOpenPacket, outResponse);
       }
@@ -139,9 +139,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel
-      #pragma mark
+      //
+      // RUDPChannel
+      //
 
       //-----------------------------------------------------------------------
       RUDPChannel::RUDPChannel(
@@ -160,7 +160,7 @@ namespace ortc
                                WORD outgoingChannelNumber,
                                QWORD remoteSequenceNumber,
                                const char *remoteChannelInfo
-                               ) :
+                               ) noexcept :
         MessageQueueAssociator(queue),
         mCurrentState(RUDPChannelState_Connecting),
         mMasterDelegate(IRUDPChannelDelegateForSessionAndListenerProxy::createWeak(queue, master)),
@@ -184,14 +184,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::init()
+      void RUDPChannel::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
         step();
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannel::~RUDPChannel()
+      RUDPChannel::~RUDPChannel() noexcept
       {
         if(isNoop()) return;
         
@@ -201,19 +201,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr RUDPChannel::convert(IRUDPChannelPtr channel)
+      RUDPChannelPtr RUDPChannel::convert(IRUDPChannelPtr channel) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr RUDPChannel::convert(ForRUDPTransportPtr channel)
+      RUDPChannelPtr RUDPChannel::convert(ForRUDPTransportPtr channel) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelPtr RUDPChannel::convert(ForRUDPListenerPtr channel)
+      RUDPChannelPtr RUDPChannel::convert(ForRUDPListenerPtr channel) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPChannel, channel);
       }
@@ -222,12 +222,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => IRUDPChannel
-      #pragma mark
+      //
+      // RUDPChannel => IRUDPChannel
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPChannel::toDebug(IRUDPChannelPtr channel)
+      ElementPtr RUDPChannel::toDebug(IRUDPChannelPtr channel) noexcept
       {
         if (!channel) return ElementPtr();
 
@@ -239,7 +239,7 @@ namespace ortc
       IRUDPChannel::RUDPChannelStates RUDPChannel::getState(
                                                             WORD *outLastErrorCode,
                                                             String *outLastErrorReason
-                                                            ) const
+                                                            ) const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -248,7 +248,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::shutdown()
+      void RUDPChannel::shutdown() noexcept
       {
         ZS_LOG_DETAIL(log("shutdown called"))
         AutoRecursiveLock lock(mLock);
@@ -256,7 +256,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::shutdownDirection(Shutdown state)
+      void RUDPChannel::shutdownDirection(Shutdown state) noexcept
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(log("shutdown direction called") + ZS_PARAM("state", IRUDPChannel::toString(state)) + ZS_PARAM("current shutdown", IRUDPChannel::toString(mShutdownDirection)))
@@ -266,7 +266,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress RUDPChannel::getConnectedRemoteIP()
+      IPAddress RUDPChannel::getConnectedRemoteIP() noexcept
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DEBUG(log("get connected remote IP called") + ZS_PARAM("ip", mRemoteIP.string()))
@@ -274,7 +274,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String RUDPChannel::getRemoteConnectionInfo()
+      String RUDPChannel::getRemoteConnectionInfo() noexcept
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DEBUG(log("get connection info called") + ZS_PARAM("remote channel info", mRemoteChannelInfo))
@@ -285,9 +285,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => IRUDPChannelForRUDPTransport
-      #pragma mark
+      //
+      // RUDPChannel => IRUDPChannelForRUDPTransport
+      //
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::createForRUDPTransportIncoming(
@@ -301,7 +301,7 @@ namespace ortc
                                                                  const char *remotePassword,
                                                                  STUNPacketPtr stun,
                                                                  STUNPacketPtr &outResponse
-                                                                 )
+                                                                 ) noexcept
       {
         QWORD sequenceNumber = 0;
         DWORD minimumRTT = 0;
@@ -378,7 +378,7 @@ namespace ortc
                                                                  const char *connectionInfo,
                                                                  ITransportStreamPtr receiveStream,
                                                                  ITransportStreamPtr sendStream
-                                                                 )
+                                                                 ) noexcept
       {
         QWORD sequenceNumber = 0;
         DWORD minimumRTT = 0;
@@ -412,7 +412,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void RUDPChannel::setDelegate(IRUDPChannelDelegatePtr delegate)
+      void RUDPChannel::setDelegate(IRUDPChannelDelegatePtr delegate) noexcept
       {
         ZS_LOG_DEBUG(log("set delegate called"))
 
@@ -438,10 +438,10 @@ namespace ortc
       void RUDPChannel::setStreams(
                                    ITransportStreamPtr receiveStream,
                                    ITransportStreamPtr sendStream
-                                   )
+                                   ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(!sendStream);
 
         ZS_LOG_DEBUG(log("set streams called"))
         AutoRecursiveLock lock(mLock);
@@ -460,7 +460,7 @@ namespace ortc
                                    STUNPacketPtr &outResponse,
                                    const String &localUsernameFrag,
                                    const String &remoteUsernameFrag
-                                   )
+                                   ) noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!mMasterDelegate) {
@@ -686,7 +686,7 @@ namespace ortc
                                    RUDPPacketPtr rudp,
                                    const BYTE *buffer,
                                    size_t bufferLengthInBytes
-                                   )
+                                   ) noexcept
       {
         IRUDPChannelStreamPtr stream;
         SecureByteBlockPtr newBuffer;
@@ -716,7 +716,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::notifyWriteReady()
+      void RUDPChannel::notifyWriteReady() noexcept
       {
         IRUDPChannelStreamPtr stream;
 
@@ -736,21 +736,21 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      WORD RUDPChannel::getIncomingChannelNumber() const
+      WORD RUDPChannel::getIncomingChannelNumber() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mIncomingChannelNumber;
       }
 
       //-----------------------------------------------------------------------
-      WORD RUDPChannel::getOutgoingChannelNumber() const
+      WORD RUDPChannel::getOutgoingChannelNumber() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mOutgoingChannelNumber;
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::issueConnectIfNotIssued()
+      void RUDPChannel::issueConnectIfNotIssued() noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -798,7 +798,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::shutdownFromTimeout()
+      void RUDPChannel::shutdownFromTimeout() noexcept
       {
         ZS_LOG_DEBUG(log("shutdown from timeout called"))
         AutoRecursiveLock lock(mLock);
@@ -811,9 +811,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => IRUDPChannelForRUDPListener
-      #pragma mark
+      //
+      // RUDPChannel => IRUDPChannelForRUDPListener
+      //
 
       //-----------------------------------------------------------------------
       RUDPChannelPtr RUDPChannel::createForListener(
@@ -823,7 +823,7 @@ namespace ortc
                                                     WORD incomingChannelNumber,
                                                     STUNPacketPtr stun,
                                                     STUNPacketPtr &outResponse
-                                                    )
+                                                    ) noexcept
       {
         String localUsernameFrag;
         String remoteUsernameFrag;
@@ -904,9 +904,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => IWakeDelegate
-      #pragma mark
+      //
+      // RUDPChannel => IWakeDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannel::onWake()
@@ -921,9 +921,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => IRUDPChannelStreamDelegate
-      #pragma mark
+      //
+      // RUDPChannel => IRUDPChannelStreamDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannel::onRUDPChannelStreamStateChanged(
@@ -955,7 +955,7 @@ namespace ortc
                                                           IRUDPChannelStreamPtr stream,
                                                           const BYTE *packet,
                                                           size_t packetLengthInBytes
-                                                          )
+                                                          ) noexcept
       {
         ZS_LOG_TRACE(log("notify channel stream send packet") + ZS_PARAM("stream ID", stream->getID()) + ZS_PARAM("length", packetLengthInBytes))
         IRUDPChannelDelegateForSessionAndListenerPtr master;
@@ -1036,9 +1036,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => ISTUNRequesterDelegate
-      #pragma mark
+      //
+      // RUDPChannel => ISTUNRequesterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannel::onSTUNRequesterSendPacket(
@@ -1097,7 +1097,7 @@ namespace ortc
                                                     ISTUNRequesterPtr requester,
                                                     IPAddress fromIPAddress,
                                                     STUNPacketPtr response
-                                                    )
+                                                    ) noexcept
       {
         ZS_LOG_DEBUG(log("notify requester received reply") + ZS_PARAM("ip", fromIPAddress.string()) + response->toDebug())
 
@@ -1297,9 +1297,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => ITimerDelegate
-      #pragma mark
+      //
+      // RUDPChannel => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannel::onTimer(ITimerPtr timer)
@@ -1332,12 +1332,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel => (internal)
-      #pragma mark
+      //
+      // RUDPChannel => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPChannel::log(const char *message) const
+      Log::Params RUDPChannel::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RUDPChannel");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -1345,20 +1345,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPChannel::debug(const char *message) const
+      Log::Params RUDPChannel::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::fix(STUNPacketPtr stun) const
+      void RUDPChannel::fix(STUNPacketPtr stun) const noexcept
       {
         stun->mLogObject = "RUDPChannel";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPChannel::toDebug() const
+      ElementPtr RUDPChannel::toDebug() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         ElementPtr resultEl = Element::create("RUDPChannel");
@@ -1415,7 +1415,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::cancel(bool waitForDataToBeSent)
+      void RUDPChannel::cancel(bool waitForDataToBeSent) noexcept
       {
         AutoRecursiveLock lock(mLock); // just in case...
 
@@ -1515,7 +1515,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::step()
+      void RUDPChannel::step() noexcept
       {
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -1538,7 +1538,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::setState(RUDPChannelStates state)
+      void RUDPChannel::setState(RUDPChannelStates state) noexcept
       {
         if (mCurrentState == state) return;
         ZS_LOG_DETAIL(log("state changed") + ZS_PARAM("old state", toString(mCurrentState)) + ZS_PARAM("new state", toString(state)))
@@ -1565,7 +1565,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::setError(WORD errorCode, const char *inReason)
+      void RUDPChannel::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -1590,7 +1590,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPChannel::isValidIntegrity(STUNPacketPtr stun)
+      bool RUDPChannel::isValidIntegrity(STUNPacketPtr stun) noexcept
       {
         if ((STUNPacket::Class_Request == stun->mClass) ||
             (STUNPacket::Class_Indication == stun->mClass)) {
@@ -1610,7 +1610,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::fillCredentials(STUNPacketPtr &outSTUN)
+      void RUDPChannel::fillCredentials(STUNPacketPtr &outSTUN) noexcept
       {
         if ((STUNPacket::Class_Request == outSTUN->mClass) ||
             (STUNPacket::Class_Indication == outSTUN->mClass)) {
@@ -1630,9 +1630,9 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannel::fillACK(STUNPacketPtr &outSTUN)
+      void RUDPChannel::fillACK(STUNPacketPtr &outSTUN) noexcept
       {
-        ZS_THROW_INVALID_ASSUMPTION_IF(!mStream)
+        ZS_ASSERT(mStream);
 
         fillCredentials(outSTUN);
 
@@ -1699,7 +1699,7 @@ namespace ortc
       bool RUDPChannel::handleStaleNonce(
                                          ISTUNRequesterPtr &originalRequestVariable,
                                          STUNPacketPtr response
-                                         )
+                                         ) noexcept
       {
         if (STUNPacket::Class_ErrorResponse != response->mClass) return false;
         if (STUNPacket::ErrorCode_StaleNonce != response->mErrorCode) return false;
@@ -1727,12 +1727,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelFactory
-      #pragma mark
+      //
+      // IRUDPChannelFactory
+      //
 
       //-----------------------------------------------------------------------
-      IRUDPChannelFactory &IRUDPChannelFactory::singleton()
+      IRUDPChannelFactory &IRUDPChannelFactory::singleton() noexcept
       {
         return RUDPChannelFactory::singleton();
       }
@@ -1749,7 +1749,7 @@ namespace ortc
                                                                          const char *remotePassword,
                                                                          STUNPacketPtr channelOpenPacket,
                                                                          STUNPacketPtr &outResponse
-                                                                         )
+                                                                         ) noexcept
       {
         if (this) {}
         return RUDPChannel::createForRUDPTransportIncoming(queue, master, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, channelOpenPacket, outResponse);
@@ -1769,7 +1769,7 @@ namespace ortc
                                                                          const char *connectionInfo,
                                                                          ITransportStreamPtr receiveStream,
                                                                          ITransportStreamPtr sendStream
-                                                                         )
+                                                                         ) noexcept
       {
         if (this) {}
         return RUDPChannel::createForRUDPTransportOutgoing(queue, master, delegate, remoteIP, incomingChannelNumber, localUserFrag, localPassword, remoteUserFrag, remotePassword, connectionInfo, receiveStream, sendStream);
@@ -1783,7 +1783,7 @@ namespace ortc
                                                             WORD incomingChannelNumber,
                                                             STUNPacketPtr channelOpenPacket,
                                                             STUNPacketPtr &outResponse
-                                                            )
+                                                            ) noexcept
       {
         if (this) {}
         return RUDPChannel::createForListener(queue, master, remoteIP, incomingChannelNumber, channelOpenPacket, outResponse);
@@ -1799,12 +1799,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPChannel
-    #pragma mark
+    //
+    // IRUDPChannel
+    //
 
     //-------------------------------------------------------------------------
-    const char *IRUDPChannel::toString(RUDPChannelStates state)
+    const char *IRUDPChannel::toString(RUDPChannelStates state) noexcept
     {
       switch (state)
       {
@@ -1818,7 +1818,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *IRUDPChannel::toString(RUDPChannelShutdownReasons reason)
+    const char *IRUDPChannel::toString(RUDPChannelShutdownReasons reason) noexcept
     {
       switch (reason)
       {
@@ -1830,11 +1830,11 @@ namespace ortc
         case RUDPChannelShutdownReason_Timeout:             return "Timeout";
         case RUDPChannelShutdownReason_IllegalStreamState:  return "Illegal stream state";
       }
-      return IHTTP::toString(IHTTP::toStatusCode(reason));
+      return IHTTP::toString(IHTTP::toStatusCode(static_cast<WORD>(reason)));
     }
 
     //-------------------------------------------------------------------------
-    const char *IRUDPChannel::toString(Shutdown value)
+    const char *IRUDPChannel::toString(Shutdown value) noexcept
     {
       switch (value)
       {
@@ -1847,7 +1847,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *IRUDPChannel::toString(CongestionAlgorithms value)
+    const char *IRUDPChannel::toString(CongestionAlgorithms value) noexcept
     {
       switch (value)
       {
@@ -1858,7 +1858,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IRUDPChannel::toDebug(IRUDPChannelPtr channel)
+    ElementPtr IRUDPChannel::toDebug(IRUDPChannelPtr channel) noexcept
     {
       return internal::RUDPChannel::toDebug(channel);
     }

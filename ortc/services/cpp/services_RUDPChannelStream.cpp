@@ -82,17 +82,17 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static bool logicalXOR(bool value1, bool value2) {
+      static bool logicalXOR(bool value1, bool value2) noexcept {
         return (0 != ((value1 ? 1 : 0) ^ (value2 ? 1 : 0)));
       }
 
       //-----------------------------------------------------------------------
-      static String sequenceToString(QWORD value)
+      static String sequenceToString(QWORD value) noexcept
       {
         return string(value) + " (" + string(value & 0xFFFFFF) + ")";
       }
@@ -101,12 +101,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStream
-      #pragma mark
+      //
+      // IRUDPChannelStream
+      //
 
       //-----------------------------------------------------------------------
-      const char *IRUDPChannelStream::toString(RUDPChannelStreamStates state)
+      const char *IRUDPChannelStream::toString(RUDPChannelStreamStates state) noexcept
       {
         switch (state) {
           case RUDPChannelStreamState_Connected:            return "Connected";
@@ -115,11 +115,12 @@ namespace ortc
           case RUDPChannelStreamState_Shutdown:             return "Shutdown";
           default:  break;
         }
+        ZS_ASSERT_FAIL("unknown rudp channel stream state");
         return "UNDEFINED";
       }
 
       //-----------------------------------------------------------------------
-      const char *IRUDPChannelStream::toString(RUDPChannelStreamShutdownReasons reason)
+      const char *IRUDPChannelStream::toString(RUDPChannelStreamShutdownReasons reason) noexcept
       {
         return IRUDPChannel::toString((IRUDPChannel::RUDPChannelShutdownReasons)reason);
       }
@@ -130,7 +131,7 @@ namespace ortc
                                                          DWORD &outMinimumRecommendedRTTInMilliseconds,
                                                          CongestionAlgorithmList &outLocalAlgorithms,
                                                          CongestionAlgorithmList &outRemoteAlgoirthms
-                                                         )
+                                                         ) noexcept
       {
         AutoSeededRandomPool rng;
 
@@ -162,7 +163,7 @@ namespace ortc
                                                               const CongestionAlgorithmList &offeredAlgorithmsForRemote,
                                                               CongestionAlgorithmList &outResponseAlgorithmsForLocal,
                                                               CongestionAlgorithmList &outResponseAlgorithmsForRemote
-                                                              )
+                                                              ) noexcept
       {
         CongestionAlgorithmList::const_iterator findLocal = find(offeredAlgorithmsForLocal.begin(), offeredAlgorithmsForLocal.end(), IRUDPChannel::CongestionAlgorithm_TCPLikeWindowWithSlowCreepUp);
         CongestionAlgorithmList::const_iterator findRemote = find(offeredAlgorithmsForRemote.begin(), offeredAlgorithmsForRemote.end(), IRUDPChannel::CongestionAlgorithm_TCPLikeWindowWithSlowCreepUp);
@@ -185,7 +186,7 @@ namespace ortc
       }
 
       //-------------------------------------------------------------------------
-      ElementPtr IRUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream)
+      ElementPtr IRUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream) noexcept
       {
         return RUDPChannelStream::toDebug(stream);
       }
@@ -199,10 +200,12 @@ namespace ortc
                                                        WORD sendingChannelNumber,
                                                        WORD receivingChannelNumber,
                                                        DWORD minimumNegotiatedRTT,
-                                                       CongestionAlgorithms algorithmForLocal,
-                                                       CongestionAlgorithms algorithmForRemote
-                                                       )
+                                                       ZS_MAYBE_USED() CongestionAlgorithms algorithmForLocal,
+                                                       ZS_MAYBE_USED() CongestionAlgorithms algorithmForRemote
+                                                       ) noexcept
       {
+        ZS_MAYBE_USED(algorithmForLocal);
+        ZS_MAYBE_USED(algorithmForRemote);
         return internal::IRUDPChannelStreamFactory::singleton().create(
                                                                        queue,
                                                                        delegate,
@@ -218,9 +221,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream
-      #pragma mark
+      //
+      // RUDPChannelStream
+      //
 
       //-----------------------------------------------------------------------
       RUDPChannelStream::RUDPChannelStream(
@@ -232,7 +235,7 @@ namespace ortc
                                            WORD sendingChannelNumber,
                                            WORD receivingChannelNumber,
                                            DWORD minimumNegotiatedRTTInMilliseconds
-                                           ) :
+                                           ) noexcept :
         MessageQueueAssociator(queue),
         mDelegate(IRUDPChannelStreamDelegateProxy::createWeak(queue, delegate)),
         mPendingReceiveData(make_shared<ByteQueue>()),
@@ -257,12 +260,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::init()
+      void RUDPChannelStream::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelStream::~RUDPChannelStream()
+      RUDPChannelStream::~RUDPChannelStream() noexcept
       {
         if(isNoop()) return;
         
@@ -272,7 +275,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPChannelStreamPtr RUDPChannelStream::convert(IRUDPChannelStreamPtr stream)
+      RUDPChannelStreamPtr RUDPChannelStream::convert(IRUDPChannelStreamPtr stream) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPChannelStream, stream);
       }
@@ -281,12 +284,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream => IRUDPChannelStream
-      #pragma mark
+      //
+      // RUDPChannelStream => IRUDPChannelStream
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream)
+      ElementPtr RUDPChannelStream::toDebug(IRUDPChannelStreamPtr stream) noexcept
       {
         if (!stream) return ElementPtr();
 
@@ -303,7 +306,7 @@ namespace ortc
                                                      WORD sendingChannelNumber,
                                                      WORD receivingChannelNumber,
                                                      DWORD minimumNegotiatedRTT
-                                                     )
+                                                     ) noexcept
       {
         RUDPChannelStreamPtr pThis(make_shared<RUDPChannelStream>(
                                                                   make_private {},
@@ -324,7 +327,7 @@ namespace ortc
       IRUDPChannelStream::RUDPChannelStreamStates RUDPChannelStream::getState(
                                                                               WORD *outLastErrorCode,
                                                                               String *outLastErrorReason
-                                                                              ) const
+                                                                              ) const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -336,12 +339,12 @@ namespace ortc
       void RUDPChannelStream::setStreams(
                                          ITransportStreamPtr receiveStream,
                                          ITransportStreamPtr sendStream
-                                         )
+                                         ) noexcept
       {
-        ZS_LOG_DEBUG(log("set streams called"))
+        ZS_LOG_DEBUG(log("set streams called"));
 
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         AutoRecursiveLock lock(mLock);
 
@@ -372,7 +375,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::shutdown(bool shutdownOnlyOnceAllDataSent)
+      void RUDPChannelStream::shutdown(bool shutdownOnlyOnceAllDataSent) noexcept
       {
         ZS_LOG_DETAIL(log("shutdown called") + ZS_PARAM("only when data sent", shutdownOnlyOnceAllDataSent))
 
@@ -394,7 +397,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::shutdownDirection(Shutdown state)
+      void RUDPChannelStream::shutdownDirection(Shutdown state) noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -414,7 +417,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber)
+      void RUDPChannelStream::holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber) noexcept
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(log("hold sending until receive sequence number") + ZS_PARAM("sequence number", sequenceToString(sequenceNumber)))
@@ -431,7 +434,7 @@ namespace ortc
                                            RUDPPacketPtr packet,
                                            SecureByteBlockPtr originalBuffer,
                                            bool ecnMarked
-                                           )
+                                           ) noexcept
       {
         ZS_LOG_TRACE(log("handle packet called") + ZS_PARAM("size", originalBuffer->SizeInBytes()) + ZS_PARAM("ecn", ecnMarked))
 
@@ -567,7 +570,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::notifySocketWriteReady()
+      void RUDPChannelStream::notifySocketWriteReady() noexcept
       {
         ZS_LOG_TRACE(log("socket write ready called"))
         AutoRecursiveLock lock(mLock);
@@ -590,7 +593,7 @@ namespace ortc
                                                 bool xpFlag,
                                                 bool dpFlag,
                                                 bool ecFlag
-                                                )
+                                                ) noexcept
       {
         ZS_LOG_TRACE(log("handle external ACK called") +
                      ZS_PARAM("forced ACK ID", mForceACKOfSentPacketsRequestID) +
@@ -696,7 +699,7 @@ namespace ortc
                                        bool &outXPFlag,
                                        bool &outDPFlag,
                                        bool &outECFlag
-                                       )
+                                       ) noexcept
       {
         AutoRecursiveLock lock(mLock);
         outNextSequenceNumber = mNextSequenceNumber;
@@ -767,8 +770,9 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::notifyExternalACKSent(QWORD ackedSequenceNumber)
+      void RUDPChannelStream::notifyExternalACKSent(ZS_MAYBE_USED() QWORD ackedSequenceNumber) noexcept
       {
+        ZS_MAYBE_USED(ackedSequenceNumber);
         ZS_LOG_TRACE(log("external ACK sent"))
         AutoRecursiveLock lock(mLock);
         mDuplicateReceived = false;
@@ -779,9 +783,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream => ITimerDelegate
-      #pragma mark
+      //
+      // RUDPChannelStream => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannelStream::onTimer(ITimerPtr timer)
@@ -841,9 +845,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream => IRUDPChannelStreamAsync
-      #pragma mark
+      //
+      // RUDPChannelStream => IRUDPChannelStreamAsync
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannelStream::onSendNow()
@@ -856,9 +860,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream => ITransportStreamReaderDelegate
-      #pragma mark
+      //
+      // RUDPChannelStream => ITransportStreamReaderDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPChannelStream::onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
@@ -871,12 +875,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream => (internal)
-      #pragma mark
+      //
+      // RUDPChannelStream => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPChannelStream::log(const char *message) const
+      Log::Params RUDPChannelStream::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RUDPChannelStream");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -884,13 +888,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPChannelStream::debug(const char *message) const
+      Log::Params RUDPChannelStream::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPChannelStream::toDebug() const
+      ElementPtr RUDPChannelStream::toDebug() const noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -971,7 +975,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::cancel()
+      void RUDPChannelStream::cancel() noexcept
       {
         AutoRecursiveLock lock(mLock);          // just in case...
 
@@ -1015,7 +1019,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::setState(RUDPChannelStreamStates state)
+      void RUDPChannelStream::setState(RUDPChannelStreamStates state) noexcept
       {
         if (mCurrentState == state) return;
 
@@ -1033,7 +1037,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::setError(WORD errorCode, const char *inReason)
+      void RUDPChannelStream::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -1062,7 +1066,7 @@ namespace ortc
                                             IRUDPChannelStreamDelegatePtr &delegate,
                                             const BYTE *buffer,
                                             size_t packetLengthInBytes
-                                            )
+                                            ) noexcept
       {
 #ifdef ORTC_INDUCE_FAKE_PACKET_LOSS
         bool forcePacketLoss = ((rand() % 100) < ORTC_INDUCE_FAKE_PACKET_LOSS_PERCENTAGE);
@@ -1076,7 +1080,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPChannelStream::sendNow()
+      bool RUDPChannelStream::sendNow() noexcept
       {
         //*********************************************************************
         //*********************************************************************
@@ -1297,7 +1301,7 @@ namespace ortc
               }
 
               SecureByteBlockPtr packetizedBuffer = newPacket->packetize();
-              ZS_THROW_BAD_STATE_IF(!packetizedBuffer)
+              ZS_ASSERT(packetizedBuffer);
 
               BufferedPacketPtr bufferedPacket = BufferedPacket::create();
               bufferedPacket->mSequenceNumber = mNextSequenceNumber;
@@ -1394,7 +1398,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::sendNowCleanup()
+      void RUDPChannelStream::sendNowCleanup() noexcept
       {
         ULONG writeBuffers = static_cast<ULONG>(mSendStream ? mSendStream->getTotalReadBuffersAvailable() : 0);
 
@@ -1585,7 +1589,7 @@ namespace ortc
                                         bool xpFlag,
                                         bool dpFlag,
                                         bool ecFlag
-                                        ) throw(Exceptions::IllegalACK)
+                                        ) noexcept(false)
       {
         // scope: handle the ACK
         {
@@ -1829,19 +1833,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::handleECN()
+      void RUDPChannelStream::handleECN() noexcept
       {
         ZS_LOG_TRACE(log("handling ECN"))
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::handleDuplicate()
+      void RUDPChannelStream::handleDuplicate() noexcept
       {
         ZS_LOG_TRACE(log("handling duplicate"))
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::handlePacketLoss()
+      void RUDPChannelStream::handlePacketLoss() noexcept
       {
         ZS_LOG_TRACE(log("handle packet loss"))
 
@@ -1901,7 +1905,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::handleUnfreezing()
+      void RUDPChannelStream::handleUnfreezing() noexcept
       {
         if (mTotalSendingPeriodWithoutIssues > Seconds(ORTC_SERVICES_UNFREEZE_AFTER_SECONDS_OF_GOOD_TRANSMISSION)) {
           mBandwidthIncreaseFrozen = false;
@@ -1929,7 +1933,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::deliverReadPackets()
+      void RUDPChannelStream::deliverReadPackets() noexcept
       {
         bool delivered = false;
         ULONG totalDelivered = 0;
@@ -1964,7 +1968,7 @@ namespace ortc
             if (mReceiveStream) {
               mReceiveStream->write(pos, bytes);
             } else {
-              ZS_THROW_BAD_STATE_IF(!mPendingReceiveData)
+              ZS_ASSERT(mPendingReceiveData);
               mPendingReceiveData->Put(pos, bytes);
             }
           }
@@ -1986,7 +1990,7 @@ namespace ortc
       size_t RUDPChannelStream::getFromWriteBuffer(
                                                   BYTE *outBuffer,
                                                   size_t maxFillSize
-                                                  )
+                                                  ) noexcept
       {
         ZS_LOG_TRACE(log("get from write buffer") + ZS_PARAM("max size", maxFillSize))
 
@@ -1999,7 +2003,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool RUDPChannelStream::getRandomFlag()
+      bool RUDPChannelStream::getRandomFlag() noexcept
       {
         ++mRandomPoolPos;
         if (mRandomPoolPos > (sizeof(mRandomPool)*8)) {
@@ -2015,7 +2019,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::closeOnAllDataSent()
+      void RUDPChannelStream::closeOnAllDataSent() noexcept
       {
         if (isShutdown()) return;       // already closed?
         if (!isShuttingDown()) return;  // do we want to close if all data is sent?
@@ -2034,12 +2038,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream::BufferedPacket
-      #pragma mark
+      //
+      // RUDPChannelStream::BufferedPacket
+      //
 
       //-----------------------------------------------------------------------
-      RUDPChannelStream::BufferedPacketPtr RUDPChannelStream::BufferedPacket::create()
+      RUDPChannelStream::BufferedPacketPtr RUDPChannelStream::BufferedPacket::create() noexcept
       {
         BufferedPacketPtr pThis(make_shared<BufferedPacket>());
         pThis->mSequenceNumber = 0;
@@ -2055,7 +2059,7 @@ namespace ortc
       void  RUDPChannelStream::BufferedPacket::flagAsReceivedByRemoteParty(
                                                                            ULONG &ioTotalPacketsToResend,
                                                                            ULONG &ioAvailableBatons
-                                                                           )
+                                                                           ) noexcept
       {
         doNotResend(ioTotalPacketsToResend);
         releaseBaton(ioAvailableBatons);
@@ -2064,7 +2068,7 @@ namespace ortc
 
       //-----------------------------------------------------------------------
 
-      void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend)
+      void RUDPChannelStream::BufferedPacket::flagForResending(ULONG &ioTotalPacketsToResend) noexcept
       {
         if (!mPacket) return;
         if (mFlagForResendingInNextBurst) return;
@@ -2073,16 +2077,16 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::BufferedPacket::doNotResend(ULONG &ioTotalPacketsToResend)
+      void RUDPChannelStream::BufferedPacket::doNotResend(ULONG &ioTotalPacketsToResend) noexcept
       {
         if (!mFlagForResendingInNextBurst) return;
         mFlagForResendingInNextBurst = false;
-        ZS_THROW_BAD_STATE_IF(0 == ioTotalPacketsToResend)
+        ZS_ASSERT(ioTotalPacketsToResend > 0);
         --ioTotalPacketsToResend;
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::BufferedPacket::consumeBaton(ULONG &ioAvailableBatons)
+      void RUDPChannelStream::BufferedPacket::consumeBaton(ULONG &ioAvailableBatons) noexcept
       {
         if (mHoldsBaton) return;
         if (0 == ioAvailableBatons) return;
@@ -2091,7 +2095,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPChannelStream::BufferedPacket::releaseBaton(ULONG &ioAvailableBatons)
+      void RUDPChannelStream::BufferedPacket::releaseBaton(ULONG &ioAvailableBatons) noexcept
       {
         if (!mHoldsBaton) return;
         mHoldsBaton = false;
@@ -2102,12 +2106,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStreamFactory
-      #pragma mark
+      //
+      // IRUDPChannelStreamFactory
+      //
 
       //-----------------------------------------------------------------------
-      IRUDPChannelStreamFactory &IRUDPChannelStreamFactory::singleton()
+      IRUDPChannelStreamFactory &IRUDPChannelStreamFactory::singleton() noexcept
       {
         return RUDPChannelStreamFactory::singleton();
       }
@@ -2121,7 +2125,7 @@ namespace ortc
                                                              WORD sendingChannelNumber,
                                                              WORD receivingChannelNumber,
                                                              DWORD minimumNegotiatedRTTInMilliseconds
-                                                             )
+                                                             ) noexcept
       {
         if (this) {}
         return RUDPChannelStream::create(queue, delegate, nextSequenceNumberToUseForSending, nextSequenberNumberExpectingToReceive, sendingChannelNumber, receivingChannelNumber, minimumNegotiatedRTTInMilliseconds);

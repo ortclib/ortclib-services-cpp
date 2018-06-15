@@ -46,9 +46,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNS
-    #pragma mark
+    //
+    // IDNS
+    //
 
     interaction IDNS
     {
@@ -69,7 +69,7 @@ namespace ortc
         void trace(
                    const char *func = NULL,
                    const char *message = NULL
-                   );
+                   ) noexcept;
       };
 
       ZS_DECLARE_TYPEDEF_PTR(AResult, AAAAResult)
@@ -100,7 +100,7 @@ namespace ortc
         void trace(
                    const char *func = NULL,
                    const char *message = NULL
-                   );
+                   ) noexcept;
       };
 
       enum SRVLookupTypes {
@@ -119,14 +119,14 @@ namespace ortc
       static IDNSQueryPtr lookupA(
                                   IDNSDelegatePtr delegate,
                                   const char *name
-                                  );
+                                  ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Perform an AAAA-record lookup using a recursive DNS server.
       static IDNSQueryPtr lookupAAAA(
                                      IDNSDelegatePtr delegate,
                                      const char *name
-                                     );
+                                     ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Perfoms both an A and AAAA lookup on the name passed in
@@ -135,7 +135,7 @@ namespace ortc
       static IDNSQueryPtr lookupAorAAAA(
                                         IDNSDelegatePtr delegate,
                                         const char *name
-                                        );
+                                        ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Perform an SRV-record lookup with a recursive DNS and
@@ -156,7 +156,7 @@ namespace ortc
                                     WORD defaultPriority = 10,
                                     WORD defaultWeight = 0,
                                     SRVLookupTypes lookupType = SRVLookupType_AutoLookupAndFallbackAll
-                                    );
+                                    ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates an A result based on a list of IP addresses (only
@@ -165,7 +165,7 @@ namespace ortc
       static AResultPtr convertIPAddressesToAResult(
                                                     const std::list<IPAddress> &ipAddresses,
                                                     UINT ttl = 3600
-                                                    );
+                                                    ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates an AAAA result based on a list of IP addresses (only
@@ -174,7 +174,7 @@ namespace ortc
       static AAAAResultPtr convertIPAddressesToAAAAResult(
                                                           const std::list<IPAddress> &ipAddresses,
                                                           UINT ttl = 3600
-                                                          );
+                                                          ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates an SRV result type from an A or AAAA result types.
@@ -186,7 +186,7 @@ namespace ortc
                                                           WORD defaultPort = 0,                    // if specified, then all IP addresses without a port will automatically get assigned this port
                                                           WORD defaultPriority = 10,
                                                           WORD defaultWeight = 0
-                                                          );
+                                                          ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates an SRV result type from a list of IP addresses.
@@ -198,11 +198,11 @@ namespace ortc
                                                         WORD defaultPriority = 10,
                                                         WORD defaultWeight = 0,
                                                         UINT ttl = 36000
-                                                        );
+                                                        ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates an SRV result from a list of individual SRV results
-      static SRVResultPtr mergeSRVs(const SRVResultList &srvList);
+      static SRVResultPtr mergeSRVs(const SRVResultList &srvList) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Extracts the next server in the list to attempt to connect.
@@ -219,13 +219,13 @@ namespace ortc
                                 IPAddress &outIP,
                                 AResultPtr *outAResult = NULL,                // if you care where the original IP address result came from then pass in address of smart pointer to A record (will only fill if came from A result)
                                 AAAAResultPtr *outAAAAResult = NULL           // if you care where the original IP address result came from then pass in address of smart pointer to AAAA record (will only fill if came from AAAA result)
-                                );
+                                ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Clone routines for various return results.
-      static AResultPtr cloneA(AResultPtr aResult);
-      static AAAAResultPtr cloneAAAA(AAAAResultPtr aaaaResult);
-      static SRVResultPtr cloneSRV(SRVResultPtr srvResult);
+      static AResultPtr cloneA(AResultPtr aResult) noexcept;
+      static AAAAResultPtr cloneAAAA(AAAAResultPtr aaaaResult) noexcept;
+      static SRVResultPtr cloneSRV(SRVResultPtr srvResult) noexcept;
     };
 
 
@@ -233,9 +233,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNSQuery
-    #pragma mark
+    //
+    // IDNSQuery
+    //
 
     interaction IDNSQuery
     {
@@ -243,29 +243,29 @@ namespace ortc
       ZS_DECLARE_TYPEDEF_PTR(IDNS::AAAAResult, AAAAResult)
       ZS_DECLARE_TYPEDEF_PTR(IDNS::SRVResult, SRVResult)
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       // PURPOSE: Cancels the DNS query request and prevents any further events
       //          from being fired about this query.
       // NOTE:    This cannot prevent events that have already fired but have
       //          not been processed in the receiving message queue yet.
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual bool hasResult() const = 0;
-      virtual bool isComplete() const = 0;
+      virtual bool hasResult() const noexcept = 0;
+      virtual bool isComplete() const noexcept = 0;
 
-      virtual AResultPtr getA() const = 0;
-      virtual AAAAResultPtr getAAAA() const = 0;
-      virtual SRVResultPtr getSRV() const = 0;
+      virtual AResultPtr getA() const noexcept = 0;
+      virtual AAAAResultPtr getAAAA() const noexcept = 0;
+      virtual SRVResultPtr getSRV() const noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNSDelegate
-    #pragma mark
+    //
+    // IDNSDelegate
+    //
 
     interaction IDNSDelegate
     {
@@ -276,5 +276,5 @@ namespace ortc
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IDNSDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IDNSQueryPtr, IDNSQueryPtr)
-ZS_DECLARE_PROXY_METHOD_1(onLookupCompleted, IDNSQueryPtr)
+ZS_DECLARE_PROXY_METHOD(onLookupCompleted, IDNSQueryPtr)
 ZS_DECLARE_PROXY_END()

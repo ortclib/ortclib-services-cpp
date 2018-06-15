@@ -44,9 +44,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDNS
-      #pragma mark
+      //
+      // IDNS
+      //
 
       class DNS : public IDNS
       {
@@ -54,24 +54,24 @@ namespace ortc
 
       protected:
         //-----------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNS => IDNS
-        #pragma mark
+        //
+        // DNS => IDNS
+        //
 
         static IDNSQueryPtr lookupA(
                                     IDNSDelegatePtr delegate,
                                     const char *name
-                                    );
+                                    ) noexcept;
 
         static IDNSQueryPtr lookupAAAA(
                                        IDNSDelegatePtr delegate,
                                        const char *name
-                                       );
+                                       ) noexcept;
 
         static IDNSQueryPtr lookupAorAAAA(
                                           IDNSDelegatePtr delegate,
                                           const char *name
-                                          );
+                                          ) noexcept;
 
         static IDNSQueryPtr lookupSRV(
                                       IDNSDelegatePtr delegate,
@@ -82,44 +82,44 @@ namespace ortc
                                       WORD defaultPriority,
                                       WORD defaultWeight,
                                       SRVLookupTypes lookupType
-                                      );
+                                      ) noexcept;
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNS => (internal)
-        #pragma mark
+        //
+        // DNS => (internal)
+        //
 
-        static Log::Params slog(const char *message);
+        static Log::Params slog(const char *message) noexcept;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDNSFactory
-      #pragma mark
+      //
+      // IDNSFactory
+      //
 
       interaction IDNSFactory
       {
         typedef IDNS::SRVLookupTypes SRVLookupTypes;
 
-        static IDNSFactory &singleton();
+        static IDNSFactory &singleton() noexcept;
 
         virtual IDNSQueryPtr lookupA(
                                      IDNSDelegatePtr delegate,
                                      const char *name
-                                     );
+                                     ) noexcept;
 
         virtual IDNSQueryPtr lookupAAAA(
                                         IDNSDelegatePtr delegate,
                                         const char *name
-                                        );
+                                        ) noexcept;
 
         virtual IDNSQueryPtr lookupAorAAAA(
                                            IDNSDelegatePtr delegate,
                                            const char *name
-                                           );
+                                           ) noexcept;
 
         virtual IDNSQueryPtr lookupSRV(
                                        IDNSDelegatePtr delegate,
@@ -130,7 +130,7 @@ namespace ortc
                                        WORD defaultPriority,
                                        WORD defaultWeight,
                                        SRVLookupTypes lookupType
-                                       );
+                                       ) noexcept;
       };
 
       class DNSFactory : public IFactory<IDNSFactory> {};

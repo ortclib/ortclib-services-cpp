@@ -53,26 +53,26 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPublicKeyForDHPublicKey
-      #pragma mark
+      //
+      // IDHPublicKeyForDHPublicKey
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPublicKey
-      #pragma mark
+      //
+      // DHPublicKey
+      //
 
       //-----------------------------------------------------------------------
-      DHPublicKey::DHPublicKey(const make_private &)
+      DHPublicKey::DHPublicKey(const make_private &) noexcept
       {
         ZS_LOG_DEBUG(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      DHPublicKey::~DHPublicKey()
+      DHPublicKey::~DHPublicKey() noexcept
       {
         if(isNoop()) return;
         
@@ -80,7 +80,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DHPublicKeyPtr DHPublicKey::convert(IDHPublicKeyPtr publicKey)
+      DHPublicKeyPtr DHPublicKey::convert(IDHPublicKeyPtr publicKey) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(DHPublicKey, publicKey);
       }
@@ -89,12 +89,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPublicKey => IDHPublicKey
-      #pragma mark
+      //
+      // DHPublicKey => IDHPublicKey
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr DHPublicKey::toDebug(IDHPublicKeyPtr keyDomain)
+      ElementPtr DHPublicKey::toDebug(IDHPublicKeyPtr keyDomain) noexcept
       {
         if (!keyDomain) return ElementPtr();
         return convert(keyDomain)->toDebug();
@@ -105,7 +105,7 @@ namespace ortc
       DHPublicKeyPtr DHPublicKey::load(
                                        const SecureByteBlock &staticPublicKey,
                                        const SecureByteBlock &ephemeralPublicKey
-                                       )
+                                       ) noexcept
       {
         DHPublicKeyPtr pThis(make_shared<DHPublicKey>(make_private{}));
 
@@ -125,7 +125,7 @@ namespace ortc
       void DHPublicKey::save(
                              SecureByteBlock *outStaticPublicKey,
                              SecureByteBlock *outEphemeralPublicKey
-                             ) const
+                             ) const noexcept
       {
         ZS_LOG_TRACE(log("save called"))
 
@@ -138,7 +138,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String DHPublicKey::getFingerprint() const
+      String DHPublicKey::getFingerprint() const noexcept
       {
         return IHelper::convertToHex(*IHasher::hash(mStaticPublicKey, IHasher::hmacSHA1(mEphemeralPublicKey)));
       }
@@ -147,18 +147,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPublicKey => IDHPublicKeyForDHPrivateKey
-      #pragma mark
+      //
+      // DHPublicKey => IDHPublicKeyForDHPrivateKey
+      //
 
       //-----------------------------------------------------------------------
-      const SecureByteBlock &DHPublicKey::getStaticPublicKey() const
+      const SecureByteBlock &DHPublicKey::getStaticPublicKey() const noexcept
       {
         return mStaticPublicKey;
       }
 
       //-----------------------------------------------------------------------
-      const SecureByteBlock &DHPublicKey::getEphemeralPublicKey() const
+      const SecureByteBlock &DHPublicKey::getEphemeralPublicKey() const noexcept
       {
         return mEphemeralPublicKey;
       }
@@ -167,12 +167,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPublicKey => (internal)
-      #pragma mark
+      //
+      // DHPublicKey => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params DHPublicKey::log(const char *message) const
+      Log::Params DHPublicKey::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("DHPublicKey");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -180,13 +180,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DHPublicKey::debug(const char *message) const
+      Log::Params DHPublicKey::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr DHPublicKey::toDebug() const
+      ElementPtr DHPublicKey::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("DHPublicKey");
 
@@ -202,12 +202,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPublicKeyFactory
-      #pragma mark
+      //
+      // IDHPublicKeyFactory
+      //
 
       //-----------------------------------------------------------------------
-      IDHPublicKeyFactory &IDHPublicKeyFactory::singleton()
+      IDHPublicKeyFactory &IDHPublicKeyFactory::singleton() noexcept
       {
         return DHPublicKeyFactory::singleton();
       }
@@ -216,7 +216,7 @@ namespace ortc
       DHPublicKeyPtr IDHPublicKeyFactory::load(
                                                const SecureByteBlock &staticPublicKey,
                                                const SecureByteBlock &ephemeralPublicKey
-                                               )
+                                               ) noexcept
       {
         if (this) {}
         return DHPublicKey::load(staticPublicKey, ephemeralPublicKey);
@@ -228,12 +228,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHPublicKey
-    #pragma mark
+    //
+    // IDHPublicKey
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IDHPublicKey::toDebug(IDHPublicKeyPtr keyDomain)
+    ElementPtr IDHPublicKey::toDebug(IDHPublicKeyPtr keyDomain) noexcept
     {
       return internal::DHPublicKey::toDebug(keyDomain);
     }
@@ -242,7 +242,7 @@ namespace ortc
     IDHPublicKeyPtr IDHPublicKey::load(
                                        const SecureByteBlock &staticPublicKey,
                                        const SecureByteBlock &ephemeralPublicKey
-                                       )
+                                       ) noexcept
     {
       return internal::IDHPublicKeyFactory::singleton().load(staticPublicKey, ephemeralPublicKey);
     }

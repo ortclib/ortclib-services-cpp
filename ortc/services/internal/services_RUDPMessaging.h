@@ -47,9 +47,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPMessaging
-      #pragma mark
+      //
+      // RUDPMessaging
+      //
 
       class RUDPMessaging : public Noop,
                             public MessageQueueAssociator,
@@ -73,25 +73,25 @@ namespace ortc
                       ITransportStreamPtr receiveStream,
                       ITransportStreamPtr sendStream,
                       size_t maxMessageSizeInBytes
-                     );
+                     ) noexcept;
 
       protected:
-        RUDPMessaging(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPMessaging(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~RUDPMessaging();
+        ~RUDPMessaging() noexcept;
 
-        static RUDPMessagingPtr convert(IRUDPMessagingPtr socket);
+        static RUDPMessagingPtr convert(IRUDPMessagingPtr socket) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => IRUDPMessaging
-        #pragma mark
+        //
+        // RUDPMessaging => IRUDPMessaging
+        //
 
-        static ElementPtr toDebug(IRUDPMessagingPtr messaging);
+        static ElementPtr toDebug(IRUDPMessagingPtr messaging) noexcept;
 
         static RUDPMessagingPtr acceptChannel(
                                               IMessageQueuePtr queue,
@@ -100,7 +100,7 @@ namespace ortc
                                               ITransportStreamPtr receiveStream,
                                               ITransportStreamPtr sendStream,
                                               size_t maxMessageSizeInBytes
-                                              );
+                                              ) noexcept;
 
         static RUDPMessagingPtr acceptChannel(
                                               IMessageQueuePtr queue,
@@ -109,7 +109,7 @@ namespace ortc
                                               ITransportStreamPtr receiveStream,
                                               ITransportStreamPtr sendStream,
                                               size_t maxMessageSizeInBytes
-                                              );
+                                              ) noexcept;
 
         static RUDPMessagingPtr openChannel(
                                             IMessageQueuePtr queue,
@@ -119,78 +119,78 @@ namespace ortc
                                             ITransportStreamPtr receiveStream,
                                             ITransportStreamPtr sendStream,
                                             size_t maxMessageSizeInBytes
-                                            );
+                                            ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual RUDPMessagingStates getState(
-                                             WORD *outLastErrorCode = NULL,
-                                             String *outLastErrorReason = NULL
-                                             ) const;
+        RUDPMessagingStates getState(
+                                     WORD *outLastErrorCode = NULL,
+                                     String *outLastErrorReason = NULL
+                                     ) const noexcept override;
 
-        virtual void shutdown();
+        void shutdown() noexcept override;
 
-        virtual void shutdownDirection(Shutdown state);
+        void shutdownDirection(Shutdown state) noexcept override;
 
-        virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes);
+        void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept override;
 
-        virtual IPAddress getConnectedRemoteIP();
+        IPAddress getConnectedRemoteIP() noexcept override;
 
-        virtual String getRemoteConnectionInfo();
+        String getRemoteConnectionInfo() noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => IRUDPChannelDelegate
-        #pragma mark
+        //
+        // RUDPMessaging => IRUDPChannelDelegate
+        //
 
-        virtual void onRDUPChannelStateChanged(
+        void onRDUPChannelStateChanged(
                                                IRUDPChannelPtr session,
                                                RUDPChannelStates state
-                                               );
+                                               ) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => ITransportStreamWriterDelegate
-        #pragma mark
+        //
+        // RUDPMessaging => ITransportStreamWriterDelegate
+        //
 
-        virtual void onTransportStreamWriterReady(ITransportStreamWriterPtr reader);
+        void onTransportStreamWriterReady(ITransportStreamWriterPtr reader) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => ITransportStreamReaderDelegate
-        #pragma mark
+        //
+        // RUDPMessaging => ITransportStreamReaderDelegate
+        //
 
-        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader);
+        void onTransportStreamReaderReady(ITransportStreamReaderPtr reader) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => (internal)
-        #pragma mark
+        //
+        // RUDPMessaging => (internal)
+        //
 
-        bool isShuttingDown() const {return RUDPMessagingState_ShuttingDown == mCurrentState;}
-        bool isShutdown() const {return RUDPMessagingState_Shutdown == mCurrentState;}
+        bool isShuttingDown() const noexcept {return RUDPMessagingState_ShuttingDown == mCurrentState;}
+        bool isShutdown() const noexcept {return RUDPMessagingState_Shutdown == mCurrentState;}
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void step();
-        bool stepSendData();
-        bool stepReceiveData();
+        void step() noexcept;
+        bool stepSendData() noexcept;
+        bool stepReceiveData() noexcept;
 
-        void cancel();
-        void setState(RUDPMessagingStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void cancel() noexcept;
+        void setState(RUDPMessagingStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        IRUDPChannelPtr getChannel() const;
+        IRUDPChannelPtr getChannel() const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPMessaging => (data)
-        #pragma mark
+        //
+        // RUDPMessaging => (data)
+        //
 
         AutoPUID mID;
         mutable RecursiveLock mLock;
@@ -228,13 +228,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPMessagingFactory
-      #pragma mark
+      //
+      // IRUDPMessagingFactory
+      //
 
       interaction IRUDPMessagingFactory
       {
-        static IRUDPMessagingFactory &singleton();
+        static IRUDPMessagingFactory &singleton() noexcept;
 
         virtual RUDPMessagingPtr acceptChannel(
                                                IMessageQueuePtr queue,
@@ -243,7 +243,7 @@ namespace ortc
                                                ITransportStreamPtr receiveStream,
                                                ITransportStreamPtr sendStream,
                                                size_t maxMessageSizeInBytes
-                                               );
+                                               ) noexcept;
 
         virtual RUDPMessagingPtr acceptChannel(
                                                IMessageQueuePtr queue,
@@ -252,7 +252,7 @@ namespace ortc
                                                ITransportStreamPtr receiveStream,
                                                ITransportStreamPtr sendStream,
                                                size_t maxMessageSizeInBytes
-                                               );
+                                               ) noexcept;
 
         virtual RUDPMessagingPtr openChannel(
                                              IMessageQueuePtr queue,
@@ -262,7 +262,7 @@ namespace ortc
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
                                              size_t maxMessageSizeInBytes
-                                             );
+                                             ) noexcept;
       };
 
       class RUDPMessagingFactory : public IFactory<IRUDPMessagingFactory> {};

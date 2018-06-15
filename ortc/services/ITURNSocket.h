@@ -49,9 +49,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITURNSocket
-    #pragma mark
+    //
+    // ITURNSocket
+    //
 
     interaction ITURNSocket
     {
@@ -65,7 +65,7 @@ namespace ortc
         TURNSocketState_ShuttingDown,
         TURNSocketState_Shutdown,
       };
-      static const char *toString(TURNSocketStates state);
+      static const char *toString(TURNSocketStates state) noexcept;
 
       enum TURNSocketErrors
       {
@@ -77,7 +77,7 @@ namespace ortc
         TURNSocketError_UnexpectedSocketFailure,
         TURNSocketError_BogusDataOnSocketReceived,
       };
-      static const char *toString(TURNSocketErrors error);
+      static const char *toString(TURNSocketErrors error) noexcept;
 
       struct CreationOptions
       {
@@ -96,32 +96,32 @@ namespace ortc
                                    IMessageQueuePtr queue,
                                    ITURNSocketDelegatePtr delegate,
                                    const CreationOptions &options
-                                   );
+                                   ) noexcept;
 
-      static ElementPtr toDebug(ITURNSocketPtr socket);
+      static ElementPtr toDebug(ITURNSocketPtr socket) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual TURNSocketStates getState() const = 0;
-      virtual TURNSocketErrors getLastError() const = 0;
+      virtual TURNSocketStates getState() const noexcept = 0;
+      virtual TURNSocketErrors getLastError() const noexcept = 0;
 
-      virtual bool isRelayingUDP() const = 0;
+      virtual bool isRelayingUDP() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Shutdown the the TURN session
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
       virtual bool sendPacket(
                               IPAddress destination,
                               const BYTE *buffer,
                               size_t bufferLengthInBytes,
                               bool bindChannelIfPossible = false
-                              ) = 0;
+                              ) noexcept = 0;
 
-      virtual IPAddress getActiveServerIP() const = 0;
-      virtual IPAddress getRelayedIP() const = 0;
-      virtual IPAddress getReflectedIP() const = 0;
-      virtual IPAddress getServerResponseIP() const = 0;
+      virtual IPAddress getActiveServerIP() const noexcept = 0;
+      virtual IPAddress getRelayedIP() const noexcept = 0;
+      virtual IPAddress getReflectedIP() const noexcept = 0;
+      virtual IPAddress getServerResponseIP() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the TURN socket that it has a packet that it must
@@ -131,7 +131,7 @@ namespace ortc
       virtual bool handleSTUNPacket(
                                     IPAddress fromIPAddress,
                                     STUNPacketPtr turnPacket
-                                    ) = 0;
+                                    ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the TURN socket that it has a packet that might be
@@ -142,22 +142,22 @@ namespace ortc
                                      IPAddress fromIPAddress,
                                      const BYTE *buffer,
                                      size_t bufferLengthInBytes
-                                     ) = 0;
+                                     ) noexcept = 0;
 
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the TURN socket that the write ready flag is available
       //          on the delegate (e.g. UDP socket is available for writing)
-      virtual void notifyWriteReady() = 0;
+      virtual void notifyWriteReady() noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITURNSocketDelegate
-    #pragma mark
+    //
+    // ITURNSocketDelegate
+    //
 
     interaction ITURNSocketDelegate
     {
@@ -180,7 +180,7 @@ namespace ortc
                                                   IPAddress source,
                                                   const BYTE *packet,
                                                   size_t packetLengthInBytes
-                                                  ) = 0;
+                                                  ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Request that the delegate send a packet on behalf of the
@@ -190,7 +190,7 @@ namespace ortc
                                               IPAddress destination,
                                               const BYTE *packet,
                                               size_t packetLengthInBytes
-                                              ) = 0;
+                                              ) noexcept = 0;
 
       virtual void onTURNSocketWriteReady(ITURNSocketPtr socket) = 0;
     };
@@ -200,8 +200,8 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::ITURNSocketDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITURNSocketPtr, ITURNSocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITURNSocketDelegate::TURNSocketStates, TURNSocketStates)
-ZS_DECLARE_PROXY_METHOD_2(onTURNSocketStateChanged, ITURNSocketPtr, TURNSocketStates)
-ZS_DECLARE_PROXY_METHOD_SYNC_4(handleTURNSocketReceivedPacket, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_4(notifyTURNSocketSendPacket, bool, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
-ZS_DECLARE_PROXY_METHOD_1(onTURNSocketWriteReady, ortc::services::ITURNSocketPtr)
+ZS_DECLARE_PROXY_METHOD(onTURNSocketStateChanged, ITURNSocketPtr, TURNSocketStates)
+ZS_DECLARE_PROXY_METHOD_SYNC(handleTURNSocketReceivedPacket, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(notifyTURNSocketSendPacket, bool, ITURNSocketPtr, IPAddress, const BYTE *, size_t)
+ZS_DECLARE_PROXY_METHOD(onTURNSocketWriteReady, ortc::services::ITURNSocketPtr)
 ZS_DECLARE_PROXY_END()

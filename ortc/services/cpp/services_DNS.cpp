@@ -79,18 +79,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark helpers
-      #pragma mark
+      //
+      // helpers
+      //
 
       //-----------------------------------------------------------------------
-      static Log::Params slog(const char *message)
+      static Log::Params slog(const char *message) noexcept
       {
         return Log::Params(message, "DNS");
       }
 
       //-----------------------------------------------------------------------
-      static bool srvCompare(const IDNS::SRVResult::SRVRecord &first, const IDNS::SRVResult::SRVRecord &second)
+      static bool srvCompare(const IDNS::SRVResult::SRVRecord &first, const IDNS::SRVResult::SRVRecord &second) noexcept
       {
         if (first.mPriority < second.mPriority)
           return true;
@@ -115,13 +115,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void sortSRV(IDNS::SRVResult &result)
+      static void sortSRV(IDNS::SRVResult &result) noexcept
       {
         result.mRecords.sort(srvCompare);
       }
 
       //-----------------------------------------------------------------------
-      static void sortSRV(IDNS::SRVResultPtr result)
+      static void sortSRV(IDNS::SRVResultPtr result) noexcept
       {
         if (!result) return;
         sortSRV(*(result.get()));
@@ -133,7 +133,7 @@ namespace ortc
                                     std::list<IPAddress> &dest,
                                     bool includeIPv4 = true,
                                     bool includeIPv6 = true
-                                    )
+                                    ) noexcept
       {
         for(std::list<IPAddress>::const_iterator iter = source.begin(); iter != source.end(); ++iter) {
           if ((*iter).isIPv4()) {
@@ -147,7 +147,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(std::list<IPAddress> &result, WORD defaultPort)
+      static void fixDefaultPort(std::list<IPAddress> &result, WORD defaultPort) noexcept
       {
         for(std::list<IPAddress>::iterator iter = result.begin(); iter != result.end(); ++iter) {
           if (0 == (*iter).getPort())
@@ -156,19 +156,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(IDNS::AResult &result, WORD defaultPort)
+      static void fixDefaultPort(IDNS::AResult &result, WORD defaultPort) noexcept
       {
         fixDefaultPort(result.mIPAddresses, defaultPort);
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(IDNS::AResultPtr result, WORD defaultPort)
+      static void fixDefaultPort(IDNS::AResultPtr result, WORD defaultPort) noexcept
       {
         fixDefaultPort(*(result.get()), defaultPort);
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(IDNS::SRVResult::SRVRecord &result, WORD defaultPort)
+      static void fixDefaultPort(IDNS::SRVResult::SRVRecord &result, WORD defaultPort) noexcept
       {
         if (result.mAResult)
           fixDefaultPort(result.mAResult, defaultPort);
@@ -177,7 +177,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(IDNS::SRVResult &result, WORD defaultPort)
+      static void fixDefaultPort(IDNS::SRVResult &result, WORD defaultPort) noexcept
       {
         if (0 == defaultPort)
           return;
@@ -188,7 +188,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void fixDefaultPort(IDNS::SRVResultPtr result, WORD defaultPort)
+      static void fixDefaultPort(IDNS::SRVResultPtr result, WORD defaultPort) noexcept
       {
         fixDefaultPort(*(result.get()), defaultPort);
       }
@@ -199,7 +199,7 @@ namespace ortc
                            StringList &output,
                            const String &delimiters = " ",
                            const bool includeEmpty = false
-                           )
+                           ) noexcept
       {
         // so much nicer when something thinks through things for you:
         // http://stackoverflow.com/a/1493195/894732
@@ -233,7 +233,7 @@ namespace ortc
                                   const char *name,
                                   WORD defaultPort,
                                   IPAddressList &outIPAddresses
-                                  )
+                                  ) noexcept
       {
         bool found = false;
 
@@ -258,7 +258,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool shouldResolveAWhenAnIP(IDNS::SRVLookupTypes types)
+      static bool shouldResolveAWhenAnIP(IDNS::SRVLookupTypes types) noexcept
       {
         if (IDNS::SRVLookupType_LookupOnly == types) return true;
         if (0 != (IDNS::SRVLookupType_AutoLookupA & types)) return true;
@@ -267,7 +267,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool shouldResolveAAAAWhenAnIP(IDNS::SRVLookupTypes types)
+      static bool shouldResolveAAAAWhenAnIP(IDNS::SRVLookupTypes types) noexcept
       {
         if (IDNS::SRVLookupType_LookupOnly == types) return true;
         if (0 != (IDNS::SRVLookupType_AutoLookupAAAA & types)) return true;
@@ -279,7 +279,7 @@ namespace ortc
       static bool isDNSsList(
                              const char *name,
                              StringList &outList
-                             )
+                             ) noexcept
       {
         StringList tokenizedList;
         tokenize(String(name), tokenizedList, ",");
@@ -295,7 +295,7 @@ namespace ortc
       static void merge(
                         IDNS::AResultPtr &ioResult,
                         const IDNS::AResultPtr &add
-                        )
+                        ) noexcept
       {
         if (!ioResult) {
           ioResult = add;
@@ -318,7 +318,7 @@ namespace ortc
       static void merge(
                         IDNS::SRVResultPtr &ioResult,
                         const IDNS::SRVResultPtr &add
-                        )
+                        ) noexcept
       {
         typedef IDNS::SRVResult::SRVRecord SRVRecord;
         typedef IDNS::SRVResult::SRVRecordList SRVRecordList;
@@ -348,7 +348,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static String extractPort(const char *name, WORD &port)
+      static String extractPort(const char *name, WORD &port) noexcept
       {
         String str(name);
         auto pos = str.find(':');
@@ -369,9 +369,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSQuery
-      #pragma mark
+      //
+      // DNSQuery
+      //
 
       class DNSQuery : public SharedRecursiveLock,
                        public IDNSQuery
@@ -408,14 +408,14 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSQuery::DNSIndirectReference
-        #pragma mark
+        //
+        // DNSQuery::DNSIndirectReference
+        //
 
         class DNSIndirectReference : public DNSMonitor::IResult {
         public:
           //-------------------------------------------------------------------
-          static DNSIndirectReferencePtr create(DNSQueryPtr query) {
+          static DNSIndirectReferencePtr create(DNSQueryPtr query) noexcept {
             DNSIndirectReferencePtr pThis(make_shared<DNSIndirectReference>());
             pThis->mThisWeak = pThis;
             pThis->mMonitor = DNSMonitor::singleton();
@@ -425,25 +425,25 @@ namespace ortc
           }
 
           //-------------------------------------------------------------------
-          ~DNSIndirectReference()
+          ~DNSIndirectReference() noexcept
           {
             mThisWeak.reset();
             cancel();
           }
 
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark DNSQuery::DNSIndirectReference => DNSMonitor::IResult
-          #pragma mark
+          //
+          // DNSQuery::DNSIndirectReference => DNSMonitor::IResult
+          //
 
           //-------------------------------------------------------------------
           // when cleaning out a strong reference to yourself, you must ensure
           // to keep the reference alive in the stack so the object is
           // destroyed after the mThis variable is reset
-          virtual PUID getID() const {return mID;}
+          virtual PUID getID() const noexcept {return mID;}
 
           //-------------------------------------------------------------------
-          virtual void cancel()
+          virtual void cancel() noexcept
           {
             DNSMonitorPtr monitor = mMonitor.lock();
             if (!monitor) return;
@@ -452,7 +452,7 @@ namespace ortc
           }
 
           //-------------------------------------------------------------------
-          virtual void setQueryID(QueryID queryID)
+          virtual void setQueryID(QueryID queryID) noexcept
           {
             mQueryID = queryID;
           }
@@ -503,9 +503,9 @@ namespace ortc
 
         public:
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark DNSQuery::DNSIndirectReference => (data)
-          #pragma mark
+          //
+          // DNSQuery::DNSIndirectReference => (data)
+          //
 
           PUID mID;
           DNSIndirectReferenceWeakPtr mThisWeak;
@@ -517,23 +517,23 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSQuery => (internal/derived)
-        #pragma mark
+        //
+        // DNSQuery => (internal/derived)
+        //
 
         //---------------------------------------------------------------------
         DNSQuery(
                  DNSMonitorPtr monitor,
                  IDNSDelegatePtr delegate
-                 ) :
+                 ) noexcept :
           SharedRecursiveLock(monitor ? *monitor : SharedRecursiveLock::create()),
           mMonitor(monitor),
           mObjectName("DNSQuery")
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
           if (!queue) {
-            ZS_THROW_BAD_STATE_MSG_IF(!queue, "The service thread was not created")
+            ZS_ASSERT_FAIL("The service thread was not created");
           }
 
           mDelegate = IDNSDelegateProxy::createWeak(delegate);
@@ -541,10 +541,10 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        ~DNSQuery() { mThisWeak.reset(); cancel(); }
+        ~DNSQuery() noexcept { mThisWeak.reset(); cancel(); }
 
         //---------------------------------------------------------------------
-        Log::Params log(const char *message) const
+        Log::Params log(const char *message) const noexcept
         {
           ElementPtr objectEl = Element::create(mObjectName);
           IHelper::debugAppend(objectEl, "id", mID);
@@ -552,7 +552,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void abortEarly()
+        virtual void abortEarly() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -572,15 +572,15 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         //---------------------------------------------------------------------
-        virtual void cancel()
+        virtual void cancel() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -591,37 +591,37 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool hasResult() const {return mA || mAAAA || mSRV;}
+        virtual bool hasResult() const noexcept {return mA || mAAAA || mSRV;}
 
         //---------------------------------------------------------------------
-        virtual bool isComplete() const {return !mQuery;}
+        virtual bool isComplete() const noexcept {return !mQuery;}
 
         //---------------------------------------------------------------------
-        virtual AResultPtr getA() const {return IDNS::cloneA(mA);}
+        virtual AResultPtr getA() const noexcept {return IDNS::cloneA(mA);}
 
         //---------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const {return IDNS::cloneAAAA(mAAAA);}
+        virtual AAAAResultPtr getAAAA() const noexcept {return IDNS::cloneAAAA(mAAAA);}
 
         //---------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const {return IDNS::cloneSRV(mSRV);}
+        virtual SRVResultPtr getSRV() const noexcept {return IDNS::cloneSRV(mSRV);}
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSQuery => (internal)
-        #pragma mark
+        //
+        // DNSQuery => (internal)
+        //
 
         //---------------------------------------------------------------------
-        void done()
+        void done() noexcept
         {
           mQuery.reset();
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSQuery => (data)
-        #pragma mark
+        //
+        // DNSQuery => (data)
+        //
 
         DNSMonitorPtr mMonitor;
         AutoPUID mID;
@@ -641,14 +641,14 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSAQuery
-      #pragma mark
+      //
+      // DNSAQuery
+      //
 
       class DNSAQuery : public DNSQuery
       {
       public:
-        DNSAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) :
+        DNSAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) noexcept :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mPort(port)
@@ -658,7 +658,7 @@ namespace ortc
 
       public:
         //---------------------------------------------------------------------
-        static DNSAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
+        static DNSAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port) noexcept
         {
           DNSAQueryPtr pThis(make_shared<DNSAQuery>(make_private{}, delegate, name, port));
           pThis->mThisWeak = pThis;
@@ -676,9 +676,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSAQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
         virtual void onAResult(IDNS::AResultPtr result)
@@ -733,9 +733,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAQuery => (data)
-        #pragma mark
+        //
+        // DNSAQuery => (data)
+        //
 
         String mName;
         WORD mPort;
@@ -745,14 +745,14 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSAAAAQuery
-      #pragma mark
+      //
+      // DNSAAAAQuery
+      //
 
       class DNSAAAAQuery : public DNSQuery
       {
       public:
-        DNSAAAAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) :
+        DNSAAAAQuery(const make_private &, IDNSDelegatePtr delegate, const char *name, WORD port) noexcept :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mPort(port)
@@ -762,7 +762,7 @@ namespace ortc
 
       public:
         //---------------------------------------------------------------------
-        static DNSAAAAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port)
+        static DNSAAAAQueryPtr create(IDNSDelegatePtr delegate, const char *name, WORD port) noexcept
         {
           DNSAAAAQueryPtr pThis(make_shared<DNSAAAAQuery>(make_private{}, delegate, name, port));
           pThis->mThisWeak = pThis;
@@ -780,9 +780,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAAAAQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSAAAAQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
         virtual void onAAAAResult(IDNS::AAAAResultPtr result)
@@ -838,9 +838,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAAAAQuery => (data)
-        #pragma mark
+        //
+        // DNSAAAAQuery => (data)
+        //
 
         String mName;
         WORD mPort;
@@ -850,9 +850,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSSRVQuery
-      #pragma mark
+      //
+      // DNSSRVQuery
+      //
 
       class DNSSRVQuery : public DNSQuery
       {
@@ -864,7 +864,7 @@ namespace ortc
                     const char *service,
                     const char *protocol,
                     WORD port
-                    ) :
+                    ) noexcept :
           DNSQuery(DNSMonitor::singleton(), delegate),
           mName(name),
           mService(service),
@@ -882,7 +882,7 @@ namespace ortc
                                      const char *service,
                                      const char *protocol,
                                      WORD port
-                                     )
+                                     ) noexcept
         {
           DNSSRVQueryPtr pThis(make_shared<DNSSRVQuery>(make_private{}, delegate, name, service, protocol, port));
           pThis->mThisWeak = pThis;
@@ -899,9 +899,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSSRVQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
         virtual void onSRVResult(IDNS::SRVResultPtr result)
@@ -974,16 +974,15 @@ namespace ortc
 
           try {
             mDelegate->onLookupCompleted(mThisWeak.lock());
-          }
-          catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
+          } catch (IDNSDelegateProxy::Exceptions::DelegateGone &) {
           }
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVQuery (data)
-        #pragma mark
+        //
+        // DNSSRVQuery (data)
+        //
 
         String mName;
         String mService;
@@ -996,9 +995,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSAorAAAAQuery
-      #pragma mark
+      //
+      // DNSAorAAAAQuery
+      //
 
       class DNSAorAAAAQuery : public MessageQueueAssociator,
                               public IDNSQuery,
@@ -1012,7 +1011,7 @@ namespace ortc
                         const make_private &,
                         IMessageQueuePtr queue,
                         IDNSDelegatePtr delegate
-                        ) :
+                        ) noexcept :
           MessageQueueAssociator(queue),
           mDelegate(IDNSDelegateProxy::createWeak(queue, delegate))
         {
@@ -1020,7 +1019,7 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        void init(const char *name)
+        void init(const char *name) noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1047,7 +1046,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void report()
+        void report() noexcept
         {
           if (mALookup) {
             if (!mALookup->isComplete()) return;
@@ -1078,11 +1077,11 @@ namespace ortc
         static DNSAorAAAAQueryPtr create(
                                          IDNSDelegatePtr delegate,
                                          const char *name
-                                         )
+                                         ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_BAD_STATE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSAorAAAAQueryPtr pThis(make_shared<DNSAorAAAAQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
@@ -1091,15 +1090,15 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAorAAAAQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSAorAAAAQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         //---------------------------------------------------------------------
-        virtual void cancel()
+        virtual void cancel() noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1116,7 +1115,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool hasResult() const
+        virtual bool hasResult() const noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1131,7 +1130,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool isComplete() const {
+        virtual bool isComplete() const noexcept {
           AutoRecursiveLock lock(mLock);
 
           bool complete = true;
@@ -1145,7 +1144,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual AResultPtr getA() const
+        virtual AResultPtr getA() const noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1154,7 +1153,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const
+        virtual AAAAResultPtr getAAAA() const noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1163,12 +1162,12 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const {return SRVResultPtr();}
+        virtual SRVResultPtr getSRV() const noexcept {return SRVResultPtr();}
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAorAAAAQuery => IDNSDelegate
-        #pragma mark
+        //
+        // DNSAorAAAAQuery => IDNSDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr query)
@@ -1179,9 +1178,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSAorAAAAQuery => (data)
-        #pragma mark
+        //
+        // DNSAorAAAAQuery => (data)
+        //
 
         mutable RecursiveLock mLock;
         AutoPUID mID;
@@ -1199,9 +1198,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSSRVResolverQuery
-      #pragma mark
+      //
+      // DNSSRVResolverQuery
+      //
 
       class DNSSRVResolverQuery : public MessageQueueAssociator,
                                   public IDNSQuery,
@@ -1222,7 +1221,7 @@ namespace ortc
                             WORD defaultPriority,
                             WORD defaultWeight,
                             IDNS::SRVLookupTypes lookupType
-                            ) :
+                            ) noexcept :
           MessageQueueAssociator(queue),
           mDelegate(IDNSDelegateProxy::createWeak(queue, delegate)),
           mOriginalName(name),
@@ -1237,7 +1236,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
           AutoRecursiveLock lock(mLock);
           mSRVLookup = IDNS::lookupSRV(
@@ -1285,7 +1284,7 @@ namespace ortc
 
       public:
         //---------------------------------------------------------------------
-        ~DNSSRVResolverQuery()
+        ~DNSSRVResolverQuery() noexcept
         {
           mThisWeak.reset();
           ZS_LOG_TRACE(log("destroyed"))
@@ -1301,11 +1300,11 @@ namespace ortc
                                              WORD defaultPriority,
                                              WORD defaultWeight,
                                              IDNS::SRVLookupTypes lookupType
-                                             )
+                                             ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_INVALID_USAGE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSSRVResolverQueryPtr pThis(make_shared<DNSSRVResolverQuery>(make_private{}, queue, delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType));
           pThis->mThisWeak = pThis;
@@ -1314,15 +1313,15 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVResolverQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSSRVResolverQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         //---------------------------------------------------------------------
-        virtual bool hasResult() const
+        virtual bool hasResult() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           if (!isComplete()) return false;
@@ -1330,27 +1329,27 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool isComplete() const
+        virtual bool isComplete() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return mDidComplete;
         }
 
         //---------------------------------------------------------------------
-        virtual AResultPtr getA() const {return AResultPtr();}
+        virtual AResultPtr getA() const noexcept {return AResultPtr();}
 
         //---------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const {return AAAAResultPtr();}
+        virtual AAAAResultPtr getAAAA() const noexcept {return AAAAResultPtr();}
 
         //---------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const
+        virtual SRVResultPtr getSRV() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return IDNS::cloneSRV(mSRVResult);
         }
 
         //---------------------------------------------------------------------
-        virtual void cancel()
+        virtual void cancel() noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1372,9 +1371,9 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVResolverQuery => IDNSDelegate
-        #pragma mark
+        //
+        // DNSSRVResolverQuery => IDNSDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr query)
@@ -1385,12 +1384,12 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVResolverQuery => (internal)
-        #pragma mark
+        //
+        // DNSSRVResolverQuery => (internal)
+        //
 
         //---------------------------------------------------------------------
-        void step()
+        void step() noexcept
         {
           ZS_LOG_TRACE(log("step") + toDebug())
 
@@ -1406,7 +1405,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool stepHandleSRVCompleted()
+        bool stepHandleSRVCompleted() noexcept
         {
           if (mSRVResult) {
             ZS_LOG_TRACE(log("already have a result"))
@@ -1490,7 +1489,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool stepHandleBackupCompleted()
+        bool stepHandleBackupCompleted() noexcept
         {
           if (mSRVResult) {
             ZS_LOG_TRACE(log("already have a result"))
@@ -1542,7 +1541,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool stepHandleResolversCompleted()
+        virtual bool stepHandleResolversCompleted() noexcept
         {
           if (mResolvers.size() < 1) {
             ZS_LOG_TRACE(log("no resolvers found"))
@@ -1580,7 +1579,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void report()
+        void report() noexcept
         {
           if (!mDelegate) return;
 
@@ -1601,7 +1600,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        Log::Params log(const char *message) const
+        Log::Params log(const char *message) const noexcept
         {
           ElementPtr objectEl = Element::create("DNSSRVResolverQuery");
           IHelper::debugAppend(objectEl, "id", mID);
@@ -1609,13 +1608,13 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        Log::Params debug(const char *message) const
+        Log::Params debug(const char *message) const noexcept
         {
           return Log::Params(message, toDebug());
         }
 
         //---------------------------------------------------------------------
-        virtual ElementPtr toDebug() const
+        virtual ElementPtr toDebug() const noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -1644,9 +1643,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVResolverQuery => (data)
-        #pragma mark
+        //
+        // DNSSRVResolverQuery => (data)
+        //
 
         mutable RecursiveLock mLock;
         AutoPUID mID;
@@ -1679,9 +1678,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSInstantResultQuery
-      #pragma mark
+      //
+      // DNSInstantResultQuery
+      //
 
       class DNSInstantResultQuery : public IDNSQuery
       {
@@ -1689,43 +1688,43 @@ namespace ortc
         struct make_private {};
 
       public:
-        DNSInstantResultQuery(const make_private &) {}
+        DNSInstantResultQuery(const make_private &) noexcept {}
 
       public:
         //---------------------------------------------------------------------
-        static DNSInstantResultQueryPtr create() {return make_shared<DNSInstantResultQuery>(make_private{});}
+        static DNSInstantResultQueryPtr create() noexcept {return make_shared<DNSInstantResultQuery>(make_private{});}
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSSRVResolverQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSSRVResolverQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         //---------------------------------------------------------------------
-        virtual void cancel() {}
+        virtual void cancel() noexcept {}
 
         //---------------------------------------------------------------------
-        virtual bool hasResult() const {return mA || mAAAA || mSRV;}
+        virtual bool hasResult() const noexcept {return mA || mAAAA || mSRV;}
 
         //---------------------------------------------------------------------
-        virtual bool isComplete() const {return true;}
+        virtual bool isComplete() const noexcept {return true;}
 
         //---------------------------------------------------------------------
-        virtual AResultPtr getA() const {return IDNS::cloneA(mA);}
+        virtual AResultPtr getA() const noexcept {return IDNS::cloneA(mA);}
 
         //---------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const {return IDNS::cloneAAAA(mAAAA);}
+        virtual AAAAResultPtr getAAAA() const noexcept {return IDNS::cloneAAAA(mAAAA);}
 
         //---------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const {return IDNS::cloneSRV(mSRV);}
+        virtual SRVResultPtr getSRV() const noexcept {return IDNS::cloneSRV(mSRV);}
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSInstantResultQuery => (data)
-        #pragma mark
+        //
+        // DNSInstantResultQuery => (data)
+        //
 
         AResultPtr mA;
         AAAAResultPtr mAAAA;
@@ -1739,9 +1738,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSListQuery
-      #pragma mark
+      //
+      // DNSListQuery
+      //
 
       class DNSListQuery : public MessageQueueAssociator,
                            public IDNSQuery,
@@ -1759,20 +1758,20 @@ namespace ortc
                      const make_private &,
                      IMessageQueuePtr queue,
                      IDNSDelegatePtr delegate
-                     ) :
+                     ) noexcept :
           MessageQueueAssociator(queue),
           mDelegate(IDNSDelegateProxy::createWeak(delegate))
         {
         }
 
       protected:
-        void init()
+        void init() noexcept
         {
         }
 
       public:
         //---------------------------------------------------------------------
-        ~DNSListQuery()
+        ~DNSListQuery() noexcept
         {
           mThisWeak.reset();
           cancel();
@@ -1788,11 +1787,11 @@ namespace ortc
                                          WORD defaultPriority,
                                          WORD defaultWeight,
                                          SRVLookupTypes lookupType
-                                         )
+                                         ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_BAD_STATE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
@@ -1824,11 +1823,11 @@ namespace ortc
         static DNSListQueryPtr createA(
                                        IDNSDelegatePtr delegate,
                                        const StringList &dnsList
-                                       )
+                                       ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_BAD_STATE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
@@ -1859,11 +1858,11 @@ namespace ortc
         static DNSListQueryPtr createAAAA(
                                           IDNSDelegatePtr delegate,
                                           const StringList &dnsList
-                                          )
+                                          ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_BAD_STATE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
@@ -1894,11 +1893,11 @@ namespace ortc
         static DNSListQueryPtr createAorAAAA(
                                              IDNSDelegatePtr delegate,
                                              const StringList &dnsList
-                                             )
+                                             ) noexcept
         {
-          ZS_THROW_INVALID_USAGE_IF(!delegate)
+          ZS_ASSERT(delegate);
           IMessageQueuePtr queue = Helper::getServiceQueue();
-          ZS_THROW_BAD_STATE_IF(!queue)
+          ZS_ASSERT(queue);
 
           DNSListQueryPtr pThis(make_shared<DNSListQuery>(make_private{}, queue, delegate));
           pThis->mThisWeak = pThis;
@@ -1926,15 +1925,15 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSListQuery => IDNSQuery
-        #pragma mark
+        //
+        // DNSListQuery => IDNSQuery
+        //
 
         //---------------------------------------------------------------------
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         //---------------------------------------------------------------------
-        virtual void cancel()
+        virtual void cancel() noexcept
         {
           AutoRecursiveLock lock(mLock);
           ZS_LOG_DEBUG(log("cancel called"))
@@ -1949,35 +1948,35 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool hasResult() const
+        virtual bool hasResult() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return mA || mAAAA || mSRV;
         }
 
         //---------------------------------------------------------------------
-        virtual bool isComplete() const
+        virtual bool isComplete() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return !mDelegate;
         }
 
         //---------------------------------------------------------------------
-        virtual AResultPtr getA() const
+        virtual AResultPtr getA() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return IDNS::cloneA(mA);
         }
 
         //---------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const
+        virtual AAAAResultPtr getAAAA() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return IDNS::cloneAAAA(mAAAA);
         }
 
         //---------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const
+        virtual SRVResultPtr getSRV() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return IDNS::cloneSRV(mSRV);
@@ -1985,9 +1984,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSListQuery => IDNSDelegate
-        #pragma mark
+        //
+        // DNSListQuery => IDNSDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr inQuery)
@@ -2055,12 +2054,12 @@ namespace ortc
 
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSListQuery => (internal)
-        #pragma mark
+        //
+        // DNSListQuery => (internal)
+        //
 
         //---------------------------------------------------------------------
-        Log::Params log(const char *message) const
+        Log::Params log(const char *message) const noexcept
         {
           ElementPtr objectEl = Element::create("DNSListQuery");
           IHelper::debugAppend(objectEl, "id", mID);
@@ -2069,9 +2068,9 @@ namespace ortc
 
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DNSListQuery => (data)
-        #pragma mark
+        //
+        // DNSListQuery => (data)
+        //
 
         mutable RecursiveLock mLock;
         AutoPUID mID;
@@ -2090,9 +2089,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNSWinUWP
-      #pragma mark
+      //
+      // DNSWinUWP
+      //
 
       using Windows::Foundation::Collections::IVectorView;
       using Windows::Foundation::IAsyncOperation;
@@ -2125,7 +2124,7 @@ namespace ortc
                  WORD defaultPort,
                  WORD defaultPriority,
                  WORD defaultWeight
-                 ) :
+                 ) noexcept :
           SharedRecursiveLock(SharedRecursiveLock::create()),
           mDelegate(IDNSDelegateProxy::createWeak(IHelper::getServiceQueue(), delegate)),
           mName(name),
@@ -2143,7 +2142,7 @@ namespace ortc
 
       protected:
         //--------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -2376,7 +2375,7 @@ namespace ortc
 
       public:
         //--------------------------------------------------------------------
-        ~DNSWinUWP()
+        ~DNSWinUWP() noexcept
         {
           mThisWeak.reset();
           ZS_LOG_TRACE(log("destroyed"))
@@ -2395,7 +2394,7 @@ namespace ortc
           WORD defaultPort,
           WORD defaultPriority,
           WORD defaultWeight
-          )
+          ) noexcept
         {
           DNSWinUWPPtr pThis(make_shared<DNSWinUWP>(make_private{}, delegate, name, port, includeIPv4, includeIPv6, serviceName, protocol, defaultPort, defaultPriority, defaultWeight));
           pThis->mThisWeak = pThis;
@@ -2404,10 +2403,10 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        virtual PUID getID() const { return mID; }
+        virtual PUID getID() const noexcept { return mID; }
 
         //--------------------------------------------------------------------
-        virtual void cancel()
+        virtual void cancel() noexcept
         {
           IDNSDelegatePtr delegate;
 
@@ -2442,7 +2441,7 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        virtual bool hasResult() const
+        virtual bool hasResult() const noexcept
         {
           AutoRecursiveLock lock(*this);
           if (!isComplete()) return false;
@@ -2450,28 +2449,28 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        virtual bool isComplete() const
+        virtual bool isComplete() const noexcept
         {
           AutoRecursiveLock lock(*this);
           return !((bool)mDelegate);
         }
 
         //--------------------------------------------------------------------
-        virtual AResultPtr getA() const
+        virtual AResultPtr getA() const noexcept
         {
           AutoRecursiveLock lock(*this);
           return mA;
         }
 
         //--------------------------------------------------------------------
-        virtual AAAAResultPtr getAAAA() const
+        virtual AAAAResultPtr getAAAA() const noexcept
         {
           AutoRecursiveLock lock(*this);
           return mAAAA;
         }
 
         //--------------------------------------------------------------------
-        virtual SRVResultPtr getSRV() const
+        virtual SRVResultPtr getSRV() const noexcept
         {
           AutoRecursiveLock lock(*this);
           return mSRV;
@@ -2479,7 +2478,7 @@ namespace ortc
 
       protected:
         //--------------------------------------------------------------------
-        Log::Params log(const char *message) const
+        Log::Params log(const char *message) const noexcept
         {
           ElementPtr objectEl = Element::create("services::DNSWinUWP");
           IHelper::debugAppend(objectEl, "id", mID);
@@ -2487,7 +2486,7 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        static Log::Params slog(PUID id, const char *message)
+        static Log::Params slog(PUID id, const char *message) noexcept
         {
           ElementPtr objectEl = Element::create("services::DNSWinUWP");
           IHelper::debugAppend(objectEl, "id", id);
@@ -2495,7 +2494,7 @@ namespace ortc
         }
 
         //--------------------------------------------------------------------
-        ElementPtr toDebug() const
+        ElementPtr toDebug() const noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -2547,18 +2546,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DNS => IDNS
-      #pragma mark
+      //
+      // DNS => IDNS
+      //
 
       //-----------------------------------------------------------------------
       IDNSQueryPtr DNS::lookupA(
                                 IDNSDelegatePtr delegate,
                                 const char *name
-                                )
+                                ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!name)
-        ZS_THROW_INVALID_USAGE_IF(String(name).length() < 1)
+        ZS_ASSERT(name);
+        ZS_ASSERT(String(name).hasData());
 
         IPAddressList ips;
         if (internal::isIPAddressList(name, 0, ips)) {
@@ -2606,10 +2605,10 @@ namespace ortc
       IDNSQueryPtr DNS::lookupAAAA(
                                    IDNSDelegatePtr delegate,
                                    const char *name
-                                   )
+                                   ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!name)
-        ZS_THROW_INVALID_USAGE_IF(String(name).length() < 1)
+        ZS_ASSERT(name);
+        ZS_ASSERT(String(name).hasData());
 
         IPAddressList ips;
         if (internal::isIPAddressList(name, 0, ips)) {
@@ -2659,10 +2658,10 @@ namespace ortc
       IDNSQueryPtr DNS::lookupAorAAAA(
                                       IDNSDelegatePtr delegate,
                                       const char *name
-                                      )
+                                      ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!name)
-        ZS_THROW_INVALID_USAGE_IF(String(name).length() < 1)
+        ZS_ASSERT(!name);
+        ZS_ASSERT(String(name).hasData());
 
         IPAddressList ips;
         if (internal::isIPAddressList(name, 0, ips)) {
@@ -2721,11 +2720,11 @@ namespace ortc
                                   WORD defaultPriority,
                                   WORD defaultWeight,
                                   SRVLookupTypes lookupType
-                                  )
+                                  ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF(!name)
-        ZS_THROW_INVALID_USAGE_IF(String(name).length() < 1)
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(name);
+        ZS_ASSERT(String(name).hasData());
 
         IPAddressList ips;
         if (internal::isIPAddressList(name, defaultPort, ips)) {
@@ -2823,7 +2822,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      Log::Params DNS::slog(const char *message)
+      Log::Params DNS::slog(const char *message) noexcept
       {
         return Log::Params(message, "DNS");
       }
@@ -2832,12 +2831,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDNSFactory
-      #pragma mark
+      //
+      // IDNSFactory
+      //
 
       //-----------------------------------------------------------------------
-      IDNSFactory &IDNSFactory::singleton()
+      IDNSFactory &IDNSFactory::singleton() noexcept
       {
         return DNSFactory::singleton();
       }
@@ -2846,7 +2845,7 @@ namespace ortc
       IDNSQueryPtr IDNSFactory::lookupA(
                                         IDNSDelegatePtr delegate,
                                         const char *name
-                                        )
+                                        ) noexcept
       {
         if (this) {}
         return DNS::lookupA(delegate, name);
@@ -2856,7 +2855,7 @@ namespace ortc
       IDNSQueryPtr IDNSFactory::lookupAAAA(
                                            IDNSDelegatePtr delegate,
                                            const char *name
-                                           )
+                                           ) noexcept
       {
         if (this) {}
         return DNS::lookupAAAA(delegate, name);
@@ -2866,7 +2865,7 @@ namespace ortc
       IDNSQueryPtr IDNSFactory::lookupAorAAAA(
                                               IDNSDelegatePtr delegate,
                                               const char *name
-                                              )
+                                              ) noexcept
       {
         if (this) {}
         return DNS::lookupAorAAAA(delegate, name);
@@ -2882,7 +2881,7 @@ namespace ortc
                                           WORD defaultPriority,
                                           WORD defaultWeight,
                                           SRVLookupTypes lookupType
-                                          )
+                                          ) noexcept
       {
         if (this) {}
         return DNS::lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
@@ -2894,15 +2893,15 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNS::AResult
-    #pragma mark
+    //
+    // IDNS::AResult
+    //
 
     //-------------------------------------------------------------------------
     void IDNS::AResult::trace(
                               const char *func,
                               const char *message
-                              )
+                              ) noexcept
     {
       ZS_EVENTING_5(
                     x, i, Basic, ServicesDnsResultListBegin, os, Dns, DC_Start,
@@ -2935,15 +2934,15 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNS::SRVResult
-    #pragma mark
+    //
+    // IDNS::SRVResult
+    //
 
     //-------------------------------------------------------------------------
     void IDNS::SRVResult::trace(
                                 const char *func,
                                 const char *message
-                                )
+                                ) noexcept
     {
       ZS_EVENTING_7(
                     x, i, Basic, ServicesDnsSrvResultListBegin, os, Dns, DC_Start,
@@ -2994,15 +2993,15 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDNS
-    #pragma mark
+    //
+    // IDNS
+    //
 
     //-------------------------------------------------------------------------
     IDNSQueryPtr IDNS::lookupA(
                                IDNSDelegatePtr delegate,
                                const char *name
-                               )
+                               ) noexcept
     {
       auto result = internal::IDNSFactory::singleton().lookupA(delegate, name);
       ZS_EVENTING_3(
@@ -3018,7 +3017,7 @@ namespace ortc
     IDNSQueryPtr IDNS::lookupAAAA(
                                   IDNSDelegatePtr delegate,
                                   const char *name
-                                  )
+                                  ) noexcept
     {
       auto result = internal::IDNSFactory::singleton().lookupAAAA(delegate, name);
       ZS_EVENTING_3(
@@ -3034,7 +3033,7 @@ namespace ortc
     IDNSQueryPtr IDNS::lookupAorAAAA(
                                      IDNSDelegatePtr delegate,
                                      const char *name
-                                     )
+                                     ) noexcept
     {
       auto result = internal::IDNSFactory::singleton().lookupAorAAAA(delegate, name);
       ZS_EVENTING_3(
@@ -3056,7 +3055,7 @@ namespace ortc
                                  WORD defaultPriority,
                                  WORD defaultWeight,
                                  SRVLookupTypes lookupType
-                                 )
+                                 ) noexcept
     {
       auto result = internal::IDNSFactory::singleton().lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
       ZS_EVENTING_7(
@@ -3076,7 +3075,7 @@ namespace ortc
     IDNS::AResultPtr IDNS::convertIPAddressesToAResult(
                                                        const std::list<IPAddress> &ipAddresses,
                                                        UINT ttl
-                                                       )
+                                                       ) noexcept
     {
       AResultPtr result(make_shared<AResult>());
 
@@ -3092,7 +3091,7 @@ namespace ortc
     IDNS::AAAAResultPtr IDNS::convertIPAddressesToAAAAResult(
                                                              const std::list<IPAddress> &ipAddresses,
                                                              UINT ttl
-                                                             )
+                                                             ) noexcept
     {
       AAAAResultPtr result(make_shared<AAAAResult>());
 
@@ -3113,9 +3112,9 @@ namespace ortc
                                                              WORD defaultPort,
                                                              WORD defaultPriority,
                                                              WORD defaultWeight
-                                                             )
+                                                             ) noexcept
     {
-      ZS_THROW_INVALID_USAGE_IF((!resultA) && (!resultAAAA))
+      ZS_ASSERT((resultA) || (resultAAAA));
 
       IDNS::AResultPtr useResult = (resultA ? resultA : resultAAAA);
 
@@ -3181,14 +3180,14 @@ namespace ortc
                                                            WORD defaultPriority,
                                                            WORD defaultWeight,
                                                            UINT ttl
-                                                           )
+                                                           ) noexcept
     {
-      ZS_THROW_INVALID_USAGE_IF(ipAddresses.size() < 1)
+      ZS_ASSERT(ipAddresses.size() > 0);
 
       AResultPtr aResult = IDNS::convertIPAddressesToAResult(ipAddresses, ttl);
       AAAAResultPtr aaaaResult = IDNS::convertIPAddressesToAAAAResult(ipAddresses, ttl);
 
-      ZS_THROW_BAD_STATE_IF((!aResult) && (!aaaaResult))  // how can this happen??
+      ZS_ASSERT((aResult) || (aaaaResult));  // how can this happen??
 
       return IDNS::convertAorAAAAResultToSRVResult(
                                                    service,
@@ -3202,7 +3201,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IDNS::SRVResultPtr IDNS::mergeSRVs(const SRVResultList &srvList)
+    IDNS::SRVResultPtr IDNS::mergeSRVs(const SRVResultList &srvList) noexcept
     {
       if (srvList.size() < 1) return SRVResultPtr();
 
@@ -3230,7 +3229,7 @@ namespace ortc
                              IPAddress &outIP,
                              AResultPtr *outAResult,
                              AAAAResultPtr *outAAAAResult
-                             )
+                             ) noexcept
     {
       if (outAResult)
         *outAResult = AResultPtr();
@@ -3282,7 +3281,7 @@ namespace ortc
 
     //-------------------------------------------------------------------------
     // PURPOSE: Clone routines for various return results.
-    IDNS::AResultPtr IDNS::cloneA(AResultPtr result)
+    IDNS::AResultPtr IDNS::cloneA(AResultPtr result) noexcept
     {
       if (!result) return result;
 
@@ -3294,13 +3293,13 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IDNS::AAAAResultPtr IDNS::cloneAAAA(AAAAResultPtr result)
+    IDNS::AAAAResultPtr IDNS::cloneAAAA(AAAAResultPtr result) noexcept
     {
       return cloneA(result);
     }
 
     //-------------------------------------------------------------------------
-    IDNS::SRVResultPtr IDNS::cloneSRV(SRVResultPtr srvResult)
+    IDNS::SRVResultPtr IDNS::cloneSRV(SRVResultPtr srvResult) noexcept
     {
       if (!srvResult) return srvResult;
 

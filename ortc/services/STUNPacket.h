@@ -49,9 +49,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark STUNPacket
-    #pragma mark
+    //
+    // STUNPacket
+    //
 
     struct STUNPacket
     {
@@ -63,7 +63,7 @@ namespace ortc
         Class_ErrorResponse = 0x03,
       };
 
-      static const char *toString(Classes value);
+      static const char *toString(Classes value) noexcept;
 
       enum Methods {
         // STUN + ICE
@@ -82,7 +82,7 @@ namespace ortc
         Method_ReliableChannelACK =   0x0175,
       };
 
-      static const char *toString(Methods value);
+      static const char *toString(Methods value) noexcept;
 
       enum Attributes {
         Attribute_None =                          0x0000,
@@ -138,7 +138,7 @@ namespace ortc
         Attribute_ReservedReflectedFrom =         0x000B,
       };
 
-      static const char *toString(Attributes value);
+      static const char *toString(Attributes value) noexcept;
 
       enum CredentialMechanisms {
         CredentialMechanisms_None,
@@ -146,7 +146,7 @@ namespace ortc
         CredentialMechanisms_LongTerm,
       };
 
-      static const char *toString(CredentialMechanisms value);
+      static const char *toString(CredentialMechanisms value) noexcept;
 
       enum ErrorCodes {
         ErrorCode_TryAlternate =                  300,
@@ -169,14 +169,14 @@ namespace ortc
         ErrorCode_RoleConflict =                  487,
       };
 
-      static const char *toString(ErrorCodes value);
+      static const char *toString(ErrorCodes value) noexcept;
 
       enum Protocols {
         Protocol_None =   255,
         Protocol_UDP =     17,
       };
 
-      static const char *toString(Protocols value);
+      static const char *toString(Protocols value) noexcept;
 
       enum RFCs {
         RFC_3489_STUN =   0x01,   // classic STUN
@@ -188,7 +188,7 @@ namespace ortc
         RFC_AllowAll    = RFC_3489_STUN | RFC_5389_STUN | RFC_5766_TURN | RFC_5245_ICE | RFC_draft_RUDP,
       };
 
-      static String toString(RFCs value);
+      static String toString(RFCs value) noexcept;
 
       enum ParseLookAheadStates {
         ParseLookAheadState_NotSTUN,
@@ -198,27 +198,27 @@ namespace ortc
       };
 
     public:
-      STUNPacket();
+      STUNPacket() noexcept;
 
       static STUNPacketPtr createRequest(
                                          Methods method,
                                          const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
-                                         );
+                                         ) noexcept;
       static STUNPacketPtr createIndication(
                                             Methods method,
                                             const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
-                                            );
+                                            ) noexcept;
 
       static STUNPacketPtr createResponse(
                                           STUNPacketPtr request,
                                           const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
-                                          );
+                                          ) noexcept;
       static STUNPacketPtr createErrorResponse(
                                                STUNPacketPtr request,
                                                const char *software = ORTC_SERVICES_CLIENT_SOFTARE_DECLARATION
-                                               );          // put the error code into the request
+                                               ) noexcept;          // put the error code into the request
 
-      STUNPacketPtr clone(bool changeTransactionID) const;
+      STUNPacketPtr clone(bool changeTransactionID) const noexcept;
 
       struct Options
       {
@@ -236,38 +236,38 @@ namespace ortc
         const char *mLogObject{};                                // when output to a log, which object was responsible for this packet (never packetized or parsed)
         PUID mLogObjectID{};                                     // when output to a log, which object ID was responsible for this packet (never packetized or parsed)
 
-        ParseOptions() {}
+        ParseOptions() noexcept {}
         ParseOptions(
                      RFCs allowedRFCs,
                      bool allowRFC3489CookieBehaviour = true,
                      const char *logObject = NULL,
                      PUID logObjectID = 0
-                     ) :
+                     ) noexcept :
           mAllowedRFCs(allowedRFCs),
           mAllowRFC3489CookieBehaviour(allowRFC3489CookieBehaviour)
         {
           mLogObject = logObject;
           mLogObjectID = logObjectID;
         }
-        ParseOptions(const ParseOptions &op2) { (*this) = op2; }
+        ParseOptions(const ParseOptions &op2) noexcept { (*this) = op2; }
       };
 
       static STUNPacketPtr parseIfSTUN(                                  // returns empty shared pointer if wasn't a STUN packet
                                        const BYTE *packet,               // NOTE: While this is const we have to overwrite the packet data momentarily during MESSAGE-INTEGRITY calculation
                                        size_t packetLengthInBytes,
                                        const ParseOptions &options
-                                       );
+                                       ) noexcept;
 
       struct ParseStreamOptions : public ParseOptions
       {
-        ParseStreamOptions() { mAllowRFC3489CookieBehaviour = false; }
+        ParseStreamOptions() noexcept { mAllowRFC3489CookieBehaviour = false; }
         ParseStreamOptions(
                            RFCs allowedRFCs,
                            bool allowRFC3489CookieBehaviour = false,
                            const char *logObject = NULL,
                            PUID logObjectID = 0
-                           ) : ParseOptions(allowedRFCs, allowRFC3489CookieBehaviour, logObject, logObjectID) {}
-        ParseStreamOptions(const ParseStreamOptions &op2) { (*this) = op2; }
+                           ) noexcept : ParseOptions(allowedRFCs, allowRFC3489CookieBehaviour, logObject, logObjectID) {}
+        ParseStreamOptions(const ParseStreamOptions &op2) noexcept { (*this) = op2; }
       };
 
       static ParseLookAheadStates parseStreamIfSTUN(
@@ -276,45 +276,45 @@ namespace ortc
                                                     const BYTE *packet,        // NOTE: While this is const we have to overwrite the packet data momentarily during MESSAGE-INTEGRITY calculation
                                                     size_t streamDataAvailableInBytes,
                                                     const ParseStreamOptions &options
-                                                    );
+                                                    ) noexcept;
 
-      const char *classAsString() const;
-      const char *methodAsString() const;
+      const char *classAsString() const noexcept;
+      const char *methodAsString() const noexcept;
 
-      Log::Params log(const char *message) const;
-      Log::Params debug(const char *message) const;
-      ElementPtr toDebug() const;
+      Log::Params log(const char *message) const noexcept;
+      Log::Params debug(const char *message) const noexcept;
+      ElementPtr toDebug() const noexcept;
       void trace(
                  const char *func,
                  const char *message
-                 ) const;
+                 ) const noexcept;
 
-      bool isLegal(RFCs rfc) const;
-      RFCs guessRFC(RFCs allowedRFCs) const;
+      bool isLegal(RFCs rfc) const noexcept;
+      RFCs guessRFC(RFCs allowedRFCs) const noexcept;
 
-      SecureByteBlockPtr packetize(RFCs rfc);
+      SecureByteBlockPtr packetize(RFCs rfc) noexcept;
 
       bool isValidResponseTo(
                              STUNPacketPtr stunRequest,
                              RFCs allowedRFCs
-                             );
+                             ) noexcept;
 
       bool isValidMessageIntegrity(
                                    const char *password,                // must be SASLprep(password)
                                    const char *username = NULL,
                                    const char *realm = NULL
-                                   ) const;
+                                   ) const noexcept;
 
-      bool isRFC3489() const;
-      bool isRFC5389() const;
+      bool isRFC3489() const noexcept;
+      bool isRFC5389() const noexcept;
 
-      bool hasAttribute(Attributes attribute) const;
-      bool hasUnknownAttribute(Attributes attribute);
+      bool hasAttribute(Attributes attribute) const noexcept;
+      bool hasUnknownAttribute(Attributes attribute) noexcept;
 
       size_t getTotalRoomAvailableForData(
                                           size_t maxPacketSizeInBytes,
                                           RFCs rfc
-                                          ) const;
+                                          ) const noexcept;
 
     public:
       Options mOptions;

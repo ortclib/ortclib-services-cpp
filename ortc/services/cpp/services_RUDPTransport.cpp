@@ -60,9 +60,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport
-      #pragma mark
+      //
+      // RUDPTransport
+      //
 
       //-----------------------------------------------------------------------
       RUDPTransport::RUDPTransport(
@@ -70,7 +70,7 @@ namespace ortc
                                    IMessageQueuePtr queue,
                                    IICESocketSessionPtr iceSession,
                                    IRUDPTransportDelegatePtr delegate
-                                   ) :
+                                   ) noexcept :
         MessageQueueAssociator(queue),
         mSubscriptions(decltype(mSubscriptions)::create()),
         mCurrentState(RUDPTransportState_Pending),
@@ -84,7 +84,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::init()
+      void RUDPTransport::init() noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -92,7 +92,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPTransport::~RUDPTransport()
+      RUDPTransport::~RUDPTransport() noexcept
       {
         if (isNoop()) return;
 
@@ -102,7 +102,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RUDPTransportPtr RUDPTransport::convert(IRUDPTransportPtr session)
+      RUDPTransportPtr RUDPTransport::convert(IRUDPTransportPtr session) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RUDPTransport, session);
       }
@@ -111,12 +111,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport => RUDPTransport
-      #pragma mark
+      //
+      // RUDPTransport => RUDPTransport
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPTransport::toDebug(IRUDPTransportPtr session)
+      ElementPtr RUDPTransport::toDebug(IRUDPTransportPtr session) noexcept
       {
         if (!session) return ElementPtr();
 
@@ -129,7 +129,7 @@ namespace ortc
                                              IMessageQueuePtr queue,
                                              IICESocketSessionPtr iceSession,
                                              IRUDPTransportDelegatePtr delegate
-                                             )
+                                             ) noexcept
       {
         RUDPTransportPtr pThis(make_shared<RUDPTransport>(make_private{}, queue, iceSession, delegate));
         pThis->mThisWeak = pThis;
@@ -138,7 +138,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IRUDPTransportSubscriptionPtr RUDPTransport::subscribe(IRUDPTransportDelegatePtr originalDelegate)
+      IRUDPTransportSubscriptionPtr RUDPTransport::subscribe(IRUDPTransportDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (!originalDelegate) return mDefaultSubscription;
@@ -171,7 +171,7 @@ namespace ortc
       IRUDPTransport::RUDPTransportStates RUDPTransport::getState(
                                                                   WORD *outLastErrorCode,
                                                                   String *outLastErrorReason
-                                                                  ) const
+                                                                  ) const noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -180,14 +180,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::shutdown()
+      void RUDPTransport::shutdown() noexcept
       {
         AutoRecursiveLock lock(getLock());
         cancel();
       }
 
       //-----------------------------------------------------------------------
-      IICESocketSessionPtr RUDPTransport::getICESession() const
+      IICESocketSessionPtr RUDPTransport::getICESession() const noexcept
       {
         AutoRecursiveLock lock(getLock());
         return mICESession;
@@ -199,7 +199,7 @@ namespace ortc
                                                  const char *connectionInfo,
                                                  ITransportStreamPtr receiveStream,
                                                  ITransportStreamPtr sendStream
-                                                 )
+                                                 ) noexcept
       {
         AutoRecursiveLock lock(getLock());
         if ((isShuttingDown()) ||
@@ -271,10 +271,10 @@ namespace ortc
                                                    IRUDPChannelDelegatePtr delegate,
                                                    ITransportStreamPtr receiveStream,
                                                    ITransportStreamPtr sendStream
-                                                   )
+                                                   ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
 
         AutoRecursiveLock lock(getLock());
 
@@ -291,9 +291,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport => IICESocketSessionDelegate
-      #pragma mark
+      //
+      // RUDPTransport => IICESocketSessionDelegate
+      //
 
       //-----------------------------------------------------------------------
       void RUDPTransport::onICESocketSessionStateChanged(
@@ -346,7 +346,7 @@ namespace ortc
                                                                IICESocketSessionPtr ignore,
                                                                const BYTE *buffer,
                                                                size_t bufferLengthInBytes
-                                                               )
+                                                               ) noexcept
       {
         if (ZS_IS_LOGGING(Insane)) {
           String base64 = Helper::convertToBase64(buffer, bufferLengthInBytes);
@@ -372,7 +372,7 @@ namespace ortc
           }
 
           session = (*found).second;
-          ZS_THROW_INVALID_ASSUMPTION_IF(!session)
+          ZS_ASSERT(session);
         }
 
         // push the RUDP packet to the session to handle
@@ -385,7 +385,7 @@ namespace ortc
                                                                    STUNPacketPtr stun,
                                                                    const String &localUsernameFrag,
                                                                    const String &remoteUsernameFrag
-                                                                   )
+                                                                   ) noexcept
       {
         // next we ignore all responses/error responses because they would have been handled by a requester
         if ((STUNPacket::Class_Response == stun->mClass) ||
@@ -481,9 +481,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport => IRUDPChannelDelegateForSessionAndListener
-      #pragma mark
+      //
+      // RUDPTransport => IRUDPChannelDelegateForSessionAndListener
+      //
 
       //-----------------------------------------------------------------------
       void RUDPTransport::onRUDPChannelStateChanged(
@@ -539,11 +539,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       bool RUDPTransport::notifyRUDPChannelSendPacket(
                                                       RUDPChannelPtr channel,
-                                                      const IPAddress &remoteIP,
+                                                      ZS_MAYBE_USED() const IPAddress &remoteIP,
                                                       const BYTE *packet,
                                                       size_t packetLengthInBytes
-                                                      )
+                                                      ) noexcept
       {
+        ZS_MAYBE_USED(remoteIP);
         IICESocketSessionPtr session = getICESession();
         if (!session) {
           ZS_LOG_WARNING(Detail, log("send packet failed as ICE session object destroyed"))
@@ -562,18 +563,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport => (internal)
-      #pragma mark
+      //
+      // RUDPTransport => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      RecursiveLock &RUDPTransport::getLock() const
+      RecursiveLock &RUDPTransport::getLock() const noexcept
       {
         return mLock;
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPTransport::log(const char *message) const
+      Log::Params RUDPTransport::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RUDPTransport");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -581,20 +582,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params RUDPTransport::debug(const char *message) const
+      Log::Params RUDPTransport::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::fix(STUNPacketPtr stun) const
+      void RUDPTransport::fix(STUNPacketPtr stun) const noexcept
       {
         stun->mLogObject = "RUDPTransport";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RUDPTransport::toDebug() const
+      ElementPtr RUDPTransport::toDebug() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -623,7 +624,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::cancel()
+      void RUDPTransport::cancel() noexcept
       {
         AutoRecursiveLock lock(getLock());  // just in case
         if (isShutdown()) return;
@@ -672,7 +673,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::step()
+      void RUDPTransport::step() noexcept
       {
         if ((isShuttingDown()) ||
             (isShutdown())) {
@@ -694,7 +695,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::setState(RUDPTransportStates state)
+      void RUDPTransport::setState(RUDPTransportStates state) noexcept
       {
         if (state == mCurrentState) return;
 
@@ -710,7 +711,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::setError(WORD errorCode, const char *inReason)
+      void RUDPTransport::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -730,9 +731,9 @@ namespace ortc
       
       //-----------------------------------------------------------------------
       bool RUDPTransport::handleUnknownChannel(
-                                                      STUNPacketPtr &stun,
-                                                      STUNPacketPtr &response
-                                                      )
+                                               STUNPacketPtr &stun,
+                                               STUNPacketPtr &response
+                                               ) noexcept
       {
         AutoRecursiveLock lock(getLock());
         if ((isShuttingDown()) ||
@@ -845,7 +846,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void RUDPTransport::issueChannelConnectIfPossible()
+      void RUDPTransport::issueChannelConnectIfPossible() noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (!isReady()) return;
@@ -862,22 +863,22 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPTransportFactory
-      #pragma mark
+      //
+      // IRUDPTransportFactory
+      //
 
       //-----------------------------------------------------------------------
-      IRUDPTransportFactory &IRUDPTransportFactory::singleton()
+      IRUDPTransportFactory &IRUDPTransportFactory::singleton() noexcept
       {
         return RUDPTransportFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
       RUDPTransportPtr IRUDPTransportFactory::listen(
-                                                            IMessageQueuePtr queue,
-                                                            IICESocketSessionPtr iceSession,
-                                                            IRUDPTransportDelegatePtr delegate
-                                                            )
+                                                     IMessageQueuePtr queue,
+                                                     IICESocketSessionPtr iceSession,
+                                                     IRUDPTransportDelegatePtr delegate
+                                                     ) noexcept
       {
         if (this) {}
         return RUDPTransport::listen(queue, iceSession, delegate);
@@ -889,12 +890,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPTransport
-    #pragma mark
+    //
+    // IRUDPTransport
+    //
 
     //-------------------------------------------------------------------------
-    const char *IRUDPTransport::toString(RUDPTransportStates states)
+    const char *IRUDPTransport::toString(RUDPTransportStates states) noexcept
     {
       switch (states) {
         case RUDPTransportState_Pending:       return "Preparing";
@@ -903,21 +904,22 @@ namespace ortc
         case RUDPTransportState_Shutdown:      return "Shutdown";
         default: break;
       }
+      ZS_ASSERT_FAIL("unknown rudp transport state");
       return "UNDEFINED";
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IRUDPTransport::toDebug(IRUDPTransportPtr session)
+    ElementPtr IRUDPTransport::toDebug(IRUDPTransportPtr session) noexcept
     {
       return internal::RUDPTransport::toDebug(session);
     }
 
     //-------------------------------------------------------------------------
     IRUDPTransportPtr IRUDPTransport::listen(
-                                                           IMessageQueuePtr queue,
-                                                           IICESocketSessionPtr iceSession,
-                                                           IRUDPTransportDelegatePtr delegate
-                                                           )
+                                             IMessageQueuePtr queue,
+                                             IICESocketSessionPtr iceSession,
+                                             IRUDPTransportDelegatePtr delegate
+                                             ) noexcept
     {
       return internal::IRUDPTransportFactory::singleton().listen(queue, iceSession, delegate);
     }

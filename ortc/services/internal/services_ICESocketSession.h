@@ -60,9 +60,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketSessionForICESocket
-      #pragma mark
+      //
+      // IICESocketSessionForICESocket
+      //
 
       interaction IICESocketSessionForICESocket
       {
@@ -71,10 +71,10 @@ namespace ortc
         typedef IICESocketSession::ICEControls ICEControls;
         typedef IICESocketSession::CandidateList CandidateList;
 
-        virtual PUID getID() const = 0;
-        virtual void close() = 0;
+        virtual PUID getID() const noexcept = 0;
+        virtual void close() noexcept = 0;
 
-        virtual void updateRemoteCandidates(const CandidateList &remoteCandidates) = 0;
+        virtual void updateRemoteCandidates(const CandidateList &remoteCandidates) noexcept = 0;
 
         virtual bool handleSTUNPacket(
                                       const IICESocket::Candidate &viaLocalCandidate,
@@ -82,25 +82,25 @@ namespace ortc
                                       STUNPacketPtr stun,
                                       const String &localUsernameFrag,
                                       const String &remoteUsernameFrag
-                                      ) = 0;
+                                      ) noexcept = 0;
         virtual bool handlePacket(
                                   const IICESocket::Candidate &viaLocalCandidate,
                                   const IPAddress &source,
                                   const BYTE *packet,
                                   size_t packetLengthInBytes
-                                  ) = 0;
+                                  ) noexcept = 0;
 
-        virtual void notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate) = 0;
-        virtual void notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate) = 0;
+        virtual void notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept = 0;
+        virtual void notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession
-      #pragma mark
+      //
+      // ICESocketSession
+      //
 
       class ICESocketSession : public Noop,
                                public MessageQueueAssociator,
@@ -128,14 +128,14 @@ namespace ortc
         typedef IICESocketSession::CandidateList CandidateList;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession::CandidatePair
-        #pragma mark
+        //
+        // ICESocketSession::CandidatePair
+        //
 
         struct CandidatePair
         {
-          static CandidatePairPtr create();
-          ElementPtr toDebug() const;
+          static CandidatePairPtr create() noexcept;
+          ElementPtr toDebug() const noexcept;
 
           AutoPUID mID;
 
@@ -161,31 +161,31 @@ namespace ortc
                          const char *remotePassword,
                          ICEControls control,
                          ICESocketSessionPtr foundation = ICESocketSessionPtr()
-                         );
+                         ) noexcept;
 
-        ICESocketSession(Noop) :
+        ICESocketSession(Noop) noexcept :
           Noop(true),
           MessageQueueAssociator(IMessageQueuePtr()),
           SharedRecursiveLock(SharedRecursiveLock::create())
         {}
 
       protected:
-        void init();
+        void init() noexcept;
 
       public:
-        static ICESocketSessionPtr convert(IICESocketSessionPtr session);
-        static ICESocketSessionPtr convert(ForICESocketPtr session);
+        static ICESocketSessionPtr convert(IICESocketSessionPtr session) noexcept;
+        static ICESocketSessionPtr convert(ForICESocketPtr session) noexcept;
 
       public:
-        ~ICESocketSession();
+        ~ICESocketSession() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => IICESocketSession
-        #pragma mark
+        //
+        // ICESocketSession => IICESocketSession
+        //
 
-        static ElementPtr toDebug(IICESocketSessionPtr socket);
+        static ElementPtr toDebug(IICESocketSessionPtr socket) noexcept;
 
         static ICESocketSessionPtr create(
                                           IICESocketSessionDelegatePtr delegate,
@@ -195,55 +195,55 @@ namespace ortc
                                           const CandidateList &remoteCandidates,
                                           ICEControls control,
                                           IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                          );
+                                          ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
-        virtual IICESocketSessionSubscriptionPtr subscribe(IICESocketSessionDelegatePtr delegate);
+        virtual IICESocketSessionSubscriptionPtr subscribe(IICESocketSessionDelegatePtr delegate) noexcept;
 
-        virtual IICESocketPtr getSocket();
+        virtual IICESocketPtr getSocket() noexcept;
 
         virtual ICESocketSessionStates getState(
                                                 WORD *outLastErrorCode = NULL,
                                                 String *outLastErrorReason = NULL
-                                                ) const;
+                                                ) const noexcept;
 
-        virtual void close();
+        virtual void close() noexcept;
 
-        virtual String getLocalUsernameFrag() const;
-        virtual String getLocalPassword() const;
-        virtual String getRemoteUsernameFrag() const;
-        virtual String getRemotePassword() const;
+        virtual String getLocalUsernameFrag() const noexcept;
+        virtual String getLocalPassword() const noexcept;
+        virtual String getRemoteUsernameFrag() const noexcept;
+        virtual String getRemotePassword() const noexcept;
 
-        virtual void getLocalCandidates(CandidateList &outCandidates);
-        virtual void updateRemoteCandidates(const CandidateList &remoteCandidates);
-        virtual void endOfRemoteCandidates();
+        virtual void getLocalCandidates(CandidateList &outCandidates) noexcept;
+        virtual void updateRemoteCandidates(const CandidateList &remoteCandidates) noexcept;
+        virtual void endOfRemoteCandidates() noexcept;
 
         virtual void setKeepAliveProperties(
                                             Milliseconds sendKeepAliveIndications,
                                             Milliseconds expectSTUNOrDataWithinWithinOrSendAliveCheck = Milliseconds(),
                                             Milliseconds keepAliveSTUNRequestTimeout = Milliseconds(),
                                             Milliseconds backgroundingTimeout = Milliseconds()
-                                            );
+                                            ) noexcept;
 
         virtual bool sendPacket(
                                 const BYTE *packet,
                                 size_t packetLengthInBytes
-                                );
+                                ) noexcept;
 
-        virtual ICEControls getConnectedControlState();
+        virtual ICEControls getConnectedControlState() noexcept;
 
-        virtual IPAddress getConnectedRemoteIP();
+        virtual IPAddress getConnectedRemoteIP() noexcept;
 
         virtual bool getNominatedCandidateInformation(
                                                       Candidate &outLocal,
                                                       Candidate &outRemote
-                                                      );
+                                                      ) noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => IICESocketSessionForICESocket
-        #pragma mark
+        //
+        // ICESocketSession => IICESocketSessionForICESocket
+        //
 
         // (duplicate) virtual PUID getID() const;
         // (duplicate) virtual void close();
@@ -256,28 +256,28 @@ namespace ortc
                                       STUNPacketPtr stun,
                                       const String &localUsernameFrag,
                                       const String &remoteUsernameFrag
-                                      );
+                                      ) noexcept;
         virtual bool handlePacket(
                                   const IICESocket::Candidate &viaLocalCandidate,
                                   const IPAddress &source,
                                   const BYTE *packet,
                                   size_t packetLengthInBytes
-                                  );
+                                  ) noexcept;
 
-        virtual void notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate);
-        virtual void notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate);
+        virtual void notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept;
+        virtual void notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => IWakeDelegate
-        #pragma mark
+        //
+        // ICESocketSession => IWakeDelegate
+        //
 
         virtual void onWake();
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => IICESocketDelegate
-        #pragma mark
+        //
+        // ICESocketSession => IICESocketDelegate
+        //
 
         virtual void onICESocketStateChanged(
                                              IICESocketPtr socket,
@@ -286,9 +286,9 @@ namespace ortc
         virtual void onICESocketCandidatesChanged(IICESocketPtr socket);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => ISTUNRequesterDelegate
-        #pragma mark
+        //
+        // ICESocketSession => ISTUNRequesterDelegate
+        //
 
         virtual void onSTUNRequesterSendPacket(
                                                ISTUNRequesterPtr requester,
@@ -300,21 +300,21 @@ namespace ortc
                                                  ISTUNRequesterPtr requester,
                                                  IPAddress fromIPAddress,
                                                  STUNPacketPtr response
-                                                 );
+                                                 ) noexcept;
 
         virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => ITimerDelegate
-        #pragma mark
+        //
+        // ICESocketSession => ITimerDelegate
+        //
 
         virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => IBackgroundingDelegate
-        #pragma mark
+        //
+        // ICESocketSession => IBackgroundingDelegate
+        //
 
         virtual void onBackgroundingGoingToBackground(
                                                       IBackgroundingSubscriptionPtr subscription,
@@ -329,36 +329,36 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => (internal)
-        #pragma mark
+        //
+        // ICESocketSession => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        void fix(STUNPacketPtr stun) const;
+        void fix(STUNPacketPtr stun) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        bool isShutdown() const {return ICESocketSessionState_Shutdown == mCurrentState;}
+        bool isShutdown() const noexcept {return ICESocketSessionState_Shutdown == mCurrentState;}
 
-        void cancel();
-        void setState(ICESocketSessionStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void cancel() noexcept;
+        void setState(ICESocketSessionStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        void step();
-        bool stepSocket();
-        bool stepCandidates();
-        bool stepActivateTimer();
-        bool stepEndSearch();
-        bool stepTimer();
-        bool stepExpectingDataTimer();
-        bool stepKeepAliveTimer();
-        bool stepCancelLowerPriority();
-        bool stepNominate();
-        void stepNotifyNominated();
+        void step() noexcept;
+        bool stepSocket() noexcept;
+        bool stepCandidates() noexcept;
+        bool stepActivateTimer() noexcept;
+        bool stepEndSearch() noexcept;
+        bool stepTimer() noexcept;
+        bool stepExpectingDataTimer() noexcept;
+        bool stepKeepAliveTimer() noexcept;
+        bool stepCancelLowerPriority() noexcept;
+        bool stepNominate() noexcept;
+        void stepNotifyNominated() noexcept;
 
-        void switchRole(ICEControls newRole);
+        void switchRole(ICEControls newRole) noexcept;
 
         bool sendTo(
                     const IICESocket::Candidate &viaLocalCandidate,
@@ -366,21 +366,21 @@ namespace ortc
                     const BYTE *buffer,
                     size_t bufferLengthInBytes,
                     bool isUserData
-                    );
+                    ) noexcept;
 
-        bool canUnfreeze(CandidatePairPtr derivedPairing);
-        void sendKeepAliveNow();
-        void sendAliveCheckRequest();
+        bool canUnfreeze(CandidatePairPtr derivedPairing) noexcept;
+        void sendKeepAliveNow() noexcept;
+        void sendAliveCheckRequest() noexcept;
 
-        void clearBackgroundingNotifierIfPossible();
-        void clearAliveCheckRequester()   {if (mAliveCheckRequester) { mAliveCheckRequester->cancel(); mAliveCheckRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
-        void clearNominateRequester()     {if (mNominateRequester) { mNominateRequester->cancel(); mNominateRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearBackgroundingNotifierIfPossible() noexcept;
+        void clearAliveCheckRequester() noexcept {if (mAliveCheckRequester) { mAliveCheckRequester->cancel(); mAliveCheckRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearNominateRequester() noexcept   {if (mNominateRequester) { mNominateRequester->cancel(); mNominateRequester.reset(); mBackgroundingNotifier.reset(); } clearBackgroundingNotifierIfPossible();}
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocketSession => (data)
-        #pragma mark
+        //
+        // ICESocketSession => (data)
+        //
 
         AutoPUID mID;
         ICESocketSessionWeakPtr mThisWeak;
@@ -445,16 +445,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketSessionFactory
-      #pragma mark
+      //
+      // IICESocketSessionFactory
+      //
 
       interaction IICESocketSessionFactory
       {
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocketSession::ICEControls ICEControls;
 
-        static IICESocketSessionFactory &singleton();
+        static IICESocketSessionFactory &singleton() noexcept;
 
         virtual ICESocketSessionPtr create(
                                            IICESocketSessionDelegatePtr delegate,
@@ -464,7 +464,7 @@ namespace ortc
                                            const CandidateList &remoteCandidates,
                                            ICEControls control,
                                            IICESocketSessionPtr foundation = IICESocketSessionPtr()
-                                           );
+                                           ) noexcept;
       };
 
       class ICESocketSessionFactory : public IFactory<IICESocketSessionFactory> {};

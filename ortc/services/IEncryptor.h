@@ -43,9 +43,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IEncryptor
-    #pragma mark
+    //
+    // IEncryptor
+    //
 
     interaction IEncryptor
     {
@@ -57,12 +57,12 @@ namespace ortc
                                   const SecureByteBlock &key, // key length of 32 = AES/256
                                   const SecureByteBlock &iv,  // 16 bytes for AES
                                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                                  );
+                                  ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: gets the optimal buffer block encryption size in bytes for
       //          encrypting data
-      virtual size_t getOptimalBlockSize() const = 0;
+      virtual size_t getOptimalBlockSize() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: encrypt the next block of data and return result data
@@ -71,20 +71,20 @@ namespace ortc
       virtual SecureByteBlockPtr encrypt(
                                          const BYTE *inBuffer,
                                          size_t inBufferSizeInBytes
-                                         ) = 0;
+                                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: encrypt the next block of data and return result data
       // RETURN:  next block of encrypted data or null SecureByteBlockPtr()
       //          when no more data is available (or error occured).
-      virtual SecureByteBlockPtr encrypt(const SecureByteBlock &input) = 0;
+      virtual SecureByteBlockPtr encrypt(const SecureByteBlock &input) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns any finalized encryption buffer when no more data
       //          will be fed into the encryption
       // RETURN:  final block of encrypted data or null SecureByteBlockPtr()
       //          when no more data is available.
-      virtual SecureByteBlockPtr finalize() = 0;
+      virtual SecureByteBlockPtr finalize() noexcept = 0;
     };
 
   }

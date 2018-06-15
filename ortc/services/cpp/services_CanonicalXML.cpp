@@ -48,15 +48,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
       static void calculateNamespaceTo(
                                        ElementPtr element,
                                        XMLNamespaceMap &outNamespaces
-                                       )
+                                       ) noexcept
       {
         if (!element)
           return;
@@ -117,7 +117,7 @@ namespace ortc
                                      ElementPtr element,
                                      XMLNamespaceMap &namespaces,
                                      XMLNamespaceMap &outOverrides
-                                     )
+                                     ) noexcept
       {
         if (!element)
           return;
@@ -167,7 +167,7 @@ namespace ortc
       static void changeAttribtues(
                                    ElementPtr element,
                                    XMLNamespaceMap &overrides
-                                   )
+                                   ) noexcept
       {
         AttributePtr attribute = element->getFirstAttribute();
         AttributePtr next;
@@ -201,9 +201,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MyXMLNSWalkSink
-      #pragma mark
+      //
+      // MyXMLNSWalkSink
+      //
 
       //-----------------------------------------------------------------------
       class MyXMLNSWalkSink : public WalkSink
@@ -213,9 +213,9 @@ namespace ortc
         MyXMLNSWalkSink(
                         XMLNamespaceMap &xmlns,
                         ElementPtr &root
-                        ) : mRootXMLNS(xmlns), mRoot(root) {}
+                        ) noexcept : mRootXMLNS(xmlns), mRoot(root) {}
 
-        virtual bool onElementEnter(ElementPtr inNode) {
+        virtual bool onElementEnter(ElementPtr inNode) noexcept {
           if (inNode == mRoot) return false;  // already processed the root element
 
           XMLNamespaceMap xmlns;
@@ -225,16 +225,16 @@ namespace ortc
         }
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MyXMLNSWalkSink => (data)
-        #pragma mark
+        //
+        // MyXMLNSWalkSink => (data)
+        //
 
         XMLNamespaceMap mRootXMLNS;
         ElementPtr mRoot;
       };
 
       //---------------------------------------------------------------------
-      static bool normizeCompare(AttributePtr v1, AttributePtr v2)
+      static bool normizeCompare(AttributePtr v1, AttributePtr v2) noexcept
       {
         if (v1->getName().substr(0, 5) == "xmlns") {
           if (v2->getName().substr(0, 5) == "xmlns") {
@@ -251,9 +251,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MyOrphanerWalkSink
-      #pragma mark
+      //
+      // MyOrphanerWalkSink
+      //
 
       //---------------------------------------------------------------------
       class MyOrphanerWalkSink : public WalkSink
@@ -261,7 +261,7 @@ namespace ortc
         typedef std::list<AttributePtr> AttributeValueList;
 
       public:
-        virtual bool onElementEnter(ElementPtr inNode) {
+        virtual bool onElementEnter(ElementPtr inNode) noexcept {
           // sort the attributes
           AttributeValueList attributes;
           AttributePtr attribute = inNode->getFirstAttribute();
@@ -299,21 +299,21 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual bool onComment(CommentPtr inNode)
+        virtual bool onComment(CommentPtr inNode) noexcept
         {
           inNode->orphan();
           return false;
         }
 
         //---------------------------------------------------------------------
-        virtual bool onDeclarationEnter(DeclarationPtr inNode)
+        virtual bool onDeclarationEnter(DeclarationPtr inNode) noexcept
         {
           inNode->orphan();
           return false;
         }
 
         //---------------------------------------------------------------------
-        virtual bool onUnknown(UnknownPtr inNode)
+        virtual bool onUnknown(UnknownPtr inNode) noexcept
         {
           String value = inNode->getValue();
           if (value.substr(0, 1) == "!") {
@@ -328,12 +328,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark CanonicalXML
-      #pragma mark
+      //
+      // CanonicalXML
+      //
 
       //-----------------------------------------------------------------------
-      String CanonicalXML::convert(ElementPtr element)
+      String CanonicalXML::convert(ElementPtr element) noexcept
       {
         if (!element)
           return String();
@@ -372,12 +372,12 @@ namespace ortc
     //---------------------------------------------------------------------
     //---------------------------------------------------------------------
     //---------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ICanonicalXML
-    #pragma mark
+    //
+    // ICanonicalXML
+    //
 
     //---------------------------------------------------------------------
-    String ICanonicalXML::convert(ElementPtr element)
+    String ICanonicalXML::convert(ElementPtr element) noexcept
     {
       return internal::CanonicalXML::convert(element);
     }

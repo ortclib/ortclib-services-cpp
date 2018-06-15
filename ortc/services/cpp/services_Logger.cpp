@@ -120,28 +120,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LoggerSettingsDefaults
-      #pragma mark
+      //
+      // LoggerSettingsDefaults
+      //
 
       class LoggerSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~LoggerSettingsDefaults()
+        ~LoggerSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static LoggerSettingsDefaultsPtr singleton()
+        static LoggerSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<LoggerSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static LoggerSettingsDefaultsPtr create()
+        static LoggerSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<LoggerSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -149,14 +149,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_SETTING_TELNET_LOGGER_PHASE, 6);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installLoggerSettingsDefaults()
+      void installLoggerSettingsDefaults() noexcept
       {
         LoggerSettingsDefaults::singleton();
       }
@@ -165,22 +165,22 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ILoggerReferencesHolderDelegate
-      #pragma mark
+      //
+      // ILoggerReferencesHolderDelegate
+      //
 
       interaction ILoggerReferencesHolderDelegate
       {
-        virtual void notifyShutdown() = 0;
+        virtual void notifyShutdown() noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark LoggerSingtonHolder
-      #pragma mark
+      //
+      // LoggerSingtonHolder
+      //
 
       class LoggerReferencesHolder : public RecursiveLock,
                                      public ISingletonManagerDelegate
@@ -192,9 +192,9 @@ namespace ortc
           ILogOutputDelegatePtr mLogOutputDelegate;
           ILoggerReferencesHolderDelegatePtr mHolderDelegate;
 
-          LogDelegateInfo() {}
+          LogDelegateInfo() noexcept {}
 
-          LogDelegateInfo(const LogDelegateInfo &info) :
+          LogDelegateInfo(const LogDelegateInfo &info) noexcept :
             mActivatedLogging(info.mActivatedLogging),
             mLogOutputDelegate(info.mLogOutputDelegate),
             mHolderDelegate(info.mHolderDelegate)
@@ -205,7 +205,7 @@ namespace ortc
                           bool activatedLogging,
                           ILogOutputDelegatePtr logOutputDelegate,
                           ILoggerReferencesHolderDelegatePtr holderDelegate
-                          ) :
+                          ) noexcept :
             mActivatedLogging(activatedLogging),
             mLogOutputDelegate(logOutputDelegate),
             mHolderDelegate(holderDelegate)
@@ -220,7 +220,7 @@ namespace ortc
         struct make_private {};
 
         //---------------------------------------------------------------------
-        static LoggerReferencesHolderPtr create()
+        static LoggerReferencesHolderPtr create() noexcept
         {
           auto pThis(make_shared<LoggerReferencesHolder>(make_private{}));
           pThis->mThisWeak = pThis;
@@ -229,25 +229,25 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
         }
 
       public:
         //---------------------------------------------------------------------
-        LoggerReferencesHolder(const make_private &)
+        LoggerReferencesHolder(const make_private &) noexcept
         {
         }
 
         //---------------------------------------------------------------------
-        ~LoggerReferencesHolder()
+        ~LoggerReferencesHolder() noexcept
         {
           mThisWeak.reset();
           notifySingletonCleanup();
         }
 
         //---------------------------------------------------------------------
-        static LoggerReferencesHolderPtr singleton()
+        static LoggerReferencesHolderPtr singleton() noexcept
         {
           AutoRecursiveLock lock(*IHelper::getGlobalLock());
           static SingletonLazySharedPtr<LoggerReferencesHolder> singleton(LoggerReferencesHolder::create());
@@ -264,7 +264,7 @@ namespace ortc
                             ILogOutputDelegatePtr logDelegate,
                             ILoggerReferencesHolderDelegatePtr holderDelegate,
                             bool activateLoggerNow
-                            )
+                            ) noexcept
         {
           String namespaceStr(loggerNamespace);
 
@@ -294,7 +294,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void unregisterLogger(const char *loggerNamespace)
+        void unregisterLogger(const char *loggerNamespace) noexcept
         {
           String namespaceStr(loggerNamespace);
 
@@ -321,7 +321,7 @@ namespace ortc
         bool findLogger(
                         const char *loggerNamespace,
                         LogDelegateInfo &outInfo
-                        )
+                        ) noexcept
         {
           String namespaceStr(loggerNamespace);
 
@@ -334,7 +334,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool activateLogger(const char *loggerNamespace)
+        bool activateLogger(const char *loggerNamespace) noexcept
         {
           String namespaceStr(loggerNamespace);
 
@@ -358,7 +358,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool deactivateLogger(const char *loggerNamespace)
+        bool deactivateLogger(const char *loggerNamespace) noexcept
         {
           String namespaceStr(loggerNamespace);
 
@@ -383,11 +383,11 @@ namespace ortc
         
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark LoggerSingtonHolder
-        #pragma mark
+        //
+        // LoggerSingtonHolder
+        //
 
-        virtual void notifySingletonCleanup() override
+        void notifySingletonCleanup() noexcept override
         {
           LoggerMap tempMap;
           {
@@ -420,12 +420,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static String currentThreadIDAsString()
+      static String currentThreadIDAsString() noexcept
       {
 #ifdef _WIN32
         return string(GetCurrentThreadId());
@@ -442,7 +442,7 @@ namespace ortc
       static String getMessageString(
                                      const Log::Params &params,
                                      bool prettyPrint
-                                     )
+                                     ) noexcept
       {
         static const char *wires[] = {"wire in", "wire out", NULL};
         static const char *jsons[] = {"json in", "json out", "json", NULL};
@@ -549,7 +549,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static std::string getNowTime()
+      static std::string getNowTime() noexcept
       {
         Time now = zsLib::now();
 
@@ -560,8 +560,9 @@ namespace ortc
 
         std::tm ttm {};
 #ifdef HAVE_GMTIME_S
-        auto error = gmtime_s(&ttm, &tt);
-        ZS_THROW_BAD_STATE_IF(0 != error)
+        ZS_MAYBE_USED() auto error = gmtime_s(&ttm, &tt);
+        ZS_MAYBE_USED(error);
+        ZS_ASSERT(0 == error);
 #else
         gmtime_r(&tt, &ttm);
 #endif //_WIN32
@@ -584,7 +585,7 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       static String toColorString(
-                                  const Subsystem &inSubsystem,
+                                  ZS_MAYBE_USED() const Subsystem &inSubsystem,
                                   Log::Severity inSeverity,
                                   Log::Level inLevel,
                                   const Log::Params &params,
@@ -593,8 +594,9 @@ namespace ortc
                                   ULONG inLineNumber,
                                   bool prettyPrint,
                                   bool eol = true
-                                  )
+                                  ) noexcept
       {
+        ZS_MAYBE_USED(inSubsystem);
         const char *posBackslash = strrchr(inFilePath, '\\');
         const char *posSlash = strrchr(inFilePath, '/');
 
@@ -654,17 +656,19 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       static String toBWString(
-                               const Subsystem &inSubsystem,
+                               ZS_MAYBE_USED() const Subsystem &inSubsystem,
                                Log::Severity inSeverity,
-                               Log::Level inLevel,
+                               ZS_MAYBE_USED() Log::Level inLevel,
                                const Log::Params &params,
                                CSTR inFunction,
                                CSTR inFilePath,
                                ULONG inLineNumber,
                                bool prettyPrint,
                                bool eol = true
-                               )
+                               ) noexcept
       {
+        ZS_MAYBE_USED(inSubsystem);
+        ZS_MAYBE_USED(inLevel);
         const char *posBackslash = strrchr(inFilePath, '\\');
         const char *posSlash = strrchr(inFilePath, '/');
 
@@ -698,17 +702,21 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       static String toWindowsString(
-                                    const Subsystem &inSubsystem,
+                                    ZS_MAYBE_USED() const Subsystem &inSubsystem,
                                     Log::Severity inSeverity,
-                                    Log::Level inLevel,
+                                    ZS_MAYBE_USED() Log::Level inLevel,
                                     const Log::Params &params,
-                                    CSTR inFunction,
+                                    ZS_MAYBE_USED() CSTR inFunction,
                                     CSTR inFilePath,
                                     ULONG inLineNumber,
                                     bool prettyPrint,
                                     bool eol = true
-                                    )
+                                    ) noexcept
       {
+        ZS_MAYBE_USED(inSubsystem);
+        ZS_MAYBE_USED(inLevel);
+        ZS_MAYBE_USED(inFunction);
+
         std::string current = getNowTime();
 
         const char *severity = "NONE";
@@ -727,7 +735,7 @@ namespace ortc
       static void appendToDoc(
                               DocumentPtr &doc,
                               const Log::Param param
-                              )
+                              ) noexcept
       {
         if (!param.param()) return;
         doc->adoptAsLastChild(param.param());
@@ -737,11 +745,11 @@ namespace ortc
       static void appendToDoc(
                               DocumentPtr &doc,
                               const ElementPtr &childEl
-                              )
+                              ) noexcept
       {
         if (!childEl) return;
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(childEl->getParent())
+        ZS_ASSERT(!childEl->getParent());
 
         doc->adoptAsLastChild(childEl);
       }
@@ -756,7 +764,7 @@ namespace ortc
                               CSTR inFilePath,
                               ULONG inLineNumber,
                               bool eol = true
-                              )
+                              ) noexcept
       {
         const char *posBackslash = strrchr(inFilePath, '\\');
         const char *posSlash = strrchr(inFilePath, '/');
@@ -823,9 +831,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark StdOutLogger
-      #pragma mark
+      //
+      // StdOutLogger
+      //
 
       ZS_DECLARE_CLASS_PTR(StdOutLogger)
 
@@ -837,7 +845,7 @@ namespace ortc
         
       protected:
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
         }
 
@@ -847,7 +855,7 @@ namespace ortc
                      const make_private &,
                      bool colorizeOutput,
                      bool prettyPrint
-                     ) :
+                     ) noexcept :
           mColorizeOutput(colorizeOutput),
           mPrettyPrint(prettyPrint)
           {}
@@ -856,7 +864,7 @@ namespace ortc
         static StdOutLoggerPtr create(
                                       bool colorizeOutput,
                                       bool prettyPrint
-                                      )
+                                      ) noexcept
         {
           StdOutLoggerPtr pThis(make_shared<StdOutLogger>(make_private{}, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
@@ -868,7 +876,7 @@ namespace ortc
         static StdOutLoggerPtr singleton(
                                          bool colorizeOutput,
                                          bool prettyPrint
-                                         )
+                                         ) noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return StdOutLoggerPtr();
@@ -895,7 +903,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static void stop()
+        static void stop() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -904,26 +912,26 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StdOutLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // StdOutLogger => ILogOutputDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyNewSubsystem(Subsystem &) override
+        void notifyNewSubsystem(Subsystem &) noexcept override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void notifyLog(
-                               const Subsystem &inSubsystem,
-                               Log::Severity inSeverity,
-                               Log::Level inLevel,
-                               CSTR inFunction,
-                               CSTR inFilePath,
-                               ULONG inLineNumber,
-                               const Log::Params &params
-                               ) override
+        void notifyLog(
+                       const Subsystem &inSubsystem,
+                       Log::Severity inSeverity,
+                       Log::Level inLevel,
+                       CSTR inFunction,
+                       CSTR inFilePath,
+                       ULONG inLineNumber,
+                       const Log::Params &params
+                       ) noexcept override
         {
           if (mColorizeOutput) {
             std::cout << toColorString(inSubsystem, inSeverity, inLevel, params, inFunction, inFilePath, inLineNumber, mPrettyPrint);
@@ -935,26 +943,26 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StdOutLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // StdOutLogger => ILogOutputDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyShutdown() override
+        void notifyShutdown() noexcept override
         {
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StdOutLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // StdOutLogger => ILogOutputDelegate
+        //
 
         //---------------------------------------------------------------------
         void getInfo(
                      bool &outColorize,
                      bool &outPrettyPrint
-                     )
+                     ) noexcept
         {
           outColorize = mColorizeOutput;
           outPrettyPrint = mPrettyPrint;
@@ -962,9 +970,9 @@ namespace ortc
 
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StdOutLogger => (data)
-        #pragma mark
+        //
+        // StdOutLogger => (data)
+        //
 
         StdOutLoggerWeakPtr mThisWeak;
         bool mColorizeOutput {};
@@ -975,9 +983,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark FileLogger
-      #pragma mark
+      //
+      // FileLogger
+      //
 
       ZS_DECLARE_CLASS_PTR(FileLogger)
 
@@ -989,7 +997,7 @@ namespace ortc
       protected:
         
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
           mFile.open(mFileName, std::ios::out | std::ios::binary);
         }
@@ -999,7 +1007,7 @@ namespace ortc
                                     const char *fileName,
                                     bool colorizeOutput,
                                     bool prettyPrint
-                                    )
+                                    ) noexcept
         {
           FileLoggerPtr pThis(make_shared<FileLogger>(make_private{}, fileName, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
@@ -1014,7 +1022,7 @@ namespace ortc
                    const char *fileName,
                    bool colorizeOutput,
                    bool prettyPrint
-                   ) :
+                   ) noexcept :
           mFileName(fileName),
           mColorizeOutput(colorizeOutput),
           mPrettyPrint(prettyPrint)
@@ -1025,7 +1033,7 @@ namespace ortc
                                        const char *fileName,
                                        bool colorizeOutput,
                                        bool prettyPrint
-                                       )
+                                       ) noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return FileLoggerPtr();
@@ -1054,7 +1062,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static void stop()
+        static void stop() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -1063,26 +1071,26 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark FileLogger => ILogDelegate
-        #pragma mark
+        //
+        // FileLogger => ILogDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyNewSubsystem(Subsystem &) override
+        void notifyNewSubsystem(Subsystem &) noexcept override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void notifyLog(
-                               const Subsystem &inSubsystem,
-                               Log::Severity inSeverity,
-                               Log::Level inLevel,
-                               CSTR inFunction,
-                               CSTR inFilePath,
-                               ULONG inLineNumber,
-                               const Log::Params &params
-                               ) override
+        void notifyLog(
+                       const Subsystem &inSubsystem,
+                       Log::Severity inSeverity,
+                       Log::Level inLevel,
+                       CSTR inFunction,
+                       CSTR inFilePath,
+                       ULONG inLineNumber,
+                       const Log::Params &params
+                       ) noexcept override
         {
           if (mFile.is_open()) {
             String output;
@@ -1097,27 +1105,27 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark FileLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // FileLogger => ILogOutputDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyShutdown() override
+        void notifyShutdown() noexcept override
         {
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark FileLogger => (internal)
-        #pragma mark
+        //
+        // FileLogger => (internal)
+        //
 
         //---------------------------------------------------------------------
         void getInfo(
                      String &outFileName,
                      bool &outColorize,
                      bool &outPrettyPrint
-                     )
+                     ) noexcept
         {
           outFileName = mFileName;
           outColorize = mColorizeOutput;
@@ -1126,9 +1134,9 @@ namespace ortc
 
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark FileLogger => (data)
-        #pragma mark
+        //
+        // FileLogger => (data)
+        //
 
         FileLoggerWeakPtr mThisWeak;
         String mFileName;
@@ -1142,9 +1150,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DebuggerLogger
-      #pragma mark
+      //
+      // DebuggerLogger
+      //
 
       ZS_DECLARE_CLASS_PTR(DebuggerLogger)
 
@@ -1156,7 +1164,7 @@ namespace ortc
         
       protected:
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
         }
 
@@ -1164,7 +1172,7 @@ namespace ortc
         static DebuggerLoggerPtr create(
                                         bool colorizeOutput,
                                         bool prettyPrint
-                                        )
+                                        ) noexcept
         {
           DebuggerLoggerPtr pThis(make_shared<DebuggerLogger>(make_private {}, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
@@ -1178,7 +1186,7 @@ namespace ortc
                        const make_private &,
                        bool colorizeOutput,
                        bool prettyPrint
-                       ) :
+                       ) noexcept :
           mColorizeOutput(colorizeOutput),
           mPrettyPrint(prettyPrint)
           {}
@@ -1187,7 +1195,7 @@ namespace ortc
         static DebuggerLoggerPtr singleton(
                                            bool colorizeOutput,
                                            bool prettyPrint
-                                           )
+                                           ) noexcept
         {
 #if (defined(_WIN32)) || ((defined(__QNX__) && (!defined(NDEBUG))))
           auto singleton = LoggerReferencesHolder::singleton();
@@ -1218,7 +1226,7 @@ namespace ortc
         }
         
         //---------------------------------------------------------------------
-        static void stop()
+        static void stop() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -1227,26 +1235,26 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DebuggerLogger => ILogDelegate
-        #pragma mark
+        //
+        // DebuggerLogger => ILogDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyNewSubsystem(Subsystem &) override
+        void notifyNewSubsystem(Subsystem &) noexcept override
         {
         }
 
         //---------------------------------------------------------------------
         // notification of a log event
-        virtual void notifyLog(
-                               const Subsystem &inSubsystem,
-                               Log::Severity inSeverity,
-                               Log::Level inLevel,
-                               CSTR inFunction,
-                               CSTR inFilePath,
-                               ULONG inLineNumber,
-                               const Log::Params &params
-                               ) override
+        void notifyLog(
+                       const Subsystem &inSubsystem,
+                       Log::Severity inSeverity,
+                       Log::Level inLevel,
+                       CSTR inFunction,
+                       CSTR inFilePath,
+                       ULONG inLineNumber,
+                       const Log::Params &params
+                       ) noexcept override
         {
 #ifdef __QNX__
 #ifndef NDEBUG
@@ -1276,26 +1284,26 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DebuggerLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // DebuggerLogger => ILogOutputDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyShutdown() override
+        void notifyShutdown() noexcept override
         {
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DebuggerLogger => (internal)
-        #pragma mark
+        //
+        // DebuggerLogger => (internal)
+        //
 
         //---------------------------------------------------------------------
         void getInfo(
                      bool &outColorize,
                      bool &outPrettyPrint
-                     )
+                     ) noexcept
         {
           outColorize = mColorizeOutput;
           outPrettyPrint = mPrettyPrint;
@@ -1303,9 +1311,9 @@ namespace ortc
         
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DebuggerLogger => (data)
-        #pragma mark
+        //
+        // DebuggerLogger => (data)
+        //
 
         DebuggerLoggerWeakPtr mThisWeak;
         bool mColorizeOutput {};
@@ -1316,9 +1324,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TelnetLogger
-      #pragma mark
+      //
+      // TelnetLogger
+      //
 
       ZS_DECLARE_CLASS_PTR(TelnetLogger)
 
@@ -1340,7 +1348,7 @@ namespace ortc
         void init(
                   USHORT listenPort,
                   Seconds maxSecondsWaitForSocketToBeAvailable
-                  )
+                  ) noexcept
         {
           mListenPort = listenPort;
           mMaxWaitTimeForSocketToBeAvailable = maxSecondsWaitForSocketToBeAvailable;
@@ -1355,7 +1363,7 @@ namespace ortc
         void init(
                   const char *serverHostWithPort,
                   const char *sendStringUponConnection
-                  )
+                  ) noexcept
         {
           mOriginalStringToSendUponConnection = String(sendStringUponConnection);
           mOriginalServer = mServerLookupName = String(serverHostWithPort);
@@ -1387,7 +1395,7 @@ namespace ortc
                                       Seconds maxSecondsWaitForSocketToBeAvailable,
                                       bool colorizeOutput,
                                       bool prettyPrint
-                                      )
+                                      ) noexcept
         {
           TelnetLoggerPtr pThis(make_shared<TelnetLogger>(make_private{}, IHelper::getLoggerQueue(), ORTC_SERVICES_LOGGER_TELNET_INCOMING_NAMESPACE, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
@@ -1401,7 +1409,7 @@ namespace ortc
                                       bool colorizeOutput,
                                       bool prettyPrint,
                                       const char *sendStringUponConnection
-                                      )
+                                      ) noexcept
         {
           TelnetLoggerPtr pThis(make_shared<TelnetLogger>(make_private{}, IHelper::getLoggerQueue(), ORTC_SERVICES_LOGGER_TELNET_OUTGOING_NAMESPACE, colorizeOutput, prettyPrint));
           pThis->mThisWeak = pThis;
@@ -1417,7 +1425,7 @@ namespace ortc
                      const char *loggerNamespace,
                      bool colorizeOutput,
                      bool prettyPrint
-                     ) :
+                     ) noexcept :
           MessageQueueAssociator(queue),
           mLoggerNamespace(loggerNamespace),
           mColorizeOutput(colorizeOutput),
@@ -1428,7 +1436,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        ~TelnetLogger()
+        ~TelnetLogger() noexcept
         {
           mThisWeak.reset();
           close();
@@ -1440,7 +1448,7 @@ namespace ortc
                                                  Seconds maxSecondsWaitForSocketToBeAvailable,
                                                  bool colorizeOutput,
                                                  bool prettyPrint
-                                                 )
+                                                 ) noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
@@ -1475,7 +1483,7 @@ namespace ortc
                                                  bool colorizeOutput,
                                                  bool prettyPrint,
                                                  const char *sendStringUponConnection
-                                                 )
+                                                 ) noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
@@ -1506,7 +1514,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static TelnetLoggerPtr singletonIncoming()
+        static TelnetLoggerPtr singletonIncoming() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
@@ -1518,7 +1526,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static TelnetLoggerPtr singletonOutgoing()
+        static TelnetLoggerPtr singletonOutgoing() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return TelnetLoggerPtr();
@@ -1530,7 +1538,7 @@ namespace ortc
         }
         
         //---------------------------------------------------------------------
-        static void stopIncoming()
+        static void stopIncoming() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -1539,7 +1547,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static void stopOutgoing()
+        static void stopOutgoing() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -1548,14 +1556,14 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool isListening()
+        bool isListening() noexcept
         {
           AutoRecursiveLock lock(*this);
           return (bool)mListenSocket;
         }
 
         //---------------------------------------------------------------------
-        bool isConnected()
+        bool isConnected() noexcept
         {
           AutoRecursiveLock lock(*this);
           if (!mTelnetSocket) return false;
@@ -1565,25 +1573,25 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => ILogDelegate
-        #pragma mark
+        //
+        // TelnetLogger => ILogDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void notifyNewSubsystem(Subsystem &) override
+        void notifyNewSubsystem(Subsystem &) noexcept override
         {
         }
 
         //---------------------------------------------------------------------
-        virtual void notifyLog(
-                               const Subsystem &inSubsystem,
-                               Log::Severity inSeverity,
-                               Log::Level inLevel,
-                               CSTR inFunction,
-                               CSTR inFilePath,
-                               ULONG inLineNumber,
-                               const Log::Params &params
-                               ) override
+        void notifyLog(
+                       const Subsystem &inSubsystem,
+                       Log::Severity inSeverity,
+                       Log::Level inLevel,
+                       CSTR inFunction,
+                       CSTR inFilePath,
+                       ULONG inLineNumber,
+                       const Log::Params &params
+                       ) noexcept override
         {
           if (0 == strcmp(inSubsystem.getName(), "zsLib_socket")) {
             // ignore events from the socket monitor to prevent recursion
@@ -1644,23 +1652,23 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DebuggerLogger => ILogOutputDelegate
-        #pragma mark
+        //
+        // DebuggerLogger => ILogOutputDelegate
+        //
         
         //---------------------------------------------------------------------
-        virtual void notifyShutdown() override
+        void notifyShutdown() noexcept override
         {
           close();
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => ISocketDelegate
-        #pragma mark
+        //
+        // TelnetLogger => ISocketDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onReadReady(SocketPtr inSocket) override
+        void onReadReady(SocketPtr inSocket) override
         {
           bool activate {false};
 
@@ -1746,7 +1754,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onWriteReady(SocketPtr socket) override
+        void onWriteReady(SocketPtr socket) override
         {
           bool activate {false};
 
@@ -1809,7 +1817,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onException(SocketPtr inSocket) override
+        void onException(SocketPtr inSocket) override
         {
           bool deactivate = false;
 
@@ -1844,12 +1852,12 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => IDNSDelegate
-        #pragma mark
+        //
+        // TelnetLogger => IDNSDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onLookupCompleted(IDNSQueryPtr query) override
+        void onLookupCompleted(IDNSQueryPtr query) override
         {
           AutoRecursiveLock lock(*this);
 
@@ -1881,47 +1889,47 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => IWakeDelegate
-        #pragma mark
+        //
+        // TelnetLogger => IWakeDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onWake() override
+        void onWake() override
         {
           step();
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => ITimerDelegate
-        #pragma mark
+        //
+        // TelnetLogger => ITimerDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onTimer(ITimerPtr timer) override
+        void onTimer(ITimerPtr timer) override
         {
           step();
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => IBackgroundingDelegate
-        #pragma mark
+        //
+        // TelnetLogger => IBackgroundingDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onBackgroundingGoingToBackground(
-                                                      IBackgroundingSubscriptionPtr subscription,
-                                                      IBackgroundingNotifierPtr notifier
-                                                      ) override {}
+        void onBackgroundingGoingToBackground(
+                                              IBackgroundingSubscriptionPtr subscription,
+                                              IBackgroundingNotifierPtr notifier
+                                              ) override {}
 
         //---------------------------------------------------------------------
-        virtual void onBackgroundingGoingToBackgroundNow(
-                                                         IBackgroundingSubscriptionPtr subscription
-                                                         ) override {}
+        void onBackgroundingGoingToBackgroundNow(
+                                                 IBackgroundingSubscriptionPtr subscription
+                                                 ) override {}
 
         //---------------------------------------------------------------------
-        virtual void onBackgroundingReturningFromBackground(
-                                                            IBackgroundingSubscriptionPtr subscription
-                                                            ) override
+        void onBackgroundingReturningFromBackground(
+                                                    IBackgroundingSubscriptionPtr subscription
+                                                    ) override
         {
           SocketPtr socket;
           {
@@ -1936,18 +1944,18 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        virtual void onBackgroundingApplicationWillQuit(
-                                                        IBackgroundingSubscriptionPtr subscription
-                                                        ) override
+        void onBackgroundingApplicationWillQuit(
+                                                IBackgroundingSubscriptionPtr subscription
+                                                ) override
         {
           close();
         }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => (internal)
-        #pragma mark
+        //
+        // TelnetLogger => (internal)
+        //
         
         //---------------------------------------------------------------------
         void getIncomingInfo(
@@ -1955,7 +1963,7 @@ namespace ortc
                              Seconds &outMaxSecondsWaitForSocketToBeAvailable,
                              bool &outColorize,
                              bool &outPrettyPrint
-                             )
+                             ) noexcept
         {
           outListenPort = mListenPort;
           outMaxSecondsWaitForSocketToBeAvailable = zsLib::toSeconds(mMaxWaitTimeForSocketToBeAvailable);
@@ -1969,7 +1977,7 @@ namespace ortc
                              bool &outColorize,
                              bool &outPrettyPrint,
                              String &outSendStringUponConnection
-                             )
+                             ) noexcept
         {
           outServerHostWithPort = mOriginalServer;
           outColorize = mColorizeOutput;
@@ -1978,7 +1986,7 @@ namespace ortc
         }
         
         //---------------------------------------------------------------------
-        void activateLogging()
+        void activateLogging() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -1992,7 +2000,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void deactivateLogging()
+        void deactivateLogging() noexcept
         {
           auto singleton = LoggerReferencesHolder::singleton();
           if (!singleton) return;
@@ -2006,7 +2014,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void close()
+        void close() noexcept
         {
           deactivateLogging();
 
@@ -2050,26 +2058,26 @@ namespace ortc
         }
         
         //---------------------------------------------------------------------
-        bool isOutgoing() const
+        bool isOutgoing() const noexcept
         {
           return mOriginalServer.hasData();
         }
         
         //---------------------------------------------------------------------
-        bool isIncoming() const
+        bool isIncoming() const noexcept
         {
           return mOriginalServer.isEmpty();
         }
 
         //---------------------------------------------------------------------
-        bool isClosed()
+        bool isClosed() noexcept
         {
           AutoRecursiveLock lock(*this);
           return mClosed;
         }
 
         //---------------------------------------------------------------------
-        void handleCommand(String command)
+        void handleCommand(String command) noexcept
         {
           String input = command;
 
@@ -2177,7 +2185,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void handleConnectionFailure()
+        void handleConnectionFailure() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -2199,7 +2207,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void step()
+        void step() noexcept
         {
           if (isClosed()) return;
 
@@ -2238,7 +2246,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool stepDNS()
+        bool stepDNS() noexcept
         {
           String serverName;
           IDNSQueryPtr query;
@@ -2266,7 +2274,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool stepConnect()
+        bool stepConnect() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -2312,7 +2320,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool stepListen()
+        bool stepListen() noexcept
         {
           AutoRecursiveLock lock(*this);
 
@@ -2368,9 +2376,9 @@ namespace ortc
         
       private:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TelnetLogger => (data)
-        #pragma mark
+        //
+        // TelnetLogger => (data)
+        //
 
         TelnetLoggerWeakPtr mThisWeak;
         bool mNotifiedShutdown {};
@@ -2417,9 +2425,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RemoteEventing
-      #pragma mark
+      //
+      // RemoteEventing
+      //
 
       class RemoteEventing : public MessageQueueAssociator,
                              public IDNSDelegate,
@@ -2435,9 +2443,9 @@ namespace ortc
         friend struct SingletonHolder;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RemoteEventing::SingletonHolder
-        #pragma mark
+        //
+        // RemoteEventing::SingletonHolder
+        //
 
         struct SingletonHolder : public ISingletonManagerDelegate
         {
@@ -2448,7 +2456,7 @@ namespace ortc
           String mSharedSecret;
 
           //-------------------------------------------------------------------
-          virtual void notifySingletonCleanup() override
+          void notifySingletonCleanup() noexcept override
           {
             AutoRecursiveLock lock(mLock);
             if (!mCurrent) return;
@@ -2457,7 +2465,7 @@ namespace ortc
         };
 
         //---------------------------------------------------------------------
-        static SingletonHolderPtr singletonHolder()
+        static SingletonHolderPtr singletonHolder() noexcept
         {
           static SingletonLazySharedPtr<SingletonHolder> info(make_shared<SingletonHolder>());
           static SingletonManager::Register reg("org.ortc.services.RemoteEventing", info.singleton());
@@ -2470,7 +2478,7 @@ namespace ortc
                                         WORD listenPort,
                                         const String &sharedSecret,
                                         Seconds maxSecondsWaitForSocketToBeAvailable
-                                        )
+                                        ) noexcept
         {
           if (0 == listenPort) listenPort = IRemoteEventingTypes::Port_Default;
           auto pThis(make_shared<RemoteEventing>(make_private{}, IHelper::getLoggerQueue(), listenPort, String(), sharedSecret, maxSecondsWaitForSocketToBeAvailable));
@@ -2483,9 +2491,9 @@ namespace ortc
         static RemoteEventingPtr create(
                                         const String &serverAddress,
                                         const String &sharedSecret
-                                        )
+                                        ) noexcept
         {
-          auto pThis(make_shared<RemoteEventing>(make_private{}, IHelper::getLoggerQueue(), 0, serverAddress, sharedSecret));
+          auto pThis(make_shared<RemoteEventing>(make_private{}, IHelper::getLoggerQueue(), static_cast<WORD>(0), serverAddress, sharedSecret));
           pThis->mThisWeak = pThis;
           pThis->init();
           return pThis;
@@ -2500,7 +2508,7 @@ namespace ortc
                        const String &serverAddress,
                        const String &sharedSecret,
                        Seconds maxSecondsWaitForSocketToBeAvailable = Seconds()
-                       ) :
+                       ) noexcept :
           MessageQueueAssociator(queue),
           mListenPort(listenPort),
           mMaxSecondsWaitForSocketToBeAvailable(maxSecondsWaitForSocketToBeAvailable),
@@ -2510,14 +2518,14 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        ~RemoteEventing()
+        ~RemoteEventing() noexcept
         {
           mThisWeak.reset();
           cancel();
         }
 
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
           AutoRecursiveLock lock(mLock);
           if (mServerAddress.hasData()) {
@@ -2528,16 +2536,16 @@ namespace ortc
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RemoteEventing (friends)
-        #pragma mark
+        //
+        // RemoteEventing (friends)
+        //
 
         //---------------------------------------------------------------------
         static void installEventingListener(
                                             WORD listenPort,
                                             const char *sharedSecret,
                                             Seconds maxSecondsWaitForSocketToBeAvailable
-                                            )
+                                            ) noexcept
         {
           String sharedSecretStr(sharedSecret);
 
@@ -2576,7 +2584,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static void uninstallEventingListener()
+        static void uninstallEventingListener() noexcept
         {
           auto holder = singletonHolder();
           if (!holder) return;
@@ -2600,7 +2608,7 @@ namespace ortc
         static void connectToEventingServer(
                                             const char *serverAddress,
                                             const char *sharedSecret
-                                            )
+                                            ) noexcept
         {
           String serverAddressStr(serverAddress);
           String sharedSecretStr(sharedSecret);
@@ -2641,7 +2649,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        static void disconnectEventingServer()
+        static void disconnectEventingServer() noexcept
         {
           auto holder = singletonHolder();
           if (!holder) return;
@@ -2663,11 +2671,11 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RemoteEventing::IDNSQueryDelegate
-        #pragma mark
+        //
+        // RemoteEventing::IDNSQueryDelegate
+        //
 
-        virtual void onLookupCompleted(IDNSQueryPtr query) override
+        void onLookupCompleted(IDNSQueryPtr query) override
         {
           AutoRecursiveLock lock(mLock);
           if (query != mServerLookup) return;
@@ -2681,28 +2689,29 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RemoteEventing::IWakeDelegate
-        #pragma mark
+        //
+        // RemoteEventing::IWakeDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onWake() override
+        void onWake() override
         {
           AutoRecursiveLock lock(mLock);
           step();
         }
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RemoteEventing::IRemoteEventingDelegate
-        #pragma mark
+        //
+        // RemoteEventing::IRemoteEventingDelegate
+        //
 
         //---------------------------------------------------------------------
-        virtual void onRemoteEventingStateChanged(
-                                                  IRemoteEventingPtr connection,
-                                                  States state
-                                                  ) override
+        void onRemoteEventingStateChanged(
+                                          IRemoteEventingPtr connection,
+                                          ZS_MAYBE_USED() States state
+                                          ) override
         {
+          ZS_MAYBE_USED(state);
           AutoRecursiveLock lock(mLock);
           step();
         }
@@ -2809,18 +2818,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark services::ILogger
-    #pragma mark
+    //
+    // services::ILogger
+    //
 
     //-------------------------------------------------------------------------
-    void ILogger::installStdOutLogger(bool colorizeOutput)
+    void ILogger::installStdOutLogger(bool colorizeOutput) noexcept
     {
       internal::StdOutLogger::singleton(colorizeOutput, true);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::installFileLogger(const char *fileName, bool colorizeOutput)
+    void ILogger::installFileLogger(const char *fileName, bool colorizeOutput) noexcept
     {
       internal::FileLogger::singleton(fileName, colorizeOutput, colorizeOutput);
     }
@@ -2830,7 +2839,7 @@ namespace ortc
                                       WORD listenPort,
                                       Seconds maxSecondsWaitForSocketToBeAvailable,
                                       bool colorizeOutput
-                                      )
+                                      ) noexcept
     {
       internal::TelnetLogger::singletonIncoming(listenPort, maxSecondsWaitForSocketToBeAvailable, colorizeOutput, colorizeOutput);
     }
@@ -2840,19 +2849,19 @@ namespace ortc
                                               const char *serverHostWithPort,
                                               bool colorizeOutput,
                                               const char *sendStringUponConnection
-                                              )
+                                              ) noexcept
     {
       internal::TelnetLogger::singletonOutgoing(serverHostWithPort, colorizeOutput, colorizeOutput, sendStringUponConnection);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::installDebuggerLogger(bool colorizeOutput)
+    void ILogger::installDebuggerLogger(bool colorizeOutput) noexcept
     {
       internal::DebuggerLogger::singleton(colorizeOutput, colorizeOutput);
     }
 
     //-------------------------------------------------------------------------
-    bool ILogger::isTelnetLoggerListening()
+    bool ILogger::isTelnetLoggerListening() noexcept
     {
       auto singleton = internal::TelnetLogger::singletonIncoming();
       if (!singleton) return false;
@@ -2861,7 +2870,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool ILogger::isTelnetLoggerConnected()
+    bool ILogger::isTelnetLoggerConnected() noexcept
     {
       auto singleton = internal::TelnetLogger::singletonIncoming();
       if (!singleton) return false;
@@ -2870,7 +2879,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool ILogger::isOutgoingTelnetLoggerConnected()
+    bool ILogger::isOutgoingTelnetLoggerConnected() noexcept
     {
       auto singleton = internal::TelnetLogger::singletonOutgoing();
       if (!singleton) return false;
@@ -2879,43 +2888,43 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallStdOutLogger()
+    void ILogger::uninstallStdOutLogger() noexcept
     {
       internal::StdOutLogger::stop();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallFileLogger()
+    void ILogger::uninstallFileLogger() noexcept
     {
       internal::FileLogger::stop();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallTelnetLogger()
+    void ILogger::uninstallTelnetLogger() noexcept
     {
       internal::TelnetLogger::stopIncoming();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallOutgoingTelnetLogger()
+    void ILogger::uninstallOutgoingTelnetLogger() noexcept
     {
       internal::TelnetLogger::stopOutgoing();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallDebuggerLogger()
+    void ILogger::uninstallDebuggerLogger() noexcept
     {
       internal::DebuggerLogger::stop();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setLogLevel(Log::Level logLevel)
+    void ILogger::setLogLevel(Log::Level logLevel) noexcept
     {
       zsLib::Log::setOutputLevelByName(NULL, logLevel);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setLogLevel(const char *component, Log::Level logLevel)
+    void ILogger::setLogLevel(const char *component, Log::Level logLevel) noexcept
     {
       zsLib::Log::setOutputLevelByName(component, logLevel);
     }
@@ -2925,13 +2934,13 @@ namespace ortc
                                           WORD listenPort,
                                           const char *sharedSecret,
                                           Seconds maxSecondsWaitForSocketToBeAvailable
-                                          )
+                                          ) noexcept
     {
       internal::RemoteEventing::installEventingListener(listenPort, sharedSecret, maxSecondsWaitForSocketToBeAvailable);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::uninstallEventingListener()
+    void ILogger::uninstallEventingListener() noexcept
     {
       internal::RemoteEventing::uninstallEventingListener();
     }
@@ -2940,37 +2949,37 @@ namespace ortc
     void ILogger::connectToEventingServer(
                                           const char *serverAddress,
                                           const char *sharedSecret
-                                          )
+                                          ) noexcept
     {
       internal::RemoteEventing::connectToEventingServer(serverAddress, sharedSecret);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::disconnectEventingServer()
+    void ILogger::disconnectEventingServer() noexcept
     {
       internal::RemoteEventing::disconnectEventingServer();
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setDefaultEventingLevel(Log::Level logLevel)
+    void ILogger::setDefaultEventingLevel(Log::Level logLevel) noexcept
     {
       zsLib::Log::setDefaultEventingLevelByName(NULL, logLevel);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setDefaultEventingLevel(const char *component, Log::Level logLevel)
+    void ILogger::setDefaultEventingLevel(const char *component, Log::Level logLevel) noexcept
     {
       zsLib::Log::setDefaultEventingLevelByName(component, logLevel);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setEventingLevel(Log::Level logLevel)
+    void ILogger::setEventingLevel(Log::Level logLevel) noexcept
     {
       zsLib::Log::setEventingLevelByName(NULL, logLevel);
     }
 
     //-------------------------------------------------------------------------
-    void ILogger::setEventingLevel(const char *component, Log::Level logLevel)
+    void ILogger::setEventingLevel(const char *component, Log::Level logLevel) noexcept
     {
       zsLib::Log::setEventingLevelByName(component, logLevel);
     }

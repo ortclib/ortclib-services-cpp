@@ -41,9 +41,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IMessageLayerSecurityChannel
-    #pragma mark
+    //
+    // IMessageLayerSecurityChannel
+    //
 
     interaction IMessageLayerSecurityChannel
     {
@@ -64,10 +64,10 @@ namespace ortc
         KeyingType_KeyAgreement,
       };
 
-      static const char *toString(SessionStates state);
-      static const char *toString(KeyingTypes type);
+      static const char *toString(SessionStates state) noexcept;
+      static const char *toString(KeyingTypes type) noexcept;
 
-      static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel);
+      static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: create a new channel to a remote connection
@@ -78,11 +78,11 @@ namespace ortc
                                                     ITransportStreamPtr sendStreamDecoded,
                                                     ITransportStreamPtr sendStreamEncoded,
                                                     const char *localContextID = NULL                                    // the session context ID
-                                                    );
+                                                    ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: get process unique ID for object
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: subscribe to class events
@@ -90,14 +90,14 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       // PURPOSE: immediately disconnects the channel (no signaling is needed)
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: return the current state of the connection
       virtual SessionStates getState(
                                      WORD *outLastErrorCode = NULL,
                                      String *outLastErrorReason = NULL
-                                     ) const = 0;
+                                     ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Returns true if the local context ID needs to be set
@@ -105,7 +105,7 @@ namespace ortc
       //          "SessionState_WaitingForNeededInformation" is
       //          notified.
       //          Call "setLocalContextID" to provide value.
-      virtual bool needsLocalContextID() const = 0;
+      virtual bool needsLocalContextID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Determine if keying material is needed for decoding the
@@ -131,7 +131,7 @@ namespace ortc
       //          pre-supplied a remote public key "out of band" then the
       //          remote public key the remote side is expecting will return
       //          via "getRemoteKeyAgreementFingerprint".
-      virtual bool needsReceiveKeying(KeyingTypes *outDecodingType = NULL) const = 0;
+      virtual bool needsReceiveKeying(KeyingTypes *outDecodingType = NULL) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Determine if keying material is needed for encoding the
@@ -164,7 +164,7 @@ namespace ortc
       //          pre-supplied a remote public key "out of band" then the
       //          remote public key the remote side is expecting will return
       //          via "getRemoteKeyAgreementFingerprint".
-      virtual bool needsSendKeying(KeyingTypes *outEncodingType = NULL) const = 0;
+      virtual bool needsSendKeying(KeyingTypes *outEncodingType = NULL) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Returns true if the signature on the incoming
@@ -179,7 +179,7 @@ namespace ortc
       //          "setReceiveKeyingSigningPublicKey" to set the
       //          remote public key expected to have signed the keying
       //           material.
-      virtual bool needsReceiveKeyingSigningPublicKey() const = 0;
+      virtual bool needsReceiveKeyingSigningPublicKey() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Returns true when the send keying materials needs to be
@@ -192,26 +192,26 @@ namespace ortc
       //          keying material to be signed and call
       //          "notifySendKeyingSigned" when the keying information
       //          has been signed.
-      virtual bool needsSendKeyingToeBeSigned() const = 0;
+      virtual bool needsSendKeyingToeBeSigned() const noexcept = 0;
 
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtain the context ID specified in the construction of this
       //          object (and sent to the remote party).
-      virtual String getLocalContextID() const = 0;
+      virtual String getLocalContextID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtain the context ID specified by the remote party.
       // NOTE:    This can be useful to pick the correct keying material
       //          when the remote party encodes keying materials using
       //          a passphrase.
-      virtual String getRemoteContextID() const = 0;
+      virtual String getRemoteContextID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Set the local context ID
       // NOTE:    A local context ID is reuqired before any data can be sent
       //          to the remote party.
-      virtual void setLocalContextID(const char *contextID) = 0;
+      virtual void setLocalContextID(const char *contextID) noexcept = 0;
 
 
       //-----------------------------------------------------------------------
@@ -223,7 +223,7 @@ namespace ortc
       //          needs a passphrase to decode its keying materials. Call this
       //          routine to provide the passphrase used to decode the receive
       //          keying material.
-      virtual void setReceiveKeying(const char *passphrase) = 0;
+      virtual void setReceiveKeying(const char *passphrase) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Calling this routine causes the keying material to be encoded
@@ -231,7 +231,7 @@ namespace ortc
       // NOTE:    When "needsSendKeying" returns true, this routine can be used
       //          to provide a passphrase to use to encode the send keying
       //          material.
-      virtual void setSendKeying(const char *passphrase) = 0;
+      virtual void setSendKeying(const char *passphrase) noexcept = 0;
 
 
       //-----------------------------------------------------------------------
@@ -240,7 +240,7 @@ namespace ortc
       //          used to encode the receive keying material is returned.
       // RETURNS: The fingerprint of the public key used to encode the
       //          receive key fingerprint (if known).
-      virtual String getReceivePublicKeyFingerprint() const = 0;
+      virtual String getReceivePublicKeyFingerprint() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: If the remote party encoded their keying materials using
@@ -252,7 +252,7 @@ namespace ortc
       virtual void setReceiveKeying(
                                     IRSAPrivateKeyPtr localPrivateKey,
                                     IRSAPublicKeyPtr localPublicKey
-                                    ) = 0;
+                                    ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Calling this routine causes the keying material to be
@@ -260,7 +260,7 @@ namespace ortc
       // NOTE:    When "needsSendKeying" returns true, this routine can be used
       //          to provide a public key to use to encode the send keying
       //          material.
-      virtual void setSendKeying(IRSAPublicKeyPtr remotePublicKey) = 0;
+      virtual void setSendKeying(IRSAPublicKeyPtr remotePublicKey) noexcept = 0;
       
 
       //-----------------------------------------------------------------------
@@ -268,7 +268,7 @@ namespace ortc
       // NOTE:    This is needed to figure out the correct Diffie-Hellman
       //          keying material needing to be supplied and the domain cannot
       //          change during the entire session.
-      virtual IDHKeyDomainPtr getKeyAgreementDomain() const = 0;
+      virtual IDHKeyDomainPtr getKeyAgreementDomain() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: If the remote side is using a key agreement for the keying
@@ -276,7 +276,7 @@ namespace ortc
       //          fingerprint of the remote public key was provided, this
       //          routine returns the fingerprint of the remote public key.
       // RETURNS: The remote agreement key fingerprint expected (if known).
-      virtual String getRemoteKeyAgreementFingerprint() const = 0;
+      virtual String getRemoteKeyAgreementFingerprint() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: If a key agreement mechanism is used for encoding keying
@@ -290,7 +290,7 @@ namespace ortc
                                         IDHPrivateKeyPtr localPrivateKey,
                                         IDHPublicKeyPtr localPublicKey,
                                         bool remoteSideAlreadyKnowsThisPublicKey
-                                        ) = 0;
+                                        ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtain the remote public key of the
@@ -299,7 +299,7 @@ namespace ortc
       //          "getRemoteKeyAgreementFingerprint" returns the a fingerprint
       //          value then this rountine must be called to supply the
       //          remote public key.
-      virtual void setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey) = 0;
+      virtual void setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: If the remote party encoded their keying materials using
@@ -308,7 +308,7 @@ namespace ortc
       // NOTE:    This is the first remote public key seen by the remote party
       //          and does not change even if the keying material is changed
       //          as the session progresses.
-      virtual IDHPublicKeyPtr getOriginalRemoteKeyAgreement() = 0;
+      virtual IDHPublicKeyPtr getOriginalRemoteKeyAgreement() noexcept = 0;
 
 
       //-----------------------------------------------------------------------
@@ -319,7 +319,7 @@ namespace ortc
       //          The signature associated to this package can be examined
       //          to help resolve the public key that must to be used to
       //          validate the receive keying material.
-      virtual ElementPtr getSignedReceiveKeying() const = 0;
+      virtual ElementPtr getSignedReceiveKeying() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Sets the public key to be used to validate the signature
@@ -328,7 +328,7 @@ namespace ortc
       //          receive keying material needs to be provided. The
       //          "needsReceiveKeyingSigningPublicKey" will return
       //          true when this information is needed.
-      virtual void setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey) = 0;
+      virtual void setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey) noexcept = 0;
 
 
       //-----------------------------------------------------------------------
@@ -344,7 +344,7 @@ namespace ortc
       virtual void getSendKeyingNeedingToBeSigned(
                                                   DocumentPtr &outDocumentContainedElementToSign,
                                                   ElementPtr &outElementToSign
-                                                  ) const = 0;
+                                                  ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notified the signture has been applied to the result of
@@ -360,7 +360,7 @@ namespace ortc
       virtual void notifySendKeyingSigned(
                                           IRSAPrivateKeyPtr signingKey,
                                           IRSAPublicKeyPtr signingPublicKey
-                                          ) = 0;
+                                          ) noexcept = 0;
     };
 
 
@@ -368,9 +368,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IMessageLayerSecurityChannelDelegate
-    #pragma mark
+    //
+    // IMessageLayerSecurityChannelDelegate
+    //
 
     interaction IMessageLayerSecurityChannelDelegate
     {
@@ -393,17 +393,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IMessageLayerSecurityChannelSubscription
-    #pragma mark
+    //
+    // IMessageLayerSecurityChannelSubscription
+    //
 
     interaction IMessageLayerSecurityChannelSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
 
   }
@@ -412,11 +412,11 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IMessageLayerSecurityChannelDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
-ZS_DECLARE_PROXY_METHOD_2(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
+ZS_DECLARE_PROXY_METHOD(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IMessageLayerSecurityChannelDelegate, ortc::services::IMessageLayerSecurityChannelSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IMessageLayerSecurityChannelPtr, IMessageLayerSecurityChannelPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IMessageLayerSecurityChannelDelegate::SessionStates, SessionStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onMessageLayerSecurityChannelStateChanged, IMessageLayerSecurityChannelPtr, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

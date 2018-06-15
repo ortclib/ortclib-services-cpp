@@ -43,35 +43,35 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRSAPublicKey
-    #pragma mark
+    //
+    // IRSAPublicKey
+    //
 
     interaction IRSAPublicKey
     {
-      static ElementPtr toDebug(IRSAPublicKeyPtr object);
+      static ElementPtr toDebug(IRSAPublicKeyPtr object) noexcept;
 
-      static IRSAPublicKeyPtr generate(IRSAPrivateKeyPtr &outPrivateKey);
+      static IRSAPublicKeyPtr generate(IRSAPrivateKeyPtr &outPrivateKey) noexcept;
 
-      static IRSAPublicKeyPtr load(const SecureByteBlock &buffer);
+      static IRSAPublicKeyPtr load(const SecureByteBlock &buffer) noexcept;
 
-      virtual SecureByteBlockPtr save() const = 0;
+      virtual SecureByteBlockPtr save() const noexcept = 0;
 
-      virtual String getFingerprint() const = 0;
+      virtual String getFingerprint() const noexcept = 0;
 
       virtual bool verify(
                           const SecureByteBlock &inOriginalBufferSigned,
                           const SecureByteBlock &inSignature
-                          ) const = 0;
+                          ) const noexcept = 0;
 
       virtual bool verify(
                           const String &inOriginalStringSigned,
                           const SecureByteBlock &inSignature
-                          ) const = 0;
+                          ) const noexcept = 0;
 
-      virtual bool verifySignature(ElementPtr signedEl) const = 0;
+      virtual bool verifySignature(ElementPtr signedEl) const noexcept = 0;
 
-      virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const = 0;
+      virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const noexcept = 0;
     };
   }
 }

@@ -43,9 +43,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTP
-    #pragma mark
+    //
+    // IHTTP
+    //
 
     interaction IHTTP
     {
@@ -149,13 +149,13 @@ namespace ortc
         HTTPStatusCode_ServerErrorEnd                   = 599,
       };
 
-      static HTTPStatusCodes toStatusCode(StatusCodeType statusCode);
-      static const char *toString(HTTPStatusCodes httpStatusCode);
-      static bool isPending(HTTPStatusCodes httpStatusCode, bool noneIsPending = true);
-      static bool isInformational(HTTPStatusCodes httpStatusCode);
-      static bool isSuccess(HTTPStatusCodes httpStatusCode, bool noneIsSuccess = true);
-      static bool isRedirection(HTTPStatusCodes httpStatusCode);
-      static bool isError(HTTPStatusCodes httpStatusCode, bool noneIsError = false);
+      static HTTPStatusCodes toStatusCode(StatusCodeType statusCode) noexcept;
+      static const char *toString(HTTPStatusCodes httpStatusCode) noexcept;
+      static bool isPending(HTTPStatusCodes httpStatusCode, bool noneIsPending = true) noexcept;
+      static bool isInformational(HTTPStatusCodes httpStatusCode) noexcept;
+      static bool isSuccess(HTTPStatusCodes httpStatusCode, bool noneIsSuccess = true) noexcept;
+      static bool isRedirection(HTTPStatusCodes httpStatusCode) noexcept;
+      static bool isError(HTTPStatusCodes httpStatusCode, bool noneIsError = false) noexcept;
 
       enum Verbs
       {
@@ -167,8 +167,8 @@ namespace ortc
         Verb_Last = Verb_Post,
       };
 
-      static const char *toString(Verbs verb);
-      static Verbs toVerb(const char *verb) throw (InvalidArgument);
+      static const char *toString(Verbs verb) noexcept;
+      static Verbs toVerb(const char *verb) noexcept(false);
 
       struct QueryInfo
       {
@@ -183,21 +183,21 @@ namespace ortc
         SecureByteBlockPtr postData_;
         String postDataAsString_;
 
-        QueryInfo();
-        QueryInfo(const QueryInfo &source);
+        QueryInfo() noexcept;
+        QueryInfo(const QueryInfo &source) noexcept;
 
-        QueryInfo &operator=(const QueryInfo &source);
+        QueryInfo &operator=(const QueryInfo &source) noexcept;
 
         void trace(
                    const char *func = NULL,
                    const char *message = NULL
-                   ) const;
+                   ) const noexcept;
       };
 
       static IHTTPQueryPtr query(
                                  IHTTPQueryDelegatePtr delegate,
                                  const QueryInfo &info
-                                 );
+                                 ) noexcept;
 
     };
 
@@ -205,69 +205,69 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTPOverride
-    #pragma mark
+    //
+    // IHTTPOverride
+    //
 
     interaction IHTTPOverride
     {
-      static void install(IHTTPOverrideDelegatePtr delegate);
-      static void uninstall();
+      static void install(IHTTPOverrideDelegatePtr delegate) noexcept;
+      static void uninstall() noexcept;
 
       static void notifyHeaderData(
                                    IHTTPQueryPtr query,
                                    const BYTE *buffer,
                                    size_t sizeInBytes
-                                   ) throw (InvalidArgument);
+                                   ) noexcept(false); // throws InvalidArgument
 
       static void notifyBodyData(
                                  IHTTPQueryPtr query,
                                  const BYTE *buffer,
                                  size_t sizeInBytes
-                                 ) throw (InvalidArgument);
+                                 ) noexcept(false); // throws InvalidArgument
 
       static void notifyComplete(
                                  IHTTPQueryPtr query,
                                  IHTTP::HTTPStatusCodes status = IHTTP::HTTPStatusCode_OK
-                                 ) throw (InvalidArgument);
+                                 ) noexcept(false); // throws InvalidArgument
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTPQuery
-    #pragma mark
+    //
+    // IHTTPQuery
+    //
 
     interaction IHTTPQuery
     {
       typedef IHTTP::HTTPStatusCodes HTTPStatusCodes;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual bool isComplete() const = 0;
-      virtual bool wasSuccessful() const = 0;
-      virtual HTTPStatusCodes getStatusCode() const = 0;
+      virtual bool isComplete() const noexcept = 0;
+      virtual bool wasSuccessful() const noexcept = 0;
+      virtual HTTPStatusCodes getStatusCode() const noexcept = 0;
 
-      virtual size_t getHeaderReadSizeAvailableInBytes() const = 0;
+      virtual size_t getHeaderReadSizeAvailableInBytes() const noexcept = 0;
       virtual size_t readHeader(
                                 BYTE *outResultData,
                                 size_t bytesToRead
-                                ) = 0;
+                                ) noexcept = 0;
 
-      virtual size_t readHeaderAsString(String &outHeader) = 0;
+      virtual size_t readHeaderAsString(String &outHeader) noexcept = 0;
 
-      virtual size_t getReadDataAvailableInBytes() const = 0;
+      virtual size_t getReadDataAvailableInBytes() const noexcept = 0;
 
       virtual size_t readData(
                               BYTE *outResultData,
                               size_t bytesToRead
-                              ) = 0;
+                              ) noexcept = 0;
 
-      virtual size_t readDataAsString(String &outResultData) = 0;
+      virtual size_t readDataAsString(String &outResultData) noexcept = 0;
     };
 
     interaction IHTTPQueryDelegate
@@ -291,13 +291,13 @@ namespace ortc
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IHTTPQueryDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTPQueryPtr, IHTTPQueryPtr)
-ZS_DECLARE_PROXY_METHOD_1(onHTTPReadDataAvailable, IHTTPQueryPtr)
-ZS_DECLARE_PROXY_METHOD_1(onHTTPCompleted, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_METHOD(onHTTPReadDataAvailable, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_METHOD(onHTTPCompleted, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IHTTPOverrideDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTPQueryPtr, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IHTTP::QueryInfo, QueryInfo)
-ZS_DECLARE_PROXY_METHOD_2(onHTTPOverrideQuery, IHTTPQueryPtr, QueryInfo)
-ZS_DECLARE_PROXY_METHOD_1(onHTTPOverrideQueryCancelled, IHTTPQueryPtr)
+ZS_DECLARE_PROXY_METHOD(onHTTPOverrideQuery, IHTTPQueryPtr, QueryInfo)
+ZS_DECLARE_PROXY_METHOD(onHTTPOverrideQueryCancelled, IHTTPQueryPtr)
 ZS_DECLARE_PROXY_END()

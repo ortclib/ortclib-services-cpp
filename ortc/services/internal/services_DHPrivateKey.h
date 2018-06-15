@@ -47,9 +47,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPrivateKey
-      #pragma mark
+      //
+      // DHPrivateKey
+      //
 
       class DHPrivateKey : public Noop,
                            public IDHPrivateKey
@@ -68,34 +68,34 @@ namespace ortc
         DHPrivateKey(
                      const make_private &,
                      UseDHKeyDomainPtr keyDomain
-                     );
+                     ) noexcept;
 
       protected:
-        DHPrivateKey(Noop) : Noop(true) {};
+        DHPrivateKey(Noop) noexcept : Noop(true) {};
 
       public:
-        ~DHPrivateKey();
+        ~DHPrivateKey() noexcept;
 
-        static DHPrivateKeyPtr convert(IDHPrivateKeyPtr privateKey);
+        static DHPrivateKeyPtr convert(IDHPrivateKeyPtr privateKey) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPrivateKey => IDHPrivateKey
-        #pragma mark
+        //
+        // DHPrivateKey => IDHPrivateKey
+        //
 
-        static ElementPtr toDebug(IDHPrivateKeyPtr keyDomain);
+        static ElementPtr toDebug(IDHPrivateKeyPtr keyDomain) noexcept;
 
         static DHPrivateKeyPtr generate(
                                         IDHKeyDomainPtr keyDomain,
                                         IDHPublicKeyPtr &outPublicKey
-                                        );
+                                        ) noexcept;
 
         static DHPrivateKeyPtr load(
                                     IDHKeyDomainPtr inKeyDomain,
                                     const SecureByteBlock &staticPrivateKey,
                                     const SecureByteBlock &ephemeralPrivateKey
-                                    );
+                                    ) noexcept;
 
         static DHPrivateKeyPtr load(
                                     IDHKeyDomainPtr keyDomain,
@@ -104,48 +104,48 @@ namespace ortc
                                     const SecureByteBlock &ephemeralPrivateKey,
                                     const SecureByteBlock &staticPublicKey,
                                     const SecureByteBlock &ephemeralPublicKey
-                                    );
+                                    ) noexcept;
         
         static DHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                            IDHKeyDomainPtr keyDomain,
                                                            const SecureByteBlock &staticPrivateKey,
                                                            const SecureByteBlock &staticPublicKey,
                                                            IDHPublicKeyPtr &outNewPublicKey
-                                                           );
+                                                           ) noexcept;
 
         static DHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                            IDHPrivateKeyPtr templatePrivateKey,
                                                            IDHPublicKeyPtr templatePublicKey,
                                                            IDHPublicKeyPtr &outNewPublicKey
-                                                           );
+                                                           ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
         
         virtual void save(
                           SecureByteBlock *outStaticPrivateKey,
                           SecureByteBlock *outEphemeralPrivateKey
-                          ) const;
+                          ) const noexcept;
 
-        virtual IDHKeyDomainPtr getKeyDomain() const;
+        virtual IDHKeyDomainPtr getKeyDomain() const noexcept;
 
-        virtual SecureByteBlockPtr getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const;
+        virtual SecureByteBlockPtr getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPrivateKey => (internal)
-        #pragma mark
+        //
+        // DHPrivateKey => (internal)
+        //
 
-        static Log::Params slog(const char *message);
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
-        virtual ElementPtr toDebug() const;
+        static Log::Params slog(const char *message) noexcept;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
+        virtual ElementPtr toDebug() const noexcept;
 
       private:
         //-------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPrivateKey => (data)
-        #pragma mark
+        //
+        // DHPrivateKey => (data)
+        //
 
         AutoPUID mID;
 
@@ -159,24 +159,24 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPrivateKeyFactory
-      #pragma mark
+      //
+      // IDHPrivateKeyFactory
+      //
 
       interaction IDHPrivateKeyFactory
       {
-        static IDHPrivateKeyFactory &singleton();
+        static IDHPrivateKeyFactory &singleton() noexcept;
 
         virtual DHPrivateKeyPtr generate(
                                          IDHKeyDomainPtr keyDomain,
                                          IDHPublicKeyPtr &outPublicKey
-                                         );
+                                         ) noexcept;
 
         virtual DHPrivateKeyPtr load(
                                      IDHKeyDomainPtr inKeyDomain,
                                      const SecureByteBlock &staticPrivateKey,
                                      const SecureByteBlock &ephemeralPrivateKey
-                                     );
+                                     ) noexcept;
 
         virtual DHPrivateKeyPtr load(
                                      IDHKeyDomainPtr keyDomain,
@@ -185,20 +185,20 @@ namespace ortc
                                      const SecureByteBlock &ephemeralPrivateKey,
                                      const SecureByteBlock &staticPublicKey,
                                      const SecureByteBlock &ephemeralPublicKey
-                                     );
+                                     ) noexcept;
 
         virtual DHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                             IDHKeyDomainPtr keyDomain,
                                                             const SecureByteBlock &staticPrivateKey,
                                                             const SecureByteBlock &staticPublicKey,
                                                             IDHPublicKeyPtr &outNewPublicKey
-                                                            );
+                                                            ) noexcept;
 
         virtual DHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                             IDHPrivateKeyPtr templatePrivateKey,
                                                             IDHPublicKeyPtr templatePublicKey,
                                                             IDHPublicKeyPtr &outNewPublicKey
-                                                            );
+                                                            ) noexcept;
       };
 
       class DHPrivateKeyFactory : public IFactory<IDHPrivateKeyFactory> {};

@@ -49,26 +49,26 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRSAPublicKeyForRSAPrivateKey
-      #pragma mark
+      //
+      // IRSAPublicKeyForRSAPrivateKey
+      //
 
       interaction IRSAPublicKeyForRSAPrivateKey
       {
         ZS_DECLARE_TYPEDEF_PTR(IRSAPublicKeyForRSAPrivateKey, ForPrivateKey)
 
-        static ForPrivateKeyPtr load(const SecureByteBlock &buffer);
+        static ForPrivateKeyPtr load(const SecureByteBlock &buffer) noexcept;
 
-        virtual ~IRSAPublicKeyForRSAPrivateKey() {} // need a virtual function to make this class polymorphic (if another virtual method is added then remove this)
+        virtual ~IRSAPublicKeyForRSAPrivateKey() noexcept {} // need a virtual function to make this class polymorphic (if another virtual method is added then remove this)
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RSAPublicKey
-      #pragma mark
+      //
+      // RSAPublicKey
+      //
 
       class RSAPublicKey : public Noop,
                            public IRSAPublicKey,
@@ -86,68 +86,68 @@ namespace ortc
         typedef CryptoPP::RSA::PublicKey PublicKey;
 
       public:
-        RSAPublicKey(const make_private &);
+        RSAPublicKey(const make_private &) noexcept;
 
       protected:
-        RSAPublicKey(Noop) : Noop(true) {};
+        RSAPublicKey(Noop) noexcept : Noop(true) {};
 
       public:
-        ~RSAPublicKey();
+        ~RSAPublicKey() noexcept;
 
-        static RSAPublicKeyPtr convert(IRSAPublicKeyPtr publicKey);
-        static RSAPublicKeyPtr convert(ForPrivateKeyPtr publicKey);
+        static RSAPublicKeyPtr convert(IRSAPublicKeyPtr publicKey) noexcept;
+        static RSAPublicKeyPtr convert(ForPrivateKeyPtr publicKey) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RSAPublicKey => IRSAPublicKey
-        #pragma mark
+        //
+        // RSAPublicKey => IRSAPublicKey
+        //
 
-        static ElementPtr toDebug(IRSAPublicKeyPtr object);
+        static ElementPtr toDebug(IRSAPublicKeyPtr object) noexcept;
 
-        static RSAPublicKeyPtr generate(RSAPrivateKeyPtr &outPrivatekey);
+        static RSAPublicKeyPtr generate(RSAPrivateKeyPtr &outPrivatekey) noexcept;
 
-        static RSAPublicKeyPtr load(const SecureByteBlock &buffer);
+        static RSAPublicKeyPtr load(const SecureByteBlock &buffer) noexcept;
 
-        virtual SecureByteBlockPtr save() const;
+        virtual SecureByteBlockPtr save() const noexcept;
 
-        virtual String getFingerprint() const;
+        virtual String getFingerprint() const noexcept;
 
         virtual bool verify(
                             const SecureByteBlock &inOriginalBufferSigned,
                             const SecureByteBlock &inSignature
-                            ) const;
+                            ) const noexcept;
 
         virtual bool verify(
                             const String &inOriginalStringSigned,
                             const SecureByteBlock &inSignature
-                            ) const;
+                            ) const noexcept;
 
-        virtual bool verifySignature(ElementPtr signedEl) const;
+        virtual bool verifySignature(ElementPtr signedEl) const noexcept;
 
-        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const;
+        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &buffer) const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RSAPublicKey => (internal)
-        #pragma mark
+        //
+        // RSAPublicKey => (internal)
+        //
 
-        Log::Params log(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
         bool verify(
                     const BYTE *inBuffer,
                     size_t inBufferLengthInBytes,
                     const SecureByteBlock &inSignature
-                    ) const;
+                    ) const noexcept;
 
       private:
         //-------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RSAPrivateKey => (data)
-        #pragma mark
+        //
+        // RSAPrivateKey => (data)
+        //
 
         AutoPUID mID;
         PublicKey mPublicKey;
@@ -158,15 +158,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRSAPublicKeyFactory
-      #pragma mark
+      //
+      // IRSAPublicKeyFactory
+      //
 
       interaction IRSAPublicKeyFactory
       {
-        static IRSAPublicKeyFactory &singleton();
+        static IRSAPublicKeyFactory &singleton() noexcept;
 
-        virtual RSAPublicKeyPtr loadPublicKey(const SecureByteBlock &buffer);
+        virtual RSAPublicKeyPtr loadPublicKey(const SecureByteBlock &buffer) noexcept;
       };
 
       class RSAPublicKeyFactory : public IFactory<IRSAPublicKeyFactory> {};

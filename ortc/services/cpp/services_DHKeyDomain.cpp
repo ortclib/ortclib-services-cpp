@@ -66,9 +66,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       struct DHPrecompiledValues
       {
@@ -410,7 +410,7 @@ namespace ortc
       };
 
       //-------------------------------------------------------------------------
-      static size_t toIndex(IDHKeyDomain::KeyDomainPrecompiledTypes length)
+      static size_t toIndex(IDHKeyDomain::KeyDomainPrecompiledTypes length) noexcept
       {
         switch (length) {
           case IDHKeyDomain::KeyDomainPrecompiledType_Unknown:  return 0;
@@ -426,7 +426,7 @@ namespace ortc
       }
 
       //-------------------------------------------------------------------------
-      static IDHKeyDomain::KeyDomainPrecompiledTypes fromIndex(size_t index)
+      static IDHKeyDomain::KeyDomainPrecompiledTypes fromIndex(size_t index) noexcept
       {
         switch (index) {
           case 0: return IDHKeyDomain::KeyDomainPrecompiledType_Unknown;
@@ -438,11 +438,12 @@ namespace ortc
           case 6: return IDHKeyDomain::KeyDomainPrecompiledType_6144;
           case 7: return IDHKeyDomain::KeyDomainPrecompiledType_8192;
         }
+        ZS_ASSERT_FAIL("unknown key domain pre-compiled type");
         return IDHKeyDomain::KeyDomainPrecompiledType_Unknown;
       }
 
       //-----------------------------------------------------------------------
-      static Log::Params slog(const char *message)
+      static Log::Params slog(const char *message) noexcept
       {
         return Log::Params(message, "stack::DHKeyDomain");
       }
@@ -451,18 +452,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHKeyDomain
-      #pragma mark
+      //
+      // DHKeyDomain
+      //
 
       //-----------------------------------------------------------------------
-      DHKeyDomain::DHKeyDomain(const make_private &)
+      DHKeyDomain::DHKeyDomain(const make_private &) noexcept
       {
         ZS_LOG_DEBUG(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      DHKeyDomain::~DHKeyDomain()
+      DHKeyDomain::~DHKeyDomain() noexcept
       {
         if(isNoop()) return;
         
@@ -470,13 +471,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DHKeyDomainPtr DHKeyDomain::convert(IDHKeyDomainPtr publicKey)
+      DHKeyDomainPtr DHKeyDomain::convert(IDHKeyDomainPtr publicKey) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(DHKeyDomain, publicKey);
       }
 
       //-----------------------------------------------------------------------
-      DHKeyDomainPtr DHKeyDomain::convert(ForDHPrivateKeyPtr object)
+      DHKeyDomainPtr DHKeyDomain::convert(ForDHPrivateKeyPtr object) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(DHKeyDomain, object);
       }
@@ -485,25 +486,25 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHKeyDomain => IDHKeyDomain
-      #pragma mark
+      //
+      // DHKeyDomain => IDHKeyDomain
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr DHKeyDomain::toDebug(IDHKeyDomainPtr keyDomain)
+      ElementPtr DHKeyDomain::toDebug(IDHKeyDomainPtr keyDomain) noexcept
       {
         if (!keyDomain) return ElementPtr();
         return convert(keyDomain)->toDebug();
       }
 
       //-----------------------------------------------------------------------
-      DHKeyDomainPtr DHKeyDomain::generate(size_t keySizeInBits)
+      DHKeyDomainPtr DHKeyDomain::generate(size_t keySizeInBits) noexcept
       {
         DHKeyDomainPtr pThis(make_shared<DHKeyDomain>(make_private{}));
 
         AutoSeededRandomPool rnd;
         pThis->mDH.AccessGroupParameters().GenerateRandomWithKeySize(rnd, static_cast<unsigned int>(keySizeInBits));
-        ZS_THROW_UNEXPECTED_ERROR_IF(!pThis->validate())  // why would we generate something that doesn't pass??
+        ZS_ASSERT(pThis->validate());  // why would we generate something that doesn't pass??
 
         ZS_LOG_DEBUG(pThis->debug("generated key domain"))
 
@@ -514,7 +515,7 @@ namespace ortc
       DHKeyDomainPtr DHKeyDomain::loadPrecompiled(
                                                   KeyDomainPrecompiledTypes precompiledKey,
                                                   bool validate
-                                                  )
+                                                  ) noexcept
       {
         size_t index = toIndex(precompiledKey);
         const char *pStr = sDHPrecompiles[index].mP;
@@ -539,7 +540,7 @@ namespace ortc
         g.Encode(resultG, resultG.SizeInBytes());
 
         DHKeyDomainPtr pThis = load(resultP, resultQ, resultG, validate);
-        ZS_THROW_BAD_STATE_IF(!pThis) // this can't fail
+        ZS_ASSERT(pThis); // this can't fail
 
         ZS_LOG_DEBUG(pThis->log("loading predefined key domain") + ZS_PARAM("length", precompiledKey) + ZS_PARAM("p", pStr) + ZS_PARAM("q", qStr) + ZS_PARAM("g", gStr))
 
@@ -547,7 +548,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IDHKeyDomain::KeyDomainPrecompiledTypes DHKeyDomain::getPrecompiledType() const
+      IDHKeyDomain::KeyDomainPrecompiledTypes DHKeyDomain::getPrecompiledType() const noexcept
       {
         SecureByteBlock p;
         SecureByteBlock q;
@@ -595,7 +596,7 @@ namespace ortc
                                        const SecureByteBlock &inQ,
                                        const SecureByteBlock &inG,
                                        bool validate
-                                       )
+                                       ) noexcept
       {
         DHKeyDomainPtr pThis(make_shared<DHKeyDomain>(make_private{}));
 
@@ -627,7 +628,7 @@ namespace ortc
                              SecureByteBlock &outP,
                              SecureByteBlock &outQ,
                              SecureByteBlock &outG
-                             ) const
+                             ) const noexcept
       {
         Integer p = mDH.GetGroupParameters().GetModulus();
         Integer q = mDH.GetGroupParameters().GetSubgroupOrder();
@@ -648,12 +649,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHKeyDomain => IDHKeyDomainForDHPrivateKey
-      #pragma mark
+      //
+      // DHKeyDomain => IDHKeyDomainForDHPrivateKey
+      //
 
       //-----------------------------------------------------------------------
-      DHKeyDomain::DH &DHKeyDomain::getDH() const
+      DHKeyDomain::DH &DHKeyDomain::getDH() const noexcept
       {
         return mDH;
       }
@@ -662,12 +663,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHKeyDomain => (internal)
-      #pragma mark
+      //
+      // DHKeyDomain => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params DHKeyDomain::log(const char *message) const
+      Log::Params DHKeyDomain::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("stack::DHKeyDomain");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -675,13 +676,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DHKeyDomain::debug(const char *message) const
+      Log::Params DHKeyDomain::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr DHKeyDomain::toDebug() const
+      ElementPtr DHKeyDomain::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("stack::DHKeyDomain");
 
@@ -710,7 +711,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool DHKeyDomain::validate() const
+      bool DHKeyDomain::validate() const noexcept
       {
         ZS_LOG_DEBUG(log("validating key domain"))
 
@@ -742,18 +743,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHKeyDomainFactory
-      #pragma mark
+      //
+      // IDHKeyDomainFactory
+      //
 
       //-----------------------------------------------------------------------
-      IDHKeyDomainFactory &IDHKeyDomainFactory::singleton()
+      IDHKeyDomainFactory &IDHKeyDomainFactory::singleton() noexcept
       {
         return DHKeyDomainFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      DHKeyDomainPtr IDHKeyDomainFactory::generate(size_t keySizeInBits)
+      DHKeyDomainPtr IDHKeyDomainFactory::generate(size_t keySizeInBits) noexcept
       {
         if (this) {}
         return DHKeyDomain::generate(keySizeInBits);
@@ -763,7 +764,7 @@ namespace ortc
       DHKeyDomainPtr IDHKeyDomainFactory::loadPrecompiled(
                                                           IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
                                                           bool validate
-                                                          )
+                                                          ) noexcept
       {
         if (this) {}
         return DHKeyDomain::loadPrecompiled(precompiledKey, validate);
@@ -775,7 +776,7 @@ namespace ortc
                                                const SecureByteBlock &q,
                                                const SecureByteBlock &g,
                                                bool validate
-                                               )
+                                               ) noexcept
       {
         if (this) {}
         return DHKeyDomain::load(p, q, g, validate);
@@ -787,12 +788,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHKeyDomain
-    #pragma mark
+    //
+    // IDHKeyDomain
+    //
 
     //-------------------------------------------------------------------------
-    const char *IDHKeyDomain::toNamespace(KeyDomainPrecompiledTypes length)
+    const char *IDHKeyDomain::toNamespace(KeyDomainPrecompiledTypes length) noexcept
     {
       switch (length) {
         case KeyDomainPrecompiledType_Unknown:  return ORTC_SERVICES_DH_KEY_DOMAIN_NAMESPACE_UNKNOWN;
@@ -808,7 +809,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IDHKeyDomain::KeyDomainPrecompiledTypes IDHKeyDomain::fromNamespace(const char *inNamespace)
+    IDHKeyDomain::KeyDomainPrecompiledTypes IDHKeyDomain::fromNamespace(const char *inNamespace) noexcept
     {
       if (!inNamespace) return KeyDomainPrecompiledType_Unknown;
       if ('\0' == *inNamespace) return KeyDomainPrecompiledType_Unknown;
@@ -839,13 +840,13 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IDHKeyDomain::toDebug(IDHKeyDomainPtr keyDomain)
+    ElementPtr IDHKeyDomain::toDebug(IDHKeyDomainPtr keyDomain) noexcept
     {
       return internal::DHKeyDomain::toDebug(keyDomain);
     }
 
     //-------------------------------------------------------------------------
-    IDHKeyDomainPtr IDHKeyDomain::generate(size_t keySizeInBits)
+    IDHKeyDomainPtr IDHKeyDomain::generate(size_t keySizeInBits) noexcept
     {
       return internal::IDHKeyDomainFactory::singleton().generate(keySizeInBits);
     }
@@ -854,7 +855,7 @@ namespace ortc
     IDHKeyDomainPtr IDHKeyDomain::loadPrecompiled(
                                                   KeyDomainPrecompiledTypes precompiledKey,
                                                   bool validate
-                                                  )
+                                                  ) noexcept
     {
       return internal::IDHKeyDomainFactory::singleton().loadPrecompiled(precompiledKey, validate);
     }
@@ -865,7 +866,7 @@ namespace ortc
                                        const SecureByteBlock &q,
                                        const SecureByteBlock &g,
                                        bool validate
-                                       )
+                                       ) noexcept
     {
       return internal::IDHKeyDomainFactory::singleton().load(p, q, g, validate);
     }

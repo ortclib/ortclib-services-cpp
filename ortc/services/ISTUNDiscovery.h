@@ -45,16 +45,16 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNDiscovery
-    #pragma mark
+    //
+    // ISTUNDiscovery
+    //
 
     interaction ISTUNDiscovery
     {
       typedef String URI;
       typedef std::list<URI> URIList;
 
-      static ElementPtr toDebug(ISTUNDiscoveryPtr discovery);
+      static ElementPtr toDebug(ISTUNDiscoveryPtr discovery) noexcept;
 
       struct CreationOptions
       {
@@ -68,24 +68,24 @@ namespace ortc
                                       IMessageQueuePtr queue,                   // which message queue to use for this service (should be on the same queue as the requesting object)
                                       ISTUNDiscoveryDelegatePtr delegate,
                                       const CreationOptions &options
-                                      );
+                                      ) noexcept;
 
-      static STUNPacket::RFCs usingRFC();
+      static STUNPacket::RFCs usingRFC() noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Returns true if STUN discovery is completed (or cancelled).
-      virtual bool isComplete() const = 0;
+      virtual bool isComplete() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Cancels the STUN discovery process.
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Returns the mapped address as discovered from the server (or
       //          empty if the discovery failed or was cancelled).
-      virtual IPAddress getMappedAddress() const = 0;
+      virtual IPAddress getMappedAddress() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the ISTUNDiscovery that it has a packet that it must
@@ -95,7 +95,7 @@ namespace ortc
       static bool handleSTUNPacket(
                                    IPAddress fromIPAddress,
                                    STUNPacketPtr stun
-                                   );
+                                   ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Tells the ISTUNDiscovery that it might have a packet that
@@ -106,16 +106,16 @@ namespace ortc
                                IPAddress fromIPAddress,
                                BYTE *packet,
                                size_t packetLengthInBytes
-                               );
+                               ) noexcept;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNDiscoveryDelegate
-    #pragma mark
+    //
+    // ISTUNDiscoveryDelegate
+    //
 
     interaction ISTUNDiscoveryDelegate
     {
@@ -141,6 +141,6 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::ISTUNDiscoveryDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ISTUNDiscoveryPtr, ISTUNDiscoveryPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::SecureByteBlockPtr, SecureByteBlockPtr)
-ZS_DECLARE_PROXY_METHOD_3(onSTUNDiscoverySendPacket, ISTUNDiscoveryPtr, IPAddress, SecureByteBlockPtr)
-ZS_DECLARE_PROXY_METHOD_1(onSTUNDiscoveryCompleted, ISTUNDiscoveryPtr)
+ZS_DECLARE_PROXY_METHOD(onSTUNDiscoverySendPacket, ISTUNDiscoveryPtr, IPAddress, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_METHOD(onSTUNDiscoveryCompleted, ISTUNDiscoveryPtr)
 ZS_DECLARE_PROXY_END()

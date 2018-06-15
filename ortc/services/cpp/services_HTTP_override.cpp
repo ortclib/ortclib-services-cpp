@@ -60,28 +60,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverrideSettingsDefaults
-      #pragma mark
+      //
+      // HTTPOverrideSettingsDefaults
+      //
 
       class HTTPOverrideSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~HTTPOverrideSettingsDefaults()
+        ~HTTPOverrideSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static HTTPOverrideSettingsDefaultsPtr singleton()
+        static HTTPOverrideSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<HTTPOverrideSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static HTTPOverrideSettingsDefaultsPtr create()
+        static HTTPOverrideSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<HTTPOverrideSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -89,14 +89,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           //ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installHttpOverrideSettingsDefaults()
+      void installHttpOverrideSettingsDefaults() noexcept
       {
         HTTPOverrideSettingsDefaults::singleton();
       }
@@ -105,24 +105,24 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride
-      #pragma mark
+      //
+      // HTTPOverride
+      //
 
       //-----------------------------------------------------------------------
-      HTTPOverride::HTTPOverride(const make_private &) :
+      HTTPOverride::HTTPOverride(const make_private &) noexcept :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
         ZS_EVENTING_1(x, i, Detail, ServicesHttpOverrideCreate, os, Http, Start, puid, id, id_);
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::init()
+      void HTTPOverride::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTPOverride::~HTTPOverride()
+      HTTPOverride::~HTTPOverride() noexcept
       {
         if (isNoop()) return;
 
@@ -135,15 +135,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride => IHTTP
-      #pragma mark
+      //
+      // HTTPOverride => IHTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTPOverride::HTTPQueryPtr HTTPOverride::query(
                                                      IHTTPQueryDelegatePtr delegate,
                                                      const QueryInfo &info
-                                                     )
+                                                     ) noexcept
       {
         auto pThis = singleton();
 
@@ -175,12 +175,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => IHTTPOverride
-      #pragma mark
+      //
+      // HTTP => IHTTPOverride
+      //
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::install(IHTTPOverrideDelegatePtr overrideDelegate)
+      void HTTPOverride::install(IHTTPOverrideDelegatePtr overrideDelegate) noexcept
       {
         auto pThis = singleton();
 
@@ -197,7 +197,7 @@ namespace ortc
                                           IHTTPQueryPtr query,
                                           const BYTE *buffer,
                                           size_t sizeInBytes
-                                          ) throw (InvalidArgument)
+                                          ) noexcept(false)
       {
         auto castQuery = ZS_DYNAMIC_PTR_CAST(HTTPQuery, query);
         ZS_THROW_INVALID_ARGUMENT_IF(!castQuery);
@@ -211,7 +211,7 @@ namespace ortc
                                         IHTTPQueryPtr query,
                                         const BYTE *buffer,
                                         size_t sizeInBytes
-                                        ) throw (InvalidArgument)
+                                        ) noexcept(false)
       {        
         auto castQuery = ZS_DYNAMIC_PTR_CAST(HTTPQuery, query);
         ZS_THROW_INVALID_ARGUMENT_IF(!castQuery);
@@ -223,7 +223,7 @@ namespace ortc
       void HTTPOverride::notifyComplete(
                                         IHTTPQueryPtr query,
                                         IHTTP::HTTPStatusCodes status
-                                        ) throw (InvalidArgument)
+                                        ) noexcept(false)
       {        
         auto castQuery = ZS_DYNAMIC_PTR_CAST(HTTPQuery, query);
         ZS_THROW_INVALID_ARGUMENT_IF(!castQuery);
@@ -235,20 +235,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride => friend HTTPQuery
-      #pragma mark
+      //
+      // HTTPOverride => friend HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride => (internal)
-      #pragma mark
+      //
+      // HTTPOverride => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      HTTPOverridePtr HTTPOverride::singleton()
+      HTTPOverridePtr HTTPOverride::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<HTTPOverride> singleton(HTTPOverride::create());
@@ -260,7 +260,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      HTTPOverridePtr HTTPOverride::create()
+      HTTPOverridePtr HTTPOverride::create() noexcept
       {
         HTTPOverridePtr pThis(make_shared<HTTPOverride>(make_private{}));
         pThis->thisWeak_ = pThis;
@@ -269,7 +269,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::cancel()
+      void HTTPOverride::cancel() noexcept
       {
 
         HTTPQueryMap queries;
@@ -291,7 +291,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::monitorBegin(HTTPQueryPtr query)
+      void HTTPOverride::monitorBegin(HTTPQueryPtr query) noexcept
       {
         {
           AutoRecursiveLock lock(*this);
@@ -306,7 +306,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::monitorEnd(HTTPQuery &query)
+      void HTTPOverride::monitorEnd(HTTPQuery &query) noexcept
       {
         ZS_EVENTING_2(x, i, Trace, ServicesHttpOverrideMonitorEnd, os, Http, Stop,
           puid, id, id_,
@@ -325,9 +325,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride::HTTPQuery
-      #pragma mark
+      //
+      // HTTPOverride::HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       HTTPOverride::HTTPQuery::HTTPQuery(
@@ -335,7 +335,7 @@ namespace ortc
                                          HTTPOverridePtr outer,
                                          IHTTPQueryDelegatePtr delegate,
                                          const QueryInfo &query
-                                         ) :
+                                         ) noexcept :
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         MessageQueueAssociator(IHelper::getServiceQueue()),
         outer_(outer),
@@ -353,12 +353,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::HTTPQuery::init()
+      void HTTPOverride::HTTPQuery::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTPOverride::HTTPQuery::~HTTPQuery()
+      HTTPOverride::HTTPQuery::~HTTPQuery() noexcept
       {
         thisWeak_.reset();
         cancel();
@@ -370,12 +370,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride::HTTPQuery => IHTTPQuery
-      #pragma mark
+      //
+      // HTTPOverride::HTTPQuery => IHTTPQuery
+      //
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::HTTPQuery::cancel()
+      void HTTPOverride::HTTPQuery::cancel() noexcept
       {
         ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCancel, os, Http, Cancel, puid, id, id_);
 
@@ -425,7 +425,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTPOverride::HTTPQuery::isComplete() const
+      bool HTTPOverride::HTTPQuery::isComplete() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!delegate_) return true;
@@ -433,7 +433,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTPOverride::HTTPQuery::wasSuccessful() const
+      bool HTTPOverride::HTTPQuery::wasSuccessful() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (delegate_) return false;
@@ -442,14 +442,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IHTTP::HTTPStatusCodes HTTPOverride::HTTPQuery::getStatusCode() const
+      IHTTP::HTTPStatusCodes HTTPOverride::HTTPQuery::getStatusCode() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return IHTTP::toStatusCode((WORD)statusCode_);
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTPOverride::HTTPQuery::getHeaderReadSizeAvailableInBytes() const
+      size_t HTTPOverride::HTTPQuery::getHeaderReadSizeAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(header_.MaxRetrievable());
@@ -459,7 +459,7 @@ namespace ortc
       size_t HTTPOverride::HTTPQuery::readHeader(
                                                  BYTE *outResultData,
                                                  size_t bytesToRead
-                                                 )
+                                                 ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = header_.Get(outResultData, bytesToRead);
@@ -475,7 +475,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTPOverride::HTTPQuery::readHeaderAsString(String &outHeader)
+      size_t HTTPOverride::HTTPQuery::readHeaderAsString(String &outHeader) noexcept
       {
         outHeader.clear();
 
@@ -498,7 +498,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTPOverride::HTTPQuery::getReadDataAvailableInBytes() const
+      size_t HTTPOverride::HTTPQuery::getReadDataAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(body_.MaxRetrievable());
@@ -508,7 +508,7 @@ namespace ortc
       size_t HTTPOverride::HTTPQuery::readData(
                                                BYTE *outResultData,
                                                size_t bytesToRead
-                                               )
+                                               ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = body_.Get(outResultData, bytesToRead);
@@ -524,7 +524,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTPOverride::HTTPQuery::readDataAsString(String &outResultData)
+      size_t HTTPOverride::HTTPQuery::readDataAsString(String &outResultData) noexcept
       {
         outResultData.clear();
 
@@ -550,9 +550,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride::HTTPQuery => ITimerDelegate
-      #pragma mark
+      //
+      // HTTPOverride::HTTPQuery => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void HTTPOverride::HTTPQuery::onTimer(ITimerPtr timer)
@@ -570,16 +570,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPOverride::HTTPQuery => friend HTTP
-      #pragma mark
+      //
+      // HTTPOverride::HTTPQuery => friend HTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTPOverride::HTTPQueryPtr HTTPOverride::HTTPQuery::create(
                                                                  HTTPOverridePtr outer,
                                                                  IHTTPQueryDelegatePtr delegate,
                                                                  const QueryInfo &query
-                                                                 )
+                                                                 ) noexcept
       {
         HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private{}, outer, delegate, query));
         pThis->thisWeak_ = pThis;
@@ -588,7 +588,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::HTTPQuery::go(IHTTPOverrideDelegatePtr overrideDelegate)
+      void HTTPOverride::HTTPQuery::go(IHTTPOverrideDelegatePtr overrideDelegate) noexcept
       {
         Time timeout = zsLib::now() + query_.timeout_;
         if (Milliseconds() == query_.timeout_) {
@@ -612,7 +612,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTPOverride::HTTPQuery::notifyComplete(HTTPStatusCodes result)
+      void HTTPOverride::HTTPQuery::notifyComplete(HTTPStatusCodes result) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -629,9 +629,9 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       void HTTPOverride::HTTPQuery::notifyHeaderData(
-                                          const BYTE *buffer,
-                                          size_t sizeInBytes
-                                          )
+                                                     const BYTE *buffer,
+                                                     size_t sizeInBytes
+                                                     ) noexcept
       {
         if ((!buffer) || 
             (sizeInBytes < 1)) return;
@@ -651,9 +651,9 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       void HTTPOverride::HTTPQuery::notifyBodyData(
-                                        const BYTE *buffer,
-                                        size_t sizeInBytes
-                                        )
+                                                   const BYTE *buffer,
+                                                   size_t sizeInBytes
+                                                   ) noexcept
       {
         if ((!buffer) || 
             (sizeInBytes < 1)) return;
@@ -675,9 +675,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => (internal)
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => (internal)
+      //
 
     } // namepsace internal
 
@@ -685,12 +685,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHTTPOverride
-    #pragma mark
+    //
+    // IHTTPOverride
+    //
 
     //-------------------------------------------------------------------------
-    void IHTTPOverride::install(IHTTPOverrideDelegatePtr delegate)
+    void IHTTPOverride::install(IHTTPOverrideDelegatePtr delegate) noexcept
     {
       ZS_DECLARE_TYPEDEF_PTR(internal::IHTTPFactory, IHTTPFactory);
 
@@ -705,7 +705,7 @@ namespace ortc
         virtual IHTTPQueryPtr query(
                                     IHTTPQueryDelegatePtr delegate,
                                     const QueryInfo &query
-                                    )
+                                    ) noexcept
         {
           return internal::HTTPOverride::query(delegate, query);
         }
@@ -716,7 +716,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void IHTTPOverride::uninstall()
+    void IHTTPOverride::uninstall() noexcept
     {
       install(IHTTPOverrideDelegatePtr());
     }
@@ -726,7 +726,7 @@ namespace ortc
                                          IHTTPQueryPtr query,
                                          const BYTE *buffer,
                                          size_t sizeInBytes
-                                         ) throw (InvalidArgument)
+                                         ) noexcept(false)
     {
       return internal::HTTPOverride::notifyHeaderData(query, buffer, sizeInBytes);
     }
@@ -736,7 +736,7 @@ namespace ortc
                                        IHTTPQueryPtr query,
                                        const BYTE *buffer,
                                        size_t sizeInBytes
-                                       ) throw (InvalidArgument)
+                                       ) noexcept(false)
     {
       return internal::HTTPOverride::notifyBodyData(query, buffer, sizeInBytes);
     }
@@ -745,7 +745,7 @@ namespace ortc
     void IHTTPOverride::notifyComplete(
                                        IHTTPQueryPtr query,
                                        IHTTP::HTTPStatusCodes status
-                                       ) throw (InvalidArgument)
+                                       ) noexcept(false)
     {
       return internal::HTTPOverride::notifyComplete(query, status);
     }

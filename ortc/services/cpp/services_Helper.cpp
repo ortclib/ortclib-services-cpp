@@ -98,29 +98,30 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (forwards)
-      #pragma mark
+      //
+      // (forwards)
+      //
 
-      void initSubsystems();
-      void installICESocketSettingsDefaults();
-      void installICESocketSessionSettingsDefaults();
-      void installTURNSocketSettingsDefaults();
-      void installTCPMessagingSettingsDefaults();
-      void installLoggerSettingsDefaults();
-      void installMessageLayerSecurityChannelSettingsDefaults();
-      void installBackOffTimerSettingsDefaults();
-      void installHttpSettingsDefaults();
-      void installHttpOverrideSettingsDefaults();
+      void initSubsystems() noexcept;
+      void installICESocketSettingsDefaults() noexcept;
+      void installICESocketSessionSettingsDefaults() noexcept;
+      void installTURNSocketSettingsDefaults() noexcept;
+      void installTCPMessagingSettingsDefaults() noexcept;
+      void installLoggerSettingsDefaults() noexcept;
+      void installMessageLayerSecurityChannelSettingsDefaults() noexcept;
+      void installBackOffTimerSettingsDefaults() noexcept;
+      void installHttpSettingsDefaults() noexcept;
+      void installHttpOverrideSettingsDefaults() noexcept;
+      void installHttpOverrideSettingsDefaults() noexcept;
 
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
       void throwOnlySetOnce()
@@ -133,28 +134,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HelperSettingsDefaults
-      #pragma mark
+      //
+      // HelperSettingsDefaults
+      //
 
       class HelperSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~HelperSettingsDefaults()
+        ~HelperSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static HelperSettingsDefaultsPtr singleton()
+        static HelperSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<HelperSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static HelperSettingsDefaultsPtr create()
+        static HelperSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<HelperSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -162,7 +163,7 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_POOL_PRIORITY, "high");
           ISettings::setString(ORTC_SERVICES_SETTING_HELPER_SERVICES_THREAD_PRIORITY, "high");
@@ -174,7 +175,7 @@ namespace ortc
       };
 
       //-------------------------------------------------------------------------
-      void installHelperSettingsDefaults()
+      void installHelperSettingsDefaults() noexcept
       {
         HelperSettingsDefaults::singleton();
       }
@@ -190,7 +191,7 @@ namespace ortc
       {
       public:
         //---------------------------------------------------------------------
-        static IDNHelper &singleton()
+        static IDNHelper &singleton() noexcept
         {
           AutoRecursiveLock lock(*zsLib::IHelper::getGlobalLock());
           static Singleton<IDNHelper> singleton;
@@ -198,7 +199,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        IDNHelper()
+        IDNHelper() noexcept
         {
           idn_result_t r = idn_nameinit(0);
 
@@ -208,7 +209,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        Log::Params log(const char *message)
+        Log::Params log(const char *message) noexcept
         {
           return Log::Params(message, "services::IDNHelper");
         }
@@ -223,14 +224,14 @@ namespace ortc
       class ServicesSetup
       {
       public:
-        static ServicesSetup &singleton()
+        static ServicesSetup &singleton() noexcept
         {
           AutoRecursiveLock lock(*zsLib::IHelper::getGlobalLock());
           static Singleton<ServicesSetup> singleton;
           return singleton.singleton();
         }
 
-        ServicesSetup()
+        ServicesSetup() noexcept
         {
           initSubsystems();
           ZS_EVENTING_REGISTER(OrtcServices);
@@ -251,7 +252,7 @@ namespace ortc
           installHttpOverrideSettingsDefaults();
         }
 
-        ~ServicesSetup()
+        ~ServicesSetup() noexcept
         {
           ZS_EVENTING_UNREGISTER(OrtcServices);
         }
@@ -261,12 +262,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Helper
-      #pragma mark
+      //
+      // Helper
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params Helper::slog(const char *message)
+      Log::Params Helper::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::Helper");
       }
@@ -277,12 +278,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark Helper
-    #pragma mark
+    //
+    // Helper
+    //
 
     //-------------------------------------------------------------------------
-    void IHelper::setup()
+    void IHelper::setup() noexcept
     {
       zsLib::eventing::IHelper::setup();
       internal::ServicesSetup::singleton();
@@ -290,7 +291,7 @@ namespace ortc
 
 #ifdef WINUWP
     //-----------------------------------------------------------------------
-    void IHelper::setup(Windows::UI::Core::CoreDispatcher ^dispatcher)
+    void IHelper::setup(Windows::UI::Core::CoreDispatcher ^dispatcher) noexcept
     {
       zsLib::eventing::IHelper::setup(dispatcher);
       internal::ServicesSetup::singleton();
@@ -298,7 +299,7 @@ namespace ortc
 #endif //WINUWP
 
     //-------------------------------------------------------------------------
-    IMessageQueuePtr IHelper::getServicePoolQueue()
+    IMessageQueuePtr IHelper::getServicePoolQueue() noexcept
     {
       class Once {
       public:
@@ -311,7 +312,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IMessageQueuePtr IHelper::getServiceQueue()
+    IMessageQueuePtr IHelper::getServiceQueue() noexcept
     {
       class Once {
       public:
@@ -322,7 +323,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IMessageQueuePtr IHelper::getLoggerQueue()
+    IMessageQueuePtr IHelper::getLoggerQueue() noexcept
     {
       class Once {
       public:
@@ -338,7 +339,7 @@ namespace ortc
                                         const SecureByteBlock &iv,
                                         const SecureByteBlock &buffer,
                                         EncryptionAlgorthms algorithm
-                                        )
+                                        ) noexcept
     {
       return encrypt(key, iv, buffer, buffer.size(), algorithm);
     }
@@ -349,7 +350,7 @@ namespace ortc
                                         const SecureByteBlock &iv,
                                         const char *value,
                                         EncryptionAlgorthms algorithm
-                                        )
+                                        ) noexcept
     {
       return encrypt(key, iv, (const BYTE *)value, strlen(value)*sizeof(char), algorithm);
     }
@@ -360,9 +361,10 @@ namespace ortc
                                         const SecureByteBlock &iv,
                                         const BYTE *buffer,
                                         size_t bufferLengthInBytes,
-                                        EncryptionAlgorthms algorithm
-                                        )
+                                        ZS_MAYBE_USED() EncryptionAlgorthms algorithm
+                                        ) noexcept
     {
+      ZS_MAYBE_USED(algorithm);
       SecureByteBlockPtr output(make_shared<SecureByteBlock>(bufferLengthInBytes));
       CFB_Mode<AES>::Encryption cfbEncryption(key, key.size(), iv);
       cfbEncryption.ProcessData(*output, buffer, bufferLengthInBytes);
@@ -374,9 +376,10 @@ namespace ortc
                                         const SecureByteBlock &key,
                                         const SecureByteBlock &iv,
                                         const SecureByteBlock &buffer,
-                                        EncryptionAlgorthms algorithm
-                                        )
+                                        ZS_MAYBE_USED() EncryptionAlgorthms algorithm
+                                        ) noexcept
     {
+      ZS_MAYBE_USED(algorithm);
       SecureByteBlockPtr output(make_shared<SecureByteBlock>(buffer.size()));
       CFB_Mode<AES>::Decryption cfbDecryption(key, key.size(), iv);
       cfbDecryption.ProcessData(*output, buffer, buffer.size());
@@ -388,12 +391,12 @@ namespace ortc
                           const SecureByteBlock &key,
                           SecureByteBlockPtr &part1,
                           SecureByteBlockPtr &part2
-                          )
+                          ) noexcept
     {
       if (key.size() < 1) return;
 
       SecureByteBlockPtr hash = IHasher::hash(key);
-      ZS_THROW_BAD_STATE_IF(!hash)
+      ZS_ASSERT(hash);
 
       SecureByteBlockPtr randomData = IHelper::random(key.SizeInBytes() + hash->SizeInBytes());
 
@@ -426,7 +429,7 @@ namespace ortc
     SecureByteBlockPtr IHelper::combineKey(
                                           const SecureByteBlockPtr &part1,
                                           const SecureByteBlockPtr &part2
-                                          )
+                                          ) noexcept
     {
       if ((!part1) || (!part2)) {
         ZS_LOG_WARNING(Detail, internal::Helper::slog("value missing") + ZS_PARAM("part1", (bool)part1) + ZS_PARAM("part2", (bool)part2))
@@ -480,7 +483,7 @@ namespace ortc
                                         ElementPtr *outSignatureEl,
                                         String *outFullPublicKey,
                                         String *outFingerprint
-                                        )
+                                        ) noexcept
     {
       if (!signedEl) {
         ZS_LOG_WARNING(Detail, internal::Helper::slog("requested to get signature info on a null element"))
@@ -568,7 +571,7 @@ namespace ortc
 //                                           unsigned char case_flags[]);
 
     //-----------------------------------------------------------------------
-    String IHelper::convertIDNToUTF8(const String &idnStr)
+    String IHelper::convertIDNToUTF8(const String &idnStr) noexcept
     {
 #ifndef _WIN32
       internal::IDNHelper::singleton();
@@ -578,7 +581,7 @@ namespace ortc
 
 #ifdef _WIN32
       std::wstring wstr(idnStr.wstring());
-      auto result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
+      auto result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), static_cast<int>(wstr.length()), nullptr, 0);
 
       wchar_t outputBuffer[1024]{};
       std::unique_ptr<wchar_t[]> overflowBuffer;
@@ -598,7 +601,7 @@ namespace ortc
       }
 
       memset(destStr, 0, sizeof(wchar_t)*(destLength + 1));
-      result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), destStr, destLength);
+      result = IdnToUnicode(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), static_cast<int>(wstr.length()), destStr, static_cast<int>(destLength));
 
       if (0 == result) {
         ZS_LOG_ERROR(Detail, internal::Helper::slog("idn to utf8 convert failed") + ZS_PARAM("input idn", idnStr) + ZS_PARAM("error", GetLastError()));
@@ -634,7 +637,7 @@ namespace ortc
     }
 
     //-----------------------------------------------------------------------
-    String IHelper::convertUTF8ToIDN(const String &utf8Str)
+    String IHelper::convertUTF8ToIDN(const String &utf8Str) noexcept
     {
 #ifndef _WIN32
       internal::IDNHelper::singleton();
@@ -644,7 +647,7 @@ namespace ortc
 
 #ifdef _WIN32
       std::wstring wstr(utf8Str.wstring());
-      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
+      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), static_cast<int>(wstr.length()), nullptr, 0);
 
       wchar_t outputBuffer[1024]{};
       std::unique_ptr<wchar_t[]> overflowBuffer;
@@ -664,7 +667,7 @@ namespace ortc
       }
 
       memset(destStr, 0, sizeof(wchar_t)*(destLength + 1));
-      result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), destStr, destLength);
+      result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), static_cast<int>(wstr.length()), destStr, static_cast<int>(destLength));
 
       if (0 == result) {
         ZS_LOG_ERROR(Detail, internal::Helper::slog("utf8 to idn convert failed") + ZS_PARAM("input idn", utf8Str) + ZS_PARAM("error", GetLastError()));
@@ -701,7 +704,7 @@ namespace ortc
     }
 
     //-----------------------------------------------------------------------
-    bool IHelper::isValidDomain(const String &inDomain)
+    bool IHelper::isValidDomain(const String &inDomain) noexcept
     {
 #ifndef _WIN32
       internal::IDNHelper::singleton();
@@ -711,7 +714,7 @@ namespace ortc
 
 #ifdef _WIN32
       std::wstring wstr(inDomain.wstring());
-      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), wstr.length(), nullptr, 0);
+      auto result = IdnToAscii(IDN_USE_STD3_ASCII_RULES, wstr.c_str(), static_cast<int>(wstr.length()), nullptr, 0);
 
       if (0 == result) {
         ZS_LOG_ERROR(Detail, internal::Helper::slog("idn convert failed") + ZS_PARAM("input utf8", inDomain) + ZS_PARAM("error", GetLastError()));

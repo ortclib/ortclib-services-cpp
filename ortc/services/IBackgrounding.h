@@ -41,15 +41,15 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgrounding
-    #pragma mark
+    //
+    // IBackgrounding
+    //
 
     interaction IBackgrounding
     {
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug element containing internal object state
-      static ElementPtr toDebug();
+      static ElementPtr toDebug() noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to the backgrounding state
@@ -61,7 +61,7 @@ namespace ortc
       static IBackgroundingSubscriptionPtr subscribe(
                                                      IBackgroundingDelegatePtr delegate,
                                                      ULONG phase
-                                                     );
+                                                     ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies the application is about to go into the background
@@ -71,27 +71,27 @@ namespace ortc
       // RETURNS: a query interface about the current backgrounding state
       static IBackgroundingQueryPtr notifyGoingToBackground(
                                                             IBackgroundingCompletionDelegatePtr readyDelegate = IBackgroundingCompletionDelegatePtr()
-                                                            );
+                                                            ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies the application is goinging to the background
       //          immediately
-      static void notifyGoingToBackgroundNow();
+      static void notifyGoingToBackgroundNow() noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies the application is returning from to the background
-      static void notifyReturningFromBackground();
+      static void notifyReturningFromBackground() noexcept;
 
-      virtual ~IBackgrounding() {}  // needed to ensure virtual table is created in order to use dynamic cast
+      virtual ~IBackgrounding() noexcept {}  // needed to ensure virtual table is created in order to use dynamic cast
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgroundingDelegate
-    #pragma mark
+    //
+    // IBackgroundingDelegate
+    //
 
     interaction IBackgroundingDelegate
     {
@@ -132,26 +132,26 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgroundingQuery
-    #pragma mark
+    //
+    // IBackgroundingQuery
+    //
 
     interaction IBackgroundingQuery
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual bool isReady() const = 0;
+      virtual bool isReady() const noexcept = 0;
 
-      virtual size_t totalBackgroundingSubscribersStillPending() const = 0;
+      virtual size_t totalBackgroundingSubscribersStillPending() const noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgroundingCompletionDelegate
-    #pragma mark
+    //
+    // IBackgroundingCompletionDelegate
+    //
 
     interaction IBackgroundingCompletionDelegate
     {
@@ -162,32 +162,32 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgroundingSubscription
-    #pragma mark
+    //
+    // IBackgroundingSubscription
+    //
 
     interaction IBackgroundingSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
     
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgroundingNotifier
-    #pragma mark
+    //
+    // IBackgroundingNotifier
+    //
 
     interaction IBackgroundingNotifier
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void ready() = 0;
+      virtual void ready() noexcept = 0;
     };
 
   }
@@ -196,10 +196,10 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackgroundingDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingSubscriptionPtr, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingNotifierPtr, IBackgroundingNotifierPtr)
-ZS_DECLARE_PROXY_METHOD_2(onBackgroundingGoingToBackground, IBackgroundingSubscriptionPtr, IBackgroundingNotifierPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_METHOD(onBackgroundingGoingToBackground, IBackgroundingSubscriptionPtr, IBackgroundingNotifierPtr)
+ZS_DECLARE_PROXY_METHOD(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_METHOD(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_METHOD(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IBackgroundingDelegate, ortc::services::IBackgroundingSubscription)
@@ -242,13 +242,13 @@ ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackgroundingNotifierPtr
 #endif // ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
 
 
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onBackgroundingGoingToBackgroundNow, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onBackgroundingReturningFromBackground, IBackgroundingSubscriptionPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onBackgroundingApplicationWillQuit, IBackgroundingSubscriptionPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackgroundingCompletionDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackgroundingQueryPtr, IBackgroundingQueryPtr)
-ZS_DECLARE_PROXY_METHOD_1(onBackgroundingReady, IBackgroundingQueryPtr)
+ZS_DECLARE_PROXY_METHOD(onBackgroundingReady, IBackgroundingQueryPtr)
 ZS_DECLARE_PROXY_END()
 

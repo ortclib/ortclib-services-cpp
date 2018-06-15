@@ -44,25 +44,25 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPublicKeyForDHPrivateKey
-      #pragma mark
+      //
+      // IDHPublicKeyForDHPrivateKey
+      //
 
       interaction IDHPublicKeyForDHPrivateKey
       {
         ZS_DECLARE_TYPEDEF_PTR(IDHPublicKeyForDHPrivateKey, ForPrivateKey)
 
-        virtual const SecureByteBlock &getStaticPublicKey() const = 0;
-        virtual const SecureByteBlock &getEphemeralPublicKey() const = 0;
+        virtual const SecureByteBlock &getStaticPublicKey() const noexcept = 0;
+        virtual const SecureByteBlock &getEphemeralPublicKey() const noexcept = 0;
       };
       
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPublicKey
-      #pragma mark
+      //
+      // DHPublicKey
+      //
 
       class DHPublicKey : public Noop,
                           public IDHPublicKey,
@@ -76,61 +76,61 @@ namespace ortc
         friend interaction IDHPublicKey;
 
       public:
-        DHPublicKey(const make_private &);
+        DHPublicKey(const make_private &) noexcept;
 
       protected:
-        DHPublicKey(Noop) : Noop(true) {};
+        DHPublicKey(Noop) noexcept : Noop(true) {};
 
       public:
-        ~DHPublicKey();
+        ~DHPublicKey() noexcept;
 
-        static DHPublicKeyPtr convert(IDHPublicKeyPtr privateKey);
+        static DHPublicKeyPtr convert(IDHPublicKeyPtr privateKey) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPublicKey => IDHPublicKey
-        #pragma mark
+        //
+        // DHPublicKey => IDHPublicKey
+        //
 
-        static ElementPtr toDebug(IDHPublicKeyPtr keyDomain);
+        static ElementPtr toDebug(IDHPublicKeyPtr keyDomain) noexcept;
 
         static DHPublicKeyPtr load(
                                    const SecureByteBlock &staticPublicKey,
                                    const SecureByteBlock &ephemeralPublicKey
-                                   );
+                                   ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         virtual void save(
                           SecureByteBlock *outStaticPublicKey,
                           SecureByteBlock *outEphemeralPublicKey
-                          ) const;
+                          ) const noexcept;
 
-        virtual String getFingerprint() const;
+        virtual String getFingerprint() const noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPublicKey => IDHPublicKeyForDHPrivateKey
-        #pragma mark
+        //
+        // DHPublicKey => IDHPublicKeyForDHPrivateKey
+        //
 
-        virtual const SecureByteBlock &getStaticPublicKey() const;
-        virtual const SecureByteBlock &getEphemeralPublicKey() const;
+        virtual const SecureByteBlock &getStaticPublicKey() const noexcept;
+        virtual const SecureByteBlock &getEphemeralPublicKey() const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPublicKey => (internal)
-        #pragma mark
+        //
+        // DHPublicKey => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
-        virtual ElementPtr toDebug() const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
+        virtual ElementPtr toDebug() const noexcept;
 
       private:
         //-------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHPublicKey => (data)
-        #pragma mark
+        //
+        // DHPublicKey => (data)
+        //
 
         AutoPUID mID;
 
@@ -142,18 +142,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPublicKeyFactory
-      #pragma mark
+      //
+      // IDHPublicKeyFactory
+      //
 
       interaction IDHPublicKeyFactory
       {
-        static IDHPublicKeyFactory &singleton();
+        static IDHPublicKeyFactory &singleton() noexcept;
 
         virtual DHPublicKeyPtr load(
                                     const SecureByteBlock &staticPublicKey,
                                     const SecureByteBlock &ephemeralPublicKey
-                                    );
+                                    ) noexcept;
       };
 
       class DHPublicKeyFactory : public IFactory<IDHPublicKeyFactory> {};

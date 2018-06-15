@@ -44,9 +44,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimer
-    #pragma mark
+    //
+    // IBackOffTimer
+    //
 
     interaction IBackOffTimer
     {
@@ -199,9 +199,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimerDelegate
-    #pragma mark
+    //
+    // IBackOffTimerDelegate
+    //
 
     interaction IBackOffTimerDelegate
     {
@@ -217,9 +217,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimerSubscription
-    #pragma mark
+    //
+    // IBackOffTimerSubscription
+    //
 
     interaction IBackOffTimerSubscription
     {
@@ -236,11 +236,11 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IBackOffTimerDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackOffTimerPtr, IBackOffTimerPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IBackOffTimer::States, States)
-ZS_DECLARE_PROXY_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
+ZS_DECLARE_PROXY_METHOD(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IBackOffTimerDelegate, ortc::services::IBackOffTimerSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackOffTimerPtr, IBackOffTimerPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IBackOffTimer::States, States)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onBackOffTimerStateChanged, IBackOffTimerPtr, States)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

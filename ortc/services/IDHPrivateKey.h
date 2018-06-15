@@ -42,24 +42,24 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHPrivateKey
-    #pragma mark
+    //
+    // IDHPrivateKey
+    //
 
     interaction IDHPrivateKey
     {
-      static ElementPtr toDebug(IDHPrivateKeyPtr privateKey);
+      static ElementPtr toDebug(IDHPrivateKeyPtr privateKey) noexcept;
 
       static IDHPrivateKeyPtr generate(
                                        IDHKeyDomainPtr keyDomain,
                                        IDHPublicKeyPtr &outPublicKey
-                                       );
+                                       ) noexcept;
 
       static IDHPrivateKeyPtr load(
                                    IDHKeyDomainPtr keyDomain,
                                    const SecureByteBlock &staticPrivateKey,
                                    const SecureByteBlock &ephemeralPrivateKey
-                                   );
+                                   ) noexcept;
 
       static IDHPrivateKeyPtr load(
                                    IDHKeyDomainPtr keyDomain,
@@ -68,31 +68,31 @@ namespace ortc
                                    const SecureByteBlock &ephemeralPrivateKey,
                                    const SecureByteBlock &staticPublicKey,
                                    const SecureByteBlock &ephemeralPublicKey
-                                   );
+                                   ) noexcept;
 
       static IDHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                           IDHKeyDomainPtr keyDomain,
                                                           const SecureByteBlock &staticPrivateKey,
                                                           const SecureByteBlock &staticPublicKey,
                                                           IDHPublicKeyPtr &outNewPublicKey
-                                                          );
+                                                          ) noexcept;
 
       static IDHPrivateKeyPtr loadAndGenerateNewEphemeral(
                                                           IDHPrivateKeyPtr templatePrivateKey,
                                                           IDHPublicKeyPtr templatePublicKey,
                                                           IDHPublicKeyPtr &outNewPublicKey
-                                                          );
+                                                          ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       virtual void save(
                         SecureByteBlock *outStaticPrivateKey,    // pass NULL to not save this value
                         SecureByteBlock *outEphemeralPrivateKey  // pass NULL to not save this value
-                        ) const = 0;
+                        ) const noexcept = 0;
 
-      virtual IDHKeyDomainPtr getKeyDomain() const = 0;
+      virtual IDHKeyDomainPtr getKeyDomain() const noexcept = 0;
 
-      virtual SecureByteBlockPtr getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const = 0;
+      virtual SecureByteBlockPtr getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const noexcept = 0;
     };
   }
 }

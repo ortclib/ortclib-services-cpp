@@ -60,24 +60,24 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPrivateKey
-      #pragma mark
+      //
+      // DHPrivateKey
+      //
 
       //-----------------------------------------------------------------------
       DHPrivateKey::DHPrivateKey(
                                  const make_private &,
                                  UseDHKeyDomainPtr keyDomain
-                                 ) :
+                                 ) noexcept :
         mKeyDomain(keyDomain)
       {
         ZS_LOG_DEBUG(log("created"))
 
-        ZS_THROW_BAD_STATE_IF(!mKeyDomain)
+          ZS_ASSERT(mKeyDomain);
       }
 
       //-----------------------------------------------------------------------
-      DHPrivateKey::~DHPrivateKey()
+      DHPrivateKey::~DHPrivateKey() noexcept
       {
         if(isNoop()) return;
         
@@ -85,7 +85,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DHPrivateKeyPtr DHPrivateKey::convert(IDHPrivateKeyPtr publicKey)
+      DHPrivateKeyPtr DHPrivateKey::convert(IDHPrivateKeyPtr publicKey) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(DHPrivateKey, publicKey);
       }
@@ -94,12 +94,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPrivateKey => IDHPrivateKey
-      #pragma mark
+      //
+      // DHPrivateKey => IDHPrivateKey
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr DHPrivateKey::toDebug(IDHPrivateKeyPtr keyDomain)
+      ElementPtr DHPrivateKey::toDebug(IDHPrivateKeyPtr keyDomain) noexcept
       {
         if (!keyDomain) return ElementPtr();
         return convert(keyDomain)->toDebug();
@@ -110,11 +110,11 @@ namespace ortc
       DHPrivateKeyPtr DHPrivateKey::generate(
                                              IDHKeyDomainPtr inKeyDomain,
                                              IDHPublicKeyPtr &outPublicKey
-                                             )
+                                             ) noexcept
       {
         UseDHKeyDomainPtr keyDomain = DHKeyDomain::convert(inKeyDomain);
 
-        ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
+        ZS_ASSERT(keyDomain);
 
         DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, keyDomain));
 
@@ -147,9 +147,9 @@ namespace ortc
                                          IDHKeyDomainPtr keyDomain,
                                          const SecureByteBlock &staticPrivateKey,
                                          const SecureByteBlock &ephemeralPrivateKey
-                                         )
+                                         ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
+        ZS_ASSERT(keyDomain);
 
         DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, DHKeyDomain::convert(keyDomain)));
 
@@ -166,12 +166,13 @@ namespace ortc
                                          IDHKeyDomainPtr keyDomain,
                                          IDHPublicKeyPtr &outPublicKey,
                                          const SecureByteBlock &staticPrivateKey,
-                                         const SecureByteBlock &ephemeralPrivateKey,
+                                         ZS_MAYBE_USED() const SecureByteBlock &ephemeralPrivateKey,
                                          const SecureByteBlock &staticPublicKey,
                                          const SecureByteBlock &ephemeralPublicKey
-                                         )
+                                         ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
+        ZS_MAYBE_USED(ephemeralPrivateKey);
+        ZS_ASSERT(keyDomain);
 
         DHPrivateKeyPtr pThis = DHPrivateKey::load(keyDomain, staticPrivateKey, staticPublicKey);
         IDHPublicKeyPtr publicKey = IDHPublicKey::load(staticPublicKey, ephemeralPublicKey);
@@ -193,11 +194,11 @@ namespace ortc
                                                                 const SecureByteBlock &staticPrivateKey,
                                                                 const SecureByteBlock &staticPublicKey,
                                                                 IDHPublicKeyPtr &outNewPublicKey
-                                                                )
+                                                                ) noexcept
       {
         UseDHKeyDomainPtr keyDomain = DHKeyDomain::convert(inKeyDomain);
 
-        ZS_THROW_INVALID_ARGUMENT_IF(!keyDomain)
+        ZS_ASSERT(keyDomain);
 
         DHPrivateKeyPtr pThis(make_shared<DHPrivateKey>(make_private{}, keyDomain));
 
@@ -232,13 +233,13 @@ namespace ortc
                                                                 IDHPrivateKeyPtr templatePrivateKey,
                                                                 IDHPublicKeyPtr templatePublicKey,
                                                                 IDHPublicKeyPtr &outNewPublicKey
-                                                                )
+                                                                ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!templatePrivateKey)
-        ZS_THROW_INVALID_ARGUMENT_IF(!templatePublicKey)
+        ZS_ASSERT(templatePrivateKey);
+        ZS_ASSERT(templatePublicKey);
 
         IDHKeyDomainPtr keyDomain = templatePrivateKey->getKeyDomain();
-        ZS_THROW_INVALID_ASSUMPTION_IF(!keyDomain)
+        ZS_ASSERT(keyDomain);
 
         SecureByteBlock staticPrivateKey;
         SecureByteBlock staticPublicKey;
@@ -253,7 +254,7 @@ namespace ortc
       void DHPrivateKey::save(
                               SecureByteBlock *outStaticPrivateKey,
                               SecureByteBlock *outEphemeralPrivateKey
-                              ) const
+                              ) const noexcept
       {
         ZS_LOG_TRACE(log("save called"))
 
@@ -266,15 +267,15 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IDHKeyDomainPtr DHPrivateKey::getKeyDomain() const
+      IDHKeyDomainPtr DHPrivateKey::getKeyDomain() const noexcept
       {
         return DHKeyDomain::convert(mKeyDomain);
       }
 
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr DHPrivateKey::getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const
+      SecureByteBlockPtr DHPrivateKey::getSharedSecret(IDHPublicKeyPtr otherPartyPublicKey) const noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!otherPartyPublicKey)
+        ZS_ASSERT(otherPartyPublicKey);
 
         AutoSeededRandomPool rnd;
 
@@ -307,18 +308,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHPrivateKey => (internal)
-      #pragma mark
+      //
+      // DHPrivateKey => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params DHPrivateKey::slog(const char *message)
+      Log::Params DHPrivateKey::slog(const char *message) noexcept
       {
         return Log::Params(message, "DHPrivateKey");
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DHPrivateKey::log(const char *message) const
+      Log::Params DHPrivateKey::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("DHPrivateKey");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -326,13 +327,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params DHPrivateKey::debug(const char *message) const
+      Log::Params DHPrivateKey::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr DHPrivateKey::toDebug() const
+      ElementPtr DHPrivateKey::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("DHPrivateKey");
 
@@ -349,12 +350,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHPrivateKeyFactory
-      #pragma mark
+      //
+      // IDHPrivateKeyFactory
+      //
 
       //-----------------------------------------------------------------------
-      IDHPrivateKeyFactory &IDHPrivateKeyFactory::singleton()
+      IDHPrivateKeyFactory &IDHPrivateKeyFactory::singleton() noexcept
       {
         return DHPrivateKeyFactory::singleton();
       }
@@ -363,7 +364,7 @@ namespace ortc
       DHPrivateKeyPtr IDHPrivateKeyFactory::generate(
                                                      IDHKeyDomainPtr keyDomain,
                                                      IDHPublicKeyPtr &outPublicKey
-                                                     )
+                                                     ) noexcept
       {
         if (this) {}
         return DHPrivateKey::generate(keyDomain, outPublicKey);
@@ -374,7 +375,7 @@ namespace ortc
                                                  IDHKeyDomainPtr keyDomain,
                                                  const SecureByteBlock &staticPrivateKey,
                                                  const SecureByteBlock &ephemeralPrivateKey
-                                                 )
+                                                 ) noexcept
       {
         if (this) {}
         return DHPrivateKey::load(keyDomain, staticPrivateKey, ephemeralPrivateKey);
@@ -388,7 +389,7 @@ namespace ortc
                                                  const SecureByteBlock &ephemeralPrivateKey,
                                                  const SecureByteBlock &staticPublicKey,
                                                  const SecureByteBlock &ephemeralPublicKey
-                                                 )
+                                                 ) noexcept
       {
         if (this) {}
         return DHPrivateKey::load(keyDomain, outPublicKey, staticPrivateKey, ephemeralPrivateKey, staticPublicKey, ephemeralPublicKey);
@@ -400,7 +401,7 @@ namespace ortc
                                                                         const SecureByteBlock &staticPrivateKey,
                                                                         const SecureByteBlock &staticPublicKey,
                                                                         IDHPublicKeyPtr &outNewPublicKey
-                                                                        )
+                                                                        ) noexcept
       {
         if (this) {}
         return DHPrivateKey::loadAndGenerateNewEphemeral(keyDomain, staticPrivateKey, staticPublicKey, outNewPublicKey);
@@ -411,7 +412,7 @@ namespace ortc
                                                                         IDHPrivateKeyPtr templatePrivateKey,
                                                                         IDHPublicKeyPtr templatePublicKey,
                                                                         IDHPublicKeyPtr &outNewPublicKey
-                                                                        )
+                                                                        ) noexcept
       {
         if (this) {}
         return DHPrivateKey::loadAndGenerateNewEphemeral(templatePrivateKey, templatePublicKey, outNewPublicKey);
@@ -423,12 +424,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHPrivateKey
-    #pragma mark
+    //
+    // IDHPrivateKey
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IDHPrivateKey::toDebug(IDHPrivateKeyPtr keyDomain)
+    ElementPtr IDHPrivateKey::toDebug(IDHPrivateKeyPtr keyDomain) noexcept
     {
       return internal::DHPrivateKey::toDebug(keyDomain);
     }
@@ -437,7 +438,7 @@ namespace ortc
     IDHPrivateKeyPtr IDHPrivateKey::generate(
                                              IDHKeyDomainPtr keyDomain,
                                              IDHPublicKeyPtr &outPublicKey
-                                             )
+                                             ) noexcept
     {
       return internal::IDHPrivateKeyFactory::singleton().generate(keyDomain, outPublicKey);
     }
@@ -447,7 +448,7 @@ namespace ortc
                                          IDHKeyDomainPtr keyDomain,
                                          const SecureByteBlock &staticPrivateKey,
                                          const SecureByteBlock &ephemeralPrivateKey
-                                         )
+                                         ) noexcept
     {
       return internal::IDHPrivateKeyFactory::singleton().load(keyDomain, staticPrivateKey, ephemeralPrivateKey);
     }
@@ -460,7 +461,7 @@ namespace ortc
                                          const SecureByteBlock &ephemeralPrivateKey,
                                          const SecureByteBlock &staticPublicKey,
                                          const SecureByteBlock &ephemeralPublicKey
-                                         )
+                                         ) noexcept
     {
       return internal::IDHPrivateKeyFactory::singleton().load(keyDomain, outPublicKey, staticPrivateKey, ephemeralPrivateKey, staticPublicKey, ephemeralPublicKey);
     }
@@ -471,7 +472,7 @@ namespace ortc
                                                                 const SecureByteBlock &staticPrivateKey,
                                                                 const SecureByteBlock &staticPublicKey,
                                                                 IDHPublicKeyPtr &outNewPublicKey
-                                                                )
+                                                                ) noexcept
     {
       return internal::IDHPrivateKeyFactory::singleton().loadAndGenerateNewEphemeral(keyDomain, staticPrivateKey, staticPublicKey, outNewPublicKey);
     }
@@ -481,7 +482,7 @@ namespace ortc
                                                                 IDHPrivateKeyPtr templatePrivateKey,
                                                                 IDHPublicKeyPtr templatePublicKey,
                                                                 IDHPublicKeyPtr &outNewPublicKey
-                                                                )
+                                                                ) noexcept
     {
       return internal::IDHPrivateKeyFactory::singleton().loadAndGenerateNewEphemeral(templatePrivateKey, templatePublicKey, outNewPublicKey);
     }

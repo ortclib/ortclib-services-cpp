@@ -51,9 +51,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelForRUDPTransport
-      #pragma mark
+      //
+      // IRUDPChannelForRUDPTransport
+      //
 
       interaction IRUDPChannelForRUDPTransport
       {
@@ -70,7 +70,7 @@ namespace ortc
                                                                   const char *remotePassword,
                                                                   STUNPacketPtr channelOpenPacket,
                                                                   STUNPacketPtr &outResponse
-                                                                  );
+                                                                  ) noexcept;
 
         static ForRUDPTransportPtr createForRUDPTransportOutgoing(
                                                                   IMessageQueuePtr queue,
@@ -85,46 +85,46 @@ namespace ortc
                                                                   const char *connectionInfo,
                                                                   ITransportStreamPtr receiveStream,
                                                                   ITransportStreamPtr sendStream
-                                                                  );
+                                                                  ) noexcept;
 
-        virtual PUID getID() const = 0;
+        virtual PUID getID() const noexcept = 0;
 
-        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) = 0;
+        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept = 0;
         virtual void setStreams(
                                 ITransportStreamPtr receiveStream,
                                 ITransportStreamPtr sendStream
-                                ) = 0;
+                                ) noexcept = 0;
 
         virtual bool handleSTUN(
                                 STUNPacketPtr stun,
                                 STUNPacketPtr &outResponse,
                                 const String &localUsernameFrag,
                                 const String &remoteUsernameFrag
-                                ) = 0;
+                                ) noexcept = 0;
 
         virtual void handleRUDP(
                                 RUDPPacketPtr rudp,
                                 const BYTE *buffer,
                                 size_t bufferLengthInBytes
-                                ) = 0;
+                                ) noexcept = 0;
 
-        virtual void notifyWriteReady() = 0;
-        virtual WORD getIncomingChannelNumber() const = 0;
-        virtual WORD getOutgoingChannelNumber() const = 0;
+        virtual void notifyWriteReady() noexcept = 0;
+        virtual WORD getIncomingChannelNumber() const noexcept = 0;
+        virtual WORD getOutgoingChannelNumber() const noexcept = 0;
 
-        virtual void issueConnectIfNotIssued() = 0;
+        virtual void issueConnectIfNotIssued() noexcept = 0;
 
-        virtual void shutdown() = 0;
-        virtual void shutdownFromTimeout() = 0;
+        virtual void shutdown() noexcept = 0;
+        virtual void shutdownFromTimeout() noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelForRUDPListener
-      #pragma mark
+      //
+      // IRUDPChannelForRUDPListener
+      //
 
       interaction IRUDPChannelForRUDPListener
       {
@@ -137,39 +137,39 @@ namespace ortc
                                                     WORD incomingChannelNumber,
                                                     STUNPacketPtr channelOpenPacket,
                                                     STUNPacketPtr &outResponse
-                                                    );
+                                                    ) noexcept;
 
-        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) = 0;
+        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept = 0;
         virtual void setStreams(
                                 ITransportStreamPtr receiveStream,
                                 ITransportStreamPtr sendStream
-                                ) = 0;
+                                ) noexcept = 0;
 
         virtual bool handleSTUN(
                                 STUNPacketPtr stun,
                                 STUNPacketPtr &outResponse,
                                 const String &localUsernameFrag,
                                 const String &remoteUsernameFrag
-                                ) = 0;
+                                ) noexcept = 0;
 
         virtual void handleRUDP(
                                 RUDPPacketPtr rudp,
                                 const BYTE *buffer,
                                 size_t bufferLengthInBytes
-                                ) = 0;
+                                ) noexcept = 0;
 
-        virtual void notifyWriteReady() = 0;
+        virtual void notifyWriteReady() noexcept = 0;
 
-        virtual void shutdown() = 0;
+        virtual void shutdown() noexcept = 0;
       };
       
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannel
-      #pragma mark
+      //
+      // RUDPChannel
+      //
 
       class RUDPChannel : public Noop,
                           public MessageQueueAssociator,
@@ -205,46 +205,46 @@ namespace ortc
                     WORD outgoingChannelNumber = 0,
                     QWORD remoteSequenceNumber = 0,
                     const char *remoteChannelInfo = NULL
-                    );
+                    ) noexcept;
       protected:
-        RUDPChannel(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPChannel(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~RUDPChannel();
+        ~RUDPChannel() noexcept;
 
-        static RUDPChannelPtr convert(IRUDPChannelPtr channel);
-        static RUDPChannelPtr convert(ForRUDPTransportPtr channel);
-        static RUDPChannelPtr convert(ForRUDPListenerPtr channel);
+        static RUDPChannelPtr convert(IRUDPChannelPtr channel) noexcept;
+        static RUDPChannelPtr convert(ForRUDPTransportPtr channel) noexcept;
+        static RUDPChannelPtr convert(ForRUDPListenerPtr channel) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => IRUDPChannel
-        #pragma mark
+        //
+        // RUDPChannel => IRUDPChannel
+        //
 
-        static ElementPtr toDebug(IRUDPChannelPtr channel);
+        static ElementPtr toDebug(IRUDPChannelPtr channel) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         virtual RUDPChannelStates getState(
                                            WORD *outLastErrorCode = NULL,
                                            String *outLastErrorReason = NULL
-                                           ) const;
+                                           ) const noexcept;
 
-        virtual void shutdown();
+        virtual void shutdown() noexcept;
 
-        virtual void shutdownDirection(Shutdown state);
+        virtual void shutdownDirection(Shutdown state) noexcept;
 
-        virtual IPAddress getConnectedRemoteIP();
+        virtual IPAddress getConnectedRemoteIP() noexcept;
 
-        virtual String getRemoteConnectionInfo();
+        virtual String getRemoteConnectionInfo() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => IRUDPChannelForRUDPTransport
-        #pragma mark
+        //
+        // RUDPChannel => IRUDPChannelForRUDPTransport
+        //
 
         static RUDPChannelPtr createForRUDPTransportIncoming(
                                                              IMessageQueuePtr queue,
@@ -257,7 +257,7 @@ namespace ortc
                                                              const char *remotePassword,
                                                              STUNPacketPtr channelOpenPacket,
                                                              STUNPacketPtr &outResponse
-                                                             );
+                                                             ) noexcept;
 
         static RUDPChannelPtr createForRUDPTransportOutgoing(
                                                              IMessageQueuePtr queue,
@@ -272,43 +272,43 @@ namespace ortc
                                                              const char *connectionInfo,
                                                              ITransportStreamPtr receiveStream,
                                                              ITransportStreamPtr sendStream
-                                                             );
+                                                             ) noexcept;
 
         // (duplicate) virtual PUID getID() const;
 
-        virtual void setDelegate(IRUDPChannelDelegatePtr delegate);
+        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept;
         virtual void setStreams(
                                 ITransportStreamPtr receiveStream,
                                 ITransportStreamPtr sendStream
-                                );
+                                ) noexcept;
 
         virtual bool handleSTUN(
                                 STUNPacketPtr stun,
                                 STUNPacketPtr &outResponse,
                                 const String &localUsernameFrag,
                                 const String &remoteUsernameFrag
-                                );
+                                ) noexcept;
 
         virtual void handleRUDP(
                                 RUDPPacketPtr rudp,
                                 const BYTE *buffer,
                                 size_t bufferLengthInBytes
-                                );
+                                ) noexcept;
 
-        virtual void notifyWriteReady();
-        virtual WORD getIncomingChannelNumber() const;
-        virtual WORD getOutgoingChannelNumber() const;
+        virtual void notifyWriteReady() noexcept;
+        virtual WORD getIncomingChannelNumber() const noexcept;
+        virtual WORD getOutgoingChannelNumber() const noexcept;
 
-        virtual void issueConnectIfNotIssued();
+        virtual void issueConnectIfNotIssued() noexcept;
 
         // (duplicate) virtual void shutdown();
 
-        virtual void shutdownFromTimeout();
+        virtual void shutdownFromTimeout() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => IRUDPChannelForRUDPListener
-        #pragma mark
+        //
+        // RUDPChannel => IRUDPChannelForRUDPListener
+        //
 
         static RUDPChannelPtr createForListener(
                                                 IMessageQueuePtr queue,
@@ -317,122 +317,122 @@ namespace ortc
                                                 WORD incomingChannelNumber,
                                                 STUNPacketPtr channelOpenPacket,
                                                 STUNPacketPtr &outResponse
-                                                );
+                                                ) noexcept;
 
-        // (duplicate) virtual void setDelegate(IRUDPChannelDelegatePtr delegate);
+        // (duplicate) virtual void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept;
         // virtual void setStreams(
         //                         ITransportStreamPtr receiveStream,
         //                         ITransportStreamPtr sendStream
-        //                         );
+        //                         ) noexcept;
 
         // (duplicate) virtual bool handleSTUN(
         //                                     STUNPacketPtr stun,
         //                                     STUNPacketPtr &outResponse,
         //                                     const String &localUsernameFrag,
         //                                     const String &remoteUsernameFrag
-        //                                     );
+        //                                     ) noexcept;
 
         // (duplicate) virtual void handleRUDP(
         //                                     RUDPPacketPtr rudp,
         //                                     const BYTE *buffer,
         //                                     size_t bufferLengthInBytes
-        //                                     );
+        //                                     ) noexcept;
 
-        // (duplicate) virtual void notifyWriteReady();
+        // (duplicate) virtual void notifyWriteReady() noexcept;
 
-        // (duplicate) virtual void shutdown();
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => IWakeDelegate
-        #pragma mark
-
-        virtual void onWake();
+        // (duplicate) virtual void shutdown() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => IRUDPChannelStreamDelegate
-        #pragma mark
+        //
+        // RUDPChannel => IWakeDelegate
+        //
 
-        virtual void onRUDPChannelStreamStateChanged(
-                                                     IRUDPChannelStreamPtr stream,
-                                                     RUDPChannelStreamStates state
-                                                     );
-
-        virtual bool notifyRUDPChannelStreamSendPacket(
-                                                       IRUDPChannelStreamPtr stream,
-                                                       const BYTE *packet,
-                                                       size_t packetLengthInBytes
-                                                       );
-
-        virtual void onRUDPChannelStreamSendExternalACKNow(
-                                                           IRUDPChannelStreamPtr stream,
-                                                           bool guarenteeDelivery,
-                                                           PUID guarenteeDeliveryRequestID = 0
-                                                           );
+        void onWake() override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => ISTUNRequesterDelegate
-        #pragma mark
+        //
+        // RUDPChannel => IRUDPChannelStreamDelegate
+        //
 
-        virtual void onSTUNRequesterSendPacket(
-                                               ISTUNRequesterPtr requester,
-                                               IPAddress destination,
-                                               SecureByteBlockPtr packet
-                                               );
+        void onRUDPChannelStreamStateChanged(
+                                             IRUDPChannelStreamPtr stream,
+                                             RUDPChannelStreamStates state
+                                             ) override;
 
-        virtual bool handleSTUNRequesterResponse(
-                                                 ISTUNRequesterPtr requester,
-                                                 IPAddress fromIPAddress,
-                                                 STUNPacketPtr response
-                                                 );
+        bool notifyRUDPChannelStreamSendPacket(
+                                               IRUDPChannelStreamPtr stream,
+                                               const BYTE *packet,
+                                               size_t packetLengthInBytes
+                                               ) noexcept override;
 
-        virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester);
+        void onRUDPChannelStreamSendExternalACKNow(
+                                                   IRUDPChannelStreamPtr stream,
+                                                   bool guarenteeDelivery,
+                                                   PUID guarenteeDeliveryRequestID = 0
+                                                   ) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => ITimerDelegate
-        #pragma mark
+        //
+        // RUDPChannel => ISTUNRequesterDelegate
+        //
 
-        virtual void onTimer(ITimerPtr timer);
+        void onSTUNRequesterSendPacket(
+                                       ISTUNRequesterPtr requester,
+                                       IPAddress destination,
+                                       SecureByteBlockPtr packet
+                                       ) override;
+
+        bool handleSTUNRequesterResponse(
+                                         ISTUNRequesterPtr requester,
+                                         IPAddress fromIPAddress,
+                                         STUNPacketPtr response
+                                         ) noexcept override;
+
+        void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester) override;
+
+        //---------------------------------------------------------------------
+        //
+        // RUDPChannel => ITimerDelegate
+        //
+
+        void onTimer(ITimerPtr timer) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => (internal)
-        #pragma mark
+        //
+        // RUDPChannel => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        void fix(STUNPacketPtr stun) const;
+        void fix(STUNPacketPtr stun) const noexcept;
 
-        bool isShuttingDown() {return RUDPChannelState_ShuttingDown == mCurrentState;}
-        bool isShutdown() {return RUDPChannelState_Shutdown == mCurrentState;}
+        bool isShuttingDown() noexcept {return RUDPChannelState_ShuttingDown == mCurrentState;}
+        bool isShutdown() noexcept {return RUDPChannelState_Shutdown == mCurrentState;}
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void cancel(bool waitForAllDataToSend);
-        void step();
+        void cancel(bool waitForAllDataToSend) noexcept;
+        void step() noexcept;
 
-        void setState(RUDPChannelStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void setState(RUDPChannelStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        bool isValidIntegrity(STUNPacketPtr stun);
-        void fillCredentials(STUNPacketPtr &outSTUN);
-        void fillACK(STUNPacketPtr &outSTUN);
+        bool isValidIntegrity(STUNPacketPtr stun) noexcept;
+        void fillCredentials(STUNPacketPtr &outSTUN) noexcept;
+        void fillACK(STUNPacketPtr &outSTUN) noexcept;
 
         bool handleStaleNonce(
                               ISTUNRequesterPtr &originalRequestVariable,
                               STUNPacketPtr response
-                              );
+                              ) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannel => (data)
-        #pragma mark
+        //
+        // RUDPChannel => (data)
+        //
 
         AutoPUID mID;
         mutable RecursiveLock mLock;
@@ -489,9 +489,9 @@ namespace ortc
       };
 
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelDelegateForSessionAndListener
-      #pragma mark
+      //
+      // IRUDPChannelDelegateForSessionAndListener
+      //
 
       interaction IRUDPChannelDelegateForSessionAndListener
       {
@@ -509,20 +509,20 @@ namespace ortc
                                                  const IPAddress &remoteIP,
                                                  const BYTE *packet,
                                                  size_t packetLengthInBytes
-                                                 ) = 0;
+                                                 ) noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelFactory
-      #pragma mark
+      //
+      // IRUDPChannelFactory
+      //
 
       interaction IRUDPChannelFactory
       {
-        static IRUDPChannelFactory &singleton();
+        static IRUDPChannelFactory &singleton() noexcept;
 
         virtual RUDPChannelPtr createForRUDPTransportIncoming(
                                                               IMessageQueuePtr queue,
@@ -535,7 +535,7 @@ namespace ortc
                                                               const char *remotePassword,
                                                               STUNPacketPtr channelOpenPacket,
                                                               STUNPacketPtr &outResponse
-                                                              );
+                                                              ) noexcept;
 
         virtual RUDPChannelPtr createForRUDPTransportOutgoing(
                                                               IMessageQueuePtr queue,
@@ -550,7 +550,7 @@ namespace ortc
                                                               const char *connectionInfo,
                                                               ITransportStreamPtr receiveStream,
                                                               ITransportStreamPtr sendStream
-                                                              );
+                                                              ) noexcept;
 
         virtual RUDPChannelPtr createForListener(
                                                  IMessageQueuePtr queue,
@@ -559,7 +559,7 @@ namespace ortc
                                                  WORD incomingChannelNumber,
                                                  STUNPacketPtr channelOpenPacket,
                                                  STUNPacketPtr &outResponse
-                                                 );
+                                                 ) noexcept;
       };
 
       class RUDPChannelFactory : public IFactory<IRUDPChannelFactory> {};
@@ -572,6 +572,6 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelDelegateForSessionAndListener)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::RUDPChannelPtr, RUDPChannelPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::IRUDPChannelDelegateForSessionAndListener::RUDPChannelStates, RUDPChannelStates)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPChannelStateChanged, RUDPChannelPtr, RUDPChannelStates)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_4(notifyRUDPChannelSendPacket, bool, RUDPChannelPtr, const IPAddress &, const BYTE *, size_t)
+ZS_DECLARE_PROXY_METHOD(onRUDPChannelStateChanged, RUDPChannelPtr, RUDPChannelStates)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(notifyRUDPChannelSendPacket, bool, RUDPChannelPtr, const IPAddress &, const BYTE *, size_t)
 ZS_DECLARE_PROXY_END()

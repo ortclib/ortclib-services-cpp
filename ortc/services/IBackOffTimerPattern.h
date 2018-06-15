@@ -43,55 +43,55 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimerPattern
-    #pragma mark
+    //
+    // IBackOffTimerPattern
+    //
 
     interaction IBackOffTimerPattern
     {
       typedef Microseconds DurationType;
 
-      static ElementPtr toDebug(IBackOffTimerPatternPtr pattern);
+      static ElementPtr toDebug(IBackOffTimerPatternPtr pattern) noexcept;
 
-      static IBackOffTimerPatternPtr create(const char *pattern = NULL);
-      static IBackOffTimerPatternPtr create(ElementPtr patternEl);
+      static IBackOffTimerPatternPtr create(const char *pattern = NULL) noexcept;
+      static IBackOffTimerPatternPtr create(ElementPtr patternEl) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual String save() const = 0;
-      virtual ElementPtr saveToJSON() const = 0;
+      virtual String save() const noexcept = 0;
+      virtual ElementPtr saveToJSON() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // attempt setters
 
       template <class TimeUnit>
-      void addNextAttemptTimeout(TimeUnit attemptTimeout) {actualAddNextAttemptTimeout(std::chrono::duration_cast<DurationType>(attemptTimeout));}
+      void addNextAttemptTimeout(TimeUnit attemptTimeout) noexcept {actualAddNextAttemptTimeout(std::chrono::duration_cast<DurationType>(attemptTimeout));}
 
-      virtual void setMultiplierForLastAttemptTimeout(double multiplier) = 0;
+      virtual void setMultiplierForLastAttemptTimeout(double multiplier) noexcept = 0;
 
-      virtual void setMaxAttempts(size_t maxAttempts) = 0;
+      virtual void setMaxAttempts(size_t maxAttempts) noexcept = 0;
 
       template <class TimeUnit>
-      void setMaxAttemptTimeout(TimeUnit maxTimeout) {actualSetMaxAttemptTimeout(std::chrono::duration_cast<DurationType>(maxTimeout));}
+      void setMaxAttemptTimeout(TimeUnit maxTimeout) noexcept {actualSetMaxAttemptTimeout(std::chrono::duration_cast<DurationType>(maxTimeout));}
 
       //-----------------------------------------------------------------------
       // retry setters
 
       template <class TimeUnit>
-      void addNextRetryAfterFailureDuration(TimeUnit nextRetryDuration) {actualAddNextRetryAfterFailureDuration(std::chrono::duration_cast<DurationType>(nextRetryDuration));}
+      void addNextRetryAfterFailureDuration(TimeUnit nextRetryDuration) noexcept {actualAddNextRetryAfterFailureDuration(std::chrono::duration_cast<DurationType>(nextRetryDuration));}
 
-      virtual void setMultiplierForLastRetryAfterFailureDuration(double multiplier) = 0;
+      virtual void setMultiplierForLastRetryAfterFailureDuration(double multiplier) noexcept = 0;
 
       template <class TimeUnit>
-      void setMaxRetryAfterFailureDuration(TimeUnit maxRetryDuration) {actualSetMaxRetryAfterFailureDuration(std::chrono::duration_cast<DurationType>(maxRetryDuration));}
+      void setMaxRetryAfterFailureDuration(TimeUnit maxRetryDuration) noexcept {actualSetMaxRetryAfterFailureDuration(std::chrono::duration_cast<DurationType>(maxRetryDuration));}
 
 
     protected:
-      virtual void actualAddNextAttemptTimeout(DurationType attemptTimeout) = 0;
-      virtual void actualSetMaxAttemptTimeout(DurationType maxRetryDuration) = 0;
+      virtual void actualAddNextAttemptTimeout(DurationType attemptTimeout) noexcept = 0;
+      virtual void actualSetMaxAttemptTimeout(DurationType maxRetryDuration) noexcept = 0;
 
-      virtual void actualAddNextRetryAfterFailureDuration(DurationType nextRetryDuration) = 0;
-      virtual void actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration) = 0;
+      virtual void actualAddNextRetryAfterFailureDuration(DurationType nextRetryDuration) noexcept = 0;
+      virtual void actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration) noexcept = 0;
     };
 
   }

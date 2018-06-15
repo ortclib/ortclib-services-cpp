@@ -42,9 +42,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDecryptor
-    #pragma mark
+    //
+    // IDecryptor
+    //
 
     interaction IDecryptor
     {
@@ -56,12 +56,12 @@ namespace ortc
                                   const SecureByteBlock &key,
                                   const SecureByteBlock &iv,
                                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                                  );
+                                  ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: gets the optimal buffer block decryption size in bytes for
       //          decrypting data
-      virtual size_t getOptimalBlockSize() const = 0;
+      virtual size_t getOptimalBlockSize() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: decrypt the next block of data and return result data
@@ -70,13 +70,13 @@ namespace ortc
       virtual SecureByteBlockPtr decrypt(
                                          const BYTE *inBuffer,
                                          size_t inBufferSizeInBytes
-                                         ) = 0;
+                                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: decrypt the next block of data and return result data
       // RETURN:  next block of decrypted data or null SecureByteBlockPtr()
       //          when no more data is available (or error occured).
-      virtual SecureByteBlockPtr decrypt(const SecureByteBlock &input) = 0;
+      virtual SecureByteBlockPtr decrypt(const SecureByteBlock &input) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns any finalized decryption buffer
@@ -84,7 +84,7 @@ namespace ortc
       //          when no more data is available (or error occured).
       virtual SecureByteBlockPtr finalize(
                                           bool *outWasSuccessful = NULL       // optional result to indicate failure of decryption (if algorithm supports decryption validation checking)
-                                          ) = 0;
+                                          ) noexcept = 0;
     };
   }
 }

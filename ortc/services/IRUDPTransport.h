@@ -47,9 +47,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPTransport
-    #pragma mark
+    //
+    // IRUDPTransport
+    //
 
     interaction IRUDPTransport
     {
@@ -61,28 +61,28 @@ namespace ortc
         RUDPTransportState_Shutdown,
       };
 
-      static const char *toString(RUDPTransportStates state);
+      static const char *toString(RUDPTransportStates state) noexcept;
 
-      static ElementPtr toDebug(IRUDPTransportPtr session);
+      static ElementPtr toDebug(IRUDPTransportPtr session) noexcept;
 
       static IRUDPTransportPtr listen(
                                       IMessageQueuePtr queue,
                                       IICESocketSessionPtr iceSession,
                                       IRUDPTransportDelegatePtr delegate
-                                      );
+                                      ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate) = 0;
+      virtual IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate) noexcept = 0;
 
       virtual RUDPTransportStates getState(
                                            WORD *outLastErrorCode = NULL,
                                            String *outLastErrorReason = NULL
-                                           ) const = 0;
+                                           ) const noexcept = 0;
 
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
-      virtual IICESocketSessionPtr getICESession() const = 0;
+      virtual IICESocketSessionPtr getICESession() const noexcept = 0;
 
       // NOTE: Will return NULL if no channel can be open at this time.
       virtual IRUDPChannelPtr openChannel(
@@ -90,23 +90,23 @@ namespace ortc
                                           const char *connectionInfo,
                                           ITransportStreamPtr receiveStream,
                                           ITransportStreamPtr sendStream
-                                          ) = 0;
+                                          ) noexcept = 0;
 
       // NOTE: Will return NULL if no channel can be accepted at this time.
       virtual IRUDPChannelPtr acceptChannel(
                                             IRUDPChannelDelegatePtr delegate,
                                             ITransportStreamPtr receiveStream,
                                             ITransportStreamPtr sendStream
-                                            ) = 0;
+                                            ) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPTransportDelegate
-    #pragma mark
+    //
+    // IRUDPTransportDelegate
+    //
 
     interaction IRUDPTransportDelegate
     {
@@ -125,17 +125,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPTransportSubscription
-    #pragma mark
+    //
+    // IRUDPTransportSubscription
+    //
 
     interaction IRUDPTransportSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
   }
 }
@@ -143,14 +143,14 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPTransportDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPTransportPtr, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPTransportDelegate::RUDPTransportStates, RUDPTransportStates)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
-ZS_DECLARE_PROXY_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_METHOD(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
+ZS_DECLARE_PROXY_METHOD(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_END()
 
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IRUDPTransportDelegate, ortc::services::IRUDPTransportSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IRUDPTransportPtr, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IRUDPTransport::RUDPTransportStates, RUDPTransportStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onRUDPTransportStateChanged, IRUDPTransportPtr, RUDPTransportStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onRUDPTransportChannelWaiting, IRUDPTransportPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

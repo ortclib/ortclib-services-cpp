@@ -51,22 +51,22 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IHTTPForSettings
-      #pragma mark
+      //
+      // IHTTPForSettings
+      //
 
       interaction IHTTPOverrideForSettings
       {
-        static void applyDefaults();
+        static void applyDefaults() ;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP
-      #pragma mark
+      //
+      // HTTP
+      //
 
       class HTTPOverride : public Noop,
                            public SharedRecursiveLock,
@@ -84,87 +84,87 @@ namespace ortc
         friend class HTTPQuery;
 
       public:
-        HTTPOverride(const make_private &);
+        HTTPOverride(const make_private &) noexcept;
 
       protected:
-        HTTPOverride(Noop) :
+        HTTPOverride(Noop) noexcept :
           Noop(true),
           SharedRecursiveLock(SharedRecursiveLock::create())
         {}
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~HTTPOverride();
+        ~HTTPOverride() noexcept;
 
     public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => IHTTPFactory
-        #pragma mark
+        //
+        // HTTP => IHTTPFactory
+        //
 
         static HTTPQueryPtr query(
                                   IHTTPQueryDelegatePtr delegate,
                                   const QueryInfo &query
-                                  );
+                                  ) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => IHTTPOverride
-        #pragma mark
+        //
+        // HTTP => IHTTPOverride
+        //
 
-        static void install(IHTTPOverrideDelegatePtr override);
+        static void install(IHTTPOverrideDelegatePtr override) noexcept;
 
         static void notifyHeaderData(
                                      IHTTPQueryPtr query,
                                      const BYTE *buffer,
                                      size_t sizeInBytes
-                                     ) throw (InvalidArgument);
+                                     ) noexcept(false);
 
         static void notifyBodyData(
                                    IHTTPQueryPtr query,
                                    const BYTE *buffer,
                                    size_t sizeInBytes
-                                   ) throw (InvalidArgument);
+                                   ) noexcept(false);
 
         static void notifyComplete(
                                    IHTTPQueryPtr query,
                                    IHTTP::HTTPStatusCodes status = IHTTP::HTTPStatusCode_OK
-                                   ) throw (InvalidArgument);
+                                   ) noexcept(false);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => friend HTTPQuery
-        #pragma mark
+        //
+        // HTTP => friend HTTPQuery
+        //
 
         // (duplicate) void monitorEnd(HTTPQueryPtr query);
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => (internal)
-        #pragma mark
+        //
+        // HTTP => (internal)
+        //
 
-        static HTTPOverridePtr singleton();
-        static HTTPOverridePtr create();
+        static HTTPOverridePtr singleton() noexcept;
+        static HTTPOverridePtr create() noexcept;
 
-        void cancel();
+        void cancel() noexcept;
 
-        void monitorBegin(HTTPQueryPtr query);
-        void monitorEnd(HTTPQuery &query);
-
-      public:
-        void operator()();
+        void monitorBegin(HTTPQueryPtr query) noexcept;
+        void monitorEnd(HTTPQuery &query) noexcept;
 
       public:
+        void operator()() noexcept;
+
+      public:
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => class HTTPQuery
-        #pragma mark
+        //
+        // HTTP => class HTTPQuery
+        //
 
         class HTTPQuery : public SharedRecursiveLock,
                           public MessageQueueAssociator,
@@ -180,89 +180,89 @@ namespace ortc
                     HTTPOverridePtr outer,
                     IHTTPQueryDelegatePtr delegate,
                     const QueryInfo &query
-                    );
+                    ) noexcept;
 
         protected:
-          void init();
+          void init() noexcept;
 
         public:
-          ~HTTPQuery();
+          ~HTTPQuery() noexcept;
 
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark HTTP::HTTPQuery => IHTTPQuery
-          #pragma mark
+          //
+          // HTTP::HTTPQuery => IHTTPQuery
+          //
 
-          virtual PUID getID() const {return id_;}
+          virtual PUID getID() const noexcept {return id_;}
 
-          virtual void cancel();
+          virtual void cancel() noexcept;
 
-          virtual bool isComplete() const;
-          virtual bool wasSuccessful() const;
-          virtual HTTPStatusCodes getStatusCode() const;
+          virtual bool isComplete() const noexcept;
+          virtual bool wasSuccessful() const noexcept;
+          virtual HTTPStatusCodes getStatusCode() const noexcept;
 
-          virtual size_t getHeaderReadSizeAvailableInBytes() const;
+          virtual size_t getHeaderReadSizeAvailableInBytes() const noexcept;
           virtual size_t readHeader(
                                     BYTE *outResultData,
                                     size_t bytesToRead
-                                    );
+                                    ) noexcept;
 
-          virtual size_t readHeaderAsString(String &outHeader);
+          virtual size_t readHeaderAsString(String &outHeader) noexcept;
 
-          virtual size_t getReadDataAvailableInBytes() const;
+          virtual size_t getReadDataAvailableInBytes() const noexcept;
 
           virtual size_t readData(
                                   BYTE *outResultData,
                                   size_t bytesToRead
-                                  );
+                                  ) noexcept;
 
-          virtual size_t readDataAsString(String &outResultData);
+          virtual size_t readDataAsString(String &outResultData) noexcept;
 
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark HTTP::HTTPQuery => friend ITimerDelegate
-          #pragma mark
+          //
+          // HTTP::HTTPQuery => friend ITimerDelegate
+          //
 
           void onTimer(ITimerPtr onTimer);
 
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark HTTP::HTTPQuery => friend HTTP
-          #pragma mark
+          //
+          // HTTP::HTTPQuery => friend HTTP
+          //
 
           static HTTPQueryPtr create(
                                      HTTPOverridePtr outer,
                                      IHTTPQueryDelegatePtr delegate,
                                      const QueryInfo &query
-                                     );
+                                     ) noexcept;
 
           // (duplicate) PUID getID() const;
 
-          void go(IHTTPOverrideDelegatePtr override);
+          void go(IHTTPOverrideDelegatePtr override) noexcept;
 
           void notifyHeaderData(
                                 const BYTE *buffer,
                                 size_t sizeInBytes
-                                );
+                                ) noexcept;
 
           void notifyBodyData(
                               const BYTE *buffer,
                               size_t sizeInBytes
-                              );
+                              ) noexcept;
 
-          void notifyComplete(IHTTP::HTTPStatusCodes result);
-
-        protected:
-          //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark HTTP::HTTPQuery => (internal)
-          #pragma mark
+          void notifyComplete(IHTTP::HTTPStatusCodes result) noexcept;
 
         protected:
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark HTTP::HTTPQuery => (data)
-          #pragma mark
+          //
+          // HTTP::HTTPQuery => (internal)
+          //
+
+        protected:
+          //-------------------------------------------------------------------
+          //
+          // HTTP::HTTPQuery => (data)
+          //
 
           AutoPUID id_;
           HTTPQueryWeakPtr thisWeak_;
@@ -282,9 +282,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark HTTP => (data)
-        #pragma mark
+        //
+        // HTTP => (data)
+        //
 
         AutoPUID id_;
         HTTPOverrideWeakPtr thisWeak_;

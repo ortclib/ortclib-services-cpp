@@ -135,7 +135,7 @@ namespace ortc
       };
 
       //-----------------------------------------------------------------------
-      static bool isComprehensionRequired(WORD attributeType)
+      static bool isComprehensionRequired(WORD attributeType) noexcept
       {
         if ((attributeType >= ORTC_STUN_COMPREHENSION_REQUIRED_MIN) &&   // ignore warning this is always true
             (attributeType <= ORTC_STUN_COMPREHENSION_REQUIRED_MAX))
@@ -144,7 +144,8 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool parseSTUNString(const BYTE *data, size_t length, size_t maxLength, String &outValue) {
+      static bool parseSTUNString(const BYTE *data, size_t length, size_t maxLength, String &outValue) noexcept
+      {
         char buffer[(ORTC_STUN_MAX_STRING*ORTC_STUN_MAX_UTF8_UNICODE_ENCODED_CHAR)+1];
 
         if (length > (maxLength*ORTC_STUN_MAX_UTF8_UNICODE_ENCODED_CHAR)) return false;
@@ -158,7 +159,8 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool parseMappedAddress(const BYTE *dataPos, size_t attributeLength, DWORD magicCookie, const BYTE *magicCookiePos, IPAddress &outIPAddress, bool &outHandleAsUnknownAttribute) {
+      static bool parseMappedAddress(const BYTE *dataPos, size_t attributeLength, DWORD magicCookie, const BYTE *magicCookiePos, IPAddress &outIPAddress, bool &outHandleAsUnknownAttribute) noexcept
+      {
         outHandleAsUnknownAttribute = false;
         outIPAddress.clear();
 
@@ -189,7 +191,7 @@ namespace ortc
           case 0x02: {
             if (attributeLength < sizeof(DWORD) + (128/8)) return false;  // IPv6 has a 64 bit address
             IPv6Address rawIP;
-            ZS_THROW_INVALID_ASSUMPTION_IF(attributeLength < sizeof(rawIP))  // this should be impossible!!
+            ZS_ASSERT(attributeLength >= sizeof(rawIP));  // this should be impossible!!
 
             memset(&rawIP, 0, sizeof(rawIP));
             memcpy(&rawIP, dataPos, sizeof(rawIP));
@@ -219,7 +221,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static QWORD parseQWORD(const BYTE *pos)
+      static QWORD parseQWORD(const BYTE *pos) noexcept
       {
         QWORD value = 0;
         for (size_t size = 0; size < sizeof(QWORD); ++size) {
@@ -230,7 +232,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static size_t dwordBoundary(size_t length)
+      static size_t dwordBoundary(size_t length) noexcept
       {
         if (0 == (length % sizeof(DWORD)))
           return length;
@@ -238,7 +240,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static size_t getActualAttributeLength(const STUNPacket &stun, STUNPacket::Attributes attribute)
+      static size_t getActualAttributeLength(const STUNPacket &stun, STUNPacket::Attributes attribute) noexcept
       {
         switch (attribute)
         {
@@ -257,7 +259,7 @@ namespace ortc
           case STUNPacket::Attribute_ChannelNumber:       return sizeof(DWORD);
           case STUNPacket::Attribute_Lifetime:            return sizeof(DWORD);
           case STUNPacket::Attribute_XORPeerAddress:      {
-            ZS_THROW_BAD_STATE_IF(stun.mPeerAddressList.size() < 1)
+            ZS_ASSERT(stun.mPeerAddressList.size() > 0);
 
             size_t total = 0;
             for (STUNPacket::PeerAddressList::const_iterator iter = stun.mPeerAddressList.begin(); iter != stun.mPeerAddressList.end(); ++iter) {
@@ -306,7 +308,7 @@ namespace ortc
                                 STUNPacket::Methods method,
                                 STUNPacket::Classes tClass,
                                 STUNPacket::RFCs allowedRFCs
-                                )
+                                ) noexcept
       {
         UINT rfcBits = 0;
         switch (method) {
@@ -367,7 +369,7 @@ namespace ortc
       static bool isAttributeKnown(
                                    STUNPacket::RFCs allowedRFCs,
                                    STUNPacket::Attributes attribute
-                                   )
+                                   ) noexcept
       {
         UINT rfcBits = 0;
         switch (attribute)
@@ -427,7 +429,7 @@ namespace ortc
                                    STUNPacket::RFCs rfc,
                                    STUNPacket::Attributes attribute,
                                    const STUNPacket::Options &options
-                                   )
+                                   ) noexcept
       {
         if (!isLegalMethod(stun.mMethod, stun.mClass, rfc))
           return false;
@@ -707,7 +709,7 @@ namespace ortc
                                       STUNPacket::RFCs rfc,
                                       STUNPacket::Attributes attribute,
                                       const STUNPacket::Options &options
-                                      )
+                                      ) noexcept
       {
         // can only be required if the attribute is known
         if (!isAttributeKnown(rfc, attribute))
@@ -971,7 +973,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static STUNPacket::RFCs guessRFC(const STUNPacket &stun)
+      static STUNPacket::RFCs guessRFC(const STUNPacket &stun) noexcept
       {
         switch (stun.mMethod) {
           case STUNPacket::Method_Binding:          {
@@ -1008,7 +1010,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static STUNPacket::RFCs guessRFC(const STUNPacket &stun, STUNPacket::RFCs allowedRFCs)
+      static STUNPacket::RFCs guessRFC(const STUNPacket &stun, STUNPacket::RFCs allowedRFCs) noexcept
       {
         STUNPacket::RFCs guessedRFC = guessRFC(stun);
         if (0 != (((UINT)guessedRFC) & ((UINT)allowedRFCs)))
@@ -1040,7 +1042,7 @@ namespace ortc
                                            STUNPacket::RFCs rfc,
                                            STUNPacket::Attributes attribute,
                                            const STUNPacket::Options &options
-                                           )
+                                           ) noexcept
       {
         if (!isAttributeLegal(
                               stun,
@@ -1097,7 +1099,7 @@ namespace ortc
                                             STUNPacket::RFCs rfc,
                                             STUNPacket::Attributes attribute,
                                             const STUNPacket::Options &options
-                                            )
+                                            ) noexcept
       {
         // do not count length for packets that should not be packetized
         if (!stun.hasAttribute(attribute)) return 0;
@@ -1148,7 +1150,7 @@ namespace ortc
                                          BYTE * &pos,
                                          const STUNPacket &stun,
                                          const BYTE *cookiePos
-                                         )
+                                         ) noexcept
       {
         for (STUNPacket::PeerAddressList::const_iterator iter = stun.mPeerAddressList.begin(); iter != stun.mPeerAddressList.end(); ++iter) {
           size_t attributeLength = sizeof(DWORD) + ((*iter).isIPv4() ? (32/8) : (128/8));
@@ -1160,12 +1162,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void packetizeDWORD(BYTE *pos, DWORD value) {
+      static void packetizeDWORD(BYTE *pos, DWORD value) noexcept {
         IHelper::setBE32(&(((DWORD *)pos)[0]), value);
       }
 
       //-----------------------------------------------------------------------
-      static void packetizeQWORD(BYTE *pos, QWORD value) {
+      static void packetizeQWORD(BYTE *pos, QWORD value) noexcept {
         // this is a quick way to fill the lowest to highest significance to do network byte order regardless of OS endianness
         pos = pos + sizeof(QWORD) - 1;
         for (size_t loop = 0; loop < sizeof(QWORD); ++loop, --pos) {
@@ -1175,9 +1177,9 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static void packetizeBuffer(BYTE *pos, const BYTE *buffer, size_t length) {
+      static void packetizeBuffer(BYTE *pos, const BYTE *buffer, size_t length) noexcept {
         if (0 == length) return;
-        ZS_THROW_INVALID_USAGE_IF(!buffer)
+        ZS_ASSERT(buffer);
         memcpy(pos, buffer, length);
       }
 
@@ -1186,7 +1188,7 @@ namespace ortc
                                             BYTE *pos,
                                             const STUNPacket &stun,
                                             const BYTE *attributeStartPos
-                                            )
+                                            ) noexcept
       {
         switch (stun.mCredentialMechanism) {
           case STUNPacket::CredentialMechanisms_None:       break;
@@ -1216,7 +1218,7 @@ namespace ortc
               hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
               hasher.Update(reinterpret_cast<const BYTE *>(stun.mPassword.c_str()), stun.mPassword.length());
 
-              ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(replacementKey) != hasher.DigestSize());
+              ZS_ASSERT(sizeof(replacementKey) == hasher.DigestSize());
               hasher.Final(&(replacementKey[0]));
             }
 
@@ -1252,7 +1254,7 @@ namespace ortc
               }
             }
 
-            ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
+            ZS_ASSERT(sizeof(result) == hmac.DigestSize());
 
             // put back the original length
             IHelper::setBE16(&(((WORD *)stun.mOriginalPacket)[1]), originalLength);
@@ -1266,7 +1268,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void packetizeErrorCode(BYTE *pos, const STUNPacket &stun)
+      void packetizeErrorCode(BYTE *pos, const STUNPacket &stun) noexcept
       {
         ULONG hundreds = stun.mErrorCode / 100;
         ULONG tensOnes = stun.mErrorCode % 100;
@@ -1280,7 +1282,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void packetizeUnknownAttributes(BYTE *pos, const STUNPacket &stun)
+      void packetizeUnknownAttributes(BYTE *pos, const STUNPacket &stun) noexcept
       {
         for (STUNPacket::UnknownAttributeList::const_iterator iter = stun.mUnknownAttributes.begin(); iter != stun.mUnknownAttributes.end(); ++iter) {
           IHelper::setBE16(&(((WORD *)pos)[0]), *iter);
@@ -1289,13 +1291,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void packetizeFingerprint(BYTE *pos, const STUNPacket &stun, const BYTE *startPos)
+      void packetizeFingerprint(BYTE *pos, const STUNPacket &stun, const BYTE *startPos) noexcept
       {
         CryptoPP::CRC32 crc;
         PTRNUMBER size = ((PTRNUMBER)startPos) - ((PTRNUMBER)stun.mOriginalPacket);
         crc.Update(stun.mOriginalPacket, (size_t)size);
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(crc.DigestSize() != sizeof(DWORD))
+        ZS_ASSERT(crc.DigestSize() == sizeof(DWORD));
         DWORD crcValue = 0;
         crc.Final((BYTE *)(&crcValue));
         crcValue ^= ORTC_STUN_MAGIC_XOR_FINGERPRINT_VALUE;
@@ -1304,7 +1306,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void packetizeCongestionControl(BYTE * &pos, const STUNPacket::CongestionControlList &list, bool directionBit)
+      void packetizeCongestionControl(BYTE * &pos, const STUNPacket::CongestionControlList &list, bool directionBit) noexcept
       {
         if (list.size() < 1) return;  // no need to encode an empty list
 
@@ -1323,7 +1325,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void packetizeCongestionControl(BYTE * &pos, const STUNPacket &stun)
+      void packetizeCongestionControl(BYTE * &pos, const STUNPacket &stun) noexcept
       {
         packetizeCongestionControl(pos, stun.mLocalCongestionControl, false);
         packetizeCongestionControl(pos, stun.mRemoteCongestionControl, true);
@@ -1336,7 +1338,7 @@ namespace ortc
                                      STUNPacket::RFCs rfc,
                                      STUNPacket::Attributes attribute,
                                      const STUNPacket::Options &options
-                                     )
+                                     ) noexcept
       {
         if (!stun.hasAttribute(attribute)) return;
         if (!shouldPacketizeAttribute(
@@ -1415,7 +1417,7 @@ namespace ortc
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(Classes value)
+    const char *STUNPacket::toString(Classes value) noexcept
     {
       switch (value) {
         case Class_Request:       return "request";
@@ -1427,7 +1429,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(Methods value)
+    const char *STUNPacket::toString(Methods value) noexcept
     {
       switch (value) {
         case Method_Binding:              return "binding";
@@ -1448,7 +1450,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(Attributes value)
+    const char *STUNPacket::toString(Attributes value) noexcept
     {
       switch (value) {
         case Attribute_None:                    return "none";
@@ -1502,7 +1504,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(CredentialMechanisms value)
+    const char *STUNPacket::toString(CredentialMechanisms value) noexcept
     {
       switch (value) {
         case CredentialMechanisms_None:       return "none";
@@ -1513,7 +1515,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(ErrorCodes value)
+    const char *STUNPacket::toString(ErrorCodes value) noexcept
     {
       switch (value) {
         case ErrorCode_TryAlternate:                  return "try alternate";
@@ -1537,7 +1539,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::toString(Protocols value)
+    const char *STUNPacket::toString(Protocols value) noexcept
     {
       switch (value) {
         case Protocol_None: return "none";
@@ -1547,7 +1549,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    static void addMore(String &original, const char *name, STUNPacket::RFCs enumed, STUNPacket::RFCs value)
+    static void addMore(String &original, const char *name, STUNPacket::RFCs enumed, STUNPacket::RFCs value) noexcept
     {
       if ((enumed & value) == 0) return;
 
@@ -1558,7 +1560,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    String STUNPacket::toString(RFCs value)
+    String STUNPacket::toString(RFCs value) noexcept
     {
       String result;
       if (RFC_AllowAll == value) {
@@ -1574,7 +1576,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    STUNPacket::STUNPacket() :
+    STUNPacket::STUNPacket() noexcept :
       mMagicCookie(ORTC_STUN_MAGIC_COOKIE)
     {
       mLogObject = "STUNPacket";
@@ -1589,7 +1591,7 @@ namespace ortc
     STUNPacketPtr STUNPacket::createRequest(
                                             Methods method,
                                             const char *software
-                                            )
+                                            ) noexcept
     {
       STUNPacketPtr stun(make_shared<STUNPacket>());
       stun->mClass = Class_Request;
@@ -1606,7 +1608,7 @@ namespace ortc
     STUNPacketPtr STUNPacket::createIndication(
                                                Methods method,
                                                const char *software
-                                               )
+                                               ) noexcept
     {
       STUNPacketPtr stun = STUNPacket::createRequest(method, software);
       stun->mClass = Class_Indication;
@@ -1619,7 +1621,7 @@ namespace ortc
     STUNPacketPtr STUNPacket::createResponse(
                                              STUNPacketPtr request,
                                              const char *software
-                                             )
+                                             ) noexcept
     {
       STUNPacketPtr stun(make_shared<STUNPacket>());
       stun->mClass = Class_Response;
@@ -1642,7 +1644,7 @@ namespace ortc
     STUNPacketPtr STUNPacket::createErrorResponse(
                                                   STUNPacketPtr request,
                                                   const char *software
-                                                  )
+                                                  ) noexcept
     {
       STUNPacketPtr stun = STUNPacket::createResponse(request);
       stun->mClass = Class_ErrorResponse;
@@ -1685,7 +1687,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    STUNPacketPtr STUNPacket::clone(bool changeTransactionID) const
+    STUNPacketPtr STUNPacket::clone(bool changeTransactionID) const noexcept
     {
       STUNPacketPtr dest(make_shared<STUNPacket>());
 
@@ -1768,7 +1770,7 @@ namespace ortc
                                           const BYTE *packet,
                                           size_t packetLengthInBytes,
                                           const ParseOptions &options
-                                          )
+                                          ) noexcept
     {
       // 0                   1                   2                   3
       // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1789,7 +1791,7 @@ namespace ortc
       //|11|10|9|8|7|1|6|5|4|0|3|2|1|0|
       //+--+--+-+-+-+-+-+-+-+-+-+-+-+-+
 
-      ZS_THROW_INVALID_USAGE_IF(!packet)
+      ZS_ASSERT(packet);
 
       // All STUN messages MUST start with a 20-byte header followed by zero or more Attributes.
       if (packetLengthInBytes < ORTC_STUN_HEADER_SIZE_IN_BYTES) return STUNPacketPtr();
@@ -1852,9 +1854,9 @@ namespace ortc
       while (availableBytes > 0) {
         bool handleAsUnknownAttribute = false;
 
-        ZS_THROW_BAD_STATE_IF(0 != (availableBytes % sizeof(DWORD)))  // every attribute is aligned to a DWORD size, so if it isn't then something is coded wrong
+        ZS_ASSERT(0 == (availableBytes % sizeof(DWORD)));  // every attribute is aligned to a DWORD size, so if it isn't then something is coded wrong
 
-        ZS_THROW_BAD_STATE_IF(availableBytes < sizeof(DWORD))         // this can't be!
+        ZS_ASSERT(availableBytes >= sizeof(DWORD));         // this can't be!
 
         WORD attributeType = IHelper::getBE16(&(((WORD *)pos)[0]));
         WORD attributeLength = IHelper::getBE16(&(((WORD *)pos)[1]));
@@ -1953,7 +1955,7 @@ namespace ortc
               CryptoPP::CRC32 crc;
               PTRNUMBER size = ((PTRNUMBER)attributeStart) - ((PTRNUMBER)packet);
               crc.Update(packet, (size_t)size);
-              ZS_THROW_INVALID_ASSUMPTION_IF(crc.DigestSize() != sizeof(DWORD))
+              ZS_ASSERT(crc.DigestSize() == sizeof(DWORD));
               DWORD crcValue = 0;
               crc.Final((BYTE *)(&crcValue));
               crcValue ^= ORTC_STUN_MAGIC_XOR_FINGERPRINT_VALUE;
@@ -2149,7 +2151,7 @@ namespace ortc
           if (!internal::isAttributeLegal(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop], options)) {
             if (0 == stun->mErrorCode)                                                // if there is already an error code on the request then don't put another one
               stun->mErrorCode = ErrorCode_UnknownAttribute;                          // this request has an illegal attribute on it that required understanding but is not allowed in this RFC
-            stun->mUnknownAttributes.push_back(internal::gAttributeOrdering[loop]);   // this is an illegal attribute
+            stun->mUnknownAttributes.push_back(static_cast<WORD>(internal::gAttributeOrdering[loop]));   // this is an illegal attribute
           }
         } else {
           if (internal::isAttributeRequired(*(stun.get()), guessedRFC, internal::gAttributeOrdering[loop], options)) {
@@ -2165,7 +2167,7 @@ namespace ortc
               case STUNPacket::Class_ErrorResponse:   {
                 if (0 == stun->mErrorCode) {                                              // if there is already an error code on the request then don't put another one
                   stun->mErrorCode = ErrorCode_UnknownAttribute;                          // this request is clearly bad but specifically an attribute is missing
-                  stun->mUnknownAttributes.push_back(internal::gAttributeOrdering[loop]); // where is this missing attribute?
+                  stun->mUnknownAttributes.push_back(static_cast<WORD>(internal::gAttributeOrdering[loop])); // where is this missing attribute?
                 }
                 break;
               }
@@ -2187,7 +2189,7 @@ namespace ortc
                                                                    const BYTE *packet,
                                                                    size_t streamDataAvailableInBytes,
                                                                    const ParseStreamOptions &options
-                                                                   )
+                                                                   ) noexcept
     {
       //0                   1                   2                   3
       //0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -2200,7 +2202,7 @@ namespace ortc
       //|                     Transaction ID (96 bits)                  |
       //|                                                               |
       //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ZS_THROW_INVALID_USAGE_IF(!packet)
+      ZS_ASSERT(packet);
 
       outSTUN = STUNPacketPtr();
       outActualSizeInBytes = 0;
@@ -2269,19 +2271,19 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::classAsString() const
+    const char *STUNPacket::classAsString() const noexcept
     {
       return toString(mClass);
     }
 
     //-------------------------------------------------------------------------
-    const char *STUNPacket::methodAsString() const
+    const char *STUNPacket::methodAsString() const noexcept
     {
       return toString(mMethod);
     }
 
     //-------------------------------------------------------------------------
-    Log::Params STUNPacket::log(const char *message) const
+    Log::Params STUNPacket::log(const char *message) const noexcept
     {
       ElementPtr objectEl = Element::create(mLogObject ? mLogObject : "STUNPacket");
       if (0 != mLogObjectID) {
@@ -2291,7 +2293,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    Log::Params STUNPacket::debug(const char *message) const
+    Log::Params STUNPacket::debug(const char *message) const noexcept
     {
       ElementPtr objectEl = Element::create(mLogObject ? mLogObject : "STUNPacket");
       if (0 != mLogObjectID) {
@@ -2305,7 +2307,7 @@ namespace ortc
     void STUNPacket::trace(
                            const char *func,
                            const char *message
-                           ) const
+                           ) const noexcept
     {
       switch (guessRFC(RFC_AllowAll))
       {
@@ -2485,7 +2487,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr STUNPacket::toDebug() const
+    ElementPtr STUNPacket::toDebug() const noexcept
     {
       ElementPtr resultEl = Element::create("STUNPacket");
 
@@ -2684,7 +2686,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool STUNPacket::isLegal(RFCs rfc) const
+    bool STUNPacket::isLegal(RFCs rfc) const noexcept
     {
       for (size_t loop = 0; Attribute_None != internal::gAttributeOrdering[loop]; ++loop) {
         if (hasAttribute(internal::gAttributeOrdering[loop])) {
@@ -2706,13 +2708,13 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    STUNPacket::RFCs STUNPacket::guessRFC(RFCs allowedRFCs) const
+    STUNPacket::RFCs STUNPacket::guessRFC(RFCs allowedRFCs) const noexcept
     {
       return internal::guessRFC(*this, allowedRFCs);
     }
 
     //-------------------------------------------------------------------------
-    SecureByteBlockPtr STUNPacket::packetize(RFCs rfc)
+    SecureByteBlockPtr STUNPacket::packetize(RFCs rfc) noexcept
     {
       if (ZS_IS_LOGGING(Trace)) {
         ZS_LOG_BASIC(debug("packetize"));
@@ -2781,9 +2783,9 @@ namespace ortc
     bool STUNPacket::isValidResponseTo(
                                        STUNPacketPtr request,
                                        RFCs allowedRFCs
-                                       )
+                                       ) noexcept
     {
-      ZS_THROW_INVALID_USAGE_IF(!request)
+      ZS_ASSERT(request);
 
       if (request->mClass != Class_Request) return false; // this isn't even a request
 
@@ -2822,7 +2824,7 @@ namespace ortc
                                              const char *password,
                                              const char *username,
                                              const char *realm
-                                             ) const
+                                             ) const noexcept
     {
       if (!mOriginalPacket) {
         ZS_LOG_ERROR(Trace, log("packet does not have message integrity"))
@@ -2850,7 +2852,7 @@ namespace ortc
         hasher.Update(reinterpret_cast<const BYTE *>(":"), strlen(":"));
         hasher.Update(reinterpret_cast<const BYTE *>(password), strlen(password));
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(replacementKey) != hasher.DigestSize());
+        ZS_ASSERT(sizeof(replacementKey) == hasher.DigestSize());
         hasher.Final(&(replacementKey[0]));
       }
 
@@ -2884,7 +2886,7 @@ namespace ortc
         }
       }
 
-      ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(result) != hmac.DigestSize())
+      ZS_ASSERT(sizeof(result) == hmac.DigestSize());
 
       // put back the original value now...
       IHelper::setBE16(&(((WORD *)mOriginalPacket)[1]), originalLength);
@@ -2894,19 +2896,19 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool STUNPacket::isRFC3489() const
+    bool STUNPacket::isRFC3489() const noexcept
     {
       return ORTC_STUN_MAGIC_COOKIE != mMagicCookie;
     }
 
     //-------------------------------------------------------------------------
-    bool STUNPacket::isRFC5389() const
+    bool STUNPacket::isRFC5389() const noexcept
     {
       return ORTC_STUN_MAGIC_COOKIE == mMagicCookie;
     }
 
     //-------------------------------------------------------------------------
-    bool STUNPacket::hasAttribute(Attributes attribute) const
+    bool STUNPacket::hasAttribute(Attributes attribute) const noexcept
     {
       switch (attribute)
       {
@@ -2963,7 +2965,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    bool STUNPacket::hasUnknownAttribute(Attributes attribute)
+    bool STUNPacket::hasUnknownAttribute(Attributes attribute) noexcept
     {
       return (mUnknownAttributes.end() != find(mUnknownAttributes.begin(), mUnknownAttributes.end(), attribute));
     }
@@ -2972,7 +2974,7 @@ namespace ortc
     size_t STUNPacket::getTotalRoomAvailableForData(
                                                     size_t maxPacketSizeInBytes,
                                                     RFCs rfc
-                                                    ) const
+                                                    ) const noexcept
     {
       size_t packetLengthInBytes = ORTC_STUN_HEADER_SIZE_IN_BYTES;
 

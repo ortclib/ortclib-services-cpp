@@ -44,9 +44,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHKeyDomain
-    #pragma mark
+    //
+    // IDHKeyDomain
+    //
 
     interaction IDHKeyDomain
     {
@@ -64,17 +64,17 @@ namespace ortc
         KeyDomainPrecompiledType_Last = KeyDomainPrecompiledType_8192,
       };
 
-      static const char *toNamespace(KeyDomainPrecompiledTypes length);
-      static KeyDomainPrecompiledTypes fromNamespace(const char *inNamespace);
+      static const char *toNamespace(KeyDomainPrecompiledTypes length) noexcept;
+      static KeyDomainPrecompiledTypes fromNamespace(const char *inNamespace) noexcept;
 
-      static ElementPtr toDebug(IDHKeyDomainPtr keyDomain);
+      static ElementPtr toDebug(IDHKeyDomainPtr keyDomain) noexcept;
 
-      static IDHKeyDomainPtr generate(size_t keySizeInBits = ORTC_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE);
+      static IDHKeyDomainPtr generate(size_t keySizeInBits = ORTC_SERVICES_DH_KEY_DOMAIN_GENERATION_SIZE) noexcept;
 
       static IDHKeyDomainPtr loadPrecompiled(
                                              KeyDomainPrecompiledTypes precompiledLength,
                                              bool validate = false
-                                             );
+                                             ) noexcept;
 
       //-----------------------------------------------------------------------
       // NOTE: p, q and g integers are read from HEX decoded byte array
@@ -86,11 +86,11 @@ namespace ortc
                                   const SecureByteBlock &q,
                                   const SecureByteBlock &g,
                                   bool validate = true
-                                  );
+                                  ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual KeyDomainPrecompiledTypes getPrecompiledType() const = 0;
+      virtual KeyDomainPrecompiledTypes getPrecompiledType() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // NOTE: p, q and g integers are HEX encoded for compatibility
@@ -98,7 +98,7 @@ namespace ortc
                         SecureByteBlock &p,
                         SecureByteBlock &q,
                         SecureByteBlock &g
-                        ) const = 0;
+                        ) const noexcept = 0;
     };
   }
 }

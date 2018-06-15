@@ -44,28 +44,28 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRSAPrivateKey
-    #pragma mark
+    //
+    // IRSAPrivateKey
+    //
 
     interaction IRSAPrivateKey
     {
-      static ElementPtr toDebug(IRSAPrivateKeyPtr object);
+      static ElementPtr toDebug(IRSAPrivateKeyPtr object) noexcept;
 
       static IRSAPrivateKeyPtr generate(
                                         IRSAPublicKeyPtr &outPublicKey,
                                         size_t keySizeInBits = ORTC_SERVICES_RSA_PRIVATE_KEY_GENERATION_SIZE
-                                        );
+                                        ) noexcept;
 
-      static IRSAPrivateKeyPtr load(const SecureByteBlock &buffer);
+      static IRSAPrivateKeyPtr load(const SecureByteBlock &buffer) noexcept;
 
-      virtual SecureByteBlockPtr save() const = 0;
+      virtual SecureByteBlockPtr save() const noexcept = 0;
 
-      virtual SecureByteBlockPtr sign(const SecureByteBlock &inBufferToSign) const = 0;
+      virtual SecureByteBlockPtr sign(const SecureByteBlock &inBufferToSign) const noexcept = 0;
 
-      virtual SecureByteBlockPtr sign(const String &stringToSign) const = 0;
+      virtual SecureByteBlockPtr sign(const String &stringToSign) const noexcept = 0;
 
-      virtual SecureByteBlockPtr decrypt(const SecureByteBlock &buffer) const = 0;
+      virtual SecureByteBlockPtr decrypt(const SecureByteBlock &buffer) const noexcept = 0;
     };
   }
 }

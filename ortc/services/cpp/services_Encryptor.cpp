@@ -49,9 +49,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark EncryptorData
-      #pragma mark
+      //
+      // EncryptorData
+      //
 
       struct EncryptorData
       {
@@ -61,7 +61,7 @@ namespace ortc
                       const BYTE *key,
                       size_t keySize,
                       const BYTE *iv
-                      ) :
+                      ) noexcept :
           encryptor(key, keySize, iv)
         {
         }
@@ -71,18 +71,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Encryptor
-      #pragma mark
+      //
+      // Encryptor
+      //
 
       //-----------------------------------------------------------------------
       Encryptor::Encryptor(
                            const make_private &,
                            const SecureByteBlock &key,
                            const SecureByteBlock &iv,
-                           EncryptionAlgorthms algorithm
-                           )
+                           ZS_MAYBE_USED() EncryptionAlgorthms algorithm
+                           ) noexcept
       {
+        ZS_MAYBE_USED(algorithm);
         mData = new EncryptorData(key, key.SizeInBytes(), iv);
       }
 
@@ -98,14 +99,14 @@ namespace ortc
                                      const SecureByteBlock &key,
                                      const SecureByteBlock &iv,
                                      EncryptionAlgorthms algorithm
-                                     )
+                                     ) noexcept
       {
         EncryptorPtr pThis(make_shared<Encryptor>(make_private{}, key, iv, algorithm));
         return pThis;
       }
 
       //-----------------------------------------------------------------------
-      size_t Encryptor::getOptimalBlockSize() const
+      size_t Encryptor::getOptimalBlockSize() const noexcept
       {
         return mData->encryptor.OptimalBlockSize();
       }
@@ -114,7 +115,7 @@ namespace ortc
       SecureByteBlockPtr Encryptor::encrypt(
                                             const BYTE *inBuffer,
                                             size_t inBufferSizeInBytes
-                                            )
+                                            ) noexcept
       {
         SecureByteBlockPtr output(make_shared<SecureByteBlock>(inBufferSizeInBytes));
         mData->encryptor.ProcessData(*output, inBuffer, inBufferSizeInBytes);
@@ -122,7 +123,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr Encryptor::encrypt(const SecureByteBlock &input)
+      SecureByteBlockPtr Encryptor::encrypt(const SecureByteBlock &input) noexcept
       {
         SecureByteBlockPtr output(make_shared<SecureByteBlock>(input.SizeInBytes()));
         mData->encryptor.ProcessData(*output, input.BytePtr(), input.SizeInBytes());
@@ -130,7 +131,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr Encryptor::finalize()
+      SecureByteBlockPtr Encryptor::finalize() noexcept
       {
         return SecureByteBlockPtr();
       }
@@ -140,16 +141,16 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IEncryptor
-    #pragma mark
+    //
+    // IEncryptor
+    //
 
     //-------------------------------------------------------------------------
     IEncryptorPtr IEncryptor::create(
                                      const SecureByteBlock &key,
                                      const SecureByteBlock &iv,
                                      EncryptionAlgorthms algorithm
-                                     )
+                                     ) noexcept
     {
       return internal::Encryptor::create(key, iv, algorithm);
     }
