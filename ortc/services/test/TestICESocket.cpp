@@ -84,7 +84,7 @@ namespace ortc
         typedef std::list<IICESocketSessionPtr> SessionList;
 
       private:
-        TestICESocketCallback(zsLib::IMessageQueuePtr queue) :
+        TestICESocketCallback(zsLib::IMessageQueuePtr queue) noexcept :
           zsLib::MessageQueueAssociator(queue)
         {
         }
@@ -93,7 +93,7 @@ namespace ortc
                   WORD port,
                   const char *srvNameTURN,
                   const char *srvNameSTUN
-                  )
+                  ) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
 
@@ -133,7 +133,7 @@ namespace ortc
                                                bool expectErrorShutdown = false,
                                                bool expectedSessionConnected = true,
                                                bool expectedSessionClosed = true
-                                               )
+                                               ) noexcept
         {
           TestICESocketCallbackPtr pThis(new TestICESocketCallback(queue));
           pThis->mThisWeak = pThis;
@@ -146,7 +146,7 @@ namespace ortc
           return pThis;
         }
 
-        ~TestICESocketCallback()
+        ~TestICESocketCallback() noexcept
         {
           if (mTimer) {
             mTimer->cancel();
@@ -245,7 +245,7 @@ namespace ortc
                                                           IICESocketSessionPtr session,
                                                           const zsLib::BYTE *buffer,
                                                           size_t bufferLengthInBytes
-                                                          )
+                                                          ) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
         }
@@ -255,7 +255,7 @@ namespace ortc
                                                               STUNPacketPtr stun,
                                                               const zsLib::String &localUsernameFrag,
                                                               const zsLib::String &remoteUsernameFrag
-                                                              )
+                                                              ) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           return false;
@@ -277,7 +277,7 @@ namespace ortc
           if (timer != mTimer) return;
         }
 
-        void shutdown()
+        void shutdown() noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
 
@@ -297,7 +297,7 @@ namespace ortc
           }
         }
 
-        bool isComplete()
+        bool isComplete() noexcept
         {
           return (mExpectConnected ? true : (mExpectConnected == mConnected)) &&
                  (mExpectGracefulShutdown == mGracefulShutdown) &&
@@ -306,7 +306,7 @@ namespace ortc
                  (mExpectedSessionClosed == mSessionClosed);
         }
 
-        void expectationsOkay() {
+        void expectationsOkay() noexcept {
           zsLib::AutoRecursiveLock lock(getLock());
           if (mExpectConnected) {
 //            TESTING_CHECK(mConnected); // invalid assumption for connected as a non routable IP will not be capable of allocating TURN
@@ -339,28 +339,28 @@ namespace ortc
           }
         }
 
-        void getLocalCandidates(IICESocket::CandidateList &outCandidates)
+        void getLocalCandidates(IICESocket::CandidateList &outCandidates) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           if (!mICESocket) return;
           mICESocket->getLocalCandidates(outCandidates);
         }
 
-        String getLocalUsernameFrag()
+        String getLocalUsernameFrag() noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           if (!mICESocket) return String();
           return mICESocket->getUsernameFrag();
         }
 
-        String getLocalPassword()
+        String getLocalPassword() noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           if (!mICESocket) return String();
           return mICESocket->getPassword();
         }
 
-        IICESocketSessionPtr createSessionFromRemoteCandidates(IICESocket::ICEControls control)
+        IICESocketSessionPtr createSessionFromRemoteCandidates(IICESocket::ICEControls control) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           if (!mICESocket) return IICESocketSessionPtr();
@@ -379,13 +379,13 @@ namespace ortc
           return session;
         }
 
-        void setRemote(TestICESocketCallbackPtr remote)
+        void setRemote(TestICESocketCallbackPtr remote) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           mRemote = remote;
         }
 
-        void updateCandidates(const IICESocket::CandidateList &candidates)
+        void updateCandidates(const IICESocket::CandidateList &candidates) noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           for (SessionList::iterator iter = mSessions.begin(); iter != mSessions.end(); ++iter)
@@ -395,7 +395,7 @@ namespace ortc
           }
         }
 
-        void notifyEndOfCandidates()
+        void notifyEndOfCandidates() noexcept
         {
           zsLib::AutoRecursiveLock lock(getLock());
           for (SessionList::iterator iter = mSessions.begin(); iter != mSessions.end(); ++iter)
@@ -405,7 +405,7 @@ namespace ortc
           }
         }
 
-        RecursiveLock &getLock() const
+        RecursiveLock &getLock() const noexcept
         {
           static RecursiveLock lock;
           return lock;
@@ -442,7 +442,7 @@ namespace ortc
 using ortc::services::test::TestICESocketCallback;
 using ortc::services::test::TestICESocketCallbackPtr;
 
-void doTestICESocket()
+void doTestICESocket() noexcept
 {
   if (!ORTC_SERVICE_TEST_DO_ICE_SOCKET_TEST) return;
 

@@ -84,9 +84,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TestRUDPListenerCallback 
-      #pragma mark
+      //
+      // TestRUDPListenerCallback 
+      //
 
       class TestRUDPListenerCallback : public zsLib::MessageQueueAssociator,
                                        public IRUDPListenerDelegate,
@@ -218,9 +218,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TestRUDPListenerCallback 
-      #pragma mark
+      //
+      // TestRUDPListenerCallback 
+      //
 
       class TestRUDPICESocketCallback : public zsLib::MessageQueueAssociator,
                                         public IICESocketDelegate,

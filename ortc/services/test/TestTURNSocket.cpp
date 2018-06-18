@@ -121,13 +121,13 @@ namespace ortc
 
       private:
         //---------------------------------------------------------------------
-        TestTURNSocketCallback(IMessageQueuePtr queue) :
+        TestTURNSocketCallback(IMessageQueuePtr queue) noexcept :
           MessageQueueAssociator(queue)
         {
         }
 
         //---------------------------------------------------------------------
-        void init()
+        void init() noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -144,14 +144,17 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        void step()
+        void step() noexcept
         {
           if (mUseAPICredentials) {
             if (!mCredentialsQuery) {
               String credentialURI = ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_GET_URI;
               credentialURI.replaceAll(String("$ACCOUNT$"), String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_ACCOUNT));
               credentialURI.replaceAll(String("$APIKEY$"), String(ORTC_SERVICE_TEST_TURN_FETCH_CREDENTIALS_APIKEY));
-              mCredentialsQuery = IHTTP::get(mThisWeak.lock(), "ORTC services test 1.0", credentialURI);
+              IHTTP::QueryInfo info;
+              info.url_ = credentialURI;
+              info.userAgent_ = "ORTC services test 1.0";
+              mCredentialsQuery = IHTTP::query(mThisWeak.lock(), info);
               return;
             }
 
@@ -304,7 +307,7 @@ namespace ortc
                                                 bool expectGracefulShutdown = true,
                                                 bool expectErrorShutdown = false,
                                                 bool expectFailedToConnect = false
-                                                )
+                                                ) noexcept
         {
           TestTURNSocketCallbackPtr pThis(new TestTURNSocketCallback(queue));
           pThis->mThisWeak = pThis;
@@ -321,7 +324,7 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        ~TestTURNSocketCallback()
+        ~TestTURNSocketCallback() noexcept
         {
         }
 
@@ -329,9 +332,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark IDNSDelegate
-        #pragma mark
+        //
+        // IDNSDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onLookupCompleted(IDNSQueryPtr query)
@@ -361,9 +364,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ISTUNDiscoveryDelegate
-        #pragma mark
+        //
+        // ISTUNDiscoveryDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void handleTURNSocketReceivedPacket(
@@ -371,7 +374,7 @@ namespace ortc
                                                     IPAddress source,
                                                     const BYTE *packet,
                                                     size_t packetLengthInBytes
-                                                    )
+                                                    ) noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -426,9 +429,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ITURNSocketDelegate
-        #pragma mark
+        //
+        // ITURNSocketDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual bool notifyTURNSocketSendPacket(
@@ -436,7 +439,7 @@ namespace ortc
                                                 IPAddress destination,
                                                 const BYTE *packet,
                                                 size_t packetLengthInBytes
-                                                )
+                                                ) noexcept
         {
           AutoRecursiveLock lock(mLock);
           return 0 != mSocket->sendTo(destination, packet, packetLengthInBytes);
@@ -519,9 +522,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ITURNSocketDelegate
-        #pragma mark
+        //
+        // ITURNSocketDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onReadReady(SocketPtr socket)
@@ -566,9 +569,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ITimerDelegate
-        #pragma mark
+        //
+        // ITimerDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onTimer(ITimerPtr timer)
@@ -608,9 +611,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark IHTTPQueryDelegate
-        #pragma mark
+        //
+        // IHTTPQueryDelegate
+        //
 
         //---------------------------------------------------------------------
         virtual void onHTTPReadDataAvailable(IHTTPQueryPtr query)
@@ -629,12 +632,12 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark (internal)
-        #pragma mark
+        //
+        // (internal)
+        //
 
         //---------------------------------------------------------------------
-        void shutdown()
+        void shutdown() noexcept
         {
           AutoRecursiveLock lock(mLock);
           TESTING_CHECK(mTURNSocket);
@@ -653,28 +656,28 @@ namespace ortc
         }
 
         //---------------------------------------------------------------------
-        bool isComplete()
+        bool isComplete() noexcept
         {
           AutoRecursiveLock lock(mLock);
           return (!((mUDPSRVQuery) || (mTCPSRVQuery) || (mSTUNSRVQuery) || (mTURNSocket)));
         }
 
         //---------------------------------------------------------------------
-        PUID getID() const
+        PUID getID() const noexcept
         {
           AutoRecursiveLock lock(mLock);
           return mID;
         }
 
         //---------------------------------------------------------------------
-        IPAddress getIP()
+        IPAddress getIP() noexcept
         {
           AutoRecursiveLock lock(mLock);
           return mDiscoveredIP;
         }
 
         //---------------------------------------------------------------------
-        void expectationsOkay()
+        void expectationsOkay() noexcept
         {
           AutoRecursiveLock lock(mLock);
 
@@ -708,7 +711,7 @@ namespace ortc
         }
         ULONG getTotalUnreceived() {
           AutoRecursiveLock lock(mLock);
-          return mSentData.size();
+          return static_cast<ULONG>(mSentData.size());
         }
 
       private:
@@ -716,9 +719,9 @@ namespace ortc
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark (data)
-        #pragma mark
+        //
+        // (data)
+        //
 
         mutable RecursiveLock mLock;
         PUID mID {};
@@ -783,7 +786,7 @@ namespace ortc
 using ortc::services::test::TestTURNSocketCallback;
 using ortc::services::test::TestTURNSocketCallbackPtr;
 
-void doTestTURNSocket()
+void doTestTURNSocket() noexcept
 {
   if (!ORTC_SERVICE_TEST_DO_TURN_TEST) return;
 

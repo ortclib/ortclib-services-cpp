@@ -2160,7 +2160,8 @@ namespace ortc
             cancel();
             return;
           }
-          HostNameType debugtype = hostname->Type;
+          ZS_MAYBE_USED() HostNameType debugtype = hostname->Type;
+          ZS_MAYBE_USED(debugtype);
 
           IAsyncOperation< IVectorView<EndpointPair^> ^> ^lookupResult = nullptr;
 
@@ -2289,11 +2290,9 @@ namespace ortc
                     }
 
                     SRVResult::SRVRecord *useRecord = NULL;
-                    for (auto iter = srv->mRecords.begin(); iter != srv->mRecords.end(); ++iter) {
-                      SRVResult::SRVRecord &record = (*iter);
-                      // add to existing record
+                    if (srv->mRecords.size() > 0) {
+                      SRVResult::SRVRecord &record = (*(srv->mRecords.begin()));
                       useRecord = &record;
-                      break;
                     }
 
                     SRVResult::SRVRecord newRecord;
@@ -2660,7 +2659,7 @@ namespace ortc
                                       const char *name
                                       ) noexcept
       {
-        ZS_ASSERT(!name);
+        ZS_ASSERT(name);
         ZS_ASSERT(String(name).hasData());
 
         IPAddressList ips;

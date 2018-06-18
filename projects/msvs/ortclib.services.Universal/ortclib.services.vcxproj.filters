@@ -246,6 +246,9 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services.events_win_etw.h">
       <Filter>ortc\services\internal</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_override.h">
+      <Filter>ortc\services\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\ortc\services\cpp\services.events.json">
@@ -374,6 +377,9 @@
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\ortc\services\cpp\services_wire.cpp">
+      <Filter>ortc\services\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_override.cpp">
       <Filter>ortc\services\cpp</Filter>
     </ClCompile>
   </ItemGroup>

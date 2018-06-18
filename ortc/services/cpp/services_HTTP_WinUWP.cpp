@@ -712,7 +712,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::notifyComplete(Windows::Web::Http::HttpResponseMessage ^response)
+      void HTTP::HTTPQuery::notifyComplete(Windows::Web::Http::HttpResponseMessage ^response) noexcept
       {
         if (nullptr == response) {
           ZS_LOG_WARNING(Detail, log("response returned was null"))

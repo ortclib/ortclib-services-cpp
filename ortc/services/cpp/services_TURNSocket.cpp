@@ -283,7 +283,7 @@ namespace ortc
                                        ) noexcept
       {
         ZS_ASSERT(queue);
-        ZS_ASSERT(!delegate);
+        ZS_ASSERT(delegate);
 
         TURNSocketPtr pThis(make_shared<TURNSocket>(make_private {}, queue, delegate, options));
         pThis->mThisWeak = pThis;

@@ -594,7 +594,7 @@ namespace ortc
         return String();
       }
 
-      if (result > destLength) {
+      if (static_cast<decltype(destLength)>(result) > destLength) {
         overflowBuffer = std::unique_ptr<wchar_t[]>(new wchar_t[(result) + 1]{});
         destStr = overflowBuffer.get();
         destLength = result;
@@ -660,7 +660,7 @@ namespace ortc
         return String();
       }
 
-      if (result > destLength) {
+      if (static_cast<decltype(destLength)>(result) > destLength) {
         overflowBuffer = std::unique_ptr<wchar_t[]>(new wchar_t[(result)+1]{});
         destStr = overflowBuffer.get();
         destLength = result;

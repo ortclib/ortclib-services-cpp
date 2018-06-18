@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_Encryptor.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Helper.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_override.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinUWP.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocketSession.h" />
@@ -127,6 +128,7 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Encryptor.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Helper.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_override.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinUWP.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
@@ -270,8 +272,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>
@@ -305,8 +306,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>
@@ -340,8 +340,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>
@@ -375,8 +374,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>
@@ -410,8 +408,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>
@@ -445,8 +442,7 @@
       <CompileAsWinRT>true</CompileAsWinRT>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
       <PreprocessorDefinitions>USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WarningLevel>Level4</WarningLevel>

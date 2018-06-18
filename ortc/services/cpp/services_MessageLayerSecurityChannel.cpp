@@ -1997,7 +1997,7 @@ namespace ortc
           AlgorithmIndex index = static_cast<AlgorithmIndex>(IHelper::random(1, mSendKeys.size()));
 
           KeyMap::iterator found = mSendKeys.find(index);
-          ZS_ASSERT(found == mSendKeys.end());
+          ZS_ASSERT(found != mSendKeys.end());
 
           KeyInfo &keyInfo = (*found).second;
 

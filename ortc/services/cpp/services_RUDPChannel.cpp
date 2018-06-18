@@ -441,7 +441,7 @@ namespace ortc
                                    ) noexcept
       {
         ZS_ASSERT(receiveStream);
-        ZS_ASSERT(!sendStream);
+        ZS_ASSERT(sendStream);
 
         ZS_LOG_DEBUG(log("set streams called"))
         AutoRecursiveLock lock(mLock);

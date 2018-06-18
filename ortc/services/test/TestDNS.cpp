@@ -74,7 +74,7 @@ namespace ortc
         virtual IDNSQueryPtr lookupA(
                                      IDNSDelegatePtr delegate,
                                      const char *name
-                                     )
+                                     ) noexcept
         {
           ++mACount;
           return services::internal::IDNSFactory::lookupA(delegate, name);
@@ -83,7 +83,7 @@ namespace ortc
         virtual IDNSQueryPtr lookupAAAA(
                                        IDNSDelegatePtr delegate,
                                        const char *name
-                                       )
+                                       ) noexcept
         {
           ++mAAAACount;
           return services::internal::IDNSFactory::lookupAAAA(delegate, name);
@@ -92,7 +92,7 @@ namespace ortc
         virtual IDNSQueryPtr lookupAorAAAA(
                                           IDNSDelegatePtr delegate,
                                           const char *name
-                                          )
+                                          ) noexcept
         {
           ++mAorAAAACount;
           return services::internal::IDNSFactory::lookupAorAAAA(delegate, name);
@@ -107,16 +107,16 @@ namespace ortc
                                        WORD defaultPriority,
                                        WORD defaultWeight,
                                        SRVLookupTypes lookupType
-                                       )
+                                       ) noexcept
         {
           ++mSRVCount;
           return services::internal::IDNSFactory::lookupSRV(delegate, name, service, protocol, defaultPort, defaultPriority, defaultWeight, lookupType);
         }
         
-        ULONG getACount() const {return mACount;}
-        ULONG getAAAACount() const {return mAAAACount;}
-        ULONG getAorAAAACount() const {return mAorAAAACount;}
-        ULONG getSRVCount() const {return mSRVCount;}
+        ULONG getACount() const noexcept {return mACount;}
+        ULONG getAAAACount() const noexcept {return mAAAACount;}
+        ULONG getAorAAAACount() const noexcept {return mAorAAAACount;}
+        ULONG getSRVCount() const noexcept {return mSRVCount;}
 
       protected:
         ULONG mACount;
@@ -131,12 +131,12 @@ namespace ortc
                               public IDNSDelegate
       {
       private:
-        TestDNSCallback(zsLib::IMessageQueuePtr queue) : zsLib::MessageQueueAssociator(queue), mCount(0)
+        TestDNSCallback(zsLib::IMessageQueuePtr queue) noexcept : zsLib::MessageQueueAssociator(queue), mCount(0)
         {
         }
 
       public:
-        static TestDNSCallbackPtr create(zsLib::IMessageQueuePtr queue)
+        static TestDNSCallbackPtr create(zsLib::IMessageQueuePtr queue) noexcept
         {
           return TestDNSCallbackPtr(new TestDNSCallback(queue));
         }
@@ -166,41 +166,41 @@ namespace ortc
           }
         }
 
-        ~TestDNSCallback()
+        ~TestDNSCallback() noexcept
         {
         }
 
-        ULONG getTotalProcessed() const
+        ULONG getTotalProcessed() const noexcept
         {
           zsLib::AutoLock lock(mLock);
           return mCount;
         }
 
-        ULONG getTotalFailed() const
+        ULONG getTotalFailed() const noexcept
         {
           zsLib::AutoLock lock(mLock);
           return static_cast<ULONG>(mFailedResults.size());
         }
 
-        ULONG getTotalAProcessed() const
+        ULONG getTotalAProcessed() const noexcept
         {
           zsLib::AutoLock lock(mLock);
           return static_cast<ULONG>(mAResults.size());
         }
 
-        ULONG getTotalAAAAProcessed() const
+        ULONG getTotalAAAAProcessed() const noexcept
         {
           zsLib::AutoLock lock(mLock);
           return static_cast<ULONG>(mAAAAResults.size());
         }
 
-        ULONG getTotalSRVProcessed() const
+        ULONG getTotalSRVProcessed() const noexcept
         {
           zsLib::AutoLock lock(mLock);
           return static_cast<ULONG>(mSRVResults.size());
         }
 
-        bool isFailed(IDNSQueryPtr query) const
+        bool isFailed(IDNSQueryPtr query) const noexcept
         {
           zsLib::AutoLock lock(mLock);
           for (size_t loop = 0; loop < mFailedResults.size(); ++loop) {
@@ -210,7 +210,7 @@ namespace ortc
           return false;
         }
 
-        IDNS::AResultPtr getA(IDNSQueryPtr query) const
+        IDNS::AResultPtr getA(IDNSQueryPtr query) const noexcept
         {
           zsLib::AutoLock lock(mLock);
           for (size_t loop = 0; loop < mAResults.size(); ++loop) {
@@ -220,7 +220,7 @@ namespace ortc
           return IDNS::AResultPtr();
         }
 
-        IDNS::AAAAResultPtr getAAAA(IDNSQueryPtr query) const
+        IDNS::AAAAResultPtr getAAAA(IDNSQueryPtr query) const noexcept
         {
           zsLib::AutoLock lock(mLock);
           for (size_t loop = 0; loop < mAAAAResults.size(); ++loop) {
@@ -230,7 +230,7 @@ namespace ortc
           return IDNS::AAAAResultPtr();
         }
 
-        IDNS::SRVResultPtr getSRV(IDNSQueryPtr query) const
+        IDNS::SRVResultPtr getSRV(IDNSQueryPtr query) const noexcept
         {
           zsLib::AutoLock lock(mLock);
           for (size_t loop = 0; loop < mSRVResults.size(); ++loop) {
@@ -261,7 +261,7 @@ using ortc::services::test::TestDNSFactoryPtr;
 using ortc::services::test::TestDNSCallback;
 using ortc::services::test::TestDNSCallbackPtr;
 
-void doTestDNS()
+void doTestDNS() noexcept
 {
   if (!ORTC_SERVICE_TEST_DO_DNS_TEST) return;
 
@@ -291,8 +291,8 @@ void doTestDNS()
   bool doQuery12 = true;
 
 #ifdef WINUWP
-#define WARNING_WINUWP_DOES_NOT_RESOLVE_AAAA 1
-#define WARNING_WINUWP_DOES_NOT_RESOLVE_AAAA 2
+
+#pragma ZS_BUILD_NOTE("!!WARNING!!", "WinUWP does not resolve AAAA records")
 
   doQuery3 = false;
   doQuery4 = false;

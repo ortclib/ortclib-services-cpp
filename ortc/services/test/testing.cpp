@@ -56,19 +56,19 @@ debugostream &getDebugCout()
 typedef ortc::services::ILogger ILogger;
 ZS_DECLARE_TYPEDEF_PTR(zsLib::ISettings, UseSettings);
 
-void doTestBackoffRetry();
-void doTestCanonicalXML();
-void doTestDH();
-void doTestDNS();
-void doTestHelper();
-void doTestICESocket();
-void doTestSTUNDiscovery();
-void doTestSTUNPacket();
-void doTestTURNSocket();
-void doTestRUDPListener();
-void doTestRUDPICESocket();
-void doTestRUDPICESocketLoopback();
-void doTestTCPMessagingLoopback();
+void doTestBackoffRetry() noexcept;
+void doTestCanonicalXML() noexcept;
+void doTestDH() noexcept;
+void doTestDNS() noexcept;
+void doTestHelper() noexcept;
+void doTestICESocket() noexcept;
+void doTestSTUNDiscovery() noexcept;
+void doTestSTUNPacket() noexcept;
+void doTestTURNSocket() noexcept;
+void doTestRUDPListener() noexcept;
+void doTestRUDPICESocket() noexcept;
+void doTestRUDPICESocketLoopback() noexcept;
+void doTestTCPMessagingLoopback() noexcept;
 
 namespace Testing
 {

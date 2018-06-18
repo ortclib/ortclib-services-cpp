@@ -127,8 +127,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -142,8 +141,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -157,8 +155,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -172,8 +169,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -187,8 +183,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -202,8 +197,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4100;4238</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include\UWP;$(ProjectDir);$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -390,6 +384,12 @@
     <Xml Include="UnitTestApp.rd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\cryptopp\projects\msvs\cryptopp.Universal\cryptopp.vcxproj">
+      <Project>{cc14ffe5-0018-4d8d-bc2c-c93477ce081c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\idnkit\projects\msvc\idnkit.Universal\idnkit.vcxproj">
+      <Project>{b236bf5a-561d-4720-babf-f6119adf5793}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\udns\projects\msvs\udns.Universal\udns.vcxproj">
       <Project>{6c13dfe2-3aa7-40b9-919c-5e95e47fc321}</Project>
     </ProjectReference>
@@ -398,6 +398,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\zsLib\projects\msvs\zsLib.Universal\zsLib.vcxproj">
       <Project>{55555c53-504f-4237-abc0-b2f59558a0e9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ortclib.services.Universal\ortclib.services.vcxproj">
+      <Project>{cc03fba3-9028-47ad-b931-13b12db368f8}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
