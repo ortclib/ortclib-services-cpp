@@ -29,9 +29,6 @@
 
  */
 #define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
-#ifdef _WIN32
-#define NOMINMAX
-#endif //WIN32
 
 #include <ortc/services/internal/services_ICESocketSession.h>
 #include <ortc/services/internal/services_ICESocket.h>
