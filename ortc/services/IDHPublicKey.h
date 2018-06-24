@@ -41,27 +41,27 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IDHPublicKey
-    #pragma mark
+    //
+    // IDHPublicKey
+    //
 
     interaction IDHPublicKey
     {
-      static ElementPtr toDebug(IDHPublicKeyPtr publicKey);
+      static ElementPtr toDebug(IDHPublicKeyPtr publicKey) noexcept;
 
       static IDHPublicKeyPtr load(
                                   const SecureByteBlock &staticPublicKey,
                                   const SecureByteBlock &ephemeralPublicKey
-                                  );
+                                  ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       virtual void save(
                         SecureByteBlock *outStaticPublicKey,    // pass NULL to not save this value
                         SecureByteBlock *outEphemeralPublicKey  // pass NULL to not save this value
-                        ) const = 0;
+                        ) const noexcept = 0;
 
-      virtual String getFingerprint() const = 0;
+      virtual String getFingerprint() const noexcept = 0;
     };
   }
 }

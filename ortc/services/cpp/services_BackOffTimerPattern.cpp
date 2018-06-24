@@ -55,23 +55,23 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerPatternForBackOffTimer
-      #pragma mark
+      //
+      // IBackOffTimerPatternForBackOffTimer
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerPattern
-      #pragma mark
+      //
+      // BackOffTimerPattern
+      //
 
       //-----------------------------------------------------------------------
       BackOffTimerPattern::BackOffTimerPattern(
                                                const make_private &,
                                                ElementPtr patternEl
-                                               ) :
+                                               ) noexcept :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
         ZS_LOG_DEBUG(log("created"))
@@ -161,7 +161,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::init()
+      void BackOffTimerPattern::init() noexcept
       {
         AutoRecursiveLock lock(*this);
         if (mAttemptTimeoutVector.size() > 0) {
@@ -179,7 +179,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPattern::~BackOffTimerPattern()
+      BackOffTimerPattern::~BackOffTimerPattern() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
@@ -188,13 +188,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr BackOffTimerPattern::convert(IBackOffTimerPatternPtr timer)
+      BackOffTimerPatternPtr BackOffTimerPattern::convert(IBackOffTimerPatternPtr timer) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(BackOffTimerPattern, timer);
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr BackOffTimerPattern::convert(ForBackOffTimerPtr timer)
+      BackOffTimerPatternPtr BackOffTimerPattern::convert(ForBackOffTimerPtr timer) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(BackOffTimerPattern, timer);
       }
@@ -203,12 +203,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerPattern => IBackOffTimerPattern
-      #pragma mark
+      //
+      // BackOffTimerPattern => IBackOffTimerPattern
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr BackOffTimerPattern::toDebug(IBackOffTimerPatternPtr pattern)
+      ElementPtr BackOffTimerPattern::toDebug(IBackOffTimerPatternPtr pattern) noexcept
       {
         if (!pattern) return ElementPtr();
 
@@ -217,13 +217,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr BackOffTimerPattern::create(const char *pattern)
+      BackOffTimerPatternPtr BackOffTimerPattern::create(const char *pattern) noexcept
       {
         return BackOffTimerPattern::create(IHelper::toJSON(pattern));
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr BackOffTimerPattern::create(ElementPtr patternEl)
+      BackOffTimerPatternPtr BackOffTimerPattern::create(ElementPtr patternEl) noexcept
       {
         BackOffTimerPatternPtr pThis(make_shared<BackOffTimerPattern>(make_private{}, patternEl));
         pThis->mThisWeak = pThis;
@@ -232,14 +232,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String BackOffTimerPattern::save() const
+      String BackOffTimerPattern::save() const noexcept
       {
         ElementPtr patternEl = saveToJSON();
         return IHelper::toString(patternEl);
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr BackOffTimerPattern::saveToJSON() const
+      ElementPtr BackOffTimerPattern::saveToJSON() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -273,49 +273,49 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::setMultiplierForLastAttemptTimeout(double multiplier)
+      void BackOffTimerPattern::setMultiplierForLastAttemptTimeout(double multiplier) noexcept
       {
         AutoRecursiveLock lock(*this);
         mAttemptTimeoutMultiplier = multiplier;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::setMaxAttempts(size_t maxAttempts)
+      void BackOffTimerPattern::setMaxAttempts(size_t maxAttempts) noexcept
       {
         AutoRecursiveLock lock(*this);
         mMaxAttempts = maxAttempts;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::setMultiplierForLastRetryAfterFailureDuration(double multiplier)
+      void BackOffTimerPattern::setMultiplierForLastRetryAfterFailureDuration(double multiplier) noexcept
       {
         AutoRecursiveLock lock(*this);
         mRetryMultiplier = multiplier;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::actualAddNextAttemptTimeout(Microseconds attemptTimeout)
+      void BackOffTimerPattern::actualAddNextAttemptTimeout(Microseconds attemptTimeout) noexcept
       {
         AutoRecursiveLock lock(*this);
         mAttemptTimeoutVector.push_back(attemptTimeout);
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::actualSetMaxAttemptTimeout(DurationType maxRetryDuration)
+      void BackOffTimerPattern::actualSetMaxAttemptTimeout(DurationType maxRetryDuration) noexcept
       {
         AutoRecursiveLock lock(*this);
         mMaxAttemptTimeout = maxRetryDuration;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::actualAddNextRetryAfterFailureDuration(Microseconds nextRetryDuration)
+      void BackOffTimerPattern::actualAddNextRetryAfterFailureDuration(Microseconds nextRetryDuration) noexcept
       {
         AutoRecursiveLock lock(*this);
         mRetryVector.push_back(nextRetryDuration);
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration)
+      void BackOffTimerPattern::actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration) noexcept
       {
         AutoRecursiveLock lock(*this);
         mMaxRetry = maxRetryDuration;
@@ -326,13 +326,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerPattern => IBackOffTimerPattern
-      #pragma mark
+      //
+      // BackOffTimerPattern => IBackOffTimerPattern
+      //
 
 
       //-----------------------------------------------------------------------
-      BackOffTimerPattern::ForBackOffTimerPtr BackOffTimerPattern::clone() const
+      BackOffTimerPattern::ForBackOffTimerPtr BackOffTimerPattern::clone() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -356,14 +356,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t BackOffTimerPattern::getMaxAttempts() const
+      size_t BackOffTimerPattern::getMaxAttempts() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mMaxAttempts;
       }
 
       //-----------------------------------------------------------------------
-      void BackOffTimerPattern::nextAttempt()
+      void BackOffTimerPattern::nextAttempt() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -399,14 +399,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      DurationType BackOffTimerPattern::getAttemptTimeout()
+      DurationType BackOffTimerPattern::getAttemptTimeout() noexcept
       {
         AutoRecursiveLock lock(*this);
         return mLastAttemptTimeout;
       }
 
       //-----------------------------------------------------------------------
-      DurationType BackOffTimerPattern::getRetryAfterDuration()
+      DurationType BackOffTimerPattern::getRetryAfterDuration() noexcept
       {
         AutoRecursiveLock lock(*this);
         return mLastRetryDuration;
@@ -416,12 +416,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerPattern => (internal)
-      #pragma mark
+      //
+      // BackOffTimerPattern => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params BackOffTimerPattern::log(const char *message) const
+      Log::Params BackOffTimerPattern::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("services::BackOffTimerPattern");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -429,19 +429,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params BackOffTimerPattern::slog(const char *message)
+      Log::Params BackOffTimerPattern::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::BackOffTimerPattern");
       }
 
       //-----------------------------------------------------------------------
-      Log::Params BackOffTimerPattern::debug(const char *message) const
+      Log::Params BackOffTimerPattern::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr BackOffTimerPattern::toDebug() const
+      ElementPtr BackOffTimerPattern::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -487,25 +487,25 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerPatternFactory
-      #pragma mark
+      //
+      // IBackOffTimerPatternFactory
+      //
 
       //-----------------------------------------------------------------------
-      IBackOffTimerPatternFactory &IBackOffTimerPatternFactory::singleton()
+      IBackOffTimerPatternFactory &IBackOffTimerPatternFactory::singleton() noexcept
       {
         return BackOffTimerPatternFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr IBackOffTimerPatternFactory::create(const char *pattern)
+      BackOffTimerPatternPtr IBackOffTimerPatternFactory::create(const char *pattern) noexcept
       {
         if (this) {}
         return BackOffTimerPattern::create(pattern);
       }
 
       //-----------------------------------------------------------------------
-      BackOffTimerPatternPtr IBackOffTimerPatternFactory::create(ElementPtr pattern)
+      BackOffTimerPatternPtr IBackOffTimerPatternFactory::create(ElementPtr pattern) noexcept
       {
         if (this) {}
         return BackOffTimerPattern::create(pattern);
@@ -517,24 +517,24 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimerPattern
-    #pragma mark
+    //
+    // IBackOffTimerPattern
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IBackOffTimerPattern::toDebug(IBackOffTimerPatternPtr timer)
+    ElementPtr IBackOffTimerPattern::toDebug(IBackOffTimerPatternPtr timer) noexcept
     {
       return internal::BackOffTimerPattern::toDebug(timer);
     }
 
     //-------------------------------------------------------------------------
-    IBackOffTimerPatternPtr IBackOffTimerPattern::create(const char *pattern)
+    IBackOffTimerPatternPtr IBackOffTimerPattern::create(const char *pattern) noexcept
     {
       return internal::IBackOffTimerPatternFactory::singleton().create(pattern);
     }
 
     //-------------------------------------------------------------------------
-    IBackOffTimerPatternPtr IBackOffTimerPattern::create(ElementPtr pattern)
+    IBackOffTimerPatternPtr IBackOffTimerPattern::create(ElementPtr pattern) noexcept
     {
       return internal::IBackOffTimerPatternFactory::singleton().create(pattern);
     }

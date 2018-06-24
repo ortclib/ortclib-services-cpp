@@ -46,9 +46,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHKeyDomainForDHPrivateKey
-      #pragma mark
+      //
+      // IDHKeyDomainForDHPrivateKey
+      //
 
       interaction IDHKeyDomainForDHPrivateKey
       {
@@ -56,18 +56,18 @@ namespace ortc
 
         typedef CryptoPP::DH DH;
 
-        virtual PUID getID() const = 0;
+        virtual PUID getID() const noexcept = 0;
 
-        virtual DH &getDH() const = 0;
+        virtual DH &getDH() const noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark DHKeyDomain
-      #pragma mark
+      //
+      // DHKeyDomain
+      //
 
       class DHKeyDomain : public Noop,
                           public IDHKeyDomain,
@@ -83,76 +83,76 @@ namespace ortc
         typedef CryptoPP::DH DH;
 
       public:
-        DHKeyDomain(const make_private &);
+        DHKeyDomain(const make_private &) noexcept;
 
       protected:
-        DHKeyDomain(Noop) : Noop(true) {};
+        DHKeyDomain(Noop) noexcept : Noop(true) {};
 
       public:
         ~DHKeyDomain();
 
-        static DHKeyDomainPtr convert(IDHKeyDomainPtr privateKey);
-        static DHKeyDomainPtr convert(ForDHPrivateKeyPtr object);
+        static DHKeyDomainPtr convert(IDHKeyDomainPtr privateKey) noexcept;
+        static DHKeyDomainPtr convert(ForDHPrivateKeyPtr object) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHKeyDomain => IDHKeyDomain
-        #pragma mark
+        //
+        // DHKeyDomain => IDHKeyDomain
+        //
 
-        static ElementPtr toDebug(IDHKeyDomainPtr keyDomain);
+        static ElementPtr toDebug(IDHKeyDomainPtr keyDomain) noexcept;
 
-        static DHKeyDomainPtr generate(size_t keySizeInBits);
+        static DHKeyDomainPtr generate(size_t keySizeInBits) noexcept;
 
         static DHKeyDomainPtr loadPrecompiled(
                                               IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
                                               bool validate
-                                              );
+                                              ) noexcept;
 
         static DHKeyDomainPtr load(
                                    const SecureByteBlock &p,
                                    const SecureByteBlock &q,
                                    const SecureByteBlock &g,
                                    bool validate = true
-                                   );
+                                   ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
-        virtual KeyDomainPrecompiledTypes getPrecompiledType() const;
+        virtual KeyDomainPrecompiledTypes getPrecompiledType() const noexcept;
 
         virtual void save(
                           SecureByteBlock &p,
                           SecureByteBlock &q,
                           SecureByteBlock &g
-                          ) const;
+                          ) const noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHKeyDomain => IDHKeyDomainForDHPrivateKey
-        #pragma mark
+        //
+        // DHKeyDomain => IDHKeyDomainForDHPrivateKey
+        //
 
         // (duplicate) virtual PUID getID() const;
 
-        virtual DH &getDH() const;
+        virtual DH &getDH() const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHKeyDomain => (internal)
-        #pragma mark
+        //
+        // DHKeyDomain => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        bool validate() const;
+        bool validate() const noexcept;
 
       private:
         //-------------------------------------------------------------------
-        #pragma mark
-        #pragma mark DHKeyDomain => (data)
-        #pragma mark
+        //
+        // DHKeyDomain => (data)
+        //
 
         AutoPUID mID;
         mutable DH mDH;
@@ -162,27 +162,27 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IDHKeyDomainFactory
-      #pragma mark
+      //
+      // IDHKeyDomainFactory
+      //
 
       interaction IDHKeyDomainFactory
       {
-        static IDHKeyDomainFactory &singleton();
+        static IDHKeyDomainFactory &singleton() noexcept;
 
-        virtual DHKeyDomainPtr generate(size_t keySizeInBits);
+        virtual DHKeyDomainPtr generate(size_t keySizeInBits) noexcept;
 
         virtual DHKeyDomainPtr loadPrecompiled(
                                                IDHKeyDomain::KeyDomainPrecompiledTypes precompiledKey,
                                                bool validate
-                                               );
+                                               ) noexcept;
 
         virtual DHKeyDomainPtr load(
                                     const SecureByteBlock &p,
                                     const SecureByteBlock &q,
                                     const SecureByteBlock &g,
                                     bool validate
-                                    );
+                                    ) noexcept;
       };
 
       class DHKeyDomainFactory : public IFactory<IDHKeyDomainFactory> {};

@@ -41,13 +41,13 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ICanonicalXML
-    #pragma mark
+    //
+    // ICanonicalXML
+    //
 
     interaction ICanonicalXML
     {
-      static String convert(zsLib::XML::ElementPtr element);
+      static String convert(zsLib::XML::ElementPtr element) noexcept;
     };
   }
 }

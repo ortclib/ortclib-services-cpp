@@ -83,12 +83,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static size_t dwordBoundary(size_t length)
+      static size_t dwordBoundary(size_t length) noexcept
       {
         if (0 == (length % sizeof(DWORD)))
           return length;
@@ -96,7 +96,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static const char *toString(ITURNSocket::TURNSocketStates state)
+      static const char *toString(ITURNSocket::TURNSocketStates state) noexcept
       {
         switch (state)
         {
@@ -106,11 +106,12 @@ namespace ortc
           case ITURNSocket::TURNSocketState_Shutdown:     return "Shutdown";
           default: break;
         }
+        ZS_ASSERT_FAIL("unknown turn socket state");
         return "UNDEFINED";
       }
 
       //-----------------------------------------------------------------------
-      static const char *toString(ITURNSocket::TURNSocketErrors error)
+      static const char *toString(ITURNSocket::TURNSocketErrors error) noexcept
       {
         switch (error)
         {
@@ -123,6 +124,7 @@ namespace ortc
           case ITURNSocket::TURNSocketError_BogusDataOnSocketReceived:  return "Bogus data on socket received";
           default: break;
         }
+        ZS_ASSERT_FAIL("unknown turn socket state");
         return "UNDEFINED";
       }
 
@@ -130,28 +132,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocketSettingsDefaults
-      #pragma mark
+      //
+      // TURNSocketSettingsDefaults
+      //
 
       class TURNSocketSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~TURNSocketSettingsDefaults()
+        ~TURNSocketSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static TURNSocketSettingsDefaultsPtr singleton()
+        static TURNSocketSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<TURNSocketSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static TURNSocketSettingsDefaultsPtr create()
+        static TURNSocketSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<TURNSocketSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -159,7 +161,7 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_TCP, false);
           ISettings::setBool(ORTC_SERVICES_SETTING_TURN_SOCKET_FORCE_TURN_TO_USE_UDP, false);
@@ -169,7 +171,7 @@ namespace ortc
       };
 
       //-------------------------------------------------------------------------
-      void installTURNSocketSettingsDefaults()
+      void installTURNSocketSettingsDefaults() noexcept
       {
         TURNSocketSettingsDefaults::singleton();
       }
@@ -178,9 +180,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket
-      #pragma mark
+      //
+      // TURNSocket
+      //
 
       //-----------------------------------------------------------------------
       TURNSocket::TURNSocket(
@@ -188,7 +190,7 @@ namespace ortc
                              IMessageQueuePtr queue,
                              ITURNSocketDelegatePtr delegate,
                              const CreationOptions &options
-                             ) :
+                             ) noexcept :
         MessageQueueAssociator(queue),
         mCurrentState(TURNSocketState_Pending),
         mLastError(TURNSocketError_None),
@@ -212,7 +214,7 @@ namespace ortc
         ZS_EVENTING_TRACE_OBJECT_PTR(Debug, mOptions.mSRVUDP, "turn socket options SRV UDP");
         ZS_EVENTING_TRACE_OBJECT_PTR(Debug, mOptions.mSRVTCP, "turn socket options SRV TCP");
 
-        ZS_THROW_INVALID_USAGE_IF((mOptions.mServers.size() < 1) && (!mOptions.mSRVUDP) && (!mOptions.mSRVTCP));
+        ZS_ASSERT(!((mOptions.mServers.size() < 1) && (!mOptions.mSRVUDP) && (!mOptions.mSRVTCP)));
 
         ZS_EVENTING_8(
                       x, i, Detail, ServicesTurnSocketCreate, os, TurnSocket, Start,
@@ -225,12 +227,12 @@ namespace ortc
                       word, limitChannelToRangeStart, mOptions.mLimitChannelToRangeStart,
                       word, limitChannelToRangeEnd, mOptions.mLimitChannelToRangeEnd
                       );
-        ZS_THROW_INVALID_USAGE_IF(mOptions.mLimitChannelToRangeStart > mOptions.mLimitChannelToRangeEnd)
+        ZS_ASSERT(mOptions.mLimitChannelToRangeStart <= mOptions.mLimitChannelToRangeEnd);
         ZS_LOG_DETAIL(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::init()
+      void TURNSocket::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
         ZS_LOG_DETAIL(debug("init"))
@@ -247,7 +249,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TURNSocket::~TURNSocket()
+      TURNSocket::~TURNSocket() noexcept
       {
         if(isNoop()) return;
         
@@ -260,7 +262,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TURNSocketPtr TURNSocket::convert(ITURNSocketPtr socket)
+      TURNSocketPtr TURNSocket::convert(ITURNSocketPtr socket) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(TURNSocket, socket);
       }
@@ -269,19 +271,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => ITURNSocket
-      #pragma mark
+      //
+      // TURNSocket => ITURNSocket
+      //
 
       //-----------------------------------------------------------------------
       TURNSocketPtr TURNSocket::create(
                                        IMessageQueuePtr queue,
                                        ITURNSocketDelegatePtr delegate,
                                        const CreationOptions &options
-                                       )
+                                       ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!queue);
-        ZS_THROW_INVALID_USAGE_IF(!delegate);
+        ZS_ASSERT(queue);
+        ZS_ASSERT(delegate);
 
         TURNSocketPtr pThis(make_shared<TURNSocket>(make_private {}, queue, delegate, options));
         pThis->mThisWeak = pThis;
@@ -290,28 +292,28 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr TURNSocket::toDebug(ITURNSocketPtr socket)
+      ElementPtr TURNSocket::toDebug(ITURNSocketPtr socket) noexcept
       {
         if (!socket) return ElementPtr();
         return TURNSocket::convert(socket)->toDebug();
       }
 
       //-----------------------------------------------------------------------
-      ITURNSocket::TURNSocketStates TURNSocket::getState() const
+      ITURNSocket::TURNSocketStates TURNSocket::getState() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mCurrentState;
       }
 
       //-----------------------------------------------------------------------
-      ITURNSocket::TURNSocketErrors TURNSocket::getLastError() const
+      ITURNSocket::TURNSocketErrors TURNSocket::getLastError() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mLastError;
       }
 
       //-----------------------------------------------------------------------
-      bool TURNSocket::isRelayingUDP() const
+      bool TURNSocket::isRelayingUDP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!isReady()) {
@@ -319,14 +321,14 @@ namespace ortc
           return false;
         }
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+        ZS_ASSERT(mActiveServer);
 
         ZS_LOG_DEBUG(log("is relaying UDP") + ZS_PARAM("relaying UDP", mActiveServer->mIsUDP))
         return mActiveServer->mIsUDP;
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::shutdown()
+      void TURNSocket::shutdown() noexcept
       {
         AutoRecursiveLock lock(mLock);
         mLastError = TURNSocketError_UserRequestedShutdown;
@@ -340,7 +342,7 @@ namespace ortc
                                   const BYTE *buffer,
                                   size_t bufferLengthInBytes,
                                   bool bindChannelIfPossible
-                                  )
+                                  ) noexcept
       {
         //ServicesTurnSocketSendPacket(__func__, mID, destination.string(), bufferLengthInBytes, buffer, bindChannelIfPossible);
         ZS_EVENTING_5(
@@ -396,7 +398,7 @@ namespace ortc
             return false;
           }
 
-          ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+          ZS_ASSERT(mActiveServer);
           server = mActiveServer;
 
           // scope: first, we check if there is a binded channel to this address
@@ -516,14 +518,14 @@ namespace ortc
           }
         } while(false);
 
-        ZS_THROW_BAD_STATE_IF(!packet)  // how is this possible?
+        ZS_ASSERT(packet);  // how is this possible?
 
         // we are free to send the data now since there is a permission installed...
         return sendPacketOrDopPacketIfBufferFull(server, *packet, packet->SizeInBytes());
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getActiveServerIP() const
+      IPAddress TURNSocket::getActiveServerIP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!mActiveServer) return IPAddress();
@@ -531,21 +533,21 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getRelayedIP() const
+      IPAddress TURNSocket::getRelayedIP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mRelayedIP;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getReflectedIP() const
+      IPAddress TURNSocket::getReflectedIP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mReflectedIP;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TURNSocket::getServerResponseIP() const
+      IPAddress TURNSocket::getServerResponseIP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mAllocateResponseIP;
@@ -555,9 +557,9 @@ namespace ortc
       bool TURNSocket::handleSTUNPacket(
                                         IPAddress fromIPAddress,
                                         STUNPacketPtr turnPacket
-                                        )
+                                        ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!turnPacket)
+        ZS_ASSERT(turnPacket);
 
         if (STUNPacket::Method_Data != turnPacket->mMethod) {
           // see if the ISTUNRequesterManager can handle this packet...
@@ -603,13 +605,13 @@ namespace ortc
                                          IPAddress fromIPAddress,
                                          const BYTE *buffer,
                                          size_t bufferLengthInBytes
-                                         )
+                                         ) noexcept
       {
         // WARNING: Do not call any delegates synchronously from within this
         //          method as this method was called from a synchronous
         //          delegate already.
-        ZS_THROW_INVALID_USAGE_IF(!buffer)
-        ZS_THROW_INVALID_USAGE_IF(0 == bufferLengthInBytes)
+        ZS_ASSERT(buffer);
+        ZS_ASSERT(bufferLengthInBytes > 0);
 
         {
           AutoRecursiveLock lock(mLock);
@@ -677,7 +679,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::notifyWriteReady()
+      void TURNSocket::notifyWriteReady() noexcept
       {
         AutoRecursiveLock lock(mLock);
 
@@ -695,9 +697,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => IWakeDelegate
-      #pragma mark
+      //
+      // TURNSocket => IWakeDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onWake()
@@ -710,9 +712,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => ISTUNRequesterDelegate
-      #pragma mark
+      //
+      // TURNSocket => ISTUNRequesterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onSTUNRequesterSendPacket(
@@ -770,7 +772,7 @@ namespace ortc
                                                    ISTUNRequesterPtr requester,
                                                    IPAddress fromIPAddress,
                                                    STUNPacketPtr response
-                                                   )
+                                                   ) noexcept
       {
         ZS_EVENTING_3(
                       x, i, Trace, ServicesTurnSocketRequesterReceivedStunResponse, os, TurnSocket, Receive,
@@ -882,9 +884,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => IDNSDelegate
-      #pragma mark
+      //
+      // TURNSocket => IDNSDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onLookupCompleted(IDNSQueryPtr query)
@@ -905,9 +907,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => ISocketDelegate
-      #pragma mark
+      //
+      // TURNSocket => ISocketDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onReadReady(SocketPtr socket)
@@ -1254,9 +1256,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => ITimer
-      #pragma mark
+      //
+      // TURNSocket => ITimer
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onTimer(ITimerPtr timer)
@@ -1361,9 +1363,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => IBackgroundingDelegate
-      #pragma mark
+      //
+      // TURNSocket => IBackgroundingDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TURNSocket::onBackgroundingGoingToBackground(
@@ -1455,12 +1457,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket => (internal)
-      #pragma mark
+      //
+      // TURNSocket => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params TURNSocket::log(const char *message) const
+      Log::Params TURNSocket::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("TURNSocket");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -1468,20 +1470,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params TURNSocket::debug(const char *message) const
+      Log::Params TURNSocket::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::fix(STUNPacketPtr stun) const
+      void TURNSocket::fix(STUNPacketPtr stun) const noexcept
       {
         stun->mLogObject = "TURNSocket";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr TURNSocket::toDebug() const
+      ElementPtr TURNSocket::toDebug() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         ElementPtr resultEl = Element::create("TURNSocket");
@@ -1546,13 +1548,13 @@ namespace ortc
       static bool hasAddedBefore(
                                  const IPAddressList &alreadyAdded,
                                  const IPAddress &server
-                                 )
+                                 ) noexcept
       {
         return alreadyAdded.end() != find(alreadyAdded.begin(), alreadyAdded.end(), server);
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::step()
+      void TURNSocket::step() noexcept
       {
         if ((isShutdown()) ||
             (isShuttingDown())) {
@@ -1679,7 +1681,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool TURNSocket::stepDNSLookupNextServer()
+      bool TURNSocket::stepDNSLookupNextServer() noexcept
       {
         if (mTURNUDPQuery) {
           if (!mTURNUDPQuery->isComplete()) {
@@ -1805,7 +1807,7 @@ namespace ortc
       IPAddress TURNSocket::stepGetNextServer(
                                               IPAddressList &previouslyAdded,
                                               SRVResultPtr &srv
-                                              )
+                                              ) noexcept
       {
         IPAddress result;
 
@@ -1837,7 +1839,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool TURNSocket::stepPrepareServers()
+      bool TURNSocket::stepPrepareServers() noexcept
       {
         if ((mServers.size() > 0) ||
             (mActiveServer)) {
@@ -1905,7 +1907,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::cancel()
+      void TURNSocket::cancel() noexcept
       {
         //ServicesTurnSocketCancel(__func__, mID);
         ZS_EVENTING_1(x, i, Debug, ServicesTurnSocketCancel, os, TurnSocket, Cancel, puid, id, mID);
@@ -2060,7 +2062,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::setState(TURNSocketStates newState)
+      void TURNSocket::setState(TURNSocketStates newState) noexcept
       {
         if (mCurrentState == newState) return;
 
@@ -2090,7 +2092,7 @@ namespace ortc
       void TURNSocket::consumeBuffer(
                                      ServerPtr &server,
                                      size_t consumeSizeInBytes
-                                     )
+                                     ) noexcept
       {
         size_t remaining = (server->mReadBufferFilledSizeInBytes > consumeSizeInBytes ? server->mReadBufferFilledSizeInBytes - consumeSizeInBytes : 0);
         if (0 == remaining) {
@@ -2107,7 +2109,7 @@ namespace ortc
                                                ISTUNRequesterPtr requester,
                                                IPAddress fromIPAddress,
                                                STUNPacketPtr response
-                                               )
+                                               ) noexcept
       {
         ServerPtr server;
         ServerList::iterator found = mServers.end();
@@ -2253,7 +2255,7 @@ namespace ortc
       bool TURNSocket::handleDeallocRequester(
                                               ISTUNRequesterPtr requester,
                                               STUNPacketPtr response
-                                              )
+                                              ) noexcept
       {
         if (requester != mDeallocateRequester) return false;
 
@@ -2283,7 +2285,7 @@ namespace ortc
       bool TURNSocket::handleRefreshRequester(
                                               ISTUNRequesterPtr requester,
                                               STUNPacketPtr response
-                                              )
+                                              ) noexcept
       {
         if (requester != mRefreshRequester) return false;
 
@@ -2332,7 +2334,7 @@ namespace ortc
       bool TURNSocket::handlePermissionRequester(
                                                  ISTUNRequesterPtr requester,
                                                  STUNPacketPtr response
-                                                 )
+                                                 ) noexcept
       {
         Permission::PendingDataList tempList;
 
@@ -2341,7 +2343,7 @@ namespace ortc
           AutoRecursiveLock lock(mLock);
           if (requester != mPermissionRequester) return false;
 
-          ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+          ZS_ASSERT(mActiveServer);
 
           mPermissionRequester = handleAuthorizationErrors(requester, response);
           if (mPermissionRequester) {
@@ -2419,7 +2421,7 @@ namespace ortc
       bool TURNSocket::handleChannelRequester(
                                               ISTUNRequesterPtr requester,
                                               STUNPacketPtr response
-                                              )
+                                              ) noexcept
       {
         ChannelInfoPtr found;
         // find the requester to which this response belongs...
@@ -2462,7 +2464,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::requestPermissionsNow()
+      void TURNSocket::requestPermissionsNow() noexcept
       {
         // we don't care of the previous permissions succeeded or not, we are going to send one right now
         clearPermissionRequester();
@@ -2548,7 +2550,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::refreshNow()
+      void TURNSocket::refreshNow() noexcept
       {
         if (mRefreshRequester) {
           ZS_LOG_TRACE(log("refresh timer not started as already have an outstanding refresh requester"))
@@ -2562,9 +2564,9 @@ namespace ortc
 
         mLastRefreshTimerWasSentAt = zsLib::now();
 
-        ZS_LOG_DEBUG(log("refresh requester starting now"))
+        ZS_LOG_DEBUG(log("refresh requester starting now"));
 
-        ZS_THROW_INVALID_ASSUMPTION_IF(!mActiveServer)
+        ZS_ASSERT(mActiveServer);
 
         // this is the refresh timer... time to perform another refresh now...
         STUNPacketPtr newRequest = STUNPacket::createRequest(STUNPacket::Method_Refresh);
@@ -2593,7 +2595,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void TURNSocket::refreshChannels()
+      void TURNSocket::refreshChannels() noexcept
       {
         // scope: clean out any channels that haven't seen data in a while
         {
@@ -2660,7 +2662,7 @@ namespace ortc
                                                          ServerPtr server,
                                                          const BYTE *buffer,
                                                          size_t bufferSizeInBytes
-                                                         )
+                                                         ) noexcept
       {
         ITURNSocketDelegatePtr delegate;
         TURNSocketPtr pThis;
@@ -2674,7 +2676,7 @@ namespace ortc
             return false;
           }
 
-          ZS_THROW_INVALID_ARGUMENT_IF(!server)
+          ZS_ASSERT(server);
 
           if (!server->mIsUDP) {
             if ((server->mTCPSocket) &&
@@ -2707,9 +2709,9 @@ namespace ortc
                                                            ServerPtr server,
                                                            const BYTE *buffer,
                                                            size_t bufferSizeInBytes
-                                                           )
+                                                           ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!server)
+        ZS_ASSERT(server);
 
         if (isShutdown()) {
           ORTC_SERVICES_WIRE_LOG_WARNING(Debug, log("send packet failed as TURN socket is shutdown") + ZS_PARAM("server IP", server->mServerIP.string()))
@@ -2820,7 +2822,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::informWriteReady()
+      void TURNSocket::informWriteReady() noexcept
       {
         if (isShutdown()) return;
 
@@ -2843,7 +2845,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      WORD TURNSocket::getNextChannelNumber()
+      WORD TURNSocket::getNextChannelNumber() noexcept
       {
         if (mChannelNumberMap.size() > 100) return 0; // already too many allocations - do not do a bind...
 
@@ -2865,7 +2867,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ISTUNRequesterPtr TURNSocket::handleAuthorizationErrors(ISTUNRequesterPtr requester, STUNPacketPtr response)
+      ISTUNRequesterPtr TURNSocket::handleAuthorizationErrors(ISTUNRequesterPtr requester, STUNPacketPtr response) noexcept
       {
         if (0 == response->mErrorCode) return ISTUNRequesterPtr();
         if (STUNPacket::Class_ErrorResponse != response->mClass) return ISTUNRequesterPtr();
@@ -2923,7 +2925,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TURNSocket::clearBackgroundingNotifierIfPossible()
+      void TURNSocket::clearBackgroundingNotifierIfPossible() noexcept
       {
         if (!mBackgroundingNotifier) return;
         if (mRefreshRequester) return;
@@ -2939,19 +2941,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket::Server
-      #pragma mark
+      //
+      // TURNSocket::Server
+      //
 
       //-----------------------------------------------------------------------
-      TURNSocket::Server::Server()
+      TURNSocket::Server::Server() noexcept
       {
         memset(&(mReadBuffer[0]), 0, sizeof(mReadBuffer));
         memset(&(mWriteBuffer[0]), 0, sizeof(mWriteBuffer));
       }
 
       //-----------------------------------------------------------------------
-      TURNSocket::Server::~Server()
+      TURNSocket::Server::~Server() noexcept
       {
         if (mTCPSocket) {
           mTCPSocket->close();
@@ -2964,14 +2966,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TURNSocket::ServerPtr TURNSocket::Server::create()
+      TURNSocket::ServerPtr TURNSocket::Server::create() noexcept
       {
         ServerPtr pThis(make_shared<Server>());
         return pThis;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr TURNSocket::Server::toDebug() const
+      ElementPtr TURNSocket::Server::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("TURNSocket::Server");
 
@@ -2992,12 +2994,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket::CompareIP
-      #pragma mark
+      //
+      // TURNSocket::CompareIP
+      //
 
       //-----------------------------------------------------------------------
-      bool TURNSocket::CompareIP::operator()(const IPAddress &op1, const IPAddress &op2) const
+      bool TURNSocket::CompareIP::operator()(const IPAddress &op1, const IPAddress &op2) const noexcept
       {
         return op1 < op2;
       }
@@ -3006,12 +3008,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket::Permission
-      #pragma mark
+      //
+      // TURNSocket::Permission
+      //
 
       //-----------------------------------------------------------------------
-      TURNSocket::PermissionPtr TURNSocket::Permission::create()
+      TURNSocket::PermissionPtr TURNSocket::Permission::create() noexcept
       {
         PermissionPtr pThis(make_shared<Permission>());
         pThis->mInstalled = false;
@@ -3023,12 +3025,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket::ChannelInfo
-      #pragma mark
+      //
+      // TURNSocket::ChannelInfo
+      //
 
       //-----------------------------------------------------------------------
-      TURNSocket::ChannelInfoPtr TURNSocket::ChannelInfo::create()
+      TURNSocket::ChannelInfoPtr TURNSocket::ChannelInfo::create() noexcept
       {
         ChannelInfoPtr pThis(make_shared<ChannelInfo>());
         pThis->mBound = 0;
@@ -3041,12 +3043,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITURNSocketFactory
-      #pragma mark
+      //
+      // ITURNSocketFactory
+      //
 
       //-----------------------------------------------------------------------
-      ITURNSocketFactory &ITURNSocketFactory::singleton()
+      ITURNSocketFactory &ITURNSocketFactory::singleton() noexcept
       {
         return TURNSocketFactory::singleton();
       }
@@ -3056,7 +3058,7 @@ namespace ortc
                                                IMessageQueuePtr queue,
                                                ITURNSocketDelegatePtr delegate,
                                                const CreationOptions &options
-                                               )
+                                               ) noexcept
       {
         if (this) {}
         return TURNSocket::create(queue, delegate, options);
@@ -3068,18 +3070,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITURNSocket
-    #pragma mark
+    //
+    // ITURNSocket
+    //
 
     //-------------------------------------------------------------------------
-    const char *ITURNSocket::toString(TURNSocketStates state)
+    const char *ITURNSocket::toString(TURNSocketStates state) noexcept
     {
       return internal::toString(state);
     }
 
     //-------------------------------------------------------------------------
-    const char *ITURNSocket::toString(TURNSocketErrors error)
+    const char *ITURNSocket::toString(TURNSocketErrors error) noexcept
     {
       return internal::toString(error);
     }
@@ -3089,13 +3091,13 @@ namespace ortc
                                        IMessageQueuePtr queue,
                                        ITURNSocketDelegatePtr delegate,
                                        const CreationOptions &options
-                                       )
+                                       ) noexcept
     {
       return internal::ITURNSocketFactory::singleton().create(queue, delegate, options);
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr ITURNSocket::toDebug(ITURNSocketPtr socket)
+    ElementPtr ITURNSocket::toDebug(ITURNSocketPtr socket) noexcept
     {
       return internal::TURNSocket::toDebug(socket);
     }

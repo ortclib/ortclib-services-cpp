@@ -29,9 +29,6 @@
 
  */
 #define ZS_DECLARE_TEMPLATE_GENERATE_IMPLEMENTATION
-#ifdef _WIN32
-#define NOMINMAX
-#endif //WIN32
 
 #include <ortc/services/internal/services_ICESocketSession.h>
 #include <ortc/services/internal/services_ICESocket.h>
@@ -73,12 +70,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static QWORD randomQWORD()
+      static QWORD randomQWORD() noexcept
       {
         BYTE buffer[sizeof(QWORD)];
 
@@ -89,7 +86,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static QWORD calculatePriority(const IICESocket::Candidate &controlling, const IICESocket::Candidate &controlled) {
+      static QWORD calculatePriority(const IICESocket::Candidate &controlling, const IICESocket::Candidate &controlled) noexcept {
         QWORD priorityControlling = controlling.mPriority;
         QWORD priorityControlled = controlled.mPriority;
 
@@ -100,7 +97,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool comparePairControlling(const ICESocketSession::CandidatePairPtr pair1, const ICESocketSession::CandidatePairPtr pair2) {
+      static bool comparePairControlling(const ICESocketSession::CandidatePairPtr pair1, const ICESocketSession::CandidatePairPtr pair2) noexcept {
         QWORD priorityPair1 = calculatePriority(pair1->mLocal, pair1->mRemote);
         QWORD priorityPair2 = calculatePriority(pair2->mLocal, pair2->mRemote);
 
@@ -108,7 +105,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static bool comparePairControlled(const ICESocketSession::CandidatePairPtr pair1, const ICESocketSession::CandidatePairPtr pair2) {
+      static bool comparePairControlled(const ICESocketSession::CandidatePairPtr pair1, const ICESocketSession::CandidatePairPtr pair2) noexcept {
         QWORD priorityPair1 = calculatePriority(pair1->mRemote, pair1->mLocal);
         QWORD priorityPair2 = calculatePriority(pair2->mRemote, pair2->mLocal);
 
@@ -116,7 +113,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static IICESocket::Types normalize(IICESocket::Types transport)
+      static IICESocket::Types normalize(IICESocket::Types transport) noexcept
       {
         if (transport == ICESocket::Type_Relayed)
           return ICESocket::Type_Relayed;
@@ -124,7 +121,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      static IPAddress getViaLocalIP(const ICESocket::Candidate &candidate)
+      static IPAddress getViaLocalIP(const ICESocket::Candidate &candidate) noexcept
       {
         switch (candidate.mType) {
           case IICESocket::Type_Unknown:          break;
@@ -141,7 +138,7 @@ namespace ortc
                                    const ICESocketSession::CandidatePairPtr &pair,
                                    const IICESocket::Candidate &viaLocalCandidate,
                                    const IPAddress &source
-                                   )
+                                   ) noexcept
       {
         if (!pair) return false;
         if (!pair->mRemote.mIPAddress.isEqualIgnoringIPv4Format(source)) return false;
@@ -157,28 +154,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSessionSettingsDefaults
-      #pragma mark
+      //
+      // ICESocketSessionSettingsDefaults
+      //
 
       class ICESocketSessionSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~ICESocketSessionSettingsDefaults()
+        ~ICESocketSessionSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static ICESocketSessionSettingsDefaultsPtr singleton()
+        static ICESocketSessionSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<ICESocketSessionSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static ICESocketSessionSettingsDefaultsPtr create()
+        static ICESocketSessionSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<ICESocketSessionSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -186,14 +183,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_SETTING_ICESOCKETSESSION_BACKGROUNDING_PHASE, 4);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installICESocketSessionSettingsDefaults()
+      void installICESocketSessionSettingsDefaults() noexcept
       {
         ICESocketSessionSettingsDefaults::singleton();
       }
@@ -202,20 +199,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketSessionForICESocket
-      #pragma mark
+      //
+      // IICESocketSessionForICESocket
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession::CandidatePair
-      #pragma mark
+      //
+      // ICESocketSession::CandidatePair
+      //
 
       //-----------------------------------------------------------------------
-      ICESocketSession::CandidatePairPtr ICESocketSession::CandidatePair::create()
+      ICESocketSession::CandidatePairPtr ICESocketSession::CandidatePair::create() noexcept
       {
         CandidatePairPtr pThis(make_shared<CandidatePair>());
         pThis->mReceivedRequest = false;
@@ -225,7 +222,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr ICESocketSession::CandidatePair::toDebug() const
+      ElementPtr ICESocketSession::CandidatePair::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("IICESocket::CandidatePair");
 
@@ -243,9 +240,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession
-      #pragma mark
+      //
+      // ICESocketSession
+      //
 
       //-----------------------------------------------------------------------
       ICESocketSession::ICESocketSession(
@@ -257,7 +254,7 @@ namespace ortc
                                          const char *remotePassword,
                                          ICEControls control,
                                          ICESocketSessionPtr foundation
-                                         ) :
+                                         ) noexcept :
         MessageQueueAssociator(queue),
         SharedRecursiveLock(*inSocket),
         mICESocket(inSocket),
@@ -283,7 +280,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::init()
+      void ICESocketSession::init() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -298,7 +295,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ICESocketSession::~ICESocketSession()
+      ICESocketSession::~ICESocketSession() noexcept
       {
         if (isNoop()) return;
         
@@ -308,13 +305,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ICESocketSessionPtr ICESocketSession::convert(IICESocketSessionPtr session)
+      ICESocketSessionPtr ICESocketSession::convert(IICESocketSessionPtr session) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(ICESocketSession, session);
       }
 
       //-----------------------------------------------------------------------
-      ICESocketSessionPtr ICESocketSession::convert(ForICESocketPtr session)
+      ICESocketSessionPtr ICESocketSession::convert(ForICESocketPtr session) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(ICESocketSession, session);
       }
@@ -323,12 +320,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => IICESocketSession
-      #pragma mark
+      //
+      // ICESocketSession => IICESocketSession
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr ICESocketSession::toDebug(IICESocketSessionPtr session)
+      ElementPtr ICESocketSession::toDebug(IICESocketSessionPtr session) noexcept
       {
         if (!session) return ElementPtr();
 
@@ -345,9 +342,9 @@ namespace ortc
                                                    const CandidateList &remoteCandidates,
                                                    ICEControls control,
                                                    IICESocketSessionPtr foundation
-                                                   )
+                                                   ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!inSocket)
+        ZS_ASSERT(inSocket);
 
         UseICESocketPtr socket = ICESocket::convert(inSocket);
 
@@ -364,7 +361,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IICESocketPtr ICESocketSession::getSocket()
+      IICESocketPtr ICESocketSession::getSocket() noexcept
       {
         UseICESocketPtr socket = mICESocket.lock();
         if (!socket) return IICESocketPtr();
@@ -372,7 +369,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IICESocketSessionSubscriptionPtr ICESocketSession::subscribe(IICESocketSessionDelegatePtr originalDelegate)
+      IICESocketSessionSubscriptionPtr ICESocketSession::subscribe(IICESocketSessionDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!originalDelegate) return mDefaultSubscription;
@@ -400,7 +397,7 @@ namespace ortc
       ICESocketSession::ICESocketSessionStates ICESocketSession::getState(
                                                                           WORD *outLastErrorCode,
                                                                           String *outLastErrorReason
-                                                                          ) const
+                                                                          ) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -409,7 +406,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::close()
+      void ICESocketSession::close() noexcept
       {
         ZS_LOG_DEBUG(log("close requested"))
         AutoRecursiveLock lock(*this);
@@ -417,35 +414,35 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::getLocalUsernameFrag() const
+      String ICESocketSession::getLocalUsernameFrag() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mLocalUsernameFrag;
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::getLocalPassword() const
+      String ICESocketSession::getLocalPassword() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mLocalPassword;
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::getRemoteUsernameFrag() const
+      String ICESocketSession::getRemoteUsernameFrag() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mRemoteUsernameFrag;
       }
 
       //-----------------------------------------------------------------------
-      String ICESocketSession::getRemotePassword() const
+      String ICESocketSession::getRemotePassword() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return mRemotePassword;
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::getLocalCandidates(CandidateList &outCandidates)
+      void ICESocketSession::getLocalCandidates(CandidateList &outCandidates) noexcept
       {
         outCandidates.clear();
 
@@ -457,7 +454,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::updateRemoteCandidates(const CandidateList &remoteCandidates)
+      void ICESocketSession::updateRemoteCandidates(const CandidateList &remoteCandidates) noexcept
       {
         ZS_LOG_DEBUG(log("updating remote candidates") + ZS_PARAM("size", remoteCandidates.size()))
         AutoRecursiveLock lock(*this);
@@ -467,7 +464,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::endOfRemoteCandidates()
+      void ICESocketSession::endOfRemoteCandidates() noexcept
       {
         ZS_LOG_DEBUG(log("end of remote candidates"))
 
@@ -482,7 +479,7 @@ namespace ortc
                                                     Milliseconds expectSTUNOrDataWithinWithinOrSendAliveCheck,
                                                     Milliseconds keepAliveSTUNRequestTimeout,
                                                     Milliseconds backgroundingTimeout
-                                                    )
+                                                    ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -515,7 +512,7 @@ namespace ortc
         mBackgroundingTimeout = backgroundingTimeout;
 
         if (Milliseconds() != mBackgroundingTimeout) {
-          ZS_THROW_INVALID_USAGE_IF(mBackgroundingTimeout < Seconds(ORTC_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS))
+          ZS_ASSERT(mBackgroundingTimeout >= Seconds(ORTC_SERVICES_ICESOCKETSESSION_BACKGROUNDING_TIMER_SECONDS));
         }
 
         ZS_LOG_DEBUG(log("forcing step to ensure all timers are properly created"))
@@ -526,7 +523,7 @@ namespace ortc
       bool ICESocketSession::sendPacket(
                                         const BYTE *packet,
                                         size_t packetLengthInBytes
-                                        )
+                                        ) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -546,14 +543,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ICESocketSession::ICEControls ICESocketSession::getConnectedControlState()
+      ICESocketSession::ICEControls ICESocketSession::getConnectedControlState() noexcept
       {
         AutoRecursiveLock lock(*this);
         return mControl;
       }
 
       //-----------------------------------------------------------------------
-      IPAddress ICESocketSession::getConnectedRemoteIP()
+      IPAddress ICESocketSession::getConnectedRemoteIP() noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!mNominated) return IPAddress();
@@ -564,7 +561,7 @@ namespace ortc
       bool ICESocketSession::getNominatedCandidateInformation(
                                                               Candidate &outLocal,
                                                               Candidate &outRemote
-                                                              )
+                                                              ) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) return false;
@@ -582,9 +579,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => IICESocketSessionForICESocket
-      #pragma mark
+      //
+      // ICESocketSession => IICESocketSessionForICESocket
+      //
 
       //-----------------------------------------------------------------------
       bool ICESocketSession::handleSTUNPacket(
@@ -593,9 +590,9 @@ namespace ortc
                                               STUNPacketPtr stun,
                                               const String &localUsernameFrag,
                                               const String &remoteUsernameFrag
-                                              )
+                                              ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!stun)
+        ZS_ASSERT(stun);
 
         ORTC_SERVICES_WIRE_LOG_DEBUG(log("handle stun packet") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("source", string(source)) + ZS_PARAM("local username frag", localUsernameFrag) + ZS_PARAM("remote username frag", remoteUsernameFrag) + ZS_PARAM("stun packet", stun->toDebug()))
 
@@ -864,7 +861,7 @@ namespace ortc
                                           const IPAddress &source,
                                           const BYTE *packet,
                                           size_t packetLengthInBytes
-                                          )
+                                          ) noexcept
       {
         // WARNING: This method calls a delegate synchronously thus must
         //          never be called from a method that is within a lock.
@@ -905,7 +902,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate)
+      void ICESocketSession::notifyLocalWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) return;
@@ -930,7 +927,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate)
+      void ICESocketSession::notifyRelayWriteReady(const IICESocket::Candidate &viaLocalCandidate) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) return;
@@ -958,9 +955,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => IWakeDelegate
-      #pragma mark
+      //
+      // ICESocketSession => IWakeDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocketSession::onWake()
@@ -974,16 +971,17 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => IICESocketDelegate
-      #pragma mark
+      //
+      // ICESocketSession => IICESocketDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocketSession::onICESocketStateChanged(
                                                      IICESocketPtr socket,
-                                                     ICESocketStates state
+                                                     ZS_MAYBE_USED() ICESocketStates state
                                                      )
       {
+        ZS_MAYBE_USED(state);
         AutoRecursiveLock lock(*this);
         ZS_LOG_DEBUG(log("on ice socket state changed"))
         step();
@@ -1010,9 +1008,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => ISTUNRequesterDelegate
-      #pragma mark
+      //
+      // ICESocketSession => ISTUNRequesterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocketSession::onSTUNRequesterSendPacket(
@@ -1060,7 +1058,7 @@ namespace ortc
                                                          ISTUNRequesterPtr requester,
                                                          IPAddress fromIPAddress,
                                                          STUNPacketPtr response
-                                                         )
+                                                         ) noexcept
       {
         ZS_LOG_TRACE(log("handle STUN requester response") + response->toDebug())
 
@@ -1071,7 +1069,7 @@ namespace ortc
             (requester == mAliveCheckRequester)) {
 
           CandidatePairPtr usePair = (requester == mNominateRequester ? mPendingNominatation : mNominated);
-          ZS_THROW_BAD_STATE_IF(!usePair)
+          ZS_ASSERT(usePair)
 
           if ((0 != response->mErrorCode) ||
               (response->mClass != STUNPacket::Class_Response)) {
@@ -1313,12 +1311,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => ITimerDelegate
-      #pragma mark
+      //
+      // ICESocketSession => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::sendKeepAliveNow()
+      void ICESocketSession::sendKeepAliveNow() noexcept
       {
         if (!mKeepAliveTimer) return;     // not legal to send keep alives right now
         if (mNominateRequester) return;   // can't do keep alives during a nomination process
@@ -1340,7 +1338,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::sendAliveCheckRequest()
+      void ICESocketSession::sendAliveCheckRequest() noexcept
       {
         if (!mExpectingDataTimer) return; // not legel to send alive check request right now
         if (mNominateRequester) return;   // can't do keep alives during a nomination process
@@ -1501,9 +1499,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => IBackgroundingDelegate
-      #pragma mark
+      //
+      // ICESocketSession => IBackgroundingDelegate
+      //
 
       //-----------------------------------------------------------------------
       void ICESocketSession::onBackgroundingGoingToBackground(
@@ -1568,12 +1566,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocketSession => (internal)
-      #pragma mark
+      //
+      // ICESocketSession => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params ICESocketSession::log(const char *message) const
+      Log::Params ICESocketSession::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("ICESocketSession");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -1581,20 +1579,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params ICESocketSession::debug(const char *message) const
+      Log::Params ICESocketSession::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::fix(STUNPacketPtr stun) const
+      void ICESocketSession::fix(STUNPacketPtr stun) const noexcept
       {
         stun->mLogObject = "ICESocketSession";
         stun->mLogObjectID = mID;
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr ICESocketSession::toDebug() const
+      ElementPtr ICESocketSession::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ElementPtr resultEl = Element::create("ICESocketSession");
@@ -1661,7 +1659,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::cancel()
+      void ICESocketSession::cancel() noexcept
       {
         AutoRecursiveLock lock(*this);  // just in case
         if (isShutdown()) {
@@ -1751,7 +1749,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::setState(ICESocketSessionStates state)
+      void ICESocketSession::setState(ICESocketSessionStates state) noexcept
       {
         if (mCurrentState == state) return;
 
@@ -1768,7 +1766,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::setError(WORD errorCode, const char *inReason)
+      void ICESocketSession::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -1787,7 +1785,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::step()
+      void ICESocketSession::step() noexcept
       {
         if (isShutdown()) {
           ZS_LOG_DEBUG(log("step forwarding to cancel"))
@@ -1816,7 +1814,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepSocket()
+      bool ICESocketSession::stepSocket() noexcept
       {
         ZS_LOG_TRACE(log("step socket"))
 
@@ -1862,7 +1860,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepCandidates()
+      bool ICESocketSession::stepCandidates() noexcept
       {
         ZS_LOG_TRACE(log("step candidates"))
 
@@ -2043,7 +2041,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepActivateTimer()
+      bool ICESocketSession::stepActivateTimer() noexcept
       {
         bool foundUnsearched = false;
 
@@ -2100,7 +2098,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepEndSearch()
+      bool ICESocketSession::stepEndSearch() noexcept
       {
         if (!mEndOfRemoteCandidatesFlag) {
           ZS_LOG_TRACE(log("no end of candidates flag set so continue search"))
@@ -2132,7 +2130,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepTimer()
+      bool ICESocketSession::stepTimer() noexcept
       {
         ZS_LOG_TRACE(log("step timer") + ZS_PARAM("needs timer", (bool)mNominated))
 
@@ -2151,7 +2149,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepExpectingDataTimer()
+      bool ICESocketSession::stepExpectingDataTimer() noexcept
       {
         bool needed =  ((mNominated) && (Milliseconds() != mExpectSTUNOrDataWithinDuration));
         ZS_LOG_TRACE(log("expecting data timer") + ZS_PARAM("needs timer", needed))
@@ -2172,7 +2170,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepKeepAliveTimer()
+      bool ICESocketSession::stepKeepAliveTimer() noexcept
       {
         bool needed =  ((mNominated) && (Milliseconds() != mKeepAliveDuration));
         ZS_LOG_TRACE(log("keep alive timer") + ZS_PARAM("needs timer", needed))
@@ -2193,7 +2191,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepCancelLowerPriority()
+      bool ICESocketSession::stepCancelLowerPriority() noexcept
       {
         if (!mNominated) {
           ZS_LOG_TRACE(log("cannot cancel until nominiated"))
@@ -2232,7 +2230,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::stepNominate()
+      bool ICESocketSession::stepNominate() noexcept
       {
         if (mNominateRequester) {
           ZS_LOG_TRACE(log("already nominating (cannot nominate again until nomination process is completed)"))
@@ -2370,7 +2368,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::stepNotifyNominated()
+      void ICESocketSession::stepNotifyNominated() noexcept
       {
         if (isShutdown()) return;
 
@@ -2383,7 +2381,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::switchRole(ICEControls newRole)
+      void ICESocketSession::switchRole(ICEControls newRole) noexcept
       {
         if (isShutdown()) return;
         if (newRole == mControl) return; // role did not switch
@@ -2416,7 +2414,7 @@ namespace ortc
                                     const BYTE *buffer,
                                     size_t bufferLengthInBytes,
                                     bool isUserData
-                                    )
+                                    ) noexcept
       {
         if (isShutdown()) {
           ZS_LOG_WARNING(Debug, log("cannot send packet as ICE session is closed") + ZS_PARAM("candidate", viaLocalCandidate.toDebug()) + ZS_PARAM("to ip", destination.string()) + ZS_PARAM("buffer", buffer ? true: false) + ZS_PARAM("buffer length", bufferLengthInBytes) + ZS_PARAM("user data", isUserData))
@@ -2433,9 +2431,9 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool ICESocketSession::canUnfreeze(CandidatePairPtr derivedPairing)
+      bool ICESocketSession::canUnfreeze(CandidatePairPtr derivedPairing) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!derivedPairing)
+        ZS_ASSERT(derivedPairing);
 
         AutoRecursiveLock lock(*this);
 
@@ -2463,7 +2461,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void ICESocketSession::clearBackgroundingNotifierIfPossible()
+      void ICESocketSession::clearBackgroundingNotifierIfPossible() noexcept
       {
         if (!mBackgroundingNotifier) return;
         if (mAliveCheckRequester) return;
@@ -2478,12 +2476,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketSessionFactory
-      #pragma mark
+      //
+      // IICESocketSessionFactory
+      //
 
       //-----------------------------------------------------------------------
-      IICESocketSessionFactory &IICESocketSessionFactory::singleton()
+      IICESocketSessionFactory &IICESocketSessionFactory::singleton() noexcept
       {
         return ICESocketSessionFactory::singleton();
       }
@@ -2497,7 +2495,7 @@ namespace ortc
                                                            const CandidateList &remoteCandidates,
                                                            ICEControls control,
                                                            IICESocketSessionPtr foundation
-                                                           )
+                                                           ) noexcept
       {
         if (this) {}
         return internal::ICESocketSession::create(delegate, socket, remoteUsernameFrag, remotePassword, remoteCandidates, control, foundation);
@@ -2509,18 +2507,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocketSession
-    #pragma mark
+    //
+    // IICESocketSession
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IICESocketSession::toDebug(IICESocketSessionPtr session)
+    ElementPtr IICESocketSession::toDebug(IICESocketSessionPtr session) noexcept
     {
       return internal::ICESocketSession::toDebug(session);
     }
 
     //-------------------------------------------------------------------------
-    const char *IICESocketSession::toString(ICESocketSessionStates state)
+    const char *IICESocketSession::toString(ICESocketSessionStates state) noexcept
     {
       switch (state) {
         case ICESocketSessionState_Pending:    return "Pending";
@@ -2532,11 +2530,12 @@ namespace ortc
         case ICESocketSessionState_Completed:  return "Completed";
         case ICESocketSessionState_Shutdown:   return "Shutdown";
       }
+      ZS_ASSERT_FAIL("unknown ice socket session type");
       return "UNDEFINED";
     }
 
     //-------------------------------------------------------------------------
-    const char *IICESocketSession::toString(ICESocketSessionShutdownReasons reason)
+    const char *IICESocketSession::toString(ICESocketSessionShutdownReasons reason) noexcept
     {
       switch (reason) {
         case ICESocketSessionShutdownReason_None:                   return "None";
@@ -2546,6 +2545,7 @@ namespace ortc
       return IHTTP::toString(IHTTP::toStatusCode((WORD)reason));
     }
 
+    //-------------------------------------------------------------------------
     IICESocketSessionPtr IICESocketSession::create(
                                                    IICESocketSessionDelegatePtr delegate,
                                                    IICESocketPtr socket,
@@ -2554,7 +2554,7 @@ namespace ortc
                                                    const CandidateList &remoteCandidates,
                                                    ICEControls control,
                                                    IICESocketSessionPtr foundation
-                                                   )
+                                                   ) noexcept
     {
       return internal::IICESocketSessionFactory::singleton().create(delegate, socket, remoteUsernameFrag, remotePassword, remoteCandidates, control, foundation);
     }

@@ -49,9 +49,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITCPMessaging
-    #pragma mark
+    //
+    // ITCPMessaging
+    //
 
     interaction ITCPMessaging
     {
@@ -65,19 +65,19 @@ namespace ortc
         SessionState_Shutdown
       };
 
-      static const char *toString(SessionStates state);
+      static const char *toString(SessionStates state) noexcept;
 
       struct ChannelHeader : public ITransportStream::StreamHeader
       {
-        ChannelHeader() : mChannelID(0) {}
-        virtual ~ChannelHeader() {}
+        ChannelHeader() noexcept : mChannelID(0) {}
+        virtual ~ChannelHeader() noexcept {}
 
-        static ChannelHeaderPtr convert(ITransportStream::StreamHeaderPtr header);
+        static ChannelHeaderPtr convert(ITransportStream::StreamHeaderPtr header) noexcept;
 
         DWORD mChannelID;
       };
 
-      static ElementPtr toDebug(ITCPMessagingPtr messaging);
+      static ElementPtr toDebug(ITCPMessagingPtr messaging) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an socket listener by accepting
@@ -91,7 +91,7 @@ namespace ortc
                                      bool messagesHaveChannelNumber,
                                      SocketPtr socket,
                                      size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                     );
+                                     ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object by connecting to a remote IP
@@ -103,45 +103,45 @@ namespace ortc
                                       bool messagesHaveChannelNumber,
                                       IPAddress remoteIP,
                                       size_t maxMessageSizeInBytes = ORTC_SERVICES_ITCPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                      );
+                                      ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: enable TCP keep alives
-      virtual void enableKeepAlive(bool enable = true) = 0;
+      virtual void enableKeepAlive(bool enable = true) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: subscribe to class events
-      virtual ITCPMessagingSubscriptionPtr subscribe(ITCPMessagingDelegatePtr delegate) = 0;  // passing in IMessageLayerSecurityChannelDelegatePtr() will return the default subscription
+      virtual ITCPMessagingSubscriptionPtr subscribe(ITCPMessagingDelegatePtr delegate) noexcept = 0;  // passing in IMessageLayerSecurityChannelDelegatePtr() will return the default subscription
 
       //-----------------------------------------------------------------------
       // PURPOSE: This closes the session gracefully.
-      virtual void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) = 0;
+      virtual void shutdown(Milliseconds lingerTime = Milliseconds(ORTC_SERVICES_CLOSE_LINGER_TIMER_IN_MILLISECONDS)) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: return the current state of the connection
       virtual SessionStates getState(
                                      WORD *outLastErrorCode = NULL,
                                      String *outLastErrorReason = NULL
-                                     ) const = 0;
+                                     ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets the IP address of the remotely connected socket
-      virtual IPAddress getRemoteIP() const = 0;
+      virtual IPAddress getRemoteIP() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Set the maximum size of a message expecting to receive
-      virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) = 0;
+      virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITCPMessagingDelegate
-    #pragma mark
+    //
+    // ITCPMessagingDelegate
+    //
 
     interaction ITCPMessagingDelegate
     {
@@ -157,17 +157,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITCPMessagingSubscription
-    #pragma mark
+    //
+    // ITCPMessagingSubscription
+    //
 
     interaction ITCPMessagingSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
   }
 }
@@ -175,11 +175,11 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::ITCPMessagingDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITCPMessagingPtr, ITCPMessagingPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITCPMessagingDelegate::SessionStates, SessionStates)
-ZS_DECLARE_PROXY_METHOD_2(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
+ZS_DECLARE_PROXY_METHOD(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITCPMessagingDelegate, ortc::services::ITCPMessagingSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITCPMessagingPtr, ITCPMessagingPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITCPMessagingDelegate::SessionStates, SessionStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onTCPMessagingStateChanged, ITCPMessagingPtr, SessionStates)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

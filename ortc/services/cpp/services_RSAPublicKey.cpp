@@ -69,12 +69,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRSAPublicKeyForRSAPrivateKey
-      #pragma mark
+      //
+      // IRSAPublicKeyForRSAPrivateKey
+      //
 
       //-----------------------------------------------------------------------
-      ForPrivateKeyPtr IRSAPublicKeyForRSAPrivateKey::load(const SecureByteBlock &buffer)
+      ForPrivateKeyPtr IRSAPublicKeyForRSAPrivateKey::load(const SecureByteBlock &buffer) noexcept
       {
         return IRSAPublicKeyFactory::singleton().loadPublicKey(buffer);
       }
@@ -83,18 +83,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RSAPublicKey
-      #pragma mark
+      //
+      // RSAPublicKey
+      //
 
       //-----------------------------------------------------------------------
-      RSAPublicKey::RSAPublicKey(const make_private &)
+      RSAPublicKey::RSAPublicKey(const make_private &) noexcept
       {
         ZS_LOG_DEBUG(log("created"))
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKey::~RSAPublicKey()
+      RSAPublicKey::~RSAPublicKey() noexcept
       {
         if(isNoop()) return;
         
@@ -102,13 +102,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKeyPtr RSAPublicKey::convert(IRSAPublicKeyPtr publicKey)
+      RSAPublicKeyPtr RSAPublicKey::convert(IRSAPublicKeyPtr publicKey) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RSAPublicKey, publicKey);
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKeyPtr RSAPublicKey::convert(ForPrivateKeyPtr publicKey)
+      RSAPublicKeyPtr RSAPublicKey::convert(ForPrivateKeyPtr publicKey) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(RSAPublicKey, publicKey);
       }
@@ -117,19 +117,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RSAPublicKey => IRSAPublicKey
-      #pragma mark
+      //
+      // RSAPublicKey => IRSAPublicKey
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr RSAPublicKey::toDebug(IRSAPublicKeyPtr object)
+      ElementPtr RSAPublicKey::toDebug(IRSAPublicKeyPtr object) noexcept
       {
         if (!object) return ElementPtr();
         return convert(object)->toDebug();
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKeyPtr RSAPublicKey::generate(RSAPrivateKeyPtr &outPrivatekey)
+      RSAPublicKeyPtr RSAPublicKey::generate(RSAPrivateKeyPtr &outPrivatekey) noexcept
       {
         RSAPublicKeyPtr result;
         outPrivatekey = RSAPrivateKey::convert(UsePrivateKey::generate(result));
@@ -137,7 +137,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKeyPtr RSAPublicKey::load(const SecureByteBlock &buffer)
+      RSAPublicKeyPtr RSAPublicKey::load(const SecureByteBlock &buffer) noexcept
       {
         if (IHelper::isEmpty(buffer)) return RSAPublicKeyPtr();
 
@@ -168,7 +168,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr RSAPublicKey::save() const
+      SecureByteBlockPtr RSAPublicKey::save() const noexcept
       {
         SecureByteBlockPtr output(make_shared<SecureByteBlock>());
 
@@ -186,7 +186,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String RSAPublicKey::getFingerprint() const
+      String RSAPublicKey::getFingerprint() const noexcept
       {
         return mFingerprint;
       }
@@ -195,7 +195,7 @@ namespace ortc
       bool RSAPublicKey::verify(
                                 const SecureByteBlock &inOriginalBufferSigned,
                                 const SecureByteBlock &inSignature
-                                ) const
+                                ) const noexcept
       {
         return verify(inOriginalBufferSigned, inOriginalBufferSigned.size(), inSignature);
       }
@@ -204,15 +204,15 @@ namespace ortc
       bool RSAPublicKey::verify(
                                 const String &inOriginalStringSigned,
                                 const SecureByteBlock &inSignature
-                                ) const
+                                ) const noexcept
       {
         return verify((const BYTE *)inOriginalStringSigned.c_str(), inOriginalStringSigned.length(), inSignature);
       }
 
       //-----------------------------------------------------------------------
-      bool RSAPublicKey::verifySignature(ElementPtr signedEl) const
+      bool RSAPublicKey::verifySignature(ElementPtr signedEl) const noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!signedEl)
+        ZS_ASSERT(signedEl);
 
         ElementPtr signatureEl;
         signedEl = IHelper::getSignatureInfo(signedEl, &signatureEl);
@@ -259,7 +259,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      SecureByteBlockPtr RSAPublicKey::encrypt(const SecureByteBlock &buffer) const
+      SecureByteBlockPtr RSAPublicKey::encrypt(const SecureByteBlock &buffer) const noexcept
       {
         AutoSeededRandomPool rng;
         RsaEncryptor encryptor(mPublicKey);
@@ -294,12 +294,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RSAPublicKey => (internal)
-      #pragma mark
+      //
+      // RSAPublicKey => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params RSAPublicKey::log(const char *message) const
+      Log::Params RSAPublicKey::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("RSAPublicKey");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -307,7 +307,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr RSAPublicKey::toDebug() const
+      ElementPtr RSAPublicKey::toDebug() const noexcept
       {
         ElementPtr resultEl = Element::create("RSAPublicKey");
 
@@ -326,7 +326,7 @@ namespace ortc
                                 const BYTE *inBuffer,
                                 size_t inBufferLengthInBytes,
                                 const SecureByteBlock &inSignature
-                                ) const
+                                ) const noexcept
       {
         Verifier verifier(mPublicKey);
 
@@ -348,18 +348,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRSAPublicKeyFactory
-      #pragma mark
+      //
+      // IRSAPublicKeyFactory
+      //
 
       //-----------------------------------------------------------------------
-      IRSAPublicKeyFactory &IRSAPublicKeyFactory::singleton()
+      IRSAPublicKeyFactory &IRSAPublicKeyFactory::singleton() noexcept
       {
         return RSAPublicKeyFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      RSAPublicKeyPtr IRSAPublicKeyFactory::loadPublicKey(const SecureByteBlock &buffer)
+      RSAPublicKeyPtr IRSAPublicKeyFactory::loadPublicKey(const SecureByteBlock &buffer) noexcept
       {
         if (this) {}
         return RSAPublicKey::load(buffer);
@@ -371,18 +371,18 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRSAPublicKey
-    #pragma mark
+    //
+    // IRSAPublicKey
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IRSAPublicKey::toDebug(IRSAPublicKeyPtr object)
+    ElementPtr IRSAPublicKey::toDebug(IRSAPublicKeyPtr object) noexcept
     {
       return internal::RSAPublicKey::toDebug(object);
     }
 
     //-------------------------------------------------------------------------
-    IRSAPublicKeyPtr IRSAPublicKey::generate(IRSAPrivateKeyPtr &outPrivateKey)
+    IRSAPublicKeyPtr IRSAPublicKey::generate(IRSAPrivateKeyPtr &outPrivateKey) noexcept
     {
       internal::RSAPrivateKeyPtr privateKey;
       IRSAPublicKeyPtr publicKey = internal::RSAPublicKey::generate(privateKey);
@@ -391,7 +391,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IRSAPublicKeyPtr IRSAPublicKey::load(const SecureByteBlock &buffer)
+    IRSAPublicKeyPtr IRSAPublicKey::load(const SecureByteBlock &buffer) noexcept
     {
       return internal::IRSAPublicKeyFactory::singleton().loadPublicKey(buffer);
     }

@@ -58,9 +58,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel
+      //
 
       class MessageLayerSecurityChannel : public Noop,
                                           public zsLib::MessageQueueAssociator,
@@ -91,7 +91,7 @@ namespace ortc
           SecureByteBlockPtr mNextIV;
           SecureByteBlockPtr mLastIntegrity;
 
-          ElementPtr toDebug(AlgorithmIndex index) const;
+          ElementPtr toDebug(AlgorithmIndex index) const noexcept;
         };
         
         typedef std::map<AlgorithmIndex, KeyInfo> KeyMap;
@@ -109,28 +109,28 @@ namespace ortc
                                     ITransportStreamPtr sendStreamDecoded,
                                     ITransportStreamPtr sendStreamEncoded,
                                     const char *contextID = NULL
-                                    );
+                                    ) noexcept;
 
       protected:
-        MessageLayerSecurityChannel(Noop) :
+        MessageLayerSecurityChannel(Noop) noexcept :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()),
           SharedRecursiveLock(SharedRecursiveLock::create()) {}
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~MessageLayerSecurityChannel();
+        ~MessageLayerSecurityChannel() noexcept;
 
-        static MessageLayerSecurityChannelPtr convert(IMessageLayerSecurityChannelPtr channel);
+        static MessageLayerSecurityChannelPtr convert(IMessageLayerSecurityChannelPtr channel) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => IMessageLayerSecurityChannel
-        #pragma mark
+        //
+        // MessageLayerSecurityChannel => IMessageLayerSecurityChannel
+        //
 
-        static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel);
+        static ElementPtr toDebug(IMessageLayerSecurityChannelPtr channel) noexcept;
 
         static MessageLayerSecurityChannelPtr create(
                                                      IMessageLayerSecurityChannelDelegatePtr delegate,
@@ -139,123 +139,123 @@ namespace ortc
                                                      ITransportStreamPtr sendStreamDecoded,
                                                      ITransportStreamPtr sendStreamEncoded,
                                                      const char *contextID = NULL
-                                                     );
+                                                     ) noexcept;
 
-        virtual IMessageLayerSecurityChannelSubscriptionPtr subscribe(IMessageLayerSecurityChannelDelegatePtr delegate);
+        IMessageLayerSecurityChannelSubscriptionPtr subscribe(IMessageLayerSecurityChannelDelegatePtr delegate) noexcept override;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual void cancel();
+        void cancel() noexcept override;
 
-        virtual SessionStates getState(
-                                       WORD *outLastErrorCode = NULL,
-                                       String *outLastErrorReason = NULL
-                                       ) const;
+        SessionStates getState(
+                               WORD *outLastErrorCode = NULL,
+                               String *outLastErrorReason = NULL
+                               ) const noexcept override;
 
-        virtual bool needsLocalContextID() const;
-        virtual bool needsReceiveKeying(KeyingTypes *outDecodingType = NULL) const;
-        virtual bool needsSendKeying(KeyingTypes *outEncodingType = NULL) const;
-        virtual bool needsReceiveKeyingSigningPublicKey() const;
-        virtual bool needsSendKeyingToeBeSigned() const;
+        bool needsLocalContextID() const noexcept override;
+        bool needsReceiveKeying(KeyingTypes *outDecodingType = NULL) const noexcept override;
+        bool needsSendKeying(KeyingTypes *outEncodingType = NULL) const noexcept override;
+        bool needsReceiveKeyingSigningPublicKey() const noexcept override;
+        bool needsSendKeyingToeBeSigned() const noexcept override;
 
-        virtual String getLocalContextID() const;
-        virtual String getRemoteContextID() const;
-        virtual void setLocalContextID(const char *contextID);
+        String getLocalContextID() const noexcept override;
+        String getRemoteContextID() const noexcept override;
+        void setLocalContextID(const char *contextID) noexcept override;
 
-        virtual void setReceiveKeying(const char *passphrase);
-        virtual void setSendKeying(const char *passphrase);
+        void setReceiveKeying(const char *passphrase) noexcept override;
+        void setSendKeying(const char *passphrase) noexcept override;
 
-        virtual String getReceivePublicKeyFingerprint() const;
-        virtual void setReceiveKeying(
-                                      IRSAPrivateKeyPtr localPrivateKey,
-                                      IRSAPublicKeyPtr localPublicKey
-                                      );
-        virtual void setSendKeying(IRSAPublicKeyPtr remotePublicKey);
+        String getReceivePublicKeyFingerprint() const noexcept override;
+        void setReceiveKeying(
+                              IRSAPrivateKeyPtr localPrivateKey,
+                              IRSAPublicKeyPtr localPublicKey
+                              ) noexcept override;
+        void setSendKeying(IRSAPublicKeyPtr remotePublicKey) noexcept override;
 
-        virtual IDHKeyDomainPtr getKeyAgreementDomain() const;
-        virtual String getRemoteKeyAgreementFingerprint() const;
-        virtual void setLocalKeyAgreement(
-                                          IDHPrivateKeyPtr localPrivateKey,
-                                          IDHPublicKeyPtr localPublicKey,
-                                          bool remoteSideAlreadyKnowsThisPublicKey
-                                          );
-        virtual void setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey);
-        virtual IDHPublicKeyPtr getOriginalRemoteKeyAgreement();
+        IDHKeyDomainPtr getKeyAgreementDomain() const noexcept override;
+        String getRemoteKeyAgreementFingerprint() const noexcept override;
+        void setLocalKeyAgreement(
+                                  IDHPrivateKeyPtr localPrivateKey,
+                                  IDHPublicKeyPtr localPublicKey,
+                                  bool remoteSideAlreadyKnowsThisPublicKey
+                                  ) noexcept override;
+        void setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey) noexcept override;
+        IDHPublicKeyPtr getOriginalRemoteKeyAgreement() noexcept override;
 
-        virtual ElementPtr getSignedReceiveKeying() const;
-        virtual void setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey);
+        ElementPtr getSignedReceiveKeying() const noexcept override;
+        void setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey) noexcept override;
 
-        virtual void getSendKeyingNeedingToBeSigned(
-                                                    DocumentPtr &outDocumentContainedElementToSign,
-                                                    ElementPtr &outElementToSign
-                                                    ) const;
-        virtual void notifySendKeyingSigned(
-                                            IRSAPrivateKeyPtr signingKey,
-                                            IRSAPublicKeyPtr signingPublicKey
-                                            );
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => ITransportStreamReaderDelegate
-        #pragma mark
-
-        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader);
+        void getSendKeyingNeedingToBeSigned(
+                                            DocumentPtr &outDocumentContainedElementToSign,
+                                            ElementPtr &outElementToSign
+                                            ) const noexcept override;
+        void notifySendKeyingSigned(
+                                    IRSAPrivateKeyPtr signingKey,
+                                    IRSAPublicKeyPtr signingPublicKey
+                                    ) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => ITransportStreamWriterDelegate
-        #pragma mark
+        //
+        // MessageLayerSecurityChannel => ITransportStreamReaderDelegate
+        //
 
-        virtual void onTransportStreamWriterReady(ITransportStreamWriterPtr writer);
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => IWakeDelegate
-        #pragma mark
-
-        virtual void onWake();
+        void onTransportStreamReaderReady(ITransportStreamReaderPtr reader) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => ITimerDelegate
-        #pragma mark
+        //
+        // MessageLayerSecurityChannel => ITransportStreamWriterDelegate
+        //
 
-        virtual void onTimer(ITimerPtr timer);
+        void onTransportStreamWriterReady(ITransportStreamWriterPtr writer) override;
+
+        //---------------------------------------------------------------------
+        //
+        // MessageLayerSecurityChannel => IWakeDelegate
+        //
+
+        void onWake() override;
+
+        //---------------------------------------------------------------------
+        //
+        // MessageLayerSecurityChannel => ITimerDelegate
+        //
+
+        void onTimer(ITimerPtr timer) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => (internal)
-        #pragma mark
+        //
+        // MessageLayerSecurityChannel => (internal)
+        //
 
-        bool isShutdown() const {return SessionState_Shutdown == mCurrentState;}
+        bool isShutdown() const noexcept {return SessionState_Shutdown == mCurrentState;}
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void setState(SessionStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void setState(SessionStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        void step();
-        bool stepReceive();
-        bool stepSendKeying();
-        bool stepSend();
-        bool stepCheckConnected();
+        void step() noexcept;
+        bool stepReceive() noexcept;
+        bool stepSendKeying() noexcept;
+        bool stepSend() noexcept;
+        bool stepCheckConnected() noexcept;
 
         bool stepProcessReceiveKeying(
                                       bool &outReturnResult,
                                       SecureByteBlockPtr keying = SecureByteBlockPtr()
-                                      );
+                                      ) noexcept;
 
-        bool isSendingReady() const;
+        bool isSendingReady() const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark MessageLayerSecurityChannel => (data)
-        #pragma mark
+        //
+        // MessageLayerSecurityChannel => (data)
+        //
 
         MessageLayerSecurityChannelWeakPtr mThisWeak;
 
@@ -340,13 +340,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IMessageLayerSecurityChannelFactory
-      #pragma mark
+      //
+      // IMessageLayerSecurityChannelFactory
+      //
 
       interaction IMessageLayerSecurityChannelFactory
       {
-        static IMessageLayerSecurityChannelFactory &singleton();
+        static IMessageLayerSecurityChannelFactory &singleton() noexcept;
 
         virtual MessageLayerSecurityChannelPtr create(
                                                       IMessageLayerSecurityChannelDelegatePtr delegate,
@@ -355,7 +355,7 @@ namespace ortc
                                                       ITransportStreamPtr sendStreamDecoded,
                                                       ITransportStreamPtr sendStreamEncoded,
                                                       const char *contextID = NULL
-                                                      );
+                                                      ) noexcept;
       };
 
       class MessageLayerSecurityChannelFactory : public IFactory<IMessageLayerSecurityChannelFactory> {};

@@ -74,17 +74,17 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketForICESocketSession
-      #pragma mark
+      //
+      // IICESocketForICESocketSession
+      //
 
       interaction IICESocketForICESocketSession
       {
         ZS_DECLARE_TYPEDEF_PTR(IICESocketForICESocketSession, ForICESocketSession)
 
-        virtual IMessageQueuePtr getMessageQueue() const = 0;
+        virtual IMessageQueuePtr getMessageQueue() const noexcept = 0;
 
-        virtual bool attach(ICESocketSessionPtr session) = 0;
+        virtual bool attach(ICESocketSessionPtr session) noexcept = 0;
 
         virtual bool sendTo(
                             const IICESocket::Candidate &viaLocalCandidate,
@@ -92,15 +92,15 @@ namespace ortc
                             const BYTE *buffer,
                             size_t bufferLengthInBytes,
                             bool isUserData
-                            ) = 0;
+                            ) noexcept = 0;
 
         virtual void addRoute(
                               ICESocketSessionPtr session,
                               const IPAddress &viaIP,
                               const IPAddress &viaLocalIP,
                               const IPAddress &source
-                              ) = 0;
-        virtual void removeRoute(ICESocketSessionPtr session) = 0;
+                              ) noexcept = 0;
+        virtual void removeRoute(ICESocketSessionPtr session) noexcept = 0;
 
         virtual void onICESocketSessionClosed(PUID sessionID) = 0;
       };
@@ -109,9 +109,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ICESocket
-      #pragma mark
+      //
+      // ICESocket
+      //
 
       class ICESocket : public Noop,
                         public MessageQueueAssociator,
@@ -149,9 +149,9 @@ namespace ortc
         typedef IPAddress SourceIP;
         typedef std::tuple<ViaIP, ViaLocalIP, SourceIP> RouteTuple;
 
-        struct RouteLess : public std::binary_function<RouteTuple, RouteTuple, bool>
+        struct RouteLess
         {
-          bool operator() (const RouteTuple& __x, const RouteTuple& __y) const
+          bool operator() (const RouteTuple& __x, const RouteTuple& __y) const noexcept
           {
             if (std::get<2>(__x) < std::get<2>(__y)) return true;   // compare source IP first
             if (std::get<2>(__x) > std::get<2>(__y)) return false;
@@ -184,7 +184,7 @@ namespace ortc
           TURNInfo(
                    WORD componentID,
                    ULONG nextLocalPreference
-                   );
+                   ) noexcept;
         };
 
         struct STUNInfo
@@ -198,7 +198,7 @@ namespace ortc
           STUNInfo(
                    WORD componentID,
                    ULONG nextLocalPreference
-                   );
+                   ) noexcept;
         };
 
         typedef std::map<TURNInfoPtr, TURNInfoPtr> TURNInfoMap;
@@ -225,12 +225,12 @@ namespace ortc
           LocalSocket(
                       WORD componentID,
                       ULONG localPreference
-                      );
+                      ) noexcept;
 
-          void updateLocalPreference(ULONG localPreference);
+          void updateLocalPreference(ULONG localPreference) noexcept;
 
-          void clearTURN(ITURNSocketPtr turnSocket);
-          void clearSTUN(ISTUNDiscoveryPtr stunDiscovery);
+          void clearTURN(ITURNSocketPtr turnSocket) noexcept;
+          void clearSTUN(ISTUNDiscoveryPtr stunDiscovery) noexcept;
         };
 
         typedef String InterfaceName;
@@ -252,30 +252,30 @@ namespace ortc
                   bool firstWORDInAnyPacketWillNotConflictWithTURNChannels,
                   WORD port,
                   IICESocketPtr foundationSocket
-                  );
+                  ) noexcept;
 
       protected:
-        ICESocket(Noop) :
+        ICESocket(Noop) noexcept :
           Noop(true),
           MessageQueueAssociator(IMessageQueuePtr()),
           SharedRecursiveLock(SharedRecursiveLock::create())
         {}
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~ICESocket();
+        ~ICESocket() noexcept;
 
-        static ICESocketPtr convert(IICESocketPtr socket);
-        static ICESocketPtr convert(ForICESocketSessionPtr socket);
+        static ICESocketPtr convert(IICESocketPtr socket) noexcept;
+        static ICESocketPtr convert(ForICESocketSessionPtr socket) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => IICESocket
-        #pragma mark
+        //
+        // ICESocket => IICESocket
+        //
 
-        static ElementPtr toDebug(IICESocketPtr socket);
+        static ElementPtr toDebug(IICESocketPtr socket) noexcept;
 
         static ICESocketPtr create(
                                    IMessageQueuePtr queue,
@@ -285,42 +285,42 @@ namespace ortc
                                    WORD port = 0,
                                    bool firstWORDInAnyPacketWillNotConflictWithTURNChannels = false,
                                    IICESocketPtr foundationSocket = IICESocketPtr()
-                                   );
+                                   ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
-        virtual IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate);
+        virtual IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate) noexcept;
 
         virtual ICESocketStates getState(
                                          WORD *outLastErrorCode = NULL,
                                          String *outLastErrorReason = NULL
-                                         ) const;
+                                         ) const noexcept;
 
-        virtual String getUsernameFrag() const;
+        virtual String getUsernameFrag() const noexcept;
 
-        virtual String getPassword() const;
+        virtual String getPassword() const noexcept;
 
-        virtual void shutdown();
+        virtual void shutdown() noexcept;
 
-        virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10));
+        virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10)) noexcept;
 
         virtual void getLocalCandidates(
                                         CandidateList &outCandidates,
                                         String *outLocalCandidateVersion = NULL
-                                        );
+                                        ) noexcept;
 
-        virtual String getLocalCandidatesVersion() const;
+        virtual String getLocalCandidatesVersion() const noexcept;
 
-        virtual void monitorWriteReadyOnAllSessions(bool monitor = true);
+        virtual void monitorWriteReadyOnAllSessions(bool monitor = true) noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => IICESocketForICESocketSession
-        #pragma mark
+        //
+        // ICESocket => IICESocketForICESocketSession
+        //
 
-        virtual IMessageQueuePtr getMessageQueue() const {return getAssociatedMessageQueue();}
+        virtual IMessageQueuePtr getMessageQueue() const noexcept {return getAssociatedMessageQueue();}
 
-        virtual bool attach(ICESocketSessionPtr session);
+        virtual bool attach(ICESocketSessionPtr session) noexcept;
 
         virtual bool sendTo(
                             const Candidate &viaLocalCandidate,
@@ -328,95 +328,95 @@ namespace ortc
                             const BYTE *buffer,
                             size_t bufferLengthInBytes,
                             bool isUserData
-                            );
+                            ) noexcept;
 
         virtual void addRoute(
                               ICESocketSessionPtr session,
                               const IPAddress &viaIP,
                               const IPAddress &viaLocalIP,
                               const IPAddress &source
-                              );
-        virtual void removeRoute(ICESocketSessionPtr session);
+                              ) noexcept;
+        virtual void removeRoute(ICESocketSessionPtr session) noexcept;
 
-        virtual void onICESocketSessionClosed(PUID sessionID);
+        virtual void onICESocketSessionClosed(PUID sessionID) noexcept;
         
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => ISocketDelegate
-        #pragma mark
+        //
+        // ICESocket => ISocketDelegate
+        //
 
         virtual void onReadReady(SocketPtr socket);
         virtual void onWriteReady(SocketPtr socket);
         virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => ITURNSocketDelegate
-        #pragma mark
+        //
+        // ICESocket => ITURNSocketDelegate
+        //
 
         virtual void onTURNSocketStateChanged(
                                               ITURNSocketPtr socket,
                                               TURNSocketStates state
-                                              );
+                                              ) override;
 
         virtual void handleTURNSocketReceivedPacket(
                                                     ITURNSocketPtr socket,
                                                     IPAddress source,
                                                     const BYTE *packet,
                                                     size_t packetLengthInBytes
-                                                    );
+                                                    ) noexcept override;
 
         virtual bool notifyTURNSocketSendPacket(
                                                 ITURNSocketPtr socket,
                                                 IPAddress destination,
                                                 const BYTE *packet,
                                                 size_t packetLengthInBytes
-                                                );
+                                                ) noexcept override;
 
-        virtual void onTURNSocketWriteReady(ITURNSocketPtr socket);
+        virtual void onTURNSocketWriteReady(ITURNSocketPtr socket) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => ISTUNDiscoveryDelegate
-        #pragma mark
+        //
+        // ICESocket => ISTUNDiscoveryDelegate
+        //
 
         virtual void onSTUNDiscoverySendPacket(
                                                ISTUNDiscoveryPtr discovery,
                                                IPAddress destination,
                                                SecureByteBlockPtr packet
-                                               );
+                                               ) override;
 
-        virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery);
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => IWakeDelegate
-        #pragma mark
-
-        virtual void onWake();
+        virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => ITimerDelegate
-        #pragma mark
+        //
+        // ICESocket => IWakeDelegate
+        //
 
-        virtual void onTimer(ITimerPtr timer);
+        virtual void onWake() override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => IDNSDelegate
-        #pragma mark
+        //
+        // ICESocket => ITimerDelegate
+        //
 
-        virtual void onLookupCompleted(IDNSQueryPtr query);
+        virtual void onTimer(ITimerPtr timer) override;
+
+        //---------------------------------------------------------------------
+        //
+        // ICESocket => IDNSDelegate
+        //
+
+        virtual void onLookupCompleted(IDNSQueryPtr query) override;
 
       public:
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket::Sorter
-        #pragma mark
+        //
+        // ICESocket::Sorter
+        //
 
         class Sorter
         {
@@ -441,79 +441,79 @@ namespace ortc
           typedef PUID QueryID;
           typedef std::map<QueryID, QueryData> QueryMap;
 
-          static bool compareLocalIPs(const Data &data1, const Data &data2);
+          static bool compareLocalIPs(const Data &data1, const Data &data2) noexcept;
 
-          static Data prepare(const IPAddress &ip);
+          static Data prepare(const IPAddress &ip) noexcept;
           static Data prepare(
                               const char *hostName,
                               const IPAddress &ip
-                              );
+                              ) noexcept;
           static Data prepare(
                               const char *hostName,
                               const IPAddress &ip,
                               const char *name,
                               const InterfaceNameToOrderMap &prefs
-                              );
+                              ) noexcept;
           static Data prepare(
                               const IPAddress &ip,
                               const char *name,
                               const InterfaceNameToOrderMap &prefs
-                              );
+                              ) noexcept;
           static Data prepare(
                               const IPAddress &ip,
                               const char *name,
                               ULONG metric,
                               const InterfaceNameToOrderMap &prefs
-                              );
+                              ) noexcept;
           static Data prepare(
                               const char *hostName,
                               const IPAddress &ip,
                               const char *name,
                               ULONG metric,
                               const InterfaceNameToOrderMap &prefs
-                              );
+                              ) noexcept;
 
           static void sort(
                            DataList &ioDataList,
                            IPAddressList &outIPs
-                           );
+                           ) noexcept;
         };
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket => (internal)
-        #pragma mark
+        //
+        // ICESocket => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        bool isShuttingDown() const {return ICESocketState_ShuttingDown == mCurrentState;}
-        bool isShutdown() const {return ICESocketState_Shutdown == mCurrentState;}
+        bool isShuttingDown() const noexcept {return ICESocketState_ShuttingDown == mCurrentState;}
+        bool isShutdown() const noexcept {return ICESocketState_Shutdown == mCurrentState;}
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void cancel();
+        void cancel() noexcept;
         
-        void step();
-        bool stepResolveLocalIPs();
-        bool stepBind();
-        bool stepSTUN();
-        bool stepTURN();
-        bool stepCandidates();
+        void step() noexcept;
+        bool stepResolveLocalIPs() noexcept;
+        bool stepBind() noexcept;
+        bool stepSTUN() noexcept;
+        bool stepTURN() noexcept;
+        bool stepCandidates() noexcept;
 
-        void setState(ICESocketStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void setState(ICESocketStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
-        bool getLocalIPs(IPAddressList &outIPs);  // returns false if IPs must be resolved later
+        bool getLocalIPs(IPAddressList &outIPs) noexcept;  // returns false if IPs must be resolved later
 
-        void stopSTUNAndTURN(LocalSocketPtr localSocket);
-        bool closeIfTURNGone(LocalSocketPtr localSocket);
-        void hardClose(LocalSocketPtr localSocket);
-        void clearRelated(LocalSocketPtr localSocket);
+        void stopSTUNAndTURN(LocalSocketPtr localSocket) noexcept;
+        bool closeIfTURNGone(LocalSocketPtr localSocket) noexcept;
+        void hardClose(LocalSocketPtr localSocket) noexcept;
+        void clearRelated(LocalSocketPtr localSocket) noexcept;
 
-        void clearTURN(ITURNSocketPtr turn);
-        void clearSTUN(ISTUNDiscoveryPtr stun);
+        void clearTURN(ITURNSocketPtr turn) noexcept;
+        void clearSTUN(ISTUNDiscoveryPtr stun) noexcept;
 
         //---------------------------------------------------------------------
         // NOTE:  Do NOT call this method while in a lock because it must
@@ -524,15 +524,15 @@ namespace ortc
                                   const IPAddress &source,
                                   const BYTE *buffer,
                                   size_t bufferLengthInBytes
-                                  );
+                                  ) noexcept;
 
-        void clearRebindTimer() { if (mRebindTimer) {mRebindTimer->cancel(); mRebindTimer.reset();} }
+        void clearRebindTimer() noexcept { if (mRebindTimer) {mRebindTimer->cancel(); mRebindTimer.reset();} }
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark ICESocket (internal)
-        #pragma mark
+        //
+        // ICESocket (internal)
+        //
 
         AutoPUID              mID;
         ICESocketWeakPtr      mThisWeak;
@@ -594,13 +594,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IICESocketFactory
-      #pragma mark
+      //
+      // IICESocketFactory
+      //
 
       interaction IICESocketFactory
       {
-        static IICESocketFactory &singleton();
+        static IICESocketFactory &singleton() noexcept;
 
         virtual ICESocketPtr create(
                                     IMessageQueuePtr queue,
@@ -610,7 +610,7 @@ namespace ortc
                                     WORD port = 0,
                                     bool firstWORDInAnyPacketWillNotConflictWithTURNChannels = false,
                                     IICESocketPtr foundationSocket = IICESocketPtr()
-                                    );
+                                    ) noexcept;
       };
 
       class ICESocketFactory : public IFactory<IICESocketFactory> {};
@@ -622,10 +622,10 @@ ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IICESocketForICESocketSession)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::internal::ICESocketSessionPtr, ICESocketSessionPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocket, IICESocket)
-ZS_DECLARE_PROXY_METHOD_SYNC_CONST_RETURN_0(getMessageQueue, IMessageQueuePtr)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_1(attach, bool, ICESocketSessionPtr)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_5(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
-ZS_DECLARE_PROXY_METHOD_1(onICESocketSessionClosed, PUID)
-ZS_DECLARE_PROXY_METHOD_SYNC_4(addRoute, ortc::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)
-ZS_DECLARE_PROXY_METHOD_SYNC_1(removeRoute, ortc::services::internal::ICESocketSessionPtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_CONST(getMessageQueue, IMessageQueuePtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(attach, bool, ICESocketSessionPtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(sendTo, bool, const IICESocket::Candidate &, const IPAddress &, const BYTE *, size_t, bool)
+ZS_DECLARE_PROXY_METHOD(onICESocketSessionClosed, PUID)
+ZS_DECLARE_PROXY_METHOD_SYNC(addRoute, ortc::services::internal::ICESocketSessionPtr, const IPAddress &, const IPAddress &, const IPAddress &)
+ZS_DECLARE_PROXY_METHOD_SYNC(removeRoute, ortc::services::internal::ICESocketSessionPtr)
 ZS_DECLARE_PROXY_END()

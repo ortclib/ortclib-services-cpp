@@ -68,37 +68,37 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP
-      #pragma mark
+      //
+      // HTTP
+      //
 
 
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTPSettingsDefaults
-      #pragma mark
+      //
+      // HTTPSettingsDefaults
+      //
 
       class HTTPSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~HTTPSettingsDefaults()
+        ~HTTPSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static HTTPSettingsDefaultsPtr singleton()
+        static HTTPSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<HTTPSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static HTTPSettingsDefaultsPtr create()
+        static HTTPSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<HTTPSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -106,14 +106,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_DEFAULT_HTTP_TIMEOUT_SECONDS, 60 * 2);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installHttpSettingsDefaults()
+      void installHttpSettingsDefaults() noexcept
       {
         HTTPSettingsDefaults::singleton();
       }
@@ -122,12 +122,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP
-      #pragma mark
+      //
+      // HTTP
+      //
 
       //-----------------------------------------------------------------------
-      HTTP::HTTP(const make_private &) :
+      HTTP::HTTP(const make_private &) noexcept :
         SharedRecursiveLock(SharedRecursiveLock::create())
       {
         mHTTPClient = ref new HttpClient();
@@ -139,12 +139,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::init()
+      void HTTP::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTP::~HTTP()
+      HTTP::~HTTP() noexcept
       {
         if (isNoop()) return;
 
@@ -157,15 +157,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => IHTTP
-      #pragma mark
+      //
+      // HTTP => IHTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQueryPtr HTTP::query(
                                      IHTTPQueryDelegatePtr delegate,
                                      const QueryInfo &info
-                                     )
+                                     ) noexcept
       {
         HTTPPtr pThis = singleton();
         HTTPQueryPtr query = HTTPQuery::create(pThis, delegate, info);
@@ -182,20 +182,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => friend HTTPQuery
-      #pragma mark
+      //
+      // HTTP => friend HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP => (internal)
-      #pragma mark
+      //
+      // HTTP => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      HTTPPtr HTTP::singleton()
+      HTTPPtr HTTP::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<HTTP> singleton(HTTP::create());
@@ -207,7 +207,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      HTTPPtr HTTP::create()
+      HTTPPtr HTTP::create() noexcept
       {
         HTTPPtr pThis(make_shared<HTTP>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -216,7 +216,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::log(const char *message) const
+      Log::Params HTTP::log(const char *message) const noexcept
       {
         ElementPtr resultEl = Element::create("HTTP");
         IHelper::debugAppend(resultEl, "id", mID);
@@ -225,13 +225,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::slog(const char *message)
+      Log::Params HTTP::slog(const char *message) noexcept
       {
         return Log::Params(message, "HTTP");
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::cancel()
+      void HTTP::cancel() noexcept
       {
 
         HTTPQueryMap queries;
@@ -255,7 +255,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::monitorBegin(HTTPQueryPtr query)
+      void HTTP::monitorBegin(HTTPQueryPtr query) noexcept
       {
         HttpClient ^client;
         {
@@ -276,7 +276,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::monitorEnd(HTTPQuery &query)
+      void HTTP::monitorEnd(HTTPQuery &query) noexcept
       {
         ZS_LOG_TRACE(log("monitor end for query") + ZS_PARAM("query", query.getID()))
 
@@ -292,9 +292,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery
-      #pragma mark
+      //
+      // HTTP::HTTPQuery
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQuery::HTTPQuery(
@@ -302,7 +302,7 @@ namespace ortc
                                  HTTPPtr outer,
                                  IHTTPQueryDelegatePtr delegate,
                                  const QueryInfo &query
-                                 ) :
+                                 ) noexcept :
         SharedRecursiveLock(outer ? *outer : SharedRecursiveLock::create()),
         MessageQueueAssociator(IHelper::getServiceQueue()),
         mOuter(outer),
@@ -323,12 +323,12 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::init()
+      void HTTP::HTTPQuery::init() noexcept
       {
       }
 
       //-----------------------------------------------------------------------
-      HTTP::HTTPQuery::~HTTPQuery()
+      HTTP::HTTPQuery::~HTTPQuery() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DEBUG(log("destroyed"))
@@ -341,12 +341,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => IHTTPQuery
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => IHTTPQuery
+      //
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::cancel()
+      void HTTP::HTTPQuery::cancel() noexcept
       {
         ZS_EVENTING_1(x, i, Debug, ServicesHttpQueryCancel, os, Http, Cancel, puid, id, mID);
         ZS_LOG_DEBUG(log("cancel called"));
@@ -389,7 +389,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTP::HTTPQuery::isComplete() const
+      bool HTTP::HTTPQuery::isComplete() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!mDelegate) return true;
@@ -397,7 +397,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool HTTP::HTTPQuery::wasSuccessful() const
+      bool HTTP::HTTPQuery::wasSuccessful() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (mDelegate) return false;
@@ -406,14 +406,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IHTTP::HTTPStatusCodes HTTP::HTTPQuery::getStatusCode() const
+      IHTTP::HTTPStatusCodes HTTP::HTTPQuery::getStatusCode() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return IHTTP::toStatusCode((WORD)mStatusCode);
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const
+      size_t HTTP::HTTPQuery::getHeaderReadSizeAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mHeader.MaxRetrievable());
@@ -423,7 +423,7 @@ namespace ortc
       size_t HTTP::HTTPQuery::readHeader(
                                          BYTE *outResultData,
                                          size_t bytesToRead
-                                         )
+                                         ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = mHeader.Get(outResultData, bytesToRead);
@@ -439,7 +439,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::readHeaderAsString(String &outHeader)
+      size_t HTTP::HTTPQuery::readHeaderAsString(String &outHeader) noexcept
       {
         outHeader.clear();
 
@@ -462,7 +462,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::getReadDataAvailableInBytes() const
+      size_t HTTP::HTTPQuery::getReadDataAvailableInBytes() const noexcept
       {
         AutoRecursiveLock lock(*this);
         return static_cast<size_t>(mBody.MaxRetrievable());
@@ -472,7 +472,7 @@ namespace ortc
       size_t HTTP::HTTPQuery::readData(
                                        BYTE *outResultData,
                                        size_t bytesToRead
-                                       )
+                                       ) noexcept
       {
         AutoRecursiveLock lock(*this);
         auto result = mBody.Get(outResultData, bytesToRead);
@@ -488,7 +488,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t HTTP::HTTPQuery::readDataAsString(String &outResultData)
+      size_t HTTP::HTTPQuery::readDataAsString(String &outResultData) noexcept
       {
         outResultData.clear();
 
@@ -514,9 +514,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => ITimerDelegate
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void HTTP::HTTPQuery::onTimer(ITimerPtr onTimer)
@@ -529,16 +529,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => friend HTTP
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => friend HTTP
+      //
 
       //-----------------------------------------------------------------------
       HTTP::HTTPQueryPtr HTTP::HTTPQuery::create(
                                                  HTTPPtr outer,
                                                  IHTTPQueryDelegatePtr delegate,
                                                  const QueryInfo &query
-                                                 )
+                                                 ) noexcept
       {
         HTTPQueryPtr pThis(make_shared<HTTPQuery>(make_private{}, outer, delegate, query));
         pThis->mThisWeak = pThis;
@@ -547,7 +547,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::go(Windows::Web::Http::HttpClient ^client)
+      void HTTP::HTTPQuery::go(Windows::Web::Http::HttpClient ^client) noexcept
       {
         Time timeout = zsLib::now() + mQuery.timeout_;
         if (Milliseconds() == mQuery.timeout_) {
@@ -645,7 +645,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::notifyComplete(HttpStatusCode result)
+      void HTTP::HTTPQuery::notifyComplete(HttpStatusCode result) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -667,12 +667,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark HTTP::HTTPQuery => (internal)
-      #pragma mark
+      //
+      // HTTP::HTTPQuery => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::HTTPQuery::log(const char *message) const
+      Log::Params HTTP::HTTPQuery::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("HTTPQuery");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -680,7 +680,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params HTTP::HTTPQuery::slogQuery(PUID id, const char *message)
+      Log::Params HTTP::HTTPQuery::slogQuery(PUID id, const char *message) noexcept
       {
         ElementPtr objectEl = Element::create("HTTPQuery");
         IHelper::debugAppend(objectEl, "id", id);
@@ -689,9 +689,9 @@ namespace ortc
 
       //-----------------------------------------------------------------------
       static void serializeHeaderCollection(
-        ByteQueue &queue,
-        IIterable<IKeyValuePair<Platform::String^, Platform::String^>^>^ headers
-        )
+                                            ByteQueue &queue,
+                                            IIterable<IKeyValuePair<Platform::String^, Platform::String^>^>^ headers
+                                            ) noexcept
       {
         if (nullptr == headers) return;
 
@@ -712,7 +712,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void HTTP::HTTPQuery::notifyComplete(Windows::Web::Http::HttpResponseMessage ^response)
+      void HTTP::HTTPQuery::notifyComplete(Windows::Web::Http::HttpResponseMessage ^response) noexcept
       {
         if (nullptr == response) {
           ZS_LOG_WARNING(Detail, log("response returned was null"))

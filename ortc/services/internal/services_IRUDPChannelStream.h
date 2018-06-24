@@ -48,9 +48,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStream
-      #pragma mark
+      //
+      // IRUDPChannelStream
+      //
 
       interaction IRUDPChannelStream
       {
@@ -62,7 +62,7 @@ namespace ortc
           RUDPChannelStreamState_Shutdown,
         };
 
-        static const char *toString(RUDPChannelStreamStates);
+        static const char *toString(RUDPChannelStreamStates) noexcept;
 
         enum RUDPChannelStreamShutdownReasons
         {
@@ -74,7 +74,7 @@ namespace ortc
           RUDPChannelStreamShutdownReason_IllegalStreamState        = IRUDPChannel::RUDPChannelShutdownReason_IllegalStreamState,
         };
 
-        static const char *toString(RUDPChannelStreamShutdownReasons reason);
+        static const char *toString(RUDPChannelStreamShutdownReasons reason) noexcept;
 
         typedef IRUDPChannel::CongestionAlgorithms CongestionAlgorithms;
         typedef IRUDPChannel::Shutdown Shutdown;
@@ -88,7 +88,7 @@ namespace ortc
                                               DWORD &outMinimumRecommendedRTTInMilliseconds,
                                               CongestionAlgorithmList &outLocalAlgorithms,
                                               CongestionAlgorithmList &outRemoteAlgoirthms
-                                              );
+                                              ) noexcept;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Determine which algorithms to respond to a remote party.
@@ -100,11 +100,11 @@ namespace ortc
                                                    const CongestionAlgorithmList &offeredAlgorithmsForRemote,
                                                    CongestionAlgorithmList &outResponseAlgorithmsForLocal,
                                                    CongestionAlgorithmList &outResponseAlgorithmsForRemote
-                                                   );
+                                                   ) noexcept;
 
         //-----------------------------------------------------------------------
         // PURPOSE: returns a debug object containing internal object state
-        static ElementPtr toDebug(IRUDPChannelStreamPtr stream);
+        static ElementPtr toDebug(IRUDPChannelStreamPtr stream) noexcept;
 
         static IRUDPChannelStreamPtr create(
                                             IMessageQueuePtr queue,
@@ -116,23 +116,23 @@ namespace ortc
                                             DWORD minimumNegotiatedRTTInMilliseconds,     // this value cannot be set lower than the offered RTT
                                             CongestionAlgorithms algorithmForLocal = IRUDPChannel::CongestionAlgorithm_TCPLikeWindowWithSlowCreepUp,
                                             CongestionAlgorithms algorithmForRemote = IRUDPChannel::CongestionAlgorithm_TCPLikeWindowWithSlowCreepUp
-                                            );
+                                            ) noexcept;
 
-        virtual PUID getID() const = 0;
+        virtual PUID getID() const noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Gets the current state of the channel stream.
         virtual RUDPChannelStreamStates getState(
                                                  WORD *outLastErrorCode = NULL,
                                                  String *outLastErrorReason = NULL
-                                                 ) const = 0;
+                                                 ) const noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Sets the associated send/receive stream
         virtual void setStreams(
                                 ITransportStreamPtr receiveStream,
                                 ITransportStreamPtr sendStream
-                                ) = 0;
+                                ) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Close the stream down to prevent further usage.
@@ -144,7 +144,7 @@ namespace ortc
         //
         //          If calling with shutdownOnlyOnceAllDataSent set to false then
         //          shutdown will occur immediately.
-        virtual void shutdown(bool shutdownOnlyOnceAllDataSent = false) = 0;
+        virtual void shutdown(bool shutdownOnlyOnceAllDataSent = false) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Prevents more data from being received from the remote party
@@ -153,7 +153,7 @@ namespace ortc
         // NOTE:    This does not close the stream. Data that has already been
         //          put into the send buffer will be delivered but additional
         //          send data will be rejected.
-        virtual void shutdownDirection(Shutdown state) = 0;
+        virtual void shutdownDirection(Shutdown state) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Prevents any new data from being sent out until the
@@ -161,7 +161,7 @@ namespace ortc
         //          to the passed-in sequence number.
         // NOTE:    Passing in a sequence number of "0" will cause the hold to be
         //          removed immediately.
-        virtual void holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber) = 0;
+        virtual void holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Cause the RUDP stream to handle an incoming packet.
@@ -171,12 +171,12 @@ namespace ortc
                                   RUDPPacketPtr packet,
                                   SecureByteBlockPtr originalBuffer,
                                   bool ecnMarked
-                                  ) = 0;
+                                  ) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Notify the stream that the socket has notified that it is
         //          available for writing at this time.
-        virtual void notifySocketWriteReady() = 0;                                    // notification that the socket is available for writing now
+        virtual void notifySocketWriteReady() noexcept = 0;                                    // notification that the socket is available for writing now
 
         //-----------------------------------------------------------------------
         // PURPOSE: Handle an ACK that did not arrive outside the RUDPChannelStream.
@@ -192,7 +192,7 @@ namespace ortc
                                        bool xpFlag,                               // XORed parity of all packets up-to-and-including GSNFR
                                        bool dpFlag,                               // received duplicate packet since last ACK
                                        bool ecFlag                                // ECN marked packet arrived since last ACK sent
-                                       ) = 0;
+                                       ) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Get the internal state of what is going on within the
@@ -209,21 +209,21 @@ namespace ortc
                               bool &outXPFlag,                                // XORed parity of all packets up-to-and-including GSNFR
                               bool &outDPFlag,                                // duplicate packet was detected
                               bool &outECFlag                                 // ECN marked packet arrived since last ACK sent
-                              ) = 0;
+                              ) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Notify that an external ACK has been sent to the remote
         //          party.
-        virtual void notifyExternalACKSent(QWORD ackedSequenceNumber) = 0;
+        virtual void notifyExternalACKSent(QWORD ackedSequenceNumber) noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStreamDelegate
-      #pragma mark
+      //
+      // IRUDPChannelStreamDelegate
+      //
 
       interaction IRUDPChannelStreamDelegate
       {
@@ -242,7 +242,7 @@ namespace ortc
                                                        IRUDPChannelStreamPtr stream,
                                                        const BYTE *packet,
                                                        size_t packetLengthInBytes
-                                                       ) = 0;
+                                                       ) noexcept = 0;
 
         //-----------------------------------------------------------------------
         // PURPOSE: Send a packet over the socket interface to the remote party.
@@ -257,7 +257,7 @@ namespace ortc
 }
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelStreamDelegate)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPChannelStreamStateChanged, ortc::services::internal::IRUDPChannelStreamPtr, ortc::services::internal::IRUDPChannelStreamDelegate::RUDPChannelStreamStates)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_3(notifyRUDPChannelStreamSendPacket, bool, ortc::services::internal::IRUDPChannelStreamPtr, const zsLib::BYTE *, size_t)
-ZS_DECLARE_PROXY_METHOD_3(onRUDPChannelStreamSendExternalACKNow, ortc::services::internal::IRUDPChannelStreamPtr, bool, zsLib::PUID)
+ZS_DECLARE_PROXY_METHOD(onRUDPChannelStreamStateChanged, ortc::services::internal::IRUDPChannelStreamPtr, ortc::services::internal::IRUDPChannelStreamDelegate::RUDPChannelStreamStates)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(notifyRUDPChannelStreamSendPacket, bool, ortc::services::internal::IRUDPChannelStreamPtr, const zsLib::BYTE *, size_t)
+ZS_DECLARE_PROXY_METHOD(onRUDPChannelStreamSendExternalACKNow, ortc::services::internal::IRUDPChannelStreamPtr, bool, zsLib::PUID)
 ZS_DECLARE_PROXY_END()

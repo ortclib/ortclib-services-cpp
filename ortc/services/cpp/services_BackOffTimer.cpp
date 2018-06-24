@@ -59,37 +59,37 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
 
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerSettingsDefaults
-      #pragma mark
+      //
+      // BackOffTimerSettingsDefaults
+      //
 
       class BackOffTimerSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~BackOffTimerSettingsDefaults()
+        ~BackOffTimerSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static BackOffTimerSettingsDefaultsPtr singleton()
+        static BackOffTimerSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<BackOffTimerSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static BackOffTimerSettingsDefaultsPtr create()
+        static BackOffTimerSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<BackOffTimerSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -97,14 +97,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_SETTING_BACKOFF_TIMER_MAX_CONSTRUCTOR_FAILURES, 100);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installBackOffTimerSettingsDefaults()
+      void installBackOffTimerSettingsDefaults() noexcept
       {
         BackOffTimerSettingsDefaults::singleton();
       }
@@ -113,9 +113,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimer
-      #pragma mark
+      //
+      // BackOffTimer
+      //
 
       //-----------------------------------------------------------------------
       BackOffTimer::BackOffTimer(
@@ -176,9 +176,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimer => IBackOffTimer
-      #pragma mark
+      //
+      // BackOffTimer => IBackOffTimer
+      //
 
       //-----------------------------------------------------------------------
       ElementPtr BackOffTimer::toDebug(IBackOffTimerPtr timer)
@@ -389,9 +389,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimer => ITimerDelegate
-      #pragma mark
+      //
+      // BackOffTimer => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void BackOffTimer::onTimer(ITimerPtr timer)
@@ -421,9 +421,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimer => (internal)
-      #pragma mark
+      //
+      // BackOffTimer => (internal)
+      //
 
       //-----------------------------------------------------------------------
       Log::Params BackOffTimer::log(const char *message) const
@@ -514,9 +514,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerFactory
-      #pragma mark
+      //
+      // IBackOffTimerFactory
+      //
 
       //-----------------------------------------------------------------------
       IBackOffTimerFactory &IBackOffTimerFactory::singleton()
@@ -541,9 +541,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackOffTimer
-    #pragma mark
+    //
+    // IBackOffTimer
+    //
 
     //-------------------------------------------------------------------------
     const char *IBackOffTimer::toString(States state)

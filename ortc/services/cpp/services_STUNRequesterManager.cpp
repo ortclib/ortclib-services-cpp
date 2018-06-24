@@ -54,12 +54,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterManagerForSTUNRequester
-      #pragma mark
+      //
+      // ISTUNRequesterManagerForSTUNRequester
+      //
 
       //-----------------------------------------------------------------------
-      ForSTUNRequesterPtr ISTUNRequesterManagerForSTUNRequester::singleton()
+      ForSTUNRequesterPtr ISTUNRequesterManagerForSTUNRequester::singleton() noexcept
       {
         return STUNRequesterManager::singleton();
       }
@@ -68,15 +68,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static STUNRequesterManager::QWORDPair getKey(STUNPacketPtr stun)
+      static STUNRequesterManager::QWORDPair getKey(STUNPacketPtr stun) noexcept
       {
         BYTE buffer[sizeof(QWORD)*2];
-        ZS_THROW_INVALID_ASSUMPTION_IF(sizeof(buffer) < (sizeof(stun->mMagicCookie) + sizeof(stun->mTransactionID)))
+        ZS_ASSERT(sizeof(buffer) >= (sizeof(stun->mMagicCookie) + sizeof(stun->mTransactionID)));
 
         memset(&(buffer[0]), 0, sizeof(buffer));
 
@@ -94,12 +94,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager
-      #pragma mark
+      //
+      // STUNRequesterManager
+      //
 
       //-----------------------------------------------------------------------
-      STUNRequesterManager::STUNRequesterManager(const make_private &) :
+      STUNRequesterManager::STUNRequesterManager(const make_private &) noexcept :
         mID(zsLib::createPUID())
       {
         //ServicesStunRequesterManagerCreate(__func__, mID);
@@ -123,12 +123,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager => ISTUNRequesterManagerFactory
-      #pragma mark
+      //
+      // STUNRequesterManager => ISTUNRequesterManagerFactory
+      //
 
       //-----------------------------------------------------------------------
-      STUNRequesterManagerPtr STUNRequesterManager::create()
+      STUNRequesterManagerPtr STUNRequesterManager::create() noexcept
       {
         STUNRequesterManagerPtr pThis(make_shared<STUNRequesterManager>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -139,12 +139,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager => ISTUNRequesterManager
-      #pragma mark
+      //
+      // STUNRequesterManager => ISTUNRequesterManager
+      //
 
       //-----------------------------------------------------------------------
-      STUNRequesterManagerPtr STUNRequesterManager::singleton()
+      STUNRequesterManagerPtr STUNRequesterManager::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<STUNRequesterManager> singleton(ISTUNRequesterManagerFactory::singleton().createSTUNRequesterManager());
@@ -159,7 +159,7 @@ namespace ortc
       ISTUNRequesterPtr STUNRequesterManager::handleSTUNPacket(
                                                                IPAddress fromIPAddress,
                                                                STUNPacketPtr stun
-                                                               )
+                                                               ) noexcept
       {
         if ((stun->mClass == STUNPacket::Class_Request) ||
             (stun->mClass == STUNPacket::Class_Indication)) {
@@ -173,7 +173,7 @@ namespace ortc
 
         QWORDPair key = getKey(stun);
 
-        ZS_THROW_INVALID_USAGE_IF(!stun)
+        ZS_ASSERT(stun);
 
         UseSTUNRequesterPtr requester;
 
@@ -223,19 +223,19 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager => ISTUNRequesterManagerForSTUNRequester
-      #pragma mark
+      //
+      // STUNRequesterManager => ISTUNRequesterManagerForSTUNRequester
+      //
 
       //-----------------------------------------------------------------------
       void STUNRequesterManager::monitorStart(
                                               STUNRequesterPtr inRequester,
                                               STUNPacketPtr request
-                                              )
+                                              ) noexcept
       {
         UseSTUNRequesterPtr requester = inRequester;
 
-        ZS_THROW_INVALID_USAGE_IF(!requester);
+        ZS_ASSERT(requester);
 
         //ServicesStunRequesterManagerMonitorStart(__func__, mID, requester->getID());
         ZS_EVENTING_2(x, i, Detail, ServicesStunRequesterManagerMonitorStart, os, StunRequesterManager, Start, puid, id, mID, puid, requesterId, requester->getID());
@@ -247,7 +247,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequesterManager::monitorStop(STUNRequester &inRequester)
+      void STUNRequesterManager::monitorStop(STUNRequester &inRequester) noexcept
       {
         UseSTUNRequester &requester = inRequester;
 
@@ -269,12 +269,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager => (internal)
-      #pragma mark
+      //
+      // STUNRequesterManager => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params STUNRequesterManager::log(const char *message) const
+      Log::Params STUNRequesterManager::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("services::STUNRequesterManager");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -282,7 +282,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params STUNRequesterManager::slog(const char *message)
+      Log::Params STUNRequesterManager::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::STUNRequesterManager");
       }
@@ -291,18 +291,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterManagerFactory
-      #pragma mark
+      //
+      // ISTUNRequesterManagerFactory
+      //
       
       //-----------------------------------------------------------------------
-      ISTUNRequesterManagerFactory &ISTUNRequesterManagerFactory::singleton()
+      ISTUNRequesterManagerFactory &ISTUNRequesterManagerFactory::singleton() noexcept
       {
         return STUNRequesterManagerFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      STUNRequesterManagerPtr ISTUNRequesterManagerFactory::createSTUNRequesterManager()
+      STUNRequesterManagerPtr ISTUNRequesterManagerFactory::createSTUNRequesterManager() noexcept
       {
         if (this) {}
         return STUNRequesterManager::create();
@@ -314,9 +314,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark STUNRequesterManager
-    #pragma mark
+    //
+    // STUNRequesterManager
+    //
 
     //-------------------------------------------------------------------------
     ISTUNRequesterPtr ISTUNRequesterManager::handlePacket(
@@ -324,10 +324,10 @@ namespace ortc
                                                           const BYTE *packet,
                                                           size_t packetLengthInBytes,
                                                           const STUNPacket::ParseOptions &options
-                                                          )
+                                                          ) noexcept
     {
-      ZS_THROW_INVALID_USAGE_IF(0 == packetLengthInBytes)
-      ZS_THROW_INVALID_USAGE_IF(!packet)
+      ZS_ASSERT(0 != packetLengthInBytes);
+      ZS_ASSERT(packet);
 
       STUNPacketPtr stun = STUNPacket::parseIfSTUN(packet, packetLengthInBytes, options);
       if (!stun) return ISTUNRequesterPtr();
@@ -339,7 +339,7 @@ namespace ortc
     ISTUNRequesterPtr ISTUNRequesterManager::handleSTUNPacket(
                                                               IPAddress fromIPAddress,
                                                               STUNPacketPtr stun
-                                                              )
+                                                              ) noexcept
     {
       internal::STUNRequesterManagerPtr manager = internal::STUNRequesterManager::singleton();
       if (!manager) return ISTUNRequesterPtr();

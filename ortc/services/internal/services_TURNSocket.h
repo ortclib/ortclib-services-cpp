@@ -66,9 +66,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TURNSocket
-      #pragma mark
+      //
+      // TURNSocket
+      //
 
       class TURNSocket : public Noop,
                          public MessageQueueAssociator,
@@ -114,223 +114,223 @@ namespace ortc
                    IMessageQueuePtr queue,
                    ITURNSocketDelegatePtr delegate,
                    const CreationOptions &options
-                   );
+                   ) noexcept;
 
       protected:
-        TURNSocket(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        TURNSocket(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~TURNSocket();
+        ~TURNSocket() noexcept;
 
-        static TURNSocketPtr convert(ITURNSocketPtr socket);
+        static TURNSocketPtr convert(ITURNSocketPtr socket) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => ITURNSocket
-        #pragma mark
+        //
+        // TURNSocket => ITURNSocket
+        //
 
         static TURNSocketPtr create(
                                     IMessageQueuePtr queue,
                                     ITURNSocketDelegatePtr delegate,
                                     const CreationOptions &options
-                                    );
+                                    ) noexcept;
 
-        static ElementPtr toDebug(ITURNSocketPtr socket);
+        static ElementPtr toDebug(ITURNSocketPtr socket) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
-        virtual TURNSocketStates getState() const;
-        virtual TURNSocketErrors getLastError() const;
+        virtual TURNSocketStates getState() const noexcept;
+        virtual TURNSocketErrors getLastError() const noexcept;
 
-        virtual bool isRelayingUDP() const;
+        virtual bool isRelayingUDP() const noexcept;
 
-        virtual void shutdown();
+        virtual void shutdown() noexcept;
 
         virtual bool sendPacket(
                                 IPAddress destination,
                                 const BYTE *buffer,
                                 size_t bufferLengthInBytes,
                                 bool bindChannelIfPossible = false
-                                );
+                                ) noexcept;
 
-        virtual IPAddress getActiveServerIP() const;
-        virtual IPAddress getRelayedIP() const;
-        virtual IPAddress getReflectedIP() const;
-        virtual IPAddress getServerResponseIP() const;
+        virtual IPAddress getActiveServerIP() const noexcept;
+        virtual IPAddress getRelayedIP() const noexcept;
+        virtual IPAddress getReflectedIP() const noexcept;
+        virtual IPAddress getServerResponseIP() const noexcept;
 
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,
                                       STUNPacketPtr turnPacket
-                                      );
+                                      ) noexcept;
 
         virtual bool handleChannelData(
                                        IPAddress fromIPAddress,
                                        const BYTE *buffer,
                                        size_t bufferLengthInBytes
-                                       );
+                                       ) noexcept;
 
-        virtual void notifyWriteReady();
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => IWakeDelegate
-        #pragma mark
-
-        virtual void onWake();
+        virtual void notifyWriteReady() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => ISTUNRequesterDelegate
-        #pragma mark
+        //
+        // TURNSocket => IWakeDelegate
+        //
 
-        virtual void onSTUNRequesterSendPacket(
-                                               ISTUNRequesterPtr requester,
-                                               IPAddress destination,
-                                               SecureByteBlockPtr packet
-                                               );
-
-        virtual bool handleSTUNRequesterResponse(
-                                                 ISTUNRequesterPtr requester,
-                                                 IPAddress fromIPAddress,
-                                                 STUNPacketPtr response
-                                                 );
-
-        virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester);
+        void onWake() override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => IDNSDelegate
-        #pragma mark
+        //
+        // TURNSocket => ISTUNRequesterDelegate
+        //
 
-        virtual void onLookupCompleted(IDNSQueryPtr query);
+        void onSTUNRequesterSendPacket(
+                                       ISTUNRequesterPtr requester,
+                                       IPAddress destination,
+                                       SecureByteBlockPtr packet
+                                       ) override;
 
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => ISocketDelegate
-        #pragma mark
+        bool handleSTUNRequesterResponse(
+                                         ISTUNRequesterPtr requester,
+                                         IPAddress fromIPAddress,
+                                         STUNPacketPtr response
+                                         ) noexcept override;
 
-        virtual void onReadReady(SocketPtr socket);
-        virtual void onWriteReady(SocketPtr socket);
-        virtual void onException(SocketPtr socket);
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => ITimer
-        #pragma mark
-
-        virtual void onTimer(ITimerPtr timer);
+        void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => IBackgroundingDelegate
-        #pragma mark
+        //
+        // TURNSocket => IDNSDelegate
+        //
 
-        virtual void onBackgroundingGoingToBackground(
-                                                      IBackgroundingSubscriptionPtr subscription,
-                                                      IBackgroundingNotifierPtr notifier
-                                                      );
+        void onLookupCompleted(IDNSQueryPtr query) override;
 
-        virtual void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription);
+        //---------------------------------------------------------------------
+        //
+        // TURNSocket => ISocketDelegate
+        //
 
-        virtual void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription);
+        void onReadReady(SocketPtr socket) override;
+        void onWriteReady(SocketPtr socket) override;
+        void onException(SocketPtr socket) override;
 
-        virtual void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription);
+        //---------------------------------------------------------------------
+        //
+        // TURNSocket => ITimer
+        //
+
+        void onTimer(ITimerPtr timer) override;
+
+        //---------------------------------------------------------------------
+        //
+        // TURNSocket => IBackgroundingDelegate
+        //
+
+        void onBackgroundingGoingToBackground(
+                                              IBackgroundingSubscriptionPtr subscription,
+                                              IBackgroundingNotifierPtr notifier
+                                              ) override;
+
+        void onBackgroundingGoingToBackgroundNow(IBackgroundingSubscriptionPtr subscription) override;
+
+        void onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription) override;
+
+        void onBackgroundingApplicationWillQuit(IBackgroundingSubscriptionPtr subscription) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => (internal)
-        #pragma mark
+        //
+        // TURNSocket => (internal)
+        //
 
-        bool isReady() const {return ITURNSocket::TURNSocketState_Ready ==  mCurrentState;}
-        bool isShuttingDown() const {return ITURNSocket::TURNSocketState_ShuttingDown ==  mCurrentState;}
-        bool isShutdown() const {return ITURNSocket::TURNSocketState_Shutdown ==  mCurrentState;}
+        bool isReady() const noexcept {return ITURNSocket::TURNSocketState_Ready ==  mCurrentState;}
+        bool isShuttingDown() const noexcept {return ITURNSocket::TURNSocketState_ShuttingDown ==  mCurrentState;}
+        bool isShutdown() const noexcept {return ITURNSocket::TURNSocketState_Shutdown ==  mCurrentState;}
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
-        virtual ElementPtr toDebug() const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void fix(STUNPacketPtr stun) const;
+        void fix(STUNPacketPtr stun) const noexcept;
 
-        void step();
-        bool stepDNSLookupNextServer();
+        void step() noexcept;
+        bool stepDNSLookupNextServer() noexcept;
         IPAddress stepGetNextServer(
                                     IPAddressList &previouslyAdded,
                                     SRVResultPtr &srv
-                                    );
-        bool stepPrepareServers();
-        void cancel();
+                                    ) noexcept;
+        bool stepPrepareServers() noexcept;
+        void cancel() noexcept;
 
-        void setState(TURNSocketStates newState);
+        void setState(TURNSocketStates newState) noexcept;
 
         void consumeBuffer(
                            ServerPtr &server,
                            size_t bufferSizeInBytes
-                           );
+                           ) noexcept;
 
         bool handleAllocateRequester(
                                      ISTUNRequesterPtr requester,
                                      IPAddress fromIPAddress,
                                      STUNPacketPtr response
-                                     );
+                                     ) noexcept;
 
         bool handleRefreshRequester(
                                     ISTUNRequesterPtr requester,
                                     STUNPacketPtr response
-                                    );
+                                    ) noexcept;
 
         bool handleDeallocRequester(
                                     ISTUNRequesterPtr requester,
                                     STUNPacketPtr response
-                                    );
+                                    ) noexcept;
 
         bool handlePermissionRequester(
                                        ISTUNRequesterPtr requester,
                                        STUNPacketPtr response
-                                       );
+                                       ) noexcept;
 
         bool handleChannelRequester(
                                     ISTUNRequesterPtr requester,
                                     STUNPacketPtr response
-                                    );
+                                    ) noexcept;
 
-        void requestPermissionsNow();
+        void requestPermissionsNow() noexcept;
 
-        void refreshNow();
+        void refreshNow() noexcept;
 
-        void refreshChannels();
+        void refreshChannels() noexcept;
 
         bool sendPacketOrDopPacketIfBufferFull(
                                                ServerPtr server,
                                                const BYTE *buffer,
                                                size_t bufferSizeInBytes
-                                               );
+                                               ) noexcept;
 
         bool sendPacketOverTCPOrDropIfBufferFull(
                                                  ServerPtr server,
                                                  const BYTE *buffer,
                                                  size_t bufferSizeInBytes
-                                                 );
+                                                 ) noexcept;
 
-        void informWriteReady();
+        void informWriteReady() noexcept;
 
-        WORD getNextChannelNumber();
+        WORD getNextChannelNumber() noexcept;
 
-        ISTUNRequesterPtr handleAuthorizationErrors(ISTUNRequesterPtr requester, STUNPacketPtr response);
+        ISTUNRequesterPtr handleAuthorizationErrors(ISTUNRequesterPtr requester, STUNPacketPtr response) noexcept;
 
-        void clearBackgroundingNotifierIfPossible();
-        void clearRefreshRequester()      {if (mRefreshRequester) { mRefreshRequester->cancel(); mRefreshRequester.reset(); } clearBackgroundingNotifierIfPossible();}
-        void clearPermissionRequester()   {if (mPermissionRequester) { mPermissionRequester->cancel(); mPermissionRequester.reset(); } clearBackgroundingNotifierIfPossible();}
-        void clearDeallocateRequester()   {if (mDeallocateRequester) { mDeallocateRequester->cancel(); mDeallocateRequester.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearBackgroundingNotifierIfPossible() noexcept;
+        void clearRefreshRequester() noexcept {if (mRefreshRequester) { mRefreshRequester->cancel(); mRefreshRequester.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearPermissionRequester() noexcept {if (mPermissionRequester) { mPermissionRequester->cancel(); mPermissionRequester.reset(); } clearBackgroundingNotifierIfPossible();}
+        void clearDeallocateRequester() noexcept {if (mDeallocateRequester) { mDeallocateRequester->cancel(); mDeallocateRequester.reset(); } clearBackgroundingNotifierIfPossible();}
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket::Server
-        #pragma mark
+        //
+        // TURNSocket::Server
+        //
 
         struct Server
         {
@@ -352,32 +352,32 @@ namespace ortc
           BYTE mWriteBuffer[ORTC_SERVICES_TURN_MAX_CHANNEL_DATA_IN_BYTES+sizeof(DWORD)];
           size_t mWriteBufferFilledSizeInBytes {};
 
-          Server();
-          ~Server();
+          Server() noexcept;
+          ~Server() noexcept;
 
-          static ServerPtr create();
+          static ServerPtr create() noexcept;
 
-          ElementPtr toDebug() const;
+          ElementPtr toDebug() const noexcept;
         };
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket::CompareIP
-        #pragma mark
+        //
+        // TURNSocket::CompareIP
+        //
 
         class CompareIP { // simple comparison function
         public:
-          bool operator()(const IPAddress &op1, const IPAddress &op2) const;
+          bool operator()(const IPAddress &op1, const IPAddress &op2) const noexcept;
         };
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket::Permission
-        #pragma mark
+        //
+        // TURNSocket::Permission
+        //
 
         struct Permission
         {
-          static PermissionPtr create();
+          static PermissionPtr create() noexcept;
 
           bool mInstalled;
           IPAddress mPeerAddress;
@@ -389,13 +389,13 @@ namespace ortc
         };
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket::ChannelInfo
-        #pragma mark
+        //
+        // TURNSocket::ChannelInfo
+        //
 
         struct ChannelInfo
         {
-          static ChannelInfoPtr create();
+          static ChannelInfoPtr create() noexcept;
 
           bool mBound;
           WORD mChannelNumber;
@@ -407,9 +407,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TURNSocket => (data)
-        #pragma mark
+        //
+        // TURNSocket => (data)
+        //
 
         mutable RecursiveLock mLock;
         TURNSocketWeakPtr mThisWeak;
@@ -471,21 +471,21 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITURNSocketFactory
-      #pragma mark
+      //
+      // ITURNSocketFactory
+      //
 
       interaction ITURNSocketFactory
       {
         typedef ITURNSocket::CreationOptions CreationOptions;
 
-        static ITURNSocketFactory &singleton();
+        static ITURNSocketFactory &singleton() noexcept;
 
         virtual TURNSocketPtr create(
                                      IMessageQueuePtr queue,
                                      ITURNSocketDelegatePtr delegate,
                                      const CreationOptions &options
-                                     );
+                                     ) noexcept;
       };
 
       class TURNSocketFactory : public IFactory<ITURNSocketFactory> {};

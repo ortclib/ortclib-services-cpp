@@ -53,12 +53,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static void appendName(String &result, const char *name)
+      static void appendName(String &result, const char *name) noexcept
       {
         if (result.isEmpty()) {
           result = name;
@@ -72,12 +72,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Reachability
-      #pragma mark
+      //
+      // Reachability
+      //
 
       //-----------------------------------------------------------------------
-      Reachability::Reachability(const make_private &) :
+      Reachability::Reachability(const make_private &) noexcept :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mSubscriptions(decltype(mSubscriptions)::create()),
@@ -87,20 +87,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Reachability::~Reachability()
+      Reachability::~Reachability() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------
-      ReachabilityPtr Reachability::convert(IReachabilityPtr backgrounding)
+      ReachabilityPtr Reachability::convert(IReachabilityPtr backgrounding) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(Reachability, backgrounding);
       }
 
       //-----------------------------------------------------------------------
-      ReachabilityPtr Reachability::create()
+      ReachabilityPtr Reachability::create() noexcept
       {
         ReachabilityPtr pThis(make_shared<Reachability>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -108,7 +108,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ReachabilityPtr Reachability::singleton()
+      ReachabilityPtr Reachability::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Reachability> singleton(IReachabilityFactory::singleton().createForReachability());
@@ -123,12 +123,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Reachability => IReachability
-      #pragma mark
+      //
+      // Reachability => IReachability
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr Reachability::toDebug(ReachabilityPtr reachability)
+      ElementPtr Reachability::toDebug(ReachabilityPtr reachability) noexcept
       {
         if (!reachability) return ElementPtr();
 
@@ -137,7 +137,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IReachabilitySubscriptionPtr Reachability::subscribe(IReachabilityDelegatePtr originalDelegate)
+      IReachabilitySubscriptionPtr Reachability::subscribe(IReachabilityDelegatePtr originalDelegate) noexcept
       {
         ZS_LOG_DETAIL(log("subscribing to backgrounding"))
 
@@ -162,7 +162,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void Reachability::notifyReachability(InterfaceTypes interfaceTypes)
+      void Reachability::notifyReachability(InterfaceTypes interfaceTypes) noexcept
       {
         ZS_LOG_DETAIL(log("notify reachability changed") + ZS_PARAM("reachability", toString(interfaceTypes)))
 
@@ -180,12 +180,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Reachability => (internal)
-      #pragma mark
+      //
+      // Reachability => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params Reachability::log(const char *message) const
+      Log::Params Reachability::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("services::Reachability");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -193,19 +193,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params Reachability::slog(const char *message)
+      Log::Params Reachability::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::Reachability");
       }
 
       //-----------------------------------------------------------------------
-      Log::Params Reachability::debug(const char *message) const
+      Log::Params Reachability::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr Reachability::toDebug() const
+      ElementPtr Reachability::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -224,18 +224,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IReachabilityFactory
-      #pragma mark
+      //
+      // IReachabilityFactory
+      //
 
       //-----------------------------------------------------------------------
-      IReachabilityFactory &IReachabilityFactory::singleton()
+      IReachabilityFactory &IReachabilityFactory::singleton() noexcept
       {
         return ReachabilityFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      ReachabilityPtr IReachabilityFactory::createForReachability()
+      ReachabilityPtr IReachabilityFactory::createForReachability() noexcept
       {
         if (this) {}
         return Reachability::create();
@@ -247,12 +247,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IReachability
-    #pragma mark
+    //
+    // IReachability
+    //
 
     //-------------------------------------------------------------------------
-    String IReachability::toString(InterfaceTypes interfaceTypes)
+    String IReachability::toString(InterfaceTypes interfaceTypes) noexcept
     {
       if (InterfaceType_None == interfaceTypes) return "None";
 
@@ -287,13 +287,13 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    ElementPtr IReachability::toDebug()
+    ElementPtr IReachability::toDebug() noexcept
     {
       return internal::Reachability::toDebug(internal::Reachability::singleton());
     }
 
     //-------------------------------------------------------------------------
-    IReachabilitySubscriptionPtr IReachability::subscribe(IReachabilityDelegatePtr delegate)
+    IReachabilitySubscriptionPtr IReachability::subscribe(IReachabilityDelegatePtr delegate) noexcept
     {
       internal::ReachabilityPtr singleton = internal::Reachability::singleton();
       if (!singleton) return IReachabilitySubscriptionPtr();
@@ -301,7 +301,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void IReachability::notifyReachability(InterfaceTypes interfaceTypes)
+    void IReachability::notifyReachability(InterfaceTypes interfaceTypes) noexcept
     {
       internal::ReachabilityPtr singleton = internal::Reachability::singleton();
       if (!singleton) return;

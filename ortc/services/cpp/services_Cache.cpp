@@ -50,31 +50,31 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Cache
-      #pragma mark
+      //
+      // Cache
+      //
 
       //-----------------------------------------------------------------------
-      Cache::Cache(const make_private &)
+      Cache::Cache(const make_private &) noexcept
       {
         ZS_LOG_DETAIL(log("created"));
       }
 
       //-----------------------------------------------------------------------
-      Cache::~Cache()
+      Cache::~Cache() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"));
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::convert(ICachePtr cache)
+      CachePtr Cache::convert(ICachePtr cache) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(Cache, cache);
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::create()
+      CachePtr Cache::create() noexcept
       {
         CachePtr pThis(make_shared<Cache>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -82,7 +82,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      CachePtr Cache::singleton()
+      CachePtr Cache::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Cache> singleton(Cache::create());
@@ -97,12 +97,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Cache => ICache
-      #pragma mark
+      //
+      // Cache => ICache
+      //
 
       //-----------------------------------------------------------------------
-      void Cache::setup(ICacheDelegatePtr delegate)
+      void Cache::setup(ICacheDelegatePtr delegate) noexcept
       {
         AutoRecursiveLock lock(mLock);
         mDelegate = delegate;
@@ -111,7 +111,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String Cache::fetch(const char *cookieNamePath) const
+      String Cache::fetch(const char *cookieNamePath) const noexcept
       {
         if (!cookieNamePath) return String();
 
@@ -138,7 +138,7 @@ namespace ortc
                         const char *cookieNamePath,
                         Time expires,
                         const char *str
-                        )
+                        ) noexcept
       {
         ZS_EVENTING_4(
                       x, i, Debug, ServicesCacheStore, os, Cache, Info,
@@ -174,7 +174,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void Cache::clear(const char *cookieNamePath)
+      void Cache::clear(const char *cookieNamePath) noexcept
       {
         ZS_EVENTING_2(x, i, Debug, ServicesCacheClear, os, Cache, Info, puid, id, mID, string, cookieNamePath, cookieNamePath);
 
@@ -198,12 +198,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Cache => (internal)
-      #pragma mark
+      //
+      // Cache => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params Cache::log(const char *message) const
+      Log::Params Cache::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("services::Cache");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -211,7 +211,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params Cache::slog(const char *message)
+      Log::Params Cache::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::Cache");
       }
@@ -222,12 +222,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ICache
-    #pragma mark
+    //
+    // ICache
+    //
 
     //-------------------------------------------------------------------------
-    void ICache::setup(ICacheDelegatePtr delegate)
+    void ICache::setup(ICacheDelegatePtr delegate) noexcept
     {
       internal::CachePtr singleton = internal::Cache::singleton();
       if (!singleton) return;
@@ -235,7 +235,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    String ICache::fetch(const char *cookieNamePath)
+    String ICache::fetch(const char *cookieNamePath) noexcept
     {
       internal::CachePtr singleton = internal::Cache::singleton();
       if (!singleton) return String();
@@ -247,7 +247,7 @@ namespace ortc
                       const char *cookieNamePath,
                       Time expires,
                       const char *str
-                      )
+                      ) noexcept
     {
       internal::CachePtr singleton = internal::Cache::singleton();
       if (!singleton) return;
@@ -255,7 +255,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void ICache::clear(const char *cookieNamePath)
+    void ICache::clear(const char *cookieNamePath) noexcept
     {
       internal::CachePtr singleton = internal::Cache::singleton();
       if (!singleton) return;

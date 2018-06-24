@@ -48,9 +48,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerPatternForBackOffTimer
-      #pragma mark
+      //
+      // IBackOffTimerPatternForBackOffTimer
+      //
 
       interaction IBackOffTimerPatternForBackOffTimer
       {
@@ -58,23 +58,23 @@ namespace ortc
 
         ZS_DECLARE_TYPEDEF_PTR(IBackOffTimerPatternForBackOffTimer, ForBackOffTimer)
 
-        virtual ForBackOffTimerPtr clone() const = 0;
+        virtual ForBackOffTimerPtr clone() const noexcept = 0;
 
-        virtual size_t getMaxAttempts() const = 0;
+        virtual size_t getMaxAttempts() const noexcept = 0;
 
-        virtual void nextAttempt() = 0;
+        virtual void nextAttempt() noexcept = 0;
 
-        virtual DurationType getAttemptTimeout() = 0;
-        virtual DurationType getRetryAfterDuration() = 0;
+        virtual DurationType getAttemptTimeout() noexcept = 0;
+        virtual DurationType getRetryAfterDuration() noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimerPattern
-      #pragma mark
+      //
+      // BackOffTimerPattern
+      //
 
       class BackOffTimerPattern : public IBackOffTimerPattern,
                                   public SharedRecursiveLock,
@@ -95,78 +95,77 @@ namespace ortc
         BackOffTimerPattern(
                             const make_private &,
                             ElementPtr patternEl
-                            );
+                            ) noexcept;
 
       protected:
-        void init();
+        void init() noexcept;
 
       public:
-        ~BackOffTimerPattern();
+        ~BackOffTimerPattern() noexcept;
 
       public:
-        static BackOffTimerPatternPtr convert(IBackOffTimerPatternPtr pattern);
-        static BackOffTimerPatternPtr convert(ForBackOffTimerPtr pattern);
+        static BackOffTimerPatternPtr convert(IBackOffTimerPatternPtr pattern) noexcept;
+        static BackOffTimerPatternPtr convert(ForBackOffTimerPtr pattern) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => IBackOffTimer
-        #pragma mark
+        //
+        // BackOffTimer => IBackOffTimer
+        //
 
-        static ElementPtr toDebug(IBackOffTimerPatternPtr timer);
+        static ElementPtr toDebug(IBackOffTimerPatternPtr timer) noexcept;
 
-        static BackOffTimerPatternPtr create(const char *pattern = NULL);
-        static BackOffTimerPatternPtr create(ElementPtr patternEl);
+        static BackOffTimerPatternPtr create(const char *pattern = NULL) noexcept;
+        static BackOffTimerPatternPtr create(ElementPtr patternEl) noexcept;
 
-        virtual PUID getID() const override {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual String save() const override;
-        virtual ElementPtr saveToJSON() const override;
+        String save() const noexcept override;
+        ElementPtr saveToJSON() const noexcept override;
 
-        virtual void setMultiplierForLastAttemptTimeout(double multiplier) override;
+        void setMultiplierForLastAttemptTimeout(double multiplier) noexcept override;
 
-        virtual void setMaxAttempts(size_t maxAttempts) override;
+        void setMaxAttempts(size_t maxAttempts) noexcept override;
 
-        virtual void setMultiplierForLastRetryAfterFailureDuration(double multiplier) override;
+        void setMultiplierForLastRetryAfterFailureDuration(double multiplier) noexcept override;
 
+        void actualAddNextAttemptTimeout(Microseconds attemptTimeout) noexcept override;
+        void actualSetMaxAttemptTimeout(DurationType maxRetryDuration) noexcept override;
 
-        virtual void actualAddNextAttemptTimeout(Microseconds attemptTimeout) override;
-        virtual void actualSetMaxAttemptTimeout(DurationType maxRetryDuration) override;
-
-        virtual void actualAddNextRetryAfterFailureDuration(Microseconds nextRetryDuration) override;
-        virtual void actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration) override;
+        void actualAddNextRetryAfterFailureDuration(Microseconds nextRetryDuration) noexcept override;
+        void actualSetMaxRetryAfterFailureDuration(DurationType maxRetryDuration) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => IBackOffTimerPatternForBackOffTimer
-        #pragma mark
+        //
+        // BackOffTimer => IBackOffTimerPatternForBackOffTimer
+        //
 
-        virtual ForBackOffTimerPtr clone() const override;
+        virtual ForBackOffTimerPtr clone() const noexcept override;
 
-        virtual size_t getMaxAttempts() const override;
+        virtual size_t getMaxAttempts() const noexcept override;
 
-        virtual void nextAttempt() override;
+        virtual void nextAttempt() noexcept override;
 
-        virtual DurationType getAttemptTimeout() override;
-        virtual DurationType getRetryAfterDuration() override;
+        virtual DurationType getAttemptTimeout() noexcept override;
+        virtual DurationType getRetryAfterDuration() noexcept override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimerPattern => (internal)
-        #pragma mark
+        //
+        // BackOffTimerPattern => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        static Log::Params slog(const char *message) noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => (data)
-        #pragma mark
+        //
+        // BackOffTimer => (data)
+        //
 
         AutoPUID mID;
         BackOffTimerPatternWeakPtr mThisWeak;
@@ -191,16 +190,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerPatternFactory
-      #pragma mark
+      //
+      // IBackOffTimerPatternFactory
+      //
 
       interaction IBackOffTimerPatternFactory
       {
-        static IBackOffTimerPatternFactory &singleton();
+        static IBackOffTimerPatternFactory &singleton() noexcept;
 
-        virtual BackOffTimerPatternPtr create(const char *pattern = NULL);
-        virtual BackOffTimerPatternPtr create(ElementPtr patternEl);
+        virtual BackOffTimerPatternPtr create(const char *pattern = NULL) noexcept;
+        virtual BackOffTimerPatternPtr create(ElementPtr patternEl) noexcept;
       };
 
       class BackOffTimerPatternFactory : public IFactory<IBackOffTimerPatternFactory> {};

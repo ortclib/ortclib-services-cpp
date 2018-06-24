@@ -49,30 +49,30 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterManagerForSTUNRequester
-      #pragma mark
+      //
+      // ISTUNRequesterManagerForSTUNRequester
+      //
 
       interaction ISTUNRequesterManagerForSTUNRequester
       {
         ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterManagerForSTUNRequester, ForSTUNRequester)
 
-        static ForSTUNRequesterPtr singleton();
+        static ForSTUNRequesterPtr singleton() noexcept;
 
         virtual void monitorStart(
                                   STUNRequesterPtr requester,
                                   STUNPacketPtr stunRequest
-                                  ) = 0;
-        virtual void monitorStop(STUNRequester &requester) = 0;
+                                  ) noexcept = 0;
+        virtual void monitorStop(STUNRequester &requester) noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequesterManager
-      #pragma mark
+      //
+      // STUNRequesterManager
+      //
 
       class STUNRequesterManager : public Noop,
                                    public ISTUNRequesterManager,
@@ -91,61 +91,61 @@ namespace ortc
         typedef std::pair<QWORD, QWORD> QWORDPair;
 
       public:
-        STUNRequesterManager(const make_private &);
+        STUNRequesterManager(const make_private &) noexcept;
 
       protected:
-        STUNRequesterManager(Noop) : Noop(true) {};
+        STUNRequesterManager(Noop) noexcept : Noop(true) {};
 
       public:
-        ~STUNRequesterManager();
+        ~STUNRequesterManager() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManagerFactory
-        #pragma mark
+        //
+        // STUNRequesterManager => ISTUNRequesterManagerFactory
+        //
 
-        static STUNRequesterManagerPtr create();
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManager
-        #pragma mark
-
-        static STUNRequesterManagerPtr singleton();
-
-        virtual ISTUNRequesterPtr handleSTUNPacket(
-                                                   IPAddress fromIPAddress,
-                                                   STUNPacketPtr stun
-                                                   );
+        static STUNRequesterManagerPtr create() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequesterManager => ISTUNRequesterManagerForSTUNRequester
-        #pragma mark
+        //
+        // STUNRequesterManager => ISTUNRequesterManager
+        //
+
+        static STUNRequesterManagerPtr singleton() noexcept;
+
+        ISTUNRequesterPtr handleSTUNPacket(
+                                           IPAddress fromIPAddress,
+                                           STUNPacketPtr stun
+                                           ) noexcept;
+
+        //---------------------------------------------------------------------
+        //
+        // STUNRequesterManager => ISTUNRequesterManagerForSTUNRequester
+        //
 
         // (duplicate) static STUNRequesterManagerPtr singleton();
 
-        virtual void monitorStart(
-                                  STUNRequesterPtr requester,
-                                  STUNPacketPtr stunRequest
-                                  );
-        virtual void monitorStop(STUNRequester &requester);
+        void monitorStart(
+                          STUNRequesterPtr requester,
+                          STUNPacketPtr stunRequest
+                          ) noexcept;
+        void monitorStop(STUNRequester &requester) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequesterManager => (internal)
-        #pragma mark
+        //
+        // STUNRequesterManager => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
+        Log::Params log(const char *message) const noexcept;
+        static Log::Params slog(const char *message) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequesterManager => (data)
-        #pragma mark
+        //
+        // STUNRequesterManager => (data)
+        //
 
         RecursiveLock mLock;
         PUID mID;
@@ -161,15 +161,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterManagerFactory
-      #pragma mark
+      //
+      // ISTUNRequesterManagerFactory
+      //
 
       interaction ISTUNRequesterManagerFactory
       {
-        static ISTUNRequesterManagerFactory &singleton();
+        static ISTUNRequesterManagerFactory &singleton() noexcept;
 
-        virtual STUNRequesterManagerPtr createSTUNRequesterManager();
+        virtual STUNRequesterManagerPtr createSTUNRequesterManager() noexcept;
       };
 
       class STUNRequesterManagerFactory : public IFactory<ISTUNRequesterManagerFactory> {};

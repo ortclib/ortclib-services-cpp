@@ -52,9 +52,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPTransport
-      #pragma mark
+      //
+      // RUDPTransport
+      //
 
       class RUDPTransport : public Noop,
                             public MessageQueueAssociator,
@@ -85,138 +85,138 @@ namespace ortc
                       IMessageQueuePtr queue,
                       IICESocketSessionPtr iceSession,
                       IRUDPTransportDelegatePtr delegate
-                      );
+                      ) noexcept;
 
       protected:
-        RUDPTransport(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPTransport(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
-        static RUDPTransportPtr convert(IRUDPTransportPtr session);
+        static RUDPTransportPtr convert(IRUDPTransportPtr session) noexcept;
 
       public:
-        ~RUDPTransport();
+        ~RUDPTransport() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPTransport => IRUDPTransport
-        #pragma mark
+        //
+        // RUDPTransport => IRUDPTransport
+        //
 
-        static ElementPtr toDebug(IRUDPTransportPtr session);
+        static ElementPtr toDebug(IRUDPTransportPtr session) noexcept;
 
         static RUDPTransportPtr listen(
                                        IMessageQueuePtr queue,
                                        IICESocketSessionPtr iceSession,
                                        IRUDPTransportDelegatePtr delegate
-                                       );
+                                       ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate);
+        IRUDPTransportSubscriptionPtr subscribe(IRUDPTransportDelegatePtr delegate) noexcept override;
 
-        virtual RUDPTransportStates getState(
-                                             WORD *outLastErrorCode = NULL,
-                                             String *outLastErrorReason = NULL
-                                             ) const;
+        RUDPTransportStates getState(
+                                     WORD *outLastErrorCode = NULL,
+                                     String *outLastErrorReason = NULL
+                                     ) const noexcept override;
 
-        virtual void shutdown();
+        void shutdown() noexcept override;
 
-        virtual IICESocketSessionPtr getICESession() const;
+        IICESocketSessionPtr getICESession() const noexcept override;
 
-        virtual IRUDPChannelPtr openChannel(
-                                            IRUDPChannelDelegatePtr delegate,
-                                            const char *connectionInfo,
-                                            ITransportStreamPtr receiveStream,
-                                            ITransportStreamPtr sendStream
-                                            );
+        IRUDPChannelPtr openChannel(
+                                    IRUDPChannelDelegatePtr delegate,
+                                    const char *connectionInfo,
+                                    ITransportStreamPtr receiveStream,
+                                    ITransportStreamPtr sendStream
+                                    ) noexcept override;
 
-        virtual IRUDPChannelPtr acceptChannel(
-                                              IRUDPChannelDelegatePtr delegate,
-                                              ITransportStreamPtr receiveStream,
-                                              ITransportStreamPtr sendStream
-                                              );
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPTransport => IICESocketSessionDelegate
-        #pragma mark
-
-        virtual void onICESocketSessionStateChanged(
-                                                    IICESocketSessionPtr session,
-                                                    ICESocketSessionStates state
-                                                    );
-
-        virtual void onICESocketSessionNominationChanged(IICESocketSessionPtr session);
-
-        virtual void handleICESocketSessionReceivedPacket(
-                                                          IICESocketSessionPtr session,
-                                                          const BYTE *buffer,
-                                                          size_t bufferLengthInBytes
-                                                          );
-
-        virtual bool handleICESocketSessionReceivedSTUNPacket(
-                                                              IICESocketSessionPtr session,
-                                                              STUNPacketPtr stun,
-                                                              const String &localUsernameFrag,
-                                                              const String &remoteUsernameFrag
-                                                              );
-
-        virtual void onICESocketSessionWriteReady(IICESocketSessionPtr session);
+        IRUDPChannelPtr acceptChannel(
+                                      IRUDPChannelDelegatePtr delegate,
+                                      ITransportStreamPtr receiveStream,
+                                      ITransportStreamPtr sendStream
+                                      ) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPTransport => IRUDPChannelDelegateForSessionAndListener
-        #pragma mark
+        //
+        // RUDPTransport => IICESocketSessionDelegate
+        //
 
-        virtual void onRUDPChannelStateChanged(
-                                               RUDPChannelPtr channel,
-                                               RUDPChannelStates state
-                                               );
+        void onICESocketSessionStateChanged(
+                                            IICESocketSessionPtr session,
+                                            ICESocketSessionStates state
+                                            ) override;
 
-        virtual bool notifyRUDPChannelSendPacket(
-                                                 RUDPChannelPtr channel,
-                                                 const IPAddress &remoteIP,
-                                                 const BYTE *packet,
-                                                 size_t packetLengthInBytes
-                                                 );
+        void onICESocketSessionNominationChanged(IICESocketSessionPtr session) override;
+
+        void handleICESocketSessionReceivedPacket(
+                                                  IICESocketSessionPtr session,
+                                                  const BYTE *buffer,
+                                                  size_t bufferLengthInBytes
+                                                  ) noexcept override;
+
+        bool handleICESocketSessionReceivedSTUNPacket(
+                                                      IICESocketSessionPtr session,
+                                                      STUNPacketPtr stun,
+                                                      const String &localUsernameFrag,
+                                                      const String &remoteUsernameFrag
+                                                      ) noexcept override;
+
+        void onICESocketSessionWriteReady(IICESocketSessionPtr session) override;
+
+        //---------------------------------------------------------------------
+        //
+        // RUDPTransport => IRUDPChannelDelegateForSessionAndListener
+        //
+
+        void onRUDPChannelStateChanged(
+                                       RUDPChannelPtr channel,
+                                       RUDPChannelStates state
+                                       ) override;
+
+        bool notifyRUDPChannelSendPacket(
+                                         RUDPChannelPtr channel,
+                                         const IPAddress &remoteIP,
+                                         const BYTE *packet,
+                                         size_t packetLengthInBytes
+                                         ) noexcept override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPTransport => (internal)
-        #pragma mark
+        //
+        // RUDPTransport => (internal)
+        //
 
-        RecursiveLock &getLock() const;
+        RecursiveLock &getLock() const noexcept;
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
-        void fix(STUNPacketPtr stun) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
+        void fix(STUNPacketPtr stun) const noexcept;
 
-        bool isReady() {return RUDPTransportState_Ready == mCurrentState;}
-        bool isShuttingDown() const {return RUDPTransportState_ShuttingDown == mCurrentState;}
-        bool isShutdown() const {return RUDPTransportState_Shutdown == mCurrentState;}
+        bool isReady() noexcept {return RUDPTransportState_Ready == mCurrentState;}
+        bool isShuttingDown() const noexcept {return RUDPTransportState_ShuttingDown == mCurrentState;}
+        bool isShutdown() const noexcept {return RUDPTransportState_Shutdown == mCurrentState;}
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void cancel();
-        void step();
+        void cancel() noexcept;
+        void step() noexcept;
 
-        void setState(RUDPTransportStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void setState(RUDPTransportStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
         bool handleUnknownChannel(
                                   STUNPacketPtr &stun,
                                   STUNPacketPtr &outResponse
-                                  );
+                                  ) noexcept;
 
-        void issueChannelConnectIfPossible();
+        void issueChannelConnectIfPossible() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPTransport => (data)
-        #pragma mark
+        //
+        // RUDPTransport => (data)
+        //
 
         mutable RecursiveLock mLock;
 
@@ -245,22 +245,22 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPTransportFactory
-      #pragma mark
+      //
+      // IRUDPTransportFactory
+      //
 
       interaction IRUDPTransportFactory
       {
         typedef IICESocket::CandidateList CandidateList;
         typedef IICESocket::ICEControls ICEControls;
 
-        static IRUDPTransportFactory &singleton();
+        static IRUDPTransportFactory &singleton() noexcept;
 
         virtual RUDPTransportPtr listen(
                                         IMessageQueuePtr queue,
                                         IICESocketSessionPtr iceSession,
                                         IRUDPTransportDelegatePtr delegate
-                                               );
+                                        ) noexcept;
       };
 
       class RUDPTransportFactory : public IFactory<IRUDPTransportFactory> {};

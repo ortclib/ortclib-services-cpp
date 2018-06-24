@@ -49,9 +49,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNDiscovery
-      #pragma mark
+      //
+      // STUNDiscovery
+      //
 
       class STUNDiscovery : public Noop,
                             public MessageQueueAssociator,
@@ -75,92 +75,92 @@ namespace ortc
                       IMessageQueuePtr queue,
                       ISTUNDiscoveryDelegatePtr delegate,
                       const CreationOptions &options
-                      );
+                      ) noexcept;
 
       protected:
-        STUNDiscovery(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        STUNDiscovery(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~STUNDiscovery();
+        ~STUNDiscovery() noexcept;
 
-        static STUNDiscoveryPtr convert(ISTUNDiscoveryPtr object);
+        static STUNDiscoveryPtr convert(ISTUNDiscoveryPtr object) noexcept;
 
       protected:
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => ISTUNDiscovery
-        #pragma mark
+        //
+        // STUNDiscovery => ISTUNDiscovery
+        //
 
-        static ElementPtr toDebug(STUNDiscoveryPtr discovery);
+        static ElementPtr toDebug(STUNDiscoveryPtr discovery) noexcept;
 
         static STUNDiscoveryPtr create(
                                        IMessageQueuePtr queue,
                                        ISTUNDiscoveryDelegatePtr delegate,
                                        const CreationOptions &options
-                                       );
+                                       ) noexcept;
 
-        virtual PUID getID() const override {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual bool isComplete() const override;
+        bool isComplete() const noexcept override;
 
-        virtual void cancel() override;
+        void cancel() noexcept override;
 
-        virtual IPAddress getMappedAddress() const override;
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => IDNSDelegate
-        #pragma mark
-
-        virtual void onLookupCompleted(IDNSQueryPtr query) override;
+        IPAddress getMappedAddress() const noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => IDNSDelegate
-        #pragma mark
+        //
+        // STUNDiscovery => IDNSDelegate
+        //
 
-        virtual void onTimer(ITimerPtr timer) override;
+        void onLookupCompleted(IDNSQueryPtr query) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => ISTUNRequesterDelegate
-        #pragma mark
+        //
+        // STUNDiscovery => IDNSDelegate
+        //
 
-        virtual void onSTUNRequesterSendPacket(
-                                               ISTUNRequesterPtr requester,
-                                               IPAddress destination,
-                                               SecureByteBlockPtr packet
-                                               ) override;
+        void onTimer(ITimerPtr timer) override;
 
-        virtual bool handleSTUNRequesterResponse(
-                                                 ISTUNRequesterPtr requester,
-                                                 IPAddress fromIPAddress,
-                                                 STUNPacketPtr response
-                                                 ) override;
+        //---------------------------------------------------------------------
+        //
+        // STUNDiscovery => ISTUNRequesterDelegate
+        //
 
-        virtual void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester) override;
+        void onSTUNRequesterSendPacket(
+                                       ISTUNRequesterPtr requester,
+                                       IPAddress destination,
+                                       SecureByteBlockPtr packet
+                                       ) override;
+
+        bool handleSTUNRequesterResponse(
+                                         ISTUNRequesterPtr requester,
+                                         IPAddress fromIPAddress,
+                                         STUNPacketPtr response
+                                         ) noexcept override;
+
+        void onSTUNRequesterTimedOut(ISTUNRequesterPtr requester) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => (internal)
-        #pragma mark
+        //
+        // STUNDiscovery => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        ElementPtr toDebug() const;
+        Log::Params log(const char *message) const noexcept;
+        ElementPtr toDebug() const noexcept;
 
-        void step();
-        bool hasContactedServerBefore(const IPAddress &server);
-        void performNextLookup();
+        void step() noexcept;
+        bool hasContactedServerBefore(const IPAddress &server) noexcept;
+        void performNextLookup() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNDiscovery => (data)
-        #pragma mark
+        //
+        // STUNDiscovery => (data)
+        //
 
         mutable RecursiveLock mLock;
         STUNDiscoveryWeakPtr mThisWeak;
@@ -186,21 +186,21 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNDiscoveryFactory
-      #pragma mark
+      //
+      // ISTUNDiscoveryFactory
+      //
 
       interaction ISTUNDiscoveryFactory
       {
         typedef ISTUNDiscovery::CreationOptions CreationOptions;
 
-        static ISTUNDiscoveryFactory &singleton();
+        static ISTUNDiscoveryFactory &singleton() noexcept;
 
         virtual STUNDiscoveryPtr create(
                                         IMessageQueuePtr queue,
                                         ISTUNDiscoveryDelegatePtr delegate,
                                         const CreationOptions &options
-                                        );
+                                        ) noexcept;
 
       };
 

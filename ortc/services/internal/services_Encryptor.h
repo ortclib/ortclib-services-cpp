@@ -46,9 +46,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Encryptor
-      #pragma mark
+      //
+      // Encryptor
+      //
 
       class Encryptor : public IEncryptor
       {
@@ -61,31 +61,31 @@ namespace ortc
                   const SecureByteBlock &key,
                   const SecureByteBlock &iv,
                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                  );
+                  ) noexcept;
       public:
-        ~Encryptor();
+        ~Encryptor() noexcept;
 
         static EncryptorPtr create(
                                    const SecureByteBlock &key,
                                    const SecureByteBlock &iv,
                                    EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                                   );
+                                   ) noexcept;
 
-        virtual size_t getOptimalBlockSize() const;
+        virtual size_t getOptimalBlockSize() const noexcept;
 
         virtual SecureByteBlockPtr encrypt(
                                            const BYTE *inBuffer,
                                            size_t inBufferSizeInBytes
-                                           );
-        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &input);
-        virtual SecureByteBlockPtr finalize();
+                                           ) noexcept;
+        virtual SecureByteBlockPtr encrypt(const SecureByteBlock &input) noexcept;
+        virtual SecureByteBlockPtr finalize() noexcept;
 
       protected:
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark (internal)
-        #pragma mark
+        //
+        // (internal)
+        //
 
       protected:
         EncryptorData *mData;

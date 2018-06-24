@@ -43,56 +43,56 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ILogger
-    #pragma mark
+    //
+    // ILogger
+    //
 
     interaction ILogger
     {
-      static void installStdOutLogger(bool colorizeOutput);
-      static void installFileLogger(const char *fileName, bool colorizeOutput);
+      static void installStdOutLogger(bool colorizeOutput) noexcept;
+      static void installFileLogger(const char *fileName, bool colorizeOutput) noexcept;
       static void installTelnetLogger(
                                       WORD listenPort,
                                       Seconds maxSecondsWaitForSocketToBeAvailable,
                                       bool colorizeOutput
-                                      );
+                                      ) noexcept;
       static void installOutgoingTelnetLogger(
                                               const char *serverHostWithPort,
                                               bool colorizeOutput,
                                               const char *sendStringUponConnection
-                                              );
-      static void installDebuggerLogger(bool colorizeOutput = false);
+                                              ) noexcept;
+      static void installDebuggerLogger(bool colorizeOutput = false) noexcept;
 
-      static bool isTelnetLoggerListening();
-      static bool isTelnetLoggerConnected();
-      static bool isOutgoingTelnetLoggerConnected();
+      static bool isTelnetLoggerListening() noexcept;
+      static bool isTelnetLoggerConnected() noexcept;
+      static bool isOutgoingTelnetLoggerConnected() noexcept;
 
-      static void uninstallStdOutLogger();
-      static void uninstallFileLogger();
-      static void uninstallTelnetLogger();
-      static void uninstallOutgoingTelnetLogger();
-      static void uninstallDebuggerLogger();
+      static void uninstallStdOutLogger() noexcept;
+      static void uninstallFileLogger() noexcept;
+      static void uninstallTelnetLogger() noexcept;
+      static void uninstallOutgoingTelnetLogger() noexcept;
+      static void uninstallDebuggerLogger() noexcept;
 
-      static void setLogLevel(Log::Level logLevel);
-      static void setLogLevel(const char *component, Log::Level logLevel);
+      static void setLogLevel(Log::Level logLevel) noexcept;
+      static void setLogLevel(const char *component, Log::Level logLevel) noexcept;
 
       static void installEventingListener(
-        WORD listenPort,
-        const char *sharedSecret,
-        Seconds maxSecondsWaitForSocketToBeAvailable
-      );
-      static void uninstallEventingListener();
+                                          WORD listenPort,
+                                          const char *sharedSecret,
+                                          Seconds maxSecondsWaitForSocketToBeAvailable
+                                          ) noexcept;
+      static void uninstallEventingListener() noexcept;
 
       static void connectToEventingServer(
-        const char *serverAddress,
-        const char *sharedSecret
-      );
-      static void disconnectEventingServer();
+                                          const char *serverAddress,
+                                          const char *sharedSecret
+                                          ) noexcept;
+      static void disconnectEventingServer() noexcept;
 
-      static void setDefaultEventingLevel(Log::Level logLevel);
-      static void setDefaultEventingLevel(const char *component, Log::Level logLevel);
-      static void setEventingLevel(Log::Level logLevel);
-      static void setEventingLevel(const char *component, Log::Level logLevel);
+      static void setDefaultEventingLevel(Log::Level logLevel) noexcept;
+      static void setDefaultEventingLevel(const char *component, Log::Level logLevel) noexcept;
+      static void setEventingLevel(Log::Level logLevel) noexcept;
+      static void setEventingLevel(const char *component, Log::Level logLevel) noexcept;
     };
   }
 }

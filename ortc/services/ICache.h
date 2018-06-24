@@ -41,32 +41,32 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ICache
-    #pragma mark
+    //
+    // ICache
+    //
 
     interaction ICache
     {
-      static void setup(ICacheDelegatePtr delegate);
+      static void setup(ICacheDelegatePtr delegate) noexcept;
 
-      static String fetch(const char *cookieNamePath);
+      static String fetch(const char *cookieNamePath) noexcept;
       static void store(
                         const char *cookieNamePath,
                         Time expires,
                         const char *str
-                        );
-      static void clear(const char *cookieNamePath);
+                        ) noexcept;
+      static void clear(const char *cookieNamePath) noexcept;
       
-      virtual ~ICache() {}  // needed to make type polymorphic
+      virtual ~ICache() noexcept {}  // needed to make type polymorphic
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ICacheDelegate
-    #pragma mark
+    //
+    // ICacheDelegate
+    //
 
     interaction ICacheDelegate
     {
@@ -74,13 +74,13 @@ namespace ortc
       //          and must NOT block on any kind of lock that might be
       //          blocked calling inside to the SDK (directly or indirectly).
 
-      virtual String fetch(const char *cookieNamePath) const = 0;
+      virtual String fetch(const char *cookieNamePath) const noexcept = 0;
       virtual void store(
                          const char *cookieNamePath,
                          Time expires,
                          const char *str
-                         ) = 0;
-      virtual void clear(const char *cookieNamePath) = 0;
+                         ) noexcept = 0;
+      virtual void clear(const char *cookieNamePath) noexcept = 0;
     };
   }
 }

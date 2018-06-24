@@ -63,37 +63,37 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
 
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessagingSettingsDefaults
-      #pragma mark
+      //
+      // TCPMessagingSettingsDefaults
+      //
 
       class TCPMessagingSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~TCPMessagingSettingsDefaults()
+        ~TCPMessagingSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static TCPMessagingSettingsDefaultsPtr singleton()
+        static TCPMessagingSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<TCPMessagingSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static TCPMessagingSettingsDefaultsPtr create()
+        static TCPMessagingSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<TCPMessagingSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -101,14 +101,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_SETTING_TCPMESSAGING_BACKGROUNDING_PHASE, 5);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installTCPMessagingSettingsDefaults()
+      void installTCPMessagingSettingsDefaults() noexcept
       {
         TCPMessagingSettingsDefaults::singleton();
       }
@@ -117,9 +117,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging
-      #pragma mark
+      //
+      // TCPMessaging
+      //
 
       //-----------------------------------------------------------------------
       TCPMessaging::TCPMessaging(
@@ -130,7 +130,7 @@ namespace ortc
                                  ITransportStreamPtr sendStream,
                                  bool framesHaveChannelNumber,
                                  size_t maxMessageSizeInBytes
-                                 ) :
+                                 ) noexcept :
         zsLib::MessageQueueAssociator(queue),
         mSubscriptions(decltype(mSubscriptions)::create()),
         mCurrentState(SessionState_Pending),
@@ -143,11 +143,11 @@ namespace ortc
       {
         ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
-        ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)
+        ZS_ASSERT(mDefaultSubscription);
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::init()
+      void TCPMessaging::init() noexcept
       {
         AutoRecursiveLock lock(getLock());
         mSendStreamSubscription = mSendStream->subscribe(mThisWeak.lock());
@@ -159,7 +159,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TCPMessaging::~TCPMessaging()
+      TCPMessaging::~TCPMessaging() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
@@ -167,7 +167,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      TCPMessagingPtr TCPMessaging::convert(ITCPMessagingPtr channel)
+      TCPMessagingPtr TCPMessaging::convert(ITCPMessagingPtr channel) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(TCPMessaging, channel);
       }
@@ -176,12 +176,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging => ITCPMessaging
-      #pragma mark
+      //
+      // TCPMessaging => ITCPMessaging
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr TCPMessaging::toDebug(ITCPMessagingPtr channel)
+      ElementPtr TCPMessaging::toDebug(ITCPMessagingPtr channel) noexcept
       {
         if (!channel) return ElementPtr();
 
@@ -197,12 +197,12 @@ namespace ortc
                                            bool framesHaveChannelNumber,
                                            SocketPtr socket,
                                            size_t maxMessageSizeInBytes
-                                           )
+                                           ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!delegate)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!socket)
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
+        ZS_ASSERT(socket);
 
         TCPMessagingPtr pThis(make_shared<TCPMessaging>(make_private {}, IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
@@ -232,13 +232,13 @@ namespace ortc
                                             bool framesHaveChannelNumber,
                                             IPAddress remoteIP,
                                             size_t maxMessageSizeInBytes
-                                            )
+                                            ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!delegate)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStream)
-        ZS_THROW_INVALID_ARGUMENT_IF(remoteIP.isAddressEmpty())
-        ZS_THROW_INVALID_ARGUMENT_IF(remoteIP.isPortEmpty())
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(receiveStream);
+        ZS_ASSERT(sendStream);
+        ZS_ASSERT(!remoteIP.isAddressEmpty());
+        ZS_ASSERT(!remoteIP.isPortEmpty());
 
         TCPMessagingPtr pThis(make_shared<TCPMessaging>(make_private {}, IHelper::getServiceQueue(), delegate, receiveStream, sendStream, framesHaveChannelNumber, maxMessageSizeInBytes));
         pThis->mThisWeak = pThis;
@@ -264,7 +264,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ITCPMessagingSubscriptionPtr TCPMessaging::subscribe(ITCPMessagingDelegatePtr originalDelegate)
+      ITCPMessagingSubscriptionPtr TCPMessaging::subscribe(ITCPMessagingDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (!originalDelegate) return mDefaultSubscription;
@@ -289,7 +289,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::enableKeepAlive(bool enable)
+      void TCPMessaging::enableKeepAlive(bool enable) noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -312,7 +312,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::shutdown(Milliseconds lingerTime)
+      void TCPMessaging::shutdown(Milliseconds lingerTime) noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -337,7 +337,7 @@ namespace ortc
       ITCPMessaging::SessionStates TCPMessaging::getState(
                                                           WORD *outLastErrorCode,
                                                           String *outLastErrorReason
-                                                          ) const
+                                                          ) const noexcept
       {
         AutoRecursiveLock lock(getLock());
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -346,14 +346,14 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress TCPMessaging::getRemoteIP() const
+      IPAddress TCPMessaging::getRemoteIP() const noexcept
       {
         AutoRecursiveLock lock(getLock());
         return mRemoteIP;
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes)
+      void TCPMessaging::setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept
       {
         AutoRecursiveLock lock(getLock());
         mMaxMessageSizeInBytes = maxMessageSizeInBytes;
@@ -363,9 +363,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging => ITransportStreamReaderDelegate
-      #pragma mark
+      //
+      // TCPMessaging => ITransportStreamReaderDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TCPMessaging::onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
@@ -386,9 +386,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging => ISocketDelegate
-      #pragma mark
+      //
+      // TCPMessaging => ISocketDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TCPMessaging::onReadReady(SocketPtr socket)
@@ -554,9 +554,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging => ITimerDelegate
-      #pragma mark
+      //
+      // TCPMessaging => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TCPMessaging::onTimer(ITimerPtr timer)
@@ -571,9 +571,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging => IBackgroundingDelegate
-      #pragma mark
+      //
+      // TCPMessaging => IBackgroundingDelegate
+      //
 
       //-----------------------------------------------------------------------
       void TCPMessaging::onBackgroundingReturningFromBackground(IBackgroundingSubscriptionPtr subscription)
@@ -591,18 +591,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TCPMessaging  => (internal)
-      #pragma mark
+      //
+      // TCPMessaging  => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      RecursiveLock &TCPMessaging::getLock() const
+      RecursiveLock &TCPMessaging::getLock() const noexcept
       {
         return mLock;
       }
 
       //-----------------------------------------------------------------------
-      Log::Params TCPMessaging::log(const char *message) const
+      Log::Params TCPMessaging::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("TCPMessaging");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -610,13 +610,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params TCPMessaging::debug(const char *message) const
+      Log::Params TCPMessaging::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr TCPMessaging::toDebug() const
+      ElementPtr TCPMessaging::toDebug() const noexcept
       {
         AutoRecursiveLock lock(getLock());
 
@@ -655,7 +655,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::setState(SessionStates state)
+      void TCPMessaging::setState(SessionStates state) noexcept
       {
         if (state == mCurrentState) return;
 
@@ -674,7 +674,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::setError(WORD errorCode, const char *inReason)
+      void TCPMessaging::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -693,7 +693,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::cancel()
+      void TCPMessaging::cancel() noexcept
       {
         ZS_LOG_DEBUG(log("cancel called"))
 
@@ -739,7 +739,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void TCPMessaging::sendDataNow()
+      void TCPMessaging::sendDataNow() noexcept
       {
         //typedef ITransportStream::StreamHeader StreamHeader;
         typedef ITransportStream::StreamHeaderPtr StreamHeaderPtr;
@@ -811,7 +811,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      bool TCPMessaging::sendQueuedData(size_t &outSent)
+      bool TCPMessaging::sendQueuedData(size_t &outSent) noexcept
       {
         outSent = 0;
 
@@ -861,12 +861,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITCPMessagingFactory
-      #pragma mark
+      //
+      // ITCPMessagingFactory
+      //
 
       //-----------------------------------------------------------------------
-      ITCPMessagingFactory &ITCPMessagingFactory::singleton()
+      ITCPMessagingFactory &ITCPMessagingFactory::singleton() noexcept
       {
         return TCPMessagingFactory::singleton();
       }
@@ -879,7 +879,7 @@ namespace ortc
                                                    bool framesHaveChannelNumber,
                                                    SocketPtr socket,
                                                    size_t maxMessageSizeInBytes
-                                                   )
+                                                   ) noexcept
       {
         if (this) {}
         return internal::TCPMessaging::accept(delegate, receiveStream, sendStream, framesHaveChannelNumber, socket, maxMessageSizeInBytes);
@@ -893,7 +893,7 @@ namespace ortc
                                                     bool framesHaveChannelNumber,
                                                     IPAddress remoteIP,
                                                     size_t maxMessageSizeInBytes
-                                                    )
+                                                    ) noexcept
       {
         if (this) {}
         return internal::TCPMessaging::connect(delegate, receiveStream, sendStream, framesHaveChannelNumber, remoteIP, maxMessageSizeInBytes);
@@ -909,12 +909,12 @@ namespace ortc
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITCPMessaging
-    #pragma mark
+    //
+    // ITCPMessaging
+    //
 
     //-----------------------------------------------------------------------
-    const char *ITCPMessaging::toString(SessionStates state)
+    const char *ITCPMessaging::toString(SessionStates state) noexcept
     {
       switch (state)
       {
@@ -927,20 +927,20 @@ namespace ortc
     }
     
     //-----------------------------------------------------------------------
-    ElementPtr ITCPMessaging::toDebug(ITCPMessagingPtr messaging)
+    ElementPtr ITCPMessaging::toDebug(ITCPMessagingPtr messaging) noexcept
     {
       return internal::TCPMessaging::toDebug(messaging);
     }
 
     //-----------------------------------------------------------------------
     ITCPMessagingPtr ITCPMessaging::accept(
-                                   ITCPMessagingDelegatePtr delegate,
-                                   ITransportStreamPtr receiveStream,
-                                   ITransportStreamPtr sendStream,
-                                   bool framesHaveChannelNumber,
-                                   SocketPtr socket,
-                                   size_t maxMessageSizeInBytes
-                                   )
+                                           ITCPMessagingDelegatePtr delegate,
+                                           ITransportStreamPtr receiveStream,
+                                           ITransportStreamPtr sendStream,
+                                           bool framesHaveChannelNumber,
+                                           SocketPtr socket,
+                                           size_t maxMessageSizeInBytes
+                                           ) noexcept
     {
       return internal::ITCPMessagingFactory::singleton().accept(delegate, receiveStream, sendStream, framesHaveChannelNumber, socket, maxMessageSizeInBytes);
     }
@@ -953,7 +953,7 @@ namespace ortc
                                             bool framesHaveChannelNumber,
                                             IPAddress remoteIP,
                                             size_t maxMessageSizeInBytes
-                                            )
+                                            ) noexcept
     {
       return internal::ITCPMessagingFactory::singleton().connect(delegate, receiveStream, sendStream, framesHaveChannelNumber, remoteIP, maxMessageSizeInBytes);
     }
@@ -961,12 +961,12 @@ namespace ortc
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITCPMessaging::ChannelHeader
-    #pragma mark
+    //
+    // ITCPMessaging::ChannelHeader
+    //
 
     //-----------------------------------------------------------------------
-    ITCPMessaging::ChannelHeaderPtr ITCPMessaging::ChannelHeader::convert(ITransportStream::StreamHeaderPtr header)
+    ITCPMessaging::ChannelHeaderPtr ITCPMessaging::ChannelHeader::convert(ITransportStream::StreamHeaderPtr header) noexcept
     {
       return ZS_DYNAMIC_PTR_CAST(ChannelHeader, header);
     }

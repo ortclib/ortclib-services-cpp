@@ -31,6 +31,15 @@
 
 #pragma once
 
+#ifdef WINUWP
+#ifdef __cplusplus_winrt
+#include <windows.ui.core.h>
+#endif  //__cplusplus_winrt
+#ifdef CPPWINRT_VERSION
+#include <winrt/windows.ui.core.h>
+#endif //CPPWINRT_VERSION
+#endif //WINUWP
+
 #include <ortc/services/types.h>
 
 #include <zsLib/eventing/IHelper.h>
@@ -48,9 +57,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IHelper
-    #pragma mark
+    //
+    // IHelper
+    //
 
     interaction IHelper : public zsLib::eventing::IHelper
     {
@@ -63,35 +72,40 @@ namespace ortc
       typedef std::map<Index, String> SplitMap;
       typedef std::list<String> StringList;
 
-      static void setup();
+      static void setup() noexcept;
 #ifdef WINUWP
-      static void setup(Windows::UI::Core::CoreDispatcher ^dispatcher);
+#ifdef __cplusplus_winrt
+      static void setup(Windows::UI::Core::CoreDispatcher ^dispatcher) noexcept;
+#endif //__cplusplus_winrt
+#ifdef CPPWINRT_VERSION
+      static void setup(winrt::Windows::UI::Core::CoreDispatcher dispatcher) noexcept;
+#endif //CPPWINRT_VERSION
 #endif //WINUWP
 
-      static IMessageQueuePtr getServicePoolQueue();
-      static IMessageQueuePtr getServiceQueue();
-      static IMessageQueuePtr getLoggerQueue();
+      static IMessageQueuePtr getServicePoolQueue() noexcept;
+      static IMessageQueuePtr getServiceQueue() noexcept;
+      static IMessageQueuePtr getLoggerQueue() noexcept;
 
       static SecureByteBlockPtr encrypt(
                                         const SecureByteBlock &key, // key length of 32 = AES/256
                                         const SecureByteBlock &iv,  // 16 bytes for AES
                                         const SecureByteBlock &value,
                                         EncryptionAlgorthms algorithm = EncryptionAlgorthm_AES
-                                        );
+                                        ) noexcept;
 
       static SecureByteBlockPtr encrypt(
                                         const SecureByteBlock &key, // key length of 32 = AES/256
                                         const SecureByteBlock &iv,  // 16 bytes for AES
                                         const char *value,
                                         EncryptionAlgorthms algorithm = EncryptionAlgorthm_AES
-                                        );
+                                        ) noexcept;
 
       static SecureByteBlockPtr encrypt(
                                         const SecureByteBlock &key, // key length of 32 = AES/256
                                         const SecureByteBlock &iv,  // 16 bytes for AES
                                         const std::string &value,
                                         EncryptionAlgorthms algorithm = EncryptionAlgorthm_AES
-                                        );
+                                        ) noexcept;
 
       static SecureByteBlockPtr encrypt(
                                         const SecureByteBlock &key, // key length of 32 = AES/256
@@ -99,24 +113,24 @@ namespace ortc
                                         const BYTE *buffer,
                                         size_t bufferLengthInBytes,
                                         EncryptionAlgorthms algorithm = EncryptionAlgorthm_AES
-                                        );
+                                        ) noexcept;
 
       static SecureByteBlockPtr decrypt(
                                         const SecureByteBlock &key,
                                         const SecureByteBlock &iv,
                                         const SecureByteBlock &value,
                                         EncryptionAlgorthms algorithm = EncryptionAlgorthm_AES
-                                        );
+                                        ) noexcept;
 
       static void splitKey(
                            const SecureByteBlock &key,
                            SecureByteBlockPtr &part1,
                            SecureByteBlockPtr &part2
-                           );
+                           ) noexcept;
       static SecureByteBlockPtr combineKey(
                                            const SecureByteBlockPtr &part1,
                                            const SecureByteBlockPtr &part2
-                                           );
+                                           ) noexcept;
 
       // RETURNS: returns the actual signed element, rather than the bundle element (if bundle was passed in) or NULL if no signature was found
       static ElementPtr getSignatureInfo(
@@ -124,12 +138,12 @@ namespace ortc
                                          ElementPtr *outSignatureEl = NULL,
                                          String *outFullPublicKey = NULL,
                                          String *outFingerprint = NULL
-                                         );
+                                         ) noexcept;
 
-      static String convertUTF8ToIDN(const String &utf8Str);
-      static String convertIDNToUTF8(const String &idnStr);
+      static String convertUTF8ToIDN(const String &utf8Str) noexcept;
+      static String convertIDNToUTF8(const String &idnStr) noexcept;
 
-      static bool isValidDomain(const String &domain);
+      static bool isValidDomain(const String &domain) noexcept;
     };
 
   } // namespace services

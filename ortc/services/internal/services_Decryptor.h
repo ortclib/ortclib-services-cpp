@@ -46,9 +46,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Encryptor
-      #pragma mark
+      //
+      // Encryptor
+      //
 
       class Decryptor : public IDecryptor
       {
@@ -61,31 +61,31 @@ namespace ortc
                   const SecureByteBlock &key,
                   const SecureByteBlock &iv,
                   EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                  );
+                  ) noexcept;
       public:
-        ~Decryptor();
+        ~Decryptor() noexcept;
 
         static DecryptorPtr create(
                                    const SecureByteBlock &key,
                                    const SecureByteBlock &iv,
                                    EncryptionAlgorthms algorithm = IHelper::EncryptionAlgorthm_AES
-                                   );
+                                   ) noexcept;
 
-        virtual size_t getOptimalBlockSize() const;
+        virtual size_t getOptimalBlockSize() const noexcept;
 
         virtual SecureByteBlockPtr decrypt(
                                            const BYTE *inBuffer,
                                            size_t inBufferSizeInBytes
-                                           );
-        virtual SecureByteBlockPtr decrypt(const SecureByteBlock &input);
-        virtual SecureByteBlockPtr finalize(bool *outWasSuccessful = NULL);
+                                           ) noexcept;
+        virtual SecureByteBlockPtr decrypt(const SecureByteBlock &input) noexcept;
+        virtual SecureByteBlockPtr finalize(bool *outWasSuccessful = NULL) noexcept;
 
       protected:
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark (internal)
-        #pragma mark
+        //
+        // (internal)
+        //
 
       protected:
         DecryptorData *mData;

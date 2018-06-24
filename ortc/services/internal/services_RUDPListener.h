@@ -56,9 +56,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPListener
-      #pragma mark
+      //
+      // RUDPListener
+      //
 
       class RUDPListener : public Noop,
                            public MessageQueueAssociator,
@@ -90,56 +90,56 @@ namespace ortc
                      IRUDPListenerDelegatePtr delegate,
                      WORD port,
                      const char *realm
-                     );
+                     ) noexcept;
 
       protected:
-        RUDPListener(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPListener(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~RUDPListener();
+        ~RUDPListener() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener => IRUDPListener
-        #pragma mark
+        //
+        // RUDPListener => IRUDPListener
+        //
 
-        virtual PUID getID() const {return mID;}
+        virtual PUID getID() const noexcept {return mID;}
 
         static RUDPListenerPtr create(
                                       IMessageQueuePtr queue,
                                       IRUDPListenerDelegatePtr delegate,
                                       WORD port,
                                       const char *realm
-                                      );
+                                      ) noexcept;
 
-        virtual IPAddress getListenerIP();
+        virtual IPAddress getListenerIP() noexcept;
 
-        virtual RUDPListenerStates getState() const;
+        virtual RUDPListenerStates getState() const noexcept;
 
-        virtual void shutdown();
+        virtual void shutdown() noexcept;
 
         virtual IRUDPChannelPtr acceptChannel(
                                               IRUDPChannelDelegatePtr delegate,
                                               ITransportStreamPtr receiveStream,
                                               ITransportStreamPtr sendStream
-                                              );
+                                              ) noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener => ISocketDelegate
-        #pragma mark
+        //
+        // RUDPListener => ISocketDelegate
+        //
 
         virtual void onReadReady(SocketPtr socket);
         virtual void onWriteReady(SocketPtr socket);
         virtual void onException(SocketPtr socket);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener => IRUDPChannelDelegateForSessionAndListener
-        #pragma mark
+        //
+        // RUDPListener => IRUDPChannelDelegateForSessionAndListener
+        //
 
         virtual void onRUDPChannelStateChanged(
                                                RUDPChannelPtr channel,
@@ -151,64 +151,64 @@ namespace ortc
                                                  const IPAddress &remoteIP,
                                                  const BYTE *packet,
                                                  size_t packetLengthInBytes
-                                                 );
+                                                 ) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener => (internal)
-        #pragma mark
+        //
+        // RUDPListener => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        void fix(STUNPacketPtr stun) const;
+        Log::Params log(const char *message) const noexcept;
+        void fix(STUNPacketPtr stun) const noexcept;
 
-        bool isShuttingDown() {return RUDPListenerState_ShuttingDown == mCurrentState;}
-        bool isShutdown() {return RUDPListenerState_Shutdown == mCurrentState;}
+        bool isShuttingDown() noexcept {return RUDPListenerState_ShuttingDown == mCurrentState;}
+        bool isShutdown() noexcept {return RUDPListenerState_Shutdown == mCurrentState;}
 
-        void cancel();
-        void setState(RUDPListenerStates state);
+        void cancel() noexcept;
+        void setState(RUDPListenerStates state) noexcept;
 
-        bool bindUDP();
+        bool bindUDP() noexcept;
 
         bool sendTo(
                     const IPAddress &destination,
                     STUNPacketPtr stun
-                    );
+                    ) noexcept;
 
         bool sendTo(
                     const IPAddress &destination,
                     const BYTE *buffer,
                     size_t bufferLengthInBytes
-                    );
+                    ) noexcept;
 
         bool handledNonce(
                           const IPAddress &remoteIP,
                           STUNPacketPtr &stun,
                           STUNPacketPtr &response
-                          );
+                          ) noexcept;
 
         bool handleUnknownChannel(
                                   const IPAddress &remoteIP,
                                   STUNPacketPtr &stun,
                                   STUNPacketPtr &outResponse
-                                  );
+                                  ) noexcept;
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener::CompareChannelPair
-        #pragma mark
+        //
+        // RUDPListener::CompareChannelPair
+        //
 
         class CompareChannelPair { // simple comparison function
         public:
-          bool operator()(const ChannelPair &op1, const ChannelPair &op2) const;
+          bool operator()(const ChannelPair &op1, const ChannelPair &op2) const noexcept;
         };
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPListener => (internal)
-        #pragma mark
+        //
+        // RUDPListener => (internal)
+        //
 
         mutable RecursiveLock mLock;
         RUDPListenerWeakPtr mThisWeak;
@@ -236,20 +236,20 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPListenerFactory
-      #pragma mark
+      //
+      // IRUDPListenerFactory
+      //
 
       interaction IRUDPListenerFactory
       {
-        static IRUDPListenerFactory &singleton();
+        static IRUDPListenerFactory &singleton() noexcept;
 
         virtual RUDPListenerPtr create(
                                        IMessageQueuePtr queue,
                                        IRUDPListenerDelegatePtr delegate,
                                        WORD port,
                                        const char *realm
-                                       );
+                                       ) noexcept;
       };
 
       class RUDPListenerFactory : public IFactory<IRUDPListenerFactory> {};

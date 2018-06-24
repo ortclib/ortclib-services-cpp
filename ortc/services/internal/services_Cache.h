@@ -44,9 +44,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Cache
-      #pragma mark
+      //
+      // Cache
+      //
 
       class Cache : public ICache
       {
@@ -57,48 +57,48 @@ namespace ortc
         friend interaction ICache;
 
       public:
-        Cache(const make_private &);
+        Cache(const make_private &) noexcept;
 
       public:
-        ~Cache();
+        ~Cache() noexcept;
 
       protected:
-        static CachePtr convert(ICachePtr cache);
+        static CachePtr convert(ICachePtr cache) noexcept;
 
-        static CachePtr create();
-        static CachePtr singleton();
+        static CachePtr create() noexcept;
+        static CachePtr singleton() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Cache => ICache
-        #pragma mark
+        //
+        // Cache => ICache
+        //
 
-        virtual void setup(ICacheDelegatePtr delegate);
+        virtual void setup(ICacheDelegatePtr delegate) noexcept;
 
-        virtual String fetch(const char *cookieNamePath) const;
+        virtual String fetch(const char *cookieNamePath) const noexcept;
         virtual void store(
                            const char *cookieNamePath,
                            Time expires,
                            const char *str
-                           );
-        virtual void clear(const char *cookieNamePath);
+                           ) noexcept;
+        virtual void clear(const char *cookieNamePath) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Cache => (internal)
-        #pragma mark
+        //
+        // Cache => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
+        Log::Params log(const char *message) const noexcept;
+        static Log::Params slog(const char *message) noexcept;
 
-        void actualSetup(ICacheDelegatePtr delegate);
+        void actualSetup(ICacheDelegatePtr delegate) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Cache => (data)
-        #pragma mark
+        //
+        // Cache => (data)
+        //
 
         mutable RecursiveLock mLock;
         AutoPUID mID;

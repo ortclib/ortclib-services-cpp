@@ -44,9 +44,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNRequester
-    #pragma mark
+    //
+    // ISTUNRequester
+    //
 
     interaction ISTUNRequester
     {
@@ -57,7 +57,7 @@ namespace ortc
                                       STUNPacketPtr stun,
                                       STUNPacket::RFCs usingRFC,
                                       IBackOffTimerPatternPtr pattern = IBackOffTimerPatternPtr()
-                                      );
+                                      ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This causes a packet (which might be STUN) to be handled
@@ -68,7 +68,7 @@ namespace ortc
                                const BYTE *packet,
                                size_t packetLengthInBytes,
                                const STUNPacket::ParseOptions &options
-                               );
+                               ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This causes a STUN packet to be handled
@@ -77,31 +77,31 @@ namespace ortc
       static bool handleSTUNPacket(
                                    IPAddress fromIPAddress,
                                    STUNPacketPtr stun
-                                   );
+                                   ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual bool isComplete() const = 0;
+      virtual bool isComplete() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void retryRequestNow() = 0;
+      virtual void retryRequestNow() noexcept = 0;
 
-      virtual IPAddress getServerIP() const = 0;
-      virtual STUNPacketPtr getRequest() const = 0;
+      virtual IPAddress getServerIP() const noexcept = 0;
+      virtual STUNPacketPtr getRequest() const noexcept = 0;
 
-      virtual IBackOffTimerPatternPtr getBackOffTimerPattern() const = 0;
+      virtual IBackOffTimerPatternPtr getBackOffTimerPattern() const noexcept = 0;
 
-      virtual size_t getTotalTries() const = 0;
+      virtual size_t getTotalTries() const noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNRequesterDelegate
-    #pragma mark
+    //
+    // ISTUNRequesterDelegate
+    //
 
     interaction ISTUNRequesterDelegate
     {
@@ -125,7 +125,7 @@ namespace ortc
                                                ISTUNRequesterPtr requester,
                                                IPAddress fromIPAddress,
                                                STUNPacketPtr response
-                                               ) = 0;
+                                               ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Notifies that a STUN discovery is now complete.
@@ -138,7 +138,7 @@ ZS_DECLARE_PROXY_BEGIN(ortc::services::ISTUNRequesterDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ISTUNRequesterPtr, ISTUNRequesterPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::STUNPacketPtr, STUNPacketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::SecureByteBlockPtr, SecureByteBlockPtr)
-ZS_DECLARE_PROXY_METHOD_3(onSTUNRequesterSendPacket, ISTUNRequesterPtr, IPAddress, SecureByteBlockPtr)
-ZS_DECLARE_PROXY_METHOD_SYNC_RETURN_3(handleSTUNRequesterResponse, bool, ISTUNRequesterPtr, IPAddress, STUNPacketPtr)
-ZS_DECLARE_PROXY_METHOD_1(onSTUNRequesterTimedOut, ISTUNRequesterPtr)
+ZS_DECLARE_PROXY_METHOD(onSTUNRequesterSendPacket, ISTUNRequesterPtr, IPAddress, SecureByteBlockPtr)
+ZS_DECLARE_PROXY_METHOD_SYNC_RETURN(handleSTUNRequesterResponse, bool, ISTUNRequesterPtr, IPAddress, STUNPacketPtr)
+ZS_DECLARE_PROXY_METHOD(onSTUNRequesterTimedOut, ISTUNRequesterPtr)
 ZS_DECLARE_PROXY_END()

@@ -48,9 +48,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPMessaging
-    #pragma mark
+    //
+    // IRUDPMessaging
+    //
 
     interaction IRUDPMessaging
     {
@@ -64,7 +64,7 @@ namespace ortc
         RUDPMessagingState_Shutdown =     IRUDPChannel::RUDPChannelState_Shutdown,
       };
 
-      static const char *toString(RUDPMessagingStates state);
+      static const char *toString(RUDPMessagingStates state) noexcept;
 
       enum RUDPMessagingShutdownReasons
       {
@@ -76,11 +76,11 @@ namespace ortc
         RUDPMessagingShutdownReason_IllegalStreamState          = IRUDPChannel::RUDPChannelShutdownReason_IllegalStreamState,
       };
 
-      static const char *toString(RUDPMessagingShutdownReasons reason);
+      static const char *toString(RUDPMessagingShutdownReasons reason) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug object containing internal object state
-      static ElementPtr toDebug(IRUDPMessagingPtr messaging);
+      static ElementPtr toDebug(IRUDPMessagingPtr messaging) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an RUDP listener by accepting
@@ -94,7 +94,7 @@ namespace ortc
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
                                              size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                             );
+                                             ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an RUDP socket session
@@ -108,7 +108,7 @@ namespace ortc
                                              ITransportStreamPtr receiveStream,
                                              ITransportStreamPtr sendStream,
                                              size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                             );
+                                             ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Creates a messaging object from an RUDP socket session
@@ -123,49 +123,49 @@ namespace ortc
                                            ITransportStreamPtr receiveStream,
                                            ITransportStreamPtr sendStream,
                                            size_t maxMessageSizeInBytes = ORTC_SERVICES_IRDUPMESSAGING_MAX_MESSAGE_SIZE_IN_BYTES
-                                           );
+                                           ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Get the current state of the messaging
       virtual RUDPMessagingStates getState(
                                            WORD *outLastErrorCode = NULL,
                                            String *outLastErrorReason = NULL
-                                           ) const = 0;
+                                           ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This closes the session gracefully.
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This shutsdown the send/receive state but does not close the
       //          channel session. Use shutdown() to actually shutdown the
       //          channel fully.
-      virtual void shutdownDirection(Shutdown state) = 0;
+      virtual void shutdownDirection(Shutdown state) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Set the maximum size of a message expecting to receive
-      virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) = 0;
+      virtual void setMaxMessageSizeInBytes(size_t maxMessageSizeInBytes) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Get the IP address of the connected remote party.
       // NOTE:    IP address will be empty until the session is connected.
-      virtual IPAddress getConnectedRemoteIP() = 0;
+      virtual IPAddress getConnectedRemoteIP() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Return connection information as reported by the remote party
       // NOTE:    Will return an empty string until connected.
-      virtual String getRemoteConnectionInfo() = 0;
+      virtual String getRemoteConnectionInfo() noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPMessagingDelegate
-    #pragma mark
+    //
+    // IRUDPMessagingDelegate
+    //
 
     interaction IRUDPMessagingDelegate
     {
@@ -183,5 +183,5 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPMessagingDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPMessagingPtr, IRUDPMessagingPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPMessagingDelegate::RUDPMessagingStates, RUDPMessagingStates)
-ZS_DECLARE_PROXY_METHOD_2(onRUDPMessagingStateChanged, IRUDPMessagingPtr, RUDPMessagingStates)
+ZS_DECLARE_PROXY_METHOD(onRUDPMessagingStateChanged, IRUDPMessagingPtr, RUDPMessagingStates)
 ZS_DECLARE_PROXY_END()

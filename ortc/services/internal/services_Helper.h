@@ -50,14 +50,14 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Helper
-      #pragma mark
+      //
+      // Helper
+      //
 
       class Helper : public services::IHelper
       {
       public:
-        static Log::Params slog(const char *message);
+        static Log::Params slog(const char *message) noexcept;
       };
     }
   }

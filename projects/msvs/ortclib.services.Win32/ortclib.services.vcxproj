@@ -56,6 +56,7 @@
     <ClInclude Include="..\..\..\ortc\services\internal\services_Encryptor.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_Helper.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP.h" />
+    <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_override.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_HTTP_WinUWP.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocket.h" />
     <ClInclude Include="..\..\..\ortc\services\internal\services_ICESocketSession.h" />
@@ -119,6 +120,7 @@
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Encryptor.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_Helper.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP.cpp" />
+    <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_override.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_HTTP_WinUWP.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocket.cpp" />
     <ClCompile Include="..\..\..\ortc\services\cpp\services_ICESocketSession.cpp" />
@@ -147,7 +149,7 @@
     <ProjectGuid>{51152297-1963-433D-B1AC-3D77A99B5184}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ortclibservices</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -215,12 +217,14 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NOMINMAX;_LIB;USE_ETW;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -230,12 +234,14 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_DEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NOMINMAX;_LIB;USE_ETW;_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -243,16 +249,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NOMINMAX;_LIB;USE_ETW;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -262,16 +270,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;$(ProjectDir)..\..\..\..\zsLib;$(ProjectDir)..\..\..\..\zsLib-eventing;$(ProjectDir)..\..\..\..;$(ProjectDir)..\..\..\..\idnkit\idnkit\include;$(ProjectDir)..\..\..\..\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4068;4290</DisableSpecificWarnings>
-      <PreprocessorDefinitions>NDEBUG;_LIB;USE_ETW;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4505</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NOMINMAX;_LIB;USE_ETW;_UNICODE;UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

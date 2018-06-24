@@ -52,9 +52,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark BackOffTimer
-      #pragma mark
+      //
+      // BackOffTimer
+      //
 
       class BackOffTimer : public MessageQueueAssociator,
                            public SharedRecursiveLock,
@@ -90,9 +90,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => IBackOffTimer
-        #pragma mark
+        //
+        // BackOffTimer => IBackOffTimer
+        //
 
         static ElementPtr toDebug(IBackOffTimerPtr timer);
 
@@ -129,17 +129,17 @@ namespace ortc
         virtual DurationType actualGetNextRetryAfterFailureDuration() override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => ITimerDelegate
-        #pragma mark
+        //
+        // BackOffTimer => ITimerDelegate
+        //
 
         virtual void onTimer(ITimerPtr timer) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => (internal)
-        #pragma mark
+        //
+        // BackOffTimer => (internal)
+        //
 
         Log::Params log(const char *message) const;
         static Log::Params slog(const char *message);
@@ -153,9 +153,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark BackOffTimer => (data)
-        #pragma mark
+        //
+        // BackOffTimer => (data)
+        //
 
         AutoPUID mID;
         BackOffTimerWeakPtr mThisWeak;
@@ -177,9 +177,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackOffTimerFactory
-      #pragma mark
+      //
+      // IBackOffTimerFactory
+      //
 
       interaction IBackOffTimerFactory
       {

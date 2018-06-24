@@ -46,9 +46,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPChannel
-    #pragma mark
+    //
+    // IRUDPChannel
+    //
 
     interaction IRUDPChannel
     {
@@ -60,7 +60,7 @@ namespace ortc
         RUDPChannelState_Shutdown,
       };
 
-      static const char *toString(RUDPChannelStates state);
+      static const char *toString(RUDPChannelStates state) noexcept;
 
       enum RUDPChannelShutdownReasons
       {
@@ -73,7 +73,7 @@ namespace ortc
         RUDPChannelShutdownReason_IllegalStreamState  = IHTTP::HTTPStatusCode_InternalServerError,
       };
 
-      static const char *toString(RUDPChannelShutdownReasons reason);
+      static const char *toString(RUDPChannelShutdownReasons reason) noexcept;
 
       enum Shutdown
       {
@@ -83,7 +83,7 @@ namespace ortc
         Shutdown_Both =     (0x03)
       };
 
-      static const char *toString(Shutdown value);
+      static const char *toString(Shutdown value) noexcept;
 
       enum CongestionAlgorithms
       {
@@ -91,44 +91,44 @@ namespace ortc
         CongestionAlgorithm_TCPLikeWindowWithSlowCreepUp = 1,
       };
 
-      static const char *toString(CongestionAlgorithms value);
+      static const char *toString(CongestionAlgorithms value) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug object containing internal object state
-      static ElementPtr toDebug(IRUDPChannelPtr channel);
+      static ElementPtr toDebug(IRUDPChannelPtr channel) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       virtual RUDPChannelStates getState(
                                          WORD *outLastErrorCode = NULL,
                                          String *outLastErrorReason = NULL
-                                         ) const = 0;
+                                         ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This closes the session gracefully.
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: This shutsdown the send/receive state but does not close the
       //          channel session. Use shutdown() to actually shutdown the
       //          channel fully.
-      virtual void shutdownDirection(Shutdown state) = 0;
+      virtual void shutdownDirection(Shutdown state) noexcept = 0;
 
-      virtual IPAddress getConnectedRemoteIP() = 0;
+      virtual IPAddress getConnectedRemoteIP() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Return connection information as reported by the remote party
       // NOTE:    Will return an empty string until connected.
-      virtual String getRemoteConnectionInfo() = 0;
+      virtual String getRemoteConnectionInfo() noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IRUDPChannelDelegate
-    #pragma mark
+    //
+    // IRUDPChannelDelegate
+    //
 
     interaction IRUDPChannelDelegate
     {
@@ -145,5 +145,5 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IRUDPChannelDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPChannelPtr, IRUDPChannelPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IRUDPChannelDelegate::RUDPChannelStates, RUDPChannelStates)
-ZS_DECLARE_PROXY_METHOD_2(onRDUPChannelStateChanged, IRUDPChannelPtr, RUDPChannelStates)
+ZS_DECLARE_PROXY_METHOD(onRDUPChannelStateChanged, IRUDPChannelPtr, RUDPChannelStates)
 ZS_DECLARE_PROXY_END()

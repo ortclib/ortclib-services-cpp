@@ -44,9 +44,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Reachability
-      #pragma mark
+      //
+      // Reachability
+      //
 
       class Reachability : public MessageQueueAssociator,
                            public SharedRecursiveLock,
@@ -60,48 +60,48 @@ namespace ortc
         friend interaction IReachability;
 
       public:
-        Reachability(const make_private &);
+        Reachability(const make_private &) noexcept;
 
       protected:
-        static ReachabilityPtr create();
+        static ReachabilityPtr create() noexcept;
 
       public:
-        ~Reachability();
+        ~Reachability() noexcept;
 
       public:
-        static ReachabilityPtr convert(IReachabilityPtr backgrounding);
+        static ReachabilityPtr convert(IReachabilityPtr backgrounding) noexcept;
 
-        static ReachabilityPtr singleton();
-
-      protected:
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Reachability => IReachability
-        #pragma mark
-
-        static ElementPtr toDebug(ReachabilityPtr backgrounding);
-
-        virtual IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate);
-
-        virtual void notifyReachability(InterfaceTypes interfaceTypes);
+        static ReachabilityPtr singleton() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Reachability => (internal)
-        #pragma mark
+        //
+        // Reachability => IReachability
+        //
 
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
-        Log::Params debug(const char *message) const;
+        static ElementPtr toDebug(ReachabilityPtr backgrounding) noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual IReachabilitySubscriptionPtr subscribe(IReachabilityDelegatePtr delegate) noexcept;
+
+        virtual void notifyReachability(InterfaceTypes interfaceTypes) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Reachability => (data)
-        #pragma mark
+        //
+        // Reachability => (internal)
+        //
+
+        Log::Params log(const char *message) const noexcept;
+        static Log::Params slog(const char *message) noexcept;
+        Log::Params debug(const char *message) const noexcept;
+
+        virtual ElementPtr toDebug() const noexcept;
+
+      protected:
+        //---------------------------------------------------------------------
+        //
+        // Reachability => (data)
+        //
 
         AutoPUID mID;
         ReachabilityWeakPtr mThisWeak;
@@ -115,15 +115,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IReachabilityFactory
-      #pragma mark
+      //
+      // IReachabilityFactory
+      //
 
       interaction IReachabilityFactory
       {
-        static IReachabilityFactory &singleton();
+        static IReachabilityFactory &singleton() noexcept;
 
-        virtual ReachabilityPtr createForReachability();
+        virtual ReachabilityPtr createForReachability() noexcept;
       };
 
       class ReachabilityFactory : public IFactory<IReachabilityFactory> {};

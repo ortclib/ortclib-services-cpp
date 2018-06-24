@@ -44,14 +44,14 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark CanonicalXML
-      #pragma mark
+      //
+      // CanonicalXML
+      //
 
       class CanonicalXML : public ICanonicalXML
       {
       public:
-        static String convert(ElementPtr element);
+        static String convert(ElementPtr element) noexcept;
       };
     }
   }

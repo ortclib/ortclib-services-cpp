@@ -75,12 +75,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      static String getElementTextAndDecode(ElementPtr node)
+      static String getElementTextAndDecode(ElementPtr node) noexcept
       {
         if (!node) return String();
         return node->getTextDecoded();
@@ -90,7 +90,7 @@ namespace ortc
       static ElementPtr createElementWithText(
                                               const String &elName,
                                               const String &textVal
-                                              )
+                                              ) noexcept
       {
         ElementPtr tmp = Element::create(elName);
         if (textVal.isEmpty()) return tmp;
@@ -105,7 +105,7 @@ namespace ortc
       static ElementPtr createElementWithNumber(
                                                 const String &elName,
                                                 const String &numberAsStringValue
-                                                )
+                                                ) noexcept
       {
         ElementPtr tmp = Element::create(elName);
 
@@ -123,7 +123,7 @@ namespace ortc
                                                                const String &passphrase,
                                                                const String &nonce,
                                                                const String &value
-                                                               )
+                                                               ) noexcept
       {
         typedef IHelper::SplitMap SplitMap;
 
@@ -158,7 +158,7 @@ namespace ortc
                                                   const String &passphrase,
                                                   const String &nonce,
                                                   const SecureByteBlock &value
-                                                  )
+                                                  ) noexcept
       {
         //hex(`<salt>`) + ":" + base64(encrypt(`<encrypted-value>`)), where key = hmac(`<external-passphrase>`, "keying:" + `<nonce>`), iv = `<salt>`
 
@@ -177,28 +177,28 @@ namespace ortc
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
       //-------------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannelSettingsDefaults
-      #pragma mark
+      //
+      // MessageLayerSecurityChannelSettingsDefaults
+      //
 
       class MessageLayerSecurityChannelSettingsDefaults : public ISettingsApplyDefaultsDelegate
       {
       public:
         //-----------------------------------------------------------------------
-        ~MessageLayerSecurityChannelSettingsDefaults()
+        ~MessageLayerSecurityChannelSettingsDefaults() noexcept
         {
           ISettings::removeDefaults(*this);
         }
 
         //-----------------------------------------------------------------------
-        static MessageLayerSecurityChannelSettingsDefaultsPtr singleton()
+        static MessageLayerSecurityChannelSettingsDefaultsPtr singleton() noexcept
         {
           static SingletonLazySharedPtr<MessageLayerSecurityChannelSettingsDefaults> singleton(create());
           return singleton.singleton();
         }
 
         //-----------------------------------------------------------------------
-        static MessageLayerSecurityChannelSettingsDefaultsPtr create()
+        static MessageLayerSecurityChannelSettingsDefaultsPtr create() noexcept
         {
           auto pThis(make_shared<MessageLayerSecurityChannelSettingsDefaults>());
           ISettings::installDefaults(pThis);
@@ -206,14 +206,14 @@ namespace ortc
         }
 
         //-----------------------------------------------------------------------
-        virtual void notifySettingsApplyDefaults() override
+        virtual void notifySettingsApplyDefaults() noexcept override
         {
           ISettings::setUInt(ORTC_SERVICES_SETTING_MESSAGE_LAYER_SECURITY_CHANGE_SENDING_KEY_AFTER, 60 * 60);
         }
       };
 
       //-------------------------------------------------------------------------
-      void installMessageLayerSecurityChannelSettingsDefaults()
+      void installMessageLayerSecurityChannelSettingsDefaults() noexcept
       {
         MessageLayerSecurityChannelSettingsDefaults::singleton();
       }
@@ -222,9 +222,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel
+      //
 
       //-----------------------------------------------------------------------
       MessageLayerSecurityChannel::MessageLayerSecurityChannel(
@@ -236,7 +236,7 @@ namespace ortc
                                                                ITransportStreamPtr sendStreamDecoded,
                                                                ITransportStreamPtr sendStreamEncoded,
                                                                const char *contextID
-                                                               ) :
+                                                               ) noexcept :
         zsLib::MessageQueueAssociator(queue),
         SharedRecursiveLock(SharedRecursiveLock::create()),
 
@@ -259,11 +259,11 @@ namespace ortc
       {
         ZS_LOG_DETAIL(log("created"))
         mDefaultSubscription = mSubscriptions.subscribe(delegate);
-        ZS_THROW_BAD_STATE_IF(!mDefaultSubscription)
+        ZS_ASSERT(mDefaultSubscription);
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::init()
+      void MessageLayerSecurityChannel::init() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -276,7 +276,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      MessageLayerSecurityChannel::~MessageLayerSecurityChannel()
+      MessageLayerSecurityChannel::~MessageLayerSecurityChannel() noexcept
       {
         ZS_LOG_DETAIL(log("destroyed"))
         mThisWeak.reset();
@@ -284,7 +284,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      MessageLayerSecurityChannelPtr MessageLayerSecurityChannel::convert(IMessageLayerSecurityChannelPtr channel)
+      MessageLayerSecurityChannelPtr MessageLayerSecurityChannel::convert(IMessageLayerSecurityChannelPtr channel) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(MessageLayerSecurityChannel, channel);
       }
@@ -293,12 +293,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel => IMessageLayerSecurityChannel
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel => IMessageLayerSecurityChannel
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr MessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel)
+      ElementPtr MessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel) noexcept
       {
         if (!channel) return ElementPtr();
 
@@ -314,12 +314,12 @@ namespace ortc
                                                                          ITransportStreamPtr sendStreamDecoded,
                                                                          ITransportStreamPtr sendStreamEncoded,
                                                                          const char *contextID
-                                                                         )
+                                                                         ) noexcept
       {
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStreamEncoded)
-        ZS_THROW_INVALID_ARGUMENT_IF(!receiveStreamDecoded)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStreamDecoded)
-        ZS_THROW_INVALID_ARGUMENT_IF(!sendStreamEncoded)
+        ZS_ASSERT(receiveStreamEncoded);
+        ZS_ASSERT(receiveStreamDecoded);
+        ZS_ASSERT(sendStreamDecoded);
+        ZS_ASSERT(sendStreamEncoded);
         MessageLayerSecurityChannelPtr pThis(make_shared<MessageLayerSecurityChannel>(make_private{}, IHelper::getServiceQueue(), delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID));
         pThis->mThisWeak = pThis;
         pThis->init();
@@ -327,7 +327,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IMessageLayerSecurityChannelSubscriptionPtr MessageLayerSecurityChannel::subscribe(IMessageLayerSecurityChannelDelegatePtr originalDelegate)
+      IMessageLayerSecurityChannelSubscriptionPtr MessageLayerSecurityChannel::subscribe(IMessageLayerSecurityChannelDelegatePtr originalDelegate) noexcept
       {
         AutoRecursiveLock lock(*this);
         if (!originalDelegate) return mDefaultSubscription;
@@ -352,7 +352,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::cancel()
+      void MessageLayerSecurityChannel::cancel() noexcept
       {
         ZS_LOG_DEBUG(log("cancel called"))
 
@@ -419,7 +419,7 @@ namespace ortc
       IMessageLayerSecurityChannel::SessionStates MessageLayerSecurityChannel::getState(
                                                                                         WORD *outLastErrorCode,
                                                                                         String *outLastErrorReason
-                                                                                        ) const
+                                                                                        ) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (outLastErrorCode) *outLastErrorCode = mLastError;
@@ -428,7 +428,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::needsLocalContextID() const
+      bool MessageLayerSecurityChannel::needsLocalContextID() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -440,7 +440,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::needsReceiveKeying(KeyingTypes *outDecodingType) const
+      bool MessageLayerSecurityChannel::needsReceiveKeying(KeyingTypes *outDecodingType) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -476,7 +476,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::needsSendKeying(KeyingTypes *outEncodingType) const
+      bool MessageLayerSecurityChannel::needsSendKeying(KeyingTypes *outEncodingType) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -513,7 +513,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::needsReceiveKeyingSigningPublicKey() const
+      bool MessageLayerSecurityChannel::needsReceiveKeyingSigningPublicKey() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -526,7 +526,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::needsSendKeyingToeBeSigned() const
+      bool MessageLayerSecurityChannel::needsSendKeyingToeBeSigned() const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (isShutdown()) {
@@ -539,7 +539,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::getLocalContextID() const
+      String MessageLayerSecurityChannel::getLocalContextID() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get local context ID") + ZS_PARAM("local context ID", mLocalContextID))
@@ -547,7 +547,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::getRemoteContextID() const
+      String MessageLayerSecurityChannel::getRemoteContextID() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get remote context ID") + ZS_PARAM("remote context ID", mRemoteContextID))
@@ -555,7 +555,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setLocalContextID(const char *contextID)
+      void MessageLayerSecurityChannel::setLocalContextID(const char *contextID) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -567,7 +567,7 @@ namespace ortc
         ZS_LOG_DEBUG(log("setting local context ID") + ZS_PARAM("context ID", contextID))
 
         if (mLocalContextID.hasData()) {
-          ZS_THROW_INVALID_ARGUMENT_IF(String(contextID) != mLocalContextID)
+          ZS_ASSERT(String(contextID) == mLocalContextID);
           return;
         }
 
@@ -579,7 +579,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setReceiveKeying(const char *passphrase)
+      void MessageLayerSecurityChannel::setReceiveKeying(const char *passphrase) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -591,7 +591,7 @@ namespace ortc
         ZS_LOG_TRACE(log("set receive keying") + ZS_PARAM("passphrase", passphrase))
 
         if (mReceivePassphrase.hasData()) {
-          ZS_THROW_INVALID_ARGUMENT_IF(String(passphrase) != mReceivePassphrase)
+          ZS_ASSERT(String(passphrase) == mReceivePassphrase);
           return;
         }
 
@@ -603,7 +603,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setSendKeying(const char *passphrase)
+      void MessageLayerSecurityChannel::setSendKeying(const char *passphrase) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -615,7 +615,7 @@ namespace ortc
         ZS_LOG_TRACE(log("set send keying") + ZS_PARAM("passphrase", passphrase))
 
         if (mReceivePassphrase.hasData()) {
-          ZS_THROW_INVALID_ARGUMENT_IF(String(passphrase) != mSendPassphrase)
+          ZS_ASSERT(String(passphrase) == mSendPassphrase);
           return;
         }
 
@@ -628,7 +628,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::getReceivePublicKeyFingerprint() const
+      String MessageLayerSecurityChannel::getReceivePublicKeyFingerprint() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get receive public key fingerprint") + ZS_PARAM("fingerprint", mReceiveLocalPublicKeyFingerprint) + IRSAPublicKey::toDebug(mReceiveLocalPublicKey))
@@ -640,7 +640,7 @@ namespace ortc
       void MessageLayerSecurityChannel::setReceiveKeying(
                                                          IRSAPrivateKeyPtr localPrivateKey,
                                                          IRSAPublicKeyPtr localPublicKey
-                                                         )
+                                                         ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -652,10 +652,10 @@ namespace ortc
         ZS_LOG_TRACE(log("set receive keying") + IRSAPrivateKey::toDebug(localPrivateKey) + IRSAPublicKey::toDebug(localPublicKey))
 
         if (mReceiveLocalPrivateKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(localPrivateKey != mReceiveLocalPrivateKey)
+          ZS_ASSERT(localPrivateKey == mReceiveLocalPrivateKey);
         }
         if (mReceiveLocalPublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(localPublicKey != mReceiveLocalPublicKey)
+          ZS_ASSERT(localPublicKey == mReceiveLocalPublicKey);
         }
 
         mReceiveLocalPrivateKey = localPrivateKey;
@@ -667,7 +667,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setSendKeying(IRSAPublicKeyPtr remotePublicKey)
+      void MessageLayerSecurityChannel::setSendKeying(IRSAPublicKeyPtr remotePublicKey) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -679,7 +679,7 @@ namespace ortc
         ZS_LOG_TRACE(log("set send keying") + IRSAPublicKey::toDebug(remotePublicKey))
 
         if (mSendRemotePublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(remotePublicKey != mSendRemotePublicKey)
+          ZS_ASSERT(remotePublicKey == mSendRemotePublicKey);
         }
 
         mSendKeyingType = KeyingType_PublicKey;
@@ -691,7 +691,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IDHKeyDomainPtr MessageLayerSecurityChannel::getKeyAgreementDomain() const
+      IDHKeyDomainPtr MessageLayerSecurityChannel::getKeyAgreementDomain() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get key domain") + IDHKeyDomain::toDebug(mDHKeyDomain))
@@ -699,7 +699,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      String MessageLayerSecurityChannel::getRemoteKeyAgreementFingerprint() const
+      String MessageLayerSecurityChannel::getRemoteKeyAgreementFingerprint() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get remote keying agreement fingerprint") + ZS_PARAM("fingerprint", mDHRemotePublicKeyFingerprint) + IDHPublicKey::toDebug(mDHRemotePublicKey))
@@ -712,7 +712,7 @@ namespace ortc
                                                              IDHPrivateKeyPtr localPrivateKey,
                                                              IDHPublicKeyPtr localPublicKey,
                                                              bool remoteSideAlreadyKnowsThisPublicKey
-                                                             )
+                                                             ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -724,10 +724,10 @@ namespace ortc
         ZS_LOG_TRACE(log("set local key agreement") + IDHPrivateKey::toDebug(localPrivateKey) + IDHPublicKey::toDebug(localPublicKey))
 
         if (mDHLocalPrivateKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(localPrivateKey != mDHLocalPrivateKey)
+          ZS_ASSERT(localPrivateKey == mDHLocalPrivateKey);
         }
         if (mDHLocalPublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(localPublicKey != mDHLocalPublicKey)
+          ZS_ASSERT(localPublicKey == mDHLocalPublicKey);
         }
 
         mSendKeyingType = KeyingType_KeyAgreement;
@@ -747,7 +747,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey)
+      void MessageLayerSecurityChannel::setRemoteKeyAgreement(IDHPublicKeyPtr remotePublicKey) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -759,7 +759,7 @@ namespace ortc
         ZS_LOG_TRACE(log("set remote key agreement") + IDHPublicKey::toDebug(remotePublicKey))
 
         if (mDHRemotePublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(remotePublicKey != mDHRemotePublicKey)
+          ZS_ASSERT(remotePublicKey == mDHRemotePublicKey);
         }
 
         mSendKeyingType = KeyingType_KeyAgreement;
@@ -774,7 +774,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IDHPublicKeyPtr MessageLayerSecurityChannel::getOriginalRemoteKeyAgreement()
+      IDHPublicKeyPtr MessageLayerSecurityChannel::getOriginalRemoteKeyAgreement() noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get original remote key agreement") + IDHPublicKey::toDebug(mDHOriginalRemotePublicKey))
@@ -782,7 +782,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr MessageLayerSecurityChannel::getSignedReceiveKeying() const
+      ElementPtr MessageLayerSecurityChannel::getSignedReceiveKeying() const noexcept
       {
         AutoRecursiveLock lock(*this);
         ZS_LOG_TRACE(log("get signed receive keying") + ZS_PARAM("signed element", (bool)mReceiveKeyingSignedEl))
@@ -790,7 +790,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey)
+      void MessageLayerSecurityChannel::setReceiveKeyingSigningPublicKey(IRSAPublicKeyPtr remotePublicKey) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -802,7 +802,7 @@ namespace ortc
         ZS_LOG_TRACE(log("set receive keying signing public key") + IRSAPublicKey::toDebug(remotePublicKey))
 
         if (mReceiveSigningPublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(remotePublicKey != mReceiveSigningPublicKey)
+          ZS_ASSERT(remotePublicKey == mReceiveSigningPublicKey);
         }
 
         mReceiveSigningPublicKey = remotePublicKey;
@@ -816,7 +816,7 @@ namespace ortc
       void MessageLayerSecurityChannel::getSendKeyingNeedingToBeSigned(
                                                                        DocumentPtr &outDocumentContainedElementToSign,
                                                                        ElementPtr &outElementToSign
-                                                                       ) const
+                                                                       ) const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -841,7 +841,7 @@ namespace ortc
       void MessageLayerSecurityChannel::notifySendKeyingSigned(
                                                                IRSAPrivateKeyPtr signingPrivateKey,
                                                                IRSAPublicKeyPtr signingPublicKey
-                                                               )
+                                                               ) noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -851,10 +851,10 @@ namespace ortc
         }
 
         if (mSendSigningPrivateKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(signingPrivateKey != mSendSigningPrivateKey)
+          ZS_ASSERT(signingPrivateKey == mSendSigningPrivateKey);
         }
         if (mSendSigningPublicKey) {
-          ZS_THROW_INVALID_ARGUMENT_IF(signingPublicKey != mSendSigningPublicKey)
+          ZS_ASSERT(signingPublicKey == mSendSigningPublicKey);
         }
 
         mSendSigningPrivateKey = signingPrivateKey;
@@ -871,9 +871,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel => ITransportStreamReaderDelegate
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel => ITransportStreamReaderDelegate
+      //
 
       //-----------------------------------------------------------------------
       void MessageLayerSecurityChannel::onTransportStreamReaderReady(ITransportStreamReaderPtr reader)
@@ -887,9 +887,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel => ITransportStreamWriterDelegate
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel => ITransportStreamWriterDelegate
+      //
 
       //-----------------------------------------------------------------------
       void MessageLayerSecurityChannel::onTransportStreamWriterReady(ITransportStreamWriterPtr writer)
@@ -913,9 +913,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel => IWakeDelegate
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel => IWakeDelegate
+      //
 
       //-----------------------------------------------------------------------
       void MessageLayerSecurityChannel::onWake()
@@ -929,9 +929,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel => ITimerDelegate
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void MessageLayerSecurityChannel::onTimer(ITimerPtr timer)
@@ -952,12 +952,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel  => (internal)
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel  => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params MessageLayerSecurityChannel::log(const char *message) const
+      Log::Params MessageLayerSecurityChannel::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("MessageLayerSecurityChannel");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -965,13 +965,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params MessageLayerSecurityChannel::debug(const char *message) const
+      Log::Params MessageLayerSecurityChannel::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr MessageLayerSecurityChannel::toDebug() const
+      ElementPtr MessageLayerSecurityChannel::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -1056,7 +1056,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setState(SessionStates state)
+      void MessageLayerSecurityChannel::setState(SessionStates state) noexcept
       {
         if (state == mCurrentState) return;
 
@@ -1071,7 +1071,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::setError(WORD errorCode, const char *inReason)
+      void MessageLayerSecurityChannel::setError(WORD errorCode, const char *inReason) noexcept
       {
         String reason(inReason ? String(inReason) : String());
         if (reason.isEmpty()) {
@@ -1090,7 +1090,7 @@ namespace ortc
       }
       
       //-----------------------------------------------------------------------
-      void MessageLayerSecurityChannel::step()
+      void MessageLayerSecurityChannel::step() noexcept
       {
         if (isShutdown()) {
           ZS_LOG_DEBUG(log("step continue to shutdown"))
@@ -1109,7 +1109,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::stepReceive()
+      bool MessageLayerSecurityChannel::stepReceive() noexcept
       {
         if (!mReceiveStreamDecodedWriteReady) {
           ZS_LOG_TRACE(log("cannot read encoded stream until notified that it's okay to write to decoded stream"))
@@ -1283,7 +1283,7 @@ namespace ortc
       bool MessageLayerSecurityChannel::stepProcessReceiveKeying(
                                                                  bool &outReturnResult,
                                                                  SecureByteBlockPtr keying
-                                                                 )
+                                                                 ) noexcept
       {
         typedef IHelper::SplitMap SplitMap;
 
@@ -1384,7 +1384,7 @@ namespace ortc
                 goto receive_waiting_for_information;
               }
 
-              ZS_THROW_BAD_STATE_IF(!mReceiveLocalPublicKey)
+              ZS_ASSERT(mReceiveLocalPublicKey);
 
               String expectingFingerprint = mReceiveLocalPublicKey->getFingerprint();
               if (encodingFingerprint != expectingFingerprint) {
@@ -1678,7 +1678,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::stepSendKeying()
+      bool MessageLayerSecurityChannel::stepSendKeying() noexcept
       {
         if (!mSendStreamEncodedWriteReady) {
           ZS_LOG_TRACE(log("cannot send encoded stream until lower layer transport (typically 'wire' transport) indicates it is ready to send data"))
@@ -1698,7 +1698,7 @@ namespace ortc
         }
 
         if (mSendKeyingNeedingToSignDoc) {
-          ZS_THROW_INVALID_ASSUMPTION_IF(mSendKeyingNeedToSignEl)
+          ZS_ASSERT(!mSendKeyingNeedToSignEl);
 
           ElementPtr keyingEl;
           try {
@@ -1716,7 +1716,7 @@ namespace ortc
           // developer using this class should have signed this bundle if enters this spot
           ElementPtr signatureEl;
           IHelper::getSignatureInfo(keyingEl, &signatureEl);
-          ZS_THROW_INVALID_USAGE_IF(!signatureEl)
+          ZS_ASSERT(signatureEl);
 
           // signature has been applied
           size_t outputLength = 0;
@@ -1793,7 +1793,7 @@ namespace ortc
             break;
           }
           case KeyingType_PublicKey: {
-            ZS_THROW_INVALID_ASSUMPTION_IF(!mSendRemotePublicKey)
+            ZS_ASSERT(mSendRemotePublicKey);
             encodingEl->adoptAsLastChild(createElementWithText("type", "pki"));
             encodingEl->adoptAsLastChild(createElementWithText("fingerprint", mSendRemotePublicKey->getFingerprint()));
             break;
@@ -1832,7 +1832,7 @@ namespace ortc
 
             if (includeFullKey) {
               IDHKeyDomainPtr keyDomain = mDHLocalPrivateKey->getKeyDomain();
-              ZS_THROW_INVALID_ASSUMPTION_IF(!keyDomain)
+              ZS_ASSERT(keyDomain);
 
               SecureByteBlock staticPublicKey;
               SecureByteBlock ephemeralPublicKey;
@@ -1903,7 +1903,7 @@ namespace ortc
               inputsEl->adoptAsLastChild(createElementWithText("iv", encodeUsingPassphraseEncoding(encodingPassphrase, nonce, *key.mNextIV)));
               inputsEl->adoptAsLastChild(createElementWithText("hmacIntegrityKey", encodeUsingPassphraseEncoding(encodingPassphrase, nonce, *IHelper::convertToBuffer(key.mIntegrityPassphrase))));
             } else {
-              ZS_THROW_INVALID_ASSUMPTION_IF(!mSendRemotePublicKey)
+              ZS_ASSERT(mSendRemotePublicKey);
               inputsEl->adoptAsLastChild(createElementWithText("secret", IHelper::convertToBase64(*mSendRemotePublicKey->encrypt(*key.mSendKey))));
               inputsEl->adoptAsLastChild(createElementWithText("iv", IHelper::convertToBase64(*mSendRemotePublicKey->encrypt(*key.mNextIV))));
               inputsEl->adoptAsLastChild(createElementWithText("hmacIntegrityKey", IHelper::convertToBase64(*mSendRemotePublicKey->encrypt(*IHelper::convertToBuffer(key.mIntegrityPassphrase)))));
@@ -1970,7 +1970,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::stepSend()
+      bool MessageLayerSecurityChannel::stepSend() noexcept
       {
         if (mSendKeys.size() < 1) {
           ZS_LOG_DEBUG(log("no send keys set, not sending yet..."))
@@ -1986,7 +1986,7 @@ namespace ortc
           StreamHeaderPtr header;
           SecureByteBlockPtr buffer = mSendStreamDecoded->read(&header);
 
-          ZS_THROW_BAD_STATE_IF(!buffer)
+          ZS_ASSERT(buffer);
 
           if (ZS_IS_LOGGING(Insane)) {
             String str = IHelper::getDebugString(*buffer);
@@ -1997,7 +1997,7 @@ namespace ortc
           AlgorithmIndex index = static_cast<AlgorithmIndex>(IHelper::random(1, mSendKeys.size()));
 
           KeyMap::iterator found = mSendKeys.find(index);
-          ZS_THROW_BAD_STATE_IF(found == mSendKeys.end())
+          ZS_ASSERT(found != mSendKeys.end());
 
           KeyInfo &keyInfo = (*found).second;
 
@@ -2041,7 +2041,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::stepCheckConnected()
+      bool MessageLayerSecurityChannel::stepCheckConnected() noexcept
       {
         if (mSendKeys.size() < 1) {
           ZS_LOG_TRACE(log("no send keys set, not sending yet..."))
@@ -2056,7 +2056,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool MessageLayerSecurityChannel::isSendingReady() const
+      bool MessageLayerSecurityChannel::isSendingReady() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -2102,12 +2102,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark MessageLayerSecurityChannel::KeyInfo
-      #pragma mark
+      //
+      // MessageLayerSecurityChannel::KeyInfo
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr MessageLayerSecurityChannel::KeyInfo::toDebug(AlgorithmIndex index) const
+      ElementPtr MessageLayerSecurityChannel::KeyInfo::toDebug(AlgorithmIndex index) const noexcept
       {
         ElementPtr resultEl = Element::create("MessageLayerSecurityChannel");
 
@@ -2123,12 +2123,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IMessageLayerSecurityChannelFactory
-      #pragma mark
+      //
+      // IMessageLayerSecurityChannelFactory
+      //
 
       //-----------------------------------------------------------------------
-      IMessageLayerSecurityChannelFactory &IMessageLayerSecurityChannelFactory::singleton()
+      IMessageLayerSecurityChannelFactory &IMessageLayerSecurityChannelFactory::singleton() noexcept
       {
         return MessageLayerSecurityChannelFactory::singleton();
       }
@@ -2141,7 +2141,7 @@ namespace ortc
                                                                                  ITransportStreamPtr sendStreamDecoded,
                                                                                  ITransportStreamPtr sendStreamEncoded,
                                                                                  const char *contextID
-                                                                                 )
+                                                                                 ) noexcept
       {
         if (this) {}
         return MessageLayerSecurityChannel::create(delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID);
@@ -2152,12 +2152,12 @@ namespace ortc
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IMessageLayerSecurityChannel
-    #pragma mark
+    //
+    // IMessageLayerSecurityChannel
+    //
 
     //-----------------------------------------------------------------------
-    const char *IMessageLayerSecurityChannel::toString(SessionStates state)
+    const char *IMessageLayerSecurityChannel::toString(SessionStates state) noexcept
     {
       switch (state)
       {
@@ -2166,11 +2166,12 @@ namespace ortc
         case SessionState_Connected:                    return "Connected";
         case SessionState_Shutdown:                     return "Shutdown";
       }
+      ZS_ASSERT_FAIL("unknown message layer security channel state");
       return "UNDEFINED";
     }
 
     //-----------------------------------------------------------------------
-    const char *IMessageLayerSecurityChannel::toString(KeyingTypes type)
+    const char *IMessageLayerSecurityChannel::toString(KeyingTypes type) noexcept
     {
       switch (type)
       {
@@ -2179,11 +2180,12 @@ namespace ortc
         case KeyingType_PublicKey:    return "Public key";
         case KeyingType_KeyAgreement: return "Key agreement";
       }
+      ZS_ASSERT_FAIL("unknown message layer security channel keying type");
       return "UNDEFINED";
     }
 
     //-----------------------------------------------------------------------
-    ElementPtr IMessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel)
+    ElementPtr IMessageLayerSecurityChannel::toDebug(IMessageLayerSecurityChannelPtr channel) noexcept
     {
       return internal::MessageLayerSecurityChannel::toDebug(channel);
     }
@@ -2196,7 +2198,7 @@ namespace ortc
                                                                          ITransportStreamPtr sendStreamDecoded,
                                                                          ITransportStreamPtr sendStreamEncoded,
                                                                          const char *contextID
-                                                                         )
+                                                                         ) noexcept
     {
       return internal::IMessageLayerSecurityChannelFactory::singleton().create(delegate, receiveStreamEncoded, receiveStreamDecoded, sendStreamDecoded, sendStreamEncoded, contextID);
     }

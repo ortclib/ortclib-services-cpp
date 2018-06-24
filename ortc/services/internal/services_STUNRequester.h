@@ -53,29 +53,29 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterForSTUNRequesterManager
-      #pragma mark
+      //
+      // ISTUNRequesterForSTUNRequesterManager
+      //
 
       interaction ISTUNRequesterForSTUNRequesterManager
       {
         ZS_DECLARE_TYPEDEF_PTR(ISTUNRequesterForSTUNRequesterManager, ForSTUNRequesterManager)
 
-        virtual PUID getID() const = 0;
+        virtual PUID getID() const noexcept = 0;
 
         virtual bool handleSTUNPacket(
                                       IPAddress fromIPAddress,
                                       STUNPacketPtr packet
-                                      ) = 0;
+                                      ) noexcept = 0;
       };
 
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester
-      #pragma mark
+      //
+      // STUNRequester
+      //
 
       class STUNRequester : public Noop,
                             public MessageQueueAssociator,
@@ -100,24 +100,24 @@ namespace ortc
                       STUNPacketPtr stun,
                       STUNPacket::RFCs usingRFC,
                       IBackOffTimerPatternPtr pattern
-                      );
+                      ) noexcept;
 
       protected:
-        STUNRequester(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        STUNRequester(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
         
-        void init();
+        void init() noexcept;
 
       public:
-        ~STUNRequester();
+        ~STUNRequester() noexcept;
 
-        static STUNRequesterPtr convert(ISTUNRequesterPtr object);
-        static STUNRequesterPtr convert(ForSTUNRequesterManagerPtr object);
+        static STUNRequesterPtr convert(ISTUNRequesterPtr object) noexcept;
+        static STUNRequesterPtr convert(ForSTUNRequesterManagerPtr object) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequester => STUNRequester
-        #pragma mark
+        //
+        // STUNRequester => STUNRequester
+        //
 
         static STUNRequesterPtr create(
                                        IMessageQueuePtr queue,
@@ -126,39 +126,39 @@ namespace ortc
                                        STUNPacketPtr stun,
                                        STUNPacket::RFCs usingRFC,
                                        IBackOffTimerPatternPtr pattern = IBackOffTimerPatternPtr()
-                                       );
+                                       ) noexcept;
 
-        virtual PUID getID() const override {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual bool isComplete() const override;
+        bool isComplete() const noexcept override;
 
-        virtual void cancel() override;
+        void cancel() noexcept override;
 
-        virtual void retryRequestNow() override;
+        void retryRequestNow() noexcept override;
 
-        virtual IPAddress getServerIP() const override;
-        virtual STUNPacketPtr getRequest() const override;
+        IPAddress getServerIP() const noexcept override;
+        STUNPacketPtr getRequest() const noexcept override;
 
-        virtual IBackOffTimerPatternPtr getBackOffTimerPattern() const override;
+        IBackOffTimerPatternPtr getBackOffTimerPattern() const noexcept override;
 
-        virtual size_t getTotalTries() const override;
+        size_t getTotalTries() const noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequester => ISTUNRequesterForSTUNRequesterManager
-        #pragma mark
+        //
+        // STUNRequester => ISTUNRequesterForSTUNRequesterManager
+        //
 
         // (duplicate) virtual PUID getID() const;
 
-        virtual bool handleSTUNPacket(
-                                      IPAddress fromIPAddress,
-                                      STUNPacketPtr packet
-                                      ) override;
+        bool handleSTUNPacket(
+                              IPAddress fromIPAddress,
+                              STUNPacketPtr packet
+                              ) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequester => ITimerDelegate
-        #pragma mark
+        //
+        // STUNRequester => ITimerDelegate
+        //
 
         virtual void onBackOffTimerStateChanged(
                                                 IBackOffTimerPtr timer,
@@ -167,19 +167,19 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequester => (internal)
-        #pragma mark
+        //
+        // STUNRequester => (internal)
+        //
 
-        Log::Params log(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
 
-        void step();
+        void step() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark STUNRequester => (data)
-        #pragma mark
+        //
+        // STUNRequester => (data)
+        //
 
         mutable RecursiveLock mLock;
         STUNRequesterWeakPtr mThisWeak;
@@ -202,13 +202,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterFactory
-      #pragma mark
+      //
+      // ISTUNRequesterFactory
+      //
 
       interaction ISTUNRequesterFactory
       {
-        static ISTUNRequesterFactory &singleton();
+        static ISTUNRequesterFactory &singleton() noexcept;
 
         virtual STUNRequesterPtr create(
                                         IMessageQueuePtr queue,
@@ -217,7 +217,7 @@ namespace ortc
                                         STUNPacketPtr stun,
                                         STUNPacket::RFCs usingRFC,
                                         IBackOffTimerPatternPtr pattern = IBackOffTimerPatternPtr()
-                                        );
+                                        ) noexcept;
       };
 
       class STUNRequesterFactory : public IFactory<ISTUNRequesterFactory> {};

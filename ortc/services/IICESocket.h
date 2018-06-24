@@ -50,9 +50,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocket
-    #pragma mark
+    //
+    // IICESocket
+    //
 
     interaction IICESocket
     {
@@ -70,7 +70,7 @@ namespace ortc
         ICESocketState_Shutdown,
       };
 
-      static const char *toString(ICESocketStates state);
+      static const char *toString(ICESocketStates state) noexcept;
 
       enum Types
       {
@@ -81,7 +81,7 @@ namespace ortc
         Type_Relayed =          0,
       };
 
-      static const char *toString(Types type);
+      static const char *toString(Types type) noexcept;
 
       struct Candidate
       {
@@ -94,10 +94,10 @@ namespace ortc
 
         IPAddress mRelatedIP;         // if server reflexive, peer reflexive or relayed, the related base IP
 
-        static CandidatePtr create();
-        Candidate(): mType(Type_Unknown), mComponentID(0), mPriority(0), mLocalPreference(0) {}
-        bool hasData() const;
-        ElementPtr toDebug() const;
+        static CandidatePtr create() noexcept;
+        Candidate() noexcept : mType(Type_Unknown), mComponentID(0), mPriority(0), mLocalPreference(0) {}
+        bool hasData() const noexcept;
+        ElementPtr toDebug() const noexcept;
       };
 
       typedef std::list<Candidate> CandidateList;
@@ -106,7 +106,7 @@ namespace ortc
                           const CandidateList &inNewCandidatesList,
                           CandidateList &outAddedCandidates,
                           CandidateList &outRemovedCandidates
-                          );
+                          ) noexcept;
 
       enum ICEControls
       {
@@ -122,9 +122,9 @@ namespace ortc
         IDNS::SRVResultPtr mSRVTURNServerUDP;
         IDNS::SRVResultPtr mSRVTURNServerTCP;
 
-        static TURNServerInfoPtr create();
-        bool hasData() const;
-        ElementPtr toDebug() const;
+        static TURNServerInfoPtr create() noexcept;
+        bool hasData() const noexcept;
+        ElementPtr toDebug() const noexcept;
       };
 
       struct STUNServerInfo
@@ -132,19 +132,19 @@ namespace ortc
         String mSTUNServer;
         IDNS::SRVResultPtr mSRVSTUNServerUDP;
 
-        static STUNServerInfoPtr create();
-        bool hasData() const;
-        ElementPtr toDebug() const;
+        static STUNServerInfoPtr create() noexcept;
+        bool hasData() const noexcept;
+        ElementPtr toDebug() const noexcept;
       };
 
       typedef std::list<TURNServerInfoPtr> TURNServerInfoList;
       typedef std::list<STUNServerInfoPtr> STUNServerInfoList;
 
-      static const char *toString(ICEControls control);
+      static const char *toString(ICEControls control) noexcept;
       
       //-----------------------------------------------------------------------
       // PURPOSE: returns a debug element containing internal object state
-      static ElementPtr toDebug(IICESocketPtr socket);
+      static ElementPtr toDebug(IICESocketPtr socket) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: creates/binds an ICE socket
@@ -156,34 +156,34 @@ namespace ortc
                                   WORD port = 0,
                                   bool firstWORDInAnyPacketWillNotConflictWithTURNChannels = false,
                                   IICESocketPtr foundationSocket = IICESocketPtr()
-                                  );
+                                  ) noexcept;
 
       //-----------------------------------------------------------------------
       // PURPOSE: returns the unique object ID
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to the current socket state.
-      virtual IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate) = 0;
+      virtual IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets the current state of the object
       virtual ICESocketStates getState(
                                        WORD *outLastErrorCode = NULL,
                                        String *outLastErrorReason = NULL
-                                       ) const = 0;
+                                       ) const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets the ICE username fragment
-      virtual String getUsernameFrag() const = 0;
+      virtual String getUsernameFrag() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets the ICE password
-      virtual String getPassword() const = 0;
+      virtual String getPassword() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Close the socket and cause all sessions to become closed.
-      virtual void shutdown() = 0;
+      virtual void shutdown() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Call to wakeup a potentially sleeping socket so that all
@@ -193,34 +193,34 @@ namespace ortc
       //          are ready. For example, TURN is shutdown while not in use
       //          and it must become active otherwise the TURN candidates will
       //          not be available.
-      virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(ORTC_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) = 0;
+      virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(ORTC_SERVICES_IICESOCKET_DEFAULT_HOW_LONG_CANDIDATES_MUST_REMAIN_VALID_IN_SECONDS)) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets a local list of offered candidates
       virtual void getLocalCandidates(
                                       CandidateList &outCandidates,
                                       String *outLocalCandidateVersion = NULL
-                                      ) = 0;
+                                      ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Gets the version string associated to the current set of
       //          local candidates
       // NOTE;    As the candidates are discovered or change, each newly
       //          introduced candidate causes a change in this version string.
-      virtual String getLocalCandidatesVersion() const = 0;
+      virtual String getLocalCandidatesVersion() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Enable or disable write ready notifications on all sessions
-      virtual void monitorWriteReadyOnAllSessions(bool monitor = true) = 0;
+      virtual void monitorWriteReadyOnAllSessions(bool monitor = true) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocketDelegate
-    #pragma mark
+    //
+    // IICESocketDelegate
+    //
 
     interaction IICESocketDelegate
     {
@@ -239,17 +239,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IICESocketSubscription
-    #pragma mark
+    //
+    // IICESocketSubscription
+    //
 
     interaction IICESocketSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
     
   }
@@ -258,13 +258,13 @@ namespace ortc
 ZS_DECLARE_PROXY_BEGIN(ortc::services::IICESocketDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
-ZS_DECLARE_PROXY_METHOD_2(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
-ZS_DECLARE_PROXY_METHOD_1(onICESocketCandidatesChanged, IICESocketPtr)
+ZS_DECLARE_PROXY_METHOD(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
+ZS_DECLARE_PROXY_METHOD(onICESocketCandidatesChanged, IICESocketPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::IICESocketDelegate, ortc::services::IICESocketSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketPtr, IICESocketPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::IICESocketDelegate::ICESocketStates, ICESocketStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_2(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onICESocketCandidatesChanged, IICESocketPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onICESocketStateChanged, IICESocketPtr, ICESocketStates)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onICESocketCandidatesChanged, IICESocketPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

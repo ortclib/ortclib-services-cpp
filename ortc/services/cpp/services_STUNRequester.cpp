@@ -58,9 +58,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester
-      #pragma mark
+      //
+      // STUNRequester
+      //
 
       //-----------------------------------------------------------------------
       STUNRequester::STUNRequester(
@@ -71,7 +71,7 @@ namespace ortc
                                    STUNPacketPtr stun,
                                    STUNPacket::RFCs usingRFC,
                                    IBackOffTimerPatternPtr pattern
-                                   ) :
+                                   ) noexcept :
         MessageQueueAssociator(queue),
         mDelegate(ISTUNRequesterDelegateProxy::createWeak(queue, delegate)),
         mSTUNRequest(stun),
@@ -98,7 +98,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      STUNRequester::~STUNRequester()
+      STUNRequester::~STUNRequester() noexcept
       {
         if(isNoop()) return;
         
@@ -110,7 +110,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequester::init()
+      void STUNRequester::init() noexcept
       {
         AutoRecursiveLock lock(mLock);
         UseSTUNRequesterManagerPtr manager = UseSTUNRequesterManager::singleton();
@@ -121,13 +121,13 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      STUNRequesterPtr STUNRequester::convert(ISTUNRequesterPtr object)
+      STUNRequesterPtr STUNRequester::convert(ISTUNRequesterPtr object) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(STUNRequester, object);
       }
 
       //-----------------------------------------------------------------------
-      STUNRequesterPtr STUNRequester::convert(ForSTUNRequesterManagerPtr object)
+      STUNRequesterPtr STUNRequester::convert(ForSTUNRequesterManagerPtr object) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(STUNRequester, object);
       }
@@ -136,9 +136,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester => STUNRequester
-      #pragma mark
+      //
+      // STUNRequester => STUNRequester
+      //
 
       //-----------------------------------------------------------------------
       STUNRequesterPtr STUNRequester::create(
@@ -148,12 +148,12 @@ namespace ortc
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
                                              IBackOffTimerPatternPtr pattern
-                                             )
+                                             ) noexcept
       {
-        ZS_THROW_INVALID_USAGE_IF(!delegate)
-        ZS_THROW_INVALID_USAGE_IF(!stun)
-        ZS_THROW_INVALID_USAGE_IF(serverIP.isAddressEmpty())
-        ZS_THROW_INVALID_USAGE_IF(serverIP.isPortEmpty())
+        ZS_ASSERT(delegate);
+        ZS_ASSERT(stun);
+        ZS_ASSERT(!serverIP.isAddressEmpty());
+        ZS_ASSERT(!serverIP.isPortEmpty());
 
         STUNRequesterPtr pThis(make_shared<STUNRequester>(make_private{}, queue, delegate, serverIP, stun, usingRFC, pattern));
         pThis->mThisWeak = pThis;
@@ -162,7 +162,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      bool STUNRequester::isComplete() const
+      bool STUNRequester::isComplete() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         if (!mDelegate) return true;
@@ -170,7 +170,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequester::cancel()
+      void STUNRequester::cancel() noexcept
       {
         //ServicesStunRequesterCancel(__func__, mID);
         ZS_EVENTING_1(x, i, Debug, ServicesStunRequesterCancel, os, StunRequester, Cancel, puid, id, mID);
@@ -193,7 +193,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequester::retryRequestNow()
+      void STUNRequester::retryRequestNow() noexcept
       {
         //ServicesStunRequesterRetryNow(__func__, mID);
         ZS_EVENTING_1(x, i, Trace, ServicesStunRequesterRetryNow, os, StunRequester, RetryNow, puid, id, mID);
@@ -211,28 +211,28 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IPAddress STUNRequester::getServerIP() const
+      IPAddress STUNRequester::getServerIP() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mServerIP;
       }
 
       //-----------------------------------------------------------------------
-      STUNPacketPtr STUNRequester::getRequest() const
+      STUNPacketPtr STUNRequester::getRequest() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mSTUNRequest;
       }
 
       //-----------------------------------------------------------------------
-      IBackOffTimerPatternPtr STUNRequester::getBackOffTimerPattern() const
+      IBackOffTimerPatternPtr STUNRequester::getBackOffTimerPattern() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mBackOffTimerPattern;
       }
 
       //-----------------------------------------------------------------------
-      size_t STUNRequester::getTotalTries() const
+      size_t STUNRequester::getTotalTries() const noexcept
       {
         AutoRecursiveLock lock(mLock);
         return mTotalTries;
@@ -242,15 +242,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester => ISTUNRequesterForSTUNRequesterManager
-      #pragma mark
+      //
+      // STUNRequester => ISTUNRequesterForSTUNRequesterManager
+      //
 
       //-----------------------------------------------------------------------
       bool STUNRequester::handleSTUNPacket(
                                            IPAddress fromIPAddress,
                                            STUNPacketPtr packet
-                                           )
+                                           ) noexcept
       {
         //ServicesStunRequesterReceivedStunPacket(__func__, mID, fromIPAddress.string());
         ZS_EVENTING_2(x, i, Debug, ServicesStunRequesterReceivedStunPacket, os, StunRequester, Receive, puid, id, mID, string, fromIpAddress, fromIPAddress.string());
@@ -304,9 +304,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester => ITimerDelegate
-      #pragma mark
+      //
+      // STUNRequester => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void STUNRequester::onBackOffTimerStateChanged(
@@ -333,12 +333,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark STUNRequester => (internal)
-      #pragma mark
+      //
+      // STUNRequester => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params STUNRequester::log(const char *message) const
+      Log::Params STUNRequester::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("STUNRequester");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -346,7 +346,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void STUNRequester::step()
+      void STUNRequester::step() noexcept
       {
         if (!mDelegate) return;                                                 // if there is no delegate then the request has completed or is cancelled
         if (mServerIP.isAddressEmpty()) return;
@@ -401,12 +401,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ISTUNRequesterFactory
-      #pragma mark
+      //
+      // ISTUNRequesterFactory
+      //
 
       //-----------------------------------------------------------------------
-      ISTUNRequesterFactory &ISTUNRequesterFactory::singleton()
+      ISTUNRequesterFactory &ISTUNRequesterFactory::singleton() noexcept
       {
         return STUNRequesterFactory::singleton();
       }
@@ -419,7 +419,7 @@ namespace ortc
                                                      STUNPacketPtr stun,
                                                      STUNPacket::RFCs usingRFC,
                                                      IBackOffTimerPatternPtr pattern
-                                                     )
+                                                     ) noexcept
       {
         if (this) {}
         return STUNRequester::create(queue, delegate, serverIP, stun, usingRFC, pattern);
@@ -431,9 +431,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ISTUNRequester
-    #pragma mark
+    //
+    // ISTUNRequester
+    //
 
     //-------------------------------------------------------------------------
     ISTUNRequesterPtr ISTUNRequester::create(
@@ -443,7 +443,7 @@ namespace ortc
                                              STUNPacketPtr stun,
                                              STUNPacket::RFCs usingRFC,
                                              IBackOffTimerPatternPtr pattern
-                                             )
+                                             ) noexcept
     {
       return internal::ISTUNRequesterFactory::singleton().create(queue, delegate, serverIP, stun, usingRFC, pattern);
     }
@@ -454,7 +454,7 @@ namespace ortc
                                       const BYTE *packet,
                                       size_t packetLengthInBytes,
                                       const STUNPacket::ParseOptions &options
-                                      )
+                                      ) noexcept
     {
       return (bool)ISTUNRequesterManager::handlePacket(fromIPAddress, packet, packetLengthInBytes, options);
     }
@@ -463,7 +463,7 @@ namespace ortc
     bool ISTUNRequester::handleSTUNPacket(
                                           IPAddress fromIPAddress,
                                           STUNPacketPtr stun
-                                          )
+                                          ) noexcept
     {
       return (bool)ISTUNRequesterManager::handleSTUNPacket(fromIPAddress, stun);
     }

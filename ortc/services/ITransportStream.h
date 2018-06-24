@@ -41,9 +41,9 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStream
-    #pragma mark
+    //
+    // ITransportStream
+    //
 
     interaction ITransportStream
     {
@@ -51,7 +51,7 @@ namespace ortc
 
       interaction StreamHeader
       {
-        virtual ~StreamHeader() {}  // needs virtual method to ensure dynamic casting works
+        virtual ~StreamHeader() noexcept {}  // needs virtual method to ensure dynamic casting works
       };
 
       enum Endians
@@ -60,30 +60,30 @@ namespace ortc
         Endian_Little = false,
       };
 
-      static const char *toString(Endians endian);
+      static const char *toString(Endians endian) noexcept;
 
-      static ElementPtr toDebug(ITransportStreamPtr stream);
+      static ElementPtr toDebug(ITransportStreamPtr stream) noexcept;
 
       static ITransportStreamPtr create(
                                         ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
                                         ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
-                                        );
+                                        ) noexcept;
 
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual ITransportStreamWriterPtr getWriter() const = 0;
-      virtual ITransportStreamReaderPtr getReader() const = 0;
+      virtual ITransportStreamWriterPtr getWriter() const noexcept = 0;
+      virtual ITransportStreamReaderPtr getReader() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStreamWriter
-    #pragma mark
+    //
+    // ITransportStreamWriter
+    //
 
     interaction ITransportStreamWriter
     {
@@ -92,25 +92,25 @@ namespace ortc
       typedef ITransportStream::StreamHeaderWeakPtr StreamHeaderWeakPtr;
       typedef ITransportStream::Endians Endians;
 
-      virtual PUID getID() const = 0; // returns the same ID as the stream
+      virtual PUID getID() const noexcept = 0; // returns the same ID as the stream
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to receive events when the write buffer is empty
       //          and available for more data to be written
-      virtual ITransportStreamWriterSubscriptionPtr subscribe(ITransportStreamWriterDelegatePtr delegate) = 0;
+      virtual ITransportStreamWriterSubscriptionPtr subscribe(ITransportStreamWriterDelegatePtr delegate) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: obtain the associated transport stream
-      virtual ITransportStreamPtr getStream() const = 0;
+      virtual ITransportStreamPtr getStream() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: check if the writer has been informed the reader is ready
-      virtual bool isWriterReady() const = 0;
+      virtual bool isWriterReady() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: clears out all data pending in the stream and prevents any
       //          more data being read/written
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Write buffer into the stream
@@ -118,14 +118,14 @@ namespace ortc
                          const BYTE *buffer,
                          size_t bufferLengthInBytes,
                          StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
-                         ) = 0;
+                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Write buffer into the stream
       virtual void write(
                          SecureByteBlockPtr bufferToAdopt,
                          StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
-                         ) = 0;
+                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Write a WORD value into the stream
@@ -133,7 +133,7 @@ namespace ortc
                          WORD value,
                          StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
                          Endians endian = ITransportStream::Endian_Big
-                         ) = 0;
+                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Write a WORD value into the stream
@@ -141,7 +141,7 @@ namespace ortc
                          DWORD value,
                          StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
                          Endians endian = ITransportStream::Endian_Big
-                         ) = 0;
+                         ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Cause the send stream to backlog all the data being written
@@ -152,16 +152,16 @@ namespace ortc
       //          be ignored. When the block is removed, all blocked data
       //          will be written as "one large buffer" combining all data
       //          written into a single written buffer.
-      virtual void block(bool block = true) = 0;
+      virtual void block(bool block = true) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStreamWriterDelegate
-    #pragma mark
+    //
+    // ITransportStreamWriterDelegate
+    //
 
     interaction ITransportStreamWriterDelegate
     {
@@ -176,26 +176,26 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStreamWriterSubscription
-    #pragma mark
+    //
+    // ITransportStreamWriterSubscription
+    //
 
     interaction ITransportStreamWriterSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStreamReader
-    #pragma mark
+    //
+    // ITransportStreamReader
+    //
 
     interaction ITransportStreamReader
     {
@@ -204,20 +204,20 @@ namespace ortc
       typedef ITransportStream::StreamHeaderWeakPtr StreamHeaderWeakPtr;
       typedef ITransportStream::Endians Endians;
 
-      virtual PUID getID() const = 0; // returns the same ID as the stream
+      virtual PUID getID() const noexcept = 0; // returns the same ID as the stream
 
       //-----------------------------------------------------------------------
       // PURPOSE: Subscribe to receive events when read data is available
-      virtual ITransportStreamReaderSubscriptionPtr subscribe(ITransportStreamReaderDelegatePtr delegate) = 0;
+      virtual ITransportStreamReaderSubscriptionPtr subscribe(ITransportStreamReaderDelegatePtr delegate) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: obtain the associated transport stream
-      virtual ITransportStreamPtr getStream() const = 0;
+      virtual ITransportStreamPtr getStream() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: clears out all data pending in the stream and prevents any
       //          more data being read/written
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: call to notify the writer that it can start sending data
@@ -235,7 +235,7 @@ namespace ortc
       //          The writer can choose to send data before receiving this
       //          ready notification in which case the read data will be
       //          cached until the reader decided to reads the data.
-      virtual void notifyReaderReadyToRead() = 0;
+      virtual void notifyReaderReadyToRead() noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the size of the next "written" buffer available to
@@ -249,18 +249,18 @@ namespace ortc
       //          if there are any buffers available or not for reading.
       //          Instead use "getTotalReadBuffersAvailable" to determine if
       //          buffers are available for reading.
-      virtual size_t getNextReadSizeInBytes() const = 0;
+      virtual size_t getNextReadSizeInBytes() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the header for the next FIFO buffer written
       // NOTE:    Will return StreamHeaderPtr() if no header is available (or
       //          no buffer is available).
-      virtual StreamHeaderPtr getNextReadHeader() const = 0;
+      virtual StreamHeaderPtr getNextReadHeader() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the total number of the buffers "written" to the
       //          FIFO write stream that are still available to read.
-      virtual size_t getTotalReadBuffersAvailable() const = 0;
+      virtual size_t getTotalReadBuffersAvailable() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Obtains the size of all data "written" buffer available to
@@ -268,7 +268,7 @@ namespace ortc
       // NOTE:    This buffer will match the sum of all FIFO buffered data
       //          written to the ITransportWriter (and not any individual
       //          written buffer).
-      virtual size_t getTotalReadSizeAvailableInBytes() const = 0;
+      virtual size_t getTotalReadSizeAvailableInBytes() const noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Reads buffered data written to the stream.
@@ -285,14 +285,14 @@ namespace ortc
                           BYTE *outBuffer,
                           size_t bufferLengthInBytes,
                           StreamHeaderPtr *outHeader = NULL
-                          ) = 0;
+                          ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Reads buffered data written to the write buffer with exactly
       //          the size written.
       virtual SecureByteBlockPtr read(
                                       StreamHeaderPtr *outHeader = NULL
-                                      ) = 0;
+                                      ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Reads a WORD of buffered data written to the stream.
@@ -301,7 +301,7 @@ namespace ortc
                               WORD &outResult,
                               StreamHeaderPtr *outHeader = NULL,
                               Endians endian = ITransportStream::Endian_Big
-                              ) = 0;
+                              ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Reads buffered data written to the stream.
@@ -310,7 +310,7 @@ namespace ortc
                                DWORD &outResult,
                                StreamHeaderPtr *outHeader = NULL,
                                Endians endian = ITransportStream::Endian_Big
-                               ) = 0;
+                               ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks ahead at the buffered data written to the stream
@@ -320,7 +320,7 @@ namespace ortc
                           size_t bufferLengthInBytes,
                           StreamHeaderPtr *outHeader = NULL,
                           size_t offsetInBytes = 0
-                          ) = 0;
+                          ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks ahead at the buffered data written to the stream
@@ -329,7 +329,7 @@ namespace ortc
                                       size_t bufferLengthInBytes = 0,
                                       StreamHeaderPtr *outHeader = NULL,
                                       size_t offsetInBytes = 0
-                                      ) = 0;
+                                      ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks a WORD of buffered data written to the stream.
@@ -339,7 +339,7 @@ namespace ortc
                               StreamHeaderPtr *outHeader = NULL,
                               size_t offsetInBytes = 0,
                               Endians endian = ITransportStream::Endian_Big
-                              ) = 0;
+                              ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Peeks buffered data written to the stream.
@@ -349,20 +349,20 @@ namespace ortc
                                StreamHeaderPtr *outHeader = NULL,
                                size_t offsetInBytes = 0,
                                Endians endian = ITransportStream::Endian_Big
-                               ) = 0;
+                               ) noexcept = 0;
 
       //-----------------------------------------------------------------------
       // PURPOSE: Flushes the FIFO by the data offset specified.
-      virtual size_t skip(size_t offsetInBytes) = 0;
+      virtual size_t skip(size_t offsetInBytes) noexcept = 0;
     };
 
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportStreamReaderDelegate
-    #pragma mark
+    //
+    // ITransportStreamReaderDelegate
+    //
 
     interaction ITransportStreamReaderDelegate
     {
@@ -376,17 +376,17 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark ITransportReaderSubscription
-    #pragma mark
+    //
+    // ITransportReaderSubscription
+    //
 
     interaction ITransportStreamReaderSubscription
     {
-      virtual PUID getID() const = 0;
+      virtual PUID getID() const noexcept = 0;
 
-      virtual void cancel() = 0;
+      virtual void cancel() noexcept = 0;
 
-      virtual void background() = 0;
+      virtual void background() noexcept = 0;
     };
     
   }
@@ -394,20 +394,20 @@ namespace ortc
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::ITransportStreamWriterDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
-ZS_DECLARE_PROXY_METHOD_1(onTransportStreamWriterReady, ITransportStreamWriterPtr)
+ZS_DECLARE_PROXY_METHOD(onTransportStreamWriterReady, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITransportStreamWriterDelegate, ortc::services::ITransportStreamWriterSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITransportStreamWriterPtr, ITransportStreamWriterPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onTransportStreamWriterReady, ITransportStreamWriterPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onTransportStreamWriterReady, ITransportStreamWriterPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::ITransportStreamReaderDelegate)
 ZS_DECLARE_PROXY_TYPEDEF(ortc::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
-ZS_DECLARE_PROXY_METHOD_1(onTransportStreamReaderReady, ITransportStreamReaderPtr)
+ZS_DECLARE_PROXY_METHOD(onTransportStreamReaderReady, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_END()
 
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_BEGIN(ortc::services::ITransportStreamReaderDelegate, ortc::services::ITransportStreamReaderSubscription)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_TYPEDEF(ortc::services::ITransportStreamReaderPtr, ITransportStreamReaderPtr)
-ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD_1(onTransportStreamReaderReady, ITransportStreamReaderPtr)
+ZS_DECLARE_PROXY_SUBSCRIPTIONS_METHOD(onTransportStreamReaderReady, ITransportStreamReaderPtr)
 ZS_DECLARE_PROXY_SUBSCRIPTIONS_END()

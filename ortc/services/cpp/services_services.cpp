@@ -69,7 +69,7 @@ namespace ortc
   {
     namespace internal
     {
-      void initSubsystems()
+      void initSubsystems() noexcept
       {
         ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services));
         ZS_GET_SUBSYSTEM_LOG_LEVEL(ZS_GET_OTHER_SUBSYSTEM(ortc::services, org_ortc_services_http));
@@ -85,19 +85,19 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    SharedRecursiveLock::SharedRecursiveLock(const SharedRecursiveLock &source) :
+    SharedRecursiveLock::SharedRecursiveLock(const SharedRecursiveLock &source) noexcept :
       mLock(source.mLock)
     {
     }
 
     //-------------------------------------------------------------------------
-    SharedRecursiveLock::SharedRecursiveLock(RecursiveLockPtr shared) : 
+    SharedRecursiveLock::SharedRecursiveLock(RecursiveLockPtr shared) noexcept :
       mLock(shared)
     {
     }
 
     //-------------------------------------------------------------------------
-    SharedRecursiveLock::~SharedRecursiveLock()
+    SharedRecursiveLock::~SharedRecursiveLock() noexcept
     {
     }
 

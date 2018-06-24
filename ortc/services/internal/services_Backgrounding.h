@@ -48,9 +48,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding
-      #pragma mark
+      //
+      // Backgrounding
+      //
 
       class Backgrounding : public MessageQueueAssociator,
                             public SharedRecursiveLock,
@@ -77,94 +77,94 @@ namespace ortc
         friend class Query;
 
       public:
-        Backgrounding(const make_private &);
+        Backgrounding(const make_private &) noexcept;
 
       protected:
-        static BackgroundingPtr create();
+        static BackgroundingPtr create() noexcept;
 
       public:
-        ~Backgrounding();
+        ~Backgrounding() noexcept;
 
       public:
-        static BackgroundingPtr convert(IBackgroundingPtr backgrounding);
+        static BackgroundingPtr convert(IBackgroundingPtr backgrounding) noexcept;
 
-        static BackgroundingPtr singleton();
+        static BackgroundingPtr singleton() noexcept;
 
-        static IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
+        static IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => IBackgrounding
-        #pragma mark
+        //
+        // Backgrounding => IBackgrounding
+        //
 
-        static ElementPtr toDebug(BackgroundingPtr backgrounding);
+        static ElementPtr toDebug(BackgroundingPtr backgrounding) noexcept;
 
         virtual IBackgroundingSubscriptionPtr subscribe(
                                                         IBackgroundingDelegatePtr delegate,
                                                         ULONG phase
-                                                        );
+                                                        ) noexcept;
 
         virtual IBackgroundingQueryPtr notifyGoingToBackground(
                                                                IBackgroundingCompletionDelegatePtr readyDelegate = IBackgroundingCompletionDelegatePtr()
-                                                               );
+                                                               ) noexcept;
 
-        virtual void notifyGoingToBackgroundNow();
+        virtual void notifyGoingToBackgroundNow() noexcept;
 
-        virtual void notifyReturningFromBackground();
+        virtual void notifyReturningFromBackground() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => ITimerDelegate
-        #pragma mark
+        //
+        // Backgrounding => ITimerDelegate
+        //
 
         virtual void onTimer(ITimerPtr timer);
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => friend Notifier
-        #pragma mark
+        //
+        // Backgrounding => friend Notifier
+        //
 
         void notifyReady(
                          PUID backgroundingID,
                          Phase phase
-                         );
+                         ) noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => friend Query
-        #pragma mark
+        //
+        // Backgrounding => friend Query
+        //
 
-        virtual size_t totalPending(PUID backgroundingID) const;
+        virtual size_t totalPending(PUID backgroundingID) const noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => friend GracefulAlert
-        #pragma mark
+        //
+        // Backgrounding => friend GracefulAlert
+        //
 
-        virtual void notifyApplicationWillQuit();
+        virtual void notifyApplicationWillQuit() noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => (internal)
-        #pragma mark
+        //
+        // Backgrounding => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        static Log::Params slog(const char *message);
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        static Log::Params slog(const char *message) noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        size_t getPreviousPhase(Phase &ioPreviousPhase);
-        size_t getNextPhase(Phase &ioNextPhase);
-        void performGoingToBackground();
+        size_t getPreviousPhase(Phase &ioPreviousPhase) noexcept;
+        size_t getNextPhase(Phase &ioNextPhase) noexcept;
+        void performGoingToBackground() noexcept;
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding::Notifier
-        #pragma mark
+        //
+        // Backgrounding::Notifier
+        //
 
         class Notifier : public SharedRecursiveLock,
                          public IBackgroundingNotifier
@@ -176,22 +176,22 @@ namespace ortc
           Notifier(
                    const make_private &,
                    ExchangedNotifierPtr notifier
-                   );
+                   ) noexcept;
 
         public:
-          ~Notifier();
+          ~Notifier() noexcept;
 
-          static NotifierPtr create(ExchangedNotifierPtr notifier);
+          static NotifierPtr create(ExchangedNotifierPtr notifier) noexcept;
 
         protected:
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark Backgrounding::Notifier => IBackgroundingNotifier
-          #pragma mark
+          //
+          // Backgrounding::Notifier => IBackgroundingNotifier
+          //
 
-          virtual PUID getID() const {return mBackgroundingID;}
+          virtual PUID getID() const noexcept {return mBackgroundingID;}
 
-          virtual void ready();
+          virtual void ready() noexcept;
 
         protected:
           BackgroundingPtr mOuter;
@@ -202,9 +202,9 @@ namespace ortc
         };
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding::ExchangedNotifier
-        #pragma mark
+        //
+        // Backgrounding::ExchangedNotifier
+        //
 
         class ExchangedNotifier : public SharedRecursiveLock,
                                   public IBackgroundingNotifier
@@ -222,7 +222,7 @@ namespace ortc
                             BackgroundingPtr outer,
                             PUID backgroundingID,
                             Phase phase
-                            ) :
+                            ) noexcept :
             SharedRecursiveLock(*outer),
             mOuter(outer),
             mBackgroundingID(backgroundingID),
@@ -234,25 +234,25 @@ namespace ortc
                                              BackgroundingPtr outer,
                                              PUID backgroundingID,
                                              Phase phase
-                                             );
+                                             ) noexcept;
 
         protected:
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark Backgrounding::ExchangedNotifier => IBackgroundingNotifier
-          #pragma mark
+          //
+          // Backgrounding::ExchangedNotifier => IBackgroundingNotifier
+          //
 
-          virtual PUID getID() const {return mBackgroundingID;}
+          virtual PUID getID() const noexcept {return mBackgroundingID;}
 
-          virtual void ready() {}
+          virtual void ready() noexcept {}
 
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark Backgrounding::ExchangedNotifier => friend Backgrounding / Notifier
-          #pragma mark
+          //
+          // Backgrounding::ExchangedNotifier => friend Backgrounding / Notifier
+          //
 
-          BackgroundingPtr getOuter() const {return mOuter;}
-          Phase getPhase() const {return mPhase;}
+          BackgroundingPtr getOuter() const noexcept {return mOuter;}
+          Phase getPhase() const noexcept {return mPhase;}
 
         protected:
           BackgroundingPtr mOuter;
@@ -262,9 +262,9 @@ namespace ortc
         };
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding::Query
-        #pragma mark
+        //
+        // Backgrounding::Query
+        //
 
         class Query : public SharedRecursiveLock,
                       public IBackgroundingQuery
@@ -277,7 +277,7 @@ namespace ortc
                 const make_private &,
                 BackgroundingPtr outer,
                 PUID backgroundingID
-                ) :
+                ) noexcept :
           SharedRecursiveLock(*outer),
           mOuter(outer),
           mBackgroundingID(backgroundingID)
@@ -287,19 +287,19 @@ namespace ortc
           static QueryPtr create(
                                  BackgroundingPtr outer,
                                  PUID backgroundingID
-                                 );
+                                 ) noexcept;
 
         protected:
           //-------------------------------------------------------------------
-          #pragma mark
-          #pragma mark Backgrounding::Query => IBackgroundingQuery
-          #pragma mark
+          //
+          // Backgrounding::Query => IBackgroundingQuery
+          //
 
-          virtual PUID getID() const {return mBackgroundingID;}
+          virtual PUID getID() const noexcept {return mBackgroundingID;}
 
-          virtual bool isReady() const;
+          virtual bool isReady() const noexcept;
 
-          virtual size_t totalBackgroundingSubscribersStillPending() const;
+          virtual size_t totalBackgroundingSubscribersStillPending() const noexcept;
 
         protected:
           BackgroundingWeakPtr mOuter;
@@ -308,9 +308,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark Backgrounding => (data)
-        #pragma mark
+        //
+        // Backgrounding => (data)
+        //
 
         AutoPUID mID;
         BackgroundingWeakPtr mThisWeak;
@@ -334,15 +334,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackgroundingFactory
-      #pragma mark
+      //
+      // IBackgroundingFactory
+      //
 
       interaction IBackgroundingFactory
       {
-        static IBackgroundingFactory &singleton();
+        static IBackgroundingFactory &singleton() noexcept;
 
-        virtual BackgroundingPtr createForBackgrounding();
+        virtual BackgroundingPtr createForBackgrounding() noexcept;
       };
 
       class BackgroundingFactory : public IFactory<IBackgroundingFactory> {};

@@ -54,12 +54,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark (helpers)
-      #pragma mark
+      //
+      // (helpers)
+      //
 
       //-----------------------------------------------------------------------
-      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier)
+      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier) noexcept
       {
         return Backgrounding::getBackgroundingNotifier(notifier);
       }
@@ -68,12 +68,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding
-      #pragma mark
+      //
+      // Backgrounding
+      //
 
       //-----------------------------------------------------------------------
-      Backgrounding::Backgrounding(const make_private &) :
+      Backgrounding::Backgrounding(const make_private &) noexcept :
         MessageQueueAssociator(IHelper::getServiceQueue()),
         SharedRecursiveLock(SharedRecursiveLock::create()),
         mCurrentBackgroundingID(zsLib::createPUID())
@@ -82,20 +82,20 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Backgrounding::~Backgrounding()
+      Backgrounding::~Backgrounding() noexcept
       {
         mThisWeak.reset();
         ZS_LOG_DETAIL(log("destroyed"))
       }
 
       //-----------------------------------------------------------------------
-      BackgroundingPtr Backgrounding::convert(IBackgroundingPtr backgrounding)
+      BackgroundingPtr Backgrounding::convert(IBackgroundingPtr backgrounding) noexcept
       {
         return ZS_DYNAMIC_PTR_CAST(Backgrounding, backgrounding);
       }
 
       //-----------------------------------------------------------------------
-      BackgroundingPtr Backgrounding::create()
+      BackgroundingPtr Backgrounding::create() noexcept
       {
         BackgroundingPtr pThis(make_shared<Backgrounding>(make_private{}));
         pThis->mThisWeak = pThis;
@@ -103,7 +103,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      BackgroundingPtr Backgrounding::singleton()
+      BackgroundingPtr Backgrounding::singleton() noexcept
       {
         AutoRecursiveLock lock(*IHelper::getGlobalLock());
         static SingletonLazySharedPtr<Backgrounding> singleton(IBackgroundingFactory::singleton().createForBackgrounding());
@@ -115,8 +115,8 @@ namespace ortc
         class GracefulAlert
         {
         public:
-          GracefulAlert(BackgroundingPtr singletonValue) : mSingleton(singletonValue) {}
-          ~GracefulAlert() {mSingleton->notifyApplicationWillQuit();}
+          GracefulAlert(BackgroundingPtr singletonValue) noexcept : mSingleton(singletonValue) {}
+          ~GracefulAlert() noexcept {mSingleton->notifyApplicationWillQuit();}
 
         protected:
           BackgroundingPtr mSingleton;
@@ -131,7 +131,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IBackgroundingNotifierPtr Backgrounding::getBackgroundingNotifier(IBackgroundingNotifierPtr inNotifier)
+      IBackgroundingNotifierPtr Backgrounding::getBackgroundingNotifier(IBackgroundingNotifierPtr inNotifier) noexcept
       {
         ExchangedNotifierPtr exchange = ZS_DYNAMIC_PTR_CAST(ExchangedNotifier, inNotifier);
 
@@ -149,12 +149,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => IBackgrounding
-      #pragma mark
+      //
+      // Backgrounding => IBackgrounding
+      //
 
       //-----------------------------------------------------------------------
-      ElementPtr Backgrounding::toDebug(BackgroundingPtr backgrounding)
+      ElementPtr Backgrounding::toDebug(BackgroundingPtr backgrounding) noexcept
       {
         if (!backgrounding) return ElementPtr();
 
@@ -166,7 +166,7 @@ namespace ortc
       IBackgroundingSubscriptionPtr Backgrounding::subscribe(
                                                              IBackgroundingDelegatePtr originalDelegate,
                                                              ULONG phase
-                                                             )
+                                                             ) noexcept
       {
         ZS_LOG_DETAIL(log("subscribing to backgrounding"))
 
@@ -203,7 +203,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      IBackgroundingQueryPtr Backgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
+      IBackgroundingQueryPtr Backgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate) noexcept
       {
         ZS_LOG_DETAIL(log("system going to background") + ZS_PARAM("delegate", (bool)readyDelegate))
 
@@ -234,7 +234,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void Backgrounding::notifyGoingToBackgroundNow()
+      void Backgrounding::notifyGoingToBackgroundNow() noexcept
       {
         ZS_LOG_DETAIL(log("system going to background now"))
 
@@ -249,7 +249,7 @@ namespace ortc
           if (0 == total) break;
 
           PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
-          ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+          ZS_ASSERT(found != mPhaseSubscriptions.end());
 
           ZS_LOG_DEBUG(log("notifying phase going to background") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
 
@@ -263,7 +263,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void Backgrounding::notifyReturningFromBackground()
+      void Backgrounding::notifyReturningFromBackground() noexcept
       {
         ZS_LOG_DETAIL(log("system returning from background"))
 
@@ -289,7 +289,7 @@ namespace ortc
           if (0 == total) break;
 
           PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
-          ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+          ZS_ASSERT(found != mPhaseSubscriptions.end());
 
           ZS_LOG_DEBUG(log("notifying phase returning from background") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
 
@@ -308,9 +308,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => ITimerDelegate
-      #pragma mark
+      //
+      // Backgrounding => ITimerDelegate
+      //
 
       //-----------------------------------------------------------------------
       void Backgrounding::onTimer(ITimerPtr timer)
@@ -362,15 +362,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => friend Notifier
-      #pragma mark
+      //
+      // Backgrounding => friend Notifier
+      //
 
       //-----------------------------------------------------------------------
       void Backgrounding::notifyReady(
                                       PUID backgroundingID,
                                       Phase phase
-                                      )
+                                      ) noexcept
       {
         ZS_LOG_DETAIL(log("received notification that notifier is complete") + ZS_PARAM("backgrounding id", backgroundingID) + ZS_PARAM("phase", phase))
 
@@ -386,7 +386,7 @@ namespace ortc
           return;
         }
 
-        ZS_THROW_BAD_STATE_IF(0 == mTotalWaiting)
+        ZS_ASSERT(mTotalWaiting > 0);
 
         --mTotalWaiting;
         --mTotalNotifiersCreated;
@@ -407,12 +407,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => friend Query
-      #pragma mark
+      //
+      // Backgrounding => friend Query
+      //
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::totalPending(PUID backgroundingID) const
+      size_t Backgrounding::totalPending(PUID backgroundingID) const noexcept
       {
         AutoRecursiveLock lock(*this);
         if (backgroundingID != mCurrentBackgroundingID) {
@@ -427,12 +427,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => friend Query
-      #pragma mark
+      //
+      // Backgrounding => friend Query
+      //
 
       //-----------------------------------------------------------------------
-      void Backgrounding::notifyApplicationWillQuit()
+      void Backgrounding::notifyApplicationWillQuit() noexcept
       {
         ZS_LOG_DETAIL(log("application will quit notification"))
 
@@ -449,7 +449,7 @@ namespace ortc
             if (0 == total) break;
 
             PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(current);
-            ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+            ZS_ASSERT(found != mPhaseSubscriptions.end());
 
             ZS_LOG_DEBUG(log("notifying phase of application quit") + ZS_PARAM("phase", current) + ZS_PARAM("total", total))
 
@@ -470,12 +470,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding => (internal)
-      #pragma mark
+      //
+      // Backgrounding => (internal)
+      //
 
       //-----------------------------------------------------------------------
-      Log::Params Backgrounding::log(const char *message) const
+      Log::Params Backgrounding::log(const char *message) const noexcept
       {
         ElementPtr objectEl = Element::create("services::Backgrounding");
         IHelper::debugAppend(objectEl, "id", mID);
@@ -483,19 +483,19 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Log::Params Backgrounding::slog(const char *message)
+      Log::Params Backgrounding::slog(const char *message) noexcept
       {
         return Log::Params(message, "services::Backgrounding");
       }
 
       //-----------------------------------------------------------------------
-      Log::Params Backgrounding::debug(const char *message) const
+      Log::Params Backgrounding::debug(const char *message) const noexcept
       {
         return Log::Params(message, toDebug());
       }
 
       //-----------------------------------------------------------------------
-      ElementPtr Backgrounding::toDebug() const
+      ElementPtr Backgrounding::toDebug() const noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -521,7 +521,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::getPreviousPhase(Phase &ioPreviousPhase)
+      size_t Backgrounding::getPreviousPhase(Phase &ioPreviousPhase) noexcept
       {
         size_t totalFound = 0;
         Phase greatestFoundEqualOrLess = ioPreviousPhase;
@@ -558,7 +558,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::getNextPhase(Phase &ioNextPhase)
+      size_t Backgrounding::getNextPhase(Phase &ioNextPhase) noexcept
       {
         size_t totalFound = 0;
         Phase lowestFoundEqualOrGreater = ioNextPhase;
@@ -595,7 +595,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      void Backgrounding::performGoingToBackground()
+      void Backgrounding::performGoingToBackground() noexcept
       {
         mTotalWaiting = getNextPhase(mCurrentPhase);
 
@@ -619,7 +619,7 @@ namespace ortc
                                                                           );
 
         PhaseSubscriptionMap::iterator found = mPhaseSubscriptions.find(mCurrentPhase);
-        ZS_THROW_BAD_STATE_IF(found == mPhaseSubscriptions.end())
+        ZS_ASSERT(found != mPhaseSubscriptions.end());
 
         UseBackgroundingDelegateSubscriptionsPtr subscription = (*found).second;
 
@@ -660,15 +660,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding::Notifier
-      #pragma mark
+      //
+      // Backgrounding::Notifier
+      //
 
       //-----------------------------------------------------------------------
       Backgrounding::Notifier::Notifier(
                                         const make_private &,
                                         ExchangedNotifierPtr notifier
-                                        ) :
+                                        ) noexcept  :
         SharedRecursiveLock(*(notifier->getOuter())),
         mOuter(notifier->getOuter()),
         mBackgroundingID(notifier->getID()),
@@ -677,7 +677,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Backgrounding::Notifier::~Notifier()
+      Backgrounding::Notifier::~Notifier() noexcept
       {
         if (mNotified) return;
 
@@ -685,7 +685,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Backgrounding::NotifierPtr Backgrounding::Notifier::create(ExchangedNotifierPtr notifier)
+      Backgrounding::NotifierPtr Backgrounding::Notifier::create(ExchangedNotifierPtr notifier) noexcept
       {
         return make_shared<Notifier>(make_private{}, notifier);
       }
@@ -694,12 +694,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding::Notifier => IBackgroundingNotifier
-      #pragma mark
+      //
+      // Backgrounding::Notifier => IBackgroundingNotifier
+      //
 
       //-----------------------------------------------------------------------
-      void Backgrounding::Notifier::ready()
+      void Backgrounding::Notifier::ready() noexcept
       {
         AutoRecursiveLock lock(*this);
 
@@ -714,16 +714,16 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding::ExchangedNotifier
-      #pragma mark
+      //
+      // Backgrounding::ExchangedNotifier
+      //
 
       //-----------------------------------------------------------------------
       Backgrounding::ExchangedNotifierPtr Backgrounding::ExchangedNotifier::create(
                                                                                    BackgroundingPtr backgrounding,
                                                                                    PUID backgroundingID,
                                                                                    Phase phase
-                                                                                   )
+                                                                                   ) noexcept
       {
         return make_shared<ExchangedNotifier>(make_private{}, backgrounding, backgroundingID, phase);
       }
@@ -732,15 +732,15 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding::Query
-      #pragma mark
+      //
+      // Backgrounding::Query
+      //
 
       //-----------------------------------------------------------------------
       Backgrounding::QueryPtr Backgrounding::Query::create(
                                                            BackgroundingPtr outer,
                                                            PUID backgroundingID
-                                                           )
+                                                           ) noexcept
       {
         return make_shared<Query>(make_private{}, outer, backgroundingID);
       }
@@ -749,12 +749,12 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark Backgrounding::Query => IBackgroundingQuery
-      #pragma mark
+      //
+      // Backgrounding::Query => IBackgroundingQuery
+      //
 
       //-----------------------------------------------------------------------
-      bool Backgrounding::Query::isReady() const
+      bool Backgrounding::Query::isReady() const noexcept
       {
         BackgroundingPtr outer = mOuter.lock();
         if (!outer) return true;
@@ -765,7 +765,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      size_t Backgrounding::Query::totalBackgroundingSubscribersStillPending() const
+      size_t Backgrounding::Query::totalBackgroundingSubscribersStillPending() const noexcept
       {
         BackgroundingPtr outer = mOuter.lock();
         if (!outer) return 0;
@@ -779,18 +779,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IBackgroundingFactory
-      #pragma mark
+      //
+      // IBackgroundingFactory
+      //
 
       //-----------------------------------------------------------------------
-      IBackgroundingFactory &IBackgroundingFactory::singleton()
+      IBackgroundingFactory &IBackgroundingFactory::singleton() noexcept
       {
         return BackgroundingFactory::singleton();
       }
 
       //-----------------------------------------------------------------------
-      BackgroundingPtr IBackgroundingFactory::createForBackgrounding()
+      BackgroundingPtr IBackgroundingFactory::createForBackgrounding() noexcept
       {
         if (this) {}
         return Backgrounding::create();
@@ -802,12 +802,12 @@ namespace ortc
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
-    #pragma mark
-    #pragma mark IBackgrounding
-    #pragma mark
+    //
+    // IBackgrounding
+    //
 
     //-------------------------------------------------------------------------
-    ElementPtr IBackgrounding::toDebug()
+    ElementPtr IBackgrounding::toDebug() noexcept
     {
       return internal::Backgrounding::toDebug(internal::Backgrounding::singleton());
     }
@@ -816,7 +816,7 @@ namespace ortc
     IBackgroundingSubscriptionPtr IBackgrounding::subscribe(
                                                             IBackgroundingDelegatePtr delegate,
                                                             ULONG phase
-                                                            )
+                                                            ) noexcept
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) return IBackgroundingSubscriptionPtr();
@@ -824,7 +824,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    IBackgroundingQueryPtr IBackgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate)
+    IBackgroundingQueryPtr IBackgrounding::notifyGoingToBackground(IBackgroundingCompletionDelegatePtr readyDelegate) noexcept
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) {
@@ -837,14 +837,14 @@ namespace ortc
         protected:
           struct make_private {};
         public:
-          BogusQuery(const make_private &) {}
+          BogusQuery(const make_private &) noexcept {}
 
         public:
           static BogusQueryPtr create() {return make_shared<BogusQuery>(make_private{});}
 
-          virtual PUID getID() const {return mID;}
-          virtual bool isReady() const {return true;}
-          virtual size_t totalBackgroundingSubscribersStillPending() const {return 0;}
+          virtual PUID getID() const noexcept {return mID;}
+          virtual bool isReady() const noexcept {return true;}
+          virtual size_t totalBackgroundingSubscribersStillPending() const noexcept {return 0;}
 
         protected:
           zsLib::AutoPUID mID;
@@ -860,7 +860,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void IBackgrounding::notifyGoingToBackgroundNow()
+    void IBackgrounding::notifyGoingToBackgroundNow() noexcept
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) return;
@@ -868,7 +868,7 @@ namespace ortc
     }
 
     //-------------------------------------------------------------------------
-    void IBackgrounding::notifyReturningFromBackground()
+    void IBackgrounding::notifyReturningFromBackground() noexcept
     {
       internal::BackgroundingPtr singleton = internal::Backgrounding::singleton();
       if (!singleton) return;

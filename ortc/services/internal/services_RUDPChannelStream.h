@@ -55,9 +55,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStreamAsync
-      #pragma mark
+      //
+      // IRUDPChannelStreamAsync
+      //
 
       interaction IRUDPChannelStreamAsync
       {
@@ -68,9 +68,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark RUDPChannelStream
-      #pragma mark
+      //
+      // RUDPChannelStream
+      //
 
       class RUDPChannelStream : public Noop,
                                 public MessageQueueAssociator,
@@ -105,26 +105,26 @@ namespace ortc
                           WORD sendingChannelNumber,
                           WORD receivingChannelNumber,
                           DWORD minimumNegotiatedRTTInMilliseconds
-                          );
+                          )noexcept;
 
       protected:
-        RUDPChannelStream(Noop) : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
+        RUDPChannelStream(Noop) noexcept : Noop(true), MessageQueueAssociator(IMessageQueuePtr()) {};
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~RUDPChannelStream();
+        ~RUDPChannelStream() noexcept;
 
-        static RUDPChannelStreamPtr convert(IRUDPChannelStreamPtr socket);
+        static RUDPChannelStreamPtr convert(IRUDPChannelStreamPtr socket) noexcept;
 
       protected:
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => IRUDPChannelStream
-        #pragma mark
+        //
+        // RUDPChannelStream => IRUDPChannelStream
+        //
 
-        static ElementPtr toDebug(IRUDPChannelStreamPtr stream);
+        static ElementPtr toDebug(IRUDPChannelStreamPtr stream) noexcept;
 
         static RUDPChannelStreamPtr create(
                                            IMessageQueuePtr queue,
@@ -134,110 +134,110 @@ namespace ortc
                                            WORD sendingChannelNumber,
                                            WORD receivingChannelNumber,
                                            DWORD minimumNegotiatedRTTInMilliseconds
-                                           );
+                                           ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual RUDPChannelStreamStates getState(
-                                                 WORD *outLastErrorCode = NULL,
-                                                 String *outLastErrorReason = NULL
-                                                 ) const;
+        RUDPChannelStreamStates getState(
+                                         WORD *outLastErrorCode = NULL,
+                                         String *outLastErrorReason = NULL
+                                         ) const noexcept override;
 
-        virtual void setStreams(
-                                ITransportStreamPtr receiveStream,
-                                ITransportStreamPtr sendStream
-                                );
+        void setStreams(
+                        ITransportStreamPtr receiveStream,
+                        ITransportStreamPtr sendStream
+                        ) noexcept override;
 
-        virtual void shutdown(bool shutdownOnlyOnceAllDataSent = false);
+        void shutdown(bool shutdownOnlyOnceAllDataSent = false) noexcept override;
 
-        virtual void shutdownDirection(Shutdown state);
+        void shutdownDirection(Shutdown state) noexcept override;
 
-        virtual void holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber);
+        void holdSendingUntilReceiveSequenceNumber(QWORD sequenceNumber) noexcept override;
 
-        virtual bool handlePacket(
-                                  RUDPPacketPtr packet,
-                                  SecureByteBlockPtr originalBuffer,
-                                  bool ecnMarked
-                                  );
+        bool handlePacket(
+                          RUDPPacketPtr packet,
+                          SecureByteBlockPtr originalBuffer,
+                          bool ecnMarked
+                          ) noexcept override;
 
-        virtual void notifySocketWriteReady();
+        void notifySocketWriteReady() noexcept override;
 
-        virtual void handleExternalAck(
-                                       PUID guarenteedDeliveryRequestID,
-                                       QWORD nextSequenceNumber,
-                                       QWORD greatestSequenceNumberReceived,
-                                       QWORD greatestSequenceNumberFullyReceived,
-                                       const BYTE *externalVector,
-                                       size_t externalVectorLengthInBytes,
-                                       bool vpFlag,
-                                       bool pgFlag,
-                                       bool xpFlag,
-                                       bool dpFlag,
-                                       bool ecFlag
-                                       );
+        void handleExternalAck(
+                               PUID guarenteedDeliveryRequestID,
+                               QWORD nextSequenceNumber,
+                               QWORD greatestSequenceNumberReceived,
+                               QWORD greatestSequenceNumberFullyReceived,
+                               const BYTE *externalVector,
+                               size_t externalVectorLengthInBytes,
+                               bool vpFlag,
+                               bool pgFlag,
+                               bool xpFlag,
+                               bool dpFlag,
+                               bool ecFlag
+                               ) noexcept override;
 
-        virtual void getState(
-                              QWORD &nextSequenceNumber,
-                              QWORD &greatestSequenceNumberReceived,
-                              QWORD &greatestSequenceNumberFullyReceived,
-                              BYTE *outVector,
-                              size_t &outVectorSizeInBytes,
-                              size_t maxVectorSizeInBytes,
-                              bool &outVPFlag,
-                              bool &outPGFlag,
-                              bool &outXPFlag,
-                              bool &outDPFlag,
-                              bool &outECFlag
-                              );
+        void getState(
+                      QWORD &nextSequenceNumber,
+                      QWORD &greatestSequenceNumberReceived,
+                      QWORD &greatestSequenceNumberFullyReceived,
+                      BYTE *outVector,
+                      size_t &outVectorSizeInBytes,
+                      size_t maxVectorSizeInBytes,
+                      bool &outVPFlag,
+                      bool &outPGFlag,
+                      bool &outXPFlag,
+                      bool &outDPFlag,
+                      bool &outECFlag
+                      ) noexcept override;
 
-        virtual void notifyExternalACKSent(QWORD ackedSequenceNumber);
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => ITimerDelegate
-        #pragma mark
-
-        virtual void onTimer(ITimerPtr timer);
+        void notifyExternalACKSent(QWORD ackedSequenceNumber) noexcept override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => IRUDPChannelStreamAsync
-        #pragma mark
+        //
+        // RUDPChannelStream => ITimerDelegate
+        //
 
-        virtual void onSendNow();
+        void onTimer(ITimerPtr timer) override;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => ITransportStreamReaderDelegate
-        #pragma mark
+        //
+        // RUDPChannelStream => IRUDPChannelStreamAsync
+        //
 
-        virtual void onTransportStreamReaderReady(ITransportStreamReaderPtr reader);
+        void onSendNow() override;
+
+        //---------------------------------------------------------------------
+        //
+        // RUDPChannelStream => ITransportStreamReaderDelegate
+        //
+
+        void onTransportStreamReaderReady(ITransportStreamReaderPtr reader) override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => (internal)
-        #pragma mark
+        //
+        // RUDPChannelStream => (internal)
+        //
 
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        bool isShuttingDown() {return RUDPChannelStreamState_ShuttingDown == mCurrentState;}
-        bool isShutdown() {return RUDPChannelStreamState_Shutdown == mCurrentState;}
+        bool isShuttingDown() noexcept {return RUDPChannelStreamState_ShuttingDown == mCurrentState;}
+        bool isShutdown() noexcept {return RUDPChannelStreamState_Shutdown == mCurrentState;}
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        void cancel();
-        void setState(RUDPChannelStreamStates state);
-        void setError(WORD errorCode, const char *inReason = NULL);
+        void cancel() noexcept;
+        void setState(RUDPChannelStreamStates state) noexcept;
+        void setError(WORD errorCode, const char *inReason = NULL) noexcept;
 
         bool sendNowHelper(
                            IRUDPChannelStreamDelegatePtr &delegate,
                            const BYTE *buffer,
                            size_t packetLengthInBytes
-                           );
-        bool sendNow();   // returns true if new packets were sent that weren't sent before
-        void sendNowCleanup();
+                           ) noexcept;
+        bool sendNow() noexcept;   // returns true if new packets were sent that weren't sent before
+        void sendNowCleanup() noexcept;
         void handleAck(
                        QWORD outNextSequenceNumber,
                        QWORD outGreatestSequenceNumberReceived,
@@ -249,43 +249,43 @@ namespace ortc
                        bool xpFlag,
                        bool dpFlag,
                        bool ecFlag
-                       ) throw(Exceptions::IllegalACK);
+                       ) noexcept(false); // throws Exceptions::IllegalACK
 
-        void handleECN();
-        void handleDuplicate();
-        void handlePacketLoss();
-        void handleUnfreezing();
+        void handleECN() noexcept;
+        void handleDuplicate() noexcept;
+        void handlePacketLoss() noexcept;
+        void handleUnfreezing() noexcept;
 
-        void deliverReadPackets();
+        void deliverReadPackets() noexcept;
         size_t getFromWriteBuffer(
                                   BYTE *outBuffer,
                                   size_t maxFillSize
-                                  );
+                                  ) noexcept;
 
-        bool getRandomFlag();
+        bool getRandomFlag() noexcept;
 
-        void closeOnAllDataSent();
+        void closeOnAllDataSent() noexcept;
 
       public:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream::BufferedPacket
-        #pragma mark
+        //
+        // RUDPChannelStream::BufferedPacket
+        //
 
         struct BufferedPacket
         {
-          static BufferedPacketPtr create();
+          static BufferedPacketPtr create() noexcept;
 
           void flagAsReceivedByRemoteParty(
                                            ULONG &ioTotalPacketsToResend,
                                            ULONG &ioAvailableBatons
-                                           );
+                                           ) noexcept;
 
-          void flagForResending(ULONG &ioTotalPacketsToResend);
-          void doNotResend(ULONG &ioTotalPacketsToResend);
+          void flagForResending(ULONG &ioTotalPacketsToResend) noexcept;
+          void doNotResend(ULONG &ioTotalPacketsToResend) noexcept;
 
-          void consumeBaton(ULONG &ioAvailableBatons);
-          void releaseBaton(ULONG &ioAvailableBatons);
+          void consumeBaton(ULONG &ioAvailableBatons) noexcept;
+          void releaseBaton(ULONG &ioAvailableBatons) noexcept;
 
           QWORD mSequenceNumber;
 
@@ -304,9 +304,9 @@ namespace ortc
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark RUDPChannelStream => (data)
-        #pragma mark
+        //
+        // RUDPChannelStream => (data)
+        //
 
         mutable RecursiveLock mLock;
 
@@ -388,13 +388,13 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark IRUDPChannelStreamFactory
-      #pragma mark
+      //
+      // IRUDPChannelStreamFactory
+      //
 
       interaction IRUDPChannelStreamFactory
       {
-        static IRUDPChannelStreamFactory &singleton();
+        static IRUDPChannelStreamFactory &singleton() noexcept;
 
         virtual RUDPChannelStreamPtr create(
                                             IMessageQueuePtr queue,
@@ -404,7 +404,7 @@ namespace ortc
                                             WORD sendingChannelNumber,
                                             WORD receivingChannelNumber,
                                             DWORD minimumNegotiatedRTTInMilliseconds
-                                            );
+                                            ) noexcept;
       };
 
       class RUDPChannelStreamFactory : public IFactory<IRUDPChannelStreamFactory> {};
@@ -414,7 +414,7 @@ namespace ortc
 }
 
 ZS_DECLARE_PROXY_BEGIN(ortc::services::internal::IRUDPChannelStreamAsync)
-ZS_DECLARE_PROXY_METHOD_0(onSendNow)
+ZS_DECLARE_PROXY_METHOD(onSendNow)
 ZS_DECLARE_PROXY_END()
 
 #pragma warning(pop)

@@ -99,19 +99,19 @@ namespace ortc
     class SharedRecursiveLock
     {
     public:
-      static SharedRecursiveLock create() {return SharedRecursiveLock(make_shared<RecursiveLock>());}
+      static SharedRecursiveLock create() noexcept {return SharedRecursiveLock(make_shared<RecursiveLock>());}
 
-      SharedRecursiveLock() = delete;
-      SharedRecursiveLock(const SharedRecursiveLock &source);
-      SharedRecursiveLock(RecursiveLockPtr shared);
-      ~SharedRecursiveLock();
+      SharedRecursiveLock() noexcept = delete;
+      SharedRecursiveLock(const SharedRecursiveLock &source) noexcept;
+      SharedRecursiveLock(RecursiveLockPtr shared) noexcept;
+      ~SharedRecursiveLock() noexcept;
 
-      RecursiveLock &lock() const {return *mLock;}
+      RecursiveLock &lock() const noexcept {return *mLock;}
 
-      operator RecursiveLock & () const {return *mLock;}
+      operator RecursiveLock & () const noexcept {return *mLock;}
 
-      void setLock(const SharedRecursiveLock &replacement) {mLock = replacement.mLock;}
-      void setLock(RecursiveLockPtr replacement) {mLock = replacement;}
+      void setLock(const SharedRecursiveLock &replacement) noexcept {mLock = replacement.mLock;}
+      void setLock(RecursiveLockPtr replacement) noexcept {mLock = replacement;}
 
     private:
       mutable RecursiveLockPtr mLock;
@@ -121,10 +121,10 @@ namespace ortc
     class LockedValue
     {
     public:
-      LockedValue() : mSet(false) {}
-      ~LockedValue() {}
+      LockedValue() noexcept : mSet(false) {}
+      ~LockedValue() noexcept {}
 
-      T get() const {AutoLock lock(mLock); return mValue;}
+      T get() const noexcept {AutoLock lock(mLock); return mValue;}
       void set(T value) {AutoLock lock(mLock); if ((setOnceOnly) && (mSet)) internal::throwOnlySetOnce(); mValue = value; mSet = true;}
 
     protected:
@@ -219,7 +219,7 @@ namespace ortc
 
     namespace internal
     {
-      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier);
+      IBackgroundingNotifierPtr getBackgroundingNotifier(IBackgroundingNotifierPtr notifier) noexcept;
     }
 
   }

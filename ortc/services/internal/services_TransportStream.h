@@ -47,9 +47,9 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark TransportStream
-      #pragma mark
+      //
+      // TransportStream
+      //
 
       class TransportStream : public Noop,
                               public zsLib::MessageQueueAssociator,
@@ -71,7 +71,7 @@ namespace ortc
 
         struct Buffer
         {
-          Buffer() : mRead(0) {}
+          Buffer() noexcept : mRead(0) {}
 
           SecureByteBlockPtr mBuffer;
           size_t mRead;
@@ -86,172 +86,172 @@ namespace ortc
                         IMessageQueuePtr queue,
                         ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
                         ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
-                        );
+                        ) noexcept;
 
       protected:
-        TransportStream(Noop) :
+        TransportStream(Noop) noexcept :
           Noop(true),
           zsLib::MessageQueueAssociator(IMessageQueuePtr()) {}
 
-        void init();
+        void init() noexcept;
 
       public:
-        ~TransportStream();
+        ~TransportStream() noexcept;
 
-        static TransportStreamPtr convert(ITransportStreamPtr stream);
+        static TransportStreamPtr convert(ITransportStreamPtr stream) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TransportStream => ITransportStream
-        #pragma mark
+        //
+        // TransportStream => ITransportStream
+        //
 
-        static ElementPtr toDebug(ITransportStreamPtr stream);
+        static ElementPtr toDebug(ITransportStreamPtr stream) noexcept;
 
         static TransportStreamPtr create(
                                          ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
                                          ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
-                                         );
+                                         ) noexcept;
 
-        virtual PUID getID() const {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual ITransportStreamWriterPtr getWriter() const;
-        virtual ITransportStreamReaderPtr getReader() const;
+        ITransportStreamWriterPtr getWriter() const noexcept override;
+        ITransportStreamReaderPtr getReader() const noexcept override;
 
-        virtual void cancel();
-
-        //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TransportStream => ITransportStreamWriter
-        #pragma mark
-
-        // (duplicate) virtual PUID getID() const;
-
-        virtual ITransportStreamWriterSubscriptionPtr subscribe(ITransportStreamWriterDelegatePtr delegate);
-
-        virtual ITransportStreamPtr getStream() const;
-
-        virtual bool isWriterReady() const;
-
-        virtual void write(
-                           const BYTE *buffer,
-                           size_t bufferLengthInBytes,
-                           StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
-                           );
-
-        virtual void write(
-                           SecureByteBlockPtr bufferToAdopt,
-                           StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
-                           );
-
-        virtual void write(
-                           WORD value,
-                           StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
-                           Endians endian = ITransportStream::Endian_Big
-                           );
-
-        virtual void write(
-                           DWORD value,
-                           StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
-                           Endians endian = ITransportStream::Endian_Big
-                           );
-
-        virtual void block(bool block = true);
+        void cancel() noexcept;
 
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark TransportStream => ITransportStreamReader
-        #pragma mark
+        //
+        // TransportStream => ITransportStreamWriter
+        //
 
-        // (duplicate) virtual PUID getID() const;
+        // (duplicate) virtual PUID getID() const noexcept override;
 
-        virtual ITransportStreamReaderSubscriptionPtr subscribe(ITransportStreamReaderDelegatePtr delegate);
+        ITransportStreamWriterSubscriptionPtr subscribe(ITransportStreamWriterDelegatePtr delegate) noexcept override;
 
-        // (duplicate) virtual ITransportStreamPtr getStream() const;
+        ITransportStreamPtr getStream() const noexcept override;
 
-        virtual void notifyReaderReadyToRead();
+        bool isWriterReady() const noexcept override;
 
-        virtual size_t getNextReadSizeInBytes() const;
+        void write(
+                   const BYTE *buffer,
+                   size_t bufferLengthInBytes,
+                   StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
+                   ) noexcept override;
 
-        virtual StreamHeaderPtr getNextReadHeader() const;
+        void write(
+                   SecureByteBlockPtr bufferToAdopt,
+                   StreamHeaderPtr header = StreamHeaderPtr()   // not always needed
+                   ) noexcept override;
 
-        virtual size_t getTotalReadBuffersAvailable() const;
+        void write(
+                   WORD value,
+                   StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
+                   Endians endian = ITransportStream::Endian_Big
+                   ) noexcept override;
 
-        virtual size_t getTotalReadSizeAvailableInBytes() const;
+        void write(
+                   DWORD value,
+                   StreamHeaderPtr header = StreamHeaderPtr(),  // not always needed
+                   Endians endian = ITransportStream::Endian_Big
+                   ) noexcept override;
 
-        virtual size_t read(
-                            BYTE *outBuffer,
-                            size_t bufferLengthInBytes,
-                            StreamHeaderPtr *outHeader = NULL
-                            );
+        void block(bool block = true) noexcept override;
 
-        virtual SecureByteBlockPtr read(StreamHeaderPtr *outHeader = NULL);
+        //---------------------------------------------------------------------
+        //
+        // TransportStream => ITransportStreamReader
+        //
 
-        virtual size_t readWORD(
-                                WORD &outResult,
+        // (duplicate) virtual PUID getID() const override;
+
+        ITransportStreamReaderSubscriptionPtr subscribe(ITransportStreamReaderDelegatePtr delegate) noexcept override;
+
+        // (duplicate) ITransportStreamPtr getStream() const noexcept override;
+
+        void notifyReaderReadyToRead() noexcept override;
+
+        size_t getNextReadSizeInBytes() const noexcept override;
+
+        StreamHeaderPtr getNextReadHeader() const noexcept override;
+
+        size_t getTotalReadBuffersAvailable() const noexcept override;
+
+        size_t getTotalReadSizeAvailableInBytes() const noexcept override;
+
+        size_t read(
+                    BYTE *outBuffer,
+                    size_t bufferLengthInBytes,
+                    StreamHeaderPtr *outHeader = NULL
+                    ) noexcept override;
+
+        SecureByteBlockPtr read(StreamHeaderPtr *outHeader = NULL) noexcept override;
+
+        size_t readWORD(
+                        WORD &outResult,
+                        StreamHeaderPtr *outHeader = NULL,
+                        Endians endian = ITransportStream::Endian_Big
+                        ) noexcept override;
+
+        size_t readDWORD(
+                         DWORD &outResult,
+                         StreamHeaderPtr *outHeader = NULL,
+                         Endians endian = ITransportStream::Endian_Big
+                         ) noexcept override;
+
+        size_t peek(
+                    BYTE *outBuffer,
+                    size_t bufferLengthInBytes,
+                    StreamHeaderPtr *outHeader = NULL,
+                    size_t offsetInBytes = 0
+                    ) noexcept override;
+
+        SecureByteBlockPtr peek(
+                                size_t bufferLengthInBytes = 0,
                                 StreamHeaderPtr *outHeader = NULL,
-                                Endians endian = ITransportStream::Endian_Big
-                                );
+                                size_t offsetInBytes = 0
+                                ) noexcept override;
 
-        virtual size_t readDWORD(
-                                 DWORD &outResult,
-                                 StreamHeaderPtr *outHeader = NULL,
-                                 Endians endian = ITransportStream::Endian_Big
-                                 );
+        size_t peekWORD(
+                        WORD &outResult,
+                        StreamHeaderPtr *outHeader = NULL,
+                        size_t offsetInBytes = 0,
+                        Endians endian = ITransportStream::Endian_Big
+                        ) noexcept override;
 
-        virtual size_t peek(
-                            BYTE *outBuffer,
-                            size_t bufferLengthInBytes,
-                            StreamHeaderPtr *outHeader = NULL,
-                            size_t offsetInBytes = 0
-                            );
+        size_t peekDWORD(
+                         DWORD &outResult,
+                         StreamHeaderPtr *outHeader = NULL,
+                         size_t offsetInBytes = 0,
+                         Endians endian = ITransportStream::Endian_Big
+                         ) noexcept override;
 
-        virtual SecureByteBlockPtr peek(
-                                        size_t bufferLengthInBytes = 0,
-                                        StreamHeaderPtr *outHeader = NULL,
-                                        size_t offsetInBytes = 0
-                                        );
-
-        virtual size_t peekWORD(
-                                WORD &outResult,
-                                StreamHeaderPtr *outHeader = NULL,
-                                size_t offsetInBytes = 0,
-                                Endians endian = ITransportStream::Endian_Big
-                                );
-
-        virtual size_t peekDWORD(
-                                 DWORD &outResult,
-                                 StreamHeaderPtr *outHeader = NULL,
-                                 size_t offsetInBytes = 0,
-                                 Endians endian = ITransportStream::Endian_Big
-                                 );
-
-        virtual size_t skip(size_t offsetInBytes);
+        size_t skip(size_t offsetInBytes) noexcept override;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StreamTransport => (internal)
-        #pragma mark
+        //
+        // StreamTransport => (internal)
+        //
 
-        RecursiveLock &getLock() const;
-        Log::Params log(const char *message) const;
-        Log::Params debug(const char *message) const;
+        RecursiveLock &getLock() const noexcept;
+        Log::Params log(const char *message) const noexcept;
+        Log::Params debug(const char *message) const noexcept;
 
-        virtual ElementPtr toDebug() const;
+        virtual ElementPtr toDebug() const noexcept;
 
-        bool isShutdown() const {return mShutdown;}
+        bool isShutdown() const noexcept {return mShutdown;}
 
         void notifySubscribers(
                                bool afterRead,
                                bool afterWrite
-                               );
+                               ) noexcept;
 
       protected:
         //---------------------------------------------------------------------
-        #pragma mark
-        #pragma mark StreamTransport => (data)
-        #pragma mark
+        //
+        // StreamTransport => (data)
+        //
 
         AutoPUID mID;
         mutable RecursiveLock mLock;
@@ -279,18 +279,18 @@ namespace ortc
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
       //-----------------------------------------------------------------------
-      #pragma mark
-      #pragma mark ITransportStreamFactor
-      #pragma mark
+      //
+      // ITransportStreamFactor
+      //
 
       interaction ITransportStreamFactory
       {
-        static ITransportStreamFactory &singleton();
+        static ITransportStreamFactory &singleton() noexcept;
 
         virtual TransportStreamPtr create(
                                           ITransportStreamWriterDelegatePtr writerDelegate = ITransportStreamWriterDelegatePtr(),
                                           ITransportStreamReaderDelegatePtr readerDelegate = ITransportStreamReaderDelegatePtr()
-                                          );
+                                          ) noexcept;
       };
 
       class TransportStreamFactory : public IFactory<ITransportStreamFactory> {};
