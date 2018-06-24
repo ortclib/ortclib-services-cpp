@@ -29,6 +29,21 @@
 
  */
 
+#ifdef WINUWP
+
+#ifdef __cplusplus_winrt
+#include <windows.ui.core.h>
+#endif //__cplusplus_winrt
+
+#ifdef __has_include
+#if __has_include(<winrt/windows.ui.core.h>)
+#include <winrt/windows.ui.core.h>
+#endif //__has_include(<winrt/windows.ui.core.h>)
+#endif //__has_include
+
+#endif //WINUWP
+
+
 #include <ortc/services/internal/services_Helper.h>
 #include <ortc/services/internal/services.events.h>
 #include <ortc/services/internal/services.events.jman.h>
@@ -290,12 +305,22 @@ namespace ortc
     }
 
 #ifdef WINUWP
+#ifdef __cplusplus_winrt
     //-----------------------------------------------------------------------
     void IHelper::setup(Windows::UI::Core::CoreDispatcher ^dispatcher) noexcept
     {
       zsLib::eventing::IHelper::setup(dispatcher);
       internal::ServicesSetup::singleton();
     }
+#endif  //__cplusplus_winrt
+#ifdef CPPWINRT_VERSION
+    //-----------------------------------------------------------------------
+    void IHelper::setup(winrt::Windows::UI::Core::CoreDispatcher dispatcher) noexcept
+    {
+      zsLib::eventing::IHelper::setup(dispatcher);
+      internal::ServicesSetup::singleton();
+    }
+#endif //CPPWINRT_VERSION
 #endif //WINUWP
 
     //-------------------------------------------------------------------------
