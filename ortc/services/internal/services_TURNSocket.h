@@ -140,39 +140,39 @@ namespace ortc
 
         static ElementPtr toDebug(ITURNSocketPtr socket) noexcept;
 
-        virtual PUID getID() const noexcept {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual TURNSocketStates getState() const noexcept;
-        virtual TURNSocketErrors getLastError() const noexcept;
+        TURNSocketStates getState() const noexcept override;
+        TURNSocketErrors getLastError() const noexcept override;
 
-        virtual bool isRelayingUDP() const noexcept;
+        bool isRelayingUDP() const noexcept override;
 
-        virtual void shutdown() noexcept;
+        void shutdown() noexcept override;
 
-        virtual bool sendPacket(
-                                IPAddress destination,
-                                const BYTE *buffer,
-                                size_t bufferLengthInBytes,
-                                bool bindChannelIfPossible = false
-                                ) noexcept;
+        bool sendPacket(
+                        IPAddress destination,
+                        const BYTE *buffer,
+                        size_t bufferLengthInBytes,
+                        bool bindChannelIfPossible = false
+                        ) noexcept override;
 
-        virtual IPAddress getActiveServerIP() const noexcept;
-        virtual IPAddress getRelayedIP() const noexcept;
-        virtual IPAddress getReflectedIP() const noexcept;
-        virtual IPAddress getServerResponseIP() const noexcept;
+        IPAddress getActiveServerIP() const noexcept override;
+        IPAddress getRelayedIP() const noexcept override;
+        IPAddress getReflectedIP() const noexcept override;
+        IPAddress getServerResponseIP() const noexcept override;
 
-        virtual bool handleSTUNPacket(
-                                      IPAddress fromIPAddress,
-                                      STUNPacketPtr turnPacket
-                                      ) noexcept;
+        bool handleSTUNPacket(
+                              IPAddress fromIPAddress,
+                              STUNPacketPtr turnPacket
+                              ) noexcept override;
 
-        virtual bool handleChannelData(
-                                       IPAddress fromIPAddress,
-                                       const BYTE *buffer,
-                                       size_t bufferLengthInBytes
-                                       ) noexcept;
+        bool handleChannelData(
+                               IPAddress fromIPAddress,
+                               const BYTE *buffer,
+                               size_t bufferLengthInBytes
+                               ) noexcept override;
 
-        virtual void notifyWriteReady() noexcept;
+        void notifyWriteReady() noexcept override;
 
         //---------------------------------------------------------------------
         //

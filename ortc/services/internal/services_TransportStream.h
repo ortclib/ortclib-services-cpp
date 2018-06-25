@@ -118,7 +118,7 @@ namespace ortc
         ITransportStreamWriterPtr getWriter() const noexcept override;
         ITransportStreamReaderPtr getReader() const noexcept override;
 
-        void cancel() noexcept;
+        void cancel() noexcept override;
 
         //---------------------------------------------------------------------
         //

@@ -2316,9 +2316,10 @@ namespace ortc
               // discover information about the adapter
               {
                 switch (pCurrAddresses->OperStatus) {
-                  case IfOperStatusDown:           goto next_address;
-                  case IfOperStatusNotPresent:     goto next_address;
-                  case IfOperStatusLowerLayerDown: goto next_address;
+                  case IfOperStatusDown:            goto next_address;
+                  case IfOperStatusNotPresent:      goto next_address;
+                  case IfOperStatusLowerLayerDown:  goto next_address;
+                  default:                          break;
                 }
 
                 IPAddress ip;

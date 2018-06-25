@@ -89,7 +89,7 @@ namespace ortc
         DHKeyDomain(Noop) noexcept : Noop(true) {};
 
       public:
-        ~DHKeyDomain();
+        ~DHKeyDomain() noexcept;
 
         static DHKeyDomainPtr convert(IDHKeyDomainPtr privateKey) noexcept;
         static DHKeyDomainPtr convert(ForDHPrivateKeyPtr object) noexcept;

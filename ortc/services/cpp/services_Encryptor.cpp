@@ -88,7 +88,7 @@ namespace ortc
       }
 
       //-----------------------------------------------------------------------
-      Encryptor::~Encryptor()
+      Encryptor::~Encryptor() noexcept
       {
         delete mData;
         mData = NULL;

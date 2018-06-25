@@ -287,127 +287,127 @@ namespace ortc
                                    IICESocketPtr foundationSocket = IICESocketPtr()
                                    ) noexcept;
 
-        virtual PUID getID() const noexcept {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate) noexcept;
+        IICESocketSubscriptionPtr subscribe(IICESocketDelegatePtr delegate) noexcept override;
 
-        virtual ICESocketStates getState(
-                                         WORD *outLastErrorCode = NULL,
-                                         String *outLastErrorReason = NULL
-                                         ) const noexcept;
+        ICESocketStates getState(
+                                 WORD *outLastErrorCode = NULL,
+                                 String *outLastErrorReason = NULL
+                                 ) const noexcept override;
 
-        virtual String getUsernameFrag() const noexcept;
+        String getUsernameFrag() const noexcept override;
 
-        virtual String getPassword() const noexcept;
+        String getPassword() const noexcept override;
 
-        virtual void shutdown() noexcept;
+        void shutdown() noexcept override;
 
-        virtual void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10)) noexcept;
+        void wakeup(Milliseconds minimumTimeCandidatesMustRemainValidWhileNotUsed = Seconds(60*10)) noexcept override;
 
-        virtual void getLocalCandidates(
-                                        CandidateList &outCandidates,
-                                        String *outLocalCandidateVersion = NULL
-                                        ) noexcept;
+        void getLocalCandidates(
+                                CandidateList &outCandidates,
+                                String *outLocalCandidateVersion = NULL
+                                ) noexcept override;
 
-        virtual String getLocalCandidatesVersion() const noexcept;
+        String getLocalCandidatesVersion() const noexcept override;
 
-        virtual void monitorWriteReadyOnAllSessions(bool monitor = true) noexcept;
+        void monitorWriteReadyOnAllSessions(bool monitor = true) noexcept override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => IICESocketForICESocketSession
         //
 
-        virtual IMessageQueuePtr getMessageQueue() const noexcept {return getAssociatedMessageQueue();}
+        IMessageQueuePtr getMessageQueue() const noexcept override {return getAssociatedMessageQueue();}
 
-        virtual bool attach(ICESocketSessionPtr session) noexcept;
+        bool attach(ICESocketSessionPtr session) noexcept override;
 
-        virtual bool sendTo(
-                            const Candidate &viaLocalCandidate,
-                            const IPAddress &destination,
-                            const BYTE *buffer,
-                            size_t bufferLengthInBytes,
-                            bool isUserData
-                            ) noexcept;
+        bool sendTo(
+                    const Candidate &viaLocalCandidate,
+                    const IPAddress &destination,
+                    const BYTE *buffer,
+                    size_t bufferLengthInBytes,
+                    bool isUserData
+                    ) noexcept override;
 
-        virtual void addRoute(
-                              ICESocketSessionPtr session,
-                              const IPAddress &viaIP,
-                              const IPAddress &viaLocalIP,
-                              const IPAddress &source
-                              ) noexcept;
-        virtual void removeRoute(ICESocketSessionPtr session) noexcept;
+        void addRoute(
+                      ICESocketSessionPtr session,
+                      const IPAddress &viaIP,
+                      const IPAddress &viaLocalIP,
+                      const IPAddress &source
+                      ) noexcept override;
+        void removeRoute(ICESocketSessionPtr session) noexcept override;
 
-        virtual void onICESocketSessionClosed(PUID sessionID) noexcept;
+        void onICESocketSessionClosed(PUID sessionID) noexcept override;
         
         //---------------------------------------------------------------------
         //
         // ICESocket => ISocketDelegate
         //
 
-        virtual void onReadReady(SocketPtr socket);
-        virtual void onWriteReady(SocketPtr socket);
-        virtual void onException(SocketPtr socket);
+        void onReadReady(SocketPtr socket) override;
+        void onWriteReady(SocketPtr socket) override;
+        void onException(SocketPtr socket) override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => ITURNSocketDelegate
         //
 
-        virtual void onTURNSocketStateChanged(
-                                              ITURNSocketPtr socket,
-                                              TURNSocketStates state
-                                              ) override;
+        void onTURNSocketStateChanged(
+                                      ITURNSocketPtr socket,
+                                      TURNSocketStates state
+                                      ) override;
 
-        virtual void handleTURNSocketReceivedPacket(
-                                                    ITURNSocketPtr socket,
-                                                    IPAddress source,
-                                                    const BYTE *packet,
-                                                    size_t packetLengthInBytes
-                                                    ) noexcept override;
+        void handleTURNSocketReceivedPacket(
+                                            ITURNSocketPtr socket,
+                                            IPAddress source,
+                                            const BYTE *packet,
+                                            size_t packetLengthInBytes
+                                            ) noexcept override;
 
-        virtual bool notifyTURNSocketSendPacket(
-                                                ITURNSocketPtr socket,
-                                                IPAddress destination,
-                                                const BYTE *packet,
-                                                size_t packetLengthInBytes
-                                                ) noexcept override;
+        bool notifyTURNSocketSendPacket(
+                                        ITURNSocketPtr socket,
+                                        IPAddress destination,
+                                        const BYTE *packet,
+                                        size_t packetLengthInBytes
+                                        ) noexcept override;
 
-        virtual void onTURNSocketWriteReady(ITURNSocketPtr socket) override;
+        void onTURNSocketWriteReady(ITURNSocketPtr socket) override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => ISTUNDiscoveryDelegate
         //
 
-        virtual void onSTUNDiscoverySendPacket(
-                                               ISTUNDiscoveryPtr discovery,
-                                               IPAddress destination,
-                                               SecureByteBlockPtr packet
-                                               ) override;
+        void onSTUNDiscoverySendPacket(
+                                       ISTUNDiscoveryPtr discovery,
+                                       IPAddress destination,
+                                       SecureByteBlockPtr packet
+                                       ) override;
 
-        virtual void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery) override;
+        void onSTUNDiscoveryCompleted(ISTUNDiscoveryPtr discovery) override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => IWakeDelegate
         //
 
-        virtual void onWake() override;
+        void onWake() override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => ITimerDelegate
         //
 
-        virtual void onTimer(ITimerPtr timer) override;
+        void onTimer(ITimerPtr timer) override;
 
         //---------------------------------------------------------------------
         //
         // ICESocket => IDNSDelegate
         //
 
-        virtual void onLookupCompleted(IDNSQueryPtr query) override;
+        void onLookupCompleted(IDNSQueryPtr query) override;
 
       public:
         //---------------------------------------------------------------------

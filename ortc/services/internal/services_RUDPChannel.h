@@ -226,20 +226,20 @@ namespace ortc
 
         static ElementPtr toDebug(IRUDPChannelPtr channel) noexcept;
 
-        virtual PUID getID() const noexcept {return mID;}
+        PUID getID() const noexcept override {return mID;}
 
-        virtual RUDPChannelStates getState(
+        RUDPChannelStates getState(
                                            WORD *outLastErrorCode = NULL,
                                            String *outLastErrorReason = NULL
-                                           ) const noexcept;
+                                           ) const noexcept override;
 
-        virtual void shutdown() noexcept;
+        void shutdown() noexcept override;
 
-        virtual void shutdownDirection(Shutdown state) noexcept;
+        void shutdownDirection(Shutdown state) noexcept override;
 
-        virtual IPAddress getConnectedRemoteIP() noexcept;
+        IPAddress getConnectedRemoteIP() noexcept override;
 
-        virtual String getRemoteConnectionInfo() noexcept;
+        String getRemoteConnectionInfo() noexcept override;
 
         //---------------------------------------------------------------------
         //
@@ -276,34 +276,34 @@ namespace ortc
 
         // (duplicate) virtual PUID getID() const;
 
-        virtual void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept;
-        virtual void setStreams(
-                                ITransportStreamPtr receiveStream,
-                                ITransportStreamPtr sendStream
-                                ) noexcept;
+        void setDelegate(IRUDPChannelDelegatePtr delegate) noexcept override;
+        void setStreams(
+                        ITransportStreamPtr receiveStream,
+                        ITransportStreamPtr sendStream
+                        ) noexcept override;
 
-        virtual bool handleSTUN(
-                                STUNPacketPtr stun,
-                                STUNPacketPtr &outResponse,
-                                const String &localUsernameFrag,
-                                const String &remoteUsernameFrag
-                                ) noexcept;
+        bool handleSTUN(
+                        STUNPacketPtr stun,
+                        STUNPacketPtr &outResponse,
+                        const String &localUsernameFrag,
+                        const String &remoteUsernameFrag
+                        ) noexcept override;
 
-        virtual void handleRUDP(
-                                RUDPPacketPtr rudp,
-                                const BYTE *buffer,
-                                size_t bufferLengthInBytes
-                                ) noexcept;
+        void handleRUDP(
+                        RUDPPacketPtr rudp,
+                        const BYTE *buffer,
+                        size_t bufferLengthInBytes
+                        ) noexcept override;
 
-        virtual void notifyWriteReady() noexcept;
-        virtual WORD getIncomingChannelNumber() const noexcept;
-        virtual WORD getOutgoingChannelNumber() const noexcept;
+        void notifyWriteReady() noexcept override;
+        WORD getIncomingChannelNumber() const noexcept override;
+        WORD getOutgoingChannelNumber() const noexcept override;
 
-        virtual void issueConnectIfNotIssued() noexcept;
+        void issueConnectIfNotIssued() noexcept override;
 
         // (duplicate) virtual void shutdown();
 
-        virtual void shutdownFromTimeout() noexcept;
+        void shutdownFromTimeout() noexcept override;
 
         //---------------------------------------------------------------------
         //
