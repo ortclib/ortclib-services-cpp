@@ -108,7 +108,7 @@ namespace ortc
         ZS_LOG_DETAIL(log("created"));
       }
 
-      STUNRequesterManager::~STUNRequesterManager()
+      STUNRequesterManager::~STUNRequesterManager() noexcept
       {
         if(isNoop()) return;
         
