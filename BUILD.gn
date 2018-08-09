@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//third_party/ortc/zsLib-eventing/zslib_eventing_tool.gni")
+import("//third_party/idl/zsLib-eventing/zslib_eventing_tool.gni")
 
 config("compiler") {
   if (!is_win) {
@@ -38,12 +38,12 @@ config("ortclib-services_config") {
   include_dirs = [
       ".",
       "..",
-      "../../",
-      "../zsLib",
-      "../zsLib/zsLib/extras",
-      "../zsLib-eventing",
-      "../../idnkit/idnkit/include",
-      "../../cryptopp",
+      "../..",
+      "../../idl",
+      "../idl/zsLib",
+      "../idl/zsLib/zsLib/extras",
+      "../idl/zsLib-eventing",
+      "../idnkit/idnkit/include",
   ]
 
   if  (is_linux) {
@@ -216,13 +216,13 @@ static_library("ortclib-services") {
 
   deps = [ 
     ":services_events",
-    "//third_party/ortc/zsLib:zslib",
+    "//third_party/idl/zsLib:zslib",
   ]
   
   if (is_win && (current_os != "winuwp")) {
-    deps += [ "//third_party/cryptopp(//build/toolchain/win:$current_cpu)", ]
+    deps += [ "//third_party/idl/cryptopp(//build/toolchain/win:$current_cpu)", ]
   } else {
-    deps += [ "//third_party/cryptopp", ]
+    deps += [ "//third_party/idl/cryptopp", ]
   }
 
   # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
