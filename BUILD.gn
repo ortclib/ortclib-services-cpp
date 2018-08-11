@@ -40,9 +40,9 @@ config("ortclib-services_config") {
       "..",
       "../..",
       "../../idl",
-      "../idl/zsLib",
-      "../idl/zsLib/zsLib/extras",
-      "../idl/zsLib-eventing",
+      "../../idl/zsLib",
+      "../../idl/zsLib/zsLib/extras",
+      "../../idl/zsLib-eventing",
       "../idnkit/idnkit/include",
   ]
 
